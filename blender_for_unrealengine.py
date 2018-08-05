@@ -28,7 +28,7 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 1, 3),
+	'version': (0, 1, 5),
 	'blender': (2, 79, 0),
 	'location': 'View3D > Tool > Unreal Engine 4',
 	'warning': '',
@@ -97,9 +97,10 @@ def VerifiDirs(directory): #check and create a folder if it does not exist
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 
-print (max(0, 1))
+
 def ExportSingleAnimation(obj, targetAction, dirpath, filename): #Export a single animation
 	if obj.type == 'ARMATURE':
+		UserAction = obj.animation_data.action #Save current action
 		bpy.ops.object.mode_set(mode = 'OBJECT')
 		originalLoc = Vector((0,0,0))
 		originalLoc =	originalLoc + obj.location #Save objet location
@@ -116,8 +117,11 @@ def ExportSingleAnimation(obj, targetAction, dirpath, filename): #Export a singl
 				keyframes.append(xCurve)
 		bpy.context.scene.frame_start = 0
 		bpy.context.scene.frame_end = max(keyframes[-1],1) #Set end_frame on the final key the current action
-		VerifiDirs(dirpath)
-		fullpath = os.path.join( dirpath , filename )
+		
+		absdirpath = bpy.path.abspath(dirpath)
+		
+		VerifiDirs(absdirpath)
+		fullpath = os.path.join( absdirpath , filename )
 		bpy.ops.export_scene.fbx(
 			filepath=fullpath,
 			check_existing=False,
@@ -130,31 +134,39 @@ def ExportSingleAnimation(obj, targetAction, dirpath, filename): #Export a singl
 			bake_anim_force_startend_keying=True,
 			)
 		exportedAssets.append(["Animation", fullpath])
-		obj.location = originalLoc #Move object to this saved location
+		obj.location = originalLoc #Resets previous object location
+		ResetArmaturePose(obj)
+		obj.animation_data.action = UserAction #Resets previous action
+		
 
 
 def ExportSingleMesh(obj, dirpath, filename): #Export a single Mesh
-	if bpy.context.mode != 'OBJECT':
-		bpy.ops.object.mode_set(mode = 'OBJECT')
+
+	bpy.ops.object.mode_set(mode = 'OBJECT')
 	originalLoc = Vector((0,0,0))
-	originalLoc =	originalLoc + obj.location #Save objet location
+	originalLoc = originalLoc + obj.location #Save current object location
+	
 	obj.location = (0,0,0) #Moves object to the center of the scene for export
 
 	SelectParentAndDesiredChilds(obj)
-
-	VerifiDirs(dirpath)
-	fullpath = os.path.join( dirpath , filename )
+	
+	absdirpath = bpy.path.abspath(dirpath)
+	VerifiDirs(absdirpath)
+	fullpath = os.path.join( absdirpath , filename )
 	bpy.ops.export_scene.fbx(filepath=fullpath,
 		check_existing=False,
 		version='BIN7400',
 		use_selection=True,
-		bake_anim=False,
+		bake_anim=False
 		)
 	meshType = "StaticMesh"
 	if obj.type == 'ARMATURE':
 		meshType = "SkeletalMesh"
 	exportedAssets.append([meshType , fullpath])
-	obj.location = originalLoc #Move object to this saved location
+	
+	obj.location = originalLoc #Resets previous object location
+	
+	
 
 
 def FindAllObjetsByExportType(exportType): #Find all objets with a ExportEnum property desired
@@ -167,6 +179,7 @@ def FindAllObjetsByExportType(exportType): #Find all objets with a ExportEnum pr
 		except:
 			pass
 	return(targetObj)
+
 
 def GenerateUe4Name(name): #From a objet name generate a new name with by adding a suffix number
 
@@ -190,9 +203,14 @@ def GenerateUe4Name(name): #From a objet name generate a new name with by adding
 	return newName
 
 
-def ConvertEmptyToUe4Socket(): #Convert all selected empty to unreal socket
+def ConvertToUe4Socket(): #Convert all selected empty to unreal socket
 	if CheckIfCollisionAndSocketOwnerIsValid():
 		ownerObjName = GetStringSceneProperty("CollisionAndSocketOwner")
+		
+		UserMode = bpy.context.object.mode #Save current mode
+		UserActive = bpy.context.active_object #Save current active object
+		UserSelected = bpy.context.selected_objects #Save current selected objects
+		
 		bpy.ops.object.mode_set(mode = 'OBJECT')
 		ownerObj = bpy.data.objects[ownerObjName]
 		for obj in bpy.context.selected_objects:
@@ -206,16 +224,34 @@ def ConvertEmptyToUe4Socket(): #Convert all selected empty to unreal socket
 						obj.select = True
 						bpy.context.scene.objects.active = ownerObj
 						bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
+						
+		for obj in UserSelected: obj.select = True #Resets previous selected objects
+		bpy.context.scene.objects.active = UserActive #Resets previous active object	
+		bpy.ops.object.mode_set(mode = UserMode) #Resets previous mode
 
 
-def ConvertMeshToUe4Collision(collisionType): #Convert all selected mesh to unreal collisions
-	ownerObjName = GetStringSceneProperty("CollisionAndSocketOwner")
+def CheckIfCollisionAndSocketOwnerIsValid():
+	for obj in bpy.data.objects:
+		if GetStringSceneProperty("CollisionAndSocketOwner") == obj.name:
+			owner = bpy.data.objects[GetStringSceneProperty("CollisionAndSocketOwner")]
+			if owner.type != "ARMATURE":
+				return True
+	return False
+
+
+def ConvertToUe4Collision(collisionType): #Convert all selected objets to unreal collisions
 	if CheckIfCollisionAndSocketOwnerIsValid():
+		ownerObjName = GetStringSceneProperty("CollisionAndSocketOwner")
+	
+		UserMode = bpy.context.object.mode #Save current mode
+		UserActive = bpy.context.active_object #Save current active object
+		UserSelected = bpy.context.selected_objects #Save current selected objects
+		
 		bpy.ops.object.mode_set(mode = 'OBJECT')
 		ownerObj = bpy.data.objects[ownerObjName]
-		prefixName = ""
-
+	
 		#Set the name of the Prefix depending on the type of collision in agreement with unreal FBX Pipeline
+		prefixName = ""
 		if collisionType == "Box":
 			prefixName = "UBX_"
 		elif collisionType == "Capsule":
@@ -247,10 +283,18 @@ def ConvertMeshToUe4Collision(collisionType): #Convert all selected mesh to unre
 						obj.select = True
 						bpy.context.scene.objects.active = ownerObj
 						bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
+		
+		for obj in UserSelected: obj.select = True #Resets previous selected objects
+		bpy.context.scene.objects.active = UserActive #Resets previous active object	
+		bpy.ops.object.mode_set(mode = UserMode) #Resets previous mode
 
 
 def ExportAllByList(targetObjets): #Export all objects that need to be exported
 	if len(targetObjets) > 0:
+		UserMode = bpy.context.object.mode #Save current mode
+		UserActive = bpy.context.active_object #Save current active object
+		UserSelected = bpy.context.selected_objects #Save current selected objects
+	
 		Scene = bpy.context.scene
 		blendFileLoc = os.path.dirname(bpy.data.filepath)
 		smPrefix = GetStringSceneProperty("StaticPrefixExportName")
@@ -258,8 +302,12 @@ def ExportAllByList(targetObjets): #Export all objects that need to be exported
 		animPrefix = GetStringSceneProperty("AnimPrefixExportName")
 		for obj in targetObjets:
 			if obj.type == 'ARMATURE':
-				exportDir = os.path.join( blendFileLoc, "ExportedFbx" , "SkeletalMesh", obj.name )
+				exportDir = os.path.join( GetStringSceneProperty("ExportNameFilePath") , "SkeletalMesh", obj.name )
 				ExportSingleMesh(obj, exportDir, skPrefix+obj.name+".fbx")
+				
+				UserStartFrame = bpy.context.scene.frame_start #Save current start frame
+				UserEndFrame = bpy.context.scene.frame_end #Save current end frame
+		
 				for Action in bpy.data.actions:
 
 					objBonesName = [bone.name for bone in obj.pose.bones]
@@ -273,9 +321,19 @@ def ExportAllByList(targetObjets): #Export all objects that need to be exported
 					if ChecksRelationship(objBonesName, animBonesName):
 						animExportDir = os.path.join( exportDir, "Anim" )
 						ExportSingleAnimation(obj, Action, animExportDir, animPrefix+obj.name+"_"+Action.name+".fbx")
+						
+				bpy.context.scene.frame_start = UserStartFrame #Resets previous start frame
+				bpy.context.scene.frame_end = UserEndFrame #Resets previous end frame
+				
 			else:
-				exportDir = os.path.join( blendFileLoc, "ExportedFbx" , "StaticMesh" )
+				exportDir = os.path.join( GetStringSceneProperty("ExportNameFilePath") , "StaticMesh" )
 				ExportSingleMesh(obj, exportDir, smPrefix+obj.name+".fbx")
+		
+		bpy.ops.object.select_all(action='DESELECT')
+		for obj in UserSelected: obj.select = True #Resets previous active object	
+		bpy.context.scene.objects.active = UserActive #Resets previous active object	
+		bpy.ops.object.mode_set(mode = UserMode) #Resets previous mode
+
 
 def	CorrectBadProperty():
 	Scene = bpy.context.scene
@@ -297,8 +355,7 @@ def	CorrectBadProperty():
 
 def ExportComplete(self): #Display a summary at the end of the export and reset "exportedAssets"
 	if len(exportedAssets) > 0:
-		self.report({'INFO'}, "Export of "+str(len(exportedAssets))+" asset(s) has been finalized ! ")
-		self.report({'INFO'}, "Look in th console for more info.")
+		self.report({'INFO'}, "Export of "+str(len(exportedAssets))+" asset(s) has been finalized ! Look in th console for more info.")
 		print ("################## Exported asset(s) ##################")
 		for asset in exportedAssets:
 			print (asset[0]+" --> "+asset[1])
@@ -310,15 +367,6 @@ def ExportComplete(self): #Display a summary at the end of the export and reset 
 
 
 #############################[Visual and UI]#############################
-
-#### UI Function
-def CheckIfCollisionAndSocketOwnerIsValid():
-	for obj in bpy.data.objects:
-		if GetStringSceneProperty("CollisionAndSocketOwner") == obj.name:
-			owner = bpy.data.objects[GetStringSceneProperty("CollisionAndSocketOwner")]
-			if owner.type != "ARMATURE":
-				return True
-	return False
 
 #### Propertys
 def initObjectProperties():
@@ -353,6 +401,14 @@ def initSceneProperties():
 		description	 = "Prefix of AnimationSequence when exported",
 		maxlen = 255,
 		default = "Anim_")
+		
+	bpy.types.Scene.ExportNameFilePath = StringProperty(
+		name = "Export file path",
+        description = "Choose a directory for export",
+        maxlen = 1024,
+		default = "//ExportedFbx\\",
+        subtype = 'DIR_PATH')
+		
 	return
 
 
@@ -372,6 +428,11 @@ def ChecksProp(prop):
 	except:
 		pass
 		prop["AnimPrefixExportName"] = "Anim_"
+	try:
+		value = prop["ExportNameFilePath"]
+	except:
+		pass
+		prop["ExportNameFilePath"] = "//ExportedFbx\\"
 
 	return
 
@@ -427,6 +488,7 @@ class ue4CollisionsAndSocketsPanel(bpy.types.Panel): #Is Collisions And Sockets 
 		convertButtons.operator("object.converttospherecollision", icon='SOLID')
 		convertButtons.operator("object.converttosocket", icon='OUTLINER_DATA_EMPTY')
 
+
 class ue4CheckCorrect(bpy.types.Panel): #Is Check and correct panel
 	bl_idname = "panel.ue4.CheckCorrect"
 	bl_label = "Check and correct"
@@ -437,6 +499,7 @@ class ue4CheckCorrect(bpy.types.Panel): #Is Check and correct panel
 	def draw(self, context):
 		scn = context.scene
 		props = self.layout.row().operator("object.correctproperty", icon='FILE_TICK')
+
 
 class ue4ExportPanel(bpy.types.Panel): #Is Export panel
 	bl_idname = "panel.ue4.export"
@@ -450,6 +513,7 @@ class ue4ExportPanel(bpy.types.Panel): #Is Export panel
 		self.layout.prop(scn, 'StaticPrefixExportName', icon='OBJECT_DATA')
 		self.layout.prop(scn, 'SkeletalPrefixExportName', icon='OBJECT_DATA')
 		self.layout.prop(scn, 'AnimPrefixExportName', icon='OBJECT_DATA')
+		self.layout.prop(scn, 'ExportNameFilePath')
 		props = self.layout.row().operator("object.exportforunreal", icon='EXPORT')
 
 #### Buttons
@@ -474,6 +538,7 @@ class DeselectExportAndChildButton(bpy.types.Operator):
 			obj.select = False
 		return {'FINISHED'}
 
+
 class SetOwnerByActive(bpy.types.Operator):
 	bl_label = "Set owner by active selection"
 	bl_idname = "object.setownerbyactive"
@@ -487,13 +552,15 @@ class SetOwnerByActive(bpy.types.Operator):
 			bpy.context.scene["CollisionAndSocketOwner"] = ""
 		return {'FINISHED'}
 
+
 class ConvertToUECollisionButtonBox(bpy.types.Operator):
 	bl_label = "Convert to box (UBX)"
 	bl_idname = "object.converttoboxcollision"
 	bl_description = "Convert selected mesh(s) to Unreal collision ready for export (Boxes type)"
 
 	def execute(self, context):
-		ConvertMeshToUe4Collision("Box")
+		ConvertToUe4Collision("Box")
+		self.report({'INFO'}, "Selected objet(s) have be converted to UE4 Box collisions")
 		return {'FINISHED'}
 
 
@@ -503,7 +570,8 @@ class ConvertToUECollisionButtonCapsule(bpy.types.Operator):
 	bl_description = "Convert selected mesh(s) to Unreal collision ready for export (Capsules type)"
 
 	def execute(self, context):
-		ConvertMeshToUe4Collision("Capsule")
+		ConvertToUe4Collision("Capsule")
+		self.report({'INFO'}, "Selected objet(s) have be converted to UE4 Capsule collisions")
 		return {'FINISHED'}
 
 
@@ -513,7 +581,8 @@ class ConvertToUECollisionButtonSphere(bpy.types.Operator):
 	bl_description = "Convert selected mesh(s) to Unreal collision ready for export (Spheres type)"
 
 	def execute(self, context):
-		ConvertMeshToUe4Collision("Sphere")
+		ConvertToUe4Collision("Sphere")
+		self.report({'INFO'}, "Selected objet(s) have be converted to UE4 Sphere collisions")
 		return {'FINISHED'}
 
 
@@ -523,7 +592,8 @@ class ConvertToUECollisionButtonConvex(bpy.types.Operator):
 	bl_description = "Convert selected mesh(s) to Unreal collision ready for export (Convex shapes type)"
 
 	def execute(self, context):
-		ConvertMeshToUe4Collision("Convex")
+		ConvertToUe4Collision("Convex")
+		self.report({'INFO'}, "Selected objet(s) have be converted to UE4 Convex collisions")
 		return {'FINISHED'}
 
 
@@ -533,10 +603,10 @@ class ConvertToUESocketButton(bpy.types.Operator):
 	bl_description = "Convert selected empty(s) to Unreal sockets ready for export"
 
 	def execute(self, context):
-		ConvertEmptyToUe4Socket()
+		ConvertToUe4Socket()
+		self.report({'INFO'}, "Selected empty(s) have be converted to UE4 Socket")
 		return {'FINISHED'}
-
-
+		
 class ExportForUnrealEngineButton(bpy.types.Operator):
 	bl_label = "Export for UnrealEngine 4"
 	bl_idname = "object.exportforunreal"
@@ -547,6 +617,7 @@ class ExportForUnrealEngineButton(bpy.types.Operator):
 		ExportAllByList(FindAllObjetsByExportType("export_and_childs"))
 		ExportComplete(self)
 		return {'FINISHED'}
+
 
 class CorrectBadPropertyButton(bpy.types.Operator):
 	bl_label = "Correct bad property"
