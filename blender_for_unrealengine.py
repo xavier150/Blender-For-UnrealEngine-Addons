@@ -28,7 +28,7 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 1, 5),
+	'version': (0, 1, 6),
 	'blender': (2, 79, 0),
 	'location': 'View3D > Tool > Unreal Engine 4',
 	'warning': '',
@@ -51,22 +51,9 @@ from bpy import data as bpy_data
 
 #############################[Variables]#############################
 
-
 exportedAssets = [] #List of exported objects [Assetsype , ExportPath] Reset with each export
 
-
 #############################[Functions]#############################
-
-
-def GetStringSceneProperty(properties): #Allows to get StringSceneProperty with properties name.
-	prop = ""
-	try:
-		prop = bpy.context.scene[properties]
-		return prop
-	except:
-		pass
-	return prop
-
 
 def ChecksRelationship(arrayA, arrayB): #Checks if it exits an identical variable in two lists
 	for a in arrayA:
@@ -76,14 +63,42 @@ def ChecksRelationship(arrayA, arrayB): #Checks if it exits an identical variabl
 	return False
 
 
+def GetChilds(obj): #Get all direct childs of a object
+	ChildsObj = []
+	for childObj in bpy.data.objects:
+		pare = childObj.parent
+		if pare is not None:
+			if pare.name == obj.name:
+				ChildsObj.append(childObj)
+
+	return ChildsObj
+
+
+def GetRecursiveChilds(obj): #Get all recursive childs of a object
+	saveobj = []
+	for newobj in GetChilds(obj):
+		for book in GetRecursiveChilds(newobj):
+			saveobj.append(book)
+		saveobj.append(newobj)
+	return saveobj
+
+
+def GetDesiredChilds(obj): #Get only all child objects that must be exported with parent objet
+	DesiredObj = GetRecursiveChilds(obj)
+	for unwantedObj in FindAllObjetsByExportType("dont_export"):
+		try:
+			DesiredObj.remove(unwantedObj)
+		except:
+			pass
+	return DesiredObj
+
+
 def SelectParentAndDesiredChilds(obj): #Selects only all child objects that must be exported with parent objet
 	bpy.ops.object.select_all(action='DESELECT')
-	bpy.context.scene.objects.active = obj
-	bpy.ops.object.select_grouped(type='CHILDREN_RECURSIVE')
-
-	for unwantedObj in FindAllObjetsByExportType("dont_export"): #Deselect all objects that should not be exported
-		unwantedObj.select = False
+	for selectObj in GetDesiredChilds(obj):
+		selectObj.select = True
 	obj.select = True
+	bpy.context.scene.objects.active = obj
 
 
 def ResetArmaturePose(obj): #Reset armature pose
@@ -117,9 +132,9 @@ def ExportSingleAnimation(obj, targetAction, dirpath, filename): #Export a singl
 				keyframes.append(xCurve)
 		bpy.context.scene.frame_start = 0
 		bpy.context.scene.frame_end = max(keyframes[-1],1) #Set end_frame on the final key the current action
-		
+
 		absdirpath = bpy.path.abspath(dirpath)
-		
+
 		VerifiDirs(absdirpath)
 		fullpath = os.path.join( absdirpath , filename )
 		bpy.ops.export_scene.fbx(
@@ -132,12 +147,12 @@ def ExportSingleAnimation(obj, targetAction, dirpath, filename): #Export a singl
 			bake_anim_use_nla_strips=False,
 			bake_anim_use_all_actions=False,
 			bake_anim_force_startend_keying=True,
+			bake_anim_simplify_factor=bpy.context.scene.export_simplify_anim
 			)
 		exportedAssets.append(["Animation", fullpath])
 		obj.location = originalLoc #Resets previous object location
 		ResetArmaturePose(obj)
 		obj.animation_data.action = UserAction #Resets previous action
-		
 
 
 def ExportSingleMesh(obj, dirpath, filename): #Export a single Mesh
@@ -145,11 +160,11 @@ def ExportSingleMesh(obj, dirpath, filename): #Export a single Mesh
 	bpy.ops.object.mode_set(mode = 'OBJECT')
 	originalLoc = Vector((0,0,0))
 	originalLoc = originalLoc + obj.location #Save current object location
-	
+
 	obj.location = (0,0,0) #Moves object to the center of the scene for export
 
 	SelectParentAndDesiredChilds(obj)
-	
+
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)
 	fullpath = os.path.join( absdirpath , filename )
@@ -163,21 +178,17 @@ def ExportSingleMesh(obj, dirpath, filename): #Export a single Mesh
 	if obj.type == 'ARMATURE':
 		meshType = "SkeletalMesh"
 	exportedAssets.append([meshType , fullpath])
-	
+
 	obj.location = originalLoc #Resets previous object location
-	
-	
 
 
 def FindAllObjetsByExportType(exportType): #Find all objets with a ExportEnum property desired
 	targetObj = []
 	for obj in bpy.context.scene.objects:
-		try:
-			prop = obj.ExportEnum
-			if prop == exportType:
-				targetObj.append(obj)
-		except:
-			pass
+		prop = obj.ExportEnum
+		if prop == exportType:
+			targetObj.append(obj)
+
 	return(targetObj)
 
 
@@ -205,12 +216,22 @@ def GenerateUe4Name(name): #From a objet name generate a new name with by adding
 
 def ConvertToUe4Socket(): #Convert all selected empty to unreal socket
 	if CheckIfCollisionAndSocketOwnerIsValid():
-		ownerObjName = GetStringSceneProperty("CollisionAndSocketOwner")
-		
+		ownerObjName = bpy.context.scene.collision_and_socket_owner
+
+		#----------------------------------------Save data
+		UserObjHide = []
+		for obj in bpy.context.scene.objects:
+			UserObjHide.append(obj.hide) #Save previous object visibility
+			obj.hide = False
+		if bpy.context.object is None:
+			print ("false")
+			bpy.context.scene.objects.active = bpy.data.objects[0]
+
 		UserMode = bpy.context.object.mode #Save current mode
 		UserActive = bpy.context.active_object #Save current active object
 		UserSelected = bpy.context.selected_objects #Save current selected objects
-		
+		#----------------------------------------
+
 		bpy.ops.object.mode_set(mode = 'OBJECT')
 		ownerObj = bpy.data.objects[ownerObjName]
 		for obj in bpy.context.selected_objects:
@@ -224,16 +245,20 @@ def ConvertToUe4Socket(): #Convert all selected empty to unreal socket
 						obj.select = True
 						bpy.context.scene.objects.active = ownerObj
 						bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
-						
-		for obj in UserSelected: obj.select = True #Resets previous selected objects
-		bpy.context.scene.objects.active = UserActive #Resets previous active object	
+
+		#----------------------------------------Reset data
+		bpy.ops.object.select_all(action='DESELECT')
+		for obj in UserSelected: obj.select = True #Resets previous active object
+		bpy.context.scene.objects.active = UserActive #Resets previous active object
 		bpy.ops.object.mode_set(mode = UserMode) #Resets previous mode
+		for x, obj in enumerate(bpy.context.scene.objects):
+			obj.hide = UserObjHide[x] #Resets previous object visibility
 
 
 def CheckIfCollisionAndSocketOwnerIsValid():
 	for obj in bpy.data.objects:
-		if GetStringSceneProperty("CollisionAndSocketOwner") == obj.name:
-			owner = bpy.data.objects[GetStringSceneProperty("CollisionAndSocketOwner")]
+		if bpy.context.scene.collision_and_socket_owner == obj.name:
+			owner = bpy.data.objects[bpy.context.scene.collision_and_socket_owner]
 			if owner.type != "ARMATURE":
 				return True
 	return False
@@ -241,15 +266,25 @@ def CheckIfCollisionAndSocketOwnerIsValid():
 
 def ConvertToUe4Collision(collisionType): #Convert all selected objets to unreal collisions
 	if CheckIfCollisionAndSocketOwnerIsValid():
-		ownerObjName = GetStringSceneProperty("CollisionAndSocketOwner")
-	
+		ownerObjName = bpy.context.scene.collision_and_socket_owner
+
+		#----------------------------------------Save data
+		UserObjHide = []
+		for obj in bpy.context.scene.objects:
+			UserObjHide.append(obj.hide) #Save previous object visibility
+			obj.hide = False
+		if bpy.context.object is None:
+			print ("false")
+			bpy.context.scene.objects.active = bpy.data.objects[0]
+
 		UserMode = bpy.context.object.mode #Save current mode
 		UserActive = bpy.context.active_object #Save current active object
 		UserSelected = bpy.context.selected_objects #Save current selected objects
-		
+		#----------------------------------------
+
 		bpy.ops.object.mode_set(mode = 'OBJECT')
 		ownerObj = bpy.data.objects[ownerObjName]
-	
+
 		#Set the name of the Prefix depending on the type of collision in agreement with unreal FBX Pipeline
 		prefixName = ""
 		if collisionType == "Box":
@@ -269,6 +304,7 @@ def ConvertToUe4Collision(collisionType): #Convert all selected objets to unreal
 		mat.diffuse_color = (0, 0.6, 0)
 		mat.alpha = 0.1
 		mat.use_transparency = True
+		mat.use_nodes = False
 
 		for obj in bpy.context.selected_objects:
 			if obj != ownerObj:
@@ -283,79 +319,91 @@ def ConvertToUe4Collision(collisionType): #Convert all selected objets to unreal
 						obj.select = True
 						bpy.context.scene.objects.active = ownerObj
 						bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
-		
-		for obj in UserSelected: obj.select = True #Resets previous selected objects
-		bpy.context.scene.objects.active = UserActive #Resets previous active object	
+
+		#----------------------------------------Reset data
+		bpy.ops.object.select_all(action='DESELECT')
+		for obj in UserSelected: obj.select = True #Resets previous active object
+		bpy.context.scene.objects.active = UserActive #Resets previous active object
 		bpy.ops.object.mode_set(mode = UserMode) #Resets previous mode
+		for x, obj in enumerate(bpy.context.scene.objects):
+			obj.hide = UserObjHide[x] #Resets previous object visibility
 
 
 def ExportAllByList(targetObjets): #Export all objects that need to be exported
 	if len(targetObjets) > 0:
+
+		#----------------------------------------Save data
+		UserObjHide = []
+		for obj in bpy.context.scene.objects:
+			UserObjHide.append(obj.hide) #Save previous object visibility
+			obj.hide = False
+		if bpy.context.object is None:
+			print ("false")
+			bpy.context.scene.objects.active = bpy.data.objects[0]
+
 		UserMode = bpy.context.object.mode #Save current mode
 		UserActive = bpy.context.active_object #Save current active object
 		UserSelected = bpy.context.selected_objects #Save current selected objects
-	
+		#----------------------------------------
+
 		Scene = bpy.context.scene
 		blendFileLoc = os.path.dirname(bpy.data.filepath)
-		smPrefix = GetStringSceneProperty("StaticPrefixExportName")
-		skPrefix = GetStringSceneProperty("SkeletalPrefixExportName")
-		animPrefix = GetStringSceneProperty("AnimPrefixExportName")
+		smPrefix = bpy.context.scene.static_prefix_export_name
+		skPrefix = bpy.context.scene.skeletal_prefix_export_name
+		animPrefix = bpy.context.scene.anim_prefix_export_name
 		for obj in targetObjets:
 			if obj.type == 'ARMATURE':
-				exportDir = os.path.join( GetStringSceneProperty("ExportNameFilePath") , "SkeletalMesh", obj.name )
+				exportDir = os.path.join( bpy.context.scene.export_skeletal_file_path , obj.name )
 				ExportSingleMesh(obj, exportDir, skPrefix+obj.name+".fbx")
-				
+
 				UserStartFrame = bpy.context.scene.frame_start #Save current start frame
 				UserEndFrame = bpy.context.scene.frame_end #Save current end frame
-		
+
 				for Action in bpy.data.actions:
 
 					objBonesName = [bone.name for bone in obj.pose.bones]
 					animBonesName = []
 					for curve in Action.fcurves:
-						try:
-							animBonesName.append(curve.data_path.split('"')[1])
-						except:
-							pass
+						animBonesName.append(curve.data_path.split('"')[1])
 
 					if ChecksRelationship(objBonesName, animBonesName):
 						animExportDir = os.path.join( exportDir, "Anim" )
 						ExportSingleAnimation(obj, Action, animExportDir, animPrefix+obj.name+"_"+Action.name+".fbx")
-						
+
 				bpy.context.scene.frame_start = UserStartFrame #Resets previous start frame
 				bpy.context.scene.frame_end = UserEndFrame #Resets previous end frame
-				
+
 			else:
-				exportDir = os.path.join( GetStringSceneProperty("ExportNameFilePath") , "StaticMesh" )
+				exportDir = os.path.join( bpy.context.scene.export_static_file_path )
 				ExportSingleMesh(obj, exportDir, smPrefix+obj.name+".fbx")
-		
+
+		#----------------------------------------Reset data
 		bpy.ops.object.select_all(action='DESELECT')
-		for obj in UserSelected: obj.select = True #Resets previous active object	
-		bpy.context.scene.objects.active = UserActive #Resets previous active object	
+		for obj in UserSelected: obj.select = True #Resets previous active object
+		bpy.context.scene.objects.active = UserActive #Resets previous active object
 		bpy.ops.object.mode_set(mode = UserMode) #Resets previous mode
+		for x, obj in enumerate(bpy.context.scene.objects):
+			obj.hide = UserObjHide[x] #Resets previous object visibility
 
 
 def	CorrectBadProperty():
 	Scene = bpy.context.scene
-	foo_objs1 = [obj for obj in Scene.objects if
+	colObjs = [obj for obj in Scene.objects if
 		fnmatch.fnmatchcase(obj.name, "UBX*") or
 		fnmatch.fnmatchcase(obj.name, "UCX*") or
 		fnmatch.fnmatchcase(obj.name, "UCP*") or
 		fnmatch.fnmatchcase(obj.name, "USP*") or
 		fnmatch.fnmatchcase(obj.name, "SOCKET*")]
 
-	for u in foo_objs1:
-		try:
-
-			if u.ExportEnum == "export_and_childs":
-				u.ExportEnum = "auto"
-		except:
-			pass
+	for obj in colObjs:
+		if obj.ExportEnum == "export_and_childs":
+			obj.ExportEnum = "auto"
 
 
 def ExportComplete(self): #Display a summary at the end of the export and reset "exportedAssets"
 	if len(exportedAssets) > 0:
-		self.report({'INFO'}, "Export of "+str(len(exportedAssets))+" asset(s) has been finalized ! Look in th console for more info.")
+		self.report({'INFO'}, "Export of "+str(len(exportedAssets))+
+		" asset(s) has been finalized ! Look in th console for more info.")
 		print ("################## Exported asset(s) ##################")
 		for asset in exportedAssets:
 			print (asset[0]+" --> "+asset[1])
@@ -368,8 +416,10 @@ def ExportComplete(self): #Display a summary at the end of the export and reset 
 
 #############################[Visual and UI]#############################
 
-#### Propertys
-def initObjectProperties():
+
+#### Panels
+class ue4PropertiesPanel(bpy.types.Panel): #Is Objet Properties panel
+
 	bpy.types.Object.ExportEnum = EnumProperty(
 	name = "Type of export ",
 	description	 = "Export type of active object",
@@ -377,67 +427,6 @@ def initObjectProperties():
 		("export_and_childs", "Export and childs", "Export self objet and all childs", "KEYINGSET", 2),
 		("dont_export", "Dont export", "Will never export", "KEY_DEHLT", 3)])
 
-
-def initSceneProperties():
-	bpy.types.Scene.CollisionAndSocketOwner = StringProperty(
-		name = "Owner",
-		description	 = "Enter the owner name of the collision or socket",
-		default = "")
-
-	bpy.types.Scene.StaticPrefixExportName = StringProperty(
-		name = "StaticMesh Prefix",
-		description	 = "Prefix of staticMesh when exported",
-		maxlen = 255,
-		default = "SM_")
-
-	bpy.types.Scene.SkeletalPrefixExportName = StringProperty(
-		name = "SkeletalMesh Prefix ",
-		description	 = "Prefix of SkeletalMesh when exported",
-		maxlen = 255,
-		default = "SK_")
-
-	bpy.types.Scene.AnimPrefixExportName = StringProperty(
-		name = "AnimationSequence Prefix",
-		description	 = "Prefix of AnimationSequence when exported",
-		maxlen = 255,
-		default = "Anim_")
-		
-	bpy.types.Scene.ExportNameFilePath = StringProperty(
-		name = "Export file path",
-        description = "Choose a directory for export",
-        maxlen = 1024,
-		default = "//ExportedFbx\\",
-        subtype = 'DIR_PATH')
-		
-	return
-
-
-def ChecksProp(prop):
-	try:
-		value = prop["StaticPrefixExportName"]
-	except:
-		pass
-		prop["StaticPrefixExportName"] = "SM_"
-	try:
-		value = prop["SkeletalPrefixExportName"]
-	except:
-		pass
-		prop["SkeletalPrefixExportName"] = "SK_"
-	try:
-		value = prop["AnimPrefixExportName"]
-	except:
-		pass
-		prop["AnimPrefixExportName"] = "Anim_"
-	try:
-		value = prop["ExportNameFilePath"]
-	except:
-		pass
-		prop["ExportNameFilePath"] = "//ExportedFbx\\"
-
-	return
-
-#### Panels
-class ue4PropertiesPanel(bpy.types.Panel): #Is Objet Properties panel
 	bl_idname = "panel.ue4.properties"
 	bl_label = "Objet Properties"
 	bl_space_type = "VIEW_3D"
@@ -446,19 +435,25 @@ class ue4PropertiesPanel(bpy.types.Panel): #Is Objet Properties panel
 
 	def draw(self, context):
 		layout = self.layout
-		try:
-			ob = context.object
-			layout.prop(ob, 'ExportEnum')
-		except:
-			pass
+		if context.object is not None:
+			layout.prop(context.object, 'ExportEnum')
 		row = self.layout.row().split(percentage = 0.80 )
 		row = row.column()
 
-		row.operator("object.selectexport")
-		row.operator("object.deselectexport")
+		row.operator("object.selectexport", icon='MARKER_HLT')
+		row.operator("object.deselectexport", icon='MARKER')
+		row.operator("object.selectexportchild", icon='SPACE2')
+		row.operator("object.deselectexportchild", icon='SPACE3')
 
 
 class ue4CollisionsAndSocketsPanel(bpy.types.Panel): #Is Collisions And Sockets panel
+
+	bpy.types.Scene.collision_and_socket_owner = bpy.props.StringProperty(
+		name = "Owner",
+		description	 = "Enter the owner name of the collision or socket",
+		maxlen = 64,
+		default = "")
+
 	bl_idname = "panel.ue4.collisionsandsockets"
 	bl_label = "Collisions And Sockets"
 	bl_space_type = "VIEW_3D"
@@ -471,14 +466,13 @@ class ue4CollisionsAndSocketsPanel(bpy.types.Panel): #Is Collisions And Sockets 
 		layout = self.layout
 
 		ownerSelect = layout.row().split(align=True, percentage=0.9)
-		ownerSelect.prop_search(scene, "CollisionAndSocketOwner", scene, "objects")
+		ownerSelect.prop_search(scene, "collision_and_socket_owner", scene, "objects")
 		ownerSelect.operator("object.setownerbyactive", text="", icon='EYEDROPPER')
-
-
 
 		layout.label("Convert selected objet to Unreal collision or socket", icon='PHYSICS')
 
 		convertButtons = layout.row().split(percentage = 0.80 )
+
 		convertButtons.active = CheckIfCollisionAndSocketOwnerIsValid()
 		convertButtons.enabled = CheckIfCollisionAndSocketOwnerIsValid()
 		convertButtons = convertButtons.column()
@@ -502,6 +496,48 @@ class ue4CheckCorrect(bpy.types.Panel): #Is Check and correct panel
 
 
 class ue4ExportPanel(bpy.types.Panel): #Is Export panel
+
+	bpy.types.Scene.static_prefix_export_name = bpy.props.StringProperty(
+		name = "StaticMesh Prefix",
+		description	 = "Prefix of staticMesh when exported",
+		maxlen = 255,
+		default = "SM_")
+
+	bpy.types.Scene.skeletal_prefix_export_name = bpy.props.StringProperty(
+		name = "SkeletalMesh Prefix ",
+		description	 = "Prefix of SkeletalMesh when exported",
+		maxlen = 255,
+		default = "SK_")
+
+	bpy.types.Scene.anim_prefix_export_name = bpy.props.StringProperty(
+		name = "AnimationSequence Prefix",
+		description	 = "Prefix of AnimationSequence when exported",
+		maxlen = 255,
+		default = "Anim_")
+
+	bpy.types.Scene.export_static_file_path = bpy.props.StringProperty(
+		name = "StaticMesh export file path",
+		description = "Choose a directory for export StaticMesh(s)",
+		maxlen = 1024,
+		default = "//ExportedFbx\StaticMesh\\",
+		subtype = 'DIR_PATH')
+
+	bpy.types.Scene.export_skeletal_file_path = bpy.props.StringProperty(
+		name = "SkeletalMesh export file path",
+		description = "Choose a directory for export SkeletalMesh(s)",
+		maxlen = 1024,
+		default = "//ExportedFbx\SkeletalMesh\\",
+		subtype = 'DIR_PATH')
+
+	prop = bpy.types.Scene
+	bpy.types.Scene.export_simplify_anim = bpy.props.FloatProperty(
+		name="Simplify animations",
+		description="How much to simplify baked values (0.0 to disable, the higher the more simplified)",
+		min=0.0, max=100.0,	 # No simplification to up to 10% of current magnitude tolerance.
+		soft_min=0.0, soft_max=10.0,
+		default=1.0,  # default: min slope: 0.005, max frame step: 10.
+		)
+
 	bl_idname = "panel.ue4.export"
 	bl_label = "Export"
 	bl_space_type = "VIEW_3D"
@@ -510,15 +546,17 @@ class ue4ExportPanel(bpy.types.Panel): #Is Export panel
 
 	def draw(self, context):
 		scn = context.scene
-		self.layout.prop(scn, 'StaticPrefixExportName', icon='OBJECT_DATA')
-		self.layout.prop(scn, 'SkeletalPrefixExportName', icon='OBJECT_DATA')
-		self.layout.prop(scn, 'AnimPrefixExportName', icon='OBJECT_DATA')
-		self.layout.prop(scn, 'ExportNameFilePath')
+		self.layout.prop(scn, 'static_prefix_export_name', icon='OBJECT_DATA')
+		self.layout.prop(scn, 'skeletal_prefix_export_name', icon='OBJECT_DATA')
+		self.layout.prop(scn, 'anim_prefix_export_name', icon='OBJECT_DATA')
+		self.layout.prop(scn, 'export_static_file_path')
+		self.layout.prop(scn, 'export_skeletal_file_path')
+		self.layout.prop(scn, 'export_simplify_anim')
 		props = self.layout.row().operator("object.exportforunreal", icon='EXPORT')
 
 #### Buttons
-class SelectExportAndChildButton(bpy.types.Operator):
-	bl_label = "Select all \"Export and childs\" objects"
+class SelectExportButton(bpy.types.Operator):
+	bl_label = "Select all export objects root"
 	bl_idname = "object.selectexport"
 	bl_description = "Select all root objects that will be exported"
 
@@ -528,8 +566,8 @@ class SelectExportAndChildButton(bpy.types.Operator):
 		return {'FINISHED'}
 
 
-class DeselectExportAndChildButton(bpy.types.Operator):
-	bl_label = "Deselect all \"Export and childs\" objects"
+class DeselectExportButton(bpy.types.Operator):
+	bl_label = "Deselect all export objects root"
 	bl_idname = "object.deselectexport"
 	bl_description = "Deselect all root objects that will be exported"
 
@@ -539,17 +577,40 @@ class DeselectExportAndChildButton(bpy.types.Operator):
 		return {'FINISHED'}
 
 
+class SelectExportAndChildButton(bpy.types.Operator):
+	bl_label = "Select all export childs objects"
+	bl_idname = "object.selectexportchild"
+	bl_description = "Select all root objects that will be exported"
+
+	def execute(self, context):
+		for obj in FindAllObjetsByExportType("export_and_childs"):
+			for obj2 in GetDesiredChilds(obj):
+				obj2.select = True
+		return {'FINISHED'}
+
+
+class DeselectExportAndChildButton(bpy.types.Operator):
+	bl_label = "Deselect all export childs objects"
+	bl_idname = "object.deselectexportchild"
+	bl_description = "Deselect all root objects that will be exported"
+
+	def execute(self, context):
+		for obj in FindAllObjetsByExportType("export_and_childs"):
+			for obj2 in GetDesiredChilds(obj):
+				obj2.select = False
+		return {'FINISHED'}
+
+
 class SetOwnerByActive(bpy.types.Operator):
 	bl_label = "Set owner by active selection"
 	bl_idname = "object.setownerbyactive"
 	bl_description = "Set owner by active selection"
 
 	def execute(self, context):
-		try:
-			bpy.context.scene["CollisionAndSocketOwner"] = bpy.context.active_object.name
-		except:
-			pass
-			bpy.context.scene["CollisionAndSocketOwner"] = ""
+		if bpy.context.active_object is not None:
+			bpy.context.scene.collision_and_socket_owner = bpy.context.active_object.name
+		else:
+			bpy.context.scene.collision_and_socket_owner = ""
 		return {'FINISHED'}
 
 
@@ -606,14 +667,14 @@ class ConvertToUESocketButton(bpy.types.Operator):
 		ConvertToUe4Socket()
 		self.report({'INFO'}, "Selected empty(s) have be converted to UE4 Socket")
 		return {'FINISHED'}
-		
+
+
 class ExportForUnrealEngineButton(bpy.types.Operator):
 	bl_label = "Export for UnrealEngine 4"
 	bl_idname = "object.exportforunreal"
 	bl_description = "Export all objet intended for export in scene to fbx"
 
 	def execute(self, context):
-		ChecksProp(bpy.context.scene)
 		ExportAllByList(FindAllObjetsByExportType("export_and_childs"))
 		ExportComplete(self)
 		return {'FINISHED'}
@@ -635,8 +696,6 @@ class CorrectBadPropertyButton(bpy.types.Operator):
 def register():
 	bpy.utils.register_module(__name__)
 	bpy.types.Scene.my_prop = bpy.props.StringProperty(default="default value")
-	initObjectProperties()
-	initSceneProperties()
 
 
 def unregister():
