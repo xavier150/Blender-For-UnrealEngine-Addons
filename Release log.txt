@@ -42,3 +42,30 @@ Initial release.
 - More feedback info.
 - Optimized Code.
 - Other small changes.
+
+== Rev 0.2.0 ==
+
+- New script generator for importing assets into unreal
+- New script generator for importing sequencer into unreal 
+- New export log
+- Now the animation can be exported without having to export the skeletal mesh with
+- Now the export quality of animations is managed directly in the object with SampleAnimForExport and SimplifyAnimForExport properties
+- Update button "check potential error": Largest list of potential problems
+- Correct bad properties and update hitachi buttons were included in check potentail error button
+- check potentail error button was moved to the export panel
+- Potential error(s) are now displaying in a popup
+- Optimized Code. (Multi files)
+- Optimized UI
+- ExportCameraPacked removed (the cameras in pack have been removed because they pose too much problem for the definition of the parameters between each camera)
+- Now the camera are exported with additional tracks. fov (FocalLength), Aperture (F-stop), and Focus Distance
+It is now possible to force the duration of an animation according to the scene or custom value
+- Copy/Paste CameraCut code text has been removed
+- Now "Export (FBX property)" panel are now named "Nomenclature"
+- New data in Nomenclature panel
+- Fixed: Bad file name make script fail. Now the not allowed characters are delete it in filename during export)
+- Fixed: The object without animation_data make script fail
+- Fixed: The camera was exported with a size 100 times too large. Now a temporary size is applied during export on delta_scale
+- Fixed: Sockets can have custom name and a temporary size is applied during export on delta_scale
+- Fixed: les animation de type pose etais exporter avec le mauvais prefix
+- Fixed: The Force StaticMesh option did not work
+- Other small changes.
