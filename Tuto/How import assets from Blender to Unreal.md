@@ -1,6 +1,6 @@
-I recommend reading before the document How export assets from Blender.md if you have not read it: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md
+I recommend reading before the document How export assets from Blender.md if you have not read it: [Link](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md)
 
-#Import assets in Unreal engine
+# Import assets in Unreal engine
 Depending on the object type, the import parameters are not the same.
 - For Static mesh assets you need tick CombineMeshs
 - For Skeletal mesh assets you need tick Import Morph Targets if you use Shape Keys
@@ -9,7 +9,7 @@ Depending on the object type, the import parameters are not the same.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocParametersByType.jpg">
 
 
-#Import assets in Unreal engine with UnrealEnginePython
+# Import assets in Unreal engine with UnrealEnginePython
 1. Instal UnrealEnginePython: https://github.com/20tab/UnrealEnginePython
 2. In Unreal Engine open Python Console. Window > Developer Tools > Python Console
 3. Found "ImportAssetScript.py" file. It is placed by default at the location of the blender file in folder ExportedFbx\Other\
@@ -20,7 +20,7 @@ Depending on the object type, the import parameters are not the same.
 Example video: https://youtu.be/FOFBfiE5EEQ
 
 
-#Import Blender camera to Unreal Sequencer with UnrealEnginePython
+# Import Blender camera to Unreal Sequencer with UnrealEnginePython
 It is possible to import complete sequence from blender to unreal with camera cut management and animations on special tracks like Fov (FocalLength), Aperture (F-stop), and Focus Distance
 The Camera cuts are generated with Markers https://docs.blender.org/manual/en/dev/animation/markers.html#bind-camera-to-marker
 
@@ -39,5 +39,5 @@ The Camera cuts are generated with Markers https://docs.blender.org/manual/en/de
 	- Animations, Poses and cameras can take a long time to export. Look in blender system console for more info.
 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocSequencerScript.jpg">
-Example video: https://youtu.be/0PQlN-y2h2Q
+Example video: https://youtu.be/0PQlN-y2h2Q </br>
 LostMoon animation: https://youtu.be/ApY2LpKkJNQ
