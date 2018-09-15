@@ -6,6 +6,7 @@ Working on object packs for Unreal Engine 4 can be complicated with Blender. Tha
 The socket and collision shapes is done directly in Blender. 
 You can choose precisely the different animations that need to be exported.
 Also tha addon includes a potential error checker to avoid problems with exporting.
+And since the last version it is possible to generate scripts for unreal who will import the assets or generate level sequencer
 
 You can see tuto and doc here:
 How export assets from blender: [Link](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md) </br>
