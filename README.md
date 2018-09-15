@@ -25,5 +25,5 @@ I recommend reading before the document How export assets from Blender.md if you
 2. Open User Preferences (Ctrl+Alt+U) and under Add-ons, click Install from File. Then navigate to the file you downloaded and select it.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/InstallationScreen1.jpg" width="600">
 3. It should now appear in the window and you can tick the checkbox in the upper right to enable it.
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/Tuto/InstallationScreen2.jpg" width="600">
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/InstallationScreen2.jpg" width="600">
 If you would like to have the add-on enabled every time you start Blender, click Save User Settings at the bottom.
