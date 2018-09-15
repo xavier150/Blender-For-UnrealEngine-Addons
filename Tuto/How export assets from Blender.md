@@ -1,4 +1,4 @@
-#Set asset(s) to export
+# Set asset(s) to export
 We will see how to define the assets to export
 
 1. Open Tool panel in 3D View (T), clic to Unreal engine 4 category and go in Object Properties panel
@@ -10,13 +10,13 @@ We will see how to define the assets to export
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocScreen2.jpg">
 
 
-#Import properties
+# Import properties
 It is possible to define parameters for importing your assets into the Object Import Properties panel, but this only works with importing via UnrealEnginePython
 About UnrealEnginePython: https://github.com/20tab/UnrealEnginePython
 How Import asset in Unreal Engine https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How import assets from Blender to Unreal.md
 
 
-#Collisions and Sockets
+# Collisions and Sockets
 It possible to create collisions and socket for your StaticMesh assets in blender.
 
 1. Create a new mesh, it will be your collider shape. And place it to your asset. (For a socket create a Empty object)
@@ -30,7 +30,7 @@ It possible to create collisions and socket for your StaticMesh assets in blende
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocCollision.jpg">
 
 
-#Animations
+# Animations
 It is of course possible to export animations with your skeletal mesh but you need use Action Editor in Dope Sheet windows
 
 1. select your SkeletalMesh and open Dope Sheet windows
@@ -41,7 +41,7 @@ It is of course possible to export animations with your skeletal mesh but you ne
 4. Select your SkeletalMesh and in Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality, and select the animations to export.
 
 
-#Nomenclature 
+# Nomenclature 
 1. go in Nomenclature panel.
 	- The nomenclature is by default defined in correlation with the UnrealEngine Pipeline but you can change it is you use another pipeline. For change nomenclature property 
 	- By default the all assets are exported to the location of the blender file but you can also change this.
@@ -49,7 +49,7 @@ It is of course possible to export animations with your skeletal mesh but you ne
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocNomenclatureColored.jpg">
 
 
-#Export process
+# Export process
 Now we can export all asset.
 
 1. go in Export panel.
