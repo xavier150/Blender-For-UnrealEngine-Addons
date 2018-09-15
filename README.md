@@ -1,7 +1,5 @@
 # Blender For Unreal Engine
 This addons allows you to export content created with Blender to Unreal Engine 4
-Addons page: http://xavierloux.com/creation/view/?creation=blender-for-unrealengine-addons
-GitHub page: https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 
 # How it works
 Working on object packs for Unreal Engine 4 can be complicated with Blender. That's why I created the Addons "Blender for UnrealEngine". It simplifies the procedure of the export, allows to export all the Assets of a scene at the same time, distributed them in a proper tree structure in correlation with the UnrealEngine Pipeline.
@@ -15,8 +13,8 @@ Working on object packs for Unreal Engine 4 can be complicated with Blender. Tha
 - You can also choose which type of assets should be exported.
 
 You can see tuto and doc here:
-How export assets from blender: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md
-How import assets from Blender to Unreal: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20import%20assets%20from%20Blender%20to%20Unreal.md
+How export assets from blender: [Link](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md) </br>
+How import assets from Blender to Unreal: [Link](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20import%20assets%20from%20Blender%20to%20Unreal.md)
 
 
 I recommend reading before the document How export assets from Blender.md if you have not read it: 
