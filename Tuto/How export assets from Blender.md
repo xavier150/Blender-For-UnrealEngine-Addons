@@ -13,8 +13,8 @@ We will see how to define the assets to export
 
 # Import properties
 It is possible to define parameters for importing your assets into the Object Import Properties panel, but this only works with importing via UnrealEnginePython
-About UnrealEnginePython: https://github.com/20tab/UnrealEnginePython
-[How import assets from Blender to Unreal](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20import%20assets%20from%20Blender%20to%20Unreal.md)
+About UnrealEnginePython: https://github.com/20tab/UnrealEnginePython </br>
+How import assets in Unreal Engine [Doc](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20import%20assets%20from%20Blender%20to%20Unreal.md)
 
 
 # Collisions and Sockets
