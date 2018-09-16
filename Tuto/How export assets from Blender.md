@@ -5,7 +5,6 @@ We will see how to define the assets to export
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocScreen1.jpg">
 
 2. Select the asset you want to export and set the Export type property on "Export recursive". Now repeat the task for all the objects you want to export.
-	- An asset can contain multiple collider shapes but each collider must use a different object
 	- Each objects that has this property will export with all its children in a Fbx file. if you don't want export the child set "Not exported" Export type property to the child. else keep "Auto".
 	- The center the scene of the Fbx file will be equal to the origin point location of the object in blender. The position of the object in the Blender scene does not matter.
 	- For the Skeletal mesh you need set the Armature as Export recursive.
