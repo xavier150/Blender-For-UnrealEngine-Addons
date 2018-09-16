@@ -10,11 +10,9 @@ Also the addon includes a potential error checker to avoid problems with exporti
 And since the last version it is possible to generate scripts for unreal who will import the assets or generate level sequencer.
 
 You can see tuto and doc here:
-How export assets from blender: [Link](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md) </br>
-How import assets from Blender to Unreal: [Link](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20import%20assets%20from%20Blender%20to%20Unreal.md)
+  - [How export assets from blender](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md) </br>
+  - [How import assets from Blender to Unreal](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20import%20assets%20from%20Blender%20to%20Unreal.md)
 
-
-I recommend reading before the document How export assets from Blender.md if you have not read it: 
 # Installation
 1. Download the latest release https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases
 2. Open User Preferences (Ctrl+Alt+U) and under Add-ons, click Install from File. Then navigate to the file you downloaded and select it.
