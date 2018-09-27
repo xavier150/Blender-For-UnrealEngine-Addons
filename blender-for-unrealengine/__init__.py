@@ -30,7 +30,7 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 2, 0),
+	'version': (0, 2, 1),
 	'blender': (2, 79, 0),
 	'location': 'View3D > Tool > Unreal Engine 4',
 	'warning': '',
@@ -690,6 +690,16 @@ class ue4ImportScriptPanel(bpy.types.Panel):
 		description	 = "Copy Reference from unreal ine Content Browser",
 		maxlen = 512,
 		default = "LevelSequence'/Game/ImportedFbx/MySequence.MySequence'")
+		
+	bpy.types.Scene.unreal_version = EnumProperty(
+		name = "Unreal version",
+		description	 = "Allows to generate a different script according to Unreal version",
+		items = [
+			("4.20", "4.20", "Export for Unreal 4.20"),
+			("4.19", "4.19", "Export for Unreal 4.19")
+			]
+		)
+
 
 	def draw(self, context):
 		scn = context.scene
@@ -699,6 +709,7 @@ class ue4ImportScriptPanel(bpy.types.Panel):
 		propsSub = propsSub.column()
 		propsSub.prop(scn, 'unreal_import_location', icon='FILE_FOLDER')
 		propsSub.prop(scn, 'unreal_levelsequence_reference', icon='FILE_FOLDER')
+		propsSub.prop(scn, 'unreal_version', icon='SCRIPTPLUGINS')
 
 		
 class ue4ExportPanel(bpy.types.Panel):

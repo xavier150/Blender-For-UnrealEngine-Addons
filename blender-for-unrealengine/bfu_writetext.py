@@ -201,6 +201,8 @@ def WriteImportAssetScript():
 def WriteImportSequencerScript():
 	#Generate a script for import camera in Ue4 sequencer
 	scene = bpy.context.scene
+	FrameRateDenominator = scene.render.fps_base
+	FrameRateNumerator = scene.render.fps
 	
 	#Comment
 	ImportScript = "#This script was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons" + "\n"
@@ -211,7 +213,10 @@ def WriteImportSequencerScript():
 	ImportScript += "import configparser" + "\n"
 	ImportScript += "import unreal_engine as ue" + "\n"
 	ImportScript += "from unreal_engine.classes import MovieSceneCameraCutTrack, MovieScene3DTransformSection, MovieScene3DTransformTrack, MovieSceneAudioTrack, CineCameraActor" + "\n"
-	ImportScript += "from unreal_engine.structs import FloatRange, FloatRangeBound, MovieSceneObjectBindingID, FrameRate" + "\n"
+	if (scene.unreal_version == "4.20"):
+		ImportScript += "from unreal_engine.structs import FloatRange, FloatRangeBound, MovieSceneObjectBindingID, FrameRate" + "\n"
+	if (scene.unreal_version == "4.19"):
+		ImportScript += "from unreal_engine.structs import FloatRange, FloatRangeBound, MovieSceneObjectBindingID" + "\n"
 	ImportScript += "from unreal_engine import FTransform, FVector, FColor" + "\n"
 	ImportScript += "from unreal_engine.enums import EMovieSceneObjectBindingSpace" + "\n"
 	ImportScript += "\n"
@@ -221,7 +226,7 @@ def WriteImportSequencerScript():
 	ImportScript += "\t" + "Config = configparser.ConfigParser()" + "\n"
 	ImportScript += "\t" + "Config.read(FileLoc)" + "\n"
 	ImportScript += "\t" + "for option in Config.options(SectionFileName):" + "\n"
-	ImportScript += "\t\t" + "frame = float(option)/"+str(scene.render.fps)+" #FrameRate" + "\n"
+	ImportScript += "\t\t" + "frame = float(option)/"+str(FrameRateNumerator)+" #FrameRate" + "\n"
 	ImportScript += "\t\t" + "value = float(Config.get(SectionFileName, option))" + "\n"
 	ImportScript += "\t\t" + "SequencerSection.sequencer_section_add_key(frame,value)" + "\n"
 			
@@ -235,14 +240,20 @@ def WriteImportSequencerScript():
 	ImportScript += "\t" + "ImportedCamera = [] #(CameraName, CameraGuid)" + "\n"
 	ImportScript += "\t" + 'print("========================= Import started ! =========================")' + "\n"
 	ImportScript += "\t" + "\n"
-		#Set frame rate
+	
 	ImportScript += "\t" + "#Set frame rate" + "\n"
-	ImportScript += "\t" + "myFFrameRate = FrameRate()" + "\n"
-	ImportScript += "\t" + "myFFrameRate.Denominator = 1" + "\n"
-	ImportScript += "\t" + "myFFrameRate.Numerator = " + str(scene.render.fps) + "\n"
-	ImportScript += "\t" + "seq.MovieScene.DisplayRate = myFFrameRate" + "\n"
+	#Set frame rate for 4.20
+	if (scene.unreal_version == "4.20"):
+		ImportScript += "\t" + "myFFrameRate = FrameRate()" + "\n"
+		ImportScript += "\t" + "myFFrameRate.Denominator = " + str(FrameRateDenominator) + "\n"
+		ImportScript += "\t" + "myFFrameRate.Numerator = " + str(FrameRateNumerator) + "\n"
+		ImportScript += "\t" + "seq.MovieScene.DisplayRate = myFFrameRate" + "\n"		
+	#Set frame rate for 4.19
+	if (scene.unreal_version == "4.19"):		
+		ImportScript += "\t" + "seq.MovieScene.FixedFrameInterval = " + str(FrameRateDenominator) + "/" + str(FrameRateNumerator) + "\n"
 	ImportScript += "\t" + "\n"
-		#Set playback range
+		
+	#Set playback range
 	StartPlayback = str(scene.frame_start/scene.render.fps)
 	EndPlayback = str(scene.frame_end/scene.render.fps)
 	ImportScript += "\t" + "#Set playback range" + "\n"
@@ -321,11 +332,11 @@ def WriteImportSequencerScript():
 		sectionCuts = []		
 		for x in range(len(markersOrderly)):
 			if scene.frame_end > markersOrderly[x].frame:
-				startTime = markersOrderly[x].frame/scene.render.fps
+				startTime = markersOrderly[x].frame/FrameRateNumerator
 				if x+1 != len(markersOrderly):
-					EndTime = markersOrderly[x+1].frame/scene.render.fps
+					EndTime = markersOrderly[x+1].frame/FrameRateNumerator
 				else:
-					EndTime = scene.frame_end/scene.render.fps
+					EndTime = scene.frame_end/FrameRateNumerator
 				sectionCuts.append([startTime, EndTime, markersOrderly[x]])
 			
 		return sectionCuts
