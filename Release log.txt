@@ -69,3 +69,9 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: les animation de type pose etais exporter avec le mauvais prefix
 - Fixed: The Force StaticMesh option did not work
 - Other small changes.
+
+== Rev 0.2.1 ==
+
+- It is possible to choose the version of Unreal for script generation.
+- The frame rate use denominator and numerator for sequencer now
+- Fixed: Camera import sequencer does not work with Unreal 4.19
