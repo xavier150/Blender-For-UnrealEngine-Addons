@@ -27,7 +27,7 @@ The Camera cuts are generated with Markers https://docs.blender.org/manual/en/de
 1. Instal UnrealEnginePython: https://github.com/20tab/UnrealEnginePython
 2. In unreal engine open your level and create a new Level Sequencer
 3. Right clic on your new Level Sequencer and Copy Reference 
-4. In Blender open Tool panel in 3D View (T), clic to Unreal engine 4 category, go in Import Script panel and paste sequence Reference in Unreal LevelSequence Reference property
+4. In Blender open Tool panel in 3D View (T), clic to Unreal engine 4 category, go in Import Script panel and paste sequence Reference in Unreal LevelSequence Reference property. And set Unreal version property according to your Unreal version
 5. Select you scene camera and set the Export type property on "Export recursive". Now repeat the task for all the camera.
 6. Check potential errors and process the export
 7. Found "ImportSequencerScript.py" file. It is placed by default at the location of the blender file in folder ExportedFbx\Other\
