@@ -1,7 +1,7 @@
 # Set asset(s) to export
 We will see how to define the assets to export
 
-1. Open Tool panel in 3D View (T), clic to Unreal engine 4 category and go in Object Properties panel
+1. Open Tool panel in 3D View (T), enlarge it, open to Unreal engine 4 main panel and go in Object Properties panel
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocScreen1.jpg">
 
 2. Select the asset you want to export and set the Export type property on "Export recursive". Now repeat the task for all the objects you want to export.
@@ -12,18 +12,19 @@ We will see how to define the assets to export
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocScreen2.jpg">
 
 # Import properties
-It is possible to define parameters for importing your assets into the Object Import Properties panel, but this only works with importing via UnrealEnginePython
+It is possible to define parameters for importing your assets into the Object Import Properties panel. This works only with importing via UnrealEnginePython
 About UnrealEnginePython: https://github.com/20tab/UnrealEnginePython </br>
 How import assets in Unreal Engine [Doc](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20import%20assets%20from%20Blender%20to%20Unreal.md)
 
 
 # Collisions and Sockets
-It possible to create collisions and socket for your StaticMesh assets in blender.
+It possible to create collisions (StaticMesh) and sockets (Static/SkeletalMesh) for your Assets directly in blender.
 
-1. Create a new mesh, it will be your collider shape. And place it to your asset. (For a socket create a Empty object)
+1. Create a new mesh, it will be your collider shape. (For a socket create a Empty object) And place it to your asset. 
 	- An asset can contain multiple collider shapes but each collider must use a different object
-2. Select your collider shape(s) or Empty object and at the last select your target asset.
-3. In Collisions and Sockets panel clic on the appropriate button for the convert the selection to collider or socket (Converted collider are green are now the child of the asset) 
+2. Select your collider shape(s) or Empty(s) at the last select the owner object.
+	- For the SkeletalMesh select the Empty(s) then the owner bone in PoseMode.
+3. Open Collisions and Sockets panel and clic on the appropriate button for the convert the selection to collider or socket (Converted collider are green are now the child of the asset) 
 	- About StaticMeshes collision:	https://docs.unrealengine.com/en-us/Engine/Content/FBX/StaticMeshes#collision
 	- If you want to create a capsule use 2 sphere in a same object.
 	- is a  Not exported child contains collider, the collider will not exploring as the child.
@@ -32,33 +33,39 @@ It possible to create collisions and socket for your StaticMesh assets in blende
 
 
 # Animations
-It is of course possible to export animations with your skeletal mesh but you need use Action Editor in Dope Sheet windows
+It is of course possible to export animations with your skeletal. You can use the use Action Editor in Dope Sheet windows to have multiple animations in one scene or use the NonLinearAnimation
 
-1. select your SkeletalMesh and open Dope Sheet windows
-2. Set Action Editor mode and create your animations on actions ( /!\ Don't forget to use fake user to not lose your animation ! )
+For the Action:
+1. select your SkeletalMesh and open Open Animation Properties panel (Do not forget to set the Armature as Export recursive)
+2. Dope Sheet windows and set Action Editor mode and create your animations on actions ( /!\ Don't forget to use fake user to not lose your animation ! )
 	- You can use driver for the Morph Targer
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocAnimation.jpg">
-3. Open Tool panel in 3D View (T) and clic to Unreal engine 4 category. 
-4. Select your SkeletalMesh and in Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality, and select the animations to export.
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocAction.jpg"> 
+3. In Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality, and select the animations to export.
+
+For the NLA:
+1. select your SkeletalMesh and open Open Animation Properties panel (Do not forget to set the Armature as Export recursive)
+2. In Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality.
+3. If you just want the NLAnimation set Action to export as Not exported and check the box Export Nla with your desired name
 
 
 # Nomenclature 
-1. go in Nomenclature panel.
-	- The nomenclature is by default defined in correlation with the UnrealEngine Pipeline but you can change it is you use another pipeline. For change nomenclature property 
-	- By default the all assets are exported to the location of the blender file but you can also change this.
-	- Depending on the assets you can also set a sub folder in Object Properties panel, Sub folder name property
+The nomenclature is by default defined in correlation with the UnrealEngine Pipeline but you can change it is you use another pipeline.
+By default the all assets are exported to the location of the blender file but you can also change this. 
+Depending on the assets you can also set a sub folder in Object Properties panel > Sub folder.
+The nomenclature also contains the name of the script and additional file.
+
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocNomenclatureColored.jpg">
 
 
 # Export process
 Now we can export all asset.
 
-1. go in Export panel.
+1. Open the Export panel.
 	- You can choose the type of object to export
 2. clic on Check potential errors button
 	- This will update all hirarchy name, correct the bad properties  and show the potential errors.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocPotentialErrors.jpg">
-3. Now clic on the big sexy Export for UnrealEngine 4 button
+3. Now clic on the Export for UnrealEngine 4 button
 	- Animations, Poses and cameras can take a long time to export.
 	- Look in blender system console for more info.
 	- At each new export the old files will be overwritten
