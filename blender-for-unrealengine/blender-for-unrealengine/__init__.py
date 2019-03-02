@@ -734,7 +734,7 @@ class ue4CollisionsAndSocketsPanel(bpy.types.Panel):
 		layout = self.layout
 		layout.label("Convert selected object to Unreal collision or socket", icon='PHYSICS')
 
-		layout.label("Select the collision shape or the Empty then the owner mesh.")
+		layout.label(text="Select your collider shape(s) or Empty(s) then the owner object.")
 		convertButtons = layout.row().split(percentage = 0.80 )
 		convertStaticCollisionButtons = convertButtons.column()
 		convertStaticCollisionButtons.enabled = ActiveModeIs("OBJECT") and ActiveTypeIs("MESH") and FoundTypeInSelect("MESH")
@@ -748,7 +748,7 @@ class ue4CollisionsAndSocketsPanel(bpy.types.Panel):
 		convertStaticSocketButtons.enabled = ActiveModeIs("OBJECT") and ActiveTypeIs("MESH") and FoundTypeInSelect("EMPTY")
 		convertStaticSocketButtons.operator("object.converttostaticsocket", icon='OUTLINER_DATA_EMPTY')
 
-		layout.label("Select the Empty then the owner bone in PoseMode.")
+		layout.label(text="Select the Empty(s) then the owner bone in PoseMode.")
 		convertButtons = self.layout.row().split(percentage = 0.80 )
 		convertSkeletalSocketButtons = convertButtons.column()
 		convertSkeletalSocketButtons.enabled = ActiveModeIs("POSE") and ActiveTypeIs("ARMATURE") and FoundTypeInSelect("EMPTY")
