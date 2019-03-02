@@ -1,4 +1,4 @@
-== Rev 0.1.3 ==
+﻿== Rev 0.1.3 ==
 
 Initial release.
 
@@ -75,3 +75,36 @@ It is now possible to force the duration of an animation according to the scene 
 - It is possible to choose the version of Unreal for script generation.
 - The frame rate use denominator and numerator for sequencer now
 - Fixed: Camera import sequencer does not work with Unreal 4.19
+
+== Rev 0.2.2 ==
+
+- New: Updated for Blender 2.8
+- New: You can now manage lod (LevelOfDetail) directly in blender (StaticMesh only for the moment)
+- New: You can now export NAL animations
+- New: Two buttons to copy the command for importing assets and sequencer in unreal
+- New: You can now create sockets for SkeletalMesh directly in Blender
+- New: select button for potential error report. It is possible to directly select the object or vertices incriminated
+- New: The all skeletal mesh are exported with the root joint named as Armature for be skiped in Unreal
+- New: For the sequencer the camera visibility (Eye Symbol in blender) will be used for spawned value in sequencer 
+- New: Now in Unreal with the serquencer a CameraCut will be created automatically with the active camera the Blender scene does not contain Marker
+- New: it is possible to change the name of the import script for unreal
+- New: Import script updated for 4.21
+- New: choose version value removed (is now automatic)
+- New: You can chose bAutoGenerateCollision for Import Script
+- Change: It is now no longer necessary to create a new sequencer in Unreal Engine for import from Blender, the script will create it itself
+- Change: The potential error report contains more detail to correct the errors
+- Change: new potential errors will be detected in the potential error report(marker)
+- Change: Show assets (s) button report contains more information and is clearer
+- Change: In the Export log the NLA types, poses and action, are indicated as animations
+- Change: export_pose check mark removed (now only one check mark for all animation types)
+- Change: Hierarchy names are automatically updated with each collisions conversion
+- Fixed: Export action doesn't work with NLA Change
+- Fixed: Unable to fix the object that are not in visible layer
+- Fixed: The potential error display some errors in duplicate
+- Fixed: reload importlib did not work good
+- Fixed: the generated sequencer sections are sometimes offset by one frame
+- Fixed: Some files with special names do not work with unreal import so the name is now correcting directly at blender export
+- Fixed: The camera cut sections are too long of 0.0001 frames
+- Fixed: UpdateNameHierarchy make bad parent_set with the ConvertToUe4SubObj function
+- Fixed: ResetArmaturePose function doesn't work with rotation mode Euler
+- Temporary problem: Currently on Blender 2.8 the hidden objects will not be exported, use Shift+H for unhide all objects
