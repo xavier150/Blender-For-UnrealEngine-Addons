@@ -10,12 +10,16 @@ Depending on the object type, the import parameters are not the same.
 
 
 # Import assets in Unreal engine with UnrealEnginePython
-1. Instal UnrealEnginePython: https://github.com/20tab/UnrealEnginePython
-2. In Unreal Engine open Python Console. Window > Developer Tools > Python Console
-3. Found "ImportAssetScript.py" file. It is placed by default at the location of the blender file in folder ExportedFbx\Other\
-4. In Python Console run the command: `unreal_engine.py_exec(r'')` with ImportAssetScript file location. For me the command is: 
-`unreal_engine.py_exec(r'G:\Projet perso\Small Project\BlenderScriptWork\BlenderforUnrealEngineAddon\0.2.0\ExportedFbx\Other\ImportAssetScript.py')`
-	- The all assets will be imported by default in folder ImportedFbx in Unreal Content Browser. You can change folder location in Blender with the property Unreal import location in Import Script panel.
+
+1. In Blender open the panel Import Script and define the location where you want to import the assets
+2. Check potential errors and process the export
+3. Open the panel Clipboard Copy and clic to appropriate button to easily copy the command
+4. Instal UnrealEnginePython: https://github.com/20tab/UnrealEnginePython
+5. In Unreal Engine open Python Console. Window > Developer Tools > Python Console
+6. In Python Console run the copied command: 
+	- `unreal_engine.py_exec(r'')` with your Script file location. 
+	- The file ImportAssetScript.py is placed by default at the location of the blender file in folder ExportedFbx\
+	
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocImportScript.jpg">
 Example video: https://youtu.be/FOFBfiE5EEQ
 
@@ -24,20 +28,17 @@ Example video: https://youtu.be/FOFBfiE5EEQ
 It is possible to import complete sequence from blender to unreal with camera cut management and animations on special tracks like Fov (FocalLength), Aperture (F-stop), and Focus Distance
 The Camera cuts are generated with Markers https://docs.blender.org/manual/en/dev/animation/markers.html#bind-camera-to-marker
 
-1. Instal UnrealEnginePython: https://github.com/20tab/UnrealEnginePython
-2. In unreal engine open your level and create a new Level Sequencer
-3. Right clic on your new Level Sequencer and Copy Reference 
-4. In Blender open Tool panel in 3D View (T), clic to Unreal engine 4 category, go in Import Script panel and paste sequence Reference in Unreal LevelSequence Reference property. And set Unreal version property according to your Unreal version
-5. Select you scene camera and set the Export type property on "Export recursive". Now repeat the task for all the camera.
-6. Check potential errors and process the export
-7. Found "ImportSequencerScript.py" file. It is placed by default at the location of the blender file in folder ExportedFbx\Other\
-8. In Unreal Engine open Python Console. Window > Developer Tools > Python Console
-9. In Python Console run the command: `unreal_engine.py_exec(r'')` with ImportSequencerScript file location. For me the command is: 
-`unreal_engine.py_exec(r'G:\Projet perso\Small Project\Animation\LostMoon\ExportedFbx\Other\ImportSequencerScript.py')`
-	- Open your Level Sequencer, the all cameras and camera cuts are now imported in !
-	- If you want reimport sequence you will need remove camera cut and all cameras from your Level Sequencer before running the script again.
-	- Animations, Poses and cameras can take a long time to export. Look in blender system console for more info.
+1. In Blender open the panel Import Script and define the location where you want to import the sequencer with his name
+2. Select you scene camera and set the Export type property on "Export recursive". Now repeat the task for all the camera.
+3. Check potential errors and process the export
+4. Open the panel Clipboard Copy and clic to appropriate button to easily copy the command
+
+5. Instal UnrealEnginePython: https://github.com/20tab/UnrealEnginePython
+6. In Unreal Engine open Python Console. Window > Developer Tools > Python Console
+7. In Python Console run the command: `unreal_engine.py_exec(r'')` with your ImportSequencerScript file location. 
+	- `unreal_engine.py_exec(r'')` with your Script file location. 
+	- The file ImportAssetScript.py is placed by default at the location of the blender file in folder ExportedFbx\
+	- If you reimport the sequence deletes it which was imported first if no it will be imported with another name next to it
 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocSequencerScript.jpg">
-Example video: https://youtu.be/0PQlN-y2h2Q </br>
-LostMoon animation: https://youtu.be/ApY2LpKkJNQ
+Example video: https://youtu.be/0PQlN-y2h2Q
