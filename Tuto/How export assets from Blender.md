@@ -11,6 +11,7 @@ We will see how to define the assets to export
 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocScreen2.jpg">
 
+
 # Import properties
 It is possible to define parameters for importing your assets into the Object Import Properties panel. This works only with importing via UnrealEnginePython
 About UnrealEnginePython: https://github.com/20tab/UnrealEnginePython </br>
@@ -30,6 +31,15 @@ It possible to create collisions (StaticMesh) and sockets (Static/SkeletalMesh) 
 	- is a  Not exported child contains collider, the collider will not exploring as the child.
 	- If you change the name of the objet that contains the collider you will need clic on Check potential errors button for update hirarchy name of the all colliders.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocCollision.jpg">
+
+
+# Level od details
+This works only on StaticMesh with importing via UnrealEnginePython
+1. Select the asset you want to export and set the Export type property on "Export recursive". 
+2. Now repeat the task for all Lod but also check the case "Export as lod?"
+3. Select your main asset and open the panel Object Import Properties
+4. Set LOD1, Lod2, [...] to your desired Lods
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocLods.jpg"> 
 
 
 # Animations
