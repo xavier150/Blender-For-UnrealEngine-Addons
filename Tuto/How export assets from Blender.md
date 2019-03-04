@@ -27,8 +27,7 @@ It possible to create collisions (StaticMesh) and sockets (Static/SkeletalMesh) 
 	- For the SkeletalMesh select the Empty(s) then the owner bone in PoseMode.
 3. Open Collisions and Sockets panel and clic on the appropriate button for the convert the selection to collider or socket (Converted collider are green are now the child of the asset) 
 	- About StaticMeshes collision:	https://docs.unrealengine.com/en-us/Engine/Content/FBX/StaticMeshes#collision
-	- If you want to create a capsule use 2 sphere in a same object.
-	<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocCollisionCapsule.gif">
+	- If you want to create a capsule use 2 sphere in a same object. <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocCollisionCapsule.gif">
 	- is a  Not exported child contains collider, the collider will not exploring as the child.
 	- If you change the name of the objet that contains the collider you will need clic on Check potential errors button for update hirarchy name of the all colliders.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocCollision.jpg">
