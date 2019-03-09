@@ -108,3 +108,8 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: UpdateNameHierarchy make bad parent_set with the ConvertToUe4SubObj function
 - Fixed: ResetArmaturePose function doesn't work with rotation mode Euler
 - Temporary problem: Currently on Blender 2.8 the hidden objects will not be exported, use Shift+H for unhide all objects
+
+== Rev 0.2.2b ==
+
+- Change: Addon panel moved in View3D > UI > Unreal Engine 4 for Blender 2.8
+- Fixed: Select in TryToCorrectPotentialError make a error with Blender 2.79
