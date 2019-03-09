@@ -20,22 +20,33 @@
 import bpy
 import time
 import math
-from .bfu_basics import *
-from .bfu_utils import *
 
 import importlib
 from . import bfu_writetext
 importlib.reload(bfu_writetext)
+
+from . import bfu_basics
+importlib.reload(bfu_basics)
+from .bfu_basics import *
+
+from . import bfu_utils
+importlib.reload(bfu_utils)
+from .bfu_utils import *
 	
-def ExportSingleFbxAnimation(dirpath, filename, obj, targetAction, actionType):
-	#Export a single animation or pose
+def ExportSingleFbxAction(dirpath, filename, obj, targetAction, actionType):
+	#Export a single action like a animation or pose
 
 	
 	scene = bpy.context.scene
-	filename = ValidFilename(filename)
+	filename = ValidFilenameForUnreal(filename)
 	curr_time = time.process_time()
-	print(obj.name)
-	UserAction = obj.animation_data.action #Save current action
+	if obj.animation_data is None:
+		obj.animation_data_create()
+	userAction = obj.animation_data.action #Save current action
+	userAction_extrapolation = obj.animation_data.action_extrapolation
+	userAction_blend_type = obj.animation_data.action_blend_type
+	userAction_influence = obj.animation_data.action_influence
+
 	
 	if  bpy.ops.object.mode_set.poll():
 		bpy.ops.object.mode_set(mode='OBJECT')
@@ -47,7 +58,12 @@ def ExportSingleFbxAnimation(dirpath, filename, obj, targetAction, actionType):
 	SelectParentAndDesiredChilds(obj)
 
 	ResetArmaturePose(obj)
-	obj.animation_data.action = targetAction #Apply desired action
+	if (scene.is_nla_tweakmode == True):
+		pass
+	obj.animation_data.action = targetAction #Apply desired action and reset NLA
+	obj.animation_data.action_extrapolation = 'HOLD' 
+	obj.animation_data.action_blend_type = 'REPLACE'
+	obj.animation_data.action_influence = 1
 	scene.frame_start = GetDesiredActionStartEndTime(obj, targetAction)[0]
 	scene.frame_end = GetDesiredActionStartEndTime(obj, targetAction)[1]
 
@@ -60,6 +76,7 @@ def ExportSingleFbxAnimation(dirpath, filename, obj, targetAction, actionType):
 		check_existing=False,
 		version='BIN7400',
 		use_selection=True,
+		global_scale=obj.exportGlobalScale,
 		object_types={'ARMATURE', 'MESH'},
 		add_leaf_bones=False,
 		use_armature_deform_only=obj.exportDeformOnly,
@@ -67,17 +84,75 @@ def ExportSingleFbxAnimation(dirpath, filename, obj, targetAction, actionType):
 		bake_anim_use_nla_strips=False,
 		bake_anim_use_all_actions=False,
 		bake_anim_force_startend_keying=True,
-		bake_anim_step=obj.SampleAnimForExport,
+		bake_anim_step=GetAnimSample(obj),
 		bake_anim_simplify_factor=obj.SimplifyAnimForExport
 		)
 	obj.location = originalLoc #Resets previous object location
 	ResetArmaturePose(obj)
-	obj.animation_data.action = UserAction #Resets previous action
+	obj.animation_data.action = userAction #Resets previous action and NLA
+	obj.animation_data.action_extrapolation = userAction_extrapolation
+	obj.animation_data.action_blend_type = userAction_blend_type
+	obj.animation_data.action_influence = userAction_influence
 	exportTime = time.process_time()-curr_time
 	
 	MyAsset = scene.UnrealExportedAssetsList.add()
 	MyAsset.assetName = filename
 	MyAsset.assetType = actionType
+	MyAsset.exportPath = absdirpath
+	MyAsset.exportTime = exportTime
+	MyAsset.object = obj
+	return MyAsset
+	
+def ExportSingleFbxNLAAnim(dirpath, filename, obj):
+	#Export a single NLA Animation
+
+	
+	scene = bpy.context.scene
+	filename = ValidFilenameForUnreal(filename)
+	curr_time = time.process_time()
+	
+	if  bpy.ops.object.mode_set.poll():
+		bpy.ops.object.mode_set(mode='OBJECT')
+	originalLoc = Vector((0,0,0))
+	originalLoc = originalLoc + obj.location #Save object location
+
+	obj.location = (0,0,0) #Moves object to the center of the scene for export
+
+	SelectParentAndDesiredChilds(obj)
+
+	ResetArmaturePose(obj)
+	if obj.AddOneAdditionalFramesAtTheEnd == True:
+		scene.frame_end += 1
+	absdirpath = bpy.path.abspath(dirpath)
+	VerifiDirs(absdirpath)
+	fullpath = os.path.join( absdirpath , filename )
+	
+	bpy.ops.export_scene.fbx(
+		filepath=fullpath,
+		check_existing=False,
+		version='BIN7400',
+		use_selection=True,
+		global_scale=obj.exportGlobalScale,
+		object_types={'ARMATURE', 'MESH'},
+		add_leaf_bones=False,
+		use_armature_deform_only=obj.exportDeformOnly,
+		bake_anim=True,
+		bake_anim_use_nla_strips=False,
+		bake_anim_use_all_actions=False,
+		bake_anim_force_startend_keying=True,
+		bake_anim_step=GetAnimSample(obj),
+		bake_anim_simplify_factor=obj.SimplifyAnimForExport
+		)
+	obj.location = originalLoc #Resets previous object location
+	ResetArmaturePose(obj)
+	if obj.AddOneAdditionalFramesAtTheEnd == True:
+		scene.frame_end -= 1
+	exportTime = time.process_time()-curr_time
+	
+	
+	MyAsset = scene.UnrealExportedAssetsList.add()
+	MyAsset.assetName = filename
+	MyAsset.assetType = "NlAnim"
 	MyAsset.exportPath = absdirpath
 	MyAsset.exportTime = exportTime
 	MyAsset.object = obj
@@ -88,16 +163,13 @@ def ExportSingleFbxMesh(dirpath, filename, obj):
 	#Export a single Mesh
 	
 	scene = bpy.context.scene
-	filename = ValidFilename(filename)
+	filename = ValidFilenameForUnreal(filename)
 	curr_time = time.process_time()
 	if  bpy.ops.object.mode_set.poll():
 		bpy.ops.object.mode_set(mode = 'OBJECT')
 	originalLoc = Vector((0,0,0))
 	originalLoc = originalLoc + obj.location #Save current object location
 	obj.location = (0,0,0) #Moves object to the center of the scene for export
-	#Set socket scale for Unreal
-	for socket in GetAllChildSocket(obj):
-		socket.delta_scale*=0.01
 
 	SelectParentAndDesiredChilds(obj)
 	absdirpath = bpy.path.abspath(dirpath)
@@ -105,15 +177,34 @@ def ExportSingleFbxMesh(dirpath, filename, obj):
 	fullpath = os.path.join( absdirpath , filename )
 	meshType = GetAssetType(obj)
 
-	object_types={'ARMATURE', 'CAMERA', 'EMPTY', 'LAMP', 'MESH', 'OTHER'}
+	#Set socket scale for Unreal
+	for socket in GetSocketDesiredChild(obj):
+		socket.delta_scale*=0.01
+		
+	#Set rename temporarily the Armature as "Armature"
+	oldArmatureName = None
+	if meshType == "SkeletalMesh":
+		if obj.name != "Armature":
+			oldArmatureName = obj.name
+			if "Armature" in scene.objects:
+				scene.objects["Armature"].name = "ArmatureTemporarilyNameForUe4Export"
+			obj.name = "Armature"
+
+	object_types={'ARMATURE', 'CAMERA', 'EMPTY', 'LAMP', 'MESH', 'OTHER'} #Default
+	
 	if meshType == "StaticMesh":
 		#Dont export ARMATURE with static mesh
 		object_types={'CAMERA', 'EMPTY', 'LAMP', 'MESH', 'OTHER'}
+	if meshType == "SkeletalMesh":
+		#Dont export EMPTY with Skeletal mesh
+		object_types={'ARMATURE', 'CAMERA', 'LAMP', 'MESH', 'OTHER'}
 	
-	bpy.ops.export_scene.fbx(filepath=fullpath,
+	bpy.ops.export_scene.fbx(
+		filepath=fullpath,
 		check_existing=False,
 		version='BIN7400',
 		use_selection=True,
+		global_scale=obj.exportGlobalScale,
 		object_types=object_types,
 		mesh_smooth_type="FACE",
 		add_leaf_bones=False,
@@ -125,8 +216,15 @@ def ExportSingleFbxMesh(dirpath, filename, obj):
 	exportTime = time.process_time()-curr_time
 	
 	#Reset socket scale
-	for socket in GetAllChildSocket(obj):
+	for socket in GetSocketDesiredChild(obj):
 		socket.delta_scale*=100
+		
+	#Reset armature name
+	if meshType == "SkeletalMesh":
+		if oldArmatureName is not None:
+			obj.name = oldArmatureName
+			if "ArmatureTemporarilyNameForUe4Export" in scene.objects:
+				scene.objects["ArmatureTemporarilyNameForUe4Export"].name = "Armature"
 	
 	MyAsset = scene.UnrealExportedAssetsList.add()
 	MyAsset.assetName = filename
@@ -157,7 +255,7 @@ def ExportSingleFbxCamera(dirpath, filename, obj):
 		action = obj.animation_data.action
 		scene.frame_start = GetDesiredActionStartEndTime(obj, action)[0]
 		scene.frame_end = GetDesiredActionStartEndTime(obj, action)[1]
-	
+		
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)
 	fullpath = os.path.join( absdirpath , filename )
@@ -165,10 +263,9 @@ def ExportSingleFbxCamera(dirpath, filename, obj):
 	bpy.ops.export_scene.fbx(
 		filepath=fullpath,
 		check_existing=False,
-		axis_forward = ('-Z'), #-Z
-		axis_up = ("Y"), #Y
 		version='BIN7400',
 		use_selection=True,
+		global_scale=obj.exportGlobalScale,
 		object_types={'CAMERA'},
 		add_leaf_bones=False,
 		use_armature_deform_only=obj.exportDeformOnly,
@@ -176,7 +273,7 @@ def ExportSingleFbxCamera(dirpath, filename, obj):
 		bake_anim_use_nla_strips=False,
 		bake_anim_use_all_actions=False,
 		bake_anim_force_startend_keying=True,
-		bake_anim_step=obj.SampleAnimForExport,
+		bake_anim_step=GetAnimSample(obj),
 		bake_anim_simplify_factor=obj.SimplifyAnimForExport
 		)
 
@@ -201,8 +298,17 @@ def ExportSingleAdditionalTrackCamera(dirpath, filename, obj):
 	
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)
-	CameraAdditionalTrack = bfu_writetext.WriteSingleCameraAdditionalTrack(obj)
-	return bfu_writetext.ExportSingleText(CameraAdditionalTrack, absdirpath, filename)
+	AdditionalTrack = bfu_writetext.WriteSingleCameraAdditionalTrack(obj)
+	return bfu_writetext.ExportSingleText(AdditionalTrack, absdirpath, filename)
+	
+def ExportSingleAdditionalParameterMesh(dirpath, filename, obj):
+	#Export additional parameter from static and skeletal mesh track for ue4
+	#SocketsList
+	
+	absdirpath = bpy.path.abspath(dirpath)
+	VerifiDirs(absdirpath)
+	AdditionalTrack = bfu_writetext.WriteSingleMeshAdditionalParameter(obj)
+	return bfu_writetext.ExportSingleConfigParser(AdditionalTrack, absdirpath, filename)
 	
 def ExportAllAssetByList(targetobjects):
 	#Export all objects that need to be exported from a list
@@ -224,55 +330,64 @@ def ExportAllAssetByList(targetobjects):
 			
 			#Camera
 			if GetAssetType(obj) == "Camera" and scene.camera_export:
-				exportDir = os.path.join( scene.export_camera_file_path, obj.exportFolderName )
 				UserStartFrame = scene.frame_start #Save current start frame
 				UserEndFrame = scene.frame_end #Save current end frame
-				ExportSingleFbxCamera(exportDir, GetObjExportFileName(obj), obj)
-				
-				ExportSingleAdditionalTrackCamera(exportDir, GetCameraTrackFileName(obj), obj)
+				ExportSingleFbxCamera(GetObjExportDir(obj), GetObjExportFileName(obj), obj)
+				if obj.ExportAsLod == False:
+					ExportSingleAdditionalTrackCamera(GetObjExportDir(obj), GetObjExportFileName(obj,"_AdditionalTrack.ini"), obj)
 				scene.frame_start = UserStartFrame #Resets previous start frame
 				scene.frame_end = UserEndFrame #Resets previous end frame
 				UpdateProgress()
 			
 			#StaticMesh
 			if GetAssetType(obj) == "StaticMesh" and scene.static_export:
-				exportDir = os.path.join( scene.export_static_file_path, obj.exportFolderName )
-				ExportSingleFbxMesh(exportDir, GetObjExportFileName(obj), obj)
+				ExportSingleFbxMesh(GetObjExportDir(obj), GetObjExportFileName(obj), obj)
+				if obj.ExportAsLod == False:
+					ExportSingleAdditionalParameterMesh(GetObjExportDir(obj), GetObjExportFileName(obj,"_AdditionalParameter.ini"), obj)
 				UpdateProgress()
-
-			if GetAssetType(obj) == "SkeletalMesh":
-				exportDir = os.path.join( scene.export_skeletal_file_path , obj.exportFolderName , obj.name )
-				#SkeletalMesh
-				if scene.skeletal_export:
-					ExportSingleFbxMesh(exportDir, GetObjExportFileName(obj), obj)
+			
+			#SkeletalMesh
+			if GetAssetType(obj) == "SkeletalMesh" and scene.skeletal_export:
+					ExportSingleFbxMesh(GetObjExportDir(obj), GetObjExportFileName(obj), obj)
+					ExportSingleAdditionalParameterMesh(GetObjExportDir(obj), GetObjExportFileName(obj,"_AdditionalParameter.ini"), obj)
 					UpdateProgress()
+					
+			#Action animation
+			if GetAssetType(obj) == "SkeletalMesh":	
+				animExportDir = os.path.join( GetObjExportDir(obj), scene.anim_subfolder_name )
 				
 				for action in GetActionToExport(obj):
-					animExportDir = os.path.join( exportDir, scene.anim_subfolder_name )					
+										
 					animType = GetActionType(action)
 									
-					#Animation
-					if animType == "Animation" and bpy.context.scene.anin_export == True:
+					#Action
+					if animType == "Action" and bpy.context.scene.anin_export == True:
 						UserStartFrame = scene.frame_start #Save current start frame
 						UserEndFrame = scene.frame_end #Save current end frame
-						ExportSingleFbxAnimation(animExportDir, GetActionExportFileName(obj, action), obj, action, "Animation")
+						ExportSingleFbxAction(animExportDir, GetActionExportFileName(obj, action), obj, action, "Action")
 						scene.frame_start = UserStartFrame #Resets previous start frame
 						scene.frame_end = UserEndFrame #Resets previous end frame
 						UpdateProgress()
 						
 					#pose
-					if animType == "Pose" and bpy.context.scene.pose_export == True:
+					if animType == "Pose" and bpy.context.scene.anin_export == True:
 						UserStartFrame = scene.frame_start #Save current start frame
 						UserEndFrame = scene.frame_end #Save current end frame
-						ExportSingleFbxAnimation(animExportDir,	GetActionExportFileName(obj, action), obj, action, "Pose")
+						ExportSingleFbxAction(animExportDir, GetActionExportFileName(obj, action), obj, action, "Pose")
 						scene.frame_start = UserStartFrame #Resets previous start frame
 						scene.frame_end = UserEndFrame #Resets previous end frame
 						UpdateProgress()
+						
+				#NLA animation
+				if bpy.context.scene.anin_export == True:
+					if obj.ExportNLA == True:
+						scene.frame_end +=1
+						ExportSingleFbxNLAAnim(animExportDir, GetNLAExportFileName(obj), obj)
+						scene.frame_end -=1
+						
 				
 	wm.progress_end()	
 	
-	
-
 
 def PrepareAndSaveDataForExport():
 

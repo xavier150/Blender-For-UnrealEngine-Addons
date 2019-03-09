@@ -16,8 +16,10 @@
 #
 #======================= END GPL LICENSE BLOCK =============================
 
-import os
 import bpy
+import os
+import string
+import bmesh
 from mathutils import Vector
 from mathutils import Quaternion
 
@@ -30,7 +32,6 @@ def ChecksRelationship(arrayA, arrayB):
 				return True
 	return False
 
-	
 def GetChilds(obj):
 	#Get all direct childs of a object
 
@@ -43,6 +44,13 @@ def GetChilds(obj):
 
 	return ChildsObj
 
+def getFirstDeformBoneParent(bone):
+	if bone.parent is not None:
+		if bone.use_deform == True:
+			return bone
+		else:
+			return getFirstDeformBoneParent(bone.parent)
+	return bone
 
 def GetRecursiveChilds(obj):
 	#Get all recursive childs of a object
@@ -53,7 +61,16 @@ def GetRecursiveChilds(obj):
 			saveObj.append(childs)
 		saveObj.append(newobj)
 	return saveObj
-
+	
+def ConvertToConvexHull(obj):
+	#Convert obj to Convex Hull
+	mesh = obj.data
+	if not mesh.is_editmode:
+		bm = bmesh.new()
+		bm.from_mesh(mesh) #Mesh to Bmesh
+		acb = bmesh.ops.convex_hull(bm, input=bm.verts, use_existing_faces=True)
+		#acb = bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+		bm.to_mesh(mesh) #BMesh to Mesh
 
 def VerifiDirs(directory):
 	#Check and create a folder if it does not exist
@@ -64,9 +81,9 @@ def VerifiDirs(directory):
 
 def ValidFilename(filename):
 	# remove not allowed characters 
-	import string
+	
 	valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
-	filename = ''.join(c for c in filename if c in valid_chars)
+	filename = ''.join(c for c in filename if c in valid_chars)		
 	return filename
 
 	
@@ -75,5 +92,13 @@ def ResetArmaturePose(obj):
 
 	for x in obj.pose.bones:
 		x.rotation_quaternion = Quaternion((0,0,0),0)
+		x.rotation_euler = Vector((0,0,0))
 		x.scale = Vector((1,1,1))
 		x.location = Vector((0,0,0))
+	bpy.context.scene.update()
+		
+def setWindowsClipboard(text):
+	bpy.context.window_manager.clipboard = text
+	bpy.context.window_manager.clipboard.encode('utf8') 
+	
+	
