@@ -21,3 +21,5 @@ You can see the tutorials and documentation here:
 3. It should now appear in the window and you can tick the checkbox in the upper right to enable it.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/InstallationScreen2.jpg" width="600">
 If you would like to have the Add-on enabled every time you start Blender, click Save User Settings at the bottom of the user settings window.
+4. You can found the addons in the right side panel (N)
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/InstallationScreen3.jpg" width="600">
