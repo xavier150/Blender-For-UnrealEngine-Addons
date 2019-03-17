@@ -113,3 +113,10 @@ It is now possible to force the duration of an animation according to the scene 
 
 - Change: Addon panel moved in View3D > UI > Unreal Engine 4 for Blender 2.8
 - Fixed: Select in TryToCorrectPotentialError make a error with Blender 2.79
+
+== Rev 0.2.2c ==
+
+- Fixed: The animations have a size 100 times too small
+- Removed: The all skeletal mesh are exported with the root joint named as Armature for be skiped in Unreal {This do problem with the animations)
+- Change: Hierarchy names are not automatically updated with each collisions conversion
+- Change: Hierarchy names are automatically updated with each export
