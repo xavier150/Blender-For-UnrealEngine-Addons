@@ -30,7 +30,7 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 2, 2),
+	'version': (0, 2, 2, 2), #Rev 0.2.2c
 	'blender': (2, 79, 0),
 	'location': 'View3D > Tool > Unreal Engine 4',
 	'warning': '',
@@ -627,7 +627,6 @@ class ue4CollisionsAndSocketsPanel(bpy.types.Panel):
 		def execute(self, context):
 			ConvertedObj = Ue4SubObj_set("Box")
 			if len(ConvertedObj) > 0 :
-				UpdateNameHierarchy()
 				self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE4 Box collisions." )
 			else :
 				self.report({'WARNING'}, "Please select two objects. (Active object is the owner of the collision)")
@@ -642,7 +641,6 @@ class ue4CollisionsAndSocketsPanel(bpy.types.Panel):
 		def execute(self, context):
 			ConvertedObj = Ue4SubObj_set("Capsule")
 			if len(ConvertedObj) > 0 :
-				UpdateNameHierarchy()
 				self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE4 Capsule collisions." )
 			else :
 				self.report({'WARNING'}, "Please select two objects. (Active object is the owner of the collision)")
@@ -657,7 +655,6 @@ class ue4CollisionsAndSocketsPanel(bpy.types.Panel):
 		def execute(self, context):
 			ConvertedObj = Ue4SubObj_set("Sphere")
 			if len(ConvertedObj) > 0 :
-				UpdateNameHierarchy()
 				self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE4 Sphere collisions." )
 			else :
 				self.report({'WARNING'}, "Please select two objects. (Active object is the owner of the collision)")
@@ -672,7 +669,6 @@ class ue4CollisionsAndSocketsPanel(bpy.types.Panel):
 		def execute(self, context):
 			ConvertedObj = Ue4SubObj_set("Convex")
 			if len(ConvertedObj) > 0 :
-				UpdateNameHierarchy()
 				self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE4 Convex Shape collisions.")
 			else :
 				self.report({'WARNING'}, "Please select two objects. (Active object is the owner of the collision)")
@@ -687,7 +683,6 @@ class ue4CollisionsAndSocketsPanel(bpy.types.Panel):
 		def execute(self, context):
 			ConvertedObj = Ue4SubObj_set("ST_Socket")
 			if len(ConvertedObj) > 0 :
-				UpdateNameHierarchy()
 				self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to to UE4 Socket." )
 			else :
 				self.report({'WARNING'}, "Please select two objects. (Active object is the owner of the socket)")
@@ -701,7 +696,6 @@ class ue4CollisionsAndSocketsPanel(bpy.types.Panel):
 		def execute(self, context):
 			ConvertedObj = Ue4SubObj_set("SK_Socket")
 			if len(ConvertedObj) > 0 :
-				UpdateNameHierarchy()
 				self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to to UE4 Socket." )
 			else :
 				self.report({'WARNING'}, "Please select two objects. (Active object is the owner of the socket)")
@@ -1118,6 +1112,7 @@ class ue4ExportPanel(bpy.types.Panel):
 				if bpy.data.is_saved:
 					scene.UnrealExportedAssetsList.clear()
 					start_time = time.process_time()
+					UpdateNameHierarchy()
 					bfu_exportasset.ExportForUnrealEngine()
 					bfu_writetext.WriteAllTextFiles()
 
