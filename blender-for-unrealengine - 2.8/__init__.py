@@ -30,7 +30,7 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 2, 2),
+	'version': (0, 2, 2, 2), #Rev 0.2.2c
 	'blender': (2, 80, 0),
 	'location': 'View3D > UI > Unreal Engine 4',
 	'warning': '',
@@ -650,7 +650,6 @@ class BFU_PT_CollisionsAndSockets(bpy.types.Panel):
 		def execute(self, context):
 			ConvertedObj = Ue4SubObj_set("Box")
 			if len(ConvertedObj) > 0 :
-				UpdateNameHierarchy()
 				self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE4 Box collisions." )
 			else :
 				self.report({'WARNING'}, "Please select two objects. (Active object is the owner of the collision)")
@@ -665,7 +664,6 @@ class BFU_PT_CollisionsAndSockets(bpy.types.Panel):
 		def execute(self, context):
 			ConvertedObj = Ue4SubObj_set("Capsule")
 			if len(ConvertedObj) > 0 :
-				UpdateNameHierarchy()
 				self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE4 Capsule collisions." )
 			else :
 				self.report({'WARNING'}, "Please select two objects. (Active object is the owner of the collision)")
@@ -680,7 +678,6 @@ class BFU_PT_CollisionsAndSockets(bpy.types.Panel):
 		def execute(self, context):
 			ConvertedObj = Ue4SubObj_set("Sphere")
 			if len(ConvertedObj) > 0 :
-				UpdateNameHierarchy()
 				self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE4 Sphere collisions." )
 			else :
 				self.report({'WARNING'}, "Please select two objects. (Active object is the owner of the collision)")
@@ -695,7 +692,6 @@ class BFU_PT_CollisionsAndSockets(bpy.types.Panel):
 		def execute(self, context):
 			ConvertedObj = Ue4SubObj_set("Convex")
 			if len(ConvertedObj) > 0 :
-				UpdateNameHierarchy()
 				self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE4 Convex Shape collisions.")
 			else :
 				self.report({'WARNING'}, "Please select two objects. (Active object is the owner of the collision)")
@@ -710,7 +706,6 @@ class BFU_PT_CollisionsAndSockets(bpy.types.Panel):
 		def execute(self, context):
 			ConvertedObj = Ue4SubObj_set("ST_Socket")
 			if len(ConvertedObj) > 0 :
-				UpdateNameHierarchy()
 				self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to to UE4 Socket." )
 			else :
 				self.report({'WARNING'}, "Please select two objects. (Active object is the owner of the socket)")
@@ -724,7 +719,6 @@ class BFU_PT_CollisionsAndSockets(bpy.types.Panel):
 		def execute(self, context):
 			ConvertedObj = Ue4SubObj_set("SK_Socket")
 			if len(ConvertedObj) > 0 :
-				UpdateNameHierarchy()
 				self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to to UE4 Socket." )
 			else :
 				self.report({'WARNING'}, "Please select two objects. (Active object is the owner of the socket)")
@@ -1024,7 +1018,7 @@ class BFU_PT_Export(bpy.types.Panel):
 			bl_label = "Fix it !"
 			bl_idname = "object.fixit_objet"
 			bl_description = "Correct target error"
-			errorIndex = bpy.props.IntProperty(default=-1)
+			errorIndex : bpy.props.IntProperty(default=-1)
 
 			def execute(self, context):
 				result = TryToCorrectPotentialError(self.errorIndex)
@@ -1035,7 +1029,7 @@ class BFU_PT_Export(bpy.types.Panel):
 			bl_label = "Select"
 			bl_idname = "object.select_error_objet"
 			bl_description = "Select target objet."
-			errorIndex = bpy.props.IntProperty(default=-1)
+			errorIndex : bpy.props.IntProperty(default=-1)
 
 			def execute(self, context):
 				result = SelectPotentialErrorObject(self.errorIndex)
@@ -1045,7 +1039,7 @@ class BFU_PT_Export(bpy.types.Panel):
 			bl_label = "Select(Vertex)"
 			bl_idname = "object.select_error_vertex"
 			bl_description = "Select target vertex."
-			errorIndex = bpy.props.IntProperty(default=-1)
+			errorIndex : bpy.props.IntProperty(default=-1)
 
 			def execute(self, context):
 				result = SelectPotentialErrorVertex(self.errorIndex)
@@ -1144,6 +1138,7 @@ class BFU_PT_Export(bpy.types.Panel):
 				if bpy.data.is_saved:
 					scene.UnrealExportedAssetsList.clear()
 					start_time = time.process_time()
+					UpdateNameHierarchy()
 					bfu_exportasset.ExportForUnrealEngine()
 					bfu_writetext.WriteAllTextFiles()
 

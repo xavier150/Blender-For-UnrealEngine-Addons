@@ -70,6 +70,9 @@ def ExportSingleFbxAction(dirpath, filename, obj, targetAction, actionType):
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)
 	fullpath = os.path.join( absdirpath , filename )
+	
+	#Set rename temporarily the Armature as "Armature"
+	oldArmatureName = RenameArmatureAsArmature(obj)
 
 	bpy.ops.export_scene.fbx(
 		filepath=fullpath,
@@ -84,8 +87,12 @@ def ExportSingleFbxAction(dirpath, filename, obj, targetAction, actionType):
 		bake_anim_use_all_actions=False,
 		bake_anim_force_startend_keying=True,
 		bake_anim_step=GetAnimSample(obj),
-		bake_anim_simplify_factor=obj.SimplifyAnimForExport 
+		bake_anim_simplify_factor=obj.SimplifyAnimForExport
 		)
+		
+	#Reset armature name
+	ResetArmatureName(obj, oldArmatureName)
+		
 	obj.location = originalLoc #Resets previous object location
 	ResetArmaturePose(obj)
 	obj.animation_data.action = userAction #Resets previous action and NLA
@@ -126,6 +133,9 @@ def ExportSingleFbxNLAAnim(dirpath, filename, obj):
 	VerifiDirs(absdirpath)
 	fullpath = os.path.join( absdirpath , filename )
 	
+	#Set rename temporarily the Armature as "Armature"
+	oldArmatureName = RenameArmatureAsArmature(obj)
+
 	bpy.ops.export_scene.fbx(
 		filepath=fullpath,
 		check_existing=False,
@@ -147,6 +157,8 @@ def ExportSingleFbxNLAAnim(dirpath, filename, obj):
 		scene.frame_end -= 1
 	exportTime = time.process_time()-curr_time
 	
+	#Reset armature name
+	ResetArmatureName(obj, oldArmatureName)
 	
 	MyAsset = scene.UnrealExportedAssetsList.add()
 	MyAsset.assetName = filename
@@ -180,13 +192,8 @@ def ExportSingleFbxMesh(dirpath, filename, obj):
 		socket.delta_scale*=0.01
 		
 	#Set rename temporarily the Armature as "Armature"
-	oldArmatureName = None
 	if meshType == "SkeletalMesh":
-		if obj.name != "Armature":
-			oldArmatureName = obj.name
-			if "Armature" in scene.objects:
-				scene.objects["Armature"].name = "ArmatureTemporarilyNameForUe4Export"
-			obj.name = "Armature"
+		oldArmatureName = RenameArmatureAsArmature(obj)
 
 	object_types={'ARMATURE', 'CAMERA', 'EMPTY', 'LIGHT', 'MESH', 'OTHER'} #Default
 	
@@ -218,10 +225,7 @@ def ExportSingleFbxMesh(dirpath, filename, obj):
 		
 	#Reset armature name
 	if meshType == "SkeletalMesh":
-		if oldArmatureName is not None:
-			obj.name = oldArmatureName
-			if "ArmatureTemporarilyNameForUe4Export" in scene.objects:
-				scene.objects["ArmatureTemporarilyNameForUe4Export"].name = "Armature"
+		ResetArmatureName(obj, oldArmatureName)
 	
 	MyAsset = scene.UnrealExportedAssetsList.add()
 	MyAsset.assetName = filename

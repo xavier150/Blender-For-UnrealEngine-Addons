@@ -294,7 +294,29 @@ def GetAnimSample(obj):
 	#return 1000 #Debug
 	return obj.SampleAnimForExport
 	
+def RenameArmatureAsArmature(obj):
+	#Set rename temporarily the Armature as "Armature"
 	
+	return None #Not used foo the momment
+	scene = bpy.context.scene
+	oldArmatureName = None
+	if obj.name != "Armature":
+		oldArmatureName = obj.name
+		if "Armature" in scene.objects:
+			scene.objects["Armature"].name = "ArmatureTemporarilyNameForUe4Export"
+		obj.name = "Armature"
+	return oldArmatureName
+			
+def ResetArmatureName(obj, oldArmatureName):
+	#Reset armature name
+	
+	return #Not used foo the momment
+	scene = bpy.context.scene
+	if oldArmatureName is not None:
+		obj.name = oldArmatureName
+		if "ArmatureTemporarilyNameForUe4Export" in scene.objects:
+			scene.objects["ArmatureTemporarilyNameForUe4Export"].name = "Armature"	
+			
 def GenerateUe4Name(name):
 	#Generate a new name with suffix number
 
