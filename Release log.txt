@@ -120,3 +120,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Removed: The all skeletal mesh are exported with the root joint named as Armature for be skiped in Unreal {This do problem with the animations)
 - Change: Hierarchy names are not automatically updated with each collisions conversion
 - Change: Hierarchy names are automatically updated with each export
+
+== Rev 0.2.2d ==
+
+- Updated class names and id names of Blender 2.8
