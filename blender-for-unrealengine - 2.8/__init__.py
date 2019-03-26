@@ -30,7 +30,7 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 2, 2, 2), #Rev 0.2.2c
+	'version': (0, 2, 2, 3), #Rev 0.2.2d
 	'blender': (2, 80, 0),
 	'location': 'View3D > UI > Unreal Engine 4',
 	'warning': '',
@@ -78,7 +78,7 @@ from .bfu_utils import *
 class BFU_PT_BlenderForUnreal(bpy.types.Panel):
 	#Unreal engine export panel
 	
-	bl_idname = "panel.bfu_pt_blenderforunreal"
+	bl_idname = "BFU_PT_BlenderForUnreal"
 	bl_label = "Blender for Unreal Engine"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
@@ -95,11 +95,12 @@ class BFU_PT_BlenderForUnreal(bpy.types.Panel):
 class BFU_PT_ObjectProperties(bpy.types.Panel):
 	#Is Object Properties panel
 
-	bl_idname = "panel.ue4.obj-properties"
+	bl_idname = "BFU_PT_ObjectProperties"
 	bl_label = "Object Properties"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
-	bl_parent_id = "panel.bfu_pt_blenderforunreal"
+	bl_category = "Unreal Engine 4"
+	bl_parent_id = "BFU_PT_BlenderForUnreal"
 	
 
 	bpy.types.Object.ExportEnum = EnumProperty(
@@ -172,11 +173,12 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
 class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 	#Is Object Properties panel
 
-	bl_idname = "panel.ue4.obj-import-properties"
+	bl_idname = "BFU_PT_ObjectImportProperties"
 	bl_label = "Object Import Properties"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
-	bl_parent_id = "panel.bfu_pt_blenderforunreal"
+	bl_category = "Unreal Engine 4"
+	bl_parent_id = "BFU_PT_BlenderForUnreal"
 	
 
 	#Lod list
@@ -347,11 +349,12 @@ class BFU_OT_ObjExportAction(bpy.types.PropertyGroup):
 class BFU_PT_AnimProperties(bpy.types.Panel):
 	#Is Animation Properties panel
 
-	bl_idname = "panel.ue4.anim-properties"
+	bl_idname = "BFU_PT_AnimProperties"
 	bl_label = "Animation Properties"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
-	bl_parent_id = "panel.bfu_pt_blenderforunreal"
+	bl_category = "Unreal Engine 4"
+	bl_parent_id = "BFU_PT_BlenderForUnreal"
 	
 
 	#Animation :
@@ -579,11 +582,12 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 class BFU_PT_AvancedObjectProperties(bpy.types.Panel):
 	#Is Avanced object properties panel
 
-	bl_idname = "panel.ue4.avanced-properties"
+	bl_idname = "BFU_PT_AvancedObjectProperties"
 	bl_label = "Avanced object properties panel"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
-	bl_parent_id = "panel.bfu_pt_blenderforunreal"
+	bl_category = "Unreal Engine 4"
+	bl_parent_id = "BFU_PT_BlenderForUnreal"
 	
 
 	bpy.types.Object.exportAxisForward = EnumProperty(
@@ -635,11 +639,12 @@ class BFU_PT_AvancedObjectProperties(bpy.types.Panel):
 class BFU_PT_CollisionsAndSockets(bpy.types.Panel):
 	#Is Collisions And Sockets panel
 
-	bl_idname = "panel.ue4.collisionsandsockets"
+	bl_idname = "BFU_PT_CollisionsAndSockets"
 	bl_label = "Collisions And Sockets"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
-	bl_parent_id = "panel.bfu_pt_blenderforunreal"
+	bl_category = "Unreal Engine 4"
+	bl_parent_id = "BFU_PT_BlenderForUnreal"
 	
 
 	class BFU_OT_BFU_OT_ConvertToCollisionButtonBox(Operator):
@@ -775,11 +780,12 @@ class BFU_PT_CollisionsAndSockets(bpy.types.Panel):
 class BFU_PT_Nomenclature(bpy.types.Panel):
 	#Is FPS Export panel
 
-	bl_idname = "panel.ue4.exportnomenclature"
+	bl_idname = "BFU_PT_Nomenclature"
 	bl_label = "Nomenclature"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
-	bl_parent_id = "panel.bfu_pt_blenderforunreal"
+	bl_category = "Unreal Engine 4"
+	bl_parent_id = "BFU_PT_BlenderForUnreal"
 	
 
 
@@ -906,11 +912,12 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 class BFU_PT_ImportScript(bpy.types.Panel):
 	#Is Import script panel
 
-	bl_idname = "panel.ue4.importScript"
+	bl_idname = "BFU_PT_ImportScript"
 	bl_label = "Import Script"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
-	bl_parent_id = "panel.bfu_pt_blenderforunreal"
+	bl_category = "Unreal Engine 4"
+	bl_parent_id = "BFU_PT_BlenderForUnreal"
 	
 
 	bpy.types.Scene.unreal_import_location = bpy.props.StringProperty(
@@ -965,11 +972,12 @@ class BFU_OT_UnrealPotentialError(bpy.types.PropertyGroup):
 class BFU_PT_Export(bpy.types.Panel):
 	#Is Export panel
 
-	bl_idname = "panel.ue4.export"
+	bl_idname = "BFU_PT_Export"
 	bl_label = "Export"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
-	bl_parent_id = "panel.bfu_pt_blenderforunreal"
+	bl_category = "Unreal Engine 4"
+	bl_parent_id = "BFU_PT_BlenderForUnreal"
 	
 
 
@@ -1244,11 +1252,12 @@ class BFU_PT_Export(bpy.types.Panel):
 class BFU_PT_Clipboard(bpy.types.Panel):
 	#Is Clipboard panel
 
-	bl_idname = "panel.ue4.clipboardcopy"
+	bl_idname = "BFU_PT_Clipboard"
 	bl_label = "Clipboard Copy"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
-	bl_parent_id = "panel.bfu_pt_blenderforunreal"
+	bl_category = "Unreal Engine 4"
+	bl_parent_id = "BFU_PT_BlenderForUnreal"
 	
 
 
