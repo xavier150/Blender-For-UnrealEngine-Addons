@@ -57,6 +57,14 @@ For the NLA:
 2. In Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality.
 3. If you just want the NLAnimation set Action to export as Not exported and check the box Export Nla with your desired name
 
+# Marterial
+Materials are not imported, you must create them in Unreal Engine
+1. Create your material in Unreal Engine 
+2. Create a basic material in Blender with the same name
+3. If you use the import script set the Material Search Location with your desired search location
+4. If you d'ont use the import script you need when you import the Material Search Location in Material > Search Location, with your desired search location
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocMaterial.jpg">
+
 
 # Nomenclature 
 The nomenclature is by default defined in correlation with the UnrealEngine Pipeline but you can change it is you use another pipeline.
