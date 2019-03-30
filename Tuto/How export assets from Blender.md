@@ -33,7 +33,7 @@ It possible to create collisions (StaticMesh) and sockets (Static/SkeletalMesh) 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocCollision.jpg">
 
 
-# Level od details
+# Level of details
 This works only on StaticMesh with importing via UnrealEnginePython
 1. Select the asset you want to export and set the Export type property on "Export recursive". 
 2. Now repeat the task for all Lod but also check the case "Export as lod?"
