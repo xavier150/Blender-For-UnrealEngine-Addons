@@ -124,3 +124,15 @@ It is now possible to force the duration of an animation according to the scene 
 == Rev 0.2.2d ==
 
 - Updated class names and id names of Blender 2.8
+
+== Rev 0.2.3 ==
+
+- New: You can now change the CollisionTraceFlag of the StaticMesh (Collision Complexity)
+- New: It is now possible to choose in the name of the root bone for the skeleton in addon preferences (if "Armature" Ue4 will remove the root bone)
+- New: You can check export_ExportOnlySelected = True for export only the selected assets groups
+- New: You can now chose what python intergration use for Import Script. ( /!\ With vania python integration some features like StaticMesh Lod or SkeletalMesh Sockets integration do not work )
+- New: You can now chose a presets for nomenclature export properties 
+- Change: The all collision are now named with two suffix. Type_MeshName_##
+- Change: new potential errors will be detected in the potential error report(CheckArmatureMultipleRoots)
+- Fixed: in 2.8 the Addon can try to export removed mesh and crash
+- Fixed: set clipboard with encode('utf8') do error
