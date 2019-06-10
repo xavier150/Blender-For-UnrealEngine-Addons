@@ -22,16 +22,16 @@ import time
 import math
 
 import importlib
-from . import bfu_writetext
-importlib.reload(bfu_writetext)
+from . import bfu_WriteText
+importlib.reload(bfu_WriteText)
 
-from . import bfu_basics
-importlib.reload(bfu_basics)
-from .bfu_basics import *
+from . import bfu_Basics
+importlib.reload(bfu_Basics)
+from .bfu_Basics import *
 
-from . import bfu_utils
-importlib.reload(bfu_utils)
-from .bfu_utils import *
+from . import bfu_Utils
+importlib.reload(bfu_Utils)
+from .bfu_Utils import *
 	
 def ExportSingleFbxAction(dirpath, filename, obj, targetAction, actionType):
 	#Export a single action like a animation or pose
@@ -72,7 +72,7 @@ def ExportSingleFbxAction(dirpath, filename, obj, targetAction, actionType):
 	fullpath = os.path.join( absdirpath , filename )
 	
 	#Set rename temporarily the Armature as "Armature"
-	oldArmatureName = RenameArmatureAsArmature(obj)
+	oldArmatureName = RenameArmatureAsExportName(obj)
 
 	bpy.ops.export_scene.fbx(
 		filepath=fullpath,
@@ -121,9 +121,7 @@ def ExportSingleFbxNLAAnim(dirpath, filename, obj):
 		bpy.ops.object.mode_set(mode='OBJECT')
 	originalLoc = Vector((0,0,0))
 	originalLoc = originalLoc + obj.location #Save object location
-
 	obj.location = (0,0,0) #Moves object to the center of the scene for export
-
 	SelectParentAndDesiredChilds(obj)
 
 	ResetArmaturePose(obj)
@@ -134,7 +132,7 @@ def ExportSingleFbxNLAAnim(dirpath, filename, obj):
 	fullpath = os.path.join( absdirpath , filename )
 	
 	#Set rename temporarily the Armature as "Armature"
-	oldArmatureName = RenameArmatureAsArmature(obj)
+	oldArmatureName = RenameArmatureAsExportName(obj)
 
 	bpy.ops.export_scene.fbx(
 		filepath=fullpath,
@@ -167,7 +165,48 @@ def ExportSingleFbxNLAAnim(dirpath, filename, obj):
 	MyAsset.exportTime = exportTime
 	MyAsset.object = obj
 	return MyAsset
+	
 
+def ExportSingleAlembicAnimation(dirpath, filename, obj):
+	#Export a single alembic animation
+	
+	scene = bpy.context.scene
+	filename = ValidFilenameForUnreal(filename)
+	curr_time = time.process_time()
+	if  bpy.ops.object.mode_set.poll():
+		bpy.ops.object.mode_set(mode = 'OBJECT')
+	originalLoc = Vector((0,0,0))
+	originalLoc = originalLoc + obj.location #Save current object location
+	#obj.location = (0,0,0) #Moves object to the center of the scene for export
+	SelectParentAndDesiredChilds(obj)
+	
+	if obj.AddOneAdditionalFramesAtTheEnd == True:
+		scene.frame_end += 1
+	absdirpath = bpy.path.abspath(dirpath)
+	VerifiDirs(absdirpath)
+	fullpath = os.path.join( absdirpath , filename )
+	
+	##Export
+	bpy.ops.wm.alembic_export(
+		filepath=fullpath,
+		check_existing=False,
+		selected=True,
+		#global_scale = obj.exportGlobalScale * 100
+		)
+	
+	#obj.location = originalLoc #Resets previous object location
+	if obj.AddOneAdditionalFramesAtTheEnd == True:
+		scene.frame_end -= 1
+	exportTime = time.process_time()-curr_time
+	
+	MyAsset = scene.UnrealExportedAssetsList.add()
+	MyAsset.assetName = filename
+	MyAsset.assetType = "Alembic"
+	MyAsset.exportPath = absdirpath
+	MyAsset.exportTime = exportTime
+	MyAsset.object = obj
+	return MyAsset
+	
 
 def ExportSingleFbxMesh(dirpath, filename, obj):
 	#Export a single Mesh
@@ -193,7 +232,7 @@ def ExportSingleFbxMesh(dirpath, filename, obj):
 		
 	#Set rename temporarily the Armature as "Armature"
 	if meshType == "SkeletalMesh":
-		oldArmatureName = RenameArmatureAsArmature(obj)
+		oldArmatureName = RenameArmatureAsExportName(obj)
 
 	object_types={'ARMATURE', 'CAMERA', 'EMPTY', 'LIGHT', 'MESH', 'OTHER'} #Default
 	
@@ -298,8 +337,8 @@ def ExportSingleAdditionalTrackCamera(dirpath, filename, obj):
 	
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)
-	AdditionalTrack = bfu_writetext.WriteSingleCameraAdditionalTrack(obj)
-	return bfu_writetext.ExportSingleText(AdditionalTrack, absdirpath, filename)
+	AdditionalTrack = bfu_WriteText.WriteSingleCameraAdditionalTrack(obj)
+	return bfu_WriteText.ExportSingleText(AdditionalTrack, absdirpath, filename)
 	
 def ExportSingleAdditionalParameterMesh(dirpath, filename, obj):
 	#Export additional parameter from static and skeletal mesh track for ue4
@@ -307,8 +346,8 @@ def ExportSingleAdditionalParameterMesh(dirpath, filename, obj):
 	
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)
-	AdditionalTrack = bfu_writetext.WriteSingleMeshAdditionalParameter(obj)
-	return bfu_writetext.ExportSingleConfigParser(AdditionalTrack, absdirpath, filename)
+	AdditionalTrack = bfu_WriteText.WriteSingleMeshAdditionalParameter(obj)
+	return bfu_WriteText.ExportSingleConfigParser(AdditionalTrack, absdirpath, filename)
 	
 def ExportAllAssetByList(targetobjects):
 	#Export all objects that need to be exported from a list
@@ -348,9 +387,15 @@ def ExportAllAssetByList(targetobjects):
 			
 			#SkeletalMesh
 			if GetAssetType(obj) == "SkeletalMesh" and scene.skeletal_export:
-					ExportSingleFbxMesh(GetObjExportDir(obj), GetObjExportFileName(obj), obj)
-					ExportSingleAdditionalParameterMesh(GetObjExportDir(obj), GetObjExportFileName(obj,"_AdditionalParameter.ini"), obj)
-					UpdateProgress()
+				ExportSingleFbxMesh(GetObjExportDir(obj), GetObjExportFileName(obj), obj)
+				ExportSingleAdditionalParameterMesh(GetObjExportDir(obj), GetObjExportFileName(obj,"_AdditionalParameter.ini"), obj)
+				UpdateProgress()
+					
+			#Alembic
+			if GetAssetType(obj) == "Alembic" and scene.alembic_export:
+				ExportSingleAlembicAnimation(GetObjExportDir(obj), GetObjExportFileName(obj, ".abc"), obj)
+				#ExportSingleAdditionalParameterMesh(GetObjExportDir(obj), GetObjExportFileName(obj,"_AdditionalParameter.ini"), obj)
+				UpdateProgress()
 					
 			#Action animation
 			if GetAssetType(obj) == "SkeletalMesh" and obj.visible_get() == True:	
@@ -428,8 +473,12 @@ def PrepareAndSaveDataForExport():
 	UserSelected = bpy.context.selected_objects #Save current selected objects
 	#----------------------------------------
 
-
-	ExportAllAssetByList(GetAllobjectsByExportType("export_recursive"))
+	list = []
+	for Asset in GetFinalAssetToExport():
+		if Asset.obj in GetAllobjectsByExportType("export_recursive"):
+			if Asset.obj not in list:
+				list.append(Asset.obj)
+	ExportAllAssetByList(list)
 	
 	
 	#----------------------------------------Reset data

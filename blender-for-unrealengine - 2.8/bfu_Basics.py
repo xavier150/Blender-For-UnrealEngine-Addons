@@ -65,13 +65,18 @@ def SetCollectionUse(collection):
 
 def GetRecursiveChilds(obj):
 	#Get all recursive childs of a object
+	
+	saveObjs = []
+	
+	def tryAppend(obj):
+		if obj.name in bpy.context.scene.objects:
+			saveObjs.append(obj)
 
-	saveObj = []
 	for newobj in GetChilds(obj):
 		for childs in GetRecursiveChilds(newobj):
-			saveObj.append(childs)
-		saveObj.append(newobj)
-	return saveObj
+			tryAppend(childs)
+		tryAppend(newobj)
+	return saveObjs
 	
 def ConvertToConvexHull(obj):
 	#Convert obj to Convex Hull
@@ -106,10 +111,9 @@ def ResetArmaturePose(obj):
 		x.rotation_euler = Vector((0,0,0))
 		x.scale = Vector((1,1,1))
 		x.location = Vector((0,0,0))
-	bpy.context.scene.update()
 		
 def setWindowsClipboard(text):
 	bpy.context.window_manager.clipboard = text
-	bpy.context.window_manager.clipboard.encode('utf8') 
+	#bpy.context.window_manager.clipboard.encode('utf8') 
 	
 	

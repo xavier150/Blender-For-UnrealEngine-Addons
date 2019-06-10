@@ -21,9 +21,9 @@ import bpy
 import fnmatch
 
 import importlib
-from . import bfu_basics
-importlib.reload(bfu_basics)
-from .bfu_basics import *
+from . import bfu_Basics
+importlib.reload(bfu_Basics)
+from .bfu_Basics import *
 
 
 
@@ -154,14 +154,19 @@ def GetIsAnimation(type):
 
 def GetAssetType(obj):
 	#Return asset type of a object
+
+	if obj.type == "CAMERA":
+		return "Camera"	
+		
+	if obj.ExportAsAlembic == True:
+		return "Alembic"
+		
 	if obj.type == "ARMATURE":
 		if obj.ForceStaticMesh == False:
 			return "SkeletalMesh"
 		return "StaticMesh"
-	elif obj.type == "CAMERA":
-		return "Camera"
-	else:
-		return "StaticMesh"
+		
+	return "StaticMesh"
 	
 
 def CheckIsCollision(target): 
@@ -185,39 +190,65 @@ def SelectParentAndDesiredChilds(obj):
 def GetFinalAssetToExport():
 	#Returns all assets that will be exported
 	
+	
+	
 	scene = bpy.context.scene
 	TargetAssetToExport = [] #Obj, Action, type
+	class AssetToExport:
+		def __init__(self, obj, action, type):
+			self.obj = obj
+			self.action = action
+			self.type = type
+	
+	if scene.export_ExportOnlySelected == True:
+		objList = []
+		for obj in GetAllobjectsByExportType("export_recursive"):
+			if obj in bpy.context.selected_objects:
+				if obj not in objList:
+					objList.append(obj)
+			for objChild in GetExportDesiredChilds(obj):
+				if objChild in bpy.context.selected_objects:
+					if obj not in objList:
+						objList.append(obj)
+	
+	else:
+		objList = GetAllobjectsByExportType("export_recursive")
+		
+	for obj in  objList:
 
-
-	for obj in GetAllobjectsByExportType("export_recursive"):
+		if GetAssetType(obj) == "Alembic":
+			#Alembic
+			if scene.alembic_export:
+				TargetAssetToExport.append(AssetToExport(obj,None,"Alembic"))
+			
 		if GetAssetType(obj) == "SkeletalMesh":
 			#SkeletalMesh
 			if scene.skeletal_export:
-				TargetAssetToExport.append((obj,None,"SkeletalMesh"))
+				TargetAssetToExport.append(AssetToExport(obj,None,"SkeletalMesh"))
 				
 			#NLA
 			if scene.anin_export:
 				if obj.ExportNLA:
-					TargetAssetToExport.append((obj,obj.animation_data,"NlAnim"))
+					TargetAssetToExport.append(AssetToExport(obj,obj.animation_data,"NlAnim"))
 					
 			for action in GetActionToExport(obj):
 				
 				#Action
 				if scene.anin_export:
 					if GetActionType(action) == "Action":
-						TargetAssetToExport.append((obj,action,"Action"))
+						TargetAssetToExport.append(AssetToExport(obj,action,"Action"))
 				
 				#Pose
 				if scene.anin_export:
 					if GetActionType(action) == "Pose":
-						TargetAssetToExport.append((obj,action,"Pose"))
+						TargetAssetToExport.append(AssetToExport(obj,action,"Pose"))
 		#Camera
 		if GetAssetType(obj) == "Camera" and scene.camera_export:
-			TargetAssetToExport.append((obj,None,"Camera"))
+			TargetAssetToExport.append(AssetToExport(obj,None,"Camera"))
 
 		#StaticMesh
 		if GetAssetType(obj) == "StaticMesh" and scene.static_export:
-				TargetAssetToExport.append((obj,None,"StaticMesh"))
+				TargetAssetToExport.append(AssetToExport(obj,None,"StaticMesh"))
 
 	return TargetAssetToExport
 
@@ -233,7 +264,9 @@ def GetObjExportDir(obj, abspath = False):
 	#Generate assset folder path
 	scene = bpy.context.scene	
 	if GetAssetType(obj) == "SkeletalMesh":
-		dirpath = os.path.join( scene.export_skeletal_file_path , obj.exportFolderName , obj.name)
+		dirpath = os.path.join( scene.export_skeletal_file_path , obj.exportFolderName , obj.name)	
+	if GetAssetType(obj) == "Alembic":
+		dirpath = os.path.join( scene.export_alembic_file_path , obj.exportFolderName , obj.name)
 	if GetAssetType(obj) == "StaticMesh":
 		dirpath = os.path.join( scene.export_static_file_path, obj.exportFolderName )
 	if GetAssetType(obj) == "Camera":
@@ -254,93 +287,112 @@ def GetObjExportFileName(obj, fileType = ".fbx"):
 	elif assetType == "StaticMesh":
 		return scene.static_prefix_export_name+obj.name+fileType
 	elif assetType == "SkeletalMesh":
-		return scene.skeletal_prefix_export_name+obj.name+fileType
+		return scene.skeletal_prefix_export_name+obj.name+fileType	
+	elif assetType == "Alembic":
+		return scene.alembic_prefix_export_name+obj.name+fileType
 	else:
 		return None
+		
 
-def GetActionExportFileName(obj, action):
+def GetActionExportFileName(obj, action, fileType = ".fbx"):
 	#Generate action file name
 
 	scene = bpy.context.scene
 	animType = GetActionType(action)
-	if animType == "NlAnim" or animType == "Action":
-		return scene.anim_prefix_export_name+obj.name+"_"+action.name+".fbx"
+	if animType == "NlAnim" or animType == "Action": #Nla can be exported as action
+		return scene.anim_prefix_export_name+obj.name+"_"+action.name+fileType
 	elif animType == "Pose":
-		return scene.pose_prefix_export_name+obj.name+"_"+action.name+".fbx"
+		return scene.pose_prefix_export_name+obj.name+"_"+action.name+fileType
 	else:
 		return None
-def GetNLAExportFileName(obj):
+		
+def GetNLAExportFileName(obj, fileType = ".fbx"):
 	#Generate action file name
 
 	scene = bpy.context.scene
-	return scene.anim_prefix_export_name+obj.name+"_"+obj.NLAAnimName+".fbx"
+	return scene.anim_prefix_export_name+obj.name+"_"+obj.NLAAnimName+fileType
 	
 def GetImportAssetScriptCommand():
 	scene = bpy.context.scene
 	fileName = scene.file_import_asset_script_name
 	absdirpath = bpy.path.abspath(scene.export_other_file_path)
 	fullpath = os.path.join( absdirpath , fileName )
-	return 'unreal_engine.py_exec(r"'+fullpath+'")'
+	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
+	if addon_prefs.Use20TabScript == True:
+		return 'unreal_engine.py_exec(r"'+fullpath+'")' #20tab
+	else:
+		return 'py "'+fullpath+'"' #Vania
 	
 def GetImportSequencerScriptCommand():
 	scene = bpy.context.scene
 	fileName = scene.file_import_sequencer_script_name
 	absdirpath = bpy.path.abspath(scene.export_other_file_path)
 	fullpath = os.path.join( absdirpath , fileName )
-	return 'unreal_engine.py_exec(r"'+fullpath+'")'
+	
+	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
+	if addon_prefs.Use20TabScript == True:
+		return 'unreal_engine.py_exec(r"'+fullpath+'")' #20tab
+	else:
+		return 'py "'+fullpath+'"' #Vania
 	
 def GetAnimSample(obj):
 	#return obj sample animation
 	#return 1000 #Debug
 	return obj.SampleAnimForExport
 	
-def RenameArmatureAsArmature(obj):
-	#Set rename temporarily the Armature as "Armature"
+def RenameArmatureAsExportName(obj):
+	#Rename temporarily the Armature as DefaultArmature
 	
-	return None #Not used foo the momment
+	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	scene = bpy.context.scene
 	oldArmatureName = None
-	if obj.name != "Armature":
+	if obj.name != addon_prefs.skeletonRootBoneName:
 		oldArmatureName = obj.name
-		if "Armature" in scene.objects:
-			scene.objects["Armature"].name = "ArmatureTemporarilyNameForUe4Export"
-		obj.name = "Armature"
+		#Avoid same name for two armature
+		if addon_prefs.skeletonRootBoneName in scene.objects:
+			scene.objects[addon_prefs.skeletonRootBoneName].name = "ArmatureTemporarilyNameForUe4Export"
+		obj.name = addon_prefs.skeletonRootBoneName
 	return oldArmatureName
 			
 def ResetArmatureName(obj, oldArmatureName):
 	#Reset armature name
 	
-	return #Not used foo the momment
+	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	scene = bpy.context.scene
 	if oldArmatureName is not None:
 		obj.name = oldArmatureName
 		if "ArmatureTemporarilyNameForUe4Export" in scene.objects:
-			scene.objects["ArmatureTemporarilyNameForUe4Export"].name = "Armature"	
+			scene.objects["ArmatureTemporarilyNameForUe4Export"].name = addon_prefs.skeletonRootBoneName
 			
 def GenerateUe4Name(name):
 	#Generate a new name with suffix number
 
 	def IsValidName(testedName):
-		#Checks if an object uses this name. (If not is a valid name)
+		#Checks if objet end with number suffix 
 
+		try:
+			number = int(testedName.split("_")[-1])
+		except:
+			#Last suffix is not a number
+			return False
+
+		#Checks if an object uses this name. (If not is a valid name)
 		for obj in bpy.context.scene.objects:
 			if testedName == obj.name:
 				return False
+
 		return True
 
-	valid = False
-	number = 1
 	newName = ""
 	if IsValidName(name):
 		return name
 	else:
-		while valid == False:
-			newName = name+"_"+str(number)
+		for num in range(0, 1000):
+			newName = name+"_"+str('%02d' % num) #Min two pad
 			if IsValidName(newName):
 				return newName
-			else:
-				number = number+1
-	return newName
+
+	return name
 
 def CreateCollisionMaterial():
 	mat = bpy.data.materials.get("UE4Collision")
@@ -676,6 +728,22 @@ def UpdateUnrealPotentialError():
 					MyError.text = 'Object "'+obj.name+'" is an Armature and does not have any valid children.'
 					MyError.object = obj
 
+	def CheckArmatureMultipleRoots():
+		#Check that skeleton have multiples roots
+		
+		for obj in objToCheck:
+			if GetAssetType(obj) == "SkeletalMesh":
+				RootsBone = []
+				for bone in obj.data.bones:
+					if bone.parent == None:
+						RootsBone.append(bone)
+				if len(RootsBone) > 1:
+					MyError = PotentialErrors.add()
+					MyError.name = obj.name
+					MyError.type = 2
+					MyError.text = 'Object "'+obj.name+'" have Multiple roots bones. Unreal only support single root bone.'
+					MyError.object = obj
+		
 	def CheckMarkerOverlay():
 		#Check that there is no overlap with the Marker
 		usedFrame = []
@@ -739,9 +807,11 @@ def UpdateUnrealPotentialError():
 	CheckArmatureModData()
 	CheckArmatureBoneData()
 	CheckArmatureValidChild()
+	CheckArmatureMultipleRoots()
 	CheckMarkerOverlay()
 	CheckVertexGroupWeight()
 	CheckZeroScaleKeyframe()
+	
 	return PotentialErrors
 
 
@@ -904,7 +974,6 @@ def TryToCorrectPotentialError(errorIndex):
 	if successCorrect == True:
 		scene.potentialErrorList.remove(errorIndex)
 		print("end correct, Error: " + error.correctRef)
-		scene.update()
 		return "Corrected"
 	print("end correct, Error not found")
 	return "Correct fail"

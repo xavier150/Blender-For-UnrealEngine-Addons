@@ -54,13 +54,17 @@ def getFirstDeformBoneParent(bone):
 
 def GetRecursiveChilds(obj):
 	#Get all recursive childs of a object
+	
+	saveObjs = []
+	
+	def tryAppend(obj):
+		saveObjs.append(obj)
 
-	saveObj = []
 	for newobj in GetChilds(obj):
 		for childs in GetRecursiveChilds(newobj):
-			saveObj.append(childs)
-		saveObj.append(newobj)
-	return saveObj
+			tryAppend(childs)
+		tryAppend(newobj)
+	return saveObjs
 	
 def ConvertToConvexHull(obj):
 	#Convert obj to Convex Hull
@@ -99,6 +103,6 @@ def ResetArmaturePose(obj):
 		
 def setWindowsClipboard(text):
 	bpy.context.window_manager.clipboard = text
-	bpy.context.window_manager.clipboard.encode('utf8') 
+	#bpy.context.window_manager.clipboard.encode('utf8') 
 	
 	
