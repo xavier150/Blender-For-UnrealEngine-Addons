@@ -33,16 +33,8 @@ importlib.reload(bfu_Utils)
 from .bfu_Utils import *
 
 
-def WriteImportSequencerScript(use20tab = False):
-	ImportScript = "#This script was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons" + "\n"
-	ImportScript += "#This script will import in unreal all camera in target sequencer" + "\n"
-	ImportScript += "#Use this command : " + GetImportSequencerScriptCommand() + "\n"
-	return ImportScript
-	
-def WriteImportSequencerScript_20tab():
-	#Generate a config file for import camera in Ue4 sequencer
+def WriteImportSequencerScript(use20tab = False):	
 	scene = bpy.context.scene
-	
 	#Comment
 	ImportScript = "#This script was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons" + "\n"
 	ImportScript += "#This script will import in unreal all camera in target sequencer" + "\n"
@@ -53,13 +45,30 @@ def WriteImportSequencerScript_20tab():
 	
 	#Import
 	ImportScript += "import os.path" + "\n"
-	ImportScript += "import unreal" + "\n"
+	ImportScript += "import time" + "\n"
+	
+	
+	if use20tab == True:
+		ImportScript += "import configparser" + "\n"
+		ImportScript += "import unreal_engine as ue" + "\n"
+		ImportScript += "from unreal_engine.classes import MovieSceneCameraCutTrack, MovieScene3DTransformSection, MovieScene3DTransformTrack, MovieSceneAudioTrack, CineCameraActor, LevelSequenceFactoryNew" + "\n"
+		ImportScript += "if ue.ENGINE_MINOR_VERSION >= 20:" + "\n"
+		ImportScript += "\t" + "from unreal_engine.structs import FloatRange, FloatRangeBound, MovieSceneObjectBindingID, FrameRate" + "\n"
+		ImportScript += "else:" + "\n"
+		ImportScript += "\t" + "from unreal_engine.structs import FloatRange, FloatRangeBound, MovieSceneObjectBindingID" + "\n"
+		ImportScript += "from unreal_engine import FTransform, FVector, FColor" + "\n"
+		ImportScript += "from unreal_engine.enums import EMovieSceneObjectBindingSpace" + "\n"
+		ImportScript += "from unreal_engine.structs import MovieSceneObjectBindingID" + "\n"
+	else:
+		ImportScript += "import ConfigParser" + "\n"
+		ImportScript += "import unreal" + "\n"
+	
 	ImportScript += "\n"
 	ImportScript += "\n"
 	
 	
 	#Prepare var	
-	ImportScript += "seqLocation = r'"+os.path.join(r"/Game/",scene.unreal_levelsequence_import_location)+"'" + "\n"
+	ImportScript += "seqPath = r'"+os.path.join(r"/Game/",scene.unreal_levelsequence_import_location)+"'" + "\n"
 	ImportScript += "seqName = r'"+scene.unreal_levelsequence_name+"'" + "\n"
 	ImportScript += "seqTempName = r'"+scene.unreal_levelsequence_name+"'+str(time.time())" + "\n"
 	ImportScript += "mustBeReplace = False" + "\n"
@@ -74,37 +83,64 @@ def WriteImportSequencerScript_20tab():
 	
 	#Prepare def	
 	ImportScript += "def AddSequencerSectionFloatKeysByIniFile(SequencerSection, SectionFileName, FileLoc):" + "\n"
-	ImportScript += "\t" + "Config = configparser.ConfigParser()" + "\n"
+	if use20tab == True:
+		ImportScript += "\t" + "Config = configparser.ConfigParser()" + "\n"
+	else:
+		ImportScript += "\t" + "Config = ConfigParser.ConfigParser()" + "\n"
 	ImportScript += "\t" + "Config.read(FileLoc)" + "\n"
 	ImportScript += "\t" + "for option in Config.options(SectionFileName):" + "\n"
 	ImportScript += "\t\t" + "frame = float(option)/frameRateNumerator #FrameRate" + "\n"
 	ImportScript += "\t\t" + "value = float(Config.get(SectionFileName, option))" + "\n"
-	ImportScript += "\t\t" + "SequencerSection.sequencer_section_add_key(frame,value)" + "\n"
+	if use20tab == True:
+		ImportScript += "\t\t" + "SequencerSection.sequencer_section_add_key(frame,value)" + "\n"
+	else:
+		ImportScript += "\t\t" + "SequencerSection.get_channels()[0].add_key(unreal.FrameNumber(frame),value)" + "\n"
 	ImportScript += "\n"
 	ImportScript += "\n"
 	
 	ImportScript += "def AddSequencerSectionBoolKeysByIniFile(SequencerSection, SectionFileName, FileLoc):" + "\n"
-	ImportScript += "\t" + "Config = configparser.ConfigParser()" + "\n"
+	if use20tab == True:
+		ImportScript += "\t" + "Config = configparser.ConfigParser()" + "\n"
+	else:
+		ImportScript += "\t" + "Config = ConfigParser.ConfigParser()" + "\n"
 	ImportScript += "\t" + "Config.read(FileLoc)" + "\n"
 	ImportScript += "\t" + "for option in Config.options(SectionFileName):" + "\n"
 	ImportScript += "\t\t" + "frame = float(option)/frameRateNumerator #FrameRate" + "\n"
 	ImportScript += "\t\t" + "value = Config.getboolean(SectionFileName, option)" + "\n"
-	ImportScript += "\t\t" + "SequencerSection.sequencer_section_add_key(frame,value)" + "\n"
+	if use20tab == True:
+		ImportScript += "\t\t" + "SequencerSection.sequencer_section_add_key(frame,value)" + "\n"
+	else:
+		ImportScript += "\t\t" + "SequencerSection.get_channels()[0].add_key(unreal.FrameNumber(frame),value)" + "\n"
 	ImportScript += "\n"
 	ImportScript += "\n"
 	
 			
 	#Prepare process import
 
-	ImportScript += "if ue.find_asset(seqLocation+'/'+seqName):" + "\n"
-	ImportScript += "\t" + 'print("Warning this file already exists")' + "\n"
-	ImportScript += "\t" + "factory = LevelSequenceFactoryNew()" + "\n"
-	ImportScript += "\t" + "seq = factory.factory_create_new(seqLocation+'/'+seqTempName.replace('.',''))" + "\n"
-	ImportScript += "\t" +	"mustBeReplace = True" + "\n"
-	ImportScript += "else:" + "\n"
-	ImportScript += "\t" + "factory = LevelSequenceFactoryNew()" + "\n"
-	ImportScript += "\t" + "seq = factory.factory_create_new(seqLocation+'/'+seqName.replace('.',''))" + "\n"
-	ImportScript += "\n"
+	if use20tab == True:
+		ImportScript += "if ue.find_asset(seqPath+'/'+seqName):" + "\n"
+		ImportScript += "\t" + 'print("Warning this file already exists")' + "\n"
+		ImportScript += "\t" + "factory = LevelSequenceFactoryNew()" + "\n"
+		ImportScript += "\t" + "seq = factory.factory_create_new(seqPath+'/'+seqTempName.replace('.',''))" + "\n"
+		ImportScript += "\t" +	"mustBeReplace = True" + "\n"
+		ImportScript += "else:" + "\n"
+		ImportScript += "\t" + "factory = LevelSequenceFactoryNew()" + "\n"
+		ImportScript += "\t" + "seq = factory.factory_create_new(seqPath+'/'+seqName.replace('.',''))" + "\n"
+		ImportScript += "\n"
+	else:
+		ImportScript += "if unreal.find_asset(seqPath+'/'+seqName):" + "\n"
+		ImportScript += "\t" + 'print("Warning this file already exists")' + "\n"
+		ImportScript += "\t" + "factory = unreal.LevelSequenceFactoryNew()" + "\n"
+		ImportScript += "\t" + "asset_tools = unreal.AssetToolsHelpers.get_asset_tools()" + "\n"
+		ImportScript += "\t" + "seq = asset_tools.create_asset(seqTempName.replace('.',''), seqPath, None, factory)" + "\n"
+		ImportScript += "\t" + "unreal.EditorAssetLibrary.save_loaded_asset(seq)" + "\n"
+		ImportScript += "\t" +	"mustBeReplace = True" + "\n"
+		ImportScript += "else:" + "\n"
+		ImportScript += "\t" + "factory = unreal.LevelSequenceFactoryNew()" + "\n"
+		ImportScript += "\t" + "asset_tools = unreal.AssetToolsHelpers.get_asset_tools()" + "\n"
+		ImportScript += "\t" + "seq = asset_tools.create_asset(seqName.replace('.',''), seqPath, None, factory)" + "\n"
+		ImportScript += "\t" + "unreal.EditorAssetLibrary.save_loaded_asset(seq)" + "\n"
+		ImportScript += "\n"
 
 	ImportScript += 'if seq:' + "\n"
 	ImportScript += "\t" + 'print("Sequencer reference created")' + "\n"
@@ -114,22 +150,34 @@ def WriteImportSequencerScript_20tab():
 	ImportScript += "\t" + "\n"
 	
 	ImportScript += "\t" + "#Set frame rate" + "\n"
-	#Set frame rate for 4.20 and bigger
-	ImportScript += "\t" + "if ue.ENGINE_MINOR_VERSION >= 20:" + "\n"
-	ImportScript += "\t\t" + "myFFrameRate = FrameRate()" + "\n"
-	ImportScript += "\t\t" + "myFFrameRate.Denominator = frameRateDenominator" + "\n"
-	ImportScript += "\t\t" + "myFFrameRate.Numerator = frameRateNumerator" + "\n"
-	ImportScript += "\t\t" + "seq.MovieScene.DisplayRate = myFFrameRate" + "\n"		
-	#Set frame rate for 4.19	
-	ImportScript += "\t" + "else:" + "\n"
-	ImportScript += "\t\t" + "seq.MovieScene.FixedFrameInterval = frameRateDenominator/frameRateNumerator" + "\n"
-	ImportScript += "\t" + "\n"
+	if use20tab == True:
+		#Set frame rate for 4.20 and bigger
+		ImportScript += "\t" + "if ue.ENGINE_MINOR_VERSION >= 20:" + "\n"
+		ImportScript += "\t\t" + "myFFrameRate = FrameRate()" + "\n"
+		ImportScript += "\t\t" + "myFFrameRate.Denominator = frameRateDenominator" + "\n"
+		ImportScript += "\t\t" + "myFFrameRate.Numerator = frameRateNumerator" + "\n"
+		ImportScript += "\t\t" + "seq.MovieScene.DisplayRate = myFFrameRate" + "\n"		
+		#Set frame rate for 4.19	
+		ImportScript += "\t" + "else:" + "\n"
+		ImportScript += "\t\t" + "seq.MovieScene.FixedFrameInterval = frameRateDenominator/frameRateNumerator" + "\n"
+		ImportScript += "\t" + "\n"
+	else:
+		ImportScript += "\t" + "myFFrameRate = unreal.FrameRate()" + "\n"
+		ImportScript += "\t" + "myFFrameRate.denominator = frameRateDenominator" + "\n"
+		ImportScript += "\t" + "myFFrameRate.numerator = frameRateNumerator" + "\n"
+		ImportScript += "\t" + "seq.set_display_rate(myFFrameRate)" + "\n"	
 		
 	#Set playback range
 	ImportScript += "\t" + "#Set playback range" + "\n"
-	ImportScript += "\t" + "seq.sequencer_set_playback_range(startFrame/frameRateNumerator, (endFrame-secureCrop)/frameRateNumerator)" + "\n"
-	ImportScript += "\t" + "camera_cut_track = seq.sequencer_add_camera_cut_track()" + "\n"
-	ImportScript += "\t" + "world = ue.get_editor_world()" + "\n"
+	if use20tab == True:
+		ImportScript += "\t" + "seq.sequencer_set_playback_range(startFrame/frameRateNumerator, (endFrame-secureCrop)/frameRateNumerator)" + "\n"
+		ImportScript += "\t" + "camera_cut_track = seq.sequencer_add_camera_cut_track()" + "\n"
+		ImportScript += "\t" + "world = ue.get_editor_world()" + "\n"		
+	else:
+		ImportScript += "\t" + "seq.set_playback_start(startFrame/frameRateNumerator)" + "\n" #set_playback_end_seconds
+		ImportScript += "\t" + "seq.set_playback_end((endFrame-secureCrop)/frameRateNumerator)" + "\n"
+		ImportScript += "\t" + "camera_cut_track = seq.add_master_track(unreal.MovieSceneCameraCutTrack)" + "\n"
+		#ImportScript += "\t" + "world = unreal.EditorLevelLibrary.get_editor_world()" + "\n"
 	
 	ImportScript += "else:" + "\n"
 	ImportScript += "\t" + 'print("Fail to create Sequencer")' + "\n"
@@ -147,14 +195,20 @@ def WriteImportSequencerScript_20tab():
 			
 			#Create spawnable camera
 			ImportScript += "\t" + "#Create spawnable camera" + "\n"
-			ImportScript += "\t" + "cine_camera_actor = world.actor_spawn(CineCameraActor) #Create camera" + "\n"
-			ImportScript += "\t" + "cine_camera_actor.set_actor_label('" + camera.name + "')" + "\n"
-			ImportScript += "\t" + "cine_camera_actor.CameraComponent.LensSettings.MinFStop = 0" + "\n"
-			ImportScript += "\t" + "cine_camera_actor.CameraComponent.LensSettings.MaxFStop = 1000" + "\n"
-			ImportScript += "\t" + "camera_spawnable_guid = seq.sequencer_make_new_spawnable(cine_camera_actor) #Add camera in sequencer" + "\n"
-			ImportScript += "\t" + "cine_camera_actor.actor_destroy()" + "\n"
-			ImportScript += "\t" + "ImportedCamera.append(('"+camera.name+"', camera_spawnable_guid))"
-			
+			if use20tab == True:
+				ImportScript += "\t" + "cine_camera_actor = world.actor_spawn(CineCameraActor) #Create camera" + "\n"
+				ImportScript += "\t" + "cine_camera_actor.set_actor_label('" + camera.name + "')" + "\n"
+				ImportScript += "\t" + "cine_camera_actor.CameraComponent.LensSettings.MinFStop = 0" + "\n"
+				ImportScript += "\t" + "cine_camera_actor.CameraComponent.LensSettings.MaxFStop = 1000" + "\n"
+				ImportScript += "\t" + "camera_spawnable_guid = seq.sequencer_make_new_spawnable(cine_camera_actor) #Add camera in sequencer" + "\n"
+				ImportScript += "\t" + "cine_camera_actor.actor_destroy()" + "\n"
+				ImportScript += "\t" + "ImportedCamera.append(('"+camera.name+"', camera_spawnable_guid))" + "\n"
+			else:
+				ImportScript += "\t" + "camera_spawnable = seq.add_spawnable_from_class(unreal.CineCameraActor) #Add camera in sequencer" + "\n"
+				ImportScript += "\t" + "camera_spawnable.get_object_template().set_actor_label('" + camera.name + "')" + "\n"
+				ImportScript += "\t" + "camera_spawnable.get_object_template().camera_component.lens_settings.min_f_stop = 0" + "\n"
+				ImportScript += "\t" + "camera_spawnable.get_object_template().camera_component.lens_settings.max_f_stop = 1000" + "\n"
+				ImportScript += "\t" + "ImportedCamera.append(('"+camera.name+"', camera_spawnable))" + "\n"
 			ImportScript += "\n"
 			
 			#Import fbx transform
@@ -163,29 +217,50 @@ def WriteImportSequencerScript_20tab():
 			ImportScript += "\t" + "AdditionalTracksLoc = os.path.join(r'"+AdditionalTracksLoc+"')" + "\n"
 			fbxFilePath = (os.path.join(asset.exportPath, GetObjExportFileName(camera)))
 			ImportScript += "\t" + "fbxFilePath = os.path.join(r'"+fbxFilePath+"')" + "\n"
-			ImportScript += "\t" + "for obj in seq.MovieScene.ObjectBindings:" + "\n"
-			ImportScript += "\t\t" + "if obj.ObjectGuid == ue.string_to_guid(camera_spawnable_guid):" + "\n"
-			ImportScript += "\t\t\t" + "transform_track = obj.tracks[0]" + "\n"
-			ImportScript += "\t\t\t" + "transform_camera_section = transform_track.Sections[0]" + "\n"
-			ImportScript += "\t\t\t" + "transform_camera_section.sequencer_import_fbx_transform(fbxFilePath, '" + camera.name + "')" + "\n"
-			ImportScript += "\n"
-			ImportScript += "\t\t\t" + "#Import additional tracks" + "\n"
-			ImportScript += "\t\t\t" + "spawned_track = obj.tracks[1]" + "\n"
-			ImportScript += "\t\t\t" + "spawned_camera_section = spawned_track.Sections[0]" + "\n"
-			ImportScript += "\t\t\t" + "AddSequencerSectionBoolKeysByIniFile(spawned_camera_section, 'Spawned', AdditionalTracksLoc)" + "\n"
+			if use20tab == True:
+				ImportScript += "\t" + "for obj in seq.MovieScene.ObjectBindings:" + "\n"
+				ImportScript += "\t\t" + "if obj.ObjectGuid == ue.string_to_guid(camera_spawnable_guid):" + "\n"
+				ImportScript += "\t\t\t" + "transform_track = obj.tracks[0]" + "\n"
+				ImportScript += "\t\t\t" + "transform_camera_section = transform_track.Sections[0]" + "\n"
+				ImportScript += "\t\t\t" + "transform_camera_section.sequencer_import_fbx_transform(fbxFilePath, '" + camera.name + "')" + "\n"
+				ImportScript += "\n"
+				ImportScript += "\t\t\t" + "#Spawned tracks" + "\n"
+				ImportScript += "\t\t\t" + "spawned_track = obj.tracks[1]" + "\n"
+				ImportScript += "\t\t\t" + "spawned_camera_section = spawned_track.Sections[0]" + "\n"
+				ImportScript += "\t\t\t" + "AddSequencerSectionBoolKeysByIniFile(spawned_camera_section, 'Spawned', AdditionalTracksLoc)" + "\n"				
+			else:
+				#ImportScript += "\t" + "transform_track = camera_spawnable.get_tracks()[0]" + "\n"
+				#ImportScript += "\t" + "transform_camera_section = transform_track.get_sections()[0]" + "\n"
+				#ImportScript += "\t" + "transform_camera_section.sequencer_import_fbx_transform(fbxFilePath, '" + camera.name + "')" + "\n"
+				ImportScript += "\n"
+				ImportScript += "\t" + "#Spawned tracks" + "\n"
+				ImportScript += "\t" + "spawned_track = camera_spawnable.get_tracks()[0]" + "\n"  #Spawn tracks with 0
+				ImportScript += "\t" + "spawned_camera_section = spawned_track.get_sections()[0]" + "\n"
+				ImportScript += "\t" + "AddSequencerSectionBoolKeysByIniFile(spawned_camera_section, 'Spawned', AdditionalTracksLoc)" + "\n"
 			ImportScript += "\n"
 			
 			#Import additional tracks
 			ImportScript += "\t" + "#Import additional tracks" + "\n"
-			ImportScript += "\t" + "Component = seq.MovieScene.ObjectBindings[-1] #Get the last" + "\n"
-			ImportScript += "\t" + "sectionFocalLength = Component.Tracks[0].Sections[0]" + "\n"
-			ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionFocalLength, 'FocalLength', AdditionalTracksLoc)" + "\n"
-			ImportScript += "\n"
-			ImportScript += "\t" + "sectionFocusDistance = Component.Tracks[1].Sections[0]" + "\n"
-			ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionFocusDistance, 'FocusDistance', AdditionalTracksLoc)" + "\n"
-			ImportScript += "\n"
-			ImportScript += "\t" + "sectionAperture = Component.Tracks[2].Sections[0]" + "\n"
-			ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionAperture, 'Aperture', AdditionalTracksLoc)" + "\n"
+			if use20tab == True:
+				ImportScript += "\t" + "Component = seq.MovieScene.ObjectBindings[-1] #Get the last" + "\n"
+				ImportScript += "\t" + "sectionFocalLength = Component.Tracks[0].Sections[0]" + "\n"
+				ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionFocalLength, 'FocalLength', AdditionalTracksLoc)" + "\n"
+				ImportScript += "\n"
+				ImportScript += "\t" + "sectionFocusDistance = Component.Tracks[1].Sections[0]" + "\n"
+				ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionFocusDistance, 'FocusDistance', AdditionalTracksLoc)" + "\n"
+				ImportScript += "\n"
+				ImportScript += "\t" + "sectionAperture = Component.Tracks[2].Sections[0]" + "\n"
+				ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionAperture, 'Aperture', AdditionalTracksLoc)" + "\n"
+			else:
+				ImportScript += "\t" + "Component = seq.get_bindings()[-1] #Get the last" + "\n"
+				ImportScript += "\t" + "sectionFocalLength = Component.get_tracks()[0].get_sections()[0]" + "\n"
+				ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionFocalLength, 'FocalLength', AdditionalTracksLoc)" + "\n"
+				ImportScript += "\n"
+				ImportScript += "\t" + "sectionFocusDistance = Component.get_tracks()[1].get_sections()[0]" + "\n"
+				ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionFocusDistance, 'FocusDistance', AdditionalTracksLoc)" + "\n"
+				ImportScript += "\n"
+				ImportScript += "\t" + "sectionAperture = Component.get_tracks()[2].get_sections()[0]" + "\n"
+				ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionAperture, 'Aperture', AdditionalTracksLoc)" + "\n"
 			ImportScript += "\n"
 			ImportScript += "\n\n"
 
@@ -239,8 +314,8 @@ def WriteImportSequencerScript_20tab():
 	
 	#Replace
 	ImportScript += "if mustBeReplace == True:" + "\n"
-	ImportScript += "\t" + "OldSeq = seqLocation+'/'+seqName.replace('.','')+'.'+seqName.replace('.','')" + "\n"
-	ImportScript += "\t" + "NewSeq = seqLocation+'/'+seqTempName.replace('.','')+'.'+seqTempName.replace('.','')" + "\n"
+	ImportScript += "\t" + "OldSeq = seqPath+'/'+seqName.replace('.','')+'.'+seqName.replace('.','')" + "\n"
+	ImportScript += "\t" + "NewSeq = seqPath+'/'+seqTempName.replace('.','')+'.'+seqTempName.replace('.','')" + "\n"
 	ImportScript += "\t" + "print(OldSeq)" + "\n"
 	ImportScript += "\t" + "print(NewSeq)" + "\n"
 	ImportScript += "\t" + "print(\"LevelSequence'\"+OldSeq+\"'\")" + "\n"

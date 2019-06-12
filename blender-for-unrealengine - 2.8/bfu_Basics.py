@@ -34,8 +34,11 @@ def ChecksRelationship(arrayA, arrayB):
 	return False
 
 def RemoveFolderTree(folder):
-	if os.path.isdir(folder):
-		shutil.rmtree(folder)
+	try:
+		if os.path.isdir(folder):
+			shutil.rmtree(folder)
+	except:
+		print("remove folder fail. "+folder)
 
 def GetChilds(obj):
 	#Get all direct childs of a object

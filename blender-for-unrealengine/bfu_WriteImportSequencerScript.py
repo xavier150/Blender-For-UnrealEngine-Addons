@@ -33,16 +33,8 @@ importlib.reload(bfu_Utils)
 from .bfu_Utils import *
 
 
-def WriteImportSequencerScript():
-	ImportScript = "#This script was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons" + "\n"
-	ImportScript += "#This script will import in unreal all camera in target sequencer" + "\n"
-	ImportScript += "#Use this command : " + GetImportSequencerScriptCommand() + "\n"
-	return ImportScript
-	
-def WriteImportSequencerScript_20tab():
-	#Generate a config file for import camera in Ue4 sequencer
+def WriteImportSequencerScript(use20tab = False):	
 	scene = bpy.context.scene
-	
 	#Comment
 	ImportScript = "#This script was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons" + "\n"
 	ImportScript += "#This script will import in unreal all camera in target sequencer" + "\n"
@@ -53,7 +45,24 @@ def WriteImportSequencerScript_20tab():
 	
 	#Import
 	ImportScript += "import os.path" + "\n"
-	ImportScript += "import unreal" + "\n"
+	ImportScript += "import time" + "\n"
+	
+	
+	if use20tab == True:
+		ImportScript += "import configparser" + "\n"
+		ImportScript += "import unreal_engine as ue" + "\n"
+		ImportScript += "from unreal_engine.classes import MovieSceneCameraCutTrack, MovieScene3DTransformSection, MovieScene3DTransformTrack, MovieSceneAudioTrack, CineCameraActor, LevelSequenceFactoryNew" + "\n"
+		ImportScript += "if ue.ENGINE_MINOR_VERSION >= 20:" + "\n"
+		ImportScript += "\t" + "from unreal_engine.structs import FloatRange, FloatRangeBound, MovieSceneObjectBindingID, FrameRate" + "\n"
+		ImportScript += "else:" + "\n"
+		ImportScript += "\t" + "from unreal_engine.structs import FloatRange, FloatRangeBound, MovieSceneObjectBindingID" + "\n"
+		ImportScript += "from unreal_engine import FTransform, FVector, FColor" + "\n"
+		ImportScript += "from unreal_engine.enums import EMovieSceneObjectBindingSpace" + "\n"
+		ImportScript += "from unreal_engine.structs import MovieSceneObjectBindingID" + "\n"
+	else:
+		ImportScript += "import ConfigParser" + "\n"
+		ImportScript += "import unreal" + "\n"
+	
 	ImportScript += "\n"
 	ImportScript += "\n"
 	

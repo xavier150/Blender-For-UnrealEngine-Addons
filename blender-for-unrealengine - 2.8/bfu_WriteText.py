@@ -277,7 +277,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 	#Write FocusDistance keys
 	ImportScript += "[FocusDistance]" + "\n"
 	if obj.data.dof.focus_object is None:
-		DataKeys = getAllKeysByPath(obj,"dof_distance",obj.data.dof.focus_distance)
+		DataKeys = getAllKeysByPath(obj,"dof.focus_distance",obj.data.dof.focus_distance)
 	else: 
 		DataKeys = getAllCamDistKeys(obj, obj.data.dof.focus_object)
 	for key in DataKeys:
@@ -291,7 +291,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 	#Write Aperture (Depth of Field) keys
 	ImportScript += "[Aperture]" + "\n"
 	if scene.render.engine == "BLENDER_EEVEE" or scene.render.engine == "CYCLES" or scene.render.engine == "BLENDER_WORKBENCH":
-		DataKeys = getAllKeysByPath(obj,"gpu_dof.fstop",obj.data.dof.aperture_fstop)
+		DataKeys = getAllKeysByPath(obj,"dof.aperture_fstop",obj.data.dof.aperture_fstop)
 		for key in DataKeys:
 			ImportScript += str(key[0])+": "+str(key[1]) + "\n" 
 
