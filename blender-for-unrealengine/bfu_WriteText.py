@@ -305,11 +305,6 @@ def WriteSingleCameraAdditionalTrack(obj):
 				else:
 					CorrectedValue = (FocalLength/(key[1]*2000))
 			ImportScript += str(key[0])+": "+str(CorrectedValue) + "\n" 
-			
-	elif scene.render.engine == "BLENDER_EEVEE":
-		DataKeys = getAllKeysByPath(obj,"gpu_dof.fstop",obj.data.gpu_dof.fstop)
-		for key in DataKeys:
-			ImportScript += str(key[0])+": "+str(key[1]) + "\n" 
 
 	else:
 		ImportScript += "0: 21\n" #21 is default value in ue4
@@ -372,6 +367,8 @@ def WriteSingleMeshAdditionalParameter(obj):
 
 		config.add_section('Sockets')
 		config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
+		addon_prefs = bpy.context.user_preferences.addons["blender-for-unrealengine"].preferences
+		
 		for i, socket in enumerate(sockets):
 			SocketName = socket.name[7:] if socket.name.startswith("SOCKET_") else socket.name
 
@@ -388,14 +385,14 @@ def WriteSingleMeshAdditionalParameter(obj):
 			RelativeMatrix = (bml.inverted() @ am.inverted() @ em)
 			l = RelativeMatrix.to_translation()
 			r = RelativeMatrix.to_euler()
-			s = socket.scale
+			s = socket.scale*addon_prefs.SkeletalSocketsImportedSize
 
 			#Convet to array for configparser and convert value for Unreal
-			array_l = [l[0], l[1]*-1, l[2]]
-			array_r = [r[0], degrees(r[1])*-1, degrees(r[2])*-1]
-			array_s = [s[0], s[1], s[2]]
+			array_location = [l[0], l[1]*-1, l[2]]
+			array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]
+			array_scale = [s[0], s[1], s[2]]
 
-			MySocket = [SocketName, b.name, array_l, array_r, array_s]
+			MySocket = [SocketName, b.name.replace('.','_'), array_location, array_rotation, array_scale]
 			config.set('Sockets', 'socket_'+str(i), str(MySocket))
 		
 		
@@ -413,21 +410,14 @@ def WriteAllTextFiles():
 	#Import script
 	if scene.text_ImportAssetScript:
 		addon_prefs = bpy.context.user_preferences.addons["blender-for-unrealengine"].preferences
-		if addon_prefs.Use20TabScript == True:
-			Text = bfu_WriteImportAssetScript.WriteImportAssetScript_20tab()
-		else:
-			Text = bfu_WriteImportAssetScript.WriteImportAssetScript()
-		print(Text)
+		Text = bfu_WriteImportAssetScript.WriteImportAssetScript(addon_prefs.Use20TabScript)
 		if Text is not None:
 			Filename = scene.file_import_asset_script_name
 			ExportSingleText(Text, scene.export_other_file_path, Filename)
 			
 	if scene.text_ImportSequenceScript:
 		addon_prefs = bpy.context.user_preferences.addons["blender-for-unrealengine"].preferences
-		if addon_prefs.Use20TabScript == True:
-			Text = bfu_WriteImportSequencerScript.WriteImportSequencerScript_20tab()
-		else:
-			Text = bfu_WriteImportSequencerScript.WriteImportSequencerScript()
+		Text = bfu_WriteImportSequencerScript.WriteImportSequencerScript(addon_prefs.Use20TabScript)
 		if Text is not None:
 			Filename = scene.file_import_sequencer_script_name
 			ExportSingleText(Text, scene.export_other_file_path, Filename)

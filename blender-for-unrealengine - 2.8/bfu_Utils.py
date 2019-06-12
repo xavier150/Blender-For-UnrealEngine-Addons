@@ -811,7 +811,7 @@ def UpdateUnrealPotentialError():
 	CheckMarkerOverlay()
 	CheckVertexGroupWeight()
 	CheckZeroScaleKeyframe()
-	
+
 	return PotentialErrors
 
 

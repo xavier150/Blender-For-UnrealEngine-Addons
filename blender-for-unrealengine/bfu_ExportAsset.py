@@ -216,6 +216,7 @@ def ExportSingleFbxMesh(dirpath, filename, obj):
 	#Export a single Mesh
 	
 	scene = bpy.context.scene
+	addon_prefs = bpy.context.user_preferences.addons["blender-for-unrealengine"].preferences
 	filename = ValidFilenameForUnreal(filename)
 	curr_time = time.process_time()
 	if  bpy.ops.object.mode_set.poll():
@@ -232,7 +233,7 @@ def ExportSingleFbxMesh(dirpath, filename, obj):
 
 	#Set socket scale for Unreal
 	for socket in GetSocketDesiredChild(obj):
-		socket.delta_scale*=0.01
+		socket.delta_scale*=0.01*addon_prefs.StaticSocketsImportedSize
 		
 	#Set rename temporarily the Armature as "Armature"
 	if meshType == "SkeletalMesh":
@@ -265,7 +266,7 @@ def ExportSingleFbxMesh(dirpath, filename, obj):
 	
 	#Reset socket scale
 	for socket in GetSocketDesiredChild(obj):
-		socket.delta_scale*=100
+		socket.delta_scale*=100*addon_prefs.StaticSocketsImportedSize
 		
 	#Reset armature name
 	if meshType == "SkeletalMesh":
@@ -443,6 +444,7 @@ def ExportAllAssetByList(targetobjects):
 def PrepareAndSaveDataForExport():
 
 	scene = bpy.context.scene
+	addon_prefs = bpy.context.user_preferences.addons["blender-for-unrealengine"].preferences
 	#----------------------------------------Save data
 	UserObjHide = []
 	UserObjHideSelect = []
@@ -468,6 +470,13 @@ def PrepareAndSaveDataForExport():
 	UserSelected = bpy.context.selected_objects #Save current selected objects
 	#----------------------------------------
 
+
+	if addon_prefs.revertExportPath == True:
+		RemoveFolderTree(bpy.path.abspath(scene.export_static_file_path))
+		RemoveFolderTree(bpy.path.abspath(scene.export_skeletal_file_path))
+		RemoveFolderTree(bpy.path.abspath(scene.export_alembic_file_path))
+		RemoveFolderTree(bpy.path.abspath(scene.export_camera_file_path))
+		RemoveFolderTree(bpy.path.abspath(scene.export_other_file_path))
 
 	list = []
 	for Asset in GetFinalAssetToExport():

@@ -33,7 +33,7 @@ importlib.reload(bfu_Utils)
 from .bfu_Utils import *
 
 
-def WriteImportSequencerScript():
+def WriteImportSequencerScript(use20tab = False):
 	ImportScript = "#This script was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons" + "\n"
 	ImportScript += "#This script will import in unreal all camera in target sequencer" + "\n"
 	ImportScript += "#Use this command : " + GetImportSequencerScriptCommand() + "\n"

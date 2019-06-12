@@ -135,4 +135,8 @@ It is now possible to force the duration of an animation according to the scene 
 - Change: The all collision are now named with two suffix. Type_MeshName_##
 - Change: new potential errors will be detected in the potential error report(CheckArmatureMultipleRoots)
 - Fixed: in 2.8 the Addon can try to export removed mesh and crash
+- Fixed: in 2.8 bpy.context.scene.update() have be removed and this do script error
+- Fixed: in 2.8 Export sequencer do error (The variables of Depth of Field have be renamed)
 - Fixed: set clipboard with encode('utf8') do error
+- Fixed: Sockets are not attached to bones with illegal caracters (bone.001 -> bone_001)
+- Fixed: Sockets are exported with a offset in AdditionalParameter

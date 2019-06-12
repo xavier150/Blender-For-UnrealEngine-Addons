@@ -727,7 +727,7 @@ def UpdateUnrealPotentialError():
 					MyError.type = 2
 					MyError.text = 'Object "'+obj.name+'" is an Armature and does not have any valid children.'
 					MyError.object = obj
-					
+
 	def CheckArmatureMultipleRoots():
 		#Check that skeleton have multiples roots
 		
@@ -743,7 +743,6 @@ def UpdateUnrealPotentialError():
 					MyError.type = 2
 					MyError.text = 'Object "'+obj.name+'" have Multiple roots bones. Unreal only support single root bone.'
 					MyError.object = obj
-		
 		
 	def CheckMarkerOverlay():
 		#Check that there is no overlap with the Marker
@@ -812,6 +811,7 @@ def UpdateUnrealPotentialError():
 	CheckMarkerOverlay()
 	CheckVertexGroupWeight()
 	CheckZeroScaleKeyframe()
+
 	return PotentialErrors
 
 

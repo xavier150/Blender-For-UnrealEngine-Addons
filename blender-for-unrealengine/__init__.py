@@ -81,22 +81,40 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 	bl_idname = __name__
 
 	skeletonRootBoneName = StringProperty(
-			name='Skeleton root bone name',
-			description='Name of the armature when exported. This is used to change the root bone name. If egal "Armature" Ue4 will remove the root bone but the animation will be 100 times smaller.',
-			default="ArmatureRoot",
-			)
+		name='Skeleton root bone name',
+		description='Name of the armature when exported. This is used to change the root bone name. If egal "Armature" Ue4 will remove the root bone but the animation will be 100 times smaller.',
+		default="ArmatureRoot",
+		)	
+		
+	StaticSocketsImportedSize = FloatProperty(
+		name='StaticMesh sockets import size',
+		description='Size of the socket when imported in Unreal Engine',
+		default=1.0,
+		)
+		
+	SkeletalSocketsImportedSize = FloatProperty(
+		name='SkeletalMesh sockets import size',
+		description='Size of the socket when imported in Unreal Engine',
+		default=0.01,
+		)
+		
+	revertExportPath = BoolProperty(
+		name='Revert all export path at each export',
+		description='will remove the folder of the all export path at each export',
+		default=True,
+		)
 			
 	UseGeneratedScripts =  BoolProperty(			
-			name='Use generated script for import assets and sequencer.',
-			description='If false the all properties that only works with import scripts will be disabled',
-			default=True,
-			)
+		name='Use generated script for import assets and sequencer.',
+		description='If false the all properties that only works with import scripts will be disabled',
+		default=True,
+		)
 			
 	Use20TabScript = BoolProperty(
-			name='Genrate import script for 20Tab python intergration',
-			description='Genrate import script for 20Tab python intergration ( /!\ With vania python integration some features like StaticMesh Lod or SkeletalMesh Sockets integration do not work )',
-			default=True,
-			)
+		name='Genrate import script for 20Tab python intergration',
+		description='Genrate import script for 20Tab python intergration ( /!\ With vania python integration some features like StaticMesh Lod or SkeletalMesh Sockets integration do not work )',
+		default=True,
+		)
 			
 
 
@@ -104,6 +122,9 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		layout = self.layout
 		col = layout.column()
 		col.prop(self, "skeletonRootBoneName")
+		col.prop(self, "StaticSocketsImportedSize")
+		col.prop(self, "SkeletalSocketsImportedSize")
+		col.prop(self, "revertExportPath")
 		col.prop(self, "UseGeneratedScripts")
 		if self.UseGeneratedScripts == True:
 			col.prop(self, "Use20TabScript")
@@ -320,7 +341,7 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 			("CTF_UseComplexAsSimple", "Use Complex as Simple", "Create only simple shapes. Use simple shapes for all scene queries and collision tests.", 4)
 			]
 		)
-		
+
 
 	def draw(self, context):
 
@@ -402,7 +423,7 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 
 	#Animation :
 
-	class ACTION_UL_ExportTarget(bpy.types.UIList):
+	class BFU_UL_ACTIONExportTarget(bpy.types.UIList):
 		def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
 			ActionIsValid = False
 			try:
@@ -509,7 +530,7 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 		subtype = 'FILE_NAME'
 		)
 
-	class UpdateObjActionButton(Operator):
+	class BFU_OT_UpdateObjActionButton(Operator):
 		bl_label = "Update action list"
 		bl_idname = "object.updateobjaction"
 		bl_description = "Update action list"
@@ -537,7 +558,7 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 			UpdateExportActionList(bpy.context.object)
 			return {'FINISHED'}
 
-	class ShowActionToExport(Operator):
+	class BFU_OT_ShowActionToExport(Operator):
 		bl_label = "Show action(s)"
 		bl_idname = "object.showobjaction"
 		bl_description = "Click to show actions that are to be exported with this armature."
@@ -586,7 +607,7 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 						ActionListProperty.prop(obj, 'exportActionEnum')
 						if obj.exportActionEnum == "export_specific_list":
 							ActionListProperty.template_list(
-								"ACTION_UL_ExportTarget", "",  # type and unique id
+								"BFU_UL_ACTIONExportTarget", "",  # type and unique id
 								obj, "exportActionList",  # pointer to the CollectionProperty
 								obj, "active_ObjectAction",	 # pointer to the active identifier
 								maxrows=5,
@@ -853,6 +874,7 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 		preset_values = [
 							'scene.static_prefix_export_name',
 							'scene.skeletal_prefix_export_name',
+							'scene.alembic_prefix_export_name',
 							'scene.anim_prefix_export_name',
 							'scene.pose_prefix_export_name',
 							'scene.camera_prefix_export_name',
@@ -880,6 +902,12 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 	bpy.types.Scene.skeletal_prefix_export_name = bpy.props.StringProperty(
 		name = "SkeletalMesh Prefix ",
 		description = "Prefix of SkeletalMesh",
+		maxlen = 32,
+		default = "SK_")	
+		
+	bpy.types.Scene.alembic_prefix_export_name = bpy.props.StringProperty(
+		name = "Alembic Prefix ",
+		description = "Prefix of Alembic (SkeletalMesh in unreal)",
 		maxlen = 32,
 		default = "SK_")
 
@@ -967,18 +995,19 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 	def draw(self, context):
 		scn = context.scene
 		addon_prefs = bpy.context.user_preferences.addons["blender-for-unrealengine"].preferences
-	
+
 		#Presets
 		row = self.layout.row(align=True)
 		row.menu('BFU_MT_Nomenclatureresets', text='Presets')
 		row.operator('object.add_preset', text='', icon='ZOOMIN')
 		row.operator('object.add_preset', text='', icon='ZOOMOUT').remove_active = True
-	
+
 		#Prefix
 		propsPrefix = self.layout.row()
 		propsPrefix = propsPrefix.column()
 		propsPrefix.prop(scn, 'static_prefix_export_name', icon='OBJECT_DATA')
 		propsPrefix.prop(scn, 'skeletal_prefix_export_name', icon='OBJECT_DATA')
+		propsPrefix.prop(scn, 'alembic_prefix_export_name', icon='OBJECT_DATA')
 		propsPrefix.prop(scn, 'anim_prefix_export_name', icon='OBJECT_DATA')
 		propsPrefix.prop(scn, 'pose_prefix_export_name', icon='OBJECT_DATA')
 		propsPrefix.prop(scn, 'camera_prefix_export_name', icon='OBJECT_DATA')
@@ -1288,7 +1317,7 @@ class BFU_PT_Export(bpy.types.Panel):
 	bpy.types.Scene.alembic_export = bpy.props.BoolProperty(
 		name = "Alembic animation(s)",
 		description = "Check mark to export Alembic animation(s)",
-		default = True
+		default = False
 		)	
 		
 	bpy.types.Scene.camera_export = bpy.props.BoolProperty(
@@ -1427,9 +1456,9 @@ classes = (
 
 	BFU_OT_ObjExportAction,
 	BFU_PT_AnimProperties,
-	BFU_PT_AnimProperties.ACTION_UL_ExportTarget,
-	BFU_PT_AnimProperties.UpdateObjActionButton,
-	BFU_PT_AnimProperties.ShowActionToExport,
+	BFU_PT_AnimProperties.BFU_UL_ACTIONExportTarget,
+	BFU_PT_AnimProperties.BFU_OT_UpdateObjActionButton,
+	BFU_PT_AnimProperties.BFU_OT_ShowActionToExport,
 
 	BFU_PT_AvancedObjectProperties,
 

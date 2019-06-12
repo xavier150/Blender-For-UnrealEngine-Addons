@@ -19,6 +19,7 @@
 import bpy
 import os
 import string
+import shutil
 import bmesh
 from mathutils import Vector
 from mathutils import Quaternion
@@ -31,6 +32,10 @@ def ChecksRelationship(arrayA, arrayB):
 			if a == b:
 				return True
 	return False
+
+def RemoveFolderTree(folder):
+	if os.path.isdir(folder):
+		shutil.rmtree(folder)
 
 def GetChilds(obj):
 	#Get all direct childs of a object
