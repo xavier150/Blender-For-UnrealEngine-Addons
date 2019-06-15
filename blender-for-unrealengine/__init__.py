@@ -1181,13 +1181,12 @@ class BFU_PT_Export(bpy.types.Panel):
 
 		def execute(self, context):
 			self.report({'INFO'}, "ok")
+			self.correctedProperty = CorrectBadProperty()
+			UpdateNameHierarchy()
+			UpdateUnrealPotentialError()
 			return {'FINISHED'}
 
 		def invoke(self, context, event):
-
-			self.correctedProperty = CorrectBadProperty()
-			UpdateNameHierarchy()
-			UpdateBFU_OT_UnrealPotentialError()
 			wm = context.window_manager
 			return wm.invoke_popup(self, width = 1020)
 

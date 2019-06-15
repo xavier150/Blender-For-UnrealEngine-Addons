@@ -194,7 +194,7 @@ def ExportSingleAlembicAnimation(dirpath, filename, obj):
 		check_existing=False,
 		selected=True,
 		triangulate=True,
-		#global_scale = obj.exportGlobalScale * 100
+		#global_scale = obj.exportGlobalScale * 100 #don't work with Unreal
 		)
 	
 	#obj.location = originalLoc #Resets previous object location

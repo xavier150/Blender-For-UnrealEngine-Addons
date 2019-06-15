@@ -161,10 +161,8 @@ def GetAssetType(obj):
 	if obj.ExportAsAlembic == True:
 		return "Alembic"
 		
-	if obj.type == "ARMATURE":
-		if obj.ForceStaticMesh == False:
-			return "SkeletalMesh"
-		return "StaticMesh"
+	if obj.type == "ARMATURE" and obj.ForceStaticMesh == False:
+		return "SkeletalMesh"
 		
 	return "StaticMesh"
 	
@@ -555,6 +553,17 @@ def CorrectBadProperty():
 			UpdatedProp += 1
 	return UpdatedProp
 
+def GetVertexWithZeroWeight(Armature, Mesh):
+	vertices = []
+	for vertex in Mesh.data.vertices:
+		cumulateWeight = 0
+		if len(vertex.groups) > 0:
+			for GroupElem in vertex.groups:
+				if Mesh.vertex_groups[GroupElem.group].name in Armature.data.bones:
+					cumulateWeight += GroupElem.weight
+		if cumulateWeight == 0:
+			vertices.append(vertex)
+	return vertices
 
 def UpdateUnrealPotentialError():
 	#Find and reset list of all potential error in scene
@@ -562,15 +571,16 @@ def UpdateUnrealPotentialError():
 	
 	PotentialErrors = bpy.context.scene.potentialErrorList
 	PotentialErrors.clear()
-
-	#prepares the data to avoid unnecessary loops
+	
+	#prepares the data to avoid unnecessary loops	
 	objToCheck = []
-	for obj in GetAllobjectsByExportType("export_recursive"):
-		if obj not in objToCheck:
-			objToCheck.append(obj)
-		for obj2 in GetExportDesiredChilds(obj):
-			if obj2 not in objToCheck:
-				objToCheck.append(obj2)
+	for Asset in GetFinalAssetToExport():
+		if Asset.obj in GetAllobjectsByExportType("export_recursive"):
+			if Asset.obj not in objToCheck:
+				objToCheck.append(Asset.obj)
+			for child in GetExportDesiredChilds(Asset.obj):
+				if child not in objToCheck:
+					objToCheck.append(child)
 
 	MeshTypeToCheck = []
 	for obj in objToCheck:
@@ -762,24 +772,14 @@ def UpdateUnrealPotentialError():
 			if GetAssetType(obj) == "SkeletalMesh":
 				childs = GetExportDesiredChilds(obj)
 				for child in childs:
-					if child.type == "MESH":	
-						#Prepare data
-						VertexWithZeroWeight = []
-						for vertex in child.data.vertices:
-							cumulateWeight = 0
-							if len(vertex.groups) > 0:
-								for group in vertex.groups:
-									cumulateWeight += group.weight
-								if not cumulateWeight > 0:
-									VertexWithZeroWeight.append(vertex)					
-							else:
-								VertexWithZeroWeight.append(vertex)
-						#Result data		
+					if child.type == "MESH":						
+						#Result data	
+						VertexWithZeroWeight = GetVertexWithZeroWeight(obj, child)
 						if len(VertexWithZeroWeight) > 0:
 							MyError = PotentialErrors.add()
 							MyError.name = child.name
 							MyError.type = 1
-							MyError.text = 'Object named "'+child.name+'" contains '+str(len(VertexWithZeroWeight))+' vertex with zero cumulative weight.'
+							MyError.text = 'Object named "'+child.name+'" contains '+str(len(VertexWithZeroWeight))+' vertex with zero cumulative valid weight.'
 							MyError.object = child							
 							MyError.vertexErrorType = "VertexWithZeroWeight"
 								
@@ -850,18 +850,9 @@ def SelectPotentialErrorVertex(errorIndex):
 	
 	bpy.ops.object.mode_set(mode = 'OBJECT')
 	if error.vertexErrorType == "VertexWithZeroWeight":
-		for vertex in obj.data.vertices:
-			cumulateWeight = 0
-			if len(vertex.groups) > 0:
-				for group in vertex.groups:
-					cumulateWeight += group.weight
-				if not cumulateWeight > 0:
-					vertex.select_set(True)	
-					print(vertex)
-			else:
-				vertex.select = True
-				print(vertex)
-	bpy.ops.object.mode_set(mode = 'EDIT') 
+		for vertex in GetVertexWithZeroWeight(obj.parent, obj):
+			vertex.select = True
+	bpy.ops.object.mode_set(mode = 'EDIT')
 	bpy.ops.view3d.view_selected()
 	return obj
 	

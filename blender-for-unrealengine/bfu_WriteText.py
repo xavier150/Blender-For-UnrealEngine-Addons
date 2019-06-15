@@ -223,7 +223,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 		return keys
 
 		
-	def getOneKeysByPath(obj,DataPath, DataValue, Frame, IsData = True):
+	def getOneKeysByFcurves(obj,DataPath, DataValue, Frame, IsData = True):
 		scene = bpy.context.scene
 		if IsData:
 			if obj.data.animation_data is not None:
@@ -239,7 +239,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 						return f.evaluate(Frame)
 		return DataValue
 		
-	def getAllKeysByPath(obj,DataPath, DataValue, IsData = True):
+	def getAllKeysByFcurves(obj,DataPath, DataValue, IsData = True):
 		scene = bpy.context.scene
 		keys = []
 		f = None
@@ -269,7 +269,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 
 	#Write FocalLength keys
 	ImportScript += "[FocalLength]" + "\n"
-	for key in getAllKeysByPath(obj,"lens",obj.data.lens): 
+	for key in getAllKeysByFcurves(obj,"lens",obj.data.lens): 
 		#Fov type return auto to lens
 		ImportScript += str(key[0])+": "+str(key[1]) + "\n"
 	ImportScript += "\n\n\n"
@@ -277,7 +277,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 	#Write FocusDistance keys
 	ImportScript += "[FocusDistance]" + "\n"
 	if obj.data.dof_object is None:
-		DataKeys = getAllKeysByPath(obj,"dof_distance",obj.data.dof_distance)
+		DataKeys = getAllKeysByFcurves(obj,"dof_distance",obj.data.dof_distance)
 	else: 
 		DataKeys = getAllCamDistKeys(obj, obj.data.dof_object)
 	for key in DataKeys:
@@ -292,14 +292,14 @@ def WriteSingleCameraAdditionalTrack(obj):
 	ImportScript += "[Aperture]" + "\n"
 	if scene.render.engine == 'CYCLES':
 		if obj.data.cycles.aperture_type == 'FSTOP':
-			DataKeys = getAllKeysByPath(obj,"cycles.aperture_fstop",obj.data.cycles.aperture_fstop)
+			DataKeys = getAllKeysByFcurves(obj,"cycles.aperture_fstop",obj.data.cycles.aperture_fstop)
 		else:
-			DataKeys = getAllKeysByPath(obj,"cycles.aperture_size",obj.data.cycles.aperture_size)
+			DataKeys = getAllKeysByFcurves(obj,"cycles.aperture_size",obj.data.cycles.aperture_size)
 		for key in DataKeys:
 			CorrectedValue = key[1]
 			if obj.data.cycles.aperture_type == 'RADIUS':
 				#Convert radius to Fstop
-				FocalLength = getOneKeysByPath(obj,"lens",obj.data.lens,key[0])
+				FocalLength = getOneKeysByFcurves(obj,"lens",obj.data.lens,key[0])
 				if CorrectedValue == 0:
 					CorrectedValue = 64
 				else:
@@ -313,7 +313,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 	#Write Spawned keys
 	ImportScript += "[Spawned]" + "\n"
 	lastKeyValue = None
-	for key in getAllKeysByPath(obj,"hide_viewport",obj.hide_viewport, False):
+	for key in getAllKeysByFcurves(obj,"hide_viewport",obj.hide_viewport, False):
 		boolKey = (key[1] < 1) #Inversed for convert hide to spawn
 		if lastKeyValue is None:
 			ImportScript += str(key[0])+": "+str(boolKey) + "\n"

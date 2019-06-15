@@ -20,7 +20,8 @@
 import bpy
 import time
 import configparser
-from math import degrees
+from math import degrees, radians
+from mathutils import Matrix
 
 
 import importlib
@@ -222,8 +223,18 @@ def WriteSingleCameraAdditionalTrack(obj):
 		scene.frame_set(saveFrame)	#Resets previous start frame
 		return keys
 
-		
-	def getOneKeysByPath(obj,DataPath, DataValue, Frame, IsData = True):
+	def getAllKeysByMatrix(obj):	
+		scene = bpy.context.scene
+		saveFrame = scene.frame_current #Save current frame
+		keys = []
+		for frame in range(scene.frame_start, scene.frame_end+1):
+			scene.frame_set(frame)			
+			v = obj.matrix_world*1
+			keys.append((frame,v))
+		scene.frame_set(saveFrame)	#Resets previous start frame
+		return keys
+	
+	def getOneKeysByFcurves(obj,DataPath, DataValue, Frame, IsData = True):
 		scene = bpy.context.scene
 		if IsData:
 			if obj.data.animation_data is not None:
@@ -239,7 +250,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 						return f.evaluate(Frame)
 		return DataValue
 		
-	def getAllKeysByPath(obj,DataPath, DataValue, IsData = True):
+	def getAllKeysByFcurves(obj,DataPath, DataValue, IsData = True):
 		scene = bpy.context.scene
 		keys = []
 		f = None
@@ -258,7 +269,6 @@ def WriteSingleCameraAdditionalTrack(obj):
 				v = f.evaluate(frame)
 				keys.append((frame,v))
 			return keys
-			
 		return[(scene.frame_start,DataValue)]
 
 	scene = bpy.context.scene
@@ -267,9 +277,30 @@ def WriteSingleCameraAdditionalTrack(obj):
 	ImportScript += ";The script must be used in Unreal Engine Editor with UnrealEnginePython : https://github.com/20tab/UnrealEnginePython" + "\n"
 	ImportScript += "\n\n\n"
 
+	#Write TransformMatrix keys
+	ImportScript += "[Transform]" + "\n"
+	for key in getAllKeysByMatrix(obj): 
+		#GetWorldPostion
+		matrix = key[1] @ Matrix.Rotation(radians(90.0), 4, 'Y') @ Matrix.Rotation(radians(-90.0), 4, 'X')
+		l = matrix.to_translation() * 100
+		r = matrix.to_euler()
+		s = matrix.to_scale()
+		
+		array_location = [l[0], l[1]*-1, l[2]]
+		array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]
+		array_scale = [s[0], s[1], s[2]]
+			
+
+		transform = [array_location[0], array_location[1], array_location[2], array_rotation[0], array_rotation[1], array_rotation[2], array_scale[0], array_scale[1], array_scale[2]]
+		strTransform = ""
+		for t in transform:
+			strTransform += str(t)+","
+		ImportScript += str(key[0])+": " + strTransform + "\n"
+	ImportScript += "\n\n\n"
+	
 	#Write FocalLength keys
 	ImportScript += "[FocalLength]" + "\n"
-	for key in getAllKeysByPath(obj,"lens",obj.data.lens): 
+	for key in getAllKeysByFcurves(obj,"lens",obj.data.lens): 
 		#Fov type return auto to lens
 		ImportScript += str(key[0])+": "+str(key[1]) + "\n"
 	ImportScript += "\n\n\n"
@@ -277,7 +308,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 	#Write FocusDistance keys
 	ImportScript += "[FocusDistance]" + "\n"
 	if obj.data.dof.focus_object is None:
-		DataKeys = getAllKeysByPath(obj,"dof.focus_distance",obj.data.dof.focus_distance)
+		DataKeys = getAllKeysByFcurves(obj,"dof.focus_distance",obj.data.dof.focus_distance)
 	else: 
 		DataKeys = getAllCamDistKeys(obj, obj.data.dof.focus_object)
 	for key in DataKeys:
@@ -291,7 +322,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 	#Write Aperture (Depth of Field) keys
 	ImportScript += "[Aperture]" + "\n"
 	if scene.render.engine == "BLENDER_EEVEE" or scene.render.engine == "CYCLES" or scene.render.engine == "BLENDER_WORKBENCH":
-		DataKeys = getAllKeysByPath(obj,"dof.aperture_fstop",obj.data.dof.aperture_fstop)
+		DataKeys = getAllKeysByFcurves(obj,"dof.aperture_fstop",obj.data.dof.aperture_fstop)
 		for key in DataKeys:
 			ImportScript += str(key[0])+": "+str(key[1]) + "\n" 
 
@@ -302,7 +333,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 	#Write Spawned keys
 	ImportScript += "[Spawned]" + "\n"
 	lastKeyValue = None
-	for key in getAllKeysByPath(obj,"hide_viewport",obj.hide_viewport, False):
+	for key in getAllKeysByFcurves(obj,"hide_viewport",obj.hide_viewport, False):
 		boolKey = (key[1] < 1) #Inversed for convert hide to spawn
 		if lastKeyValue is None:
 			ImportScript += str(key[0])+": "+str(boolKey) + "\n"
