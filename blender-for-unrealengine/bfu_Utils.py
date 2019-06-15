@@ -161,10 +161,8 @@ def GetAssetType(obj):
 	if obj.ExportAsAlembic == True:
 		return "Alembic"
 		
-	if obj.type == "ARMATURE":
-		if obj.ForceStaticMesh == False:
-			return "SkeletalMesh"
-		return "StaticMesh"
+	if obj.type == "ARMATURE" and obj.ForceStaticMesh == False:
+		return "SkeletalMesh"
 		
 	return "StaticMesh"
 	
@@ -399,7 +397,7 @@ def CreateCollisionMaterial():
 	if mat is None:
 		mat = bpy.data.materials.new(name="UE4Collision")
 	mat.diffuse_color = (0, 0.6, 0)
-	mat.alpha = 0.1
+	mat.alpha = 0.11
 	mat.use_transparency = True
 	mat.use_nodes = False
 	if bpy.context.scene.render.engine == 'CYCLES':
@@ -574,14 +572,15 @@ def UpdateUnrealPotentialError():
 	PotentialErrors = bpy.context.scene.potentialErrorList
 	PotentialErrors.clear()
 	
-	#prepares the data to avoid unnecessary loops
+	#prepares the data to avoid unnecessary loops	
 	objToCheck = []
-	for obj in GetAllobjectsByExportType("export_recursive"):
-		if obj not in objToCheck:
-			objToCheck.append(obj)
-		for obj2 in GetExportDesiredChilds(obj):
-			if obj2 not in objToCheck:
-				objToCheck.append(obj2)
+	for Asset in GetFinalAssetToExport():
+		if Asset.obj in GetAllobjectsByExportType("export_recursive"):
+			if Asset.obj not in objToCheck:
+				objToCheck.append(Asset.obj)
+			for child in GetExportDesiredChilds(Asset.obj):
+				if child not in objToCheck:
+					objToCheck.append(child)
 
 	MeshTypeToCheck = []
 	for obj in objToCheck:
@@ -780,7 +779,8 @@ def UpdateUnrealPotentialError():
 							MyError = PotentialErrors.add()
 							MyError.name = child.name
 							MyError.type = 1
-							MyError.text = 'Object named "'+child.name+'" contains '+str(len(VertexWithZeroWeight))+' vertex with zero cumulative weight.'
+							MyError.text = 'Object named "'+child.name+'" contains '+str(len(VertexWithZeroWeight))+' vertex with zero cumulative valid weight.'
+							MyError.text += '\nNote: Vertex groups must have a bone with the same name to be valid.'
 							MyError.object = child							
 							MyError.vertexErrorType = "VertexWithZeroWeight"
 								
@@ -819,7 +819,8 @@ def UpdateUnrealPotentialError():
 def SelectPotentialErrorObject(errorIndex):
 	#Select potential error
 	
-	bpy.ops.object.mode_set(mode = "OBJECT")
+	if bpy.context.active_object and bpy.context.active_object.mode != 'OBJECT' and bpy.ops.object.mode_set.poll():
+		bpy.ops.object.mode_set(mode = "OBJECT")
 	scene = bpy.context.scene
 	error = scene.potentialErrorList[errorIndex]
 	obj = error.object

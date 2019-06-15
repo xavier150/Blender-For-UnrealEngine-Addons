@@ -361,7 +361,6 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 		)
 
 
-
 	def draw(self, context):
 
 
@@ -369,7 +368,6 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 		obj = context.object
 		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 		
-
 		if addon_prefs.UseGeneratedScripts == True:
 			if obj is not None:
 				if obj.ExportEnum == "export_recursive":
@@ -423,10 +421,9 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 				else:
 					layout.label(text='(No properties to show.)')
 			else:
-				layout.label(text='(No properties to show.)')		
+				layout.label(text='(No properties to show.)')
 		else:
 			layout.label(text='(Generated scripts are deactivated.)')
-
 
 class BFU_OT_ObjExportAction(bpy.types.PropertyGroup):
 	name: StringProperty(name="Action data name", default="Unknown")
@@ -442,7 +439,6 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
 	bl_parent_id = "BFU_PT_BlenderForUnreal"
-	
 
 	#Animation :
 
@@ -733,7 +729,6 @@ class BFU_PT_CollisionsAndSockets(bpy.types.Panel):
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
 	bl_parent_id = "BFU_PT_BlenderForUnreal"
-	
 
 	class BFU_OT_ConvertToCollisionButtonBox(Operator):
 		bl_label = "Convert to box (UBX)"
@@ -818,7 +813,7 @@ class BFU_PT_CollisionsAndSockets(bpy.types.Panel):
 			return {'FINISHED'}
 
 	def draw(self, context):
-	
+
 		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 
 		def ActiveModeIs(targetMode): #Return True is active mode ==
@@ -859,14 +854,13 @@ class BFU_PT_CollisionsAndSockets(bpy.types.Panel):
 		convertStaticSocketButtons = convertButtons.column()
 		convertStaticSocketButtons.enabled = ActiveModeIs("OBJECT") and ActiveTypeIs("MESH") and FoundTypeInSelect("EMPTY")
 		convertStaticSocketButtons.operator("object.converttostaticsocket", icon='OUTLINER_DATA_EMPTY')
-		
+
 		if addon_prefs.UseGeneratedScripts == True:
 			layout.label(text="Select the Empty(s) then the owner bone in PoseMode.")
 			convertButtons = self.layout.row().split(factor = 0.80 )
 			convertSkeletalSocketButtons = convertButtons.column()
 			convertSkeletalSocketButtons.enabled = ActiveModeIs("POSE") and ActiveTypeIs("ARMATURE") and FoundTypeInSelect("EMPTY")
 			convertSkeletalSocketButtons.operator("object.converttoskeletalsocket", icon='OUTLINER_DATA_EMPTY')
-
 
 
 class BFU_PT_Nomenclature(bpy.types.Panel):
@@ -1073,7 +1067,6 @@ class BFU_PT_ImportScript(bpy.types.Panel):
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
 	bl_parent_id = "BFU_PT_BlenderForUnreal"
-	
 
 	bpy.types.Scene.unreal_import_location = bpy.props.StringProperty(
 		name = "Unreal import location",
@@ -1107,7 +1100,6 @@ class BFU_PT_ImportScript(bpy.types.Panel):
 		else:
 			self.layout.label(text='(Generated scripts are deactivated.)')
 
-
 class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
 	#[AssetName , AssetType , ExportPath, ExportTime]
 	assetName: StringProperty(default="None")
@@ -1137,7 +1129,6 @@ class BFU_PT_Export(bpy.types.Panel):
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
 	bl_parent_id = "BFU_PT_BlenderForUnreal"
-	
 
 
 	class BFU_OT_ShowAssetToExport(Operator):
@@ -1251,7 +1242,6 @@ class BFU_PT_Export(bpy.types.Panel):
 				error = bpy.context.scene.potentialErrorList[x]
 
 				myLine = col.box().split(factor = 0.85 )
-				#myLine = col.split(factor = 0.85 )
 				#----
 				if error.type == 0:
 					msgType = 'INFO'

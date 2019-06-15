@@ -397,8 +397,6 @@ def CreateCollisionMaterial():
 	if mat is None:
 		mat = bpy.data.materials.new(name="UE4Collision")
 	mat.diffuse_color = (0, 0.6, 0, 0.11)
-	#mat.alpha = 0.1
-	#mat.use_transparency = True
 	mat.use_nodes = False
 	if bpy.context.scene.render.engine == 'CYCLES':
 		#sets up the nodes to create a transparent material with GLSL mat in Cycle
@@ -780,6 +778,7 @@ def UpdateUnrealPotentialError():
 							MyError.name = child.name
 							MyError.type = 1
 							MyError.text = 'Object named "'+child.name+'" contains '+str(len(VertexWithZeroWeight))+' vertex with zero cumulative valid weight.'
+							MyError.text += '\nNote: Vertex groups must have a bone with the same name to be valid.'
 							MyError.object = child							
 							MyError.vertexErrorType = "VertexWithZeroWeight"
 								
@@ -954,7 +953,6 @@ def TryToCorrectPotentialError(errorIndex):
 	
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in UserSelected: #Resets previous selected object if still exist
-		print("######",obj)
 		if obj.name in scene.objects:
 			obj.select_set(True) 
 	bpy.context.view_layer.objects.active = UserActive #Resets previous active object

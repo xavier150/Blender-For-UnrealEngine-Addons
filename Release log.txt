@@ -127,7 +127,7 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.2.3 ==
 
-- New: Alembic animation
+- New: Alembic animation (Export only)
 - New: You can now change the CollisionTraceFlag of the StaticMesh (Collision Complexity)
 - New: It is now possible to choose in the name of the root bone for the skeleton in addon preferences (if "Armature" Ue4 will remove the root bone)
 - New: You can check export_ExportOnlySelected = True for export only the selected assets groups
@@ -147,8 +147,3 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: CheckVertexGroupWeight does not detect if a VertexGroup is not used by a bone
 - Fixed: in 2.8 Mesh select error vertex don't work good
 - Fixed: In Unreal 22.2 the sequencer with imported fbx camera don't have transform. (Now the camera use AdditionalParameter file for import transform)
-
-
-to do 
-
-Alembic Animation

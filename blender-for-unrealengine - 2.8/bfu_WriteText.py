@@ -233,7 +233,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 			keys.append((frame,v))
 		scene.frame_set(saveFrame)	#Resets previous start frame
 		return keys
-	
+		
 	def getOneKeysByFcurves(obj,DataPath, DataValue, Frame, IsData = True):
 		scene = bpy.context.scene
 		if IsData:

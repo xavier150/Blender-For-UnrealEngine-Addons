@@ -217,6 +217,7 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
 							AssetType2.prop(obj, "ForceStaticMesh") #Show asset type
 							if GetAssetType(obj) == "SkeletalMesh":
 								AssetType2.prop(obj, 'exportDeformOnly')
+		else:
 			layout.label(text='(No properties to show.)')
 
 class BFU_PT_ObjectImportProperties(bpy.types.Panel):
@@ -1075,7 +1076,6 @@ class BFU_PT_ImportScript(bpy.types.Panel):
 			propsSub.prop(scn, 'unreal_levelsequence_name', icon='FILE')
 		else:
 			self.layout.label(text='(Generated scripts are deactivated.)')
-		
 
 class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
 	#[AssetName , AssetType , ExportPath, ExportTime]
@@ -1180,13 +1180,15 @@ class BFU_PT_Export(bpy.types.Panel):
 				return {'FINISHED'}
 
 		def execute(self, context):
-			self.report({'INFO'}, "ok")
 			self.correctedProperty = CorrectBadProperty()
 			UpdateNameHierarchy()
 			UpdateUnrealPotentialError()
 			return {'FINISHED'}
 
 		def invoke(self, context, event):
+			self.correctedProperty = CorrectBadProperty()
+			UpdateNameHierarchy()
+			UpdateUnrealPotentialError()
 			wm = context.window_manager
 			return wm.invoke_popup(self, width = 1020)
 
@@ -1216,7 +1218,6 @@ class BFU_PT_Export(bpy.types.Panel):
 				error = bpy.context.scene.potentialErrorList[x]
 
 				myLine = col.box().split(percentage = 0.85 )
-				#myLine = col.split(percentage = 0.85 )
 				#----
 				if error.type == 0:
 					msgType = 'INFO'

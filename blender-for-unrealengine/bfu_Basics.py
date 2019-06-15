@@ -19,6 +19,7 @@
 import bpy
 import os
 import string
+import shutil
 import bmesh
 from mathutils import Vector
 from mathutils import Quaternion
