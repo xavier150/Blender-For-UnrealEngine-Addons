@@ -23,7 +23,6 @@ Depending on the object type, the import parameters are not the same.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocImportScript.jpg">
 Example video: https://youtu.be/FOFBfiE5EEQ
 
-
 # Import Blender camera to Unreal Sequencer with UnrealEnginePython
 It is possible to import complete sequence from blender to unreal with camera cut management and animations on special tracks like Fov (FocalLength), Aperture (F-stop), and Focus Distance
 The Camera cuts are generated with Markers https://docs.blender.org/manual/en/dev/animation/markers.html#bind-camera-to-marker
@@ -40,5 +39,12 @@ The Camera cuts are generated with Markers https://docs.blender.org/manual/en/de
 	- The file ImportAssetScript.py is placed by default at the location of the blender file in folder ExportedFbx\
 	- If you reimport the sequence deletes it which was imported first if no it will be imported with another name next to it
 
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocSequencerScriptExample.gif">
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocSequencerScript.jpg">
 Example video: https://youtu.be/0PQlN-y2h2Q
+
+# Use Unreal vania python
+Note: since Rev 0.2.3 You can now use vania python but several features do not work at the moment.
+1. In Blender set Use20TabScript on False in addon preferences. 
+2. In Unreal enabled Pyton Editor Script Plugin, Editor Scripting Utilities and Sequencer Scripting.
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocVaniaPython.jpg">
