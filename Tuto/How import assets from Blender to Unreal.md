@@ -9,6 +9,7 @@ Depending on the object type, the import parameters are not the same.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocParametersByType.jpg">
 
 - For Alembic animations assets tick Merge Meshes
+	Alembic export and import can take a lot of time.
 - Set ImportType on Skeletal
 - Set FlipU on False and FlipV on True
 - Set Scale 100,-100,100 (xyz)
