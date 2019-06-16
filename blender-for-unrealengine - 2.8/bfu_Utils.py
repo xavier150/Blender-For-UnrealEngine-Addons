@@ -79,16 +79,16 @@ def GetAllCollisionObj():
 
 def GetActionToExport(obj):
 	#Returns only the actions that will be exported with the Armature
-	
+
 	#if obj.animation_data is None:
 		#return []
-		
+
 	if obj.ExportAsLod == True:
 		return []
 
 	TargetActionToExport = [] #Action list
 	if obj.exportActionEnum == "dont_export":
-		return []	
+		return []
 	elif obj.exportActionEnum == "export_specific_list":
 		for action in bpy.data.actions:
 			for targetAction in obj.exportActionList:
@@ -100,7 +100,7 @@ def GetActionToExport(obj):
 		for action in bpy.data.actions:
 			if fnmatch.fnmatchcase(action.name, obj.PrefixNameToExport+"*"):
 				TargetActionToExport.append(action)
-				
+
 	elif obj.exportActionEnum == "export_auto":
 		objBoneNames = [bone.name for bone in obj.data.bones]
 		for action in bpy.data.actions:
@@ -109,42 +109,42 @@ def GetActionToExport(obj):
 				TargetActionToExport.append(action)
 
 	return TargetActionToExport
-		
 
-def GetDesiredActionStartEndTime(obj, action): 
+
+def GetDesiredActionStartEndTime(obj, action):
 	#Returns desired action or camera anim start/end time
 	#Return start with index 0 and end with index 1
-	
+
 	scene = bpy.context.scene
 	if obj.type == "CAMERA":
 		startTime = scene.frame_start
 		endTime = scene.frame_end
-		
+
 	elif obj.AnimStartEndTimeEnum == "with_keyframes":
 		startTime = action.frame_range.x #GetFirstActionFrame
 		endTime = action.frame_range.y #GetLastActionFrame
-		
+
 	elif obj.AnimStartEndTimeEnum == "with_sceneframes":
 		startTime = scene.frame_start
 		endTime = scene.frame_end
-		
+
 	elif obj.AnimStartEndTimeEnum == "with_customframes":
 		startTime = obj.AnimCustomStartTime
 		endTime = obj.AnimCustomEndTime
 
 	if obj.AddOneAdditionalFramesAtTheEnd == True:
 		endTime += 1
-	return (startTime,endTime)	
-	
-	
+	return (startTime,endTime)
+
+
 def GetActionType(action):
 	#return action type
-	
+
 	if action.frame_range.y - action.frame_range.x == 1:
 		return "Pose"
 	return "Action"
-	
-	
+
+
 def GetIsAnimation(type):
 	#return True if type(string) is a animation
 	if (type == "NlAnim" or type == "Action" or type == "Pose"):
@@ -156,25 +156,25 @@ def GetAssetType(obj):
 	#Return asset type of a object
 
 	if obj.type == "CAMERA":
-		return "Camera"	
-		
+		return "Camera"
+
 	if obj.ExportAsAlembic == True:
 		return "Alembic"
-		
+
 	if obj.type == "ARMATURE" and obj.ForceStaticMesh == False:
 		return "SkeletalMesh"
-		
-	return "StaticMesh"
-	
 
-def CheckIsCollision(target): 
+	return "StaticMesh"
+
+
+def CheckIsCollision(target):
 	#Return true if obj is a collision
 	for obj in GetAllCollisionObj():
 		if obj == target:
 			return True
 	return False
-	
-	
+
+
 def SelectParentAndDesiredChilds(obj):
 	#Selects only all child objects that must be exported with parent object
 
@@ -187,9 +187,9 @@ def SelectParentAndDesiredChilds(obj):
 
 def GetFinalAssetToExport():
 	#Returns all assets that will be exported
-	
-	
-	
+
+
+
 	scene = bpy.context.scene
 	TargetAssetToExport = [] #Obj, Action, type
 	class AssetToExport:
@@ -197,7 +197,7 @@ def GetFinalAssetToExport():
 			self.obj = obj
 			self.action = action
 			self.type = type
-	
+
 	if scene.export_ExportOnlySelected == True:
 		objList = []
 		for obj in GetAllobjectsByExportType("export_recursive"):
@@ -208,34 +208,34 @@ def GetFinalAssetToExport():
 				if objChild in bpy.context.selected_objects:
 					if obj not in objList:
 						objList.append(obj)
-	
+
 	else:
 		objList = GetAllobjectsByExportType("export_recursive")
-		
-	for obj in  objList:
+
+	for obj in	objList:
 
 		if GetAssetType(obj) == "Alembic":
 			#Alembic
 			if scene.alembic_export:
 				TargetAssetToExport.append(AssetToExport(obj,None,"Alembic"))
-			
+
 		if GetAssetType(obj) == "SkeletalMesh":
 			#SkeletalMesh
 			if scene.skeletal_export:
 				TargetAssetToExport.append(AssetToExport(obj,None,"SkeletalMesh"))
-				
+
 			#NLA
 			if scene.anin_export:
 				if obj.ExportNLA:
 					TargetAssetToExport.append(AssetToExport(obj,obj.animation_data,"NlAnim"))
-					
+
 			for action in GetActionToExport(obj):
-				
+
 				#Action
 				if scene.anin_export:
 					if GetActionType(action) == "Action":
 						TargetAssetToExport.append(AssetToExport(obj,action,"Action"))
-				
+
 				#Pose
 				if scene.anin_export:
 					if GetActionType(action) == "Pose":
@@ -260,9 +260,9 @@ def ValidFilenameForUnreal(filename):
 
 def GetObjExportDir(obj, abspath = False):
 	#Generate assset folder path
-	scene = bpy.context.scene	
+	scene = bpy.context.scene
 	if GetAssetType(obj) == "SkeletalMesh":
-		dirpath = os.path.join( scene.export_skeletal_file_path , obj.exportFolderName , obj.name)	
+		dirpath = os.path.join( scene.export_skeletal_file_path , obj.exportFolderName , obj.name)
 	if GetAssetType(obj) == "Alembic":
 		dirpath = os.path.join( scene.export_alembic_file_path , obj.exportFolderName , obj.name)
 	if GetAssetType(obj) == "StaticMesh":
@@ -277,7 +277,7 @@ def GetObjExportDir(obj, abspath = False):
 
 def GetObjExportFileName(obj, fileType = ".fbx"):
 	#Generate assset file name
-	
+
 	scene = bpy.context.scene
 	assetType = GetAssetType(obj)
 	if assetType == "Camera":
@@ -285,12 +285,12 @@ def GetObjExportFileName(obj, fileType = ".fbx"):
 	elif assetType == "StaticMesh":
 		return scene.static_prefix_export_name+obj.name+fileType
 	elif assetType == "SkeletalMesh":
-		return scene.skeletal_prefix_export_name+obj.name+fileType	
+		return scene.skeletal_prefix_export_name+obj.name+fileType
 	elif assetType == "Alembic":
 		return scene.alembic_prefix_export_name+obj.name+fileType
 	else:
 		return None
-		
+
 
 def GetActionExportFileName(obj, action, fileType = ".fbx"):
 	#Generate action file name
@@ -303,13 +303,13 @@ def GetActionExportFileName(obj, action, fileType = ".fbx"):
 		return scene.pose_prefix_export_name+obj.name+"_"+action.name+fileType
 	else:
 		return None
-		
+
 def GetNLAExportFileName(obj, fileType = ".fbx"):
 	#Generate action file name
 
 	scene = bpy.context.scene
 	return scene.anim_prefix_export_name+obj.name+"_"+obj.NLAAnimName+fileType
-	
+
 def GetImportAssetScriptCommand():
 	scene = bpy.context.scene
 	fileName = scene.file_import_asset_script_name
@@ -320,27 +320,27 @@ def GetImportAssetScriptCommand():
 		return 'unreal_engine.py_exec(r"'+fullpath+'")' #20tab
 	else:
 		return 'py "'+fullpath+'"' #Vania
-	
+
 def GetImportSequencerScriptCommand():
 	scene = bpy.context.scene
 	fileName = scene.file_import_sequencer_script_name
 	absdirpath = bpy.path.abspath(scene.export_other_file_path)
 	fullpath = os.path.join( absdirpath , fileName )
-	
+
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	if addon_prefs.Use20TabScript == True:
 		return 'unreal_engine.py_exec(r"'+fullpath+'")' #20tab
 	else:
 		return 'py "'+fullpath+'"' #Vania
-	
+
 def GetAnimSample(obj):
 	#return obj sample animation
 	#return 1000 #Debug
 	return obj.SampleAnimForExport
-	
+
 def RenameArmatureAsExportName(obj):
 	#Rename temporarily the Armature as DefaultArmature
-	
+
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	scene = bpy.context.scene
 	oldArmatureName = None
@@ -351,22 +351,22 @@ def RenameArmatureAsExportName(obj):
 			scene.objects[addon_prefs.skeletonRootBoneName].name = "ArmatureTemporarilyNameForUe4Export"
 		obj.name = addon_prefs.skeletonRootBoneName
 	return oldArmatureName
-			
+
 def ResetArmatureName(obj, oldArmatureName):
 	#Reset armature name
-	
+
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	scene = bpy.context.scene
 	if oldArmatureName is not None:
 		obj.name = oldArmatureName
 		if "ArmatureTemporarilyNameForUe4Export" in scene.objects:
 			scene.objects["ArmatureTemporarilyNameForUe4Export"].name = addon_prefs.skeletonRootBoneName
-			
+
 def GenerateUe4Name(name):
 	#Generate a new name with suffix number
 
 	def IsValidName(testedName):
-		#Checks if objet end with number suffix 
+		#Checks if objet end with number suffix
 
 		try:
 			number = int(testedName.split("_")[-1])
@@ -422,25 +422,25 @@ def CreateCollisionMaterial():
 
 def Ue4SubObj_set(SubType):
 	#Convect obj to ue4 sub objects (Collisions Shapes or Socket)
-	
+
 	def DeselectAllWithoutActive():
 		for obj in bpy.context.selected_objects:
 			if obj != bpy.context.active_object:
 				obj.select_set(False)
-	
+
 	ownerObj = bpy.context.active_object
 	ownerBone = bpy.context.active_pose_bone
 	objList = bpy.context.selected_objects
 	if ownerObj is None:
 		return []
-		
+
 	ConvertedObjs = []
 
 	for obj in objList:
 		DeselectAllWithoutActive()
 		obj.select_set(True)
 		if obj != ownerObj:
-		
+
 			#SkeletalMesh Colider
 			if obj.type == 'MESH':
 				ConvertToConvexHull(obj)
@@ -449,7 +449,7 @@ def Ue4SubObj_set(SubType):
 				obj.data.materials.clear()
 				obj.active_material_index = 0
 				obj.data.materials.append(CreateCollisionMaterial())
-				
+
 				#Set the name of the Prefix depending on the type of collision in agreement with unreal FBX Pipeline
 				if SubType == "Box":
 					prefixName = "UBX_"
@@ -459,14 +459,14 @@ def Ue4SubObj_set(SubType):
 					prefixName = "USP_"
 				elif SubType == "Convex":
 					prefixName = "UCX_"
-				
+
 				obj.name = GenerateUe4Name(prefixName+ownerObj.name)
 				obj.show_wire = True
 				obj.show_transparent = True
 				bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
 				ConvertedObjs.append(obj)
-				
-				
+
+
 			#StaticMesh Socket
 			if obj.type == 'EMPTY' and SubType == "ST_Socket":
 				if ownerObj.type == 'MESH':
@@ -474,30 +474,30 @@ def Ue4SubObj_set(SubType):
 						obj.name = GenerateUe4Name("SOCKET_"+obj.name)
 					bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
 					ConvertedObjs.append(obj)
-						
-			#SkeletalMesh Socket			
+
+			#SkeletalMesh Socket
 			if obj.type == 'EMPTY' and SubType == "SK_Socket":
 				if ownerObj.type == 'ARMATURE':
 					if not obj.name.startswith("SOCKET_"):
 						obj.name = GenerateUe4Name("SOCKET_"+obj.name)
 					bpy.ops.object.parent_set(type='BONE')
 					ConvertedObjs.append(obj)
-						
+
 	DeselectAllWithoutActive()
 	for obj in objList: obj.select_set(True) #Resets previous selected object
 	return ConvertedObjs
-	
-	
+
+
 def UpdateUe4Name(SubType, objList):
 	#Convect obj to ue4 sub objects (Collisions Shapes or Socket)
-	
+
 	for obj in objList:
 		ownerObj = obj.parent
-			
+
 
 		if ownerObj is not None:
 			if obj != ownerObj:
-		
+
 				#SkeletalMesh Colider
 				if obj.type == 'MESH':
 
@@ -512,15 +512,15 @@ def UpdateUe4Name(SubType, objList):
 						prefixName = "UCX_"
 
 					obj.name = GenerateUe4Name(prefixName+ownerObj.name)
-					
-					
+
+
 				#StaticMesh Socket
 				if obj.type == 'EMPTY' and SubType == "ST_Socket":
 					if ownerObj.type == 'MESH':
 						if not obj.name.startswith("SOCKET_"):
 							obj.name = GenerateUe4Name("SOCKET_"+obj.name)
-							
-				#SkeletalMesh Socket			
+
+				#SkeletalMesh Socket
 				if obj.type == 'EMPTY' and SubType == "SK_Socket":
 					if ownerObj.type == 'ARMATURE':
 						if not obj.name.startswith("SOCKET_"):
@@ -565,12 +565,12 @@ def GetVertexWithZeroWeight(Armature, Mesh):
 
 def UpdateUnrealPotentialError():
 	#Find and reset list of all potential error in scene
-	
-	
+
+
 	PotentialErrors = bpy.context.scene.potentialErrorList
 	PotentialErrors.clear()
-	
-	#prepares the data to avoid unnecessary loops	
+
+	#prepares the data to avoid unnecessary loops
 	objToCheck = []
 	for Asset in GetFinalAssetToExport():
 		if Asset.obj in GetAllobjectsByExportType("export_recursive"):
@@ -584,8 +584,8 @@ def UpdateUnrealPotentialError():
 	for obj in objToCheck:
 		if obj.type == 'MESH':
 			MeshTypeToCheck.append(obj)
-			
-	MeshTypeWithoutCol = [] # is Mesh Type To Check Without Collision	
+
+	MeshTypeWithoutCol = [] # is Mesh Type To Check Without Collision
 	for obj in MeshTypeToCheck:
 		if not CheckIsCollision(obj):
 			MeshTypeWithoutCol.append(obj)
@@ -601,7 +601,7 @@ def UpdateUnrealPotentialError():
 				MyError.object = obj
 				MyError.correctRef = "ConvertToMesh"
 				MyError.correctlabel = 'Convert to mesh'
-				
+
 	def CheckShapeKeys():
 		for obj in MeshTypeToCheck:
 			if obj.data.shape_keys is not None:
@@ -617,7 +617,7 @@ def UpdateUnrealPotentialError():
 							MyError.text = 'In object "'+obj.name+'" the modifier '+modif.type+' named "'+modif.name+'" can destroy shape keys. Please use only Armature modifier with shape keys.'
 							MyError.correctRef = "RemoveModfier"
 							MyError.correctlabel = 'Remove modifier'
-				
+
 				#Check that the key shapes are not out of bounds for Unreal
 				for key in obj.data.shape_keys.key_blocks:
 					#Min
@@ -630,7 +630,7 @@ def UpdateUnrealPotentialError():
 						MyError.text = 'In object "'+obj.name+'" the shape key "'+key.name+'" is out of bounds for Unreal. The min range of must not be inferior to -5.'
 						MyError.correctRef = "SetKeyRangeMin"
 						MyError.correctlabel = 'Set min range to -5'
-					
+
 					#Max
 					if key.slider_max > 5:
 						MyError = PotentialErrors.add()
@@ -641,7 +641,7 @@ def UpdateUnrealPotentialError():
 						MyError.text = 'In object "'+obj.name+'" the shape key "'+key.name+'" is out of bounds for Unreal. The max range of must not be superior to 5.'
 						MyError.correctRef = "SetKeyRangeMax"
 						MyError.correctlabel = 'Set max range to -5'
-						
+
 	def CheckUVMaps():
 		#Check that the objects have at least one UV map valid
 		for obj in MeshTypeWithoutCol:
@@ -694,7 +694,7 @@ def UpdateUnrealPotentialError():
 						MyError.itemName = modif.name
 						MyError.correctRef = "PreserveVolume"
 						MyError.correctlabel = 'Set Preserve Volume to False'
-						
+
 	def CheckArmatureBoneData():
 		#check the parameter of the ARMATURE bones
 		for obj in objToCheck:
@@ -709,7 +709,7 @@ def UpdateUnrealPotentialError():
 						MyError.itemName = bone.name
 						MyError.correctRef = "BoneSegments"
 						MyError.correctlabel = 'Set Bone Segments to 1'
-						
+
 					if bone.use_inherit_scale == False:
 						MyError = PotentialErrors.add()
 						MyError.name = obj.name
@@ -719,7 +719,7 @@ def UpdateUnrealPotentialError():
 						MyError.itemName = bone.name
 						MyError.correctRef = "InheritScale"
 						MyError.correctlabel = 'Set Inherit Scale to True'
-	
+
 	def CheckArmatureValidChild():
 		#Check that skeleton also has a mesh to export
 		for obj in objToCheck:
@@ -738,7 +738,7 @@ def UpdateUnrealPotentialError():
 
 	def CheckArmatureMultipleRoots():
 		#Check that skeleton have multiples roots
-		
+
 		for obj in objToCheck:
 			if GetAssetType(obj) == "SkeletalMesh":
 				RootsBone = []
@@ -751,7 +751,7 @@ def UpdateUnrealPotentialError():
 					MyError.type = 2
 					MyError.text = 'Object "'+obj.name+'" have Multiple roots bones. Unreal only support single root bone.'
 					MyError.object = obj
-		
+
 	def CheckMarkerOverlay():
 		#Check that there is no overlap with the Marker
 		usedFrame = []
@@ -762,16 +762,16 @@ def UpdateUnrealPotentialError():
 				MyError.text = 'In the scene timeline the frame "'+str(marker.frame)+'" contains overlaped Markers\n To avoid camera conflict in the generation of sequencer you must use max one marker per frame '
 			else:
 				usedFrame.append(marker.frame)
-			
-	
+
+
 	def CheckVertexGroupWeight():
 		#Check that all vertex have a weight
 		for obj in objToCheck:
 			if GetAssetType(obj) == "SkeletalMesh":
 				childs = GetExportDesiredChilds(obj)
 				for child in childs:
-					if child.type == "MESH":						
-						#Result data	
+					if child.type == "MESH":
+						#Result data
 						VertexWithZeroWeight = GetVertexWithZeroWeight(obj, child)
 						if len(VertexWithZeroWeight) > 0:
 							MyError = PotentialErrors.add()
@@ -779,10 +779,10 @@ def UpdateUnrealPotentialError():
 							MyError.type = 1
 							MyError.text = 'Object named "'+child.name+'" contains '+str(len(VertexWithZeroWeight))+' vertex with zero cumulative valid weight.'
 							MyError.text += '\nNote: Vertex groups must have a bone with the same name to be valid.'
-							MyError.object = child							
+							MyError.object = child
 							MyError.vertexErrorType = "VertexWithZeroWeight"
-								
-			
+
+
 	def CheckZeroScaleKeyframe():
 		#Check that animations do not use a invalid value
 		for obj in objToCheck:
@@ -796,8 +796,8 @@ def UpdateUnrealPotentialError():
 									MyError = PotentialErrors.add()
 									MyError.type = 2
 									MyError.text = 'In action "'+action.name+'" at frame '+str(key.co[0])+', the bone named "'+fcurve.data_path.split('"')[1]+'" has a zero value in scale transform. This is invalid in Unreal.'
-				
-						
+
+
 	CheckObjType()
 	CheckShapeKeys()
 	CheckUVMaps()
@@ -816,20 +816,20 @@ def UpdateUnrealPotentialError():
 
 def SelectPotentialErrorObject(errorIndex):
 	#Select potential error
-	
+
 	if bpy.context.active_object and bpy.context.active_object.mode != 'OBJECT' and bpy.ops.object.mode_set.poll():
 		bpy.ops.object.mode_set(mode = "OBJECT")
 	scene = bpy.context.scene
 	error = scene.potentialErrorList[errorIndex]
 	obj = error.object
-	
+
 	bpy.ops.object.select_all(action='DESELECT')
 	obj.hide_viewport = False
 	obj.select_set(True)
 	bpy.context.view_layer.objects.active = obj
 
-	#show collection for select object		
-	for collection in bpy.data.collections: 
+	#show collection for select object
+	for collection in bpy.data.collections:
 		for ColObj in collection.objects:
 			if ColObj == obj:
 				SetCollectionUse(collection)
@@ -840,13 +840,13 @@ def SelectPotentialErrorVertex(errorIndex):
 	#Select potential error
 	SelectPotentialErrorObject(errorIndex)
 	bpy.ops.object.mode_set(mode = "EDIT")
-	
+
 	scene = bpy.context.scene
 	error = scene.potentialErrorList[errorIndex]
 	obj = error.object
 	bpy.ops.mesh.select_mode(type="VERT")
 	bpy.ops.mesh.select_all(action='DESELECT')
-	
+
 	bpy.ops.object.mode_set(mode = 'OBJECT')
 	if error.vertexErrorType == "VertexWithZeroWeight":
 		for vertex in GetVertexWithZeroWeight(obj.parent, obj):
@@ -854,22 +854,22 @@ def SelectPotentialErrorVertex(errorIndex):
 	bpy.ops.object.mode_set(mode = 'EDIT')
 	bpy.ops.view3d.view_selected()
 	return obj
-	
+
 def TryToCorrectPotentialError(errorIndex):
 	#Try to correct potential error
-	
+
 	scene = bpy.context.scene
 	error = scene.potentialErrorList[errorIndex]
-	global successCorrect 
+	global successCorrect
 	successCorrect = False
 	#----------------------------------------Save data
 	UserActive = bpy.context.active_object #Save current active object
-	UserMode = None 
+	UserMode = None
 	if UserActive and UserActive.mode != 'OBJECT' and bpy.ops.object.mode_set.poll():
 		UserMode = UserActive.mode #Save current mode
 		bpy.ops.object.mode_set(mode='OBJECT')
 	UserSelected = bpy.context.selected_objects #Save current selected objects
-			
+
 	UsedViewLayerCollectionHideViewport = []
 	UsedCollectionHideViewport = []
 	UsedCollectionHideselect = []
@@ -882,65 +882,65 @@ def TryToCorrectPotentialError(errorIndex):
 		UsedCollectionHideViewport.append(collection.hide_viewport)
 		UsedCollectionHideselect.append(collection.hide_select)
 		SetCollectionUse(collection)
-	
+
 	#----------------------------------------
 	print("Start correct")
 	def SelectObj(obj):
 		bpy.ops.object.select_all(action='DESELECT')
 		obj.select_set(True)
 		bpy.context.view_layer.objects.active = obj
-			
-	
+
+
 	#Correction list
-	
+
 	if error.correctRef == "ConvertToMesh":
 		obj = error.object
 		SelectObj(obj)
 		bpy.ops.object.convert(target='MESH')
 		successCorrect = True
-		
+
 	if error.correctRef == "SetKeyRangeMin":
 		obj = error.object
 		key = obj.data.shape_keys.key_blocks[error.itemName]
 		key.slider_min = -5
 		successCorrect = True
-	
+
 	if error.correctRef == "SetKeyRangeMax":
 		obj = error.object
 		key = obj.data.shape_keys.key_blocks[error.itemName]
 		key.slider_max = 5
 		successCorrect = True
-	
+
 	if error.correctRef == "CreateUV":
 		obj = error.object
 		SelectObj(obj)
 		bpy.ops.uv.smart_project()
 		successCorrect = True
-		
+
 	if error.correctRef == "RemoveModfier":
 		obj = error.object
 		mod = obj.modifiers[error.itemName]
 		obj.modifiers.remove(mod)
 		successCorrect = True
-		
+
 	if error.correctRef == "PreserveVolume":
 		obj = error.object
 		mod = obj.modifiers[error.itemName]
 		mod.use_deform_preserve_volume = False
 		successCorrect = True
-		
+
 	if error.correctRef == "BoneSegments":
 		obj = error.object
 		bone = obj.data.bones[error.itemName]
-		bone.bbone_segments = 1		
+		bone.bbone_segments = 1
 		successCorrect = True
-	
+
 	if error.correctRef == "InheritScale":
 		obj = error.object
 		bone = obj.data.bones[error.itemName]
-		bone.use_inherit_scale = True		
+		bone.use_inherit_scale = True
 		successCorrect = True
-		
+
 	#----------------------------------------Reset data
 	for x, collection in enumerate(bpy.data.collections):
 		try:
@@ -950,31 +950,31 @@ def TryToCorrectPotentialError(errorIndex):
 			pass
 		collection.hide_viewport = UsedCollectionHideViewport[x]
 		collection.hide_select = UsedCollectionHideselect[x]
-	
+
 	bpy.ops.object.select_all(action='DESELECT')
 	for obj in UserSelected: #Resets previous selected object if still exist
 		if obj.name in scene.objects:
-			obj.select_set(True) 
+			obj.select_set(True)
 	bpy.context.view_layer.objects.active = UserActive #Resets previous active object
 	if UserActive and UserMode and bpy.ops.object.mode_set.poll():
 		bpy.ops.object.mode_set(mode=UserMode) #Resets previous mode
 	#----------------------------------------
-		
+
 	if successCorrect == True:
 		scene.potentialErrorList.remove(errorIndex)
 		print("end correct, Error: " + error.correctRef)
 		return "Corrected"
 	print("end correct, Error not found")
 	return "Correct fail"
-	
-	
+
+
 def AddFrontEachLine(ImportScript, text = "\t"):
-	
+
 	print("start")
 	NewImportScript = ""
 	text_splited = ImportScript.split('\n')
 	for line in text_splited:
 		NewImportScript += text + line + "\n"
-		
+
 	print("line: "+str(len(text_splited)))
 	return NewImportScript

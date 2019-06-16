@@ -84,14 +84,14 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		name='Skeleton root bone name',
 		description='Name of the armature when exported. This is used to change the root bone name. If egal "Armature" Ue4 will remove the root bone but the animation will be 100 times smaller.',
 		default="ArmatureRoot",
-		)	
-		
+		)
+
 	StaticSocketsImportedSize : FloatProperty(
 		name='StaticMesh sockets import size',
 		description='Size of the socket when imported in Unreal Engine',
 		default=1.0,
 		)
-		
+
 	SkeletalSocketsImportedSize : FloatProperty(
 		name='SkeletalMesh sockets import size',
 		description='Size of the socket when imported in Unreal Engine',
@@ -102,20 +102,20 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		name='Revert all export path at each export',
 		description='will remove the folder of the all export path at each export',
 		default=True,
-		)		
-			
-	UseGeneratedScripts :  BoolProperty(			
+		)
+
+	UseGeneratedScripts :  BoolProperty(
 		name='Use generated script for import assets and sequencer.',
 		description='If false the all properties that only works with import scripts will be disabled',
 		default=True,
 		)
-			
+
 	Use20TabScript : BoolProperty(
 		name='Genrate import script for 20Tab python intergration',
 		description='Genrate import script for 20Tab python intergration ( /!\ With vania python integration some features like StaticMesh Lod or SkeletalMesh Sockets integration do not work )',
 		default=True,
 		)
-			
+
 
 
 	def draw(self, context):
@@ -131,16 +131,16 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 
 class BFU_PT_BlenderForUnreal(bpy.types.Panel):
 	#Unreal engine export panel
-	
+
 	bl_idname = "BFU_PT_BlenderForUnreal"
 	bl_label = "Blender for Unreal Engine"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
-	
+
 	def draw(self, contex):
 		layout =  self.layout
-		layout.label(text='Git hub and documentation: https://github.com/xavier150/Blender-For-UnrealEngine-Addons')		
+		layout.label(text='Git hub and documentation: https://github.com/xavier150/Blender-For-UnrealEngine-Addons')
 
 
 class BFU_PT_ObjectProperties(bpy.types.Panel):
@@ -152,7 +152,7 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
 	bl_parent_id = "BFU_PT_BlenderForUnreal"
-	
+
 
 	bpy.types.Object.ExportEnum = EnumProperty(
 		name = "Export type",
@@ -177,7 +177,7 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
 		description="If true this mesh will be exported as a Alembic animation",
 		default=False
 		)
-		
+
 	bpy.types.Object.ExportAsLod = BoolProperty(
 		name="Export as lod?",
 		description="If true this mesh will be exported as a level of detail for another mesh",
@@ -203,7 +203,7 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
 		layout = self.layout
 		obj = context.object
 		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
-		
+
 		if obj is not None:
 
 			AssetType = layout.row()
@@ -244,7 +244,7 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
-	bl_parent_id = "BFU_PT_BlenderForUnreal"	
+	bl_parent_id = "BFU_PT_BlenderForUnreal"
 
 	#Lod list
 	bpy.types.Object.Ue4Lod1 = PointerProperty(
@@ -346,7 +346,7 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 			("AllAssets", "AllAssets", "Search for matching material in all assets folders.", 4)
 			]
 		)
-		
+
 	bpy.types.Object.CollisionTraceFlag = EnumProperty(
 		name = "Collision Complexity",
 		description = "Collision Trace Flag",
@@ -367,7 +367,7 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 		layout = self.layout
 		obj = context.object
 		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
-		
+
 		if addon_prefs.UseGeneratedScripts == True:
 			if obj is not None:
 				if obj.ExportEnum == "export_recursive":
@@ -387,7 +387,7 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 						if GetAssetType(obj) == "StaticMesh" or GetAssetType(obj) == "SkeletalMesh" or GetAssetType(obj) == "Alembic":
 							MaterialSearchLocation = layout.row()
 							MaterialSearchLocation.prop(obj, 'MaterialSearchLocation')
-							
+
 					#StaticMesh prop
 					if GetAssetType(obj) == "StaticMesh":
 						if obj.ExportAsLod == False:
@@ -650,7 +650,7 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 						ArmaturePropertyInfo.label(text=actionFeedback, icon='INFO')
 						ArmaturePropertyInfo.operator("object.showobjaction")
 						layout.label(text='Note: The Action with only one frame are exported like Pose.')
-						
+
 					if GetAssetType(obj) == "SkeletalMesh":
 						NLAAnim = layout.row()
 						NLAAnim.prop(obj, 'ExportNLA')
@@ -672,7 +672,7 @@ class BFU_PT_AvancedObjectProperties(bpy.types.Panel):
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
 	bl_parent_id = "BFU_PT_BlenderForUnreal"
-	
+
 
 	bpy.types.Object.exportAxisForward = EnumProperty(
 		name="Axis Forward",
@@ -872,16 +872,16 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
 	bl_parent_id = "BFU_PT_BlenderForUnreal"
-	
-	
+
+
 	class BFU_MT_Nomenclatureresets(bpy.types.Menu):
 		bl_label = 'My Presets'
 		preset_subdir = 'blender-for-unrealengine/nomenclature-presets'
 		preset_operator = 'script.execute_preset'
 		draw = bpy.types.Menu.draw_preset
-	
+
 	from bl_operators.presets import AddPresetBase
-	
+
 	class BFU_OT_AddNomenclaturePreset(AddPresetBase, Operator):
 		bl_idname = 'object.add_preset'
 		bl_label = 'Add A preset'
@@ -913,7 +913,7 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 						]
 
 		# Directory to store the presets
-		preset_subdir = 'blender-for-unrealengine/nomenclature-presets'	
+		preset_subdir = 'blender-for-unrealengine/nomenclature-presets'
 
 	#Prefix
 	bpy.types.Scene.static_prefix_export_name = bpy.props.StringProperty(
@@ -926,8 +926,8 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 		name = "SkeletalMesh Prefix ",
 		description = "Prefix of SkeletalMesh",
 		maxlen = 32,
-		default = "SK_")	
-		
+		default = "SK_")
+
 	bpy.types.Scene.alembic_prefix_export_name = bpy.props.StringProperty(
 		name = "Alembic Prefix ",
 		description = "Prefix of Alembic (SkeletalMesh in unreal)",
@@ -972,8 +972,8 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 		description = "Choose a directory to export SkeletalMesh(s)",
 		maxlen = 512,
 		default = "//ExportedFbx\SkeletalMesh\\",
-		subtype = 'DIR_PATH')	
-		
+		subtype = 'DIR_PATH')
+
 	bpy.types.Scene.export_alembic_file_path = bpy.props.StringProperty(
 		name = "Alembic export file path",
 		description = "Choose a directory to export Alembic(s)",
@@ -1089,7 +1089,7 @@ class BFU_PT_ImportScript(bpy.types.Panel):
 	def draw(self, context):
 		scn = context.scene
 		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
-		
+
 		#Sub folder
 		if addon_prefs.UseGeneratedScripts == True:
 			propsSub = self.layout.row()
@@ -1099,6 +1099,7 @@ class BFU_PT_ImportScript(bpy.types.Panel):
 			propsSub.prop(scn, 'unreal_levelsequence_name', icon='FILE')
 		else:
 			self.layout.label(text='(Generated scripts are deactivated.)')
+
 
 class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
 	#[AssetName , AssetType , ExportPath, ExportTime]
@@ -1317,7 +1318,7 @@ class BFU_PT_Export(bpy.types.Panel):
 			else:
 				self.report({'WARNING'}, "No asset type is checked.")
 			return {'FINISHED'}
-			
+
 
 	#Categories :
 	bpy.types.Scene.static_export = bpy.props.BoolProperty(
@@ -1342,8 +1343,8 @@ class BFU_PT_Export(bpy.types.Panel):
 		name = "Alembic animation(s)",
 		description = "Check mark to export Alembic animation(s)",
 		default = False
-		)	
-		
+		)
+
 	bpy.types.Scene.camera_export = bpy.props.BoolProperty(
 		name = "Camera(s)",
 		description = "Check mark to export Camera(s)",
@@ -1411,17 +1412,16 @@ class BFU_PT_Export(bpy.types.Panel):
 
 		#Export button :
 		checkButton = layout.row()
-		checkButton.operator("object.checkpotentialerror", icon='FILE_TICK')	
-				
+		checkButton.operator("object.checkpotentialerror", icon='FILE_TICK')
+
 		#exportProperty
 		exportOnlySelect = layout.row()
 		exportOnlySelect.prop(scn, 'export_ExportOnlySelected')
-		
+
 		exportButton = layout.row()
 		exportButton.scale_y = 2.0
-		exportButton.operator("object.exportforunreal", icon='EXPORT')	
+		exportButton.operator("object.exportforunreal", icon='EXPORT')
 
-		
 
 class BFU_PT_Clipboard(bpy.types.Panel):
 	#Is Clipboard panel
@@ -1432,7 +1432,6 @@ class BFU_PT_Clipboard(bpy.types.Panel):
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
 	bl_parent_id = "BFU_PT_BlenderForUnreal"
-	
 
 
 	class BFU_OT_CopyImportAssetScriptCommand(Operator):
@@ -1461,7 +1460,7 @@ class BFU_PT_Clipboard(bpy.types.Panel):
 		scn = context.scene
 		layout = self.layout
 		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
-		
+
 		if addon_prefs.UseGeneratedScripts == True:
 			layout.label(text="Click on one of the buttons to copy the import command.", icon='INFO')
 			copyButton = layout.row()
@@ -1504,23 +1503,20 @@ classes = (
 
 	#BFU_OT_UnrealExportedAsset,
 	#BFU_OT_UnrealPotentialError,
-	BFU_PT_Export,		
+	BFU_PT_Export,
 	BFU_PT_Export.BFU_OT_ShowAssetToExport,
 	BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup,
 	BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup.BFU_OT_FixitTarget,
 	BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup.BFU_OT_SelectObjetButton,
 	BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup.BFU_OT_SelectVertexButton,
 	BFU_PT_Export.BFU_OT_ExportForUnrealEngineButton,
-	
+
 	BFU_PT_Clipboard,
 	BFU_PT_Clipboard.BFU_OT_CopyImportAssetScriptCommand,
 	BFU_PT_Clipboard.BFU_OT_CopyImportSequencerScriptCommand,
 )
 
 register, unregister = bpy.utils.register_classes_factory(classes)
-#def register():
-	#pass
-# Register
 bpy.utils.register_class(BFU_OT_ObjExportAction)
 bpy.types.Object.exportActionList = CollectionProperty(type=BFU_OT_ObjExportAction)
 bpy.utils.register_class(BFU_OT_UnrealExportedAsset)

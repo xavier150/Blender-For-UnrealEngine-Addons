@@ -62,9 +62,9 @@ def getFirstDeformBoneParent(bone):
 
 def GetRecursiveChilds(obj):
 	#Get all recursive childs of a object
-	
+
 	saveObjs = []
-	
+
 	def tryAppend(obj):
 		saveObjs.append(obj)
 
@@ -73,7 +73,7 @@ def GetRecursiveChilds(obj):
 			tryAppend(childs)
 		tryAppend(newobj)
 	return saveObjs
-	
+
 def ConvertToConvexHull(obj):
 	#Convert obj to Convex Hull
 	mesh = obj.data
@@ -92,13 +92,13 @@ def VerifiDirs(directory):
 
 
 def ValidFilename(filename):
-	# remove not allowed characters 
-	
+	# remove not allowed characters
+
 	valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
-	filename = ''.join(c for c in filename if c in valid_chars)		
+	filename = ''.join(c for c in filename if c in valid_chars)
 	return filename
 
-	
+
 def ResetArmaturePose(obj):
 	#Reset armature pose
 
@@ -108,9 +108,8 @@ def ResetArmaturePose(obj):
 		x.scale = Vector((1,1,1))
 		x.location = Vector((0,0,0))
 	bpy.context.scene.update()
-		
+
 def setWindowsClipboard(text):
 	bpy.context.window_manager.clipboard = text
-	#bpy.context.window_manager.clipboard.encode('utf8') 
-	
-	
+	#bpy.context.window_manager.clipboard.encode('utf8')
+

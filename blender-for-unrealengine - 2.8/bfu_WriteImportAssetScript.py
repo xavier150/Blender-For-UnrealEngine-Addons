@@ -54,11 +54,11 @@ def GetFBXImportType(assetType, use20tab = False):
 			else:
 				return "FBXIT_SKELETAL_MESH"
 
-	
-def WriteImportPythonHeader(use20tab = False):	
+
+def WriteImportPythonHeader(use20tab = False):
 	GetImportSequencerScriptCommand()
 	scene = bpy.context.scene
-	
+
 	#Import
 	ImportScript = "import os.path" + "\n"
 	if use20tab == True:
@@ -76,25 +76,25 @@ def WriteImportPythonHeader(use20tab = False):
 		ImportScript += "import unreal" + "\n"
 	ImportScript += "\n"
 	ImportScript += "\n"
-	
+
 	#Prepare var and def
 	ImportScript += "#Prepare var and def" + "\n"
 	ImportScript += "unrealImportLocation = r'/Game/" + scene.unreal_import_location + "'" + "\n"
 	ImportScript += "ImportedList = []" + "\n"
 	ImportScript += "ImportFailList = []" + "\n"
 	ImportScript += "\n"
-	
-	return ImportScript	
+
+	return ImportScript
 
 def WriteImportPythonDef(use20tab = False):
-	
+
 	ImportScript = ""
 	ImportScript += "def GetOptionByIniFile(FileLoc, OptionName, literal = False):" + "\n"
 	if use20tab == True:
 		ImportScript += "\t" + "Config = configparser.ConfigParser()" + "\n"
 	else:
 		ImportScript += "\t" + "Config = ConfigParser.ConfigParser()" + "\n"
-	
+
 	ImportScript += "\t" + "Config.read(FileLoc)" + "\n"
 	ImportScript += "\t" + "Options = []" + "\n"
 	ImportScript += "\t" + 'for option in Config.options(OptionName):' + "\n"
@@ -105,8 +105,8 @@ def WriteImportPythonDef(use20tab = False):
 	ImportScript += "\t" + "return Options" + "\n"
 	ImportScript += "\n"
 	ImportScript += "\n"
-	
-	return ImportScript	
+
+	return ImportScript
 
 def WriteImportPythonFooter():
 
@@ -114,15 +114,15 @@ def WriteImportPythonFooter():
 	ImportScript = ""
 	ImportScript += "print('========================= Full import completed !  =========================')" + "\n"
 	ImportScript += "\n"
-	ImportScript += "StaticMesh_ImportedList = []" + "\n"	
-	ImportScript += "SkeletalMesh_ImportedList = []" + "\n"	
-	ImportScript += "Alembic_ImportedList = []" + "\n"	
-	ImportScript += "Animation_ImportedList = []" + "\n"	
-	ImportScript += "for asset in ImportedList:" + "\n"		
-	ImportScript += "\t" + "if asset[1] == 'StaticMesh':" + "\n"	
-	ImportScript += "\t\t" + "StaticMesh_ImportedList.append(asset[0])" + "\n"	
+	ImportScript += "StaticMesh_ImportedList = []" + "\n"
+	ImportScript += "SkeletalMesh_ImportedList = []" + "\n"
+	ImportScript += "Alembic_ImportedList = []" + "\n"
+	ImportScript += "Animation_ImportedList = []" + "\n"
+	ImportScript += "for asset in ImportedList:" + "\n"
+	ImportScript += "\t" + "if asset[1] == 'StaticMesh':" + "\n"
+	ImportScript += "\t\t" + "StaticMesh_ImportedList.append(asset[0])" + "\n"
 	ImportScript += "\t" + "elif asset[1] == 'SkeletalMesh':" + "\n"
-	ImportScript += "\t\t" + "SkeletalMesh_ImportedList.append(asset[0])" + "\n"	
+	ImportScript += "\t\t" + "SkeletalMesh_ImportedList.append(asset[0])" + "\n"
 	ImportScript += "\t" + "elif asset[1] == 'Alembic':" + "\n"
 	ImportScript += "\t\t" + "Alembic_ImportedList.append(asset[0])" + "\n"
 	ImportScript += "\t" + "else:" + "\n"
@@ -137,28 +137,28 @@ def WriteImportPythonFooter():
 	ImportScript += "\t" + "print(error)" + "\n"
 	ImportScript += "\n"
 	ImportScript += "print('=========================')" + "\n"
-	return ImportScript		
+	return ImportScript
 
 
 def WriteOneAssetTaskDef(asset, use20tab = False):
 	scene = bpy.context.scene
 	ImportScript = ""
 	ImportScript += "\n"
-	if (asset.object.ExportAsLod == False and 
-		(asset.assetType == "StaticMesh" 
+	if (asset.object.ExportAsLod == False and
+		(asset.assetType == "StaticMesh"
 		or asset.assetType == "SkeletalMesh"
 		or asset.assetType == "Alembic"
 		or GetIsAnimation(asset.assetType))
-		):		
+		):
 		pass
 	else:
 		return
-		
+
 	if asset.assetType == "Alembic":
 		FileType = "ABC"
 	else:
 		FileType = "FBX"
-		
+
 	obj = asset.object
 	if GetIsAnimation(asset.assetType):
 		AssetRelatifImportPath = os.path.join(obj.exportFolderName, scene.anim_subfolder_name)
@@ -166,23 +166,23 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 		AssetRelatifImportPath = obj.exportFolderName
 	FilePath = (os.path.join(asset.exportPath, asset.assetName))
 	AdditionalParameterLoc = (os.path.join(asset.exportPath, GetObjExportFileName(asset.object,"_AdditionalParameter.ini")))
-	
-	
+
+
 	assetUseName = asset.assetName[:-4].replace(' ','_')
-	ImportScript += "def CreateTask_"+ assetUseName + "():" + "\n"	
+	ImportScript += "def CreateTask_"+ assetUseName + "():" + "\n"
 	################[ New import task ]################
 	ImportScript += "\t" + "################[ Import "+obj.name+" as "+asset.assetType+" type ]################" + "\n"
 	ImportScript += "\t" + "print('================[ New import task : "+obj.name+" as "+asset.assetType+" type ]================')" + "\n"
-	
-	
+
+
 	##################################[Change]
-	
+
 	#Property
-	ImportScript += "\t" + "FilePath = os.path.join(r'"+FilePath+"')" + "\n"	
-	ImportScript += "\t" + "AdditionalParameterLoc = os.path.join(r'"+AdditionalParameterLoc+"')" + "\n"	
+	ImportScript += "\t" + "FilePath = os.path.join(r'"+FilePath+"')" + "\n"
+	ImportScript += "\t" + "AdditionalParameterLoc = os.path.join(r'"+AdditionalParameterLoc+"')" + "\n"
 	ImportScript += "\t" + "AssetImportPath = (os.path.join(unrealImportLocation, r'"+AssetRelatifImportPath+r"').replace('\\','/')).rstrip('/')" + "\n"
-	
-	if GetIsAnimation(asset.assetType):				
+
+	if GetIsAnimation(asset.assetType):
 		SkeletonName = scene.skeletal_prefix_export_name+obj.name+"_Skeleton."+scene.skeletal_prefix_export_name+obj.name+"_Skeleton"
 		SkeletonLoc = os.path.join(obj.exportFolderName,SkeletonName)
 		ImportScript += "\t" + "SkeletonLocation = os.path.join(unrealImportLocation, r'" + SkeletonLoc + r"').replace('\\','/')" + "\n"
@@ -191,7 +191,7 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 		else:
 			ImportScript += "\t" + "OriginSkeleton = unreal.find_asset(SkeletonLocation)" + "\n"
 
-	
+
 	#ImportTask
 	if use20tab == True:
 		if FileType == "FBX":
@@ -210,7 +210,7 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 		if FileType == "ABC":
 			ImportScript += "\t" + "task.set_editor_property('options', unreal.AbcImportSettings())" + "\n"
 
-	
+
 	# unreal.FbxImportUI
 	if FileType == "FBX":
 		if GetIsAnimation(asset.assetType):
@@ -220,15 +220,15 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 			else:
 				ImportScript += "\t\t" + "task.get_editor_property('options').set_editor_property('Skeleton', OriginSkeleton)" + "\n"
 			ImportScript += "\t" + "else:" + "\n"
-			
+
 			ImportScript += "\t\t" + "ImportFailList.append('Skeleton \"'+SkeletonLocation+'\" Not found for \""+obj.name+"\" asset ')" + "\n"
 			ImportScript += "\t\t" + "return" + "\n"
-		
+
 		if use20tab == True:
 			ImportScript += "\t" + "task.ImportUI.MeshTypeToImport = EFBXImportType."+GetFBXImportType(asset.assetType, True) + "\n"
 		else:
 			ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('original_import_type', unreal.FBXImportType."+GetFBXImportType(asset.assetType)+")" + "\n"
-		
+
 		if use20tab == True:
 			if GetIsAnimation(asset.assetType):
 				ImportScript += "\t" + "task.ImportUI.bImportMaterials = False" + "\n"
@@ -241,7 +241,7 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 			else:
 				ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('import_materials', True)" + "\n"
 			ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('import_textures', False)" + "\n"
-		
+
 		if asset.assetType == "SkeletalMesh":
 			if use20tab == True:
 				ImportScript += "\t" + "task.ImportUI.bImportAnimations = False" + "\n"
@@ -249,7 +249,7 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 			else:
 				ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('import_animations', False)" + "\n"
 				ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('create_physics_asset', " + str(obj.CreatePhysicsAsset) + ")" + "\n"
-		
+
 		if use20tab == True:
 			if GetIsAnimation(asset.assetType):
 				ImportScript += "\t" + "task.ImportUI.bImportAnimations = True" + "\n"
@@ -267,8 +267,8 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 			else:
 				ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('import_animations', False)" + "\n"
 				ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('import_mesh', True)" + "\n"
-				ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('create_physics_asset', True)" + "\n"	
-		
+				ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('create_physics_asset', True)" + "\n"
+
 		# unreal.FbxMeshImportData
 		if asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh":
 			# unreal.FbxTextureImportData
@@ -280,7 +280,7 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 				if obj.MaterialSearchLocation == "UnderRoot": python_MaterialSearchLocation = "UNDER_ROOT"
 				if obj.MaterialSearchLocation == "AllAssets": python_MaterialSearchLocation = "ALL_ASSETS"
 				ImportScript += "\t" + "task.get_editor_property('options').texture_import_data.set_editor_property('material_search_location', unreal.MaterialSearchLocation." + python_MaterialSearchLocation +")"+ "\n"
-				
+
 		if asset.assetType == "StaticMesh":
 			# unreal.FbxStaticMeshImportData
 			if use20tab == True:
@@ -293,10 +293,10 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 				ImportScript += "\t" + "task.get_editor_property('options').static_mesh_import_data.set_editor_property('combine_meshes', True)" + "\n"
 				ImportScript += "\t" + "task.get_editor_property('options').static_mesh_import_data.set_editor_property('auto_generate_collision', "+ str(obj.AutoGenerateCollision) +")"+ "\n"
 				if (obj.UseStaticMeshLODGroup == True):
-					ImportScript += "\t" + "task.get_editor_property('options').static_mesh_import_data.set_editor_property('static_mesh_lod_group', '" + obj.StaticMeshLODGroup +"')"+ "\n"	
+					ImportScript += "\t" + "task.get_editor_property('options').static_mesh_import_data.set_editor_property('static_mesh_lod_group', '" + obj.StaticMeshLODGroup +"')"+ "\n"
 				ImportScript += "\t" + "task.get_editor_property('options').static_mesh_import_data.set_editor_property('generate_lightmap_u_vs', " + str(obj.GenerateLightmapUVs) +")"+ "\n"
 
-		
+
 		if asset.assetType == "SkeletalMesh" or GetIsAnimation(asset.assetType):
 			# unreal.FbxSkeletalMeshImportData
 			if use20tab == True:
@@ -314,10 +314,10 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 		else:
 			ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('import_type', unreal.AlembicImportType.SKELETAL)" + "\n"
 
-	
-	
+
+
 	################[ import asset ]################
-	ImportScript += "\t" + "print('================[ import asset : "+obj.name+" ]================')" + "\n"	
+	ImportScript += "\t" + "print('================[ import asset : "+obj.name+" ]================')" + "\n"
 	if use20tab == True:
 		ImportScript += "\t" + "try:" + "\n"
 		ImportScript += "\t\t" + "asset = task.factory_import_object(FilePath, AssetImportPath)" + "\n"
@@ -329,9 +329,9 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 	ImportScript += "\t" + "if asset == None:" + "\n"
 	ImportScript += "\t\t" + "ImportFailList.append('Asset \""+obj.name+"\" not found for after inport')" + "\n"
 	ImportScript += "\t\t" + "return" + "\n"
-		
 
-	
+
+
 	################[ Post treatment ]################
 	ImportScript += "\t" + "print('========================= Imports of "+obj.name+" completed ! Post treatment started...	=========================')" + "\n"
 	if asset.assetType == "StaticMesh":
@@ -381,18 +381,18 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 			#Save socket
 			#ImportScript += "\t" + "skeleton.Sockets = current_sockets + new_sockets" + "\n"
 			ImportScript += "\t" + "skeleton.Sockets = new_sockets" + "\n"
-			ImportScript += "\t" + "\n"	
+			ImportScript += "\t" + "\n"
 		else:
-			ImportScript += "\t" + "skeleton = asset.get_editor_property('skeleton')" + "\n"			
+			ImportScript += "\t" + "skeleton = asset.get_editor_property('skeleton')" + "\n"
 			################
 			################ Vania unreal python dont have unreal.Skeleton.Sockets
 			################
 
 	#Lod
-	if asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh":  
+	if asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh":
 		ImportScript += "\t" + "lods_to_add = GetOptionByIniFile(AdditionalParameterLoc, 'LevelOfDetail')" + "\n"
 		ImportScript += "\t" + "for x, lod in enumerate(lods_to_add):" + "\n"
-		ImportScript += "\t\t" + "pass" + "\n"	
+		ImportScript += "\t\t" + "pass" + "\n"
 		if asset.assetType == "StaticMesh":
 			if use20tab == True:
 				ImportScript += "\t\t" + "asset.static_mesh_import_lod(lod, x+1)" + "\n"
@@ -407,15 +407,15 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 				pass
 				#ImportScript += "\t\t" + "unreal.FbxMeshUtils.ImportSkeletalMeshLOD(asset, lod, x+1)" + "\n" #Vania unreal python dont have unreal.FbxMeshUtils.
 
-	
+
 
 	##################################[EndChange]
 
-	
+
 	ImportScript += "\t" + "print('========================= Post treatment of "+obj.name+" completed !	 =========================')" + "\n"
 	if use20tab == True:
 		ImportScript += "\t" + "asset.save_package()" + "\n"
-		ImportScript += "\t" + "asset.post_edit_change()" + "\n"		
+		ImportScript += "\t" + "asset.post_edit_change()" + "\n"
 	else:
 		pass
 	ImportScript += "\t" + "ImportedList.append([asset, '" + asset.assetType + "'])" + "\n"
@@ -423,26 +423,26 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 	ImportScript += "\n"
 	ImportScript += "\n"
 	ImportScript += "\n"
-		
+
 	return ImportScript
 
-def WriteImportAssetScript(use20tab = False):			
+def WriteImportAssetScript(use20tab = False):
 	#Generate a script for import assets in Ue4
 	scene = bpy.context.scene
 
 	ImportScript = WriteImportPythonHeader(use20tab)
 	ImportScript += WriteImportPythonDef(use20tab)
-	
+
 	#Process import
 	ImportScript += "#Process import" + "\n"
 	ImportScript += "print('========================= Import started ! =========================')" + "\n"
 	ImportScript += "\n"
 	ImportScript += "\n"
 	ImportScript += "\n"
-		
-	
-	def WriteImportMultiTask(desiredTaskType):	
-		
+
+
+	def WriteImportMultiTask(desiredTaskType):
+
 		ImportScript = ""
 		ImportScript += "\n"
 		ImportScript += "'''" + "\n"
@@ -452,28 +452,28 @@ def WriteImportAssetScript(use20tab = False):
 			emptyChar+= " "
 			hashtagChar+= "#"
 		ImportScript += "<###############################"+ hashtagChar +"#####################################>" + "\n"
-		ImportScript += "<#############################  "+ emptyChar +"        #############################>" + "\n"
-		ImportScript += "<############################   "+ emptyChar +"         ############################>" + "\n"
-		ImportScript += "<############################   "+desiredTaskType+" tasks   ############################>" + "\n"
-		ImportScript += "<############################   "+ emptyChar +"         ############################>" + "\n"
-		ImportScript += "<#############################  "+ emptyChar +"        #############################>" + "\n"
+		ImportScript += "<#############################	 "+ emptyChar +"		#############################>" + "\n"
+		ImportScript += "<############################	 "+ emptyChar +"		 ############################>" + "\n"
+		ImportScript += "<############################	 "+desiredTaskType+" tasks	 ############################>" + "\n"
+		ImportScript += "<############################	 "+ emptyChar +"		 ############################>" + "\n"
+		ImportScript += "<#############################	 "+ emptyChar +"		#############################>" + "\n"
 		ImportScript += "<###############################"+ hashtagChar +"#####################################>" + "\n"
 		ImportScript += "'''" + "\n"
 		ImportScript += "\n"
-		
+
 		ImportScript += desiredTaskType+"_TasksList = []" + "\n"
 		ImportScript += desiredTaskType+"_PreImportPath = []" + "\n"
-		ImportScript += "print('========================= Creating "+desiredTaskType+" tasks... =========================')" + "\n"	
-		
+		ImportScript += "print('========================= Creating "+desiredTaskType+" tasks... =========================')" + "\n"
+
 		for asset in scene.UnrealExportedAssetsList:
 			if desiredTaskType == asset.assetType or (GetIsAnimation(asset.assetType) and desiredTaskType == "Animation" ):
 				ImportScript += WriteOneAssetTaskDef(asset, use20tab)
-				
+
 
 		ImportScript += "\n"
-				
 
-		
+
+
 		return ImportScript
 
 	def ExsitTypeInExportedAssets(desiredTaskType):
@@ -484,7 +484,7 @@ def WriteImportAssetScript(use20tab = False):
 			if GetIsAnimation(asset.assetType) and desiredTaskType == "Animation":
 				return True
 		return False
-	
+
 	#Deffini la priorité d'import des objects
 	if ExsitTypeInExportedAssets("Alembic"):
 		ImportScript += WriteImportMultiTask("Alembic")
@@ -494,14 +494,14 @@ def WriteImportAssetScript(use20tab = False):
 		ImportScript += WriteImportMultiTask("SkeletalMesh")
 	if ExsitTypeInExportedAssets("Animation"):
 		ImportScript += WriteImportMultiTask("Animation")
-		
+
 	ImportScript += WriteImportPythonFooter()
 
 	ImportScript += "if len(ImportFailList) == 0:" + "\n"
 	ImportScript += "\t" + "return 'Assets imported with success !' " + "\n"
 	ImportScript += "else:" + "\n"
 	ImportScript += "\t" + "return 'Some asset(s) could not be imported.' " + "\n"
-	
+
 	OutImportScript = "def ImportAllAssets():" + "\n"
 	OutImportScript += WriteImportPythonHeadComment(use20tab, False)
 	OutImportScript += bfu_Utils.AddFrontEachLine(ImportScript, "\t")
