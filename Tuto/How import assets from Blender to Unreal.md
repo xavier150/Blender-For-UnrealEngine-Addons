@@ -8,6 +8,12 @@ Depending on the object type, the import parameters are not the same.
 - For animations assets untick Import Mesh and select you Skeleton in Skeleton
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocParametersByType.jpg">
 
+- For Alembic animations assets tick Merge Meshes
+- Set ImportType on Skeletal
+- Set FlipU on False and FlipV on True
+- Set Scale 100,-100,100 (xyz)
+- Set Rotation 90,0,0 (xyz)
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocParametersByType2.jpg">
 
 # Import assets in Unreal engine with UnrealEnginePython
 
