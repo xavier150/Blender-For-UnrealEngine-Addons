@@ -62,6 +62,8 @@ Alembic export and import can take a lot of time.
 1. Select the asset you want to export (Armature with child or Mesh) 
 2. Set the Export type property on "Export recursive"
 3. check ExportAsAlembic
+We must be sure that the animation was played at least once for bake cache. You can also use the command "bpy.ops.ptcache.bake_all()
+" for bake the physics 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocAlembic.jpg">
 
 # Marterial
