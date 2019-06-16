@@ -126,7 +126,29 @@ def WriteExportLog():
 		ExportLog += "\n"
 	
 	return ExportLog
+	
+	
+def WriteImportPythonHeadComment(use20tab = False, useSequencer = False):
 
+	scene = bpy.context.scene
+
+	#Comment
+	ImportScript = "#This script was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons" + "\n"
+	if useSequencer == True:
+		ImportScript += "#It will import into Unreal Engine all the assets of type StaticMesh, SkeletalMesh, Animation and Pose" + "\n"
+	else:
+		ImportScript += "#This script will import in unreal all camera in target sequencer" + "\n"
+	if use20tab == True:
+		ImportScript += "#The script must be used in Unreal Engine Editor with UnrealEnginePython : https://github.com/20tab/UnrealEnginePython" + "\n"
+	else:
+		ImportScript += "#The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python" + "\n"
+	if useSequencer == True:
+		ImportScript += "#Use this command : " + GetImportSequencerScriptCommand() + "\n"
+	else:
+		ImportScript += "#Use this command : " + GetImportAssetScriptCommand() + "\n"
+	ImportScript += "\n"
+	ImportScript += "\n"
+	return ImportScript
 				
 def WriteExportedAssetsDetail():
 	#Generate a config file for import assets in Ue4

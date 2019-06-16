@@ -954,3 +954,15 @@ def TryToCorrectPotentialError(errorIndex):
 		return "Corrected"
 	print("end correct, Error not found")
 	return "Correct fail"
+	
+	
+def AddFrontEachLine(ImportScript, text = "\t"):
+	
+	print("start")
+	NewImportScript = ""
+	text_splited = ImportScript.split('\n')
+	for line in text_splited:
+		NewImportScript += text + line + "\n"
+		
+	print("line: "+str(len(text_splited)))
+	return NewImportScript

@@ -32,19 +32,17 @@ from . import bfu_Utils
 importlib.reload(bfu_Utils)
 from .bfu_Utils import *
 
+from . import bfu_WriteText
+importlib.reload(bfu_WriteText)
+from .bfu_WriteText import *
+
 
 def WriteImportSequencerScript(use20tab = False):	
+	GetImportSequencerScriptCommand()
 	scene = bpy.context.scene
-	#Comment
-	ImportScript = "#This script was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons" + "\n"
-	ImportScript += "#This script will import in unreal all camera in target sequencer" + "\n"
-	ImportScript += "#The script must be used in Unreal Engine Editor with UnrealEnginePython : https://github.com/20tab/UnrealEnginePython" + "\n"
-	ImportScript += "#Use this command : " + GetImportSequencerScriptCommand() + "\n"
-	ImportScript += "\n"
-	ImportScript += "\n"
 	
 	#Import
-	ImportScript += "def CreateSequencer():" + "\n"	
+	ImportScript = "def CreateSequencer():" + "\n"	
 	ImportScript += "\t" + "import os.path" + "\n"
 	ImportScript += "\t" + "import time" + "\n"
 	
@@ -399,4 +397,7 @@ def WriteImportSequencerScript(use20tab = False):
 	ImportScript += "\t" + "return 'Sequencer created with success !' " + "\n"
 	ImportScript += "print(CreateSequencer())" + "\n"	
 	
-	return ImportScript
+	OutImportScript = WriteImportPythonHeadComment(use20tab, True)
+	OutImportScript += ImportScript#bfu_Utils.AddFrontEachLine(ImportScript, "\t")
+
+	return OutImportScript
