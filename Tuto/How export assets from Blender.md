@@ -78,8 +78,7 @@ Materials are not imported, you must create them in Unreal Engine
 
 # Armature and Skeleton Tree
 You can set the name what the amature should use once exported in Addon Preferences.
-If egal "Armature" Ue4 will remove the root bone but the animation will be 100 times smaller.
-This is produced because the first bone will always be a size of 100
+If egal "Armature" Ue4 will remove the root bone but the animation will be 100 times smaller. (This is produced because the first bone will always be a size of 100 in Skeleton but not in Animation.)
 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocSkeletonTree.jpg">
 
