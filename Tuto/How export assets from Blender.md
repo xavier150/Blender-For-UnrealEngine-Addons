@@ -57,7 +57,7 @@ For the NLA:
 2. In Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality.
 3. If you just want the NLAnimation set Action to export as Not exported and check the box Export Nla with your desired name
 
-# Alembic 
+# Alembic animation
 Alembic export and import can take a lot of time.
 1. Select the asset you want to export (Armature with child or Mesh) 
 2. Set the Export type property on "Export recursive"
@@ -74,6 +74,13 @@ Materials are not imported, you must create them in Unreal Engine
 3. If you use the import script set the Material Search Location with your desired search location
 4. If you d'ont use the import script you need when you import the Material Search Location in Material > Search Location, with your desired search location
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocMaterial.jpg">
+
+
+# Armature and Skeleton Tree
+You can set the name what the amature should use once exported in Addon Preferences.
+If egal "Armature" Ue4 will remove the root bone but the animation will be 100 times smaller.
+This is produced because the first bone will always be a size of 100
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocSkeletonTree.jpg">
 
 
 # Nomenclature 
