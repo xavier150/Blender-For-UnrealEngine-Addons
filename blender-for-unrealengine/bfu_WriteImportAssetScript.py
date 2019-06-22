@@ -152,7 +152,7 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 		):
 		pass
 	else:
-		return
+		return ImportScript
 
 	if asset.assetType == "Alembic":
 		FileType = "ABC"

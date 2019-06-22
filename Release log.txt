@@ -147,3 +147,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: CheckVertexGroupWeight does not detect if a VertexGroup is not used by a bone
 - Fixed: in 2.8 Mesh select error vertex don't work good
 - Fixed: In Unreal 22.2 the sequencer with imported fbx camera don't have transform. (Now the camera use AdditionalParameter file for import transform)
+
+== Rev 0.2.3b ==
+
+- Fixed: ImportAssetScript return error with animation
