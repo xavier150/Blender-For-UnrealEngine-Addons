@@ -29,4 +29,5 @@ If you would like to have the Add-on enabled every time you start Blender, click
 
 
 # Other
+About the next version: https://trello.com/c/P2hjPAdZ/38-blender-for-unreal-engine-addon-24
 If you want support me you can buy the addon here: https://blendermarket.com/products/blender-for-unreal-engine
