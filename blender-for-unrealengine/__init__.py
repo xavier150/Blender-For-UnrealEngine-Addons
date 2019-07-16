@@ -30,7 +30,7 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 2, 3, 1), #Rev 0.2.3b
+	'version': (0, 2, 3, 2), #Rev 0.2.3c
 	'blender': (2, 79, 0),
 	'location': 'View3D > Tool > Unreal Engine 4',
 	'warning': '',
@@ -851,7 +851,7 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 	bl_category = "Unreal Engine 4"
 
 
-	class BFU_MT_Nomenclatureresets(bpy.types.Menu):
+	class BFU_MT_NomenclaturePresets(bpy.types.Menu):
 		bl_label = 'My Presets'
 		preset_subdir = 'blender-for-unrealengine/nomenclature-presets'
 		preset_operator = 'script.execute_preset'
@@ -862,7 +862,7 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 	class BFU_OT_AddNomenclaturePreset(AddPresetBase, Operator):
 		bl_idname = 'object.add_preset'
 		bl_label = 'Add A preset'
-		preset_menu = 'BFU_MT_Nomenclatureresets'
+		preset_menu = 'BFU_MT_NomenclaturePresets'
 
 		# Common variable used for all preset values
 		preset_defines = [
@@ -941,35 +941,35 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 		name = "StaticMesh export file path",
 		description = "Choose a directory to export StaticMesh(s)",
 		maxlen = 512,
-		default = "//ExportedFbx\StaticMesh\\",
+		default = os.path.join("//","ExportedFbx","StaticMesh"),
 		subtype = 'DIR_PATH')
 
 	bpy.types.Scene.export_skeletal_file_path = bpy.props.StringProperty(
 		name = "SkeletalMesh export file path",
 		description = "Choose a directory to export SkeletalMesh(s)",
 		maxlen = 512,
-		default = "//ExportedFbx\SkeletalMesh\\",
+		default = os.path.join("//","ExportedFbx","SkeletalMesh"),
 		subtype = 'DIR_PATH')
 
 	bpy.types.Scene.export_alembic_file_path = bpy.props.StringProperty(
 		name = "Alembic export file path",
 		description = "Choose a directory to export Alembic(s)",
 		maxlen = 512,
-		default = "//ExportedFbx\Alembic\\",
+		default = os.path.join("//","ExportedFbx","Alembic"),
 		subtype = 'DIR_PATH')
 
 	bpy.types.Scene.export_camera_file_path = bpy.props.StringProperty(
 		name = "Camera export file path",
 		description = "Choose a directory to export Camera(s)",
 		maxlen = 512,
-		default = "//ExportedFbx\Sequencer\\",
+		default = os.path.join("//","ExportedFbx","Sequencer"),
 		subtype = 'DIR_PATH')
 
 	bpy.types.Scene.export_other_file_path = bpy.props.StringProperty(
 		name = "Other export file path",
 		description = "Choose a directory to export text file and other",
 		maxlen = 512,
-		default = "//ExportedFbx\\",
+		default = os.path.join("//","ExportedFbx"),
 		subtype = 'DIR_PATH')
 
 	#File name
@@ -998,7 +998,7 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 
 		#Presets
 		row = self.layout.row(align=True)
-		row.menu('BFU_MT_Nomenclatureresets', text='Presets')
+		row.menu('BFU_MT_NomenclaturePresets', text='Presets')
 		row.operator('object.add_preset', text='', icon='ZOOMIN')
 		row.operator('object.add_preset', text='', icon='ZOOMOUT').remove_active = True
 
@@ -1471,7 +1471,7 @@ classes = (
 	BFU_PT_CollisionsAndSockets.BFU_OT_ConvertToSkeletalSocketButton,
 
 	BFU_PT_Nomenclature,
-	BFU_PT_Nomenclature.BFU_MT_Nomenclatureresets,
+	BFU_PT_Nomenclature.BFU_MT_NomenclaturePresets,
 	BFU_PT_Nomenclature.BFU_OT_AddNomenclaturePreset,
 
 	BFU_PT_ImportScript,
