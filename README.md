@@ -15,7 +15,12 @@ You can see the tutorials and documentation here:
   - [How import assets from Blender to Unreal](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20import%20assets%20from%20Blender%20to%20Unreal.md)
 
 # Installation
-1. Download the latest release https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases
+1. Download addon :
+- [Rev 0.2.3c for Blender 2.8](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/download/v.0.2.3c/blender-for-unrealengin_2.8.zip) 
+- [Rev 0.2.3c for Blender 2.7](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/download/v.0.2.3c/blender-for-unrealengin_2.7.zip)
+
+Or previous versions : [Releases page](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases)
+
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/DownloadScreen1.jpg" width="600">
 
 2. Open User Preferences (Ctrl+Alt+U) and under Add-ons, click Install from File. Then navigate to the .zip file you downloaded and select it.
