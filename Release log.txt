@@ -151,3 +151,15 @@ It is now possible to force the duration of an animation according to the scene 
 == Rev 0.2.3b ==
 
 - Fixed: ImportAssetScript return error with animation
+
+== Rev 0.2.3c ==
+
+- Change: BFU_MT_Nomenclatureresets -> BFU_MT_NomenclaturePresets
+- Change: revertExportPath is now False by default
+- Fixed: Preset export paths are wrong in Linux
+
+== Rev 0.2.3d ==
+
+- Change: Export use now custom properties (Used for Metadata) You can deactivate in addon preference 
+- Fixed: bpy.ops.object.showasset() do error with skeletalMesh animation
+- Fixed: With Blender 2.7 Export camera do error (hide for 2.7, hide_viewport for 2.8)
