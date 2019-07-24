@@ -30,7 +30,7 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 2, 3, 2), #Rev 0.2.3c
+	'version': (0, 2, 3, 3), #Rev 0.2.3d
 	'blender': (2, 80, 0),
 	'location': 'View3D > UI > Unreal Engine 4',
 	'warning': '',
@@ -97,11 +97,17 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		description='Size of the socket when imported in Unreal Engine',
 		default=0.01,
 		)
+		
+	exportWithCustomProps : BoolProperty(
+		name='Export custom properties',
+		description='Process export with custom properties (Can be used for Metadata)',
+		default=False,
+		)
 
 	revertExportPath : BoolProperty(
 		name='Revert all export path at each export',
 		description='will remove the folder of the all export path at each export',
-		default=True,
+		default=False,
 		)
 
 	UseGeneratedScripts :  BoolProperty(
@@ -124,6 +130,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		col.prop(self, "skeletonRootBoneName")
 		col.prop(self, "StaticSocketsImportedSize")
 		col.prop(self, "SkeletalSocketsImportedSize")
+		col.prop(self, "exportWithCustomProps")
 		col.prop(self, "revertExportPath")
 		col.prop(self, "UseGeneratedScripts")
 		if self.UseGeneratedScripts == True:
@@ -1158,7 +1165,7 @@ class BFU_PT_Export(bpy.types.Panel):
 								action = asset.obj.NLAAnimName
 							else:
 								action = "..."
-							row.label(text="- ["+asset.obj.name+"] --> "+action+" ("+asset[2]+")")
+							row.label(text="- ["+asset.obj.name+"] --> "+action+" ("+asset.type+")")
 						else:
 							row.label(text="- "+asset.obj.name+" ("+asset.type+")")
 					else:
