@@ -38,6 +38,8 @@ def ExportSingleFbxAction(dirpath, filename, obj, targetAction, actionType):
 
 
 	scene = bpy.context.scene
+	addon_prefs = bpy.context.user_preferences.addons["blender-for-unrealengine"].preferences
+	
 	filename = ValidFilenameForUnreal(filename)
 	curr_time = time.process_time()
 	if obj.animation_data is None:
@@ -79,8 +81,9 @@ def ExportSingleFbxAction(dirpath, filename, obj, targetAction, actionType):
 		check_existing=False,
 		version='BIN7400',
 		use_selection=True,
-		global_scale=obj.exportGlobalScale,
+		global_scale=GetObjExportScale(obj),
 		object_types={'ARMATURE', 'MESH'},
+		use_custom_props=addon_prefs.exportWithCustomProps,
 		add_leaf_bones=False,
 		use_armature_deform_only=obj.exportDeformOnly,
 		bake_anim=True,
@@ -115,6 +118,8 @@ def ExportSingleFbxNLAAnim(dirpath, filename, obj):
 
 
 	scene = bpy.context.scene
+	addon_prefs = bpy.context.user_preferences.addons["blender-for-unrealengine"].preferences
+	
 	filename = ValidFilenameForUnreal(filename)
 	curr_time = time.process_time()
 
@@ -142,8 +147,9 @@ def ExportSingleFbxNLAAnim(dirpath, filename, obj):
 		check_existing=False,
 		version='BIN7400',
 		use_selection=True,
-		global_scale=obj.exportGlobalScale,
+		global_scale=GetObjExportScale(obj),
 		object_types={'ARMATURE', 'MESH'},
+		use_custom_props=addon_prefs.exportWithCustomProps,
 		add_leaf_bones=False,
 		use_armature_deform_only=obj.exportDeformOnly,
 		bake_anim=True,
@@ -196,7 +202,7 @@ def ExportSingleAlembicAnimation(dirpath, filename, obj):
 		check_existing=False,
 		selected=True,
 		triangulate=False,
-		#global_scale = obj.exportGlobalScale * 100 #don't work with Unreal
+		#global_scale = GetObjExportScale(obj) #don't work with Unreal
 		)
 
 	#obj.location = originalLoc #Resets previous object location
@@ -218,6 +224,7 @@ def ExportSingleFbxMesh(dirpath, filename, obj):
 
 	scene = bpy.context.scene
 	addon_prefs = bpy.context.user_preferences.addons["blender-for-unrealengine"].preferences
+	
 	filename = ValidFilenameForUnreal(filename)
 	curr_time = time.process_time()
 	if	bpy.ops.object.mode_set.poll():
@@ -254,8 +261,9 @@ def ExportSingleFbxMesh(dirpath, filename, obj):
 		check_existing=False,
 		version='BIN7400',
 		use_selection=True,
-		global_scale=obj.exportGlobalScale,
+		global_scale=GetObjExportScale(obj),
 		object_types=object_types,
+		use_custom_props=addon_prefs.exportWithCustomProps,
 		mesh_smooth_type="FACE",
 		add_leaf_bones=False,
 		use_armature_deform_only=obj.exportDeformOnly,
@@ -286,6 +294,8 @@ def ExportSingleFbxCamera(dirpath, filename, obj):
 	#Export single camera
 
 	scene = bpy.context.scene
+	addon_prefs = bpy.context.user_preferences.addons["blender-for-unrealengine"].preferences
+	
 	filename = ValidFilename(filename)
 	if obj.type != 'CAMERA':
 		return;
@@ -312,8 +322,9 @@ def ExportSingleFbxCamera(dirpath, filename, obj):
 		check_existing=False,
 		version='BIN7400',
 		use_selection=True,
-		global_scale=obj.exportGlobalScale,
+		global_scale=GetObjExportScale(obj),
 		object_types={'CAMERA'},
+		use_custom_props=addon_prefs.exportWithCustomProps,
 		add_leaf_bones=False,
 		use_armature_deform_only=obj.exportDeformOnly,
 		bake_anim=True,

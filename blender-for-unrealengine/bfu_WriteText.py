@@ -366,7 +366,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 	#Write Spawned keys
 	ImportScript += "[Spawned]" + "\n"
 	lastKeyValue = None
-	for key in getAllKeysByFcurves(obj,"hide_viewport",obj.hide_viewport, False):
+	for key in getAllKeysByFcurves(obj,"hide",obj.hide, False):
 		boolKey = (key[1] < 1) #Inversed for convert hide to spawn
 		if lastKeyValue is None:
 			ImportScript += str(key[0])+": "+str(boolKey) + "\n"

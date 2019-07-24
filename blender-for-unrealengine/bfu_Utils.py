@@ -337,6 +337,17 @@ def GetAnimSample(obj):
 	#return obj sample animation
 	#return 1000 #Debug
 	return obj.SampleAnimForExport
+	
+def GetObjExportScale(obj):
+	'''
+	#Exported root bone with "Armature" name are removed in Unreal so scale *100 d'ont work...
+	if GetAssetType(obj) == "SkeletalMesh":
+		addon_prefs = bpy.context.user_preferences.addons["blender-for-unrealengine"].preferences
+		if addon_prefs.skeletonRootBoneName == "Armature":
+			return obj.exportGlobalScale * 100
+	'''
+	return obj.exportGlobalScale
+	
 
 def RenameArmatureAsExportName(obj):
 	#Rename temporarily the Armature as DefaultArmature
