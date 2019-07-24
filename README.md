@@ -16,8 +16,8 @@ You can see the tutorials and documentation here:
 
 # Installation
 1. Download addon :
-- [Rev 0.2.3c for Blender 2.8](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/download/v.0.2.3c/blender-for-unrealengin_2.8.zip) 
-- [Rev 0.2.3c for Blender 2.7](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/download/v.0.2.3c/blender-for-unrealengin_2.7.zip)
+- [Rev 0.2.3d for Blender 2.8](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/download/v.0.2.3d/blender-for-unrealengin_2.8.zip) 
+- [Rev 0.2.3d for Blender 2.7](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/download/v.0.2.3d/blender-for-unrealengin_2.7.zip)
 
 Or previous versions : [Releases page](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases)
 
