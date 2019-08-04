@@ -117,8 +117,8 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		)
 
 	Use20TabScript : BoolProperty(
-		name='Genrate import script for 20Tab python intergration',
-		description='Genrate import script for 20Tab python intergration ( /!\ With vania python integration some features like StaticMesh Lod or SkeletalMesh Sockets integration do not work )',
+		name='Generate import script for 20Tab python intergration',
+		description='Generate import script for 20Tab python intergration ( /!\ With vania python integration some features like StaticMesh Lod or SkeletalMesh Sockets integration do not work )',
 		default=True,
 		)
 
