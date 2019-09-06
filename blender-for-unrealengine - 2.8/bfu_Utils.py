@@ -38,10 +38,15 @@ def GetAllobjectsByExportType(exportType):
 	return(targetObj)
 
 
-def GetAllCollisionAndSocketsObj():
+def GetAllCollisionAndSocketsObj(list =  None):
 	#Get any object that can be understood as a collision or a socket by unreal
 
-	colObjs = [obj for obj in bpy.context.scene.objects if
+	if list is not None:
+		objs = list 
+	else:
+		objs = bpy.context.scene.objects
+
+	colObjs = [obj for obj in objs if
 		fnmatch.fnmatchcase(obj.name, "UBX*") or
 		fnmatch.fnmatchcase(obj.name, "UCP*") or
 		fnmatch.fnmatchcase(obj.name, "USP*") or
@@ -50,13 +55,16 @@ def GetAllCollisionAndSocketsObj():
 	return colObjs
 
 
-def GetExportDesiredChilds(obj):
+def GetExportDesiredChilds(obj, d = False):
 	#Get only all child objects that must be exported with parent object
 
+	
+	
 	DesiredObj = []
 	for child in GetRecursiveChilds(obj):
 		if child.ExportEnum != "dont_export":
-			DesiredObj.append(child)
+				DesiredObj.append(child)
+			
 	return DesiredObj
 
 
@@ -132,8 +140,8 @@ def GetDesiredActionStartEndTime(obj, action):
 		startTime = obj.AnimCustomStartTime
 		endTime = obj.AnimCustomEndTime
 
-	if obj.AddOneAdditionalFramesAtTheEnd == True:
-		endTime += 1
+	startTime += obj.StartFramesOffset
+	endTime += obj.EndFramesOffset
 	return (startTime,endTime)
 
 
@@ -177,13 +185,34 @@ def CheckIsCollision(target):
 
 def SelectParentAndDesiredChilds(obj):
 	#Selects only all child objects that must be exported with parent object
-
+	selectedObjs = []
 	bpy.ops.object.select_all(action='DESELECT')
 	for selectObj in GetExportDesiredChilds(obj):
-		selectObj.select_set(True)
+		if selectObj.name in bpy.context.view_layer.objects:
+			if GetAssetType(obj) == "SkeletalMesh":
+				#With skeletal mesh the socket must be not exported, ue4 read it like a bone
+				if not fnmatch.fnmatchcase(selectObj.name, "SOCKET*"):
+					selectObj.select_set(True)
+					selectedObjs.append(selectObj)
+			else:
+				selectObj.select_set(True)
+				selectedObjs.append(selectObj)
 	obj.select_set(True)
+	selectedObjs.append(obj)
 	bpy.context.view_layer.objects.active = obj
-
+	return selectedObjs
+	
+def ApplyNeededModifierToSelect():
+	
+	activeObj = bpy.context.view_layer.objects.active
+	for obj in bpy.context.selected_objects:
+		for mod in [m for m in obj.modifiers if m.type != 'ARMATURE']:
+			bpy.context.view_layer.objects.active = obj
+			bpy.ops.object.modifier_apply(modifier = mod.name)
+			print("mod")
+			
+	bpy.context.view_layer.objects.active = activeObj
+	
 
 def GetFinalAssetToExport():
 	#Returns all assets that will be exported
@@ -538,9 +567,15 @@ def UpdateUe4Name(SubType, objList):
 							obj.name = GenerateUe4Name("SOCKET_"+obj.name)
 
 
-def UpdateNameHierarchy():
+def UpdateNameHierarchy(list =  None):
 #Updates hierarchy names
-	for obj in GetAllCollisionAndSocketsObj():
+	
+	if list is not None:
+		objs = list 
+	else:
+		objs = GetAllCollisionAndSocketsObj()
+		
+	for obj in objs:
 		if fnmatch.fnmatchcase(obj.name, "UBX*"):
 			UpdateUe4Name("Box", [obj])
 		if fnmatch.fnmatchcase(obj.name, "UCP*"):

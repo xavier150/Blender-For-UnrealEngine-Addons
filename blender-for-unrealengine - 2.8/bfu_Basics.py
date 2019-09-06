@@ -16,13 +16,42 @@
 #
 #======================= END GPL LICENSE BLOCK =============================
 
+import sys
 import bpy
 import os
 import string
 import shutil
 import bmesh
+import requests 
+import json
+import addon_utils
 from mathutils import Vector
 from mathutils import Quaternion
+
+def GetCurrentAddonRelase():
+	#addon_ = bpy.context.preferences.addons["blender-for-unrealengine"]
+	mod = sys.modules["blender-for-unrealengine"]
+	v = mod.bl_info.get('version')
+	letter = ""
+	if len(v) > 3:
+		if  v[3] == 1: letter = "a"
+		if  v[3] == 2: letter = "b"
+		if  v[3] == 3: letter = "c"
+		if  v[3] == 4: letter = "d"
+		if  v[3] == 5: letter = "e"
+		if  v[3] == 6: letter = "f"
+		
+	return "v."+str(v[0])+"."+str(v[1])+"."+str(v[2])+letter
+
+
+def GetGitHubLastRelaseVersion():
+	return "v.0.2.3d"
+	print("requests GitHub version")
+	URL = "https://api.github.com/repos/xavier150/Blender-For-UnrealEngine-Addons/releases/latest"
+	r = requests.get(url = URL)
+	jsonReturn = json.loads(r.text)
+	return jsonReturn["tag_name"]
+
 
 def ChecksRelationship(arrayA, arrayB):
 	#Checks if it exits an identical variable in two lists

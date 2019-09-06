@@ -97,11 +97,14 @@ def WriteImportPythonDef(use20tab = False):
 
 	ImportScript += "\t" + "Config.read(FileLoc)" + "\n"
 	ImportScript += "\t" + "Options = []" + "\n"
-	ImportScript += "\t" + 'for option in Config.options(OptionName):' + "\n"
-	ImportScript += "\t\t" + 'if (literal == True):' + "\n"
-	ImportScript += "\t\t\t" + 'Options.append(ast.literal_eval(Config.get(OptionName, option)))' + "\n"
-	ImportScript += "\t\t" + 'else:' + "\n"
-	ImportScript += "\t\t\t" + 'Options.append(Config.get(OptionName, option))' + "\n"
+	ImportScript += "\t" + 'if Config.has_section(OptionName):' + "\n"
+	ImportScript += "\t\t" + 'for option in Config.options(OptionName):' + "\n"
+	ImportScript += "\t\t\t" + 'if (literal == True):' + "\n"
+	ImportScript += "\t\t\t\t" + 'Options.append(ast.literal_eval(Config.get(OptionName, option)))' + "\n"
+	ImportScript += "\t\t\t" + 'else:' + "\n"
+	ImportScript += "\t\t\t\t" + 'Options.append(Config.get(OptionName, option))' + "\n"	
+	ImportScript += "\t" + 'else:' + "\n"
+	ImportScript += "\t\t" + 'print("/!\ Option: "+OptionName+" not found in file: "+FileLoc)' + "\n"
 	ImportScript += "\t" + "return Options" + "\n"
 	ImportScript += "\n"
 	ImportScript += "\n"
@@ -168,7 +171,7 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 	AdditionalParameterLoc = (os.path.join(asset.exportPath, GetObjExportFileName(asset.object,"_AdditionalParameter.ini")))
 
 
-	assetUseName = asset.assetName[:-4].replace(' ','_')
+	assetUseName = asset.assetName[:-4].replace(' ','_').replace('-','_')
 	ImportScript += "def CreateTask_"+ assetUseName + "():" + "\n"
 	################[ New import task ]################
 	ImportScript += "\t" + "################[ Import "+obj.name+" as "+asset.assetType+" type ]################" + "\n"

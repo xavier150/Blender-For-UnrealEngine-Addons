@@ -30,11 +30,11 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 2, 3, 3), #Rev 0.2.3d
+	'version': (0, 2, 4), #Rev 0.2.4
 	'blender': (2, 80, 0),
 	'location': 'View3D > UI > Unreal Engine 4',
 	'warning': '',
-	"wiki_url": "https://github.com/xavier150/blender-for-unrealengine-addons",
+	"wiki_url": "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md",
 	'tracker_url': '',
 	'support': 'COMMUNITY',
 	'category': 'Import-Export'}
@@ -44,13 +44,14 @@ import os
 import bpy
 import fnmatch
 import time
+
 from bpy.props import (
 		StringProperty,
 		BoolProperty,
 		EnumProperty,
 		IntProperty,
 		FloatProperty,
-		BoolVectorProperty,
+		FloatVectorProperty,
 		PointerProperty,
 		CollectionProperty,
 		)
@@ -102,6 +103,12 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		name='Export custom properties',
 		description='Process export with custom properties (Can be used for Metadata)',
 		default=False,
+		)	
+	
+	exportWithMetaData : BoolProperty(
+		name='Export meta data',
+		description='Process export with meta data',
+		default=False,
 		)
 
 	revertExportPath : BoolProperty(
@@ -119,7 +126,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 	Use20TabScript : BoolProperty(
 		name='Generate import script for 20Tab python intergration',
 		description='Generate import script for 20Tab python intergration ( /!\ With vania python integration some features like StaticMesh Lod or SkeletalMesh Sockets integration do not work )',
-		default=True,
+		default=False,
 		)
 
 
@@ -131,11 +138,17 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		col.prop(self, "StaticSocketsImportedSize")
 		col.prop(self, "SkeletalSocketsImportedSize")
 		col.prop(self, "exportWithCustomProps")
+		col.prop(self, "exportWithMetaData")
 		col.prop(self, "revertExportPath")
 		col.prop(self, "UseGeneratedScripts")
 		if self.UseGeneratedScripts == True:
 			col.prop(self, "Use20TabScript")
 
+
+
+releaseVersion = GetGitHubLastRelaseVersion()
+	
+	
 class BFU_PT_BlenderForUnreal(bpy.types.Panel):
 	#Unreal engine export panel
 
@@ -144,10 +157,39 @@ class BFU_PT_BlenderForUnreal(bpy.types.Panel):
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
+	
+	
+	class BFU_OT_OpenDocumentationPage(Operator):
+		bl_label = "Documentation"
+		bl_idname = "object.open_documentation_page"
+		bl_description = "Clic for open documentation page on GitHub"
+
+		def execute(self, context):		
+			os.system("start \"\" https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md")
+			return {'FINISHED'}
+			
+	class BFU_OT_NewReleaseInfo(Operator):
+		bl_label = "New release available !"
+		bl_idname = "object.new_release_info"
+		bl_description = "Clic for download latest release! (Your version: "+str(GetCurrentAddonRelase())+" Latest version "+str(releaseVersion)+")"
+			
+		def execute(self, context):		
+			os.system("start \"\" https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/latest")
+			return {'FINISHED'}
 
 	def draw(self, contex):
+	
+		
+		
 		layout =  self.layout
-		layout.label(text='Git hub and documentation: https://github.com/xavier150/Blender-For-UnrealEngine-Addons')
+		updateButton = layout.row()
+		if releaseVersion is not None:
+			if str(GetCurrentAddonRelase()) != str(releaseVersion):
+				updateButton.scale_y = 2.0
+				updateButton.operator("object.new_release_info", icon= "TIME")
+		docsButton = layout.row()
+		docsButton.operator("object.open_documentation_page", icon= "HELP")
+		
 
 
 class BFU_PT_ObjectProperties(bpy.types.Panel):
@@ -202,7 +244,7 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
 		description="Only write deforming bones (and non-deforming ones when they have deforming children)",
 		default=True
 		)
-
+		
 
 	def draw(self, context):
 
@@ -240,6 +282,9 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
 							AssetType2.prop(obj, "ForceStaticMesh") #Show asset type
 							if GetAssetType(obj) == "SkeletalMesh":
 								AssetType2.prop(obj, 'exportDeformOnly')
+						
+
+						
 		else:
 			layout.label(text='(No properties to show.)')
 
@@ -507,10 +552,16 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 			]
 		)
 
-	bpy.types.Object.AddOneAdditionalFramesAtTheEnd = BoolProperty(
-		name = "Additional end frame",
-		description = "If checked, the animation will have an additional frame at the end. This is recommended for the sequences but it is not recommended with the cycles",
-		default=False
+	bpy.types.Object.StartFramesOffset = IntProperty(
+		name = "Offset at start frame",
+		description = "Offset for the start frame.",
+		default=0
+	)
+
+	bpy.types.Object.EndFramesOffset = IntProperty(
+		name = "Offset at end frame",
+		description = "Offset for the end frame. +1 is recommended for the sequences, 0 is recommended for UnrealEngine cycles, -1 is recommended for Sketchfab cycles",
+		default=0
 	)
 
 	bpy.types.Object.AnimCustomStartTime = IntProperty(
@@ -623,7 +674,9 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 							ActionTimePropertyChild=ActionTimeProperty = layout.row()
 							ActionTimePropertyChild.prop(obj, 'AnimCustomStartTime')
 							ActionTimePropertyChild.prop(obj, 'AnimCustomEndTime')
-						ActionTimeProperty.prop(obj, 'AddOneAdditionalFramesAtTheEnd')
+						ActionTimeProperty.prop(obj, 'StartFramesOffset')
+						ActionTimeProperty.prop(obj, 'EndFramesOffset')
+						
 					else:
 						layout.label(text="Note: animation start/end use scene frames with the camera for the sequencer.")
 
@@ -681,6 +734,13 @@ class BFU_PT_AvancedObjectProperties(bpy.types.Panel):
 	bl_parent_id = "BFU_PT_BlenderForUnreal"
 
 
+	bpy.types.Object.exportGlobalScale = IntProperty(
+		name="Global scale",
+		description="Scale, change is not recommended with SkeletalMesh.",
+		default=1
+		)
+		
+	
 	bpy.types.Object.exportAxisForward = EnumProperty(
 		name="Axis Forward",
 		items=[
@@ -706,11 +766,58 @@ class BFU_PT_AvancedObjectProperties(bpy.types.Panel):
 			],
 		default='Y',
 		)
+		
+	bpy.types.Object.exportPrimaryBaneAxis = EnumProperty(
+		name="Primary Axis Bone",
+		items=[
+			('X', "X", ""),
+			('Y', "Y", ""),
+			('Z', "Z", ""),
+			('-X', "-X", ""),
+			('-Y', "-Y", ""),
+			('-Z', "-Z", ""),
+			],
+		default='Y',
+		)
 
-	bpy.types.Object.exportGlobalScale = IntProperty(
-		name="Global scale",
-		description="Scale, change is not recommended with SkeletalMesh.",
-		default=1
+	bpy.types.Object.exporSecondaryBoneAxis = EnumProperty(
+		name="Secondary Axis Bone",
+		items=[
+			('X', "X", ""),
+			('Y', "Y", ""),
+			('Z', "Z", ""),
+			('-X', "-X", ""),
+			('-Y', "-Y", ""),
+			('-Z', "-Z", ""),
+			],
+		default='X',
+		)
+		
+	bpy.types.Object.MoveToCenterForExport = BoolProperty(
+		name="Move to center",
+		description="If true use object origin else use scene origin. | If true the mesh will be moved to the center of the scene for export. (This is used so that the origin of the fbx file is the same as the mesh in blender)",
+		default=True
+		)
+
+		
+	bpy.types.Object.RotateToZeroForExport = BoolProperty(
+		name="Rotate to zero",
+		description="If true use object rotation else use scene rotation. | If true the mesh will use zero rotation for export.",
+		default=False
+		)	
+		
+	bpy.types.Object.AdditionalLocationForExport = FloatVectorProperty(
+		name="Additional location",
+		description="This will add a additional absolute rotation to the mesh",
+		subtype="TRANSLATION",
+		default=(0,0,0)
+		)	
+	
+	bpy.types.Object.AdditionalRotationForExport = FloatVectorProperty(
+		name="Additional rotation",
+		description="This will add a additional absolute rotation to the mesh",
+		subtype="EULER",
+		default=(0,0,0)
 		)
 
 	def draw(self, context):
@@ -719,10 +826,22 @@ class BFU_PT_AvancedObjectProperties(bpy.types.Panel):
 		obj = context.object
 		if obj is not None:
 			if obj.ExportEnum == "export_recursive":
+				
+				transformProp = layout.column()
+				if GetAssetType(obj) != "Alembic":
+					transformProp.prop(obj, "MoveToCenterForExport")
+					transformProp.prop(obj, "RotateToZeroForExport")
+					transformProp.prop(obj, "AdditionalLocationForExport")
+					transformProp.prop(obj, "AdditionalRotationForExport")
+					transformProp.prop(obj, 'exportGlobalScale')
+				
 				AxisProperty = layout.column()
-				AxisProperty.prop(obj, 'exportGlobalScale')
 				AxisProperty.prop(obj, 'exportAxisForward')
-				AxisProperty.prop(obj, 'exportAxisUp')
+				AxisProperty.prop(obj, 'exportAxisUp')		
+				if GetAssetType(obj) == "SkeletalMesh":
+					BoneAxisProperty = layout.column()
+					BoneAxisProperty.prop(obj, 'exportPrimaryBaneAxis')
+					BoneAxisProperty.prop(obj, 'exporSecondaryBoneAxis')
 		else:
 			layout.label(text='(No properties to show.)')
 
@@ -1319,7 +1438,7 @@ class BFU_PT_Export(bpy.types.Panel):
 						print("")
 						print("========================= ... =========================")
 					else:
-						self.report({'WARNING'}, "Not found assets. with \"Export and child\" properties.")
+						self.report({'WARNING'}, "Not found assets with \"Export and child\" properties.")
 				else:
 					self.report({'WARNING'}, "Please save this blend file before export")
 			else:
@@ -1376,6 +1495,12 @@ class BFU_PT_Export(bpy.types.Panel):
 		description = "Check mark to write import sequencer script file",
 		default = True
 		)
+		
+	bpy.types.Scene.text_AdditionalData = bpy.props.BoolProperty(
+		name = "Additional data",
+		description = "Check mark to write additional data like parameter or anim tracks",
+		default = True
+		)
 
 	#exportProperty
 	bpy.types.Scene.export_ExportOnlySelected = bpy.props.BoolProperty(
@@ -1387,6 +1512,7 @@ class BFU_PT_Export(bpy.types.Panel):
 
 	def draw(self, context):
 		scn = context.scene
+		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 
 		#Categories :
 		layout = self.layout
@@ -1408,6 +1534,8 @@ class BFU_PT_Export(bpy.types.Panel):
 		FileCol.prop(scn, 'text_ExportLog')
 		FileCol.prop(scn, 'text_ImportAssetScript')
 		FileCol.prop(scn, 'text_ImportSequenceScript')
+		if addon_prefs.UseGeneratedScripts == True:
+			FileCol.prop(scn, 'text_AdditionalData')
 
 
 		#Feedback info :
@@ -1483,6 +1611,9 @@ class BFU_PT_Clipboard(bpy.types.Panel):
 classes = (
 	BFU_AP_AddonPreferences,
 	BFU_PT_BlenderForUnreal,
+	BFU_PT_BlenderForUnreal.BFU_OT_OpenDocumentationPage,
+	BFU_PT_BlenderForUnreal.BFU_OT_NewReleaseInfo,
+	
 	BFU_PT_ObjectProperties,
 	BFU_PT_ObjectImportProperties,
 
