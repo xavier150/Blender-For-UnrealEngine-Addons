@@ -160,6 +160,20 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.2.3d ==
 
-- Change: Export use now custom properties (Used for Metadata) You can deactivate in addon preference 
+- Change: Export can use custom properties. (Used for Metadata) You can activate in addon preference.
 - Fixed: bpy.ops.object.showasset() do error with skeletalMesh animation
 - Fixed: With Blender 2.7 Export camera do error (hide for 2.7, hide_viewport for 2.8)
+
+== Rev 0.2.4 ==
+Empty export for Collection with proxy mesh
+
+- New: Button for open documentation
+- New: Button open last release page (GitHub)
+- New: You can chose export with scene origin or object origin
+- New: You can chose export with scene rotation or object rotation
+- New: You can add additional location to asset for export
+- New: You can add additional rotation to asset for export
+- Change: AddOneAdditionalFramesAtTheEnd remplaced by StartFramesOffset and EndFramesOffset
+- Change: Export can use MetaData. You can activate in addon preference.
+- Change: It is now possible not to write the additional parameter, (.ini files)
+- Fixed: invalid syntax on ImportAssetScript.py if asset name use "-"
