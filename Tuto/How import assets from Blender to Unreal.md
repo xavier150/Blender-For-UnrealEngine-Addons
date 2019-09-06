@@ -57,3 +57,4 @@ Note: since Rev 0.2.3 You can now use vania python but several features do not w
 1. In Blender set Use20TabScript on False in addon preferences. 
 2. In Unreal enabled Pyton Editor Script Plugin, Editor Scripting Utilities and Sequencer Scripting.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocVaniaPython.jpg">
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocVaniaPythonUseCmd.jpg">
