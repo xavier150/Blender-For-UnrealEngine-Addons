@@ -390,10 +390,16 @@ def WriteImportSequencerScript(use20tab = False):
 	ImportScript += "\t\t" + "print(cam[0])" + "\n"
 	ImportScript += "\t" + "\n"
 	ImportScript += "\t" + "print('=========================')" + "\n"
+	
+		
+	ImportScript += "#Select and open seq in content browser" + "\n"
+	
 	if use20tab == True:
 		ImportScript += "\t" + "seq.sequencer_changed(True)" + "\n"
+		pass #sync_browser_to_objects
 	else:
 		ImportScript += "\t" + "unreal.AssetToolsHelpers.get_asset_tools().open_editor_for_assets([unreal.load_asset(seqPath+'/'+seqName.replace('.',''))])" + "\n"
+		ImportScript += "\t" + "unreal.EditorAssetLibrary.sync_browser_to_objects([seqPath+'/'+seqName.replace('.','')])" + "\n"
 	ImportScript += "\t" + "return 'Sequencer created with success !' " + "\n"
 	ImportScript += "print(CreateSequencer())" + "\n"
 

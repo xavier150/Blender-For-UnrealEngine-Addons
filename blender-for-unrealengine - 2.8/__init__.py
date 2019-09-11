@@ -126,7 +126,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 	Use20TabScript : BoolProperty(
 		name='Generate import script for 20Tab python intergration',
 		description='Generate import script for 20Tab python intergration ( /!\ With vania python integration some features like StaticMesh Lod or SkeletalMesh Sockets integration do not work )',
-		default=False,
+		default=True,
 		)
 
 
@@ -157,6 +157,73 @@ class BFU_PT_BlenderForUnreal(bpy.types.Panel):
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
+	
+	class BFU_MT_ObjectGlobalPropertiesPresets(bpy.types.Menu):
+		bl_label = 'Global Properties Presets'
+		preset_subdir = 'blender-for-unrealengine/global-properties-presets'
+		preset_operator = 'script.execute_preset'
+		draw = bpy.types.Menu.draw_preset
+		
+	from bl_operators.presets import AddPresetBase
+	
+	class BFU_OT_AddObjectGlobalPropertiesPreset(AddPresetBase, Operator):
+		bl_idname = 'object.add_globalproperties_preset'
+		bl_label = 'Add or remove a preset for Global properties'
+		bl_description = 'Add or remove a preset for Global properties'
+		preset_menu = 'BFU_MT_ObjectGlobalPropertiesPresets'
+
+		# Common variable used for all preset values
+		preset_defines = [
+							'obj = bpy.context.object',
+							'scene = bpy.context.scene'
+						 ]
+
+		# Properties to store in the preset
+		preset_values = [
+							'obj.exportFolderName',
+							'obj.ExportAsAlembic',
+							'obj.ExportAsLod',
+							'obj.ForceStaticMesh',
+							'obj.exportDeformOnly',
+							'obj.Ue4Lod1',
+							'obj.Ue4Lod2',
+							'obj.Ue4Lod3',
+							'obj.Ue4Lod4',
+							'obj.Ue4Lod5',
+							'obj.CreatePhysicsAsset',
+							'obj.UseStaticMeshLODGroup',
+							'obj.StaticMeshLODGroup',
+							'obj.UseStaticMeshLightMapRes',
+							'obj.StaticMeshLightMapRes',
+							'obj.GenerateLightmapUVs',
+							'obj.AutoGenerateCollision',
+							'obj.MaterialSearchLocation',
+							'obj.CollisionTraceFlag',
+							'obj.exportActionEnum',
+							'obj.active_ObjectAction',
+							'obj.PrefixNameToExport',
+							'obj.AnimStartEndTimeEnum',
+							'obj.StartFramesOffset',
+							'obj.EndFramesOffset',
+							'obj.AnimCustomStartTime',
+							'obj.AnimCustomEndTime',
+							'obj.SampleAnimForExport',
+							'obj.SimplifyAnimForExport',
+							'obj.ExportNLA',
+							'obj.NLAAnimName',
+							'obj.exportGlobalScale',
+							'obj.exportAxisForward',
+							'obj.exportAxisUp',
+							'obj.exportPrimaryBaneAxis',
+							'obj.exporSecondaryBoneAxis',
+							'obj.MoveToCenterForExport',
+							'obj.RotateToZeroForExport',
+							'obj.AdditionalLocationForExport',
+							'obj.AdditionalRotationForExport',
+						]
+
+		# Directory to store the presets
+		preset_subdir = 'blender-for-unrealengine/global-properties-presets'
 	
 	
 	class BFU_OT_OpenDocumentationPage(Operator):
@@ -201,7 +268,6 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
 	bl_parent_id = "BFU_PT_BlenderForUnreal"
-
 
 	bpy.types.Object.ExportEnum = EnumProperty(
 		name = "Export type",
@@ -263,6 +329,12 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
 			ExportType.prop(obj, 'ExportEnum')
 
 			if obj.ExportEnum == "export_recursive":
+			
+				row = self.layout.row(align=True)
+				row.menu('BFU_MT_ObjectGlobalPropertiesPresets', text='Global Properties Presets')
+				row.operator('object.add_globalproperties_preset', text='', icon='ADD')
+				row.operator('object.add_globalproperties_preset', text='', icon='REMOVE').remove_active = True
+			
 				folderNameProperty = layout.column()
 				folderNameProperty.prop(obj, 'exportFolderName', icon='FILE_FOLDER')
 
@@ -424,6 +496,7 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 			if obj is not None:
 				if obj.ExportEnum == "export_recursive":
 
+					
 					#Lod selection
 					if obj.ExportAsLod == False:
 						if GetAssetType(obj) == "StaticMesh" or GetAssetType(obj) == "SkeletalMesh":
@@ -448,7 +521,9 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 							StaticMeshLODGroupChild = StaticMeshLODGroup.column()
 							StaticMeshLODGroupChild.enabled = obj.UseStaticMeshLODGroup
 							StaticMeshLODGroupChild.prop(obj, 'StaticMeshLODGroup')
-							StaticMeshLODGroupChild.prop(obj, 'CollisionTraceFlag')
+						
+						StaticMeshCollisionTraceFlag = layout.row()
+						StaticMeshCollisionTraceFlag.prop(obj, 'CollisionTraceFlag')
 
 						StaticMeshLightMapRes = layout.row()
 						StaticMeshLightMapRes.prop(obj, 'UseStaticMeshLightMapRes', text="")
@@ -1001,7 +1076,7 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 
 
 	class BFU_MT_NomenclaturePresets(bpy.types.Menu):
-		bl_label = 'My Presets'
+		bl_label = 'Nomenclature Presets'
 		preset_subdir = 'blender-for-unrealengine/nomenclature-presets'
 		preset_operator = 'script.execute_preset'
 		draw = bpy.types.Menu.draw_preset
@@ -1009,8 +1084,9 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 	from bl_operators.presets import AddPresetBase
 
 	class BFU_OT_AddNomenclaturePreset(AddPresetBase, Operator):
-		bl_idname = 'object.add_preset'
-		bl_label = 'Add A preset'
+		bl_idname = 'object.add_nomenclature_preset'
+		bl_label = 'Add or remove a preset for Nomenclature'
+		bl_description = 'Add or remove a preset for Nomenclature'
 		preset_menu = 'BFU_MT_NomenclaturePresets'
 
 		# Common variable used for all preset values
@@ -1147,9 +1223,9 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 
 		#Presets
 		row = self.layout.row(align=True)
-		row.menu('BFU_MT_NomenclaturePresets', text='Presets')
-		row.operator('object.add_preset', text='', icon='ADD')
-		row.operator('object.add_preset', text='', icon='REMOVE').remove_active = True
+		row.menu('BFU_MT_NomenclaturePresets', text='Nomenclature Presets')
+		row.operator('object.add_nomenclature_preset', text='', icon='ADD')
+		row.operator('object.add_nomenclature_preset', text='', icon='REMOVE').remove_active = True
 
 		#Prefix
 		propsPrefix = self.layout.row()
@@ -1611,6 +1687,8 @@ class BFU_PT_Clipboard(bpy.types.Panel):
 classes = (
 	BFU_AP_AddonPreferences,
 	BFU_PT_BlenderForUnreal,
+	BFU_PT_BlenderForUnreal.BFU_MT_ObjectGlobalPropertiesPresets,
+	BFU_PT_BlenderForUnreal.BFU_OT_AddObjectGlobalPropertiesPreset,
 	BFU_PT_BlenderForUnreal.BFU_OT_OpenDocumentationPage,
 	BFU_PT_BlenderForUnreal.BFU_OT_NewReleaseInfo,
 	

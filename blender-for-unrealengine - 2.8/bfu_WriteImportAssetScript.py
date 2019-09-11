@@ -65,6 +65,8 @@ def WriteImportPythonHeader(use20tab = False):
 		ImportScript += "import configparser" + "\n"
 	else:
 		ImportScript += "import ConfigParser" + "\n"
+	print(use20tab)
+	
 	ImportScript += "import ast" + "\n"
 	if use20tab == True:
 		ImportScript += "import unreal_engine as ue" + "\n"
@@ -111,7 +113,7 @@ def WriteImportPythonDef(use20tab = False):
 
 	return ImportScript
 
-def WriteImportPythonFooter():
+def WriteImportPythonFooter(use20tab = False):
 
 	#import result
 	ImportScript = ""
@@ -139,6 +141,17 @@ def WriteImportPythonFooter():
 	ImportScript += "for error in ImportFailList:" + "\n"
 	ImportScript += "\t" + "print(error)" + "\n"
 	ImportScript += "\n"
+	
+	ImportScript += "#Select asset(s) in content browser" + "\n"
+	ImportScript += "PathList = []" + "\n"
+	ImportScript += "for asset in (StaticMesh_ImportedList + SkeletalMesh_ImportedList + Alembic_ImportedList + Animation_ImportedList):" + "\n"
+	ImportScript += "\t" + "PathList.append(asset.get_path_name())" + "\n"
+	if use20tab == True:
+		pass #sync_browser_to_objects
+	else:
+		ImportScript += "unreal.EditorAssetLibrary.sync_browser_to_objects(PathList)" + "\n"
+	ImportScript += "\n"
+	
 	ImportScript += "print('=========================')" + "\n"
 	return ImportScript
 
@@ -498,7 +511,7 @@ def WriteImportAssetScript(use20tab = False):
 	if ExsitTypeInExportedAssets("Animation"):
 		ImportScript += WriteImportMultiTask("Animation")
 
-	ImportScript += WriteImportPythonFooter()
+	ImportScript += WriteImportPythonFooter(use20tab)
 
 	ImportScript += "if len(ImportFailList) == 0:" + "\n"
 	ImportScript += "\t" + "return 'Assets imported with success !' " + "\n"

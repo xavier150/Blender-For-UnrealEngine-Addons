@@ -537,6 +537,10 @@ def PrepareAndSaveDataForExport():
 	copyScene = bpy.context.scene.copy()
 	copyScene.name = "ue4-export_Temp"
 	bpy.context.window.scene = copyScene
+	UserActive = bpy.context.active_object #Save current active object
+	if UserActive and UserActive.mode != 'OBJECT' and bpy.ops.object.mode_set.poll():
+		UserMode = UserActive.mode #Save current mode
+		bpy.ops.object.mode_set(mode='OBJECT')
 	
 	if addon_prefs.revertExportPath == True:
 		RemoveFolderTree(bpy.path.abspath(scene.export_static_file_path))
