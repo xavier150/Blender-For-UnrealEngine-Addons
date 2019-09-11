@@ -176,4 +176,6 @@ Empty export for Collection with proxy mesh
 - Change: AddOneAdditionalFramesAtTheEnd remplaced by StartFramesOffset and EndFramesOffset
 - Change: Export can use MetaData. You can activate in addon preference.
 - Change: It is now possible not to write the additional parameter, (.ini files)
+- Change: Import script sync the UE4 Content Browser to the imported asset (Vania python only)
 - Fixed: invalid syntax on ImportAssetScript.py if asset name use "-"
+- Fixed: CollisionTraceFlag can't be set if UseStaticMeshLODGroup is False
