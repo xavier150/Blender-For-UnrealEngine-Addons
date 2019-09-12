@@ -165,7 +165,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: With Blender 2.7 Export camera do error (hide for 2.7, hide_viewport for 2.8)
 
 == Rev 0.2.4 ==
-Empty export for Collection with proxy mesh
+
 
 - New: Button for open documentation
 - New: Button open last release page (GitHub)
@@ -173,9 +173,11 @@ Empty export for Collection with proxy mesh
 - New: You can chose export with scene rotation or object rotation
 - New: You can add additional location to asset for export
 - New: You can add additional rotation to asset for export
+- New: Export use now a copy of the mesh for apply modifier, instance groups and collections
 - Change: AddOneAdditionalFramesAtTheEnd remplaced by StartFramesOffset and EndFramesOffset
 - Change: Export can use MetaData. You can activate in addon preference.
 - Change: It is now possible not to write the additional parameter, (.ini files)
 - Change: Import script sync the UE4 Content Browser to the imported asset (Vania python only)
 - Fixed: invalid syntax on ImportAssetScript.py if asset name use "-"
 - Fixed: CollisionTraceFlag can't be set if UseStaticMeshLODGroup is False
+- Fixed: Export recursive object can be wrong placed to the scene center if is child of a other object 
