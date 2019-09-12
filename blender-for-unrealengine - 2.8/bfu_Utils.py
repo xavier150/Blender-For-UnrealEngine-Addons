@@ -19,6 +19,7 @@
 
 import bpy
 import fnmatch
+import mathutils
 
 import importlib
 from . import bfu_Basics
@@ -213,7 +214,35 @@ def ApplyNeededModifierToSelect():
 			
 	bpy.context.view_layer.objects.active = activeObj
 	
+def ApplyExportTransform(obj):
+	newMatrix = obj.matrix_world @ mathutils.Matrix.Translation((0,0,0))
+	saveScale = obj.scale * 1
 
+	#Ref
+
+	
+	if obj.MoveToCenterForExport == True: #Moves object to the center of the scene for export	
+		mat_trans = mathutils.Matrix.Translation((0,0,0))
+		mat_rot = newMatrix.to_quaternion().to_matrix()
+		newMatrix = mat_trans @ mat_rot.to_4x4()
+
+	if obj.RotateToZeroForExport == True: #Turn object to the center of the scene for export
+		mat_trans = mathutils.Matrix.Translation(newMatrix.to_translation())
+		mat_rot = mathutils.Matrix.Rotation(0, 4, 'X')
+		newMatrix = mat_trans @ mat_rot
+
+	
+	
+	eul = obj.AdditionalRotationForExport
+	loc = obj.AdditionalLocationForExport
+	
+	mat_rot = eul.to_matrix()
+	mat_loc = mathutils.Matrix.Translation(loc)
+	AddMat = mat_loc @ mat_rot.to_4x4()
+	
+	obj.matrix_world = newMatrix @ AddMat
+	obj.scale = saveScale
+		
 def GetFinalAssetToExport():
 	#Returns all assets that will be exported
 

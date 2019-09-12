@@ -20,7 +20,6 @@
 import bpy
 import time
 import math
-import mathutils
 
 import importlib
 from . import bfu_WriteText
@@ -54,19 +53,9 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	if	bpy.ops.object.mode_set.poll():
 		bpy.ops.object.mode_set(mode='OBJECT')
 		
-	if obj.MoveToCenterForExport == True:
-		originalLoc = Vector((0,0,0))
-		originalLoc = originalLoc + obj.location #Save object location
-		obj.location = (0,0,0) #Moves object to the center of the scene for export
-	if obj.RotateToZeroForExport == True:
-		originalRot = Vector((0,0,0))
-		originalRot = originalRot + obj.rotation_euler #Save object location
-		originalQuat = Matrix((1,0,0,0))
-		originalQuat = originalQuat + obj.rotation_quaternion #Save object location
-		obj.rotation_euler = (0,0,0)
-		obj.rotation_quaternion = (1,0,0,0)
 
 	SelectParentAndDesiredChilds(obj)
+	ApplyExportTransform(obj)
 
 	ResetArmaturePose(obj)
 	if (scene.is_nla_tweakmode == True):
@@ -105,7 +94,7 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 		secondary_bone_axis = obj.exporSecondaryBoneAxis,	
 		axis_forward = obj.exportAxisForward,
 		axis_up = obj.exportAxisUp,
-		bake_space_transform = True
+		bake_space_transform = False
 		)
 
 	#Reset armature name
@@ -142,22 +131,8 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 	filename = ValidFilenameForUnreal(filename)
 	curr_time = time.process_time()
 
-	if	bpy.ops.object.mode_set.poll():
-		bpy.ops.object.mode_set(mode='OBJECT')
-	
-	if obj.MoveToCenterForExport == True:
-		originalLoc = Vector((0,0,0))
-		originalLoc = originalLoc + obj.location #Save object location
-		obj.location = (0,0,0) #Moves object to the center of the scene for export
-	if obj.RotateToZeroForExport == True:
-		originalRot = Vector((0,0,0))
-		originalRot = originalRot + obj.rotation_euler #Save object location
-		originalQuat = Matrix((1,0,0,0))
-		originalQuat = originalQuat + obj.rotation_quaternion #Save object location
-		obj.rotation_euler = (0,0,0)
-		obj.rotation_quaternion = (1,0,0,0)
-
 	SelectParentAndDesiredChilds(obj)
+	ApplyExportTransform(obj)
 
 	ResetArmaturePose(obj)
 	scene.frame_start += obj.StartFramesOffset
@@ -189,7 +164,7 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 		secondary_bone_axis = obj.exporSecondaryBoneAxis,	
 		axis_forward = obj.exportAxisForward,
 		axis_up = obj.exportAxisUp,
-		bake_space_transform = True
+		bake_space_transform = False
 		)
 		
 	if obj.MoveToCenterForExport == True:
@@ -262,31 +237,34 @@ def ExportSingleFbxMesh(originalScene, dirpath, filename, obj):
 	filename = ValidFilenameForUnreal(filename)
 	curr_time = time.process_time()
 	
-	SelectParentAndDesiredChilds(obj)
-	bpy.ops.object.duplicate()
-	ApplyNeededModifierToSelect()
-	UpdateNameHierarchy(GetAllCollisionAndSocketsObj(bpy.context.selected_objects))
-	
-	
 	if	bpy.ops.object.mode_set.poll():
 		bpy.ops.object.mode_set(mode = 'OBJECT')
+	
+	SelectParentAndDesiredChilds(obj)
+	bpy.ops.object.duplicate()
+	currentObjName = []
+	for objScene in scene.objects:
+		currentObjName.append(objScene.name)
 		
+	bpy.ops.object.duplicates_make_real(use_base_parent=True, use_hierarchy=True)
+	
+	for objScene in scene.objects:
+		if objScene.name not in currentObjName:
+			objScene.select_set(True)
+			pass
+			
+	for objScene in bpy.context.selected_objects:
+		if objScene.data is not None:
+			objScene.data = objScene.data.copy()
+	
+	
+	
+	ApplyNeededModifierToSelect()
+	UpdateNameHierarchy(GetAllCollisionAndSocketsObj(bpy.context.selected_objects))
 	active = bpy.context.view_layer.objects.active
-	if obj.MoveToCenterForExport == True:
-		active.location = (0,0,0) #Moves object to the center of the scene for export	
-		
-	if obj.RotateToZeroForExport == True:
-		active.rotation_euler = (0,0,0)
-		active.rotation_quaternion = (1,0,0,0)
-		
-	eul = obj.AdditionalRotationForExport
-	loc = obj.AdditionalLocationForExport
 	
-	mat_rot = eul.to_matrix()
-	mat_loc = mathutils.Matrix.Translation(loc)
-	mat = mat_loc @ mat_rot.to_4x4()
+	ApplyExportTransform(active)
 	
-	active.matrix_world  = active.matrix_world  @ mat
 
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)
@@ -326,17 +304,16 @@ def ExportSingleFbxMesh(originalScene, dirpath, filename, obj):
 		secondary_bone_axis = active.exporSecondaryBoneAxis,	
 		axis_forward = active.exportAxisForward,
 		axis_up = active.exportAxisUp,
-		bake_space_transform = True
+		bake_space_transform = False
 		)
-		
-	print(obj.exportAxisForward)
-	print(obj.exportAxisUp)
 
 	#Reset armature name
 	if meshType == "SkeletalMesh":
 		ResetArmatureName(active, oldArmatureName)
 		
+	
 	bpy.ops.object.delete()
+	
 	exportTime = time.process_time()-curr_time
 
 	MyAsset = originalScene.UnrealExportedAssetsList.add()
@@ -395,7 +372,7 @@ def ExportSingleFbxCamera(originalScene, dirpath, filename, obj):
 		secondary_bone_axis = obj.exporSecondaryBoneAxis,	
 		axis_forward = obj.exportAxisForward,
 		axis_up = obj.exportAxisUp,
-		bake_space_transform = True
+		bake_space_transform = False
 		)
 
 	#Reset camera scale

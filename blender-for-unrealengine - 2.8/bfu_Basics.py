@@ -45,7 +45,7 @@ def GetCurrentAddonRelase():
 
 
 def GetGitHubLastRelaseVersion():
-	return "v.0.2.3d"
+	#return "v.0.2.4"
 	print("requests GitHub version")
 	URL = "https://api.github.com/repos/xavier150/Blender-For-UnrealEngine-Addons/releases/latest"
 	r = requests.get(url = URL)
