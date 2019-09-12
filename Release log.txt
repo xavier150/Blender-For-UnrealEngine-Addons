@@ -173,6 +173,7 @@ It is now possible to force the duration of an animation according to the scene 
 - New: You can chose export with scene rotation or object rotation
 - New: You can add additional location to asset for export
 - New: You can add additional rotation to asset for export
+- New: You can chose bone axis with skeletalMesh
 - New: Export use now a copy of the mesh for apply modifier, instance groups and collections
 - New: You can chose a presets for object global properties
 - Change: AddOneAdditionalFramesAtTheEnd remplaced by StartFramesOffset and EndFramesOffset
