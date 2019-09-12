@@ -57,6 +57,7 @@ For the NLA:
 2. In Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality.
 3. If you just want the NLAnimation set Action to export as Not exported and check the box Export Nla with your desired name
 
+
 # Alembic animation
 Alembic export and import can take a lot of time.
 1. Select the asset you want to export (Armature with child or Mesh) 
@@ -66,6 +67,12 @@ Alembic export and import can take a lot of time.
 We must be sure that the animation was played at least once for bake cache. You can also use the command "bpy.ops.ptcache.bake_all()
 " for bake the physics 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocAlembic.jpg">
+
+
+# Change export transform
+You can set specific transform options at export in Avanced object properties panel
+Example video: https://youtu.be/rbW5NcyNoK0
+
 
 # Marterial
 Materials are not imported, you must create them in Unreal Engine
