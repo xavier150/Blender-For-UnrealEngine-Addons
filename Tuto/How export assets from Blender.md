@@ -1,12 +1,12 @@
-# Set asset(s) to export
-We will see how to define the assets to export
+# Prepare asset(s) to export
+We will see how to prepare the assets to export.
 
-1. Open Tool panel in 3D View (T), enlarge it, open Unreal engine 4 main panel and go in Object Properties panel
+1. Open Tool panel in 3D View (T), enlarge it, open Unreal engine 4 main panel and go in Object Properties panel.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocScreen1.jpg">
 
 2. Select the asset you want to export and set the Export type property to "Export recursive". Now repeat the task for all the objects you want to export:
-	- Each objects that has this property will export with all its children in a Fbx file. If you don't want to export the child set "Not exported" for Export type in Object Properties of the child, else keep "Auto".
-	- The center the scene of the Fbx file will be equal to the origin point location of the object in blender. The position of the object in the Blender scene does not matter.
+	- Each objects having this property will export with all its children in a Fbx file. If you don't want to export the child set "Not exported" for Export type in Object Properties of the child, else keep "Auto".
+	- The center of the scene of the Fbx file will be equal to the origin point location of the object in blender. The position of the object in the Blender scene does not matter.
 	- For the Skeletal mesh you need to set the Export type for Armature as Export recursive.
 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocScreen2.jpg">
@@ -23,7 +23,7 @@ It possible to create collisions (StaticMesh) and sockets (Static/SkeletalMesh) 
 
 1. Create a new mesh, it will be your collider shape (For a socket create a Empty object). 
 	- An asset can contain multiple collider shapes but each collider must use a different object.
-2. Select your collider shape(s) or Empty(s) and at the last select the owner object.
+2. Select your collider Shape(s) or Empty(s) and at the end select the owner object.
 	- For the SkeletalMesh select the Empty(s) then the owner bone in PoseMode.
 3. Open Collisions and Sockets panel and click on the appropriate button to convert the selection to either collider or socket (Converted collider are green are now the child of the asset). 
 	- About StaticMeshes collision:	https://docs.unrealengine.com/en-us/Engine/Content/FBX/StaticMeshes#collision.
@@ -34,16 +34,16 @@ It possible to create collisions (StaticMesh) and sockets (Static/SkeletalMesh) 
 
 
 # Level of details
-This works only on StaticMesh with importing via UnrealEnginePython
+This works only on StaticMesh with importing via UnrealEnginePython.
 1. Select the asset you want to export and set the Export type property to "Export recursive". 
-2. Now repeat the task for all LOD but also check the case "Export as lod?".
+2. Now repeat the task for all LODs but also check the box "Export as lod?".
 3. Select your main asset and open the panel Object Import Properties.
-4. Set LOD1, Lod2, [...] to your desired LODs.
+4. Set LOD1, LOD2, [...] to your desired LODs.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocLods.jpg"> 
 
 
 # Animations
-It is of course possible to export animations with your skeletal. You can use the Action Editor in Dope Sheet windows to have multiple animations in one scene or use the NonLinearAnimation
+It is of course possible to export animations with your skeletal. You can use the Action Editor in Dope Sheet windows to have multiple animations in one scene or use the NonLinearAnimation.
 
 For the Action:
 1. Select your SkeletalMesh and open Animation Properties panel (Do not forget to set the Armature as Export recursive).
@@ -53,7 +53,7 @@ For the Action:
 3. In Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality, and select the animations to export.
 
 For the NLA:
-1. Select your SkeletalMesh and open Open Animation Properties panel (Do not forget to set the Armature as Export recursive)
+1. Select your SkeletalMesh and open Animation Properties panel (Do not forget to set the Armature as "Export recursive")
 2. In Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality.
 3. If you just want the NLAnimation set Action to export as Not exported and check the box Export Nla with your desired name.
 
@@ -61,8 +61,8 @@ For the NLA:
 # Alembic animation
 Alembic export and import can take a lot of time.
 1. Select the asset you want to export (Armature with child or Mesh).
-2. Set the Export type property on "Export recursive"
-3. Check the box Export as Alembic animation.
+2. Set the Export type property to "Export recursive".
+3. Check the box Export as "Alembic animation".
 4. Don't forget to check the box Alembic animation(s) in Asset types to export. Make sure that the animation was played at least once for bake cache. You can also use the command "bpy.ops.ptcache.bake_all()" to bake the physics. 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocAlembic.jpg">
 
@@ -89,7 +89,7 @@ If egal "Armature" Ue4 will remove the root bone but the animation will be 100 t
 
 # Nomenclature 
 The nomenclature is by default defined in correlation with the Unreal Engine Pipeline but you can change it if you use another pipeline.
-By default the all assets are exported to the location of the blender(.blend) file but you can also change this. 
+By default the all assets are exported to the location of the blender(.blend) which can be changed if you want. 
 Depending on the assets you can also set a sub folder in Object Properties panel > Sub folder.
 The nomenclature also contains the name of the script and additional file.
 
