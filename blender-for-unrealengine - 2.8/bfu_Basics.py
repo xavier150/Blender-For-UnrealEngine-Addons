@@ -34,23 +34,29 @@ def GetCurrentAddonRelase():
 	v = mod.bl_info.get('version')
 	letter = ""
 	if len(v) > 3:
-		if  v[3] == 1: letter = "a"
-		if  v[3] == 2: letter = "b"
-		if  v[3] == 3: letter = "c"
-		if  v[3] == 4: letter = "d"
-		if  v[3] == 5: letter = "e"
-		if  v[3] == 6: letter = "f"
+		if  v[3] == 1: letter = "b"
+		if  v[3] == 2: letter = "c"
+		if  v[3] == 3: letter = "d"
+		if  v[3] == 4: letter = "e"
+		if  v[3] == 5: letter = "f"
+		if  v[3] == 6: letter = "g"
 		
 	return "v."+str(v[0])+"."+str(v[1])+"."+str(v[2])+letter
 
 
 def GetGitHubLastRelaseVersion():
-	#return "v.0.2.4"
+	
 	print("requests GitHub version")
-	URL = "https://api.github.com/repos/xavier150/Blender-For-UnrealEngine-Addons/releases/latest"
-	r = requests.get(url = URL)
-	jsonReturn = json.loads(r.text)
-	return jsonReturn["tag_name"]
+	try: 
+		URL = "https://api.github.com/repos/xavier150/Blender-For-UnrealEngine-Addons/releases/latest"
+		r = requests.get(url = URL)
+		jsonReturn = json.loads(r.text)
+		version = jsonReturn["tag_name"]
+	except:
+		print("requests fail.")
+		version = "v.0.2.4b"
+	
+	return version
 
 
 def ChecksRelationship(arrayA, arrayB):
