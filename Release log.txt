@@ -166,7 +166,6 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.2.4 ==
 
-
 - New: Button for open documentation
 - New: Button open last release page (GitHub)
 - New: You can chose export with scene origin or object origin
@@ -183,3 +182,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: invalid syntax on ImportAssetScript.py if asset name use "-"
 - Fixed: CollisionTraceFlag can't be set if UseStaticMeshLODGroup is False
 - Fixed: Export recursive object can be wrong placed to the scene center if is child of a other object 
+
+== Rev 0.2.4b ==
+
+- Fixed: Button open last release page (GitHub) do error with no internet connection or limited by proxies 
