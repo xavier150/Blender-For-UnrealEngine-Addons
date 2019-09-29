@@ -186,3 +186,7 @@ It is now possible to force the duration of an animation according to the scene 
 == Rev 0.2.4b ==
 
 - Fixed: Button open last release page (GitHub) do error with no internet connection or limited by proxies 
+
+== Rev 0.2.4c ==
+
+- Fixed: Error with forget variable "originalLoc" with armature
