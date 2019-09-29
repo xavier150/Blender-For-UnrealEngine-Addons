@@ -99,12 +99,6 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 
 	#Reset armature name
 	ResetArmatureName(obj, oldArmatureName, )
-
-	if obj.MoveToCenterForExport == True:
-		obj.location = originalLoc #Resets previous object location
-	if obj.RotateToZeroForExport == True:	
-		obj.rotation_euler = originalRot
-		obj.rotation_quaternion = originalQuat
 	
 	ResetArmaturePose(obj)
 	obj.animation_data.action = userAction #Resets previous action and NLA
@@ -165,13 +159,7 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 		axis_forward = obj.exportAxisForward,
 		axis_up = obj.exportAxisUp,
 		bake_space_transform = False
-		)
-		
-	if obj.MoveToCenterForExport == True:
-		obj.location = originalLoc #Resets previous object location
-	if obj.RotateToZeroForExport == True:	
-		obj.rotation_euler = originalRot
-		obj.rotation_quaternion = originalQuat		
+		)		
 		
 	ResetArmaturePose(obj)
 	scene.frame_start -= obj.StartFramesOffset
