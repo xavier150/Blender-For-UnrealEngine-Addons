@@ -190,3 +190,16 @@ It is now possible to force the duration of an animation according to the scene 
 == Rev 0.2.4c ==
 
 - Fixed: Error with forget variable "originalLoc" with armature
+
+== Rev 0.2.5 ==
+
+- New: Updated for Blender 2.81
+- New: Option for export current selected Action
+- New: New button in preferences for check update
+- New: New option in preferences for add +90 on StaticMesh sockets (Default True)
+- Change: Frames offset removed with custom time
+- Fixed: exportGlobalScale it a int, it should be a float
+- Fixed: GetActionToExport() uses too many resources
+- Fixed: Set frames with Custom time don't work
+- Fixed: "Automatic Update Check" take too many time to check (removed)
+- Fixed: StaticMesh sockets import size does not display good value
