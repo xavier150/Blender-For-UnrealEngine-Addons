@@ -44,24 +44,9 @@ def GetCurrentAddonRelase():
 	return "v."+str(v[0])+"."+str(v[1])+"."+str(v[2])+letter
 
 
-def GetGitHubLastRelaseVersion():
-	
-	print("requests GitHub version")
-	try: 
-		URL = "https://api.github.com/repos/xavier150/Blender-For-UnrealEngine-Addons/releases/latest"
-		r = requests.get(url = URL)
-		jsonReturn = json.loads(r.text)
-		version = jsonReturn["tag_name"]
-	except:
-		print("requests fail.")
-		version = "v.0.2.4b"
-	
-	return version
-
-
 def ChecksRelationship(arrayA, arrayB):
 	#Checks if it exits an identical variable in two lists
-
+	#return False
 	for a in arrayA:
 		for b in arrayB:
 			if a == b:

@@ -261,7 +261,10 @@ def ExportSingleFbxMesh(originalScene, dirpath, filename, obj):
 
 	#Set socket scale for Unreal
 	for socket in GetSocketDesiredChild(active):
-		socket.delta_scale*=0.01*addon_prefs.StaticSocketsImportedSize
+		socket.delta_scale *= addon_prefs.StaticSocketsImportedSize
+		if addon_prefs.StaticSocketsAdd90X == True:
+			socket.delta_rotation_euler[0] += math.radians(90.0)
+
 
 	#Set rename temporarily the Armature as "Armature"
 	if meshType == "SkeletalMesh":

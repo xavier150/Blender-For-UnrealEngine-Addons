@@ -30,7 +30,7 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 2, 4, 2), #Rev 0.2.4c
+	'version': (0, 2, 5), #Rev 0.2.5
 	'blender': (2, 80, 0),
 	'location': 'View3D > UI > Unreal Engine 4',
 	'warning': '',
@@ -90,7 +90,13 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 	StaticSocketsImportedSize : FloatProperty(
 		name='StaticMesh sockets import size',
 		description='Size of the socket when imported in Unreal Engine',
-		default=1.0,
+		default=0.01,
+		)
+	
+	StaticSocketsAdd90X : BoolProperty(
+		name='Export StaticMesh Sockets with +90 degrees on X',
+		description='On StaticMesh the sockets are auto imported by unreal with -90 degrees on X',
+		default=True,
 		)
 
 	SkeletalSocketsImportedSize : FloatProperty(
@@ -98,6 +104,8 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		description='Size of the socket when imported in Unreal Engine',
 		default=0.01,
 		)
+		
+
 		
 	exportWithCustomProps : BoolProperty(
 		name='Export custom properties',
@@ -129,13 +137,21 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		default=True,
 		)
 
-
+	class BFU_OT_NewReleaseInfo(Operator):
+		bl_label = "Open last release page"
+		bl_idname = "object.new_release_info"
+		bl_description = "Clic for open latest release page."
+			
+		def execute(self, context):		
+			os.system("start \"\" https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/latest")
+			return {'FINISHED'}
 
 	def draw(self, context):
 		layout = self.layout
 		col = layout.column()
 		col.prop(self, "skeletonRootBoneName")
 		col.prop(self, "StaticSocketsImportedSize")
+		col.prop(self, "StaticSocketsAdd90X")
 		col.prop(self, "SkeletalSocketsImportedSize")
 		col.prop(self, "exportWithCustomProps")
 		col.prop(self, "exportWithMetaData")
@@ -144,9 +160,10 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		if self.UseGeneratedScripts == True:
 			col.prop(self, "Use20TabScript")
 
+		updateButton = layout.row()
+		updateButton.scale_y = 2.0
+		updateButton.operator("object.new_release_info", icon= "TIME")
 
-
-releaseVersion = GetGitHubLastRelaseVersion()
 	
 	
 class BFU_PT_BlenderForUnreal(bpy.types.Panel):
@@ -235,25 +252,13 @@ class BFU_PT_BlenderForUnreal(bpy.types.Panel):
 			os.system("start \"\" https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md")
 			return {'FINISHED'}
 			
-	class BFU_OT_NewReleaseInfo(Operator):
-		bl_label = "New release available !"
-		bl_idname = "object.new_release_info"
-		bl_description = "Clic for download latest release! (Your version: "+str(GetCurrentAddonRelase())+" Latest version "+str(releaseVersion)+")"
-			
-		def execute(self, context):		
-			os.system("start \"\" https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/latest")
-			return {'FINISHED'}
+
 
 	def draw(self, contex):
 	
-		
+		releaseVersion = None#GetGitHubLastRelaseVersion()
 		
 		layout =  self.layout
-		updateButton = layout.row()
-		if releaseVersion is not None:
-			if str(GetCurrentAddonRelase()) != str(releaseVersion):
-				updateButton.scale_y = 2.0
-				updateButton.operator("object.new_release_info", icon= "TIME")
 		docsButton = layout.row()
 		docsButton.operator("object.open_documentation_page", icon= "HELP")
 		
@@ -596,9 +601,10 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 		description = "Export procedure for actions (Animations and poses)",
 		items = [
 			("export_auto", "Export auto", "Export all actions connected to the bones names", "FILE_SCRIPT", 1),
-			("export_specific_list", "Export specific list", "Export only actions that are checked in the list", "LINENUMBERS_ON", 2),
-			("export_specific_prefix", "Export specific prefix", "Export only actions with a specific prefix or the beginning of the actions names", "SYNTAX_ON", 3),
-			("dont_export", "Not exported", "No action will be exported", "MATPLANE", 4)
+			("export_specific_list", "Export specific list", "Export only actions that are checked in the list", "LINENUMBERS_ON", 3),
+			("export_specific_prefix", "Export specific prefix", "Export only actions with a specific prefix or the beginning of the actions names", "SYNTAX_ON", 4),
+			("dont_export", "Not exported", "No action will be exported", "MATPLANE", 5),
+			("export_current", "Export Current", "Export only the current actions", "FILE_SCRIPT", 6),
 			]
 		)
 
@@ -746,11 +752,12 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 						ActionTimeProperty = layout.column()
 						ActionTimeProperty.prop(obj, 'AnimStartEndTimeEnum')
 						if obj.AnimStartEndTimeEnum == "with_customframes":
-							ActionTimePropertyChild=ActionTimeProperty = layout.row()
-							ActionTimePropertyChild.prop(obj, 'AnimCustomStartTime')
-							ActionTimePropertyChild.prop(obj, 'AnimCustomEndTime')
-						ActionTimeProperty.prop(obj, 'StartFramesOffset')
-						ActionTimeProperty.prop(obj, 'EndFramesOffset')
+							
+							ActionTimeProperty.prop(obj, 'AnimCustomStartTime')
+							ActionTimeProperty.prop(obj, 'AnimCustomEndTime')
+						if obj.AnimStartEndTimeEnum != "with_customframes":
+							ActionTimeProperty.prop(obj, 'StartFramesOffset')
+							ActionTimeProperty.prop(obj, 'EndFramesOffset')
 						
 					else:
 						layout.label(text="Note: animation start/end use scene frames with the camera for the sequencer.")
@@ -809,10 +816,10 @@ class BFU_PT_AvancedObjectProperties(bpy.types.Panel):
 	bl_parent_id = "BFU_PT_BlenderForUnreal"
 
 
-	bpy.types.Object.exportGlobalScale = IntProperty(
+	bpy.types.Object.exportGlobalScale = FloatProperty(
 		name="Global scale",
 		description="Scale, change is not recommended with SkeletalMesh.",
-		default=1
+		default=1.0
 		)
 		
 	
@@ -1686,11 +1693,13 @@ class BFU_PT_Clipboard(bpy.types.Panel):
 
 classes = (
 	BFU_AP_AddonPreferences,
+	BFU_AP_AddonPreferences.BFU_OT_NewReleaseInfo,
+		
 	BFU_PT_BlenderForUnreal,
 	BFU_PT_BlenderForUnreal.BFU_MT_ObjectGlobalPropertiesPresets,
 	BFU_PT_BlenderForUnreal.BFU_OT_AddObjectGlobalPropertiesPreset,
 	BFU_PT_BlenderForUnreal.BFU_OT_OpenDocumentationPage,
-	BFU_PT_BlenderForUnreal.BFU_OT_NewReleaseInfo,
+
 	
 	BFU_PT_ObjectProperties,
 	BFU_PT_ObjectImportProperties,

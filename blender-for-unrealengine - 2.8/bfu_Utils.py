@@ -89,15 +89,18 @@ def GetAllCollisionObj():
 def GetActionToExport(obj):
 	#Returns only the actions that will be exported with the Armature
 
-	#if obj.animation_data is None:
-		#return []
-
 	if obj.ExportAsLod == True:
 		return []
 
 	TargetActionToExport = [] #Action list
 	if obj.exportActionEnum == "dont_export":
 		return []
+		
+	if obj.exportActionEnum == "export_current":
+		if obj.animation_data is not None:
+			if obj.animation_data.action is not None:
+				return [obj.animation_data.action]
+	
 	elif obj.exportActionEnum == "export_specific_list":
 		for action in bpy.data.actions:
 			for targetAction in obj.exportActionList:
@@ -114,7 +117,7 @@ def GetActionToExport(obj):
 		objBoneNames = [bone.name for bone in obj.data.bones]
 		for action in bpy.data.actions:
 			actionBoneNames = [group.name for group in action.groups]
-			if ChecksRelationship(objBoneNames, actionBoneNames):
+			if ChecksRelationship(actionBoneNames, objBoneNames):
 				TargetActionToExport.append(action)
 
 	return TargetActionToExport
@@ -130,21 +133,20 @@ def GetDesiredActionStartEndTime(obj, action):
 		endTime = scene.frame_end
 
 	elif obj.AnimStartEndTimeEnum == "with_keyframes":
-		startTime = action.frame_range.x #GetFirstActionFrame
-		endTime = action.frame_range.y #GetLastActionFrame
+		startTime = action.frame_range.x + obj.StartFramesOffset #GetFirstActionFrame + Offset
+		endTime = action.frame_range.y + obj.EndFramesOffset #GetLastActionFrame + Offset
+		return (startTime,endTime)
 
 	elif obj.AnimStartEndTimeEnum == "with_sceneframes":
-		startTime = scene.frame_start
-		endTime = scene.frame_end
+		startTime = scene.frame_start + obj.StartFramesOffset
+		endTime = scene.frame_end + obj.EndFramesOffset
+		return (startTime,endTime)
 
 	elif obj.AnimStartEndTimeEnum == "with_customframes":
 		startTime = obj.AnimCustomStartTime
 		endTime = obj.AnimCustomEndTime
-
-	startTime += obj.StartFramesOffset
-	endTime += obj.EndFramesOffset
-	return (startTime,endTime)
-
+		return (startTime,endTime)
+	
 
 def GetActionType(action):
 	#return action type
@@ -245,7 +247,6 @@ def ApplyExportTransform(obj):
 		
 def GetFinalAssetToExport():
 	#Returns all assets that will be exported
-
 
 
 	scene = bpy.context.scene
