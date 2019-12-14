@@ -58,7 +58,8 @@ For the NLA:
 3. If you just want the NLAnimation set Action to export as Not exported and check the box Export Nla with your desired name.
 
 # Export animation with Proxys
-If you want export the animations of a Skeletal Mesh with Proxys you should set proxy as parent of you collection and set Export recursive on the proxy 
+If you want export the animations of a Skeletal Mesh with Proxys you should set proxy as parent of you collection and set Export recursive on the proxy.
+
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocActionWithProxy.jpg"> 
 
 # Alembic animation
