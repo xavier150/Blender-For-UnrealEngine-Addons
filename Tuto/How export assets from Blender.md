@@ -57,6 +57,9 @@ For the NLA:
 2. In Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality.
 3. If you just want the NLAnimation set Action to export as Not exported and check the box Export Nla with your desired name.
 
+# Export animation with Proxys
+If you want export the animations of a Skeletal Mesh with Proxys you should set proxy as parent of you collection and set Export recursive on the proxy 
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocActionWithProxy.jpg"> 
 
 # Alembic animation
 Alembic export and import can take a lot of time.
