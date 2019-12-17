@@ -62,6 +62,8 @@ If you want export the animations of a Skeletal Mesh with Proxys you should set 
 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocActionWithProxy.jpg"> 
 
+Warning: don't use the exported fbx from a proxy like a Skeleton or SkeletalMesh. It containt a double Rig.
+
 # Alembic animation
 Alembic export and import can take a lot of time.
 1. Select the asset you want to export (Armature with child or Mesh).
