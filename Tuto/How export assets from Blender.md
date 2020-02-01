@@ -92,6 +92,12 @@ If the name used is "Armature" Unreal Engine will remove the root bone but the a
 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocSkeletonTree.jpg">
 
+# UV
+( In next update! )
+You can correct extreme UV for better quality in Unreal Engine.
+This is useful if you use UVProject Modifier in Blender.
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocUVcorrected.jpg">
+
 
 # Nomenclature 
 The nomenclature is by default defined in correlation with the Unreal Engine Pipeline but you can change it if you use another pipeline.
