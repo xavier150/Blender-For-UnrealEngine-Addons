@@ -30,7 +30,7 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 2, 5), #Rev 0.2.5
+	'version': (0, 2, 6), #Rev 0.2.6
 	'blender': (2, 80, 0),
 	'location': 'View3D > UI > Unreal Engine 4',
 	'warning': '',
@@ -81,31 +81,47 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 	# when defining this in a submodule of a python package.
 	bl_idname = __name__
 
+	correctExtremUVScale : BoolProperty(
+		name='Correct Extrem UV Scale',
+		description='Correct Extrem UV Scale for better UV quality in UE4 (Export will take more time)',
+		default=False,
+		)
+	
+	removeSkeletonRootBone : BoolProperty(
+		name='Remove root bone',
+		description='Remove root bone ?',
+		default=True,
+		)
+		
+	SkeletonRootBoneScale : FloatProperty(
+		name='Skeleton root bone scale',
+		description='If ',
+		default=1,
+	)
+	
 	skeletonRootBoneName : StringProperty(
 		name='Skeleton root bone name',
 		description='Name of the armature when exported. This is used to change the root bone name. If egal "Armature" Ue4 will remove the root bone but the animation will be 100 times smaller.',
 		default="ArmatureRoot",
 		)
 
-	StaticSocketsImportedSize : FloatProperty(
+	staticSocketsImportedSize : FloatProperty(
 		name='StaticMesh sockets import size',
 		description='Size of the socket when imported in Unreal Engine',
 		default=0.01,
 		)
 	
-	StaticSocketsAdd90X : BoolProperty(
+	staticSocketsAdd90X : BoolProperty(
 		name='Export StaticMesh Sockets with +90 degrees on X',
 		description='On StaticMesh the sockets are auto imported by unreal with -90 degrees on X',
 		default=True,
 		)
 
-	SkeletalSocketsImportedSize : FloatProperty(
+	skeletalSocketsImportedSize : FloatProperty(
 		name='SkeletalMesh sockets import size',
 		description='Size of the socket when imported in Unreal Engine',
-		default=0.01,
+		default=1,
 		)
-		
-
 		
 	exportWithCustomProps : BoolProperty(
 		name='Export custom properties',
@@ -125,16 +141,16 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		default=False,
 		)
 
-	UseGeneratedScripts :  BoolProperty(
+	useGeneratedScripts :  BoolProperty(
 		name='Use generated script for import assets and sequencer.',
 		description='If false the all properties that only works with import scripts will be disabled',
 		default=True,
 		)
 
-	Use20TabScript : BoolProperty(
+	use20TabScript : BoolProperty(
 		name='Generate import script for 20Tab python intergration',
 		description='Generate import script for 20Tab python intergration ( /!\ With vania python integration some features like StaticMesh Lod or SkeletalMesh Sockets integration do not work )',
-		default=True,
+		default=False,
 		)
 
 	class BFU_OT_NewReleaseInfo(Operator):
@@ -148,17 +164,38 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 
 	def draw(self, context):
 		layout = self.layout
-		col = layout.column()
-		col.prop(self, "skeletonRootBoneName")
-		col.prop(self, "StaticSocketsImportedSize")
-		col.prop(self, "StaticSocketsAdd90X")
-		col.prop(self, "SkeletalSocketsImportedSize")
-		col.prop(self, "exportWithCustomProps")
-		col.prop(self, "exportWithMetaData")
-		col.prop(self, "revertExportPath")
-		col.prop(self, "UseGeneratedScripts")
-		if self.UseGeneratedScripts == True:
-			col.prop(self, "Use20TabScript")
+		
+		boxColumn = layout.column().split(factor = 0.5 )
+		
+		rootBone = boxColumn.box()
+		rootBone.label(text='ROOT BONE')
+		rootBone.prop(self, "removeSkeletonRootBone")
+		rootBoneName = rootBone.column()
+		rootBoneName.enabled = not self.removeSkeletonRootBone
+		rootBoneName.prop(self, "skeletonRootBoneName")
+		rootBone.prop(self, "SkeletonRootBoneScale")
+
+		socket = boxColumn.box()
+		socket.label(text='SOCKET')
+		socket.prop(self, "staticSocketsImportedSize")
+		socket.prop(self, "staticSocketsAdd90X")
+		socket.prop(self, "skeletalSocketsImportedSize")
+		
+		boxColumn = layout.column().split(factor = 0.5 )
+		
+		data = boxColumn.box()
+		data.label(text='DATA')
+		data.prop(self, "correctExtremUVScale")
+		data.prop(self, "exportWithCustomProps")
+		data.prop(self, "exportWithMetaData")
+		data.prop(self, "revertExportPath")
+		
+		script = boxColumn.box()
+		script.label(text='IMPORT SCRIPT')
+		script.prop(self, "useGeneratedScripts")
+		scriptProp = script.column()
+		scriptProp.enabled = self.useGeneratedScripts
+		scriptProp.prop(self, "use20TabScript")
 
 		updateButton = layout.row()
 		updateButton.scale_y = 2.0
@@ -217,7 +254,6 @@ class BFU_PT_BlenderForUnreal(bpy.types.Panel):
 							'obj.MaterialSearchLocation',
 							'obj.CollisionTraceFlag',
 							'obj.exportActionEnum',
-							'obj.active_ObjectAction',
 							'obj.PrefixNameToExport',
 							'obj.AnimStartEndTimeEnum',
 							'obj.StartFramesOffset',
@@ -350,7 +386,7 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
 						AlembicProp.label(text="(Alembic animation are exported with scene position.)")
 						AlembicProp.label(text="(Use import script for use origin position.)")
 					else:
-						if addon_prefs.UseGeneratedScripts == True:
+						if addon_prefs.useGeneratedScripts == True:
 							LodProp = layout.column()
 							LodProp.prop(obj, 'ExportAsLod')
 
@@ -497,7 +533,7 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 		obj = context.object
 		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 
-		if addon_prefs.UseGeneratedScripts == True:
+		if addon_prefs.useGeneratedScripts == True:
 			if obj is not None:
 				if obj.ExportEnum == "export_recursive":
 
@@ -574,7 +610,7 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 
 	#Animation :
 
-	class BFU_UL_ACTIONExportTarget(bpy.types.UIList):
+	class BFU_UL_ActionExportTarget(bpy.types.UIList):
 		def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
 			ActionIsValid = False
 			try:
@@ -688,9 +724,9 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 		subtype = 'FILE_NAME'
 		)
 
-	class BFU_OT_UpdateObjActionButton(Operator):
+	class BFU_OT_UpdateObjActionListButton(Operator):
 		bl_label = "Update action list"
-		bl_idname = "object.updateobjaction"
+		bl_idname = "object.updateobjactionlist"
 		bl_description = "Update action list"
 
 		def execute(self, context):
@@ -704,15 +740,15 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 								return True
 					return False
 
-				AnimSave = [["", False]]
+				animSave = [["", False]]
 				for Anim in obj.exportActionList: #CollectionProperty
 					name = Anim.name
 					use = Anim.use
-					AnimSave.append([name, use])
+					animSave.append([name, use])
 				obj.exportActionList.clear()
 				for action in bpy.data.actions:
 					obj.exportActionList.add().name = action.name
-					obj.exportActionList[action.name].use = SetUseFromLast(AnimSave, action.name)
+					obj.exportActionList[action.name].use = SetUseFromLast(animSave, action.name)
 			UpdateExportActionList(bpy.context.object)
 			return {'FINISHED'}
 
@@ -725,7 +761,7 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 			obj = context.object
 			actions = GetActionToExport(obj)
 			popup_title = "Action list"
-			if len(actions) > 1:
+			if len(actions) > 0:
 				popup_title = str(len(actions))+' action(s) found for obj named "'+obj.name+'".'
 			else:
 				popup_title = 'No actions found for obj named "'+obj.name+'".'
@@ -752,12 +788,13 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 						ActionTimeProperty = layout.column()
 						ActionTimeProperty.prop(obj, 'AnimStartEndTimeEnum')
 						if obj.AnimStartEndTimeEnum == "with_customframes":
-							
-							ActionTimeProperty.prop(obj, 'AnimCustomStartTime')
-							ActionTimeProperty.prop(obj, 'AnimCustomEndTime')
+							OfsetTime = ActionTimeProperty.row()
+							OfsetTime.prop(obj, 'AnimCustomStartTime')
+							OfsetTime.prop(obj, 'AnimCustomEndTime')
 						if obj.AnimStartEndTimeEnum != "with_customframes":
-							ActionTimeProperty.prop(obj, 'StartFramesOffset')
-							ActionTimeProperty.prop(obj, 'EndFramesOffset')
+							OfsetTime = ActionTimeProperty.row()
+							OfsetTime.prop(obj, 'StartFramesOffset')
+							OfsetTime.prop(obj, 'EndFramesOffset')
 						
 					else:
 						layout.label(text="Note: animation start/end use scene frames with the camera for the sequencer.")
@@ -768,13 +805,13 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 						ActionListProperty.prop(obj, 'exportActionEnum')
 						if obj.exportActionEnum == "export_specific_list":
 							ActionListProperty.template_list(
-								"BFU_UL_ACTIONExportTarget", "",  # type and unique id
+								"BFU_UL_ActionExportTarget", "",  # type and unique id
 								obj, "exportActionList",  # pointer to the CollectionProperty
 								obj, "active_ObjectAction",	 # pointer to the active identifier
 								maxrows=5,
 								rows=5
 							)
-							ActionListProperty.operator("object.updateobjaction", icon='RECOVER_LAST')
+							ActionListProperty.operator("object.updateobjactionlist", icon='RECOVER_LAST')
 						if obj.exportActionEnum == "export_specific_prefix":
 							ActionListProperty.prop(obj, 'PrefixNameToExport')
 
@@ -803,7 +840,123 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 					layout.label(text='(This assets is not a SkeletalMesh or Camera)')
 			else:
 				layout.label(text='(No properties to show.)')
+		else:
+			layout.label(text='(No properties to show.)')
 
+
+class BFU_OT_SceneCollectionExport(bpy.types.PropertyGroup):
+	name: StringProperty(name="collection data name", default="Unknown")
+	use: BoolProperty(name="export this collection", default=False)
+			
+class BFU_PT_CollectionProperties(bpy.types.Panel):
+	#Is Collection Properties panel
+	
+	bl_idname = "BFU_PT_CollectionProperties"
+	bl_label = "Collection Properties panel"
+	bl_space_type = "VIEW_3D"
+	bl_region_type = "UI"
+	bl_category = "Unreal Engine 4"
+	bl_parent_id = "BFU_PT_BlenderForUnreal"
+	
+	class BFU_UL_CollectionExportTarget(bpy.types.UIList):
+		def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
+			CollectionIsValid = False
+			try:
+				bpy.data.collections[item.name]
+				CollectionIsValid = True
+			except:
+				pass
+
+			if self.layout_type in {'DEFAULT', 'COMPACT'}:
+				if CollectionIsValid: #If action is valid
+					#layout.prop(item, "name", text="", emboss=False, icon="ACTION") #Debug only for see target line
+					layout.prop(bpy.data.collections[item.name], "name", text="", emboss=False, icon="GROUP")
+					layout.prop(item, "use", text="")
+				else:
+					dataText = ('Collection named "' + item.name + '" Not Found. Please clic on update')
+					layout.label(text=dataText, icon="ERROR")
+			# Not optimised for 'GRID' layout type.
+			elif self.layout_type in {'GRID'}:
+				layout.alignment = 'CENTER'
+				layout.label(text="", icon_value=icon)
+	
+	class BFU_OT_UpdateCollectionButton(Operator):
+		bl_label = "Update collection list"
+		bl_idname = "object.updatecollectionlist"
+		bl_description = "Update collection list"
+
+		def execute(self, context):
+			def UpdateExportCollectionList(scn):
+				#Update the provisional collection list known by the object
+
+				def SetUseFromLast(list, CollectionName):
+					for item in list:
+						if item[0] == CollectionName:
+							if item[1] == True:
+								return True
+					return False
+
+				colSave = [["", False]]
+				for col in scn.CollectionExportList: #CollectionProperty
+					name = col.name
+					use = col.use
+					colSave.append([name, use])
+				scn.CollectionExportList.clear()
+				for col in bpy.data.collections:
+					scn.CollectionExportList.add().name = col.name
+					scn.CollectionExportList[col.name].use = SetUseFromLast(colSave, col.name)
+			UpdateExportCollectionList(context.scene)
+			return {'FINISHED'}
+	
+	class BFU_OT_ShowCollectionToExport(Operator):
+		bl_label = "Show action(s)"
+		bl_idname = "object.showscenecollection"
+		bl_description = "Click to show collections to export"
+
+		def execute(self, context):
+			scn = context.scene
+			collections = GetCollectionToExport(scn)
+			popup_title = "Collection list"
+			if len(collections) > 0:
+				popup_title = str(len(collections))+' collection(s) to export found.'
+			else:
+				popup_title = 'No collection to export found.'
+
+			def draw(self, context):
+				col = self.layout.column()
+				for collection in collections:
+					row = col.row()
+					row.label(text="- "+collection)
+			bpy.context.window_manager.popup_menu(draw, title=popup_title, icon='GROUP')
+			return {'FINISHED'}
+			
+	bpy.types.Scene.active_CollectionExportList = IntProperty(
+		name="Active Collection",
+		description="Index of the currently active collection",
+		default=0
+		)
+			
+	def draw(self, context):
+		scn = context.scene
+		layout = self.layout
+		collectionListProperty = layout.column()
+		collectionListProperty.template_list(
+			"BFU_UL_CollectionExportTarget", "",  # type and unique id
+			scn, "CollectionExportList",  # pointer to the CollectionProperty
+			scn, "active_CollectionExportList",	 # pointer to the active identifier
+			maxrows=5,
+			rows=5
+		)
+		collectionListProperty.operator("object.updatecollectionlist", icon='RECOVER_LAST')
+		
+		collectionPropertyInfo = layout.row().box().split(factor = 0.75 )
+		collectionNum = len(GetCollectionToExport(scn))
+		collectionFeedback = str(collectionNum) + " Collection(s) will be exported with this armature."
+		collectionPropertyInfo.label(text=collectionFeedback, icon='INFO')
+		collectionPropertyInfo.operator("object.showscenecollection")
+		layout.label(text='Note: The collection are exported like StaticMesh.')
+		
+	
 
 class BFU_PT_AvancedObjectProperties(bpy.types.Panel):
 	#Is Avanced object properties panel
@@ -1063,7 +1216,7 @@ class BFU_PT_CollisionsAndSockets(bpy.types.Panel):
 		convertStaticSocketButtons.enabled = ActiveModeIs("OBJECT") and ActiveTypeIs("MESH") and FoundTypeInSelect("EMPTY")
 		convertStaticSocketButtons.operator("object.converttostaticsocket", icon='OUTLINER_DATA_EMPTY')
 
-		if addon_prefs.UseGeneratedScripts == True:
+		if addon_prefs.useGeneratedScripts == True:
 			layout.label(text="Select the Empty(s) then the owner bone in PoseMode.")
 			convertButtons = self.layout.row().split(factor = 0.80 )
 			convertSkeletalSocketButtons = convertButtons.column()
@@ -1262,7 +1415,7 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 		fileName = self.layout.row()
 		fileName = fileName.column()
 		fileName.prop(scn, 'file_export_log_name', icon='FILE')
-		if addon_prefs.UseGeneratedScripts == True:
+		if addon_prefs.useGeneratedScripts == True:
 			fileName.prop(scn, 'file_import_asset_script_name', icon='FILE')
 			fileName.prop(scn, 'file_import_sequencer_script_name', icon='FILE')
 
@@ -1300,7 +1453,7 @@ class BFU_PT_ImportScript(bpy.types.Panel):
 		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 
 		#Sub folder
-		if addon_prefs.UseGeneratedScripts == True:
+		if addon_prefs.useGeneratedScripts == True:
 			propsSub = self.layout.row()
 			propsSub = propsSub.column()
 			propsSub.prop(scn, 'unreal_import_location', icon='FILE_FOLDER')
@@ -1369,7 +1522,11 @@ class BFU_PT_Export(bpy.types.Panel):
 								action = "..."
 							row.label(text="- ["+asset.obj.name+"] --> "+action+" ("+asset.type+")")
 						else:
-							row.label(text="- "+asset.obj.name+" ("+asset.type+")")
+							if asset.type != "Collection StaticMesh":
+								row.label(text="- "+asset.obj.name+" ("+asset.type+")")
+							else:
+								row.label(text="- "+asset.obj+" ("+asset.type+")")
+								
 					else:
 						row.label(text="- ("+asset.type+")")
 			bpy.context.window_manager.popup_menu(draw, title=popup_title, icon='PACKAGE')
@@ -1494,6 +1651,7 @@ class BFU_PT_Export(bpy.types.Panel):
 			scene = bpy.context.scene
 			def GetIfOneTypeCheck():
 				if (scene.static_export
+				or scene.static_collection_export
 				or scene.skeletal_export
 				or scene.anin_export
 				or scene.alembic_export
@@ -1521,7 +1679,7 @@ class BFU_PT_Export(bpy.types.Panel):
 						print("")
 						print("========================= ... =========================")
 					else:
-						self.report({'WARNING'}, "Not found assets with \"Export and child\" properties.")
+						self.report({'WARNING'}, "Not found assets with \"Export and child\" properties or collection to export.")
 				else:
 					self.report({'WARNING'}, "Please save this blend file before export")
 			else:
@@ -1532,13 +1690,19 @@ class BFU_PT_Export(bpy.types.Panel):
 	#Categories :
 	bpy.types.Scene.static_export = bpy.props.BoolProperty(
 		name = "StaticMesh(s)",
-		description = "Check mark to export StaticMesh(es)",
+		description = "Check mark to export StaticMesh(s)",
 		default = True
+		)	
+		
+	bpy.types.Scene.static_collection_export = bpy.props.BoolProperty(
+		name = "Collection(s) ",
+		description = "Check mark to export Collection(s)",
+		default = False
 		)
 
 	bpy.types.Scene.skeletal_export = bpy.props.BoolProperty(
 		name = "SkeletalMesh(s)",
-		description = "Check mark to export SkeletalMesh(es)",
+		description = "Check mark to export SkeletalMesh(s)",
 		default = True
 		)
 
@@ -1606,6 +1770,7 @@ class BFU_PT_Export(bpy.types.Panel):
 		AssetsCol = row.column()
 		AssetsCol.label(text="Asset types to export", icon='PACKAGE')
 		AssetsCol.prop(scn, 'static_export')
+		AssetsCol.prop(scn, 'static_collection_export')
 		AssetsCol.prop(scn, 'skeletal_export')
 		AssetsCol.prop(scn, 'anin_export')
 		AssetsCol.prop(scn, 'alembic_export')
@@ -1617,7 +1782,7 @@ class BFU_PT_Export(bpy.types.Panel):
 		FileCol.prop(scn, 'text_ExportLog')
 		FileCol.prop(scn, 'text_ImportAssetScript')
 		FileCol.prop(scn, 'text_ImportSequenceScript')
-		if addon_prefs.UseGeneratedScripts == True:
+		if addon_prefs.useGeneratedScripts == True:
 			FileCol.prop(scn, 'text_AdditionalData')
 
 
@@ -1679,7 +1844,7 @@ class BFU_PT_Clipboard(bpy.types.Panel):
 		layout = self.layout
 		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 
-		if addon_prefs.UseGeneratedScripts == True:
+		if addon_prefs.useGeneratedScripts == True:
 			layout.label(text="Click on one of the buttons to copy the import command.", icon='INFO')
 			copyButton = layout.row()
 			copyButton.operator("object.copy_importassetscript_command")
@@ -1706,11 +1871,17 @@ classes = (
 
 	#BFU_OT_ObjExportAction,
 	BFU_PT_AnimProperties,
-	BFU_PT_AnimProperties.BFU_UL_ACTIONExportTarget,
-	BFU_PT_AnimProperties.BFU_OT_UpdateObjActionButton,
+	BFU_PT_AnimProperties.BFU_UL_ActionExportTarget,
+	BFU_PT_AnimProperties.BFU_OT_UpdateObjActionListButton,
 	BFU_PT_AnimProperties.BFU_OT_ShowActionToExport,
+	
+	BFU_PT_CollectionProperties,
+	BFU_PT_CollectionProperties.BFU_UL_CollectionExportTarget,
+	BFU_PT_CollectionProperties.BFU_OT_UpdateCollectionButton,
+	BFU_PT_CollectionProperties.BFU_OT_ShowCollectionToExport,
 
 	BFU_PT_AvancedObjectProperties,
+
 
 	BFU_PT_CollisionsAndSockets,
 	BFU_PT_CollisionsAndSockets.BFU_OT_ConvertToCollisionButtonBox,
@@ -1744,6 +1915,8 @@ classes = (
 register, unregister = bpy.utils.register_classes_factory(classes)
 bpy.utils.register_class(BFU_OT_ObjExportAction)
 bpy.types.Object.exportActionList = CollectionProperty(type=BFU_OT_ObjExportAction)
+bpy.utils.register_class(BFU_OT_SceneCollectionExport)
+bpy.types.Scene.CollectionExportList = CollectionProperty(type=BFU_OT_SceneCollectionExport)
 bpy.utils.register_class(BFU_OT_UnrealExportedAsset)
 bpy.types.Scene.UnrealExportedAssetsList = CollectionProperty(type=BFU_OT_UnrealExportedAsset)
 bpy.utils.register_class(BFU_OT_UnrealPotentialError)

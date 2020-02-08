@@ -427,7 +427,7 @@ def WriteSingleMeshAdditionalParameter(obj):
 			RelativeMatrix = (bml.inverted() @ am.inverted() @ em)
 			l = RelativeMatrix.to_translation()
 			r = RelativeMatrix.to_euler()
-			s = socket.scale*addon_prefs.SkeletalSocketsImportedSize
+			s = socket.scale*addon_prefs.skeletalSocketsImportedSize
 
 			#Convet to array for configparser and convert value for Unreal
 			array_location = [l[0], l[1]*-1, l[2]]
@@ -452,14 +452,14 @@ def WriteAllTextFiles():
 	#Import script
 	if scene.text_ImportAssetScript:
 		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
-		Text = bfu_WriteImportAssetScript.WriteImportAssetScript(addon_prefs.Use20TabScript)
+		Text = bfu_WriteImportAssetScript.WriteImportAssetScript(addon_prefs.use20TabScript)
 		if Text is not None:
 			Filename = scene.file_import_asset_script_name
 			ExportSingleText(Text, scene.export_other_file_path, Filename)
 
 	if scene.text_ImportSequenceScript:
 		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
-		Text = bfu_WriteImportSequencerScript.WriteImportSequencerScript(addon_prefs.Use20TabScript)
+		Text = bfu_WriteImportSequencerScript.WriteImportSequencerScript(addon_prefs.use20TabScript)
 		if Text is not None:
 			Filename = scene.file_import_sequencer_script_name
 			ExportSingleText(Text, scene.export_other_file_path, Filename)

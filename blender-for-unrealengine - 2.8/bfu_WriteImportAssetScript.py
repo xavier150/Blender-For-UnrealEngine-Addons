@@ -245,7 +245,7 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 		else:
 			ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('original_import_type', unreal.FBXImportType."+GetFBXImportType(asset.assetType)+")" + "\n"
 
-		if use20tab == True:
+		if use20tab == True: #import_materials
 			if GetIsAnimation(asset.assetType):
 				ImportScript += "\t" + "task.ImportUI.bImportMaterials = False" + "\n"
 			else:
@@ -304,12 +304,16 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 				ImportScript += "\t" + "task.ImportUI.StaticMeshImportData.bAutoGenerateCollision = "+ str(obj.AutoGenerateCollision) + "\n"
 				if (obj.UseStaticMeshLODGroup == True):
 					ImportScript += "\t" +"task.ImportUI.StaticMeshImportData.StaticMeshLODGroup = '" + obj.StaticMeshLODGroup + "'" + "\n"
+				else:
+					ImportScript += "\t" +"task.ImportUI.StaticMeshImportData.StaticMeshLODGroup = 'None'" + "\n"
 				ImportScript += "\t" + "task.ImportUI.StaticMeshImportData.bGenerateLightmapUVs = " + str(obj.GenerateLightmapUVs) + "\n"
 			else:
 				ImportScript += "\t" + "task.get_editor_property('options').static_mesh_import_data.set_editor_property('combine_meshes', True)" + "\n"
 				ImportScript += "\t" + "task.get_editor_property('options').static_mesh_import_data.set_editor_property('auto_generate_collision', "+ str(obj.AutoGenerateCollision) +")"+ "\n"
 				if (obj.UseStaticMeshLODGroup == True):
 					ImportScript += "\t" + "task.get_editor_property('options').static_mesh_import_data.set_editor_property('static_mesh_lod_group', '" + obj.StaticMeshLODGroup +"')"+ "\n"
+				else:
+					ImportScript += "\t" + "task.get_editor_property('options').static_mesh_import_data.set_editor_property('static_mesh_lod_group', 'None')"+ "\n"
 				ImportScript += "\t" + "task.get_editor_property('options').static_mesh_import_data.set_editor_property('generate_lightmap_u_vs', " + str(obj.GenerateLightmapUVs) +")"+ "\n"
 
 
@@ -354,12 +358,16 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 		if use20tab == True:
 			if (obj.UseStaticMeshLODGroup == True):
 				ImportScript += "\t" "asset.LODGroup = '" + obj.StaticMeshLODGroup + "'" + "\n"
+			else:
+				ImportScript += "\t" "asset.LODGroup = 'None'" + "\n"
 			if (obj.UseStaticMeshLightMapRes == True):
 				ImportScript += "\t" "asset.LightMapResolution = " + str(obj.StaticMeshLightMapRes) + "\n"
 			ImportScript += "\t" + "asset.BodySetup.CollisionTraceFlag = ECollisionTraceFlag." + obj.CollisionTraceFlag + " " + "\n"
 		else:
 			if (obj.UseStaticMeshLODGroup == True):
 				ImportScript += "\t" "asset.set_editor_property('lod_group', '" + obj.StaticMeshLODGroup + "')" + "\n"
+			else:
+				ImportScript += "\t" "asset.set_editor_property('lod_group', 'None')" + "\n"
 			if (obj.UseStaticMeshLightMapRes == True):
 				ImportScript += "\t" "asset.set_editor_property('light_map_resolution', " + str(obj.StaticMeshLightMapRes) + ")" +"\n"
 			if obj.CollisionTraceFlag == "CTF_UseDefault": python_CollisionTraceFlag = "CTF_USE_DEFAULT"

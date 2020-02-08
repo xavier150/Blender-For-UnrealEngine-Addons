@@ -82,7 +82,6 @@ def getFirstDeformBoneParent(bone):
 
 def SetCollectionUse(collection):
 	#Set if collection is hide and selectable
-	print(collection)
 	collection.hide_viewport = False
 	collection.hide_select = False
 	try:
@@ -134,11 +133,12 @@ def ValidFilename(filename):
 def ResetArmaturePose(obj):
 	#Reset armature pose
 
-	for x in obj.pose.bones:
-		x.rotation_quaternion = Quaternion((0,0,0),0)
-		x.rotation_euler = Vector((0,0,0))
-		x.scale = Vector((1,1,1))
-		x.location = Vector((0,0,0))
+	for b in obj.pose.bones:
+		b.rotation_quaternion = Quaternion((0,0,0),0)
+		b.rotation_euler = Vector((0,0,0))
+		b.scale = Vector((1,1,1))
+		b.location = Vector((0,0,0))
+
 
 def setWindowsClipboard(text):
 	bpy.context.window_manager.clipboard = text

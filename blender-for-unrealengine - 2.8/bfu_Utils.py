@@ -39,7 +39,7 @@ def GetAllobjectsByExportType(exportType):
 	return(targetObj)
 
 
-def GetAllCollisionAndSocketsObj(list =  None):
+def GetAllCollisionAndSocketsObj(list =	 None):
 	#Get any object that can be understood as a collision or a socket by unreal
 
 	if list is not None:
@@ -74,6 +74,16 @@ def GetSocketDesiredChild(targetObj):
 		fnmatch.fnmatchcase(obj.name, "SOCKET*")]
 	return socket
 
+def RemoveAllConsraints(obj):
+	for b in obj.pose.bones:
+		for c in b.constraints: 
+			b.constraints.remove(c)
+			
+def RescaleStretchLengthConsraints(obj, scale):
+	for b in bpy.context.active_object.pose.bones:
+		for c in b.constraints: 
+			if c.type == "STRETCH_TO":
+				c.rest_length *= scale
 
 def GetAllCollisionObj():
 	#Get any object that can be understood as a collision or a socket by unreal
@@ -85,6 +95,12 @@ def GetAllCollisionObj():
 		fnmatch.fnmatchcase(obj.name, "UCX*")]
 	return colObjs
 
+def GetCollectionToExport(scene):
+	colExport = []
+	for col in scene.CollectionExportList:
+		if col.use == True:
+			colExport.append(col.name)
+	return colExport
 
 def GetActionToExport(obj):
 	#Returns only the actions that will be exported with the Armature
@@ -204,7 +220,15 @@ def SelectParentAndDesiredChilds(obj):
 	selectedObjs.append(obj)
 	bpy.context.view_layer.objects.active = obj
 	return selectedObjs
-	
+
+def GoToMeshEditMode():
+	for obj in bpy.context.selected_objects:
+		if obj.type == "MESH":
+			bpy.context.view_layer.objects.active = obj
+			bpy.ops.object.mode_set(mode = 'EDIT')
+			return True
+	return False
+				
 def ApplyNeededModifierToSelect():
 	
 	activeObj = bpy.context.view_layer.objects.active
@@ -212,17 +236,100 @@ def ApplyNeededModifierToSelect():
 		for mod in [m for m in obj.modifiers if m.type != 'ARMATURE']:
 			bpy.context.view_layer.objects.active = obj
 			bpy.ops.object.modifier_apply(modifier = mod.name)
-			print("mod")
 			
 	bpy.context.view_layer.objects.active = activeObj
+	
+def CorrectExtremeUV(stepScale = 2):
+
+	def GetHaveConnectedLoop(faceTarget):
+		#In bmesh faces
+		for loop in faceTarget.loops:
+			uv = loop[uv_lay].uv
+			for face in bm.faces:
+				if face.select == True:
+					if faceTarget != face:
+						for loop in face.loops:
+							if uv == loop[uv_lay].uv:
+								return True
+		return False
+		
+	def SelectRecursiveUVLinked(uv_lay):
+
+		AddedFaces = []
+		for v in [v for v in bm.verts if v.select]:
+			for f in v.link_faces:
+				if f.select == False:
+					if GetHaveConnectedLoop(f):
+						AddedFaces.append(f)
+						f.select = True
+											   
+		if len(AddedFaces) == 0:
+			return AddedFaces
+		else:
+			for addedFace in SelectRecursiveUVLinked(uv_lay):
+				AddedFaces.append(addedFace)
+			return AddedFaces
+
+	def GetAllIsland(bm, uv_lay):
+		ToCheakFace = []
+		Islands = []
+		for face in bm.faces:
+			ToCheakFace.append(face)
+			
+		while len(ToCheakFace) > 0:
+			for face in bm.faces:
+				face.select = False
+			
+			ToCheakFace[-1].select = True
+			SelectRecursiveUVLinked(uv_lay)
+			
+			
+			Island = []
+			for face in bm.faces:
+				if face.select == True: 
+					Island.append(face)
+					if face in ToCheakFace:
+						ToCheakFace.remove(face)
+			Islands.append(Island)
+		
+		return Islands
+	
+	def MoveItlandToCenter(faces, uv_lay, minDistance):
+		loop = faces[-1].loops[-1]			  
+		
+		x = round(loop[uv_lay].uv[0]/minDistance, 0)*minDistance
+		y = round(loop[uv_lay].uv[1]/minDistance, 0)*minDistance
+		
+		for face in faces:
+			for loop in face.loops:
+				loop[uv_lay].uv[0] -= x
+				loop[uv_lay].uv[1] -= y	  
+
+	def IsValidForUvEdit(obj):
+		if obj.type == "MESH":
+			return True
+		return False
+
+	for obj in bpy.context.selected_objects:
+		if IsValidForUvEdit(obj):
+			bm = bmesh.from_edit_mesh(obj.data)
+			
+			uv_lay = bm.loops.layers.uv.active
+			if uv_lay is None:
+				return
+			
+			for faces in GetAllIsland(bm, uv_lay):
+				uv_lay = bm.loops.layers.uv.active
+				MoveItlandToCenter(faces, uv_lay, stepScale)
+
+			obj.data.update()
+	
 	
 def ApplyExportTransform(obj):
 	newMatrix = obj.matrix_world @ mathutils.Matrix.Translation((0,0,0))
 	saveScale = obj.scale * 1
 
 	#Ref
-
-	
 	if obj.MoveToCenterForExport == True: #Moves object to the center of the scene for export	
 		mat_trans = mathutils.Matrix.Translation((0,0,0))
 		mat_rot = newMatrix.to_quaternion().to_matrix()
@@ -244,10 +351,35 @@ def ApplyExportTransform(obj):
 	
 	obj.matrix_world = newMatrix @ AddMat
 	obj.scale = saveScale
-		
+
+def RescaleActionCurve(action, scale):
+	for fcurve in action.fcurves:
+		if fcurve.data_path.split(".")[-1] == "location":
+			for key in fcurve.keyframe_points:
+				key.co[1] *= scale
+				key.handle_left[1] *=scale
+				key.handle_right[1] *=scale
+
+def RescaleAllActionCurve(scale):
+	for action in bpy.data.actions:
+		for fcurve in action.fcurves:
+			if fcurve.data_path.split(".")[-1] == "location":
+				for key in fcurve.keyframe_points:
+					key.co[1] *= scale
+					key.handle_left[1] *=scale
+					key.handle_right[1] *=scale
+
 def GetFinalAssetToExport():
 	#Returns all assets that will be exported
-
+	
+	def getHaveParentToExport(obj):
+		if obj.parent is not None:
+			if obj.parent.ExportEnum == 'export_recursive':
+				return obj.parent
+			else:
+				return getHaveParentToExport(obj.parent)
+		else:
+			return None
 
 	scene = bpy.context.scene
 	TargetAssetToExport = [] #Obj, Action, type
@@ -259,19 +391,30 @@ def GetFinalAssetToExport():
 
 	if scene.export_ExportOnlySelected == True:
 		objList = []
-		for obj in GetAllobjectsByExportType("export_recursive"):
-			if obj in bpy.context.selected_objects:
+		collectionList = []
+		recuList = GetAllobjectsByExportType("export_recursive")
+		
+		for obj in bpy.context.selected_objects:
+			if obj in recuList:
 				if obj not in objList:
 					objList.append(obj)
-			for objChild in GetExportDesiredChilds(obj):
-				if objChild in bpy.context.selected_objects:
-					if obj not in objList:
-						objList.append(obj)
+			parentTarget = getHaveParentToExport(obj)
+			if parentTarget is not None:
+				if parentTarget not in objList:
+					objList.append(parentTarget)
+		
 
 	else:
 		objList = GetAllobjectsByExportType("export_recursive")
+		collectionList = GetCollectionToExport(scene)
 
-	for obj in	objList:
+	for collection in collectionList:
+		#Collection
+		if scene.static_collection_export:
+			TargetAssetToExport.append(AssetToExport(collection,None,"Collection StaticMesh"))
+			
+		
+	for obj in objList:
 
 		if GetAssetType(obj) == "Alembic":
 			#Alembic
@@ -279,6 +422,7 @@ def GetFinalAssetToExport():
 				TargetAssetToExport.append(AssetToExport(obj,None,"Alembic"))
 
 		if GetAssetType(obj) == "SkeletalMesh":
+			
 			#SkeletalMesh
 			if scene.skeletal_export:
 				TargetAssetToExport.append(AssetToExport(obj,None,"SkeletalMesh"))
@@ -287,9 +431,9 @@ def GetFinalAssetToExport():
 			if scene.anin_export:
 				if obj.ExportNLA:
 					TargetAssetToExport.append(AssetToExport(obj,obj.animation_data,"NlAnim"))
-
+			
+			
 			for action in GetActionToExport(obj):
-
 				#Action
 				if scene.anin_export:
 					if GetActionType(action) == "Action":
@@ -316,6 +460,14 @@ def ValidFilenameForUnreal(filename):
 	newfilename = ValidFilename(os.path.splitext(filename)[0])
 	return (''.join(c for c in newfilename if c != ".")+extension)
 
+def GetCollectionExportDir(abspath = False):
+	#Generate assset folder path
+	scene = bpy.context.scene
+
+	if abspath == True:
+		return bpy.path.abspath(dirpath)
+	else:
+		return os.path.join( scene.export_static_file_path, "" )
 
 def GetObjExportDir(obj, abspath = False):
 	#Generate assset folder path
@@ -333,7 +485,13 @@ def GetObjExportDir(obj, abspath = False):
 	else:
 		return dirpath
 
+def GetCollectionExportFileName(collection, fileType = ".fbx"):
+	#Generate assset file name
 
+	scene = bpy.context.scene
+	return scene.static_prefix_export_name+collection+fileType
+
+		
 def GetObjExportFileName(obj, fileType = ".fbx"):
 	#Generate assset file name
 
@@ -375,7 +533,7 @@ def GetImportAssetScriptCommand():
 	absdirpath = bpy.path.abspath(scene.export_other_file_path)
 	fullpath = os.path.join( absdirpath , fileName )
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
-	if addon_prefs.Use20TabScript == True:
+	if addon_prefs.use20TabScript == True:
 		return 'unreal_engine.py_exec(r"'+fullpath+'")' #20tab
 	else:
 		return 'py "'+fullpath+'"' #Vania
@@ -387,7 +545,7 @@ def GetImportSequencerScriptCommand():
 	fullpath = os.path.join( absdirpath , fileName )
 
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
-	if addon_prefs.Use20TabScript == True:
+	if addon_prefs.use20TabScript == True:
 		return 'unreal_engine.py_exec(r"'+fullpath+'")' #20tab
 	else:
 		return 'py "'+fullpath+'"' #Vania
@@ -397,12 +555,17 @@ def GetAnimSample(obj):
 	#return 1000 #Debug
 	return obj.SampleAnimForExport
 
+def GetDesiredExportArmatureName():
+	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
+	if addon_prefs.removeSkeletonRootBone == True:
+		return "Armature"
+	return addon_prefs.skeletonRootBoneName
+
 def GetObjExportScale(obj):
 	'''
 	#Exported root bone with "Armature" name are removed in Unreal so scale *100 d'ont work...
 	if GetAssetType(obj) == "SkeletalMesh":
-		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
-		if addon_prefs.skeletonRootBoneName == "Armature":
+		if GetDesiredExportArmatureName() == "Armature":
 			return obj.exportGlobalScale * 100
 	'''
 	return obj.exportGlobalScale
@@ -411,15 +574,15 @@ def GetObjExportScale(obj):
 def RenameArmatureAsExportName(obj):
 	#Rename temporarily the Armature as DefaultArmature
 
-	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	scene = bpy.context.scene
 	oldArmatureName = None
-	if obj.name != addon_prefs.skeletonRootBoneName:
+	newArmatureName = GetDesiredExportArmatureName()
+	if obj.name != newArmatureName:
 		oldArmatureName = obj.name
 		#Avoid same name for two armature
-		if addon_prefs.skeletonRootBoneName in scene.objects:
-			scene.objects[addon_prefs.skeletonRootBoneName].name = "ArmatureTemporarilyNameForUe4Export"
-		obj.name = addon_prefs.skeletonRootBoneName
+		if newArmatureName in scene.objects:
+			scene.objects[newArmatureName].name = "ArmatureTemporarilyNameForUe4Export"
+		obj.name = newArmatureName
 	return oldArmatureName
 
 def ResetArmatureName(obj, oldArmatureName):
@@ -597,7 +760,7 @@ def UpdateUe4Name(SubType, objList):
 							obj.name = GenerateUe4Name("SOCKET_"+obj.name)
 
 
-def UpdateNameHierarchy(list =  None):
+def UpdateNameHierarchy(list =	None):
 #Updates hierarchy names
 	
 	if list is not None:
@@ -817,15 +980,23 @@ def UpdateUnrealPotentialError():
 
 		for obj in objToCheck:
 			if GetAssetType(obj) == "SkeletalMesh":
-				RootsBone = []
+				rootBones = []
 				for bone in obj.data.bones:
-					if bone.parent == None:
-						RootsBone.append(bone)
-				if len(RootsBone) > 1:
+					if obj.exportDeformOnly == True:
+						if bone.use_deform == True:
+							if bone.parent == None:
+								rootBones.append(bone)
+					else:
+						if bone.parent == None:
+							rootBones.append(bone)
+				if len(rootBones) > 1:
 					MyError = PotentialErrors.add()
 					MyError.name = obj.name
 					MyError.type = 2
 					MyError.text = 'Object "'+obj.name+'" have Multiple roots bones. Unreal only support single root bone.'
+					MyError.text += '\nRoot bones: '
+					for rootBone in rootBones:
+						MyError.text += rootBone.name+' '
 					MyError.object = obj
 
 	def CheckMarkerOverlay():
@@ -1046,11 +1217,10 @@ def TryToCorrectPotentialError(errorIndex):
 
 def AddFrontEachLine(ImportScript, text = "\t"):
 
-	print("start")
 	NewImportScript = ""
 	text_splited = ImportScript.split('\n')
 	for line in text_splited:
 		NewImportScript += text + line + "\n"
 
-	print("line: "+str(len(text_splited)))
+	#print("line: "+str(len(text_splited)))
 	return NewImportScript
