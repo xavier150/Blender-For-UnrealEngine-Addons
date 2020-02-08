@@ -86,14 +86,14 @@ Materials are not imported, you must create them in Unreal Engine.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocMaterial.jpg">
 
 
-# Armature and Skeleton Tree
-You can set the name what the amature should use once exported in Addon Preferences.
-If the name used is "Armature" Unreal Engine will remove the root bone but the animation will be 100 times smaller. (This is produced because the first bone will always be a size of 100 in Skeleton but not in Animation.)
+# Root bone and Skeleton Tree
+Blender export the armature like a root bone. For remove this bone check the box "Remove root bone" in Addon Preferences.
+You you don't want remove it you can set the desired root bone name. If the name used is "Armature" Unreal Engine will remove the root bone. You can set the root bone scale too.
+If you modify this you will have to import the animation.
 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocSkeletonTree.jpg">
 
 # UV
-( In next update! )
 You can correct extreme UV for better quality in Unreal Engine.
 This is useful if you use UVProject Modifier in Blender.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocUVcorrected.jpg">
