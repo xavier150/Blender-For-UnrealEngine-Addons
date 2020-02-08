@@ -107,6 +107,10 @@ The nomenclature also contains the name of the script and additional file.
 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocNomenclatureColored.jpg">
 
+# Addon Preferences
+Don't forget to look in Addon Preferences.
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocPreferences.jpg">
+
 # Export process
 Now we can export all asset.
 
