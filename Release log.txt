@@ -203,3 +203,26 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Set frames with Custom time don't work
 - Fixed: "Automatic Update Check" take too many time to check (removed)
 - Fixed: StaticMesh sockets import size does not display good value
+
+== Rev 0.2.6 ==
+
+- New: Option in addon preferences for correct Extrem UV Scale
+- New: You can now set desired Skeleton root bone scale in addon preferences
+- New: You can now directly export the Blender collections
+- New: Skeleton root bone scale are now set by default on 1
+- Change: ArmatureRoot bone are auto removed by default
+- Change: Export export skeletal mesh Unit size loocked at 0.01
+- Fixed: Lag with Export only select option
+- Fixed: Import script don't set LodGroup on None if not set in Blender
+- Fixed: Fixed: StaticMesh sockets add ".001" in name
+- Fixed: Linked meshs can break final export size
+- Fixed: Export action can move mesh to center
+- Fixed: RigidBody Anim Node don't work (Bone scale 0.01)
+- Fixed: AnimDynamics Anim Node don't work (Bone scale 0.01)
+- Fixed: CheckArmatureMultipleRoots detect non deform bones
+
+== Rev 0.2.6.1 ==
+
+- Change: Export export static mesh Unit size loocked at 1.0
+- Fixed: Export serval socket at same time can make script fail
+- Fixed: SocketsAdd90X don't use the good rotation
