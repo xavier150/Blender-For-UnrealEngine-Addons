@@ -51,6 +51,40 @@ def DuplicateSelect():
 		if objScene.data is not None:
 			objScene.data = objScene.data.copy()
 
+def SetSocketsExportTransform(obj):
+	#Set socket scale for Unreal
+	
+	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
+	for socket in GetSocketDesiredChild(obj):
+		socket.delta_scale *= addon_prefs.staticSocketsImportedSize
+		if addon_prefs.staticSocketsAdd90X == True:
+			savedScale = socket.scale.copy()
+			AddMat = mathutils.Matrix.Rotation(math.radians(90.0), 4, 'X')
+			socket.matrix_world = socket.matrix_world @ AddMat
+			socket.scale = savedScale
+	
+def AddSocketsTempName(obj):
+	#Add _UE4Socket_TempName at end
+	
+	for socket in GetSocketDesiredChild(obj):
+		socket.name += "_UE4Socket_TempName"
+		
+def RemoveDuplicatedSocketsTempName(obj):
+	#Remove _UE4Socket_TempName at end
+	
+	for socket in GetSocketDesiredChild(obj):
+		ToRemove = "_UE4Socket_TempName.xxx"
+		socket.name = socket.name[:-len(ToRemove)]
+	
+def RemoveSocketsTempName(obj):
+	#Remove _UE4Socket_TempName at end
+	
+	for socket in GetSocketDesiredChild(obj):
+		ToRemove = "_UE4Socket_TempName"
+		socket.name = socket.name[:-len(ToRemove)]
+		
+
+	
 
 def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, actionType):
 	'''
@@ -86,14 +120,9 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	
 	ApplyExportTransform(active)
 	rootScale = addon_prefs.SkeletonRootBoneScale
-	active.scale = active.scale*(100/rootScale)
-	bpy.ops.object.transform_apply(location = True, scale = True, rotation = True)
-	savedScaleLength = bpy.context.scene.unit_settings.scale_length
-	bpy.context.scene.unit_settings.scale_length = 0.01
-
+	savedUnitLength = ApplySkelatalExportScale(active, rootScale)
+	
 	RescaleActionCurve(targetAction, 100*rootScale)
-
-
 	ResetArmaturePose(active)
 	RescaleStretchLengthConsraints(active, 100*rootScale)
 	
@@ -154,7 +183,7 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	
 	#Reset Transform
 	obj.matrix_world = BaseTransform
-	bpy.context.scene.unit_settings.scale_length = savedScaleLength
+	bpy.context.scene.unit_settings.scale_length = savedUnitLength
 	
 	#Reset Curve
 	RescaleActionCurve(targetAction, 1/(100*rootScale))
@@ -189,12 +218,9 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 	BaseTransform = obj.matrix_world.copy()
 	active = bpy.context.view_layer.objects.active
 	
-	ApplyExportTransform(obj)
+	ApplyExportTransform(active)
 	rootScale = addon_prefs.SkeletonRootBoneScale
-	active.scale = active.scale*(100/rootScale)
-	bpy.ops.object.transform_apply(location = True, scale = True, rotation = True)
-	savedScaleLength = bpy.context.scene.unit_settings.scale_length
-	bpy.context.scene.unit_settings.scale_length = 0.01
+	savedUnitLength = ApplySkelatalExportScale(active, rootScale)
 
 	RescaleAllActionCurve(100*rootScale)
 	ResetArmaturePose(active)
@@ -244,7 +270,7 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 	
 	#Reset Transform
 	obj.matrix_world = BaseTransform
-	bpy.context.scene.unit_settings.scale_length = savedScaleLength
+	bpy.context.scene.unit_settings.scale_length = savedUnitLength
 	
 	#Reset Curve
 	RescaleAllActionCurve(1/(100*rootScale))
@@ -340,15 +366,11 @@ def ExportSingleStaticMesh(originalScene, dirpath, filename, obj):
 		bpy.ops.object.mode_set(mode = 'OBJECT')
 	
 	SelectParentAndDesiredChilds(obj)
-	
+	AddSocketsTempName(obj)
 	DuplicateSelect()	
 	ApplyNeededModifierToSelect()
-	
-	
-	
-	
+
 	active = bpy.context.view_layer.objects.active
-	
 	
 
 	if addon_prefs.correctExtremUVScale == True:
@@ -366,17 +388,13 @@ def ExportSingleStaticMesh(originalScene, dirpath, filename, obj):
 	VerifiDirs(absdirpath)
 	fullpath = os.path.join( absdirpath , filename )
 	meshType = GetAssetType(active)
-
-	#Set socket scale for Unreal and set correct name
-	for socket in GetSocketDesiredChild(active):
-		socket.delta_scale *= addon_prefs.staticSocketsImportedSize
-		if addon_prefs.staticSocketsAdd90X == True:
-			socket.delta_rotation_euler[0] += math.radians(90.0)
-			
-		baseSocket = bpy.data.objects[socket.name[:-4]]
-		baseSocket.name = baseSocket.name+".002"
-		socket.name = socket.name[:-4] #Remove .001 at end
+	
+	SetSocketsExportTransform(active)
+	RemoveDuplicatedSocketsTempName(active)
 		
+	savedUnitLength = bpy.context.scene.unit_settings.scale_length
+	bpy.context.scene.unit_settings.scale_length = 1
+
 	bpy.ops.export_scene.fbx(
 		filepath=fullpath,
 		check_existing=False,
@@ -396,12 +414,13 @@ def ExportSingleStaticMesh(originalScene, dirpath, filename, obj):
 		bake_space_transform = False
 		)
 	
-	for socket in GetSocketDesiredChild(active):
-		baseSocket = bpy.data.objects[socket.name+".002"]
-		socket.name = socket.name+".001"
-		baseSocket.name = socket.name[:-4] 
+	bpy.context.scene.unit_settings.scale_length = savedUnitLength
+	
 	
 	bpy.ops.object.delete()
+	RemoveSocketsTempName(obj)
+		
+
 	
 	
 	exportTime = time.process_time()-curr_time
@@ -435,6 +454,7 @@ def ExportSingleSkeletalMesh(originalScene, dirpath, filename, obj):
 		bpy.ops.object.mode_set(mode = 'OBJECT')
 	
 	SelectParentAndDesiredChilds(obj)
+	AddSocketsTempName(obj)
 	DuplicateSelect()	
 	
 	ApplyNeededModifierToSelect()
@@ -456,26 +476,16 @@ def ExportSingleSkeletalMesh(originalScene, dirpath, filename, obj):
 	
 	ApplyExportTransform(active)
 	rootScale = addon_prefs.SkeletonRootBoneScale
-	active.scale = active.scale*(100/rootScale)
-	bpy.ops.object.transform_apply(location = True, scale = True, rotation = True)
-	savedScaleLength = bpy.context.scene.unit_settings.scale_length
-	bpy.context.scene.unit_settings.scale_length = 0.01
+	savedUnitLength = ApplySkelatalExportScale(active, rootScale)
 
 
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)
 	fullpath = os.path.join( absdirpath , filename )
 	meshType = GetAssetType(active)
-
-	#Set socket scale for Unreal and set correct name
-	for socket in GetSocketDesiredChild(active):
-		socket.delta_scale *= addon_prefs.staticSocketsImportedSize
-		if addon_prefs.staticSocketsAdd90X == True:
-			socket.delta_rotation_euler[0] += math.radians(90.0)
 			
-		baseSocket = bpy.data.objects[socket.name[:-4]]
-		baseSocket.name = baseSocket.name+".002"
-		socket.name = socket.name[:-4] #Remove .001 at end
+	SetSocketsExportTransform(active)
+	RemoveDuplicatedSocketsTempName(active)
 
 
 	#Set rename temporarily the Armature as "Armature"
@@ -506,16 +516,11 @@ def ExportSingleSkeletalMesh(originalScene, dirpath, filename, obj):
 	#Reset armature name
 	ResetArmatureName(active, oldArmatureName)
 	
-	bpy.context.scene.unit_settings.scale_length = savedScaleLength
-
-	for socket in GetSocketDesiredChild(active):
-		baseSocket = bpy.data.objects[socket.name+".002"]
-		socket.name = socket.name+".001"
-		baseSocket.name = socket.name[:-4] 
+	bpy.context.scene.unit_settings.scale_length = savedUnitLength
 	
 	bpy.ops.object.delete()
 	
-
+	RemoveSocketsTempName(obj)
 	
 	exportTime = time.process_time()-curr_time
 	MyAsset = originalScene.UnrealExportedAssetsList.add()

@@ -324,7 +324,7 @@ def CorrectExtremeUV(stepScale = 2):
 
 			obj.data.update()
 	
-	
+
 def ApplyExportTransform(obj):
 	newMatrix = obj.matrix_world @ mathutils.Matrix.Translation((0,0,0))
 	saveScale = obj.scale * 1
@@ -351,6 +351,15 @@ def ApplyExportTransform(obj):
 	
 	obj.matrix_world = newMatrix @ AddMat
 	obj.scale = saveScale
+	
+	
+def ApplySkelatalExportScale(obj, rootScale):
+	obj.scale = obj.scale*(100/rootScale)
+	bpy.ops.object.transform_apply(location = True, scale = True, rotation = True)
+	OldUnitLength = bpy.context.scene.unit_settings.scale_length
+	bpy.context.scene.unit_settings.scale_length = 0.01
+	return OldUnitLength
+
 
 def RescaleActionCurve(action, scale):
 	for fcurve in action.fcurves:
@@ -359,6 +368,7 @@ def RescaleActionCurve(action, scale):
 				key.co[1] *= scale
 				key.handle_left[1] *=scale
 				key.handle_right[1] *=scale
+
 
 def RescaleAllActionCurve(scale):
 	for action in bpy.data.actions:
