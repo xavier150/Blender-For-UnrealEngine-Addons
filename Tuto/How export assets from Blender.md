@@ -6,7 +6,7 @@ We will see how to prepare the assets to export.
 
 2. Select the asset you want to export and set the Export type property to "Export recursive". Now repeat the task for all the objects you want to export:
 	- Each object having this property will export with all its children in a Fbx file. If you don't want to export the child set "Not exported" for Export type in Object Properties of the child, or else keep "Auto".
-	- The center of the scene of the Fbx file will be equal to the origin point location of the object in blender. The position of the object in the Blender scene does not matter.
+	- By default the center of the scene of the Fbx file will be equal to the origin point location of the object in blender. So the position of the object in the Blender scene does not matter. go in 'Advanced object properties panel' for change this. [Example video](https://youtu.be/rbW5NcyNoK0)
 	- For a Skeletal mesh you need to set the Export type for Armature as Export recursive.
 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocScreen2.jpg">
