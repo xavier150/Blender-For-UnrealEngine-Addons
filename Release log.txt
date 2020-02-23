@@ -226,3 +226,15 @@ It is now possible to force the duration of an animation according to the scene 
 - Change: Export export static mesh Unit size loocked at 1.0
 - Fixed: Export serval socket at same time can make script fail
 - Fixed: SocketsAdd90X don't use the good rotation
+
+== Rev 0.2.6.2 ==
+
+- New: New options for export animations from Proxy
+- New: Show action(s) will now also display the frames range
+- New: Option for include or not the armature name in animation file name
+- Change: Works better with very complex rigs
+- Change: StartFramesOffset set on 1 by default for animations cycles
+- Fixed: SocketsAdd90X break the socket export location
+- Fixed: modifier with no MESH type object can make script fail
+- Fixed: CheckArmatureMultipleRoots don't work good
+- Fixed: The export process creates an empty with Proxy Armature
