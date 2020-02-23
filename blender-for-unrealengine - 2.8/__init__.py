@@ -30,7 +30,7 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 2, 6, 1), #Rev 0.2.6.1
+	'version': (0, 2, 6, 2), #Rev 0.2.6.2
 	'blender': (2, 80, 0),
 	'location': 'View3D > UI > Unreal Engine 4',
 	'warning': '',
@@ -328,6 +328,18 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
 		subtype = 'FILE_NAME'
 		)
 
+	bpy.types.Object.ExportAsProxy = BoolProperty(
+		name="The armature is a Proxy ?",
+		description="If true this mesh will be exported with a target child for keed to data",
+		default=False
+		)	
+		
+	bpy.types.Object.ExportProxyChild = PointerProperty(
+		name="The armature proxy children",
+		description="Select child proxy (The mesh animated by this armature)",
+		type = bpy.types.Object
+		)
+
 	bpy.types.Object.ExportAsAlembic = BoolProperty(
 		name="Export as Alembic animation",
 		description="If true this mesh will be exported as a Alembic animation",
@@ -380,21 +392,27 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
 				folderNameProperty.prop(obj, 'exportFolderName', icon='FILE_FOLDER')
 
 				if obj.type != "CAMERA":
-					AlembicProp = layout.column()
-					AlembicProp.prop(obj, 'ExportAsAlembic')
-					if obj.ExportAsAlembic == True:
-						AlembicProp.label(text="(Alembic animation are exported with scene position.)")
-						AlembicProp.label(text="(Use import script for use origin position.)")
-					else:
-						if addon_prefs.useGeneratedScripts == True:
-							LodProp = layout.column()
-							LodProp.prop(obj, 'ExportAsLod')
+					ProxyProp = layout.column()
+					ProxyProp.prop(obj, 'ExportAsProxy')
+					if obj.ExportAsProxy == True:
+						ProxyProp.prop(obj, 'ExportProxyChild')
+						pass
+					else:	
+						AlembicProp = layout.column()
+						AlembicProp.prop(obj, 'ExportAsAlembic')
+						if obj.ExportAsAlembic == True:
+							AlembicProp.label(text="(Alembic animation are exported with scene position.)")
+							AlembicProp.label(text="(Use import script for use origin position.)")
+						else:
+							if addon_prefs.useGeneratedScripts == True:
+								LodProp = layout.column()
+								LodProp.prop(obj, 'ExportAsLod')
 
-						if obj.type == "ARMATURE":
-							AssetType2 = layout.column()
-							AssetType2.prop(obj, "ForceStaticMesh") #Show asset type
-							if GetAssetType(obj) == "SkeletalMesh":
-								AssetType2.prop(obj, 'exportDeformOnly')
+							if obj.type == "ARMATURE":
+								AssetType2 = layout.column()
+								AssetType2.prop(obj, "ForceStaticMesh") #Show asset type
+								if GetAssetType(obj) == "SkeletalMesh":
+									AssetType2.prop(obj, 'exportDeformOnly')
 						
 
 						
@@ -672,7 +690,7 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 	bpy.types.Object.StartFramesOffset = IntProperty(
 		name = "Offset at start frame",
 		description = "Offset for the start frame.",
-		default=0
+		default=1
 	)
 
 	bpy.types.Object.EndFramesOffset = IntProperty(
@@ -770,7 +788,8 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 				col = self.layout.column()
 				for action in actions:
 					row = col.row()
-					row.label(text="- "+action.name+GetActionType(action))
+					Frames = GetDesiredActionStartEndTime(obj, action)
+					row.label(text="- "+action.name+GetActionType(action)+" From "+str(Frames[0])+" to "+str(Frames[1]) )
 			bpy.context.window_manager.popup_menu(draw, title=popup_title, icon='ACTION')
 			return {'FINISHED'}
 
@@ -1263,6 +1282,7 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 							'scene.anim_prefix_export_name',
 							'scene.pose_prefix_export_name',
 							'scene.camera_prefix_export_name',
+							'scene.include_armature_export_name',
 							'scene.anim_subfolder_name',
 							'scene.export_static_file_path',
 							'scene.export_skeletal_file_path',
@@ -1313,6 +1333,11 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 		description = "Prefix of camera animations",
 		maxlen = 32,
 		default = "Cam_")
+		
+	bpy.types.Scene.include_armature_export_name = bpy.props.BoolProperty(
+		name = "Include armature in animations file name",
+		description = "Include armature name in animation export file name",
+		default = True)
 
 	#Sub folder
 	bpy.types.Scene.anim_subfolder_name = bpy.props.StringProperty(
@@ -1396,6 +1421,8 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 		propsPrefix.prop(scn, 'anim_prefix_export_name', icon='OBJECT_DATA')
 		propsPrefix.prop(scn, 'pose_prefix_export_name', icon='OBJECT_DATA')
 		propsPrefix.prop(scn, 'camera_prefix_export_name', icon='OBJECT_DATA')
+		propsPrefix.prop(scn, 'include_armature_export_name')
+		
 
 		#Sub folder
 		propsSub = self.layout.row()

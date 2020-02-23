@@ -56,15 +56,15 @@ def GetAllCollisionAndSocketsObj(list =	 None):
 	return colObjs
 
 
-def GetExportDesiredChilds(obj, d = False):
+def GetExportDesiredChilds(obj):
 	#Get only all child objects that must be exported with parent object
-
-	
 	
 	DesiredObj = []
 	for child in GetRecursiveChilds(obj):
 		if child.ExportEnum != "dont_export":
+			if child.name in bpy.context.window.view_layer.objects:
 				DesiredObj.append(child)
+		
 			
 	return DesiredObj
 
@@ -216,7 +216,12 @@ def SelectParentAndDesiredChilds(obj):
 			else:
 				selectObj.select_set(True)
 				selectedObjs.append(selectObj)
+				
 	obj.select_set(True)
+	if obj.ExportAsProxy == True:
+		if obj.ExportProxyChild is not None:
+			obj.ExportProxyChild.select_set(True)
+			
 	selectedObjs.append(obj)
 	bpy.context.view_layer.objects.active = obj
 	return selectedObjs
@@ -231,13 +236,16 @@ def GoToMeshEditMode():
 				
 def ApplyNeededModifierToSelect():
 	
-	activeObj = bpy.context.view_layer.objects.active
-	for obj in bpy.context.selected_objects:
-		for mod in [m for m in obj.modifiers if m.type != 'ARMATURE']:
-			bpy.context.view_layer.objects.active = obj
-			bpy.ops.object.modifier_apply(modifier = mod.name)
-			
-	bpy.context.view_layer.objects.active = activeObj
+	SavedSelect = GetCurrentSelect()
+	for obj in SavedSelect[0]:
+		if obj.type == "MESH":
+			SelectSpecificObject(obj)
+			for mod in [m for m in obj.modifiers if m.type != 'ARMATURE']:
+				bpy.ops.object.modifier_apply(modifier = mod.name)
+				
+	
+	SetCurrentSelect(SavedSelect)
+	
 	
 def CorrectExtremeUV(stepScale = 2):
 
@@ -353,12 +361,52 @@ def ApplyExportTransform(obj):
 	obj.scale = saveScale
 	
 	
-def ApplySkelatalExportScale(obj, rootScale):
+def ApplySkeletalExportScale(obj, rootScale):
 	obj.scale = obj.scale*(100/rootScale)
-	bpy.ops.object.transform_apply(location = True, scale = True, rotation = True)
 	OldUnitLength = bpy.context.scene.unit_settings.scale_length
 	bpy.context.scene.unit_settings.scale_length = 0.01
+	bpy.ops.object.transform_apply(location = True, scale = True, rotation = True, properties = True)
 	return OldUnitLength
+
+
+def RescaleSelectCurveHook(scale):
+	
+	def GetRescaledMatrix(matrix, scale):
+		newMatrix = matrix.copy()
+		
+		newMatrix[0][0] *= 1#Fix
+		newMatrix[0][1] *= 1
+		newMatrix[0][2] *= 1
+		newMatrix[0][3] *= scale
+		#---
+		newMatrix[1][0] *= 1
+		newMatrix[1][1] *= 1#Fix
+		newMatrix[1][2] *= 1#Fix
+		newMatrix[1][3] *= scale
+		#---
+		newMatrix[2][0] *= 1
+		newMatrix[2][1] *= 1#Fix
+		newMatrix[2][2] *= 1#Fix
+		newMatrix[2][3] *= scale
+		#---
+		newMatrix[3][0] *= 1
+		newMatrix[3][1] *= 1
+		newMatrix[3][2] *= 1
+		newMatrix[3][3] *= 1#Fix
+		
+		return newMatrix
+	
+	for obj in bpy.context.selected_objects:
+		if obj.type == "CURVE":
+			for mod in obj.modifiers:
+				if mod.type == "HOOK":
+					scale_factor = 100
+					mod.matrix_inverse = GetRescaledMatrix(mod.matrix_inverse, scale_factor)
+					#NewMatrix = mod.matrix_inverse.Scale(scale_factor, 4)
+					#mod.matrix_inverse = NewMatrix
+			for spline in obj.data.splines:
+				for bezier_point in spline.bezier_points:
+					bezier_point.radius *= scale
 
 
 def RescaleActionCurve(action, scale):
@@ -523,11 +571,16 @@ def GetActionExportFileName(obj, action, fileType = ".fbx"):
 	#Generate action file name
 
 	scene = bpy.context.scene
+	if scene.include_armature_export_name == True:
+		ArmatureName = obj.name+"_"
+	else:
+		ArmatureName = ""
+	
 	animType = GetActionType(action)
 	if animType == "NlAnim" or animType == "Action": #Nla can be exported as action
-		return scene.anim_prefix_export_name+obj.name+"_"+action.name+fileType
+		return scene.anim_prefix_export_name+ArmatureName+action.name+fileType
 	elif animType == "Pose":
-		return scene.pose_prefix_export_name+obj.name+"_"+action.name+fileType
+		return scene.pose_prefix_export_name+ArmatureName+action.name+fileType
 	else:
 		return None
 
@@ -535,7 +588,12 @@ def GetNLAExportFileName(obj, fileType = ".fbx"):
 	#Generate action file name
 
 	scene = bpy.context.scene
-	return scene.anim_prefix_export_name+obj.name+"_"+obj.NLAAnimName+fileType
+	if scene.include_armature_export_name == True:
+		ArmatureName = obj.name+"_"
+	else:
+		ArmatureName = ""
+		
+	return scene.anim_prefix_export_name+ArmatureName+obj.NLAAnimName+fileType
 
 def GetImportAssetScriptCommand():
 	scene = bpy.context.scene
@@ -978,6 +1036,9 @@ def UpdateUnrealPotentialError():
 				for child in childs:
 					if child.type == "MESH":
 						validChild += 1
+				if obj.ExportAsProxy == True:
+					if obj.ExportProxyChild is not None:
+						validChild += 1
 				if validChild < 1:
 					MyError = PotentialErrors.add()
 					MyError.name = obj.name
@@ -987,18 +1048,28 @@ def UpdateUnrealPotentialError():
 
 	def CheckArmatureMultipleRoots():
 		#Check that skeleton have multiples roots
-
 		for obj in objToCheck:
 			if GetAssetType(obj) == "SkeletalMesh":
+			
 				rootBones = []
-				for bone in obj.data.bones:
-					if obj.exportDeformOnly == True:
-						if bone.use_deform == True:
-							if bone.parent == None:
-								rootBones.append(bone)
-					else:
+				if obj.exportDeformOnly == False:	
+					for bone in obj.data.bones:
 						if bone.parent == None:
 							rootBones.append(bone)
+				
+				
+				if obj.exportDeformOnly == True:	
+					for bone in obj.data.bones:
+						if bone.use_deform == True:
+							rootBone = getRootBoneParent(bone)
+							if rootBone not in rootBones:
+								rootBones.append(bone)
+
+
+
+							
+							
+							
 				if len(rootBones) > 1:
 					MyError = PotentialErrors.add()
 					MyError.name = obj.name
@@ -1232,5 +1303,4 @@ def AddFrontEachLine(ImportScript, text = "\t"):
 	for line in text_splited:
 		NewImportScript += text + line + "\n"
 
-	#print("line: "+str(len(text_splited)))
 	return NewImportScript

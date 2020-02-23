@@ -43,6 +43,39 @@ def GetCurrentAddonRelase():
 		
 	return "v."+str(v[0])+"."+str(v[1])+"."+str(v[2])+letter
 
+def is_deleted(o):
+	try:
+		return not (o.name in bpy.data.objects)
+	except:
+		return True
+    
+
+def GetCurrentSelect():
+	#Return array for selected and the active
+
+	activeObj = bpy.context.view_layer.objects.active
+	SelectedObjs = bpy.context.selected_objects.copy()
+	return([activeObj, SelectedObjs])
+
+def SetCurrentSelect(SelectArray):
+	#Get array select object and the active
+	
+	bpy.ops.object.select_all(action='DESELECT')
+	for obj in SelectArray[1]:
+		if not is_deleted(obj):
+			if obj.name in bpy.context.window.view_layer.objects:
+				obj.select_set(True)
+	SelectArray[0].select_set(True)
+	bpy.context.view_layer.objects.active = SelectArray[0]
+	
+def SelectSpecificObject(obj):
+	
+	bpy.ops.object.select_all(action='DESELECT')
+	if obj.name in bpy.context.window.view_layer.objects:
+		obj.select_set(True)
+	bpy.context.view_layer.objects.active = obj	
+	
+
 
 def ChecksRelationship(arrayA, arrayB):
 	#Checks if it exits an identical variable in two lists
@@ -71,6 +104,11 @@ def GetChilds(obj):
 				ChildsObj.append(childObj)
 
 	return ChildsObj
+
+def getRootBoneParent(bone):
+	if bone.parent is not None:
+		return getRootBoneParent(bone.parent)
+	return bone
 
 def getFirstDeformBoneParent(bone):
 	if bone.parent is not None:

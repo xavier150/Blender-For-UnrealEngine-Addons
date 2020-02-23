@@ -33,19 +33,90 @@ from . import bfu_Utils
 importlib.reload(bfu_Utils)
 from .bfu_Utils import *
 
+def ApplyProxyData(obj):
+	
+	#Apphy proxy data if needed.
+	if obj.ExportProxyChild is not None:
+		
+		def ReasignProxySkeleton(newArmature, oldArmature):
+			for select in bpy.context.selected_objects:
+				if select.type == "CURVE":
+					for mod in select.modifiers:
+						if mod.type == "HOOK":
+							if mod.object == oldArmature:
+								matrix_inverse = mod.matrix_inverse.copy()
+								mod.object = newArmature
+								mod.matrix_inverse = matrix_inverse
+				
+				else:
+					for mod in select.modifiers:
+						if mod.type == 'ARMATURE':
+							if mod.object == oldArmature:
+								mod.object = newArmature
+			
+			for bone in newArmature.pose.bones:
+				for cons in bone.constraints:
+					if hasattr(cons, 'target'):
+						if cons.target == oldArmature:
+							cons.target = newArmature
+						else:
+							NewChildProxyName = cons.target.name+"_UEProxyChild"
+							if NewChildProxyName in bpy.data.objects:
+								cons.target = bpy.data.objects[NewChildProxyName]
+
+
+
+
+		#Get old armature
+		OldProxyChildArmature = None
+		for selectedObj in bpy.context.selected_objects:
+			if selectedObj != obj:
+				if selectedObj.type == "ARMATURE":
+					OldProxyChildArmature = selectedObj
+				
+		if OldProxyChildArmature is not None:
+			
+			#Re set parent + add to remove	
+			ToRemove = []
+			for selectedObj in bpy.context.selected_objects:
+				if selectedObj != obj:
+					if selectedObj.parent == OldProxyChildArmature:
+						SavedPos = selectedObj.matrix_world.copy()
+						selectedObj.name += "_UEProxyChild"
+						selectedObj.parent = obj
+						selectedObj.matrix_world = SavedPos
+					else:
+						ToRemove.append(selectedObj)
+			
+			ReasignProxySkeleton(obj, OldProxyChildArmature)
+					
+
+		
+
+							
+
+			
+			SavedSelect = GetCurrentSelect()
+			SetCurrentSelect([OldProxyChildArmature, ToRemove])
+			bpy.ops.object.delete()
+			SetCurrentSelect(SavedSelect)				
+
+
+
 def DuplicateSelect():
+	
 	scene = bpy.context.scene
 	bpy.ops.object.duplicate()
-	currentObjName = []
-	for objScene in scene.objects:
-		currentObjName.append(objScene.name)
-		
-	bpy.ops.object.duplicates_make_real(use_base_parent=True, use_hierarchy=True)
 	
-	for objScene in scene.objects:
-		if objScene.name not in currentObjName:
-			objScene.select_set(True)
-			pass
+	currentSelectNames = []
+	for currentSelectName in bpy.context.selected_objects:
+		currentSelectNames.append(currentSelectName.name)
+
+	bpy.ops.object.duplicates_make_real(use_base_parent=True, use_hierarchy=True)
+
+	for objSelect in currentSelectNames:
+		if objSelect not in bpy.context.selected_objects:
+			bpy.data.objects[objSelect].select_set(True)
 			
 	for objScene in bpy.context.selected_objects:
 		if objScene.data is not None:
@@ -59,9 +130,11 @@ def SetSocketsExportTransform(obj):
 		socket.delta_scale *= addon_prefs.staticSocketsImportedSize
 		if addon_prefs.staticSocketsAdd90X == True:
 			savedScale = socket.scale.copy()
+			savedLocation = socket.location.copy()
 			AddMat = mathutils.Matrix.Rotation(math.radians(90.0), 4, 'X')
 			socket.matrix_world = socket.matrix_world @ AddMat
 			socket.scale = savedScale
+			socket.location = savedLocation
 	
 def AddSocketsTempName(obj):
 	#Add _UE4Socket_TempName at end
@@ -114,19 +187,21 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 
 	SelectParentAndDesiredChilds(obj)
 	DuplicateSelect()
-	
 	BaseTransform = obj.matrix_world.copy()
 	active = bpy.context.view_layer.objects.active
+	if active.ExportAsProxy == True:
+		ApplyProxyData(active)		
 	
 	ApplyExportTransform(active)
 	rootScale = addon_prefs.SkeletonRootBoneScale
-	savedUnitLength = ApplySkelatalExportScale(active, rootScale)
+	savedUnitLength = ApplySkeletalExportScale(active, rootScale)
 	
 	RescaleActionCurve(targetAction, 100*rootScale)
+	RescaleSelectCurveHook(1/100)
+
 	ResetArmaturePose(active)
 	RescaleStretchLengthConsraints(active, 100*rootScale)
 	
-
 	if (scene.is_nla_tweakmode == True):
 		active.animation_data.use_tweak_mode = False #animation_data.action is ReadOnly with tweakmode in 2.8
 	active.animation_data.action = targetAction #Apply desired action and reset NLA
@@ -217,12 +292,15 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 	DuplicateSelect()
 	BaseTransform = obj.matrix_world.copy()
 	active = bpy.context.view_layer.objects.active
+	if active.ExportAsProxy == True:
+		ApplyProxyData(active)
 	
 	ApplyExportTransform(active)
 	rootScale = addon_prefs.SkeletonRootBoneScale
-	savedUnitLength = ApplySkelatalExportScale(active, rootScale)
+	savedUnitLength = ApplySkeletalExportScale(active, rootScale)
 
 	RescaleAllActionCurve(100*rootScale)
+	RescaleSelectCurveHook(1/100)
 	ResetArmaturePose(active)
 	RescaleStretchLengthConsraints(active, 100*rootScale)
 	
@@ -344,7 +422,7 @@ def ExportSingleStaticMeshCollection(originalScene, dirpath, filename, collectio
 	ExportSingleStaticMesh(originalScene, dirpath, filename, obj)
 	
 	#Remove the created collection
-	obj.select_set(True)
+	SelectSpecificObject(obj)
 	bpy.ops.object.delete()  
 	
 	
@@ -390,6 +468,7 @@ def ExportSingleStaticMesh(originalScene, dirpath, filename, obj):
 	meshType = GetAssetType(active)
 	
 	SetSocketsExportTransform(active)
+	
 	RemoveDuplicatedSocketsTempName(active)
 		
 	savedUnitLength = bpy.context.scene.unit_settings.scale_length
@@ -452,31 +531,32 @@ def ExportSingleSkeletalMesh(originalScene, dirpath, filename, obj):
 	
 	if	bpy.ops.object.mode_set.poll():
 		bpy.ops.object.mode_set(mode = 'OBJECT')
+
 	
 	SelectParentAndDesiredChilds(obj)
 	AddSocketsTempName(obj)
 	DuplicateSelect()	
-	
+		
 	ApplyNeededModifierToSelect()
 	
-	
-	
 	if addon_prefs.correctExtremUVScale == True:
-		activeArmature = bpy.context.view_layer.objects.active
+		SavedSelect = GetCurrentSelect()
 		if GoToMeshEditMode() == True:
 			CorrectExtremeUV(2)
 		bpy.ops.object.mode_set(mode = 'OBJECT')
-		bpy.context.view_layer.objects.active = activeArmature
+		SetCurrentSelect(SavedSelect)
 		
 		
 		
 		
 	UpdateNameHierarchy(GetAllCollisionAndSocketsObj(bpy.context.selected_objects))
 	active = bpy.context.view_layer.objects.active
+	if active.ExportAsProxy == True:
+		ApplyProxyData(active)
 	
 	ApplyExportTransform(active)
 	rootScale = addon_prefs.SkeletonRootBoneScale
-	savedUnitLength = ApplySkelatalExportScale(active, rootScale)
+	savedUnitLength = ApplySkeletalExportScale(active, rootScale)
 
 
 	absdirpath = bpy.path.abspath(dirpath)
@@ -552,8 +632,7 @@ def ExportSingleFbxCamera(originalScene, dirpath, filename, obj):
 	bpy.ops.object.select_all(action='DESELECT')
 
 	#Select and rescale camera for export
-	obj.select_set(True)
-	bpy.context.view_layer.objects.active = obj
+	SelectSpecificObject(obj)
 	obj.delta_scale*=0.01
 	if obj.animation_data is not None:
 		action = obj.animation_data.action
