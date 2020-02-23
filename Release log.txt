@@ -238,3 +238,5 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: modifier with no MESH type object can make script fail
 - Fixed: CheckArmatureMultipleRoots don't work good
 - Fixed: The export process creates an empty with Proxy Armature
+- Fixed: Proxy armature with curve in rig can break the animation.
+- Fixed: Script fail with modifier on Curve or Text
