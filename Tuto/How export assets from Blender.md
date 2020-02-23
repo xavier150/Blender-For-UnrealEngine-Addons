@@ -65,13 +65,6 @@ For the NLA:
 2. In Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality.
 3. If you just want the NLAnimation set Action to export as Not exported and check the box Export Nla with your desired name.
 
-# Export animation with Proxys
-If you want export the animations of a Skeletal Mesh with Proxys you should set proxy as parent of your collection and set Export recursive on the proxy.
-
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocActionWithProxy.jpg"> 
-Warning: don't use the exported fbx from a proxy like a Skeleton or SkeletalMesh. It containt a double Rig.
-
-
 # Export animation with Proxys (In next version)
 If you want export the animations of a Skeletal Mesh with Proxys you should set 'Export recursive' on the proxy. Tick 'The armature is a Proxy ?' and select the child proxy.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocActionWithProxyV2.jpg"> 
