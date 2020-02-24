@@ -65,7 +65,6 @@ def WriteImportPythonHeader(use20tab = False):
 		ImportScript += "import configparser" + "\n"
 	else:
 		ImportScript += "import ConfigParser" + "\n"
-	print(use20tab)
 	
 	ImportScript += "import ast" + "\n"
 	if use20tab == True:

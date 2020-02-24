@@ -237,7 +237,7 @@ def GoToMeshEditMode():
 def ApplyNeededModifierToSelect():
 	
 	SavedSelect = GetCurrentSelect()
-	for obj in SavedSelect[0]:
+	for obj in bpy.context.selected_objects:
 		if obj.type == "MESH":
 			SelectSpecificObject(obj)
 			for mod in [m for m in obj.modifiers if m.type != 'ARMATURE']:
