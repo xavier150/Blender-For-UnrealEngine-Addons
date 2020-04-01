@@ -253,6 +253,7 @@ class BFU_PT_BlenderForUnreal(bpy.types.Panel):
 							'obj.AutoGenerateCollision',
 							'obj.MaterialSearchLocation',
 							'obj.CollisionTraceFlag',
+							'obj.VertexColorImportOption',
 							'obj.exportActionEnum',
 							'obj.PrefixNameToExport',
 							'obj.AnimStartEndTimeEnum',
@@ -543,6 +544,17 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 			]
 		)
 
+	bpy.types.Object.VertexColorImportOption = EnumProperty(
+		name = "Vertex Color Import Option",
+		description = "Specify how vertex colors should be imported",
+		#Vania python -> https://docs.unrealengine.com/en-US/PythonAPI/class/VertexColorImportOption.html
+		#20tab python -> https://docs.unrealengine.com/en-US/API/Editor/UnrealEd/Factories/EVertexColorImportOption__Type/index.html
+		items = [
+			("VCIO_Ignore", "Ignore", "Ignore vertex colors from the FBX file, and keep the existing mesh vertex colors.", 1),
+			("VCIO_Replace", "Replace", "Import the static mesh using the vertex colors from the FBX file.", 2)
+			]
+		)
+
 
 	def draw(self, context):
 
@@ -583,6 +595,9 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 						
 						StaticMeshCollisionTraceFlag = layout.row()
 						StaticMeshCollisionTraceFlag.prop(obj, 'CollisionTraceFlag')
+
+						StaticMeshVertexColorImportOption = layout.row()
+						StaticMeshVertexColorImportOption.prop(obj, 'VertexColorImportOption')
 
 						StaticMeshLightMapRes = layout.row()
 						StaticMeshLightMapRes.prop(obj, 'UseStaticMeshLightMapRes', text="")
