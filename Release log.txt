@@ -240,3 +240,12 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: The export process creates an empty with Proxy Armature
 - Fixed: Proxy armature with curve in rig can break the animation.
 - Fixed: Script fail with modifier on Curve or Text
+
+== Rev 0.2.7 ==
+
+- New: Button for correct Extrem UV
+- New: VertexColorImportOption (Vania python import for the momment)
+- Fixed: Export camera do Script Fail
+- Fixed: Import script don't work if a folder in path contains '
+- Fixed: Object are not exported if bpy.context.object.hide_select = True
+- 
