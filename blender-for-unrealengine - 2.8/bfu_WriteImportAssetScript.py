@@ -375,6 +375,10 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 			if obj.CollisionTraceFlag == "CTF_UseComplexAsSimple": python_CollisionTraceFlag = "CTF_USE_COMPLEX_AS_SIMPLE"
 			ImportScript += "\t" + "asset.get_editor_property('body_setup').set_editor_property('collision_trace_flag', unreal.CollisionTraceFlag." + python_CollisionTraceFlag + ") " + "\n"
 
+			if obj.VertexColorImportOption == "VCIO_Ignore" : python_VertexColorImportOption = "IGNORE"
+			if obj.VertexColorImportOption == "VCIO_Replace" : python_VertexColorImportOption = "REPLACE"
+			ImportScript += "\t" + "asset.get_editor_property('asset_import_data').set_editor_property('vertex_color_import_option', unreal.VertexColorImportOption." + python_VertexColorImportOption + ") " + "\n"
+
 
 
 	if asset.assetType == "SkeletalMesh":
