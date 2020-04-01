@@ -67,7 +67,7 @@ def WriteImportSequencerScript(use20tab = False):
 
 
 	#Prepare var
-	ImportScript += "\t" + "seqPath = r'"+os.path.join(r"/Game/",scene.unreal_levelsequence_import_location)+"'" + "\n"
+	ImportScript += '\t' + 'seqPath = r"'+os.path.join(r'/Game/',scene.unreal_levelsequence_import_location)+'"' + '\n'
 	ImportScript += "\t" + "seqName = r'"+scene.unreal_levelsequence_name+"'" + "\n"
 	ImportScript += "\t" + "seqTempName = r'"+scene.unreal_levelsequence_name+"'+str(time.time())" + "\n"
 	if use20tab == True:
@@ -235,9 +235,9 @@ def WriteImportSequencerScript(use20tab = False):
 			#Import fbx transform
 			ImportScript += "\t" + "#Import fbx transform" + "\n"
 			AdditionalTracksLoc = (os.path.join(asset.exportPath, GetObjExportFileName(asset.object,"_AdditionalTrack.ini")))
-			ImportScript += "\t" + "AdditionalTracksLoc = os.path.join(r'"+AdditionalTracksLoc+"')" + "\n"
+			ImportScript += '\t' + 'AdditionalTracksLoc = os.path.join(r"'+AdditionalTracksLoc+'")' + '\n'
 			fbxFilePath = (os.path.join(asset.exportPath, GetObjExportFileName(camera)))
-			ImportScript += "\t" + "fbxFilePath = os.path.join(r'"+fbxFilePath+"')" + "\n"
+			ImportScript += '\t' + 'fbxFilePath = os.path.join(r"'+fbxFilePath+'")' + '\n'
 			if use20tab == True:
 				ImportScript += "\t" + "for obj in seq.MovieScene.ObjectBindings:" + "\n"
 				ImportScript += "\t\t" + "if obj.ObjectGuid == ue.string_to_guid(camera_spawnable_guid):" + "\n"

@@ -138,7 +138,6 @@ def GetActionToExport(obj):
 
 	return TargetActionToExport
 
-
 def GetDesiredActionStartEndTime(obj, action):
 	#Returns desired action or camera anim start/end time
 	#Return start with index 0 and end with index 1
@@ -147,6 +146,7 @@ def GetDesiredActionStartEndTime(obj, action):
 	if obj.type == "CAMERA":
 		startTime = scene.frame_start
 		endTime = scene.frame_end
+		return (startTime,endTime)
 
 	elif obj.AnimStartEndTimeEnum == "with_keyframes":
 		startTime = action.frame_range.x + obj.StartFramesOffset #GetFirstActionFrame + Offset

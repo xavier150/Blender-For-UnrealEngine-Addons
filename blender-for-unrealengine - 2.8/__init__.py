@@ -30,7 +30,7 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 2, 6, 2), #Rev 0.2.6.2
+	'version': (0, 2, 7), #Rev 0.2.7
 	'blender': (2, 80, 0),
 	'location': 'View3D > UI > Unreal Engine 4',
 	'warning': '',
@@ -80,6 +80,12 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 	# this must match the addon name, use '__package__'
 	# when defining this in a submodule of a python package.
 	bl_idname = __name__
+
+	bakeArmatureAction : BoolProperty(
+		name='Bake Armature animation',
+		description='Bake Armature animation for export (Export will take more time)',
+		default=False,
+		)
 
 	correctExtremUVScale : BoolProperty(
 		name='Correct Extrem UV Scale',
@@ -186,6 +192,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		data = boxColumn.box()
 		data.label(text='DATA')
 		data.prop(self, "correctExtremUVScale")
+		data.prop(self, "bakeArmatureAction")
 		data.prop(self, "exportWithCustomProps")
 		data.prop(self, "exportWithMetaData")
 		data.prop(self, "revertExportPath")
@@ -543,7 +550,7 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 			("CTF_UseComplexAsSimple", "Use Complex as Simple", "Create only simple shapes. Use simple shapes for all scene queries and collision tests.", 4)
 			]
 		)
-
+	
 	bpy.types.Object.VertexColorImportOption = EnumProperty(
 		name = "Vertex Color Import Option",
 		description = "Specify how vertex colors should be imported",
@@ -595,7 +602,7 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 						
 						StaticMeshCollisionTraceFlag = layout.row()
 						StaticMeshCollisionTraceFlag.prop(obj, 'CollisionTraceFlag')
-
+						
 						StaticMeshVertexColorImportOption = layout.row()
 						StaticMeshVertexColorImportOption.prop(obj, 'VertexColorImportOption')
 
@@ -1849,6 +1856,7 @@ class BFU_PT_Export(bpy.types.Panel):
 
 
 class BFU_PT_Clipboard(bpy.types.Panel):
+
 	#Is Clipboard panel
 
 	bl_idname = "BFU_PT_Clipboard"
@@ -1895,6 +1903,24 @@ class BFU_PT_Clipboard(bpy.types.Panel):
 		else:
 			layout.label(text='(Generated scripts are deactivated.)')
 
+class BFU_PT_CorrectAndImprov(bpy.types.Panel):
+	#Is Clipboard panel
+
+	bl_idname = "BFU_PT_CorrectAndImprov"
+	bl_label = "Correct and improv"
+	bl_space_type = "VIEW_3D"
+	bl_region_type = "UI"
+	bl_category = "Unreal Engine 4 bis"
+	bl_parent_id = "BFU_PT_BlenderForUnreal"
+	
+	class BFU_OT_CorrectExtremUV(Operator):
+		bl_label = "Correct extrem UV"
+		bl_idname = "object.correct_extrem_uv"
+		bl_description = "Correct extrem UV island of the selected object for better use in real time engines"
+
+		def execute(self, context):
+			CorrectExtremeUV(stepScale = 2)
+			return {'FINISHED'}
 #############################[...]#############################
 
 
@@ -1952,6 +1978,8 @@ classes = (
 	BFU_PT_Clipboard,
 	BFU_PT_Clipboard.BFU_OT_CopyImportAssetScriptCommand,
 	BFU_PT_Clipboard.BFU_OT_CopyImportSequencerScriptCommand,
+	
+	BFU_PT_CorrectAndImprov.BFU_OT_CorrectExtremUV
 )
 
 register, unregister = bpy.utils.register_classes_factory(classes)

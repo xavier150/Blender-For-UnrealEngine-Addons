@@ -102,7 +102,16 @@ def ApplyProxyData(obj):
 			SetCurrentSelect(SavedSelect)				
 
 
+def BakeArmatureAnimation(armature, frame_start, frame_end):
+	#Change to pose mode
+	SavedSelect = GetCurrentSelect()
+	bpy.ops.object.select_all(action='DESELECT')
+	SelectSpecificObject(armature)
+	bpy.ops.nla.bake(frame_start=frame_start, frame_end=frame_end, only_selected=False, visual_keying=True, clear_constraints=True, bake_types={'POSE'})
+	bpy.ops.object.select_all(action='DESELECT')
+	SetCurrentSelect(SavedSelect)	
 
+	
 def DuplicateSelect():
 	
 	scene = bpy.context.scene
@@ -190,7 +199,10 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	BaseTransform = obj.matrix_world.copy()
 	active = bpy.context.view_layer.objects.active
 	if active.ExportAsProxy == True:
-		ApplyProxyData(active)		
+		ApplyProxyData(active)	
+
+	if addon_prefs.bakeArmatureAction == True:
+		BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)		
 	
 	ApplyExportTransform(active)
 	rootScale = addon_prefs.SkeletonRootBoneScale
@@ -198,7 +210,6 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	
 	RescaleActionCurve(targetAction, 100*rootScale)
 	RescaleSelectCurveHook(1/100)
-
 	ResetArmaturePose(active)
 	RescaleStretchLengthConsraints(active, 100*rootScale)
 	
@@ -295,10 +306,13 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 	if active.ExportAsProxy == True:
 		ApplyProxyData(active)
 	
+	if addon_prefs.bakeArmatureAction == True:
+		BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)
+		
 	ApplyExportTransform(active)
 	rootScale = addon_prefs.SkeletonRootBoneScale
 	savedUnitLength = ApplySkeletalExportScale(active, rootScale)
-
+	
 	RescaleAllActionCurve(100*rootScale)
 	RescaleSelectCurveHook(1/100)
 	ResetArmaturePose(active)
@@ -629,10 +643,12 @@ def ExportSingleFbxCamera(originalScene, dirpath, filename, obj):
 	curr_time = time.process_time()
 	if	bpy.ops.object.mode_set.poll():
 		bpy.ops.object.mode_set(mode = 'OBJECT')
-	bpy.ops.object.select_all(action='DESELECT')
+	
 
 	#Select and rescale camera for export
+	bpy.ops.object.select_all(action='DESELECT')
 	SelectSpecificObject(obj)
+	
 	obj.delta_scale*=0.01
 	if obj.animation_data is not None:
 		action = obj.animation_data.action

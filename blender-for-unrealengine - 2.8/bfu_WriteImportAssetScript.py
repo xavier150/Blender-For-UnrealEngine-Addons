@@ -379,8 +379,6 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 			if obj.VertexColorImportOption == "VCIO_Replace" : python_VertexColorImportOption = "REPLACE"
 			ImportScript += "\t" + "asset.get_editor_property('asset_import_data').set_editor_property('vertex_color_import_option', unreal.VertexColorImportOption." + python_VertexColorImportOption + ") " + "\n"
 
-
-
 	if asset.assetType == "SkeletalMesh":
 
 		if use20tab == True:

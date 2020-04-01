@@ -144,8 +144,7 @@ def PrepareAndSaveDataForExport():
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	view_layer = bpy.context.view_layer
 	#----------------------------------------Save data
-	UserObjHideViewport = []
-	UserObjHideSelect = []
+	
 	
 	baseActionName = []
 	for action in bpy.data.actions:
@@ -154,6 +153,11 @@ def PrepareAndSaveDataForExport():
 	baseCollectionName = []
 	for collection in bpy.data.collections:
 		baseCollectionName.append(collection.name)
+	
+	UserObjHideSelect = []
+	for object in bpy.data.objects:
+		UserObjHideSelect.append((object.name, object.hide_select))
+		object.hide_select = False
 	
 	copyScene = bpy.context.scene.copy()
 	copyScene.name = "ue4-export_Temp"
@@ -185,10 +189,15 @@ def PrepareAndSaveDataForExport():
 	bpy.context.window.scene = scene
 	bpy.data.scenes.remove(copyScene)
 	
+	#Clean actions
 	for action in bpy.data.actions:
 		if action.name not in baseActionName:
 			bpy.data.actions.remove(action)
-
+			
+	#Reset hide select
+	for object in UserObjHideSelect:
+		bpy.data.objects[object[0]].hide_select = object[1]
+		
 
 def ExportForUnrealEngine():
 	PrepareAndSaveDataForExport()
