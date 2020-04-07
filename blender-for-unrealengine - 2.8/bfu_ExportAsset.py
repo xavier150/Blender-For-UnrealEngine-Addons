@@ -142,9 +142,18 @@ def PrepareAndSaveDataForExport():
 
 	scene = bpy.context.scene
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
-	view_layer = bpy.context.view_layer
+
+	#Move to global view
+	for area in bpy.context.screen.areas:
+		if area.type == 'VIEW_3D':
+			space = area.spaces[0]
+			if space.local_view: #check if using local view
+				for region in area.regions:
+					if region.type == 'WINDOW':
+						override = {'area': area, 'region': region} #override context
+						bpy.ops.view3d.localview(override) #switch to global view
+
 	#----------------------------------------Save data
-	
 	
 	baseActionName = []
 	for action in bpy.data.actions:
@@ -196,7 +205,10 @@ def PrepareAndSaveDataForExport():
 			
 	#Reset hide select
 	for object in UserObjHideSelect:
-		bpy.data.objects[object[0]].hide_select = object[1]
+		if object[0] in bpy.data.objects:
+			bpy.data.objects[object[0]].hide_select = object[1]
+		else:
+			print("/!\ "+object[0]+" not found in bpy.data.objects")
 		
 
 def ExportForUnrealEngine():

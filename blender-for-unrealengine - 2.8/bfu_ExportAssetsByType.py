@@ -160,7 +160,6 @@ def RemoveDuplicatedSocketsTempName(obj):
 	
 def RemoveSocketsTempName(obj):
 	#Remove _UE4Socket_TempName at end
-	
 	for socket in GetSocketDesiredChild(obj):
 		ToRemove = "_UE4Socket_TempName"
 		socket.name = socket.name[:-len(ToRemove)]
@@ -437,7 +436,7 @@ def ExportSingleStaticMeshCollection(originalScene, dirpath, filename, collectio
 	
 	#Remove the created collection
 	SelectSpecificObject(obj)
-	bpy.ops.object.delete()  
+	bpy.ops.object.delete()	 
 	
 	
 def ExportSingleStaticMesh(originalScene, dirpath, filename, obj):
@@ -459,7 +458,7 @@ def ExportSingleStaticMesh(originalScene, dirpath, filename, obj):
 	
 	SelectParentAndDesiredChilds(obj)
 	AddSocketsTempName(obj)
-	DuplicateSelect()	
+	DuplicateSelect()
 	ApplyNeededModifierToSelect()
 
 	active = bpy.context.view_layer.objects.active
@@ -471,7 +470,6 @@ def ExportSingleStaticMesh(originalScene, dirpath, filename, obj):
 		bpy.ops.object.mode_set(mode = 'OBJECT')
 		
 	UpdateNameHierarchy(GetAllCollisionAndSocketsObj(bpy.context.selected_objects))
-	
 	
 	ApplyExportTransform(active)
 	
@@ -508,7 +506,6 @@ def ExportSingleStaticMesh(originalScene, dirpath, filename, obj):
 		)
 	
 	bpy.context.scene.unit_settings.scale_length = savedUnitLength
-	
 	
 	bpy.ops.object.delete()
 	RemoveSocketsTempName(obj)
