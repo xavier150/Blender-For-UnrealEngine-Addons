@@ -14,11 +14,15 @@ We will see how to prepare the assets to export.
 3. In the export panel click on the Export for UnrealEngine 4 button.
 
 # Export collection like a StaticMesh
+Exporting with collection will only export your collection like a StaticMesh.
+
 1. Open the Tool panel in 3D View (T), enlarge it, open Unreal engine 4 main panel and go to the Collection Properties panel.
 2. Click on the update button then select the collections that you want to export.
 3. In the export panel click on the Export for UnrealEngine 4 button.
 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocExportCollection.jpg">
+
+
 
 # Import properties
 It is possible to define parameters for importing your assets in Unreal Engine in the Object Import Properties panel. This works only with importing via UnrealEnginePython.
