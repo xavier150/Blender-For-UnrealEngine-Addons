@@ -115,6 +115,10 @@ If you modify this you will have to import the animation.
 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocSkeletonTree.jpg">
 
+Sine 0.2.6.1 the Unit scale will not change the scale of the exported mesh in Unreal
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocUnitScale.jpg">
+
+
 # UV
 You can correct extreme UV for better quality in Unreal Engine.
 This is useful if you use UVProject Modifier in Blender.
