@@ -66,8 +66,14 @@ For the Action:
 3. In the Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality, and select the animations to export. 
 
 Note if your animation is not a cycle set 'Offset at start frame' on 0
-'Offset at start frame' are set on 1 by default because in the animation cycles, unreal will play the first and the last frame so twice the same. 
+'Offset at start frame' are set on 1 by default because in the animation cycles, unreal will play the first and the last frame so twice the same.
 
+
+With a offset of 0 in Unreal I have this:
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocActionOffsetCycle0.gif">
+
+With a offset of 1 in Unreal I have this:
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocActionOffsetCycle1.gif"> 
 
 
 For the NLA:
