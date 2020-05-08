@@ -62,7 +62,13 @@ For the Action:
 2. Inside the Dope Sheet window select Action Editor mode and create your animations on actions ( /!\ Don't forget to use fake user to not lose your animation ! )
 	- You can use driver for the Morph Target.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocAction.jpg"> 
-3. In the Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality, and select the animations to export. Note if your animation is not a cycle set 'Offset at start frame' on 0
+
+3. In the Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality, and select the animations to export. 
+
+Note if your animation is not a cycle set 'Offset at start frame' on 0
+'Offset at start frame' are set on 1 by default because in the animation cycles, unreal will play the first and the last frame so twice the same. 
+
+
 
 For the NLA:
 1. Select your SkeletalMesh and open Animation Properties panel (Do not forget to set the Armature as "Export recursive")
