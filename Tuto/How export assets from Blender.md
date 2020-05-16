@@ -108,7 +108,7 @@ Materials are not imported, you must create them in Unreal Engine.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocMaterial.jpg">
 
 
-# Root bone and Skeleton Tree
+# Skeleton & Root bone
 Blender exports the armature like a root bone. To remove this bone check the box "Remove root bone" in Addon Preferences.
 If you don't want to remove it you can set the desired root bone name. If the name used is "Armature", Unreal Engine will remove the root bone. You can set the root bone scale too.
 If you modify this you will have to import the animation.
