@@ -117,8 +117,6 @@ If you modify this you will have to import the animation.
 
 Sine v0.2.6.1 the Unit scale will not change the scale of the exported mesh in Unreal.
 If you working with unit scale at 0.01 I recommend using version 2.5 https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/tag/v.0.2.5
-I will add a  options for change this in v0.2.7. 
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocUnitScale.jpg">
 
 Sine v0.2.7 the addon are adapted to the all workflows. You can work with Unreal unit scale: 0.01 with Blender Unit scale: 1.00 or custom unit scale depending on your production. Example files: MySkeleton_BlenderSize.blend MySkeleton_UnrealSize.blend
 This is automatically managed by the addon but if you need you can choose the how the rig need be scaled at the export.
