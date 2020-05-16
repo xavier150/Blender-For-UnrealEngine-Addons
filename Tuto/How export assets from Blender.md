@@ -115,7 +115,9 @@ If you modify this you will have to import the animation.
 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocSkeletonTree.jpg">
 
-Sine 0.2.6.1 the Unit scale will not change the scale of the exported mesh in Unreal
+Sine v0.2.6.1 the Unit scale will not change the scale of the exported mesh in Unreal.
+If you working with unit scale at 0.01 I recommend using version 2.5 https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/tag/v.0.2.5
+I will add a  options for change this in v0.2.7. 
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocUnitScale.jpg">
 
 
