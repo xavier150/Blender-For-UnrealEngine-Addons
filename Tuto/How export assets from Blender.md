@@ -44,6 +44,9 @@ It possible to create collisions (StaticMesh) and sockets (Static/SkeletalMesh) 
 	- If you change the name of the object that contains the collider you will need to click on the Check potential errors button to update hierarchy name of all the colliders.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocCollision.jpg">
 
+Note: The addon will export the socket with +90 degrees on X. You have an option for this in addon preferences
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocSocket90degrees.jpg">
+
 
 # Level of details
 This works only on StaticMesh with importing via UnrealEnginePython.
