@@ -42,7 +42,7 @@ def WriteImportSequencerScript(use20tab = False):
 	scene = bpy.context.scene
 
 	#Import
-	ImportScript = "def CreateSequencer():" + "\n"
+	ImportScript = ""
 	ImportScript += "\t" + "import os.path" + "\n"
 	ImportScript += "\t" + "import time" + "\n"
 
@@ -289,7 +289,10 @@ def WriteImportSequencerScript(use20tab = False):
 				ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionFocalLength, 'FocalLength', AdditionalTracksLoc)" + "\n"
 				ImportScript += "\n"
 				ImportScript += "\t" + "TrackFocusDistance = camera_component.add_track(unreal.MovieSceneFloatTrack)" + "\n"
-				ImportScript += "\t" + "TrackFocusDistance.set_property_name_and_path('ManualFocusDistance', 'ManualFocusDistance')" + "\n"
+				ImportScript += "\t" + "if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 24:" + "\n"
+				ImportScript += "\t\t" + "TrackFocusDistance.set_property_name_and_path('CurrentFocusDistance', 'CurrentFocusDistance')" + "\n"
+				ImportScript += "\t" + "else:" + "\n"
+				ImportScript += "\t\t" + "TrackFocusDistance.set_property_name_and_path('ManualFocusDistance', 'ManualFocusDistance')" + "\n"
 				ImportScript += "\t" + "TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance')" + "\n"
 				ImportScript += "\t" + "sectionFocusDistance = TrackFocusDistance.add_section()" + "\n"
 				ImportScript += "\t" + "sectionFocusDistance.set_end_frame_bounded(False)" + "\n"
@@ -401,9 +404,38 @@ def WriteImportSequencerScript(use20tab = False):
 		ImportScript += "\t" + "unreal.AssetToolsHelpers.get_asset_tools().open_editor_for_assets([unreal.load_asset(seqPath+'/'+seqName.replace('.',''))])" + "\n"
 		ImportScript += "\t" + "unreal.EditorAssetLibrary.sync_browser_to_objects([seqPath+'/'+seqName.replace('.','')])" + "\n"
 	ImportScript += "\t" + "return 'Sequencer created with success !' " + "\n"
-	ImportScript += "print(CreateSequencer())" + "\n"
+	
 
-	OutImportScript = WriteImportPythonHeadComment(use20tab, True)
-	OutImportScript += ImportScript#bfu_Utils.AddFrontEachLine(ImportScript, "\t")
+	#-------------------------------------
+	
+	CheckScript = ""
+	if use20tab == True:
+		CheckScript += "pass" + "\n"
+	else:
+		CheckScript += "import unreal" + "\n"
+		
+		CheckScript += "if hasattr(unreal, 'EditorAssetLibrary') == False:" + "\n"
+		CheckScript += "\t" + "print('--------------------------------------------------\\n /!\ Warning: Editor Scripting Utilities should be activated.\\n Plugin > Scripting > Editor Scripting Utilities.')" + "\n"
+		CheckScript += "\t" + "return False" + "\n"
+		
+		CheckScript += "if hasattr(unreal.MovieSceneSequence, 'set_display_rate') == False:" + "\n"
+		CheckScript += "\t" + "print('--------------------------------------------------\\n /!\ Warning: Editor Scripting Utilities should be activated.\\n Plugin > Scripting > Sequencer Scripting.')" + "\n"
+		CheckScript += "\t" + "return False" + "\n"
+		
+		CheckScript += "return True" + "\n"
+	
+	#-------------------------------------
+
+	OutImportScript = ""
+	OutImportScript += WriteImportPythonHeadComment(use20tab, True)
+	
+	OutImportScript += "def CheckTasks():" + "\n"
+	OutImportScript += bfu_Utils.AddFrontEachLine(CheckScript, "\t")
+	
+	OutImportScript += "def CreateSequencer():" + "\n"
+	OutImportScript += bfu_Utils.AddFrontEachLine(ImportScript, "\t")
+	
+	OutImportScript += "if CheckTasks() == True:" + "\n"
+	OutImportScript += "\t" + "print(CreateSequencer())" + "\n"
 
 	return OutImportScript

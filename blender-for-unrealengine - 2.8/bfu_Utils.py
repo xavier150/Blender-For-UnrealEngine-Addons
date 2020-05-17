@@ -129,7 +129,9 @@ def GetActionToExport(obj):
 			if fnmatch.fnmatchcase(action.name, obj.PrefixNameToExport+"*"):
 				TargetActionToExport.append(action)
 
+
 	elif obj.exportActionEnum == "export_auto":
+		#This will cheak if the action contains the same bones of the armature
 		objBoneNames = [bone.name for bone in obj.data.bones]
 		for action in bpy.data.actions:
 			actionBoneNames = [group.name for group in action.groups]
@@ -361,12 +363,11 @@ def ApplyExportTransform(obj):
 	obj.scale = saveScale
 	
 	
-def ApplySkeletalExportScale(obj, rootScale):
-	obj.scale = obj.scale*(100/rootScale)
-	OldUnitLength = bpy.context.scene.unit_settings.scale_length
-	bpy.context.scene.unit_settings.scale_length = 0.01
+def ApplySkeletalExportScale(obj, rescale):
+	#That a correct name ? 
+	obj.scale = obj.scale*rescale
 	bpy.ops.object.transform_apply(location = True, scale = True, rotation = True, properties = True)
-	return OldUnitLength
+
 
 
 def RescaleSelectCurveHook(scale):
@@ -630,18 +631,13 @@ def GetDesiredExportArmatureName():
 	return addon_prefs.skeletonRootBoneName
 
 def GetObjExportScale(obj):
-	'''
-	#Exported root bone with "Armature" name are removed in Unreal so scale *100 d'ont work...
-	if GetAssetType(obj) == "SkeletalMesh":
-		if GetDesiredExportArmatureName() == "Armature":
-			return obj.exportGlobalScale * 100
-	'''
+
 	return obj.exportGlobalScale
 	
 	
 def RenameArmatureAsExportName(obj):
 	#Rename temporarily the Armature as DefaultArmature
-
+	
 	scene = bpy.context.scene
 	oldArmatureName = None
 	newArmatureName = GetDesiredExportArmatureName()
@@ -656,12 +652,12 @@ def RenameArmatureAsExportName(obj):
 def ResetArmatureName(obj, oldArmatureName):
 	#Reset armature name
 
-	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	scene = bpy.context.scene
 	if oldArmatureName is not None:
 		obj.name = oldArmatureName
 		if "ArmatureTemporarilyNameForUe4Export" in scene.objects:
-			scene.objects["ArmatureTemporarilyNameForUe4Export"].name = addon_prefs.skeletonRootBoneName
+			scene.objects["ArmatureTemporarilyNameForUe4Export"].name = GetDesiredExportArmatureName()
+			
 
 def GenerateUe4Name(name):
 	#Generate a new name with suffix number

@@ -304,7 +304,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 	for key in getAllKeysByMatrix(obj):
 		#GetWorldPostion
 		matrix = key[1] @ Matrix.Rotation(radians(90.0), 4, 'Y') @ Matrix.Rotation(radians(-90.0), 4, 'X')
-		l = matrix.to_translation() * 100
+		l = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
 		r = matrix.to_euler()
 		s = matrix.to_scale()
 

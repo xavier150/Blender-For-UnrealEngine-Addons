@@ -79,12 +79,13 @@ def SelectSpecificObject(obj):
 
 def ChecksRelationship(arrayA, arrayB):
 	#Checks if it exits an identical variable in two lists
-	#return False
+	
 	for a in arrayA:
 		for b in arrayB:
 			if a == b:
 				return True
 	return False
+	
 
 def RemoveFolderTree(folder):
 	try:

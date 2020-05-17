@@ -42,7 +42,6 @@ def ExportAllAssetByList(originalScene, targetobjects, targetActionName, targetc
 	#Export all objects that need to be exported from a list
 	
 	
-
 	if len(targetobjects) < 1 and len(targetcollection) < 1 :
 		return
 
@@ -167,6 +166,11 @@ def PrepareAndSaveDataForExport():
 	for object in bpy.data.objects:
 		UserObjHideSelect.append((object.name, object.hide_select))
 		object.hide_select = False
+		
+	UserObjHideViewport = []
+	for object in bpy.data.objects:
+		UserObjHideViewport.append((object.name, object.hide_viewport))
+		object.hide_viewport = False
 	
 	copyScene = bpy.context.scene.copy()
 	copyScene.name = "ue4-export_Temp"
@@ -207,6 +211,13 @@ def PrepareAndSaveDataForExport():
 	for object in UserObjHideSelect:
 		if object[0] in bpy.data.objects:
 			bpy.data.objects[object[0]].hide_select = object[1]
+		else:
+			print("/!\ "+object[0]+" not found in bpy.data.objects")
+			
+	#Reset hide viewport
+	for object in UserObjHideViewport:
+		if object[0] in bpy.data.objects:
+			bpy.data.objects[object[0]].hide_viewport = object[1]
 		else:
 			print("/!\ "+object[0]+" not found in bpy.data.objects")
 		

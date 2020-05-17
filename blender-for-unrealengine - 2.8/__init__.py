@@ -31,7 +31,7 @@ bl_info = {
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
 	'version': (0, 2, 7), #Rev 0.2.7
-	'blender': (2, 80, 0),
+	'blender': (2, 80, 2),
 	'location': 'View3D > UI > Unreal Engine 4',
 	'warning': '',
 	"wiki_url": "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md",
@@ -44,6 +44,7 @@ import os
 import bpy
 import fnmatch
 import time
+import addon_utils
 
 from bpy.props import (
 		StringProperty,
@@ -95,37 +96,57 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 	
 	removeSkeletonRootBone : BoolProperty(
 		name='Remove root bone',
-		description='Remove root bone ?',
+		description='Remove the armature root bone',
 		default=True,
 		)
 		
-	SkeletonRootBoneScale : FloatProperty(
-		name='Skeleton root bone scale',
-		description='If ',
-		default=1,
-	)
-	
 	skeletonRootBoneName : StringProperty(
 		name='Skeleton root bone name',
-		description='Name of the armature when exported. This is used to change the root bone name. If egal "Armature" Ue4 will remove the root bone but the animation will be 100 times smaller.',
+		description='Name of the armature when exported. This is used to change the root bone name. If egal "Armature" Ue4 will remove the Armature root bone.',
 		default="ArmatureRoot",
 		)
-
-	staticSocketsImportedSize : FloatProperty(
-		name='StaticMesh sockets import size',
-		description='Size of the socket when imported in Unreal Engine',
-		default=0.01,
+		
+	rescaleFullRigAtExport : EnumProperty(
+		name='Rescale exported rig',
+		description='This will rescale the full rig at the export with the all constraints.',
+		items = [
+			("auto", "Auto", "Rescale only if the the Unit Scale is not = to 0.01", "SHADERFX", 1),
+			("custom_rescale", "Custom Rescale", "You can choose how rescale the rig at the export", "MODIFIER", 2),
+			("dont_rescale", "Dont Rescale", "Will not rescale the rig", "CANCEL", 3)
+			]
 		)
-	
+		
+	newRigScale : FloatProperty(
+		name='New scale',
+		description='The new rig scale. AUTO: [New scale} = 100 * [Unit scale]',
+		default=100,
+		)
+		
 	staticSocketsAdd90X : BoolProperty(
 		name='Export StaticMesh Sockets with +90 degrees on X',
 		description='On StaticMesh the sockets are auto imported by unreal with -90 degrees on X',
 		default=True,
 		)
 
+	rescaleSocketsAtExport : EnumProperty(
+		name='Rescale exported sockets',
+		description='This will rescale the all sockets at the export.',
+		items = [
+			("auto", "Auto", "Rescale only if the the Unit Scale is not = to 0.01", "SHADERFX", 1),
+			("custom_rescale", "Custom Rescale", "You can choose how rescale the sockets at the export", "MODIFIER", 2),
+			("dont_rescale", "Dont Rescale", "Will not rescale the sockets", "CANCEL", 3)
+			]
+		)
+
+	staticSocketsImportedSize : FloatProperty(
+		name='StaticMesh sockets import size',
+		description='Size of the socket when imported in Unreal Engine. AUTO: 1 ( [New scale} = 100 / [Unit scale] )',
+		default=1,
+		)
+		
 	skeletalSocketsImportedSize : FloatProperty(
 		name='SkeletalMesh sockets import size',
-		description='Size of the socket when imported in Unreal Engine',
+		description='Size of the socket when imported in Unreal Engine. AUTO: 1 ( [New scale} = 100 / [Unit scale] )',
 		default=1,
 		)
 		
@@ -159,6 +180,16 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		default=False,
 		)
 
+	class BFU_OT_OpenDocumentationTargetPage(Operator):
+		bl_label = "Documentation"
+		bl_idname = "object.open_documentation_target_page"
+		bl_description = "Clic for open documentation page on GitHub"
+		octicon: StringProperty(default="")
+
+		def execute(self, context):		
+			os.system("start \"\" https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md"+self.octicon)
+			return {'FINISHED'}
+
 	class BFU_OT_NewReleaseInfo(Operator):
 		bl_label = "Open last release page"
 		bl_idname = "object.new_release_info"
@@ -171,27 +202,47 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 	def draw(self, context):
 		layout = self.layout
 		
+		def LabelWithDocButton(tagetlayout, name, docOcticon):
+			newRow = tagetlayout.row()
+			newRow.label(text=name)
+			docOperator = newRow.operator("object.open_documentation_target_page", icon= "HELP", text="")
+			docOperator.octicon=docOcticon
+		
+		def PropWithDocButton(tagetlayout, name, docOcticon):
+			newRow = tagetlayout.row()
+			newRow.prop(self, name)
+			docOperator = newRow.operator("object.open_documentation_target_page", icon= "HELP", text="")
+			docOperator.octicon=docOcticon
+		
 		boxColumn = layout.column().split(factor = 0.5 )
 		
 		rootBone = boxColumn.box()
-		rootBone.label(text='ROOT BONE')
+
+		LabelWithDocButton(rootBone, "SKELETON & ROOT BONE", "#skeleton--root-bone")
 		rootBone.prop(self, "removeSkeletonRootBone")
 		rootBoneName = rootBone.column()
 		rootBoneName.enabled = not self.removeSkeletonRootBone
 		rootBoneName.prop(self, "skeletonRootBoneName")
-		rootBone.prop(self, "SkeletonRootBoneScale")
+		
+		rootBone.prop(self, "rescaleFullRigAtExport")
+		newRigScale = rootBone.column()
+		newRigScale.enabled = self.rescaleFullRigAtExport == "custom_rescale"
+		newRigScale.prop(self, "newRigScale")
 
 		socket = boxColumn.box()
 		socket.label(text='SOCKET')
-		socket.prop(self, "staticSocketsImportedSize")
 		socket.prop(self, "staticSocketsAdd90X")
-		socket.prop(self, "skeletalSocketsImportedSize")
+		socket.prop(self, "rescaleSocketsAtExport")
+		socketRescale = socket.column()
+		socketRescale.enabled = self.rescaleSocketsAtExport == "custom_rescale"
+		socketRescale.prop(self, "staticSocketsImportedSize")
+		socketRescale.prop(self, "skeletalSocketsImportedSize")
 		
 		boxColumn = layout.column().split(factor = 0.5 )
 		
 		data = boxColumn.box()
 		data.label(text='DATA')
-		data.prop(self, "correctExtremUVScale")
+		PropWithDocButton(data, "correctExtremUVScale", "#uv")
 		data.prop(self, "bakeArmatureAction")
 		data.prop(self, "exportWithCustomProps")
 		data.prop(self, "exportWithMetaData")
@@ -1698,6 +1749,14 @@ class BFU_PT_Export(bpy.types.Panel):
 
 		def execute(self, context):
 			scene = bpy.context.scene
+			
+			def CheckIfFbxPluginIsActivated():
+				is_enabled, is_loaded = addon_utils.check("io_scene_fbx")
+				if is_enabled == True and is_enabled == True:
+					return True					
+				return False
+
+			
 			def GetIfOneTypeCheck():
 				if (scene.static_export
 				or scene.static_collection_export
@@ -1708,7 +1767,12 @@ class BFU_PT_Export(bpy.types.Panel):
 					return True
 				else:
 					return False
+					
 
+			if CheckIfFbxPluginIsActivated() == False:
+				self.report({'WARNING'}, 'Add-on FBX format is not activated! Edit > Preferences > Add-ons > And check "FBX format"')
+				return {'FINISHED'}	
+			
 			if GetIfOneTypeCheck():
 				#Primary check	if file is saved to avoid windows PermissionError
 				if bpy.data.is_saved:
@@ -1733,6 +1797,7 @@ class BFU_PT_Export(bpy.types.Panel):
 					self.report({'WARNING'}, "Please save this blend file before export")
 			else:
 				self.report({'WARNING'}, "No asset type is checked.")
+				return {'FINISHED'}
 			return {'FINISHED'}
 
 
@@ -1914,19 +1979,29 @@ class BFU_PT_CorrectAndImprov(bpy.types.Panel):
 	bl_parent_id = "BFU_PT_BlenderForUnreal"
 	
 	class BFU_OT_CorrectExtremUV(Operator):
-		bl_label = "Correct extrem UV"
+		bl_label = "Correct extrem UV For Unreal"
 		bl_idname = "object.correct_extrem_uv"
 		bl_description = "Correct extrem UV island of the selected object for better use in real time engines"
-
+		bl_options = {'REGISTER', 'UNDO'}
+		
+		stepScale : bpy.props.IntProperty(name="Step scale", default=2, min=1, max=100)
+		
 		def execute(self, context):
-			CorrectExtremeUV(stepScale = 2)
+			if bpy.context.active_object.mode == "EDIT":
+				CorrectExtremeUV(stepScale = self.stepScale)
+				self.report({'INFO'}, "UV corrected!" )
+			else:
+				self.report({'WARNING'}, "Move to Edit mode for correct extrem UV." )
 			return {'FINISHED'}
+			
+
 #############################[...]#############################
 
 
 classes = (
 	BFU_AP_AddonPreferences,
 	BFU_AP_AddonPreferences.BFU_OT_NewReleaseInfo,
+	BFU_AP_AddonPreferences.BFU_OT_OpenDocumentationTargetPage,
 		
 	BFU_PT_BlenderForUnreal,
 	BFU_PT_BlenderForUnreal.BFU_MT_ObjectGlobalPropertiesPresets,
@@ -1982,12 +2057,41 @@ classes = (
 	BFU_PT_CorrectAndImprov.BFU_OT_CorrectExtremUV
 )
 
-register, unregister = bpy.utils.register_classes_factory(classes)
-bpy.utils.register_class(BFU_OT_ObjExportAction)
-bpy.types.Object.exportActionList = CollectionProperty(type=BFU_OT_ObjExportAction)
-bpy.utils.register_class(BFU_OT_SceneCollectionExport)
-bpy.types.Scene.CollectionExportList = CollectionProperty(type=BFU_OT_SceneCollectionExport)
-bpy.utils.register_class(BFU_OT_UnrealExportedAsset)
-bpy.types.Scene.UnrealExportedAssetsList = CollectionProperty(type=BFU_OT_UnrealExportedAsset)
-bpy.utils.register_class(BFU_OT_UnrealPotentialError)
-bpy.types.Scene.potentialErrorList = CollectionProperty(type=BFU_OT_UnrealPotentialError)
+def menu_func(self, context):
+	layout = self.layout
+	col = layout.column()
+	col.separator(factor=1.0)
+	col.operator(BFU_PT_CorrectAndImprov.BFU_OT_CorrectExtremUV.bl_idname)
+
+
+def register():
+	from bpy.utils import register_class
+	for cls in classes:
+		register_class(cls)
+	
+	bpy.utils.register_class(BFU_OT_ObjExportAction)
+	bpy.types.Object.exportActionList = CollectionProperty(type=BFU_OT_ObjExportAction)
+	bpy.utils.register_class(BFU_OT_SceneCollectionExport)
+	bpy.types.Scene.CollectionExportList = CollectionProperty(type=BFU_OT_SceneCollectionExport)
+	bpy.utils.register_class(BFU_OT_UnrealExportedAsset)
+	bpy.types.Scene.UnrealExportedAssetsList = CollectionProperty(type=BFU_OT_UnrealExportedAsset)
+	bpy.utils.register_class(BFU_OT_UnrealPotentialError)
+	bpy.types.Scene.potentialErrorList = CollectionProperty(type=BFU_OT_UnrealPotentialError)
+	
+	bpy.types.VIEW3D_MT_uv_map.append(menu_func)
+
+def unregister():
+	from bpy.utils import unregister_class
+	for cls in reversed(classes):
+		unregister_class(cls)
+		
+	bpy.utils.unregister_class(BFU_OT_ObjExportAction)
+	bpy.utils.unregister_class(BFU_OT_SceneCollectionExport)
+	bpy.utils.unregister_class(BFU_OT_UnrealExportedAsset)
+	bpy.utils.unregister_class(BFU_OT_UnrealPotentialError)
+		
+	bpy.types.VIEW3D_MT_uv_map.remove(menu_func)
+
+
+
+#register, unregister = bpy.utils.register_classes_factory(classes)

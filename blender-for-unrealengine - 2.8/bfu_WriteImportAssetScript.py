@@ -322,6 +322,7 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 				ImportScript += "\t" + "task.ImportUI.SkeletalMeshImportData.bImportMorphTargets = True" + "\n"
 			else:
 				ImportScript += "\t" + "task.get_editor_property('options').skeletal_mesh_import_data.set_editor_property('import_morph_targets', True)" + "\n"
+				ImportScript += "\t" + "task.get_editor_property('options').skeletal_mesh_import_data.set_editor_property('convert_scene', True)" + "\n"
 	if FileType == "ABC":
 		if use20tab:
 			ImportScript += "\t" + "task.ImportSettings.ImportType = 2" + "\n"
@@ -353,6 +354,15 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 
 	################[ Post treatment ]################
 	ImportScript += "\t" + "print('========================= Imports of "+obj.name+" completed ! Post treatment started...	=========================')" + "\n"
+	if asset.assetType == "Action" or asset.assetType == "Pose" or asset.assetType == "NlAnim":
+		if use20tab == True:
+			pass
+			
+		else:
+			ImportScript += "\t" + "p = task.imported_object_paths[0]" + "\n"
+			ImportScript += "\t" + "animAsset = unreal.find_asset(p.split('.')[0]+'_anim.'+p.split('.')[1]+'_anim')" + "\n"
+			ImportScript += "\t" + "unreal.EditorAssetLibrary.delete_asset(task.imported_object_paths[0])" + "\n"
+	
 	if asset.assetType == "StaticMesh":
 		if use20tab == True:
 			if (obj.UseStaticMeshLODGroup == True):
@@ -379,14 +389,16 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 			if obj.VertexColorImportOption == "VCIO_Replace" : python_VertexColorImportOption = "REPLACE"
 			ImportScript += "\t" + "asset.get_editor_property('asset_import_data').set_editor_property('vertex_color_import_option', unreal.VertexColorImportOption." + python_VertexColorImportOption + ") " + "\n"
 
+	#Socket
 	if asset.assetType == "SkeletalMesh":
-
+		
+		ImportScript += "\n\t" + "#Import the SkeletalMesh socket(s)" + "\n" #Import the SkeletalMesh  Socket(s)
+		ImportScript += "\t" + "sockets_to_add = GetOptionByIniFile(AdditionalParameterLoc, 'Sockets', True)" + "\n"
 		if use20tab == True:
 			ImportScript += "\t" + "skeleton = asset.skeleton" + "\n"
 			#Sockets
 			ImportScript += "\t" + "current_sockets = skeleton.Sockets" + "\n"
 			ImportScript += "\t" + "new_sockets = []" + "\n"
-			ImportScript += "\t" + "sockets_to_add = GetOptionByIniFile(AdditionalParameterLoc, 'Sockets', True)" + "\n"
 			ImportScript += "\t" + "for socket in sockets_to_add :" + "\n"
 
 			#Create socket
@@ -404,34 +416,61 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 			ImportScript += "\t\t" + "new_sockets.append(new_socket)" + "\n"
 
 			#Save socket
-			#ImportScript += "\t" + "skeleton.Sockets = current_sockets + new_sockets" + "\n"
 			ImportScript += "\t" + "skeleton.Sockets = new_sockets" + "\n"
 			ImportScript += "\t" + "\n"
 		else:
 			ImportScript += "\t" + "skeleton = asset.get_editor_property('skeleton')" + "\n"
-			################
-			################ Vania unreal python dont have unreal.Skeleton.Sockets
-			################
+			ImportScript += "\t" + "for socket in sockets_to_add :" + "\n"
+			
+			#Create socket
+			ImportScript += "\t\t" + "pass" + "\n"
+			#ImportScript += "\t\t" + "#Create socket" + "\n"
+			#ImportScript += "\t\t" + "new_socket = unreal.SkeletalMeshSocket('', skeleton)" + "\n"
+			#ImportScript += "\t\t" + "new_socket.SocketName = socket[0]" + "\n"
 
 	#Lod
-	if asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh":
+	if asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh":	
+		if asset.assetType == "StaticMesh":
+			ImportScript += "\n\t" + "#Import the StaticMesh lod(s)" + "\n" #Import the StaticMesh lod(s)
+			if use20tab == True:
+				pass
+			else:
+				"\t" + "unreal.EditorStaticMeshLibrary.remove_lods(asset)" + "\n"
+		
+		if asset.assetType == "SkeletalMesh":
+			ImportScript += "\n\t" + "#Import the SkeletalMesh lod(s)" + "\n" #Import the SkeletalMesh  lod(s)
+			if use20tab == True:
+				pass
+			else:
+				pass
+		
 		ImportScript += "\t" + "lods_to_add = GetOptionByIniFile(AdditionalParameterLoc, 'LevelOfDetail')" + "\n"
 		ImportScript += "\t" + "for x, lod in enumerate(lods_to_add):" + "\n"
-		ImportScript += "\t\t" + "pass" + "\n"
+		
+		
 		if asset.assetType == "StaticMesh":
+			
 			if use20tab == True:
 				ImportScript += "\t\t" + "asset.static_mesh_import_lod(lod, x+1)" + "\n"
 			else:
-				pass
-				#ImportScript += "\t\t" + "unreal.FbxMeshUtils.ImportStaticMeshLOD(asset, lod, x+1)" + "\n" #Vania unreal python dont have unreal.FbxMeshUtils.
-		if asset.assetType == "SkeletalMesh":
+				ImportScript += "\t\t" + "lodTask = unreal.AssetImportTask()" + "\n"
+				ImportScript += "\t\t" + "lodTask.filename = lod" + "\n"
+				ImportScript += "\t\t" + "lodTask.destination_path = AssetImportPath" + "\n"
+				ImportScript += "\t\t" + "lodTask.automated = True" + "\n"
+				ImportScript += "\t\t" + "lodTask.replace_existing = True" + "\n"
+				ImportScript += "\t\t" + "unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([lodTask])" + "\n"
+				ImportScript += "\t\t" + "lodAsset = unreal.find_asset(lodTask.imported_object_paths[0])" + "\n"
+				ImportScript += "\t\t" + "slot_replaced = unreal.EditorStaticMeshLibrary.set_lod_from_static_mesh(asset, x+1, lodAsset, 0, True)" + "\n"
+				ImportScript += "\t\t" + "unreal.EditorAssetLibrary.delete_asset(lodTask.imported_object_paths[0])" + "\n"
+		elif asset.assetType == "SkeletalMesh":
 			if use20tab == True:
-				pass
+				ImportScript += "\t\t" + "pass" + "\n"
 				#ImportScript += "\t\t" + "asset.skeletal_mesh_import_lod(lod, x+1)" + "\n" #Need 20 tab implementation
 			else:
-				pass
+				ImportScript += "\t\t" + "pass" + "\n"
 				#ImportScript += "\t\t" + "unreal.FbxMeshUtils.ImportSkeletalMeshLOD(asset, lod, x+1)" + "\n" #Vania unreal python dont have unreal.FbxMeshUtils.
-
+		else:
+			ImportScript += "\t\t" + "pass" + "\n"
 
 
 	##################################[EndChange]
@@ -442,8 +481,16 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 		ImportScript += "\t" + "asset.save_package()" + "\n"
 		ImportScript += "\t" + "asset.post_edit_change()" + "\n"
 	else:
-		pass
-	ImportScript += "\t" + "ImportedList.append([asset, '" + asset.assetType + "'])" + "\n"
+		if asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh":	
+			ImportScript += "\t" + "unreal.EditorAssetLibrary.save_loaded_asset(asset)" + "\n"
+	
+	if use20tab == True:
+		ImportScript += "\t" + "ImportedList.append([asset, '" + asset.assetType + "'])" + "\n"
+	else:
+		if asset.assetType == "Action" or asset.assetType == "Pose" or asset.assetType == "NlAnim":
+			ImportScript += "\t" + "ImportedList.append([animAsset, '" + asset.assetType + "'])" + "\n"
+		else:
+			ImportScript += "\t" + "ImportedList.append([asset, '" + asset.assetType + "'])" + "\n"
 	ImportScript += "CreateTask_"+assetUseName + "()" + "\n"
 	ImportScript += "\n"
 	ImportScript += "\n"
@@ -527,9 +574,33 @@ def WriteImportAssetScript(use20tab = False):
 	ImportScript += "else:" + "\n"
 	ImportScript += "\t" + "return 'Some asset(s) could not be imported.' " + "\n"
 
-	OutImportScript = "def ImportAllAssets():" + "\n"
+	#-------------------------------------
+	
+	CheckScript = ""
+	if use20tab == True:
+		CheckScript += "pass" + "\n"
+	else:
+		CheckScript += "import unreal" + "\n"
+		
+		CheckScript += "if hasattr(unreal, 'EditorAssetLibrary') == False:" + "\n"
+		CheckScript += "\t" + "print('--------------------------------------------------\\n /!\ Warning: Editor Scripting Utilities should be activated.\\n Plugin > Scripting > Editor Scripting Utilities.')" + "\n"
+		CheckScript += "\t" + "return False" + "\n"
+		
+		CheckScript += "return True" + "\n"
+	
+	#-------------------------------------
+
+	OutImportScript = ""
 	OutImportScript += WriteImportPythonHeadComment(use20tab, False)
+	
+	OutImportScript += "def CheckTasks():" + "\n"
+	OutImportScript += bfu_Utils.AddFrontEachLine(CheckScript, "\t")
+	
+	OutImportScript += "def ImportAllAssets():" + "\n"
 	OutImportScript += bfu_Utils.AddFrontEachLine(ImportScript, "\t")
-	OutImportScript += "print(ImportAllAssets())" + "\n"
+	
+	OutImportScript += "if CheckTasks() == True:" + "\n"
+	OutImportScript += "\t" + "print(ImportAllAssets())" + "\n"
+	
 
 	return OutImportScript
