@@ -243,9 +243,23 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.2.7 ==
 
-- New: Button for correct Extrem UV
+- New: Button for correct Extrem UV in UV menu.
 - New: VertexColorImportOption (Vania python import for the momment)
+- New: Option for choose how rescale the skeletalMesh depending on the Unit Scale
+- New: Option for choose how rescale the sockets depending on the Unit Scale
+- New: Option for choose export action should ignore Nonlinear Animation layer(s)
+- New: Import Lod are now functional with Vania python Import
+- New: Import script updated for 4.25
+- Change: StaticMesh, and SkeletalMesh are automatically rescale depending on the Unit Scale (Fix from 0.2.6)
+- Change: Camera, Sockets are automatically rescale depending on the Unit Scale
+- Change: With Vania python import the SkeletalMesh Imported with the animation will be automatically delete
+- Change: Vania python import will check if the plugin is Activated.
+- Change: New check if the FBX format plugin is Activated.
+- Change: Nonlinear Animation layer(s) are now by default not ignored.
 - Fixed: Export camera do Script Fail
-- Fixed: Import script don't work if a folder in path contains '
+- Fixed: Import script don't work if a folder in path contains "'"
 - Fixed: Object are not exported if bpy.context.object.hide_select = True
+- Fixed: Object are not exported if bpy.context.object.hide_viewport = True
 - Fixed: Exporting while in local view mode product bugs
+- Fixed: Sine v0.26 Workflow with 0.01 can be break.
+- Fixed: If armature are named "Armature" the export will change his name to "ArmatureRoot"
