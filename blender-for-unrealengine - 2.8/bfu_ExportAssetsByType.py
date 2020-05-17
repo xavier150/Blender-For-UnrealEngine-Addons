@@ -253,7 +253,7 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 		BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)		
 	
 	ApplyExportTransform(active)
-
+	
 	#This is temp and should me apply only if Unit scale = 1
 	if GetShoulRescaleRig() == True:
 	
@@ -261,17 +261,19 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 		savedUnitLength = bpy.context.scene.unit_settings.scale_length
 		bpy.context.scene.unit_settings.scale_length *= 1/rrf
 		ApplySkeletalExportScale(active, rrf)
-		RescaleActionCurve(targetAction, rrf)
+		RescaleAllActionCurve(rrf)
 		RescaleSelectCurveHook(1/rrf)
 		ResetArmaturePose(active)
 		RescaleStretchLengthConsraints(active, rrf)
 	
 	if (scene.is_nla_tweakmode == True):
 		active.animation_data.use_tweak_mode = False #animation_data.action is ReadOnly with tweakmode in 2.8
-	active.animation_data.action = targetAction #Apply desired action and reset NLA
-	active.animation_data.action_extrapolation = 'HOLD'
-	active.animation_data.action_blend_type = 'REPLACE'
-	active.animation_data.action_influence = 1
+	
+	if addon_prefs.ignoreNLAForAction == True:
+		active.animation_data.action = targetAction #Apply desired action and reset NLA
+		active.animation_data.action_extrapolation = 'HOLD'
+		active.animation_data.action_blend_type = 'REPLACE'
+		active.animation_data.action_influence = 1
 	scene.frame_start = GetDesiredActionStartEndTime(active, targetAction)[0]
 	scene.frame_end = GetDesiredActionStartEndTime(active, targetAction)[1]
 	
@@ -282,7 +284,7 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	
 	#Set rename temporarily the Armature as "Armature"
 	oldArmatureName = RenameArmatureAsExportName(active)
-
+	
 	bpy.ops.export_scene.fbx(
 		filepath=fullpath,
 		check_existing=False,
@@ -327,7 +329,7 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	if GetShoulRescaleRig() == True:
 		#Reset Curve an unit
 		bpy.context.scene.unit_settings.scale_length = savedUnitLength
-		RescaleActionCurve(targetAction, 1/rrf)
+		RescaleAllActionCurve(1/rrf)
 
 	bpy.ops.object.delete()
 	
@@ -630,6 +632,7 @@ def ExportSingleSkeletalMesh(originalScene, dirpath, filename, obj):
 		savedUnitLength = bpy.context.scene.unit_settings.scale_length
 		bpy.context.scene.unit_settings.scale_length *= 1/rrf
 		ApplySkeletalExportScale(active, rrf)
+		
 
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)

@@ -83,7 +83,7 @@ def RescaleStretchLengthConsraints(obj, scale):
 	for b in bpy.context.active_object.pose.bones:
 		for c in b.constraints: 
 			if c.type == "STRETCH_TO":
-				c.rest_length *= scale
+				c.rest_length *= scale #Can be bigger than 10?... wtf
 
 def GetAllCollisionObj():
 	#Get any object that can be understood as a collision or a socket by unreal

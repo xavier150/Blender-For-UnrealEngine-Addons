@@ -149,7 +149,13 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		description='Size of the socket when imported in Unreal Engine. AUTO: 1 ( [New scale} = 100 / [Unit scale] )',
 		default=1,
 		)
-		
+	
+	ignoreNLAForAction : BoolProperty(
+		name='Ignore NLA for Actions',
+		description='This will export the action and ignore the all layer in Nonlinear Animation',
+		default=False,
+		)		
+	
 	exportWithCustomProps : BoolProperty(
 		name='Export custom properties',
 		description='Process export with custom properties (Can be used for Metadata)',
@@ -242,6 +248,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		
 		data = boxColumn.box()
 		data.label(text='DATA')
+		data.prop(self, "ignoreNLAForAction")
 		PropWithDocButton(data, "correctExtremUVScale", "#uv")
 		data.prop(self, "bakeArmatureAction")
 		data.prop(self, "exportWithCustomProps")
