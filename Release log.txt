@@ -263,3 +263,9 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Exporting while in local view mode product bugs
 - Fixed: Sine v0.26 Workflow with 0.01 can be break.
 - Fixed: If armature are named "Armature" the export will change his name to "ArmatureRoot"
+
+== Rev 0.2.7.1 ==
+
+- Fixed: If uncheck the "ignore NLA for actions" option and export multiple animations, all exported animation will be the same one.
+- Fixed: Calculated export time is not accurate with dependency cycle in rig.
+- Change: Optimized export time.
