@@ -115,8 +115,9 @@ def BakeArmatureAnimation(armature, frame_start, frame_end):
 def DuplicateSelect():
 	
 	scene = bpy.context.scene
+	#Need look for a optimized duplicate, This is too long
 	bpy.ops.object.duplicate()
-	
+
 	currentSelectNames = []
 	for currentSelectName in bpy.context.selected_objects:
 		currentSelectNames.append(currentSelectName.name)
@@ -136,7 +137,7 @@ def SetSocketsExportTransform(obj):
 	
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	for socket in GetSocketDesiredChild(obj):
-		if GetShoulRescaleSocket() == True:
+		if GetShouldRescaleSocket() == True:
 			socket.delta_scale *= GetRescaleSocketFactor()
 	
 		if addon_prefs.staticSocketsAdd90X == True:
@@ -167,7 +168,7 @@ def RemoveSocketsTempName(obj):
 		socket.name = socket.name[:-len(ToRemove)]
 		
 
-def GetShoulRescaleRig():
+def GetShouldRescaleRig():
 	#This will return if the rig should be rescale.
 	
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
@@ -192,7 +193,7 @@ def GetRescaleRigFactor():
 		return addon_prefs.newRigScale #rigRescaleFactor
 		
 		
-def GetShoulRescaleSocket():
+def GetShouldRescaleSocket():
 	#This will return if the socket should be rescale.
 	
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
@@ -228,7 +229,7 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	
 	filename = ValidFilenameForUnreal(filename)
-	curr_time = time.process_time()
+	curr_time = time.perf_counter()
 	
 	if obj.animation_data is None:
 		obj.animation_data_create()
@@ -241,9 +242,10 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	if	bpy.ops.object.mode_set.poll():
 		bpy.ops.object.mode_set(mode='OBJECT')
 		
-
+	
 	SelectParentAndDesiredChilds(obj)
 	DuplicateSelect()
+
 	BaseTransform = obj.matrix_world.copy()
 	active = bpy.context.view_layer.objects.active
 	if active.ExportAsProxy == True:
@@ -254,8 +256,8 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	
 	ApplyExportTransform(active)
 	
-	#This is temp and should me apply only if Unit scale = 1
-	if GetShoulRescaleRig() == True:
+	#This will recale the rig and unit scale to get a root bone egal to 1
+	if GetShouldRescaleRig() == True:
 	
 		rrf = GetRescaleRigFactor() #rigRescaleFactor
 		savedUnitLength = bpy.context.scene.unit_settings.scale_length
@@ -269,8 +271,9 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	if (scene.is_nla_tweakmode == True):
 		active.animation_data.use_tweak_mode = False #animation_data.action is ReadOnly with tweakmode in 2.8
 	
+	active.animation_data.action = targetAction #Apply desired action and reset NLA
+	
 	if addon_prefs.ignoreNLAForAction == True:
-		active.animation_data.action = targetAction #Apply desired action and reset NLA
 		active.animation_data.action_extrapolation = 'HOLD'
 		active.animation_data.action_blend_type = 'REPLACE'
 		active.animation_data.action_influence = 1
@@ -309,31 +312,30 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 		bake_space_transform = False
 		)
 
-	
-
 	#Reset armature name
 	ResetArmatureName(active, oldArmatureName, )
 	
 	ResetArmaturePose(obj)
 		
 	obj.animation_data.action = userAction #Resets previous action and NLA
-	obj.animation_data.action_extrapolation = userAction_extrapolation
-	obj.animation_data.action_blend_type = userAction_blend_type
-	obj.animation_data.action_influence = userAction_influence
+	if addon_prefs.ignoreNLAForAction == True:
+		obj.animation_data.action_extrapolation = userAction_extrapolation
+		obj.animation_data.action_blend_type = userAction_blend_type
+		obj.animation_data.action_influence = userAction_influence
 	
 	
 	#Reset Transform
 	obj.matrix_world = BaseTransform
 	
-	#This is temp and should me apply only if Unit scale = 1
-	if GetShoulRescaleRig() == True:
+	##This will recale the rig and unit scale to get a root bone egal to 1
+	if GetShouldRescaleRig() == True:
 		#Reset Curve an unit
 		bpy.context.scene.unit_settings.scale_length = savedUnitLength
 		RescaleAllActionCurve(1/rrf)
 
 	bpy.ops.object.delete()
 	
-	exportTime = time.process_time()-curr_time
+	exportTime = time.perf_counter()-curr_time
 	MyAsset = originalScene.UnrealExportedAssetsList.add()
 	MyAsset.assetName = filename
 	MyAsset.assetType = actionType
@@ -354,7 +356,7 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	
 	filename = ValidFilenameForUnreal(filename)
-	curr_time = time.process_time()
+	curr_time = time.perf_counter()
 
 	SelectParentAndDesiredChilds(obj)
 	DuplicateSelect()
@@ -368,8 +370,8 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 		
 	ApplyExportTransform(active)
 
-	#This is temp and should me apply only if Unit scale = 1
-	if GetShoulRescaleRig() == True:
+	##This will recale the rig and unit scale to get a root bone egal to 1
+	if GetShouldRescaleRig() == True:
 	
 		rrf = GetRescaleRigFactor() #rigRescaleFactor
 		savedUnitLength = bpy.context.scene.unit_settings.scale_length
@@ -415,7 +417,7 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 	ResetArmaturePose(active)
 	scene.frame_start -= active.StartFramesOffset
 	scene.frame_end -= active.EndFramesOffset
-	exportTime = time.process_time()-curr_time
+	exportTime = time.perf_counter()-curr_time
 
 	#Reset armature name
 	ResetArmatureName(active, oldArmatureName)
@@ -425,8 +427,8 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 	#Reset Transform
 	obj.matrix_world = BaseTransform
 	
-	#This is temp and should me apply only if Unit scale = 1
-	if GetShoulRescaleRig() == True:
+	##This will recale the rig and unit scale to get a root bone egal to 1
+	if GetShouldRescaleRig() == True:
 		#Reset Curve an unit
 		bpy.context.scene.unit_settings.scale_length = savedUnitLength
 		RescaleAllActionCurve(1/rrf)
@@ -453,7 +455,7 @@ def ExportSingleAlembicAnimation(originalScene, dirpath, filename, obj):
 
 	scene = bpy.context.scene
 	filename = ValidFilenameForUnreal(filename)
-	curr_time = time.process_time()
+	curr_time = time.perf_counter()
 	if	bpy.ops.object.mode_set.poll():
 		bpy.ops.object.mode_set(mode = 'OBJECT')
 
@@ -475,7 +477,7 @@ def ExportSingleAlembicAnimation(originalScene, dirpath, filename, obj):
 
 	scene.frame_start -= obj.StartFramesOffset
 	scene.frame_end -= obj.EndFramesOffset
-	exportTime = time.process_time()-curr_time
+	exportTime = time.perf_counter()-curr_time
 
 	MyAsset = originalScene.UnrealExportedAssetsList.add()
 	MyAsset.assetName = filename
@@ -516,7 +518,7 @@ def ExportSingleStaticMesh(originalScene, dirpath, filename, obj):
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	
 	filename = ValidFilenameForUnreal(filename)
-	curr_time = time.process_time()
+	curr_time = time.perf_counter()
 	
 	if	bpy.ops.object.mode_set.poll():
 		bpy.ops.object.mode_set(mode = 'OBJECT')
@@ -574,7 +576,7 @@ def ExportSingleStaticMesh(originalScene, dirpath, filename, obj):
 
 	
 	
-	exportTime = time.process_time()-curr_time
+	exportTime = time.perf_counter()-curr_time
 
 	MyAsset = originalScene.UnrealExportedAssetsList.add()
 	MyAsset.assetName = filename
@@ -596,7 +598,7 @@ def ExportSingleSkeletalMesh(originalScene, dirpath, filename, obj):
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	
 	filename = ValidFilenameForUnreal(filename)
-	curr_time = time.process_time()
+	curr_time = time.perf_counter()
 	
 	if	bpy.ops.object.mode_set.poll():
 		bpy.ops.object.mode_set(mode = 'OBJECT')
@@ -625,8 +627,8 @@ def ExportSingleSkeletalMesh(originalScene, dirpath, filename, obj):
 	
 	ApplyExportTransform(active)
 	
-	#This is temp and should me apply only if Unit scale = 1
-	if GetShoulRescaleRig() == True:
+	##This will recale the rig and unit scale to get a root bone egal to 1
+	if GetShouldRescaleRig() == True:
 				
 		rrf = GetRescaleRigFactor() #rigRescaleFactor
 		savedUnitLength = bpy.context.scene.unit_settings.scale_length
@@ -668,8 +670,8 @@ def ExportSingleSkeletalMesh(originalScene, dirpath, filename, obj):
 		bake_space_transform = False
 		)
 	
-	#This is temp and should me apply only if Unit scale = 1
-	if GetShoulRescaleRig() == True:
+	##This will recale the rig and unit scale to get a root bone egal to 1
+	if GetShouldRescaleRig() == True:
 		#Reset Curve an unit
 		bpy.context.scene.unit_settings.scale_length = savedUnitLength
 		
@@ -680,7 +682,7 @@ def ExportSingleSkeletalMesh(originalScene, dirpath, filename, obj):
 	
 	RemoveSocketsTempName(obj)
 	
-	exportTime = time.process_time()-curr_time
+	exportTime = time.perf_counter()-curr_time
 	MyAsset = originalScene.UnrealExportedAssetsList.add()
 	MyAsset.assetName = filename
 	MyAsset.assetType = meshType
@@ -704,7 +706,7 @@ def ExportSingleFbxCamera(originalScene, dirpath, filename, obj):
 	filename = ValidFilename(filename)
 	if obj.type != 'CAMERA':
 		return;
-	curr_time = time.process_time()
+	curr_time = time.perf_counter()
 	if	bpy.ops.object.mode_set.poll():
 		bpy.ops.object.mode_set(mode = 'OBJECT')
 	
@@ -749,7 +751,7 @@ def ExportSingleFbxCamera(originalScene, dirpath, filename, obj):
 	#Reset camera scale
 	obj.delta_scale*=100
 
-	exportTime = time.process_time()-curr_time
+	exportTime = time.perf_counter()-curr_time
 
 	MyAsset = originalScene.UnrealExportedAssetsList.add()
 	MyAsset.assetName = filename

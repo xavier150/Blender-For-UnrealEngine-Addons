@@ -44,7 +44,7 @@ def ExportSingleText(text, dirpath, filename):
 	#Export single text
 
 	filename = ValidFilename(filename)
-	curr_time = time.process_time()
+	curr_time = time.perf_counter()
 
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)
@@ -53,14 +53,14 @@ def ExportSingleText(text, dirpath, filename):
 	with open(fullpath, "w") as file:
 		file.write(text)
 
-	exportTime = time.process_time()-curr_time
+	exportTime = time.perf_counter()-curr_time
 	return([filename,"TextFile",absdirpath,exportTime]) #[AssetName , AssetType , ExportPath, ExportTime]
 
 def ExportSingleConfigParser(config, dirpath, filename):
 	#Export single ConfigParser
 
 	filename = ValidFilename(filename)
-	curr_time = time.process_time()
+	curr_time = time.perf_counter()
 
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)
@@ -69,7 +69,7 @@ def ExportSingleConfigParser(config, dirpath, filename):
 	with open(fullpath, "w") as configfile:
 		config.write(configfile)
 
-	exportTime = time.process_time()-curr_time
+	exportTime = time.perf_counter()-curr_time
 	return([filename,"TextFile",absdirpath,exportTime]) #[AssetName , AssetType , ExportPath, ExportTime]
 
 def WriteExportLog():

@@ -138,7 +138,7 @@ def ExportAllAssetByList(originalScene, targetobjects, targetActionName, targetc
 
 
 def PrepareAndSaveDataForExport():
-
+	
 	scene = bpy.context.scene
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 
@@ -153,6 +153,7 @@ def PrepareAndSaveDataForExport():
 						bpy.ops.view3d.localview(override) #switch to global view
 
 	#----------------------------------------Save data
+	#This can take time
 	
 	baseActionName = []
 	for action in bpy.data.actions:
@@ -162,19 +163,19 @@ def PrepareAndSaveDataForExport():
 	for collection in bpy.data.collections:
 		baseCollectionName.append(collection.name)
 	
-	UserObjHideSelect = []
+	UserObjHide = []
 	for object in bpy.data.objects:
-		UserObjHideSelect.append((object.name, object.hide_select))
-		object.hide_select = False
+		pass
+		UserObjHide.append((object.name, object.hide_select, object.hide_viewport))
+		if object.hide_select == True:
+			object.hide_select = False	
+		if object.hide_viewport == True:
+			object.hide_viewport = False	
 		
-	UserObjHideViewport = []
-	for object in bpy.data.objects:
-		UserObjHideViewport.append((object.name, object.hide_viewport))
-		object.hide_viewport = False
-	
 	copyScene = bpy.context.scene.copy()
 	copyScene.name = "ue4-export_Temp"
-	bpy.context.window.scene = copyScene
+	bpy.context.window.scene = copyScene #Switch the scene but can take time
+
 	UserActive = bpy.context.active_object #Save current active object
 	if UserActive and UserActive.mode != 'OBJECT' and bpy.ops.object.mode_set.poll():
 		UserMode = UserActive.mode #Save current mode
@@ -187,14 +188,16 @@ def PrepareAndSaveDataForExport():
 		RemoveFolderTree(bpy.path.abspath(scene.export_camera_file_path))
 		RemoveFolderTree(bpy.path.abspath(scene.export_other_file_path))
 
-	list = []
+	
+	assetList = [] #Do a simple lit of objects to export
 	for Asset in GetFinalAssetToExport():
 		if Asset.obj in GetAllobjectsByExportType("export_recursive"):
-			if Asset.obj not in list:
-				list.append(Asset.obj)
+			if Asset.obj not in assetList:
+				assetList.append(Asset.obj)
+	
 	ExportAllAssetByList(
 	originalScene = scene,
-	targetobjects = list,
+	targetobjects = assetList,
 	targetActionName = baseActionName,
 	targetcollection = baseCollectionName,
 	)
@@ -207,17 +210,14 @@ def PrepareAndSaveDataForExport():
 		if action.name not in baseActionName:
 			bpy.data.actions.remove(action)
 			
-	#Reset hide select
-	for object in UserObjHideSelect:
+	#Reset hide in select and viewport
+	for object in UserObjHide:
 		if object[0] in bpy.data.objects:
-			bpy.data.objects[object[0]].hide_select = object[1]
-		else:
-			print("/!\ "+object[0]+" not found in bpy.data.objects")
-			
-	#Reset hide viewport
-	for object in UserObjHideViewport:
-		if object[0] in bpy.data.objects:
-			bpy.data.objects[object[0]].hide_viewport = object[1]
+			if bpy.data.objects[object[0]].hide_select != object[1]:
+				bpy.data.objects[object[0]].hide_select = object[1]
+			if bpy.data.objects[object[0]].hide_select != object[2]:
+				bpy.data.objects[object[0]].hide_viewport = object[2]
+			pass
 		else:
 			print("/!\ "+object[0]+" not found in bpy.data.objects")
 		

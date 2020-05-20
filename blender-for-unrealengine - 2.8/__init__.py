@@ -30,7 +30,7 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 2, 7), #Rev 0.2.7
+	'version': (0, 2, 7, 1), #Rev 0.2.7.1
 	'blender': (2, 80, 2),
 	'location': 'View3D > UI > Unreal Engine 4',
 	'warning': '',
@@ -1784,14 +1784,14 @@ class BFU_PT_Export(bpy.types.Panel):
 				#Primary check	if file is saved to avoid windows PermissionError
 				if bpy.data.is_saved:
 					scene.UnrealExportedAssetsList.clear()
-					start_time = time.process_time()
+					start_time = time.perf_counter()
 					UpdateNameHierarchy()
 					bfu_ExportAsset.ExportForUnrealEngine()
 					bfu_WriteText.WriteAllTextFiles()
 
 					if len(scene.UnrealExportedAssetsList) > 0:
 						self.report({'INFO'}, "Export of "+str(len(scene.UnrealExportedAssetsList))+
-						" asset(s) has been finalized in "+str(time.process_time()-start_time)+" sec. Look in console for more info.")
+						" asset(s) has been finalized in "+str(time.perf_counter()-start_time)+" sec. Look in console for more info.")
 						print("========================= Exported asset(s) =========================")
 						print("")
 						for line in bfu_WriteText.WriteExportLog().splitlines():
