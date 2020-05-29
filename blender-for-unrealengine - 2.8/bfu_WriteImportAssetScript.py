@@ -345,7 +345,10 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 		ImportScript += "\t\t" + "asset = None" + "\n"
 	else:
 		ImportScript += "\t" + "unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])" + "\n"
-		ImportScript += "\t" + "asset = unreal.find_asset(task.imported_object_paths[0])" + "\n"
+		ImportScript += "\t" + "if len(task.imported_object_paths) > 0:" + "\n"
+		ImportScript += "\t\t" + "asset = unreal.find_asset(task.imported_object_paths[0])" + "\n"
+		ImportScript += "\t" + "else:" + "\n"
+		ImportScript += "\t\t" + "asset = None" + "\n"
 	ImportScript += "\t" + "if asset == None:" + "\n"
 	ImportScript += "\t\t" + "ImportFailList.append('Asset \""+obj.name+"\" not found for after inport')" + "\n"
 	ImportScript += "\t\t" + "return" + "\n"
@@ -435,7 +438,7 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 			if use20tab == True:
 				pass
 			else:
-				"\t" + "unreal.EditorStaticMeshLibrary.remove_lods(asset)" + "\n"
+				ImportScript += "\t" + "unreal.EditorStaticMeshLibrary.remove_lods(asset)" + "\n"
 		
 		if asset.assetType == "SkeletalMesh":
 			ImportScript += "\n\t" + "#Import the SkeletalMesh lod(s)" + "\n" #Import the SkeletalMesh  lod(s)

@@ -107,7 +107,7 @@ def BakeArmatureAnimation(armature, frame_start, frame_end):
 	SavedSelect = GetCurrentSelect()
 	bpy.ops.object.select_all(action='DESELECT')
 	SelectSpecificObject(armature)
-	bpy.ops.nla.bake(frame_start=frame_start, frame_end=frame_end, only_selected=False, visual_keying=True, clear_constraints=True, bake_types={'POSE'})
+	bpy.ops.nla.bake(frame_start=frame_start-10, frame_end=frame_end+10, only_selected=False, visual_keying=True, clear_constraints=True, bake_types={'POSE'})
 	bpy.ops.object.select_all(action='DESELECT')
 	SetCurrentSelect(SavedSelect)	
 
@@ -252,7 +252,7 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 		ApplyProxyData(active)	
 
 	if addon_prefs.bakeArmatureAction == True:
-		BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)		
+		BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)
 	
 	ApplyExportTransform(active)
 	

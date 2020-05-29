@@ -1076,6 +1076,20 @@ def UpdateUnrealPotentialError():
 						MyError.text += rootBone.name+' '
 					MyError.object = obj
 
+	def CheckArmatureNoDeformBone():
+		#Check that skeleton have at less one deform bone
+		for obj in objToCheck:
+			if GetAssetType(obj) == "SkeletalMesh":
+				if obj.exportDeformOnly == True:
+					for bone in obj.data.bones:
+						if bone.use_deform == True:
+							return
+					MyError = PotentialErrors.add()
+					MyError.name = obj.name
+					MyError.type = 2
+					MyError.text = 'Object "'+obj.name+'" don\'t have any deform bones. Unreal will import it like a StaticMesh.'
+					MyError.object = obj
+
 	def CheckMarkerOverlay():
 		#Check that there is no overlap with the Marker
 		usedFrame = []
@@ -1131,6 +1145,7 @@ def UpdateUnrealPotentialError():
 	CheckArmatureBoneData()
 	CheckArmatureValidChild()
 	CheckArmatureMultipleRoots()
+	CheckArmatureNoDeformBone()
 	CheckMarkerOverlay()
 	CheckVertexGroupWeight()
 	CheckZeroScaleKeyframe()
