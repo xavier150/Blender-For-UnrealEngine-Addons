@@ -269,3 +269,10 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: If uncheck the "ignore NLA for actions" option and export multiple animations, all exported animation will be the same one.
 - Fixed: Calculated export time is not accurate with dependency cycle in rig.
 - Change: Optimized export time.
+
+== Rev 0.2.7.2 ==
+
+
+- New: Check potential error will detect if the armature have at less one deform bone.
+- Change: Bake armature will bake 10 frames and after for better accuracy animation
+- Fixed: Import script don't remove old lods
