@@ -352,19 +352,21 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 	ImportScript += "\t" + "if asset == None:" + "\n"
 	ImportScript += "\t\t" + "ImportFailList.append('Asset \""+obj.name+"\" not found for after inport')" + "\n"
 	ImportScript += "\t\t" + "return" + "\n"
-
-
-
-	################[ Post treatment ]################
-	ImportScript += "\t" + "print('========================= Imports of "+obj.name+" completed ! Post treatment started...	=========================')" + "\n"
 	if asset.assetType == "Action" or asset.assetType == "Pose" or asset.assetType == "NlAnim":
 		if use20tab == True:
 			pass
-			
 		else:
 			ImportScript += "\t" + "p = task.imported_object_paths[0]" + "\n"
 			ImportScript += "\t" + "animAsset = unreal.find_asset(p.split('.')[0]+'_anim.'+p.split('.')[1]+'_anim')" + "\n"
 			ImportScript += "\t" + "unreal.EditorAssetLibrary.delete_asset(task.imported_object_paths[0])" + "\n"
+			ImportScript += "\t" + "if animAsset == None:" + "\n"
+			ImportScript += "\t\t" + "ImportFailList.append('animAsset \""+obj.name+"\" not found for after inport')" + "\n"
+			ImportScript += "\t\t" + "return" + "\n"
+
+
+	################[ Post treatment ]################
+	ImportScript += "\t" + "print('========================= Imports of "+obj.name+" completed ! Post treatment started...	=========================')" + "\n"
+
 	
 	if asset.assetType == "StaticMesh":
 		if use20tab == True:

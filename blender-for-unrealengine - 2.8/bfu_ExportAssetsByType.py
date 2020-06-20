@@ -173,7 +173,8 @@ def GetShouldRescaleRig():
 	
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	if addon_prefs.rescaleFullRigAtExport == "auto":
-		if bpy.context.scene.unit_settings.scale_length == 0.01:
+		if math.isclose(bpy.context.scene.unit_settings.scale_length, 0.01, rel_tol=1e-5):
+
 			return False #False because that useless to rescale at 1 :v
 		else:
 			return True

@@ -20,7 +20,7 @@
 import bpy
 import time
 import configparser
-from math import degrees, radians
+from math import degrees, radians, tan
 from mathutils import Matrix
 
 
@@ -322,9 +322,11 @@ def WriteSingleCameraAdditionalTrack(obj):
 
 	#Write FocalLength keys
 	ImportScript += "[FocalLength]" + "\n"
-	for key in getAllKeysByFcurves(obj,"lens",obj.data.lens):
+	for key in getAllKeysByFcurves(obj,"angle",obj.data.angle):
 		#Fov type return auto to lens
-		ImportScript += str(key[0])+": "+str(key[1]) + "\n"
+		angle = key[1]
+		lens = 12/tan(angle/2)
+		ImportScript += str(key[0])+": "+str(lens) + "\n"
 	ImportScript += "\n\n\n"
 
 	#Write FocusDistance keys

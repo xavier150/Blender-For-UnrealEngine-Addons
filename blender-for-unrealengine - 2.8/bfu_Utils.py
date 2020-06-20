@@ -143,26 +143,35 @@ def GetActionToExport(obj):
 def GetDesiredActionStartEndTime(obj, action):
 	#Returns desired action or camera anim start/end time
 	#Return start with index 0 and end with index 1
+	#EndTime should be a less one frame bigger than StartTime
 
 	scene = bpy.context.scene
 	if obj.type == "CAMERA":
 		startTime = scene.frame_start
 		endTime = scene.frame_end
+		if endTime <= startTime:
+			endTime = startTime+1 
 		return (startTime,endTime)
 
 	elif obj.AnimStartEndTimeEnum == "with_keyframes":
 		startTime = action.frame_range.x + obj.StartFramesOffset #GetFirstActionFrame + Offset
 		endTime = action.frame_range.y + obj.EndFramesOffset #GetLastActionFrame + Offset
+		if endTime <= startTime:
+			endTime = startTime+1 
 		return (startTime,endTime)
 
 	elif obj.AnimStartEndTimeEnum == "with_sceneframes":
 		startTime = scene.frame_start + obj.StartFramesOffset
 		endTime = scene.frame_end + obj.EndFramesOffset
+		if endTime <= startTime:
+			endTime = startTime+1 
 		return (startTime,endTime)
 
 	elif obj.AnimStartEndTimeEnum == "with_customframes":
 		startTime = obj.AnimCustomStartTime
 		endTime = obj.AnimCustomEndTime
+		if endTime <= startTime:
+			endTime = startTime+1 
 		return (startTime,endTime)
 	
 
