@@ -20,8 +20,6 @@ You can see the tutorials and documentation here:
 
 Or previous versions : [Releases page](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases)
 
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/DownloadScreen1.jpg" width="600">
-
 2. Open User Preferences (Ctrl+Alt+U) and under Add-ons, click Install from File. Then navigate to the .zip file you downloaded and select it.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/InstallationScreen1.jpg" width="600">
 3. It should now appear in the window and you can tick the checkbox in the upper right to enable it.
