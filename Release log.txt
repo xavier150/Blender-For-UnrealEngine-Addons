@@ -280,3 +280,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Action poses are exported with a null duration (Wrong for ue4)
 - Fixed: If the imported animation is wrong this do a script error.
 - Fixed: Option auto for Rescale rig will always rescale.
+
+== Rev 0.2.7.3 ==
+
+- Fixed: Export fail if an object library have the same name of a real object.
