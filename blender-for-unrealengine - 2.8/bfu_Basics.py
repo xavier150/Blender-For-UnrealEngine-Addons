@@ -99,10 +99,11 @@ def GetChilds(obj):
 
 	ChildsObj = []
 	for childObj in bpy.data.objects:
-		pare = childObj.parent
-		if pare is not None:
-			if pare.name == obj.name:
-				ChildsObj.append(childObj)
+		if childObj.library == None:
+			pare = childObj.parent
+			if pare is not None:
+				if pare.name == obj.name:
+					ChildsObj.append(childObj)
 
 	return ChildsObj
 
