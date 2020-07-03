@@ -30,8 +30,8 @@ About UnrealEnginePython: https://github.com/20tab/UnrealEnginePython </br>
 How to import assets in Unreal Engine [Doc](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20import%20assets%20from%20Blender%20to%20Unreal.md)
 
 
-# Collisions and Sockets
-It possible to create collisions (StaticMesh) and sockets (Static/SkeletalMesh) for your Assets directly in blender.
+# Collisions and Sockets 
+It possible to create collisions (StaticMesh) and sockets (Static/SkeletalMesh) for your Assets directly in blender. Work only with 20Tab integration.
 
 1. Create a new mesh, it will be your collider shape (For a socket create a Empty object). 
 	- An asset can contain multiple collider shapes but each collider must use a different object.
