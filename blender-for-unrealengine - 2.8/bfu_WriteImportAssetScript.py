@@ -425,7 +425,7 @@ def WriteOneAssetTaskDef(asset, use20tab = False):
 			ImportScript += "\t" + "\n"
 		else:
 			ImportScript += "\t" + "skeleton = asset.get_editor_property('skeleton')" + "\n"
-			ImportScript += "\t" + "for socket in sockets_to_add :" + "\n"
+			ImportScript += "\t" + "for socket in sockets_to_add:" + "\n"
 			
 			#Create socket
 			ImportScript += "\t\t" + "pass" + "\n"

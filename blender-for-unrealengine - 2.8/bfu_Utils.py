@@ -79,11 +79,52 @@ def RemoveAllConsraints(obj):
 		for c in b.constraints: 
 			b.constraints.remove(c)
 			
-def RescaleStretchLengthConsraints(obj, scale):
-	for b in bpy.context.active_object.pose.bones:
+def RescaleRigConsraints(obj, scale):
+	for b in obj.pose.bones:
 		for c in b.constraints: 
+			#STRETCH_TO
 			if c.type == "STRETCH_TO":
 				c.rest_length *= scale #Can be bigger than 10?... wtf
+			
+			#LIMIT_LOCATION
+			if c.type == "LIMIT_LOCATION":
+				c.min_x *= scale
+				c.min_y *= scale
+				c.min_z *= scale	
+				c.max_x *= scale
+				c.max_y *= scale
+				c.max_z *= scale
+
+			#LIMIT_DISTANCE
+			if c.type == "LIMIT_DISTANCE":
+				c.distance *= scale
+				
+def RescaleShapeKeysCurve(obj, scale):
+	print("A")
+	if obj.data.shape_keys is None: #Optimisation
+		return
+	print("B")
+	if obj.data.shape_keys.animation_data is None:
+		return
+	print("C")
+	if obj.data.shape_keys.animation_data.drivers is None:
+		return
+	print("D")
+	
+		
+	for driver in obj.data.shape_keys.animation_data.drivers:
+		print("E")
+		for key in driver.keyframe_points:
+			key.co[1] *= scale
+			key.handle_left[1] *=scale
+			key.handle_right[1] *=scale
+		
+		for mod in driver.modifiers:
+			print("F")
+			if mod.type == "GENERATOR":
+				mod.coefficients[0] *=scale #coef: +
+				mod.coefficients[1] *=scale #coef: x
+				print("scale")
 
 def GetAllCollisionObj():
 	#Get any object that can be understood as a collision or a socket by unreal

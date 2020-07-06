@@ -251,6 +251,9 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	active = bpy.context.view_layer.objects.active
 	if active.ExportAsProxy == True:
 		ApplyProxyData(active)	
+		
+	scene.frame_start = GetDesiredActionStartEndTime(active, targetAction)[0]
+	scene.frame_end = GetDesiredActionStartEndTime(active, targetAction)[1]
 
 	if addon_prefs.bakeArmatureAction == True:
 		BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)
@@ -258,29 +261,30 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	ApplyExportTransform(active)
 	
 	#This will recale the rig and unit scale to get a root bone egal to 1
-	if GetShouldRescaleRig() == True:
+	ShouldRescaleRig = GetShouldRescaleRig()
+	if ShouldRescaleRig == True:
 	
 		rrf = GetRescaleRigFactor() #rigRescaleFactor
 		savedUnitLength = bpy.context.scene.unit_settings.scale_length
 		bpy.context.scene.unit_settings.scale_length *= 1/rrf
 		ApplySkeletalExportScale(active, rrf)
 		RescaleAllActionCurve(rrf)
+		for selected in bpy.context.selected_objects:
+			if selected.type == "MESH":
+				RescaleShapeKeysCurve(selected, 1/rrf)
 		RescaleSelectCurveHook(1/rrf)
 		ResetArmaturePose(active)
-		RescaleStretchLengthConsraints(active, rrf)
+		RescaleRigConsraints(active, rrf)
 	
 	if (scene.is_nla_tweakmode == True):
 		active.animation_data.use_tweak_mode = False #animation_data.action is ReadOnly with tweakmode in 2.8
 	
 	active.animation_data.action = targetAction #Apply desired action and reset NLA
-	
 	if addon_prefs.ignoreNLAForAction == True:
 		active.animation_data.action_extrapolation = 'HOLD'
 		active.animation_data.action_blend_type = 'REPLACE'
 		active.animation_data.action_influence = 1
-	scene.frame_start = GetDesiredActionStartEndTime(active, targetAction)[0]
-	scene.frame_end = GetDesiredActionStartEndTime(active, targetAction)[1]
-	
+		
 	
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)
@@ -329,7 +333,7 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	obj.matrix_world = BaseTransform
 	
 	##This will recale the rig and unit scale to get a root bone egal to 1
-	if GetShouldRescaleRig() == True:
+	if ShouldRescaleRig == True:
 		#Reset Curve an unit
 		bpy.context.scene.unit_settings.scale_length = savedUnitLength
 		RescaleAllActionCurve(1/rrf)
@@ -372,16 +376,20 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 	ApplyExportTransform(active)
 
 	##This will recale the rig and unit scale to get a root bone egal to 1
-	if GetShouldRescaleRig() == True:
+	ShouldRescaleRig = GetShouldRescaleRig()
+	if ShouldRescaleRig == True:
 	
 		rrf = GetRescaleRigFactor() #rigRescaleFactor
 		savedUnitLength = bpy.context.scene.unit_settings.scale_length
 		bpy.context.scene.unit_settings.scale_length *= 1/rrf
 		ApplySkeletalExportScale(active, rrf)
 		RescaleAllActionCurve(rrf)
+		for selected in bpy.context.selected_objects:
+			if selected.type == "MESH":
+				RescaleShapeKeysCurve(selected, 1/rrf)
 		RescaleSelectCurveHook(1/rrf)
 		ResetArmaturePose(active)
-		RescaleStretchLengthConsraints(active, rrf)
+		RescaleRigConsraints(active, rrf)
 	
 	scene.frame_start += active.StartFramesOffset
 	scene.frame_end += active.EndFramesOffset
@@ -429,7 +437,7 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 	obj.matrix_world = BaseTransform
 	
 	##This will recale the rig and unit scale to get a root bone egal to 1
-	if GetShouldRescaleRig() == True:
+	if ShouldRescaleRig == True:
 		#Reset Curve an unit
 		bpy.context.scene.unit_settings.scale_length = savedUnitLength
 		RescaleAllActionCurve(1/rrf)
@@ -629,7 +637,8 @@ def ExportSingleSkeletalMesh(originalScene, dirpath, filename, obj):
 	ApplyExportTransform(active)
 	
 	##This will recale the rig and unit scale to get a root bone egal to 1
-	if GetShouldRescaleRig() == True:
+	ShouldRescaleRig = GetShouldRescaleRig()
+	if ShouldRescaleRig == True:
 				
 		rrf = GetRescaleRigFactor() #rigRescaleFactor
 		savedUnitLength = bpy.context.scene.unit_settings.scale_length
@@ -672,7 +681,7 @@ def ExportSingleSkeletalMesh(originalScene, dirpath, filename, obj):
 		)
 	
 	##This will recale the rig and unit scale to get a root bone egal to 1
-	if GetShouldRescaleRig() == True:
+	if ShouldRescaleRig == True:
 		#Reset Curve an unit
 		bpy.context.scene.unit_settings.scale_length = savedUnitLength
 		
