@@ -49,7 +49,7 @@ Note: The addon will export the socket with +90 degrees on X. You have an option
 
 
 # Level of details
-This works only on StaticMesh with importing via UnrealEnginePython.
+This works only on StaticMesh with importing.
 1. Select the asset you want to export and set the Export type property to "Export recursive". 
 2. Now repeat the task for all LODs but also check the box "Export as lod?".
 3. Select your main asset and open the panel Object Import Properties.
