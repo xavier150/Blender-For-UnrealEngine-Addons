@@ -121,6 +121,7 @@ If you modify this you will have to import the animation.
 Sine v0.2.7 the addon are adapted to the all workflows. You can work with Unreal unit scale: 0.01 with Blender Unit scale: 1.00 or custom unit scale depending on your production. 
 
 This is automatically managed by the addon but if you need you can choose the how the rig need be scaled at the export.
+
 Note: To optimize export time and avoid problems I recommend using unit scale at 0.01
 
 
