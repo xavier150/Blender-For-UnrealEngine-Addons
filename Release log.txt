@@ -284,7 +284,13 @@ It is now possible to force the duration of an animation according to the scene 
 == Rev 0.2.7.3 ==
 
 - Fixed: Export fail if an object library have the same name of a real object.
-- Fixed: With Unit Scale at 1 if you export an skeletalMesh and an animation in same time the animation can be wrong.
-- Fixed: With Unit Scale at 1 some consraints can make the animation wrong.
-- Fixed: With Unit Scale at 1 ShapeKeys are 100 times too big.
+- Fixed: With Unit Scale not at 0.01 if you export an skeletalMesh and an animation in same time the animation can be wrong.
+- Fixed: With Unit Scale not at 0.01 some consraints can make the animation wrong.
+- Fixed: With Unit Scale not at 0.01 ShapeKeys are 100 times too big.
 - Fixed: Bake Armature animation bake only the current scene start to end frames.
+
+== Rev 0.2.7.4 ==
+
+- Fixed: Animation created with mixamo are not detected in auto.
+- Fixed: With Unit Scale not at 0.01 if and the armature scale is not egal to 1 the animation is wrong.
+- Change: new potential error: Check if the ARMATURE use the same value on all scale axes
