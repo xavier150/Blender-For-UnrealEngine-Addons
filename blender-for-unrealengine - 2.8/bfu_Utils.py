@@ -175,10 +175,8 @@ def GetActionToExport(obj):
 		#This will cheak if the action contains the same bones of the armature
 		objBoneNames = [bone.name for bone in obj.data.bones]
 		for action in bpy.data.actions:
-			actionBoneNames = [group.name for group in action.groups]
-			if ChecksRelationship(actionBoneNames, objBoneNames):
+			if GetIfActionIsAssociated(action, objBoneNames) == True:
 				TargetActionToExport.append(action)
-
 	return TargetActionToExport
 
 def GetDesiredActionStartEndTime(obj, action):
@@ -1019,6 +1017,18 @@ def UpdateUnrealPotentialError():
 						MyError.text = 'In object "'+obj.name+'" the modifier '+modif.type+' named "'+modif.name+'" will not be applied when exported with StaticMesh assets.\nNote: with armature if you want export objets as skeletal mesh you need set only the armature as export_recursive not the childs'
 						MyError.object = obj
 
+	def CheckArmatureScale():
+		#Check if the ARMATURE use the same value on all scale axes
+		for obj in objToCheck:
+			if GetAssetType(obj) == "SkeletalMesh":
+				if obj.scale.z != obj.scale.y or obj.scale.z != obj.scale.x:
+					MyError = PotentialErrors.add()				
+					MyError.name = obj.name
+					MyError.type = 2
+					MyError.text = 'In object "'+obj.name+'" do not use the same value on all scale axes '
+					MyError.text += '\nScale x:'+str(obj.scale.x)+' y:'+str(obj.scale.y)+' z:'+str(obj.scale.z)
+					MyError.object = obj
+		
 	def CheckArmatureModNumber():
 		#check that there is no more than one Modifier ARMATURE at the same time
 		for obj in MeshTypeToCheck:
@@ -1190,6 +1200,7 @@ def UpdateUnrealPotentialError():
 	CheckShapeKeys()
 	CheckUVMaps()
 	CheckBadStaicMeshExportedLikeSkeletalMesh()
+	CheckArmatureScale()
 	CheckArmatureModNumber()
 	CheckArmatureModData()
 	CheckArmatureBoneData()

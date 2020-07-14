@@ -30,8 +30,8 @@ bl_info = {
 	'description': "This add-ons allows to easily export several "
 	"objects at the same time for use in unreal engine 4.",
 	'author': 'Loux Xavier (BleuRaven)',
-	'version': (0, 2, 7, 3), #Rev 0.2.7.3
-	'blender': (2, 83, 1),
+	'version': (0, 2, 7, 4), #Rev 0.2.7.4
+	'blender': (2, 83, 2),
 	'location': 'View3D > UI > Unreal Engine 4',
 	'warning': '',
 	"wiki_url": "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md",

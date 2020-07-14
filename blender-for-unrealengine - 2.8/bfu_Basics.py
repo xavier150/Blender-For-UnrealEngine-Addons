@@ -179,6 +179,21 @@ def ResetArmaturePose(obj):
 		b.scale = Vector((1,1,1))
 		b.location = Vector((0,0,0))
 
+def GetIfActionIsAssociated(action, boneNames):
+	print(boneNames)
+	for group in action.groups:
+		for fcurve in group.channels:
+			s=fcurve.data_path
+			start = s.find('["')
+			end = s.rfind('"]')
+			if start>0 and end>0:
+				substring = s[start+2:end]
+				print(s)
+				print(substring)
+				if substring in boneNames:
+					return True
+	return False
+	pass
 
 def setWindowsClipboard(text):
 	bpy.context.window_manager.clipboard = text

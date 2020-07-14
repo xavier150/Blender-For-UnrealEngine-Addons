@@ -267,15 +267,15 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 		rrf = GetRescaleRigFactor() #rigRescaleFactor
 		savedUnitLength = bpy.context.scene.unit_settings.scale_length
 		bpy.context.scene.unit_settings.scale_length *= 1/rrf
+		oldScale = active.scale.z
 		ApplySkeletalExportScale(active, rrf)
-		RescaleAllActionCurve(rrf)
+		RescaleAllActionCurve(rrf*oldScale)
 		for selected in bpy.context.selected_objects:
 			if selected.type == "MESH":
 				RescaleShapeKeysCurve(selected, 1/rrf)
 		RescaleSelectCurveHook(1/rrf)
 		ResetArmaturePose(active)
 		RescaleRigConsraints(active, rrf)
-	
 	if (scene.is_nla_tweakmode == True):
 		active.animation_data.use_tweak_mode = False #animation_data.action is ReadOnly with tweakmode in 2.8
 	
@@ -292,7 +292,6 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	
 	#Set rename temporarily the Armature as "Armature"
 	oldArmatureName = RenameArmatureAsExportName(active)
-	
 	bpy.ops.export_scene.fbx(
 		filepath=fullpath,
 		check_existing=False,
@@ -336,7 +335,7 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	if ShouldRescaleRig == True:
 		#Reset Curve an unit
 		bpy.context.scene.unit_settings.scale_length = savedUnitLength
-		RescaleAllActionCurve(1/rrf)
+		RescaleAllActionCurve(1/(rrf*oldScale))
 
 	bpy.ops.object.delete()
 	
@@ -382,8 +381,9 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 		rrf = GetRescaleRigFactor() #rigRescaleFactor
 		savedUnitLength = bpy.context.scene.unit_settings.scale_length
 		bpy.context.scene.unit_settings.scale_length *= 1/rrf
+		oldScale = active.scale.z
 		ApplySkeletalExportScale(active, rrf)
-		RescaleAllActionCurve(rrf)
+		RescaleAllActionCurve(rrf*oldScale)
 		for selected in bpy.context.selected_objects:
 			if selected.type == "MESH":
 				RescaleShapeKeysCurve(selected, 1/rrf)
@@ -440,7 +440,7 @@ def ExportSingleFbxNLAAnim(originalScene, dirpath, filename, obj):
 	if ShouldRescaleRig == True:
 		#Reset Curve an unit
 		bpy.context.scene.unit_settings.scale_length = savedUnitLength
-		RescaleAllActionCurve(1/rrf)
+		RescaleAllActionCurve(1/(rrf*oldScale))
 
 	bpy.ops.object.delete()
 
