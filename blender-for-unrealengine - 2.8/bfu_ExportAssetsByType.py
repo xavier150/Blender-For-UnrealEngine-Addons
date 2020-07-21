@@ -107,7 +107,7 @@ def BakeArmatureAnimation(armature, frame_start, frame_end):
 	SavedSelect = GetCurrentSelect()
 	bpy.ops.object.select_all(action='DESELECT')
 	SelectSpecificObject(armature)
-	bpy.ops.nla.bake(frame_start=frame_start-10, frame_end=frame_end+10, only_selected=False, visual_keying=True, clear_constraints=True, bake_types={'POSE'})
+	bpy.ops.nla.bake(frame_start=frame_start-10, frame_end=frame_end+10, only_selected=False, visual_keying=True, clear_constraints=True, use_current_action=False, bake_types={'POSE'})
 	bpy.ops.object.select_all(action='DESELECT')
 	SetCurrentSelect(SavedSelect)	
 
@@ -255,6 +255,8 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	scene.frame_start = GetDesiredActionStartEndTime(active, targetAction)[0]
 	scene.frame_end = GetDesiredActionStartEndTime(active, targetAction)[1]
 
+	active.animation_data.action = targetAction #Apply desired action
+
 	if addon_prefs.bakeArmatureAction == True:
 		BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)
 	
@@ -278,9 +280,8 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 		RescaleRigConsraints(active, rrf)
 	if (scene.is_nla_tweakmode == True):
 		active.animation_data.use_tweak_mode = False #animation_data.action is ReadOnly with tweakmode in 2.8
-	
-	active.animation_data.action = targetAction #Apply desired action and reset NLA
-	if addon_prefs.ignoreNLAForAction == True:
+
+	if addon_prefs.ignoreNLAForAction == True: #Reset NLA
 		active.animation_data.action_extrapolation = 'HOLD'
 		active.animation_data.action_blend_type = 'REPLACE'
 		active.animation_data.action_influence = 1
@@ -289,7 +290,7 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)
 	fullpath = os.path.join( absdirpath , filename )
-	
+
 	#Set rename temporarily the Armature as "Armature"
 	oldArmatureName = RenameArmatureAsExportName(active)
 	bpy.ops.export_scene.fbx(
