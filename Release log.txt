@@ -293,4 +293,5 @@ It is now possible to force the duration of an animation according to the scene 
 
 - Fixed: Animation created with mixamo are not detected in auto.
 - Fixed: With Unit Scale not at 0.01 if and the armature scale is not egal to 1 the animation is wrong.
-- Change: new potential error: Check if the ARMATURE use the same value on all scale axes
+- Fixed: Animation bake don't work on all constraints.
+- Change: new potential error: Check if the ARMATURE use the same value on all scale axes.
