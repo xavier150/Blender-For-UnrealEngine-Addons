@@ -112,7 +112,7 @@ Materials are not imported, you must create them in Unreal Engine.
 
 # LightMap (For next update)
 You can specify how the light map resolution will be generated
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocLightMap.jpg">
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocLightMapType.jpg">
 
 # Skeleton & Root bone
 Blender exports the armature like a root bone. To remove this bone check the box "Remove root bone" in Addon Preferences.
