@@ -34,7 +34,7 @@ If you would like to have the Add-on enabled every time you start Blender, click
 2. Extract "blender-for-unrealengine - 2.8"
 3. Compress "blender-for-unrealengine - 2.8" as new Zip file.
 4. Install the new zip file in Blender.
-https://github.com/xavier150/Blender-For-UnrealEngine-Addons#download-and-installation
+[Download and installation](#download-and-installation)
 
 # Other
 About the next version: [Trello](https://trello.com/b/32g729kg/blender-for-unreal-engine-addon) </br>
