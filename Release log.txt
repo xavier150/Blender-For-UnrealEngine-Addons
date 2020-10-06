@@ -294,4 +294,24 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Animation created with mixamo are not detected in auto.
 - Fixed: With Unit Scale not at 0.01 if and the armature scale is not egal to 1 the animation is wrong.
 - Fixed: Animation bake don't work on all constraints.
-- Change: new potential error: Check if the ARMATURE use the same value on all scale axes.
+- Change: New potential error: Check if the ARMATURE use the same value on all scale axes.
+
+== Rev 0.2.8 ==
+
+- New: You can now choose the preview collision color.
+- New: You can set a light map res depending on the surface Area
+- New: New button for update light map res depending on the surface Area
+- New: You can now use ../ for up one directory in folder names
+- Change: Error message "Not found assets with Export recursive"
+- Change: New potential error: Check if the unit scale is equal to 0.01 (You can disable this potential error in addon_prefs)
+- Change: 20 Tab python integration is now not supported
+- Change: Simple others change in property values and texts.
+- Change: Return to the user mode (OBJECT, EDIT, [...]) after the export
+- Fixed: Export fail if the object consraint shapes keys and modifiers.
+- Fixed: Export fail if UserMode not set
+- Fixed: Create PhysicsAsset option in skeletalMesh alway create PhysicsAsset.
+- Fixed: Useless data created by the export are not removed
+
+
+
+Cheak vertex_color_import_option + normal_import_method 
