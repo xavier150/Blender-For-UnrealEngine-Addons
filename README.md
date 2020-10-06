@@ -13,7 +13,7 @@ You can see the tutorials and documentation here:
   - [How export assets from blender](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md) </br>
   - [How import assets from Blender to Unreal](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20import%20assets%20from%20Blender%20to%20Unreal.md)
 
-# Installation
+# Download and installation
 1. Download addon :
 - [Rev 0.2.7.4 for Blender 2.8](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/download/v0.2.7.4/blender-for-unrealengine_2.8.zip) 
 - [Rev 0.2.3d for Blender 2.7](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/download/v.0.2.3d/blender-for-unrealengine_2.7.zip)
@@ -29,6 +29,12 @@ If you would like to have the Add-on enabled every time you start Blender, click
 4. You can found the addons in the right side panel (N)
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/InstallationScreen3.jpg" width="600">
 
+# Download and installation from sources
+1. Download source file as Zip file.
+2. Extract "blender-for-unrealengine - 2.8"
+3. Compress "blender-for-unrealengine - 2.8" as new Zip file.
+4. Install the new zip file in Blender.
+https://github.com/xavier150/Blender-For-UnrealEngine-Addons#installation
 
 # Other
 About the next version: [Trello](https://trello.com/b/32g729kg/blender-for-unreal-engine-addon) </br>
