@@ -20,13 +20,81 @@
 import bpy
 import fnmatch
 import mathutils
+import math
+import time, sys
 
 import importlib
 from . import bfu_Basics
 importlib.reload(bfu_Basics)
 from .bfu_Basics import *
 
+def CounterStart():
+	return time.perf_counter()
+	
+def CounterEnd(start):
+	return time.perf_counter()-start
 
+def update_progress(job_title, progress, time = None):
+	length = 20 # modify this to change the length
+	block = int(round(length*progress))
+	msg = "\r{0}: [{1}] {2}%".format(job_title, "#"*block + "-"*(length-block), round(progress*100, 2))
+	if progress >= 1:
+		if time is not None	: msg += " DONE IN " + str(round(time,2)) + "s\r\n" 
+		else: msg += " DONE\r\n"
+	sys.stdout.write(msg)
+	sys.stdout.flush()
+
+def RemoveUselessSpecificData(name, type):
+	#MESH CURVE SURFACE META FONT HAIR POINTCLOUD VOLUME ARMATURE LATTICE EMPTY GPENCIL CAMERA LIGHT SPEAKER LIGHT_PROBE
+	
+	
+	if type == "MESH":
+		oldData = bpy.data.meshes[name]
+		if oldData.users == 0:
+			bpy.data.meshes.remove(oldData)
+	
+	if type == "ARMATURE":
+		oldData = bpy.data.armatures[name]
+		if oldData.users == 0:
+			bpy.data.armatures.remove(oldData)
+
+
+def CleanJoinSelect():
+
+	if len(bpy.context.selected_objects) < 1:
+		if bpy.context.view_layer.objects.active == None:
+			bpy.context.view_layer.objects.active = bpy.context.selected_objects[0]
+				
+		if bpy.ops.object.convert.poll():
+			bpy.ops.object.join()
+	
+
+def CleanDeleteSelect():
+
+	oldDataToRemove = []
+	for obj in bpy.context.selected_objects:
+		if obj.data is not None:
+			oldDataToRemove.append([obj.data.name, obj.type])
+			
+	bpy.ops.object.delete()
+	
+	for data in oldDataToRemove:
+		RemoveUselessSpecificData(data[0], data[1])
+		
+def CleanDeleteObjects(objs):
+
+	for obj in objs:
+	
+		souldRemoveData = False
+		if obj.data is not None:
+			oldDataToRemove = obj.data.name
+			oldDataTypeToRemove = obj.type
+			souldRemoveData = True
+			
+		bpy.data.objects.remove(obj)
+		
+		if souldRemoveData == True:
+			RemoveUselessSpecificData(oldDataToRemove, oldDataTypeToRemove)
 
 def GetAllobjectsByExportType(exportType):
 	#Find all objects with a specific ExportEnum property
@@ -100,31 +168,24 @@ def RescaleRigConsraints(obj, scale):
 				c.distance *= scale
 				
 def RescaleShapeKeysCurve(obj, scale):
-	print("A")
 	if obj.data.shape_keys is None: #Optimisation
 		return
-	print("B")
 	if obj.data.shape_keys.animation_data is None:
 		return
-	print("C")
 	if obj.data.shape_keys.animation_data.drivers is None:
 		return
-	print("D")
 	
 		
 	for driver in obj.data.shape_keys.animation_data.drivers:
-		print("E")
 		for key in driver.keyframe_points:
 			key.co[1] *= scale
 			key.handle_left[1] *=scale
 			key.handle_right[1] *=scale
 		
 		for mod in driver.modifiers:
-			print("F")
 			if mod.type == "GENERATOR":
 				mod.coefficients[0] *=scale #coef: +
 				mod.coefficients[1] *=scale #coef: x
-				print("scale")
 
 def GetAllCollisionObj():
 	#Get any object that can be understood as a collision or a socket by unreal
@@ -213,6 +274,76 @@ def GetDesiredActionStartEndTime(obj, action):
 			endTime = startTime+1 
 		return (startTime,endTime)
 	
+def ExportCompuntedLightMapValue(obj):
+	if obj.StaticMeshLightMapEnum == "Default":
+		return False
+	return True
+
+def GetExportRealSurfaceArea(obj):
+	scene = bpy.context.scene
+	
+	MoveToGlobalView()
+	if	bpy.ops.object.mode_set.poll():
+		bpy.ops.object.mode_set(mode = 'OBJECT')
+	
+	SavedSelect = GetCurrentSelect()
+	SelectParentAndDesiredChilds(obj)
+	
+	bpy.ops.object.duplicate()
+	bpy.ops.object.duplicates_make_real(use_base_parent=True, use_hierarchy=True)
+	
+	ApplyNeededModifierToSelect()
+	bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+	for selectObj in bpy.context.selected_objects: #Remove unable to convert mesh
+		if selectObj.type == "EMPTY" or selectObj.type == "CURVE":
+			CleanDeleteObjects([selectObj])
+	
+	for selectObj in bpy.context.selected_objects: #Remove collision box
+		if CheckIsCollision(selectObj) == True:
+			CleanDeleteObjects([selectObj])
+
+
+	if bpy.context.view_layer.objects.active == None: #When the active id a empty
+		bpy.context.view_layer.objects.active = bpy.context.selected_objects[0]
+	bpy.ops.object.convert(target='MESH')
+	
+	active = bpy.context.view_layer.objects.active
+	
+	CleanJoinSelect()
+	active = bpy.context.view_layer.objects.active
+	area = GetSurfaceArea(active)
+	CleanDeleteObjects(bpy.context.selected_objects)
+	SetCurrentSelect(SavedSelect)
+	return area
+
+	
+	#active = bpy.context.view_layer.objects.active
+
+def GetCompuntedLightMap(obj):
+	if obj.StaticMeshLightMapEnum == "Default":
+		return -1
+		
+	if obj.StaticMeshLightMapEnum == "CustomMap":
+		return obj.customStaticMeshLightMapRes
+		
+	if obj.StaticMeshLightMapEnum == "SurfaceArea":
+		#Get the area
+		area = obj.computedStaticMeshLightMapRes
+		area**= 0.5 #Adapte for light map
+		
+		if obj.useStaticMeshLightMapWorldScale == True:
+			#Turn area at world scale
+			objScale = (obj.scale.x + obj.scale.y + obj.scale.z)/3
+			area *= objScale
+			
+		
+		#Computed light map equal light map scale for a plane vvv
+		area*= bpy.context.scene.unit_settings.scale_length
+		area*= obj.staticMeshLightMapSurfaceScale/2 
+		if obj.staticMeshLightMapRoundPowerOfTwo:
+			
+			return nearestPowerOfTwo(int(round(area)))
+		return int(round(area))
 
 def GetActionType(action):
 	#return action type
@@ -291,7 +422,11 @@ def ApplyNeededModifierToSelect():
 		if obj.type == "MESH":
 			SelectSpecificObject(obj)
 			for mod in [m for m in obj.modifiers if m.type != 'ARMATURE']:
-				bpy.ops.object.modifier_apply(modifier = mod.name)
+				if obj.data.shape_keys is None:
+					if obj.data.users > 1:
+						obj.data = obj.data.copy()
+					if bpy.ops.object.modifier_apply.poll():
+						bpy.ops.object.modifier_apply(modifier = mod.name)
 				
 	
 	SetCurrentSelect(SavedSelect)
@@ -650,10 +785,7 @@ def GetImportAssetScriptCommand():
 	absdirpath = bpy.path.abspath(scene.export_other_file_path)
 	fullpath = os.path.join( absdirpath , fileName )
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
-	if addon_prefs.use20TabScript == True:
-		return 'unreal_engine.py_exec(r"'+fullpath+'")' #20tab
-	else:
-		return 'py "'+fullpath+'"' #Vania
+	return 'py "'+fullpath+'"'
 
 def GetImportSequencerScriptCommand():
 	scene = bpy.context.scene
@@ -662,10 +794,7 @@ def GetImportSequencerScriptCommand():
 	fullpath = os.path.join( absdirpath , fileName )
 
 	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
-	if addon_prefs.use20TabScript == True:
-		return 'unreal_engine.py_exec(r"'+fullpath+'")' #20tab
-	else:
-		return 'py "'+fullpath+'"' #Vania
+	return 'py "'+fullpath+'"' #Vania
 
 def GetAnimSample(obj):
 	#return obj sample animation
@@ -738,10 +867,13 @@ def GenerateUe4Name(name):
 	return name
 
 def CreateCollisionMaterial():
+	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
+	
 	mat = bpy.data.materials.get("UE4Collision")
 	if mat is None:
 		mat = bpy.data.materials.new(name="UE4Collision")
-	mat.diffuse_color = (0, 0.6, 0, 0.11)
+	
+	mat.diffuse_color = addon_prefs.collisionColor
 	mat.use_nodes = False
 	if bpy.context.scene.render.engine == 'CYCLES':
 		#sets up the nodes to create a transparent material with GLSL mat in Cycle
@@ -872,7 +1004,7 @@ def UpdateUe4Name(SubType, objList):
 							obj.name = GenerateUe4Name("SOCKET_"+obj.name)
 
 
-def UpdateNameHierarchy(list =	None):
+def UpdateNameHierarchy(list = None):
 #Updates hierarchy names
 	
 	if list is not None:
@@ -880,23 +1012,58 @@ def UpdateNameHierarchy(list =	None):
 	else:
 		objs = GetAllCollisionAndSocketsObj()
 		
+	UpdatedHierarchy = 0
 	for obj in objs:
 		if fnmatch.fnmatchcase(obj.name, "UBX*"):
 			UpdateUe4Name("Box", [obj])
+			UpdatedHierarchy += 1
 		if fnmatch.fnmatchcase(obj.name, "UCP*"):
 			UpdateUe4Name("Capsule", [obj])
+			UpdatedHierarchy += 1
 		if fnmatch.fnmatchcase(obj.name, "USP*"):
 			UpdateUe4Name("Sphere", [obj])
+			UpdatedHierarchy += 1
 		if fnmatch.fnmatchcase(obj.name, "UCX*"):
 			UpdateUe4Name("Convex", [obj])
+			UpdatedHierarchy += 1
 		if fnmatch.fnmatchcase(obj.name, "SOCKET*"):
 			UpdateUe4Name("Socket", [obj])
+			UpdatedHierarchy += 1
+		return UpdatedHierarchy
+
+def UpdateAreaLightMapList(list = None):
+#Updates area LightMap
+
+	if list is not None:
+		objs = list 
+	else:
+		objs = []
+		exportObjs = GetAllobjectsByExportType("export_recursive")
+		for exportObj in exportObjs:
+			if GetAssetType(exportObj) == "StaticMesh":
+				objs.append(exportObj)
+		
+	UpdatedRes = 0
+	
+	s = CounterStart()
+	for obj in objs:
+		obj.computedStaticMeshLightMapRes = GetExportRealSurfaceArea(obj)
+		UpdatedRes += 1
+		update_progress("Update LightMap", (UpdatedRes/len(objs)), CounterEnd(s))
+	return UpdatedRes
+		
 
 
-def CorrectBadProperty():
+def CorrectBadProperty(list = None):
 #Corrects bad properties
+
+	if list is not None:
+		objs = list 
+	else:
+		objs = GetAllCollisionAndSocketsObj()
+		
 	UpdatedProp = 0
-	for obj in GetAllCollisionAndSocketsObj():
+	for obj in objs:
 		if obj.ExportEnum == "export_recursive":
 			obj.ExportEnum = "auto"
 			UpdatedProp += 1
@@ -917,7 +1084,7 @@ def GetVertexWithZeroWeight(Armature, Mesh):
 def UpdateUnrealPotentialError():
 	#Find and reset list of all potential error in scene
 
-
+	addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
 	PotentialErrors = bpy.context.scene.potentialErrorList
 	PotentialErrors.clear()
 
@@ -941,6 +1108,23 @@ def UpdateUnrealPotentialError():
 		if not CheckIsCollision(obj):
 			MeshTypeWithoutCol.append(obj)
 
+	def CheckUnitScale():
+	#Check if the unit scale is equal to 0.01.
+		if addon_prefs.notifyUnitScalePotentialError == True:
+			if not math.isclose(bpy.context.scene.unit_settings.scale_length, 0.01, rel_tol=1e-5):
+				MyError = PotentialErrors.add()
+				MyError.name = bpy.context.scene.name
+				MyError.type = 1
+				MyError.text = 'Scene "'+bpy.context.scene.name+'" has a UnitScale egal to '+str(bpy.context.scene.unit_settings.scale_length)
+				MyError.text += '\nFor Unreal unit scale equal to 0.01 is recommended.'
+				MyError.text += '\n(You can disable this potential error in addon_prefs)'
+				MyError.object = None
+				MyError.correctRef = "SetUnrealUnit"
+				MyError.correctlabel = 'Set Unreal Unit'			
+
+	
+	
+	
 	def CheckObjType():
 	#Check if objects use a non-recommended type
 		for obj in objToCheck:
@@ -1196,6 +1380,7 @@ def UpdateUnrealPotentialError():
 									MyError.text = 'In action "'+action.name+'" at frame '+str(key.co[0])+', the bone named "'+fcurve.data_path.split('"')[1]+'" has a zero value in scale transform. This is invalid in Unreal.'
 
 
+	CheckUnitScale()
 	CheckObjType()
 	CheckShapeKeys()
 	CheckUVMaps()
@@ -1292,6 +1477,10 @@ def TryToCorrectPotentialError(errorIndex):
 
 
 	#Correction list
+	
+	if error.correctRef == "SetUnrealUnit":
+		bpy.context.scene.unit_settings.scale_length = 0.01
+		successCorrect = True
 
 	if error.correctRef == "ConvertToMesh":
 		obj = error.object

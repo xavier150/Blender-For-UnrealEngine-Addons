@@ -34,12 +34,12 @@ def GetCurrentAddonRelase():
 	v = mod.bl_info.get('version')
 	letter = ""
 	if len(v) > 3:
-		if  v[3] == 1: letter = "b"
-		if  v[3] == 2: letter = "c"
-		if  v[3] == 3: letter = "d"
-		if  v[3] == 4: letter = "e"
-		if  v[3] == 5: letter = "f"
-		if  v[3] == 6: letter = "g"
+		if	v[3] == 1: letter = "b"
+		if	v[3] == 2: letter = "c"
+		if	v[3] == 3: letter = "d"
+		if	v[3] == 4: letter = "e"
+		if	v[3] == 5: letter = "f"
+		if	v[3] == 6: letter = "g"
 		
 	return "v."+str(v[0])+"."+str(v[1])+"."+str(v[2])+letter
 
@@ -48,7 +48,17 @@ def is_deleted(o):
 		return not (o.name in bpy.data.objects)
 	except:
 		return True
-    
+	
+	
+def MoveToGlobalView():
+	for area in bpy.context.screen.areas:
+		if area.type == 'VIEW_3D':
+			space = area.spaces[0]
+			if space.local_view: #check if using local view
+				for region in area.regions:
+					if region.type == 'WINDOW':
+						override = {'area': area, 'region': region} #override context
+						bpy.ops.view3d.localview(override) #switch to global view
 
 def GetCurrentSelect():
 	#Return array for selected and the active
@@ -86,6 +96,41 @@ def ChecksRelationship(arrayA, arrayB):
 				return True
 	return False
 	
+# compute power of two greater than or equal to n
+def nextPowerOfTwo(n):
+
+	# decrement n (to handle cases when n itself
+	# is a power of 2)
+	n = n - 1
+
+	# do till only one bit is left
+	while n & n - 1:
+		n = n & n - 1  # unset rightmost bit
+
+	# n is now a power of two (less than n)
+	return n << 1
+
+# compute power of two less than or equal to n
+def previousPowerOfTwo(n):
+
+	# do till only one bit is left
+	while (n & n - 1):
+		n = n & n - 1		# unset rightmost bit
+
+	# n is now a power of two (less than or equal to n)
+	return n
+	
+def nearestPowerOfTwo(value):
+	if value < 2:
+		return 2
+		
+	a = previousPowerOfTwo(value)
+	b = nextPowerOfTwo(value)
+	
+	if value - a < b - value:
+		return a
+	else:
+		return b
 
 def RemoveFolderTree(folder):
 	try:
@@ -180,7 +225,6 @@ def ResetArmaturePose(obj):
 		b.location = Vector((0,0,0))
 
 def GetIfActionIsAssociated(action, boneNames):
-	print(boneNames)
 	for group in action.groups:
 		for fcurve in group.channels:
 			s=fcurve.data_path
@@ -188,12 +232,17 @@ def GetIfActionIsAssociated(action, boneNames):
 			end = s.rfind('"]')
 			if start>0 and end>0:
 				substring = s[start+2:end]
-				print(s)
-				print(substring)
 				if substring in boneNames:
 					return True
 	return False
 	pass
+
+def GetSurfaceArea(obj):
+	bm = bmesh.new()
+	bm.from_mesh(obj.data)
+	area = sum(f.calc_area() for f in bm.faces)
+	bm.free()	
+	return area
 
 def setWindowsClipboard(text):
 	bpy.context.window_manager.clipboard = text

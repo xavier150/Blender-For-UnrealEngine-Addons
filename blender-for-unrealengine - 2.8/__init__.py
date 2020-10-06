@@ -179,11 +179,21 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		description='If false the all properties that only works with import scripts will be disabled',
 		default=True,
 		)
-
-	use20TabScript : BoolProperty(
-		name='Generate import script for 20Tab python intergration',
-		description='Generate import script for 20Tab python intergration ( /!\ With vania python integration some features like StaticMesh Lod or SkeletalMesh Sockets integration do not work )',
-		default=False,
+		
+	collisionColor :  FloatVectorProperty(
+		name='Collision color.',
+		description='Color of the collision in Blender',
+		subtype='COLOR',
+		size=4,
+		#default=(0, 0.6, 0,),
+		default=(0, 0.6, 0, 0.11),
+		min=0.0, max=1.0,
+		)
+		
+	notifyUnitScalePotentialError : BoolProperty(
+		name='Notify UnitScale (PotentialError)',
+		description='Notify as potential error if the unit scale is not equal to 0.01.',
+		default=True,
 		)
 
 	class BFU_OT_OpenDocumentationTargetPage(Operator):
@@ -258,9 +268,13 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 		script = boxColumn.box()
 		script.label(text='IMPORT SCRIPT')
 		script.prop(self, "useGeneratedScripts")
-		scriptProp = script.column()
-		scriptProp.enabled = self.useGeneratedScripts
-		scriptProp.prop(self, "use20TabScript")
+		
+		boxColumn = layout.column().split(factor = 0.5 )
+		
+		other = boxColumn.box()
+		other.label(text='OTHER')
+		other.prop(self, "collisionColor")
+		other.prop(self, "notifyUnitScalePotentialError")
 
 		updateButton = layout.row()
 		updateButton.scale_y = 2.0
@@ -268,14 +282,44 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 
 	
 	
+class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
+	#Unreal engine export panel
+
+	bl_idname = "BFU_PT_BlenderForUnrealObject"
+	bl_label = "(Select) Blender for Unreal Engine"
+	bl_space_type = "VIEW_3D"
+	bl_region_type = "UI"
+	bl_category = "Unreal Engine"
+	
+	
+	class BFU_OT_OpenDocumentationPage(Operator):
+		bl_label = "Documentation"
+		bl_idname = "object.open_documentation_page"
+		bl_description = "Clic for open documentation page on GitHub"
+
+		def execute(self, context):		
+			os.system("start \"\" https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md")
+			return {'FINISHED'}
+			
+
+
+	def draw(self, contex):
+	
+		releaseVersion = None#GetGitHubLastRelaseVersion()
+		
+		layout =  self.layout
+		docsButton = layout.row()
+		docsButton.operator("object.open_documentation_page", icon= "HELP")
+		
+
 class BFU_PT_BlenderForUnreal(bpy.types.Panel):
 	#Unreal engine export panel
 
 	bl_idname = "BFU_PT_BlenderForUnreal"
-	bl_label = "Blender for Unreal Engine"
+	bl_label = "(Global) Blender for Unreal Engine"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
-	bl_category = "Unreal Engine 4"
+	bl_category = "Unreal Engine"
 	
 	class BFU_MT_ObjectGlobalPropertiesPresets(bpy.types.Menu):
 		bl_label = 'Global Properties Presets'
@@ -312,8 +356,11 @@ class BFU_PT_BlenderForUnreal(bpy.types.Panel):
 							'obj.CreatePhysicsAsset',
 							'obj.UseStaticMeshLODGroup',
 							'obj.StaticMeshLODGroup',
-							'obj.UseStaticMeshLightMapRes',
-							'obj.StaticMeshLightMapRes',
+							'obj.StaticMeshLightMapEnum',
+							'obj.customStaticMeshLightMapRes',
+							'obj.staticMeshLightMapSurfaceScale',
+							'obj.staticMeshLightMapRoundPowerOfTwo',
+							'obj.useStaticMeshLightMapWorldScale',
 							'obj.GenerateLightmapUVs',
 							'obj.AutoGenerateCollision',
 							'obj.MaterialSearchLocation',
@@ -344,26 +391,8 @@ class BFU_PT_BlenderForUnreal(bpy.types.Panel):
 		# Directory to store the presets
 		preset_subdir = 'blender-for-unrealengine/global-properties-presets'
 	
-	
-	class BFU_OT_OpenDocumentationPage(Operator):
-		bl_label = "Documentation"
-		bl_idname = "object.open_documentation_page"
-		bl_description = "Clic for open documentation page on GitHub"
-
-		def execute(self, context):		
-			os.system("start \"\" https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md")
-			return {'FINISHED'}
-			
-
-
 	def draw(self, contex):
-	
-		releaseVersion = None#GetGitHubLastRelaseVersion()
-		
-		layout =  self.layout
-		docsButton = layout.row()
-		docsButton.operator("object.open_documentation_page", icon= "HELP")
-		
+		pass
 
 
 class BFU_PT_ObjectProperties(bpy.types.Panel):
@@ -374,7 +403,7 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
-	bl_parent_id = "BFU_PT_BlenderForUnreal"
+	bl_parent_id = "BFU_PT_BlenderForUnrealObject"
 
 	bpy.types.Object.ExportEnum = EnumProperty(
 		name = "Export type",
@@ -388,7 +417,8 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
 
 	bpy.types.Object.exportFolderName = StringProperty(
 		name = "Sub folder name",
-		description = 'Sub folder name. No Sub folder created if left empty',
+		description = 'The name of sub folder. You can now use ../ for up one directory.',
+		
 		maxlen = 64,
 		default = "",
 		subtype = 'FILE_NAME'
@@ -493,7 +523,7 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
-	bl_parent_id = "BFU_PT_BlenderForUnreal"
+	bl_parent_id = "BFU_PT_BlenderForUnrealObject"
 
 	#Lod list
 	bpy.types.Object.Ue4Lod1 = PointerProperty(
@@ -543,6 +573,7 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 		description = '',
 		default=False
 		)
+		
 	bpy.types.Object.StaticMeshLODGroup = StringProperty(
 		name = "LOD Group",
 		description = "The LODGroup to associate with this mesh when it is imported. Default: LevelArchitecture, SmallProp, LargeProp, Deco, Vista, Foliage, HighDetail" ,
@@ -550,21 +581,51 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 		default = "SmallProp"
 		)
 
-	bpy.types.Object.UseStaticMeshLightMapRes = BoolProperty(
-		name = "",
-		description = '',
-		default=False
+	bpy.types.Object.StaticMeshLightMapEnum = EnumProperty(
+		name = "Light map",
+		description = 'Specify how the light map resolution will be generated',
+		items = [
+			("Default", "Default", "Has no effect on light maps", 1),
+			("CustomMap", "Custom map", "Set the custom light map resolution", 2),
+			("SurfaceArea", "surface Area", "Set light map resolution depending on the surface Area", 3)
+			]
 		)
-	bpy.types.Object.StaticMeshLightMapRes = IntProperty(
+	
+	bpy.types.Object.customStaticMeshLightMapRes = IntProperty(
 		name = "Light Map resolution",
-		description = " This is the resolution of the light map" ,
+		description = "This is the resolution of the light map" ,
 		soft_max = 2048,
 		soft_min = 16,
 		max = 4096, #Max for unreal
 		min = 4, #Min for unreal
-		default = 16
+		default = 64
+		)
+	
+	bpy.types.Object.computedStaticMeshLightMapRes = FloatProperty(
+		name = "computed Light Map resolution",
+		description = "This is the computed resolution of the light map" ,
+		default = 64.0
 		)
 
+	bpy.types.Object.staticMeshLightMapSurfaceScale = FloatProperty(
+		name = "Surface scale",
+		description = "This is for resacle the surface Area value" ,
+		min = 0.00001, #Min for unreal
+		default = 64
+		)
+			
+	bpy.types.Object.staticMeshLightMapRoundPowerOfTwo = BoolProperty(
+		name = "Round power of 2",
+		description = "round Light Map resolution to nearest power of 2" ,
+		default = True
+		)	
+	
+	bpy.types.Object.useStaticMeshLightMapWorldScale = BoolProperty(
+		name = "Use world scale",
+		description = "If not that will use the object scale." ,
+		default = True
+		)
+		
 	bpy.types.Object.GenerateLightmapUVs = BoolProperty(
 		name = "Generate LightmapUVs",
 		description = "If checked, UVs for Lightmap will automatically be generated." ,
@@ -587,12 +648,12 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 		name = "Material search location",
 		description = "Specify where we should search for matching materials when importing",
 		#Vania python -> #https://docs.unrealengine.com/en-US/PythonAPI/class/MaterialSearchLocation.html?highlight=materialsearchlocation
-		#20tab python -> http://api.unrealengine.com/INT/API/Editor/UnrealEd/Factories/EMaterialSearchLocation/index.html
+		#C++ API -> http://api.unrealengine.com/INT/API/Editor/UnrealEd/Factories/EMaterialSearchLocation/index.html
 		items = [
 			("Local", "Local", "Search for matching material in local import folder only.", 1),
-			("UnderParent", "UnderParent", "Search for matching material recursively from parent folder.", 2),
-			("UnderRoot", "UnderRoot", "Search for matching material recursively from root folder.", 3),
-			("AllAssets", "AllAssets", "Search for matching material in all assets folders.", 4)
+			("UnderParent", "Under parent", "Search for matching material recursively from parent folder.", 2),
+			("UnderRoot", "Under root", "Search for matching material recursively from root folder.", 3),
+			("AllAssets", "All assets", "Search for matching material in all assets folders.", 4)
 			]
 		)
 
@@ -600,7 +661,7 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 		name = "Collision Complexity",
 		description = "Collision Trace Flag",
 		#Vania python -> https://docs.unrealengine.com/en-US/PythonAPI/class/CollisionTraceFlag.html
-		#20tab python ->https://api.unrealengine.com/INT/API/Runtime/Engine/PhysicsEngine/ECollisionTraceFlag/index.html
+		#C++ API -> https://api.unrealengine.com/INT/API/Runtime/Engine/PhysicsEngine/ECollisionTraceFlag/index.html
 		items = [
 			("CTF_UseDefault", "Project Default", "Create only complex shapes (per poly). Use complex shapes for all scene queries and collision tests. Can be used in simulation for static shapes only (i.e can be collided against but not moved through forces or velocity.", 1),
 			("CTF_UseSimpleAndComplex", "Use Simple And Complex", "Use project physics settings (DefaultShapeComplexity)", 2),
@@ -613,13 +674,33 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 		name = "Vertex Color Import Option",
 		description = "Specify how vertex colors should be imported",
 		#Vania python -> https://docs.unrealengine.com/en-US/PythonAPI/class/VertexColorImportOption.html
-		#20tab python -> https://docs.unrealengine.com/en-US/API/Editor/UnrealEd/Factories/EVertexColorImportOption__Type/index.html
+		#C++ API -> https://docs.unrealengine.com/en-US/API/Editor/UnrealEd/Factories/EVertexColorImportOption__Type/index.html
 		items = [
 			("VCIO_Ignore", "Ignore", "Ignore vertex colors from the FBX file, and keep the existing mesh vertex colors.", 1),
 			("VCIO_Replace", "Replace", "Import the static mesh using the vertex colors from the FBX file.", 2)
 			]
 		)
 
+	class BFU_OT_ComputLightMap(Operator):
+		bl_label = "Calculate surface area"
+		bl_idname = "object.computlightmap"
+		bl_description = "Click to calculate the surface of the object"
+
+		def execute(self, context):
+			obj = context.object
+			obj.computedStaticMeshLightMapRes = GetExportRealSurfaceArea(obj)
+			self.report({'INFO'}, "Light map area updated to " + str(round(obj.computedStaticMeshLightMapRes)) + "." )
+			return {'FINISHED'}	
+	
+	class BFU_OT_ComputAllLightMap(Operator):
+		bl_label = "Calculate all surface area"
+		bl_idname = "object.computalllightmap"
+		bl_description = "Click to calculate the surface of the all object in the scene"
+
+		def execute(self, context):
+			updated = UpdateAreaLightMapList()
+			self.report({'INFO'}, "The light maps of " + str(updated) + " object(s) have been updated." )
+			return {'FINISHED'}
 
 	def draw(self, context):
 
@@ -664,11 +745,20 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
 						StaticMeshVertexColorImportOption = layout.row()
 						StaticMeshVertexColorImportOption.prop(obj, 'VertexColorImportOption')
 
-						StaticMeshLightMapRes = layout.row()
-						StaticMeshLightMapRes.prop(obj, 'UseStaticMeshLightMapRes', text="")
-						StaticMeshLightMapResChild = StaticMeshLightMapRes.column()
-						StaticMeshLightMapResChild.enabled = obj.UseStaticMeshLightMapRes
-						StaticMeshLightMapResChild.prop(obj, 'StaticMeshLightMapRes')
+						StaticMeshLightMapRes = layout.box()
+						StaticMeshLightMapRes.prop(obj, 'StaticMeshLightMapEnum')
+						if obj.StaticMeshLightMapEnum == "CustomMap":
+							CustomLightMap = StaticMeshLightMapRes.column()
+							CustomLightMap.prop(obj, 'customStaticMeshLightMapRes')
+						if obj.StaticMeshLightMapEnum == "SurfaceArea":
+							SurfaceAreaLightMap = StaticMeshLightMapRes.column()
+							SurfaceAreaLightMap.operator("object.computlightmap", icon='TEXTURE')
+							SurfaceAreaLightMap.operator("object.computalllightmap", icon='TEXTURE')
+							SurfaceAreaLightMap.prop(obj, 'useStaticMeshLightMapWorldScale')
+							SurfaceAreaLightMap.prop(obj, 'staticMeshLightMapSurfaceScale')
+							SurfaceAreaLightMap.prop(obj, 'staticMeshLightMapRoundPowerOfTwo')
+						StaticMeshLightMapRes.label(text='Compunted light map: '+str(GetCompuntedLightMap(obj)))
+						
 
 						GenerateLightmapUVs = layout.row()
 						GenerateLightmapUVs.prop(obj, 'GenerateLightmapUVs')
@@ -704,7 +794,7 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
-	bl_parent_id = "BFU_PT_BlenderForUnreal"
+	bl_parent_id = "BFU_PT_BlenderForUnrealObject"
 
 	#Animation :
 
@@ -1065,7 +1155,7 @@ class BFU_PT_AvancedObjectProperties(bpy.types.Panel):
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
-	bl_parent_id = "BFU_PT_BlenderForUnreal"
+	bl_parent_id = "BFU_PT_BlenderForUnrealObject"
 
 
 	bpy.types.Object.exportGlobalScale = FloatProperty(
@@ -1422,7 +1512,7 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 	#Sub folder
 	bpy.types.Scene.anim_subfolder_name = bpy.props.StringProperty(
 		name = "Animations sub folder name",
-		description = "name of sub folder for animations",
+		description = r"The name of sub folder for animations New. You can now use ../ for up one directory.",
 		maxlen = 32,
 		default = "Anim")
 
@@ -1703,12 +1793,13 @@ class BFU_PT_Export(bpy.types.Panel):
 				popup_title = "No potential error to correct!"
 
 			if self.correctedProperty > 0 :
-				CheckInfo = str(self.correctedProperty) + " properties corrected."
+				potentialErrorInfo = str(self.correctedProperty) + "- properties corrected."
 			else:
-				CheckInfo = "no properties to correct."
+				potentialErrorInfo = "- No properties to correct."
 
 			layout.label(text=popup_title)
-			layout.label(text="Hierarchy names updated and " + CheckInfo)
+			layout.label(text="- Hierarchy names updated")
+			layout.label(text=potentialErrorInfo)
 			layout.separator()
 			row = layout.row()
 			col = row.column()
@@ -1784,14 +1875,14 @@ class BFU_PT_Export(bpy.types.Panel):
 				#Primary check	if file is saved to avoid windows PermissionError
 				if bpy.data.is_saved:
 					scene.UnrealExportedAssetsList.clear()
-					start_time = time.perf_counter()
+					s = CounterStart()
 					UpdateNameHierarchy()
 					bfu_ExportAsset.ExportForUnrealEngine()
 					bfu_WriteText.WriteAllTextFiles()
 
 					if len(scene.UnrealExportedAssetsList) > 0:
 						self.report({'INFO'}, "Export of "+str(len(scene.UnrealExportedAssetsList))+
-						" asset(s) has been finalized in "+str(time.perf_counter()-start_time)+" sec. Look in console for more info.")
+						" asset(s) has been finalized in "+str(round(CounterEnd(s), 2))+"seconds. Look in console for more info.")
 						print("========================= Exported asset(s) =========================")
 						print("")
 						for line in bfu_WriteText.WriteExportLog().splitlines():
@@ -1799,7 +1890,7 @@ class BFU_PT_Export(bpy.types.Panel):
 						print("")
 						print("========================= ... =========================")
 					else:
-						self.report({'WARNING'}, "Not found assets with \"Export and child\" properties or collection to export.")
+						self.report({'WARNING'}, "Not found assets with \"Export recursive\" properties or collection to export.")
 				else:
 					self.report({'WARNING'}, "Please save this blend file before export")
 			else:
@@ -1915,8 +2006,9 @@ class BFU_PT_Export(bpy.types.Panel):
 		AssetInfo.operator("object.showasset")
 
 		#Export button :
-		checkButton = layout.row()
+		checkButton = layout.column()
 		checkButton.operator("object.checkpotentialerror", icon='FILE_TICK')
+		checkButton.operator("object.computalllightmap", icon='TEXTURE')
 
 		#exportProperty
 		exportOnlySelect = layout.row()
@@ -2010,14 +2102,20 @@ classes = (
 	BFU_AP_AddonPreferences.BFU_OT_NewReleaseInfo,
 	BFU_AP_AddonPreferences.BFU_OT_OpenDocumentationTargetPage,
 		
+	BFU_PT_BlenderForUnrealObject,
+	BFU_PT_BlenderForUnrealObject.BFU_OT_OpenDocumentationPage,
+		
 	BFU_PT_BlenderForUnreal,
 	BFU_PT_BlenderForUnreal.BFU_MT_ObjectGlobalPropertiesPresets,
 	BFU_PT_BlenderForUnreal.BFU_OT_AddObjectGlobalPropertiesPreset,
-	BFU_PT_BlenderForUnreal.BFU_OT_OpenDocumentationPage,
+	
+	
 
 	
 	BFU_PT_ObjectProperties,
 	BFU_PT_ObjectImportProperties,
+	BFU_PT_ObjectImportProperties.BFU_OT_ComputLightMap,
+	BFU_PT_ObjectImportProperties.BFU_OT_ComputAllLightMap,
 
 	#BFU_OT_ObjExportAction,
 	BFU_PT_AnimProperties,

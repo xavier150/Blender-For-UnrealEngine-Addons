@@ -44,7 +44,7 @@ def ExportSingleText(text, dirpath, filename):
 	#Export single text
 
 	filename = ValidFilename(filename)
-	curr_time = time.perf_counter()
+	s = CounterStart()
 
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)
@@ -53,14 +53,14 @@ def ExportSingleText(text, dirpath, filename):
 	with open(fullpath, "w") as file:
 		file.write(text)
 
-	exportTime = time.perf_counter()-curr_time
+	exportTime = CounterEnd(s)
 	return([filename,"TextFile",absdirpath,exportTime]) #[AssetName , AssetType , ExportPath, ExportTime]
 
 def ExportSingleConfigParser(config, dirpath, filename):
 	#Export single ConfigParser
 
 	filename = ValidFilename(filename)
-	curr_time = time.perf_counter()
+	s = CounterStart()
 
 	absdirpath = bpy.path.abspath(dirpath)
 	VerifiDirs(absdirpath)
@@ -69,7 +69,7 @@ def ExportSingleConfigParser(config, dirpath, filename):
 	with open(fullpath, "w") as configfile:
 		config.write(configfile)
 
-	exportTime = time.perf_counter()-curr_time
+	exportTime = CounterEnd(s)
 	return([filename,"TextFile",absdirpath,exportTime]) #[AssetName , AssetType , ExportPath, ExportTime]
 
 def WriteExportLog():
@@ -121,14 +121,14 @@ def WriteExportLog():
 			primaryInfo = asset.assetType
 			secondaryInfo = " (LOD)" if asset.object.ExportAsLod == True else ""
 
-		ExportLog +=("["+primaryInfo+"]"+secondaryInfo+" -> "+"\""+asset.assetName+"\" exported in "+str(asset.exportTime)+" sec.\n")
+		ExportLog +=("["+primaryInfo+"]"+secondaryInfo+" -> "+"\""+asset.assetName+"\" EXPORTED IN "+str(round(asset.exportTime,2))+"s\r\n")
 		ExportLog +=(asset.exportPath + "\n")
 		ExportLog += "\n"
 
 	return ExportLog
 
 
-def WriteImportPythonHeadComment(use20tab = False, useSequencer = False):
+def WriteImportPythonHeadComment(useSequencer = False):
 
 	scene = bpy.context.scene
 
@@ -138,10 +138,9 @@ def WriteImportPythonHeadComment(use20tab = False, useSequencer = False):
 		ImportScript += "#It will import into Unreal Engine all the assets of type StaticMesh, SkeletalMesh, Animation and Pose" + "\n"
 	else:
 		ImportScript += "#This script will import in unreal all camera in target sequencer" + "\n"
-	if use20tab == True:
-		ImportScript += "#The script must be used in Unreal Engine Editor with UnrealEnginePython : https://github.com/20tab/UnrealEnginePython" + "\n"
-	else:
-		ImportScript += "#The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python" + "\n"
+	
+	ImportScript += "#The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python" + "\n"
+	
 	if useSequencer == True:
 		ImportScript += "#Use this command : " + GetImportSequencerScriptCommand() + "\n"
 	else:
@@ -182,8 +181,8 @@ def WriteExportedAssetsDetail():
 			config.set(AssetSectionName, 'create_physics_asset', str(obj.CreatePhysicsAsset))
 			if (obj.UseStaticMeshLODGroup == True):
 				config.set(AssetSectionName, 'static_mesh_lod_group', obj.StaticMeshLODGroup)
-			if (obj.UseStaticMeshLightMapRes == True):
-				config.set(AssetSectionName, 'light_map_resolution', str(obj.StaticMeshLightMapRes))
+			if (ExportCompuntedLightMapValue(obj) == True):
+				config.set(AssetSectionName, 'light_map_resolution', str(GetCompuntedLightMap(obj)))
 
 
 
@@ -296,7 +295,7 @@ def WriteSingleCameraAdditionalTrack(obj):
 	scene = bpy.context.scene
 	ImportScript = ";This file was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons" + "\n"
 	ImportScript += ";This file contains additional Camera animation informations that is not supported with .fbx files" + "\n"
-	ImportScript += ";The script must be used in Unreal Engine Editor with UnrealEnginePython : https://github.com/20tab/UnrealEnginePython" + "\n"
+	ImportScript += ";The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python" + "\n"
 	ImportScript += "\n\n\n"
 
 	#Write TransformMatrix keys
@@ -382,7 +381,7 @@ def WriteSingleMeshAdditionalParameter(obj):
 	config.add_section('Comment')
 	config.set('Comment', '; This file was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons')
 	config.set('Comment', '; This file contains Additional StaticMesh and SkeletalMesh parameters informations that is not supported with .fbx files')
-	config.set('Comment', '; The script must be used in Unreal Engine Editor with UnrealEnginePython : https://github.com/20tab/UnrealEnginePython')
+	config.set('Comment', '; The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python')
 
 	#Defaultsettings
 	config.add_section('DefaultSettings')
@@ -454,14 +453,14 @@ def WriteAllTextFiles():
 	#Import script
 	if scene.text_ImportAssetScript:
 		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
-		Text = bfu_WriteImportAssetScript.WriteImportAssetScript(addon_prefs.use20TabScript)
+		Text = bfu_WriteImportAssetScript.WriteImportAssetScript()
 		if Text is not None:
 			Filename = scene.file_import_asset_script_name
 			ExportSingleText(Text, scene.export_other_file_path, Filename)
 
 	if scene.text_ImportSequenceScript:
 		addon_prefs = bpy.context.preferences.addons["blender-for-unrealengine"].preferences
-		Text = bfu_WriteImportSequencerScript.WriteImportSequencerScript(addon_prefs.use20TabScript)
+		Text = bfu_WriteImportSequencerScript.WriteImportSequencerScript()
 		if Text is not None:
 			Filename = scene.file_import_sequencer_script_name
 			ExportSingleText(Text, scene.export_other_file_path, Filename)
