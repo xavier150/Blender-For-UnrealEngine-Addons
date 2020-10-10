@@ -1462,6 +1462,10 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
 							'scene.file_export_log_name',
 							'scene.file_import_asset_script_name',
 							'scene.file_import_sequencer_script_name',
+							#Import location:
+							'scene.unreal_import_location',
+							'scene.unreal_levelsequence_import_location',
+							'scene.unreal_levelsequence_name',
 						]
 
 		# Directory to store the presets
