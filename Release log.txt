@@ -307,6 +307,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Change: 20 Tab python integration is now not supported
 - Change: Simple others change in property values and texts.
 - Change: Return to the user mode (OBJECT, EDIT, [...]) after the export
+- Change: Import Script values are now saved with Nomenclature Presets.
 - Fixed: Export fail if the object consraint shapes keys and modifiers.
 - Fixed: Export fail if UserMode not set
 - Fixed: Create PhysicsAsset option in skeletalMesh alway create PhysicsAsset.
