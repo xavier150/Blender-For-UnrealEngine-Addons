@@ -600,6 +600,13 @@ def RescaleActionCurve(action, scale):
 				key.co[1] *= scale
 				key.handle_left[1] *=scale
 				key.handle_right[1] *=scale
+		
+			#Modifier
+			for mod in fcurve.modifiers:
+				if mod.type == "NOISE":
+					mod.strength*=scale
+				
+	
 
 
 def RescaleAllActionCurve(scale):
@@ -610,6 +617,12 @@ def RescaleAllActionCurve(scale):
 					key.co[1] *= scale
 					key.handle_left[1] *=scale
 					key.handle_right[1] *=scale
+					
+				#Modifier
+				for mod in fcurve.modifiers:
+					if mod.type == "NOISE":
+						mod.strength*=scale
+			
 
 def GetFinalAssetToExport():
 	#Returns all assets that will be exported
@@ -1247,25 +1260,32 @@ def UpdateUnrealPotentialError():
 		for obj in objToCheck:
 			if GetAssetType(obj) == "SkeletalMesh":
 				for bone in obj.data.bones:
-					if bone.bbone_segments > 1:
-						MyError = PotentialErrors.add()
-						MyError.name = obj.name
-						MyError.type = 2
-						MyError.text = 'In object3 "'+obj.name+'" the bone named "'+bone.name+'". The parameter Bendy Bones / Segments must be set to 1.'
-						MyError.object = obj
-						MyError.itemName = bone.name
-						MyError.correctRef = "BoneSegments"
-						MyError.correctlabel = 'Set Bone Segments to 1'
+					if (obj.exportDeformOnly == False or (bone.use_deform == True and obj.exportDeformOnly == True)):
+						if bone.bbone_segments > 1:
+							MyError = PotentialErrors.add()
+							MyError.name = obj.name
+							MyError.type = 1
+							MyError.text = 'In object3 "'+obj.name+'" the bone named "'+bone.name+'". The parameter Bendy Bones / Segments must be set to 1.'
+							MyError.text += '\nBendy bones are not supported by Unreal Engine, so that better to disable it if you want the same animation preview in Unreal and blender.'
+							MyError.object = obj
+							MyError.itemName = bone.name
+							MyError.selectPoseBoneButton = True
+							MyError.correctRef = "BoneSegments"
+							MyError.correctlabel = 'Set Bone Segments to 1'
+							MyError.docsOcticon = 'bendy-bone'
+							
 
-					if bone.use_inherit_scale == False:
-						MyError = PotentialErrors.add()
-						MyError.name = obj.name
-						MyError.type = 2
-						MyError.text = 'In object2 "'+obj.name+'" the bone named "'+bone.name+'". The parameter Inherit Scale must be set to True.'
-						MyError.object = obj
-						MyError.itemName = bone.name
-						MyError.correctRef = "InheritScale"
-						MyError.correctlabel = 'Set Inherit Scale to True'
+						#Removed
+						# if bone.use_inherit_scale == False:
+							# MyError = PotentialErrors.add()
+							# MyError.name = obj.name
+							# MyError.type = 1
+							# MyError.text = 'In object2 "'+obj.name+'" the bone named "'+bone.name+'". The parameter Inherit Scale must be set to True.'
+							# MyError.object = obj
+							# MyError.itemName = bone.name
+							# MyError.selectPoseBoneButton = True
+							# MyError.correctRef = "InheritScale"
+							# MyError.correctlabel = 'Set Inherit Scale to True'
 
 	def CheckArmatureValidChild():
 		#Check that skeleton also has a mesh to export
@@ -1296,19 +1316,13 @@ def UpdateUnrealPotentialError():
 					for bone in obj.data.bones:
 						if bone.parent == None:
 							rootBones.append(bone)
-				
-				
+
 				if obj.exportDeformOnly == True:	
 					for bone in obj.data.bones:
 						if bone.use_deform == True:
 							rootBone = getRootBoneParent(bone)
 							if rootBone not in rootBones:
-								rootBones.append(bone)
-
-
-
-							
-							
+								rootBones.append(rootBone)
 							
 				if len(rootBones) > 1:
 					MyError = PotentialErrors.add()
@@ -1362,7 +1376,8 @@ def UpdateUnrealPotentialError():
 							MyError.text = 'Object named "'+child.name+'" contains '+str(len(VertexWithZeroWeight))+' vertex with zero cumulative valid weight.'
 							MyError.text += '\nNote: Vertex groups must have a bone with the same name to be valid.'
 							MyError.object = child
-							MyError.vertexErrorType = "VertexWithZeroWeight"
+							MyError.selectVertexButton = True
+							MyError.selectOption = "VertexWithZeroWeight"
 
 
 	def CheckZeroScaleKeyframe():
@@ -1433,12 +1448,36 @@ def SelectPotentialErrorVertex(errorIndex):
 	bpy.ops.mesh.select_all(action='DESELECT')
 
 	bpy.ops.object.mode_set(mode = 'OBJECT')
-	if error.vertexErrorType == "VertexWithZeroWeight":
+	if error.selectOption == "VertexWithZeroWeight":
 		for vertex in GetVertexWithZeroWeight(obj.parent, obj):
 			vertex.select = True
 	bpy.ops.object.mode_set(mode = 'EDIT')
 	bpy.ops.view3d.view_selected()
 	return obj
+	
+def SelectPotentialErrorPoseBone(errorIndex):
+	#Select potential error
+	SelectPotentialErrorObject(errorIndex)
+	bpy.ops.object.mode_set(mode = "POSE")
+	
+	scene = bpy.context.scene
+	error = scene.potentialErrorList[errorIndex]
+	obj = error.object
+	bone = obj.data.bones[error.itemName]
+	
+	#Make bone visible if hide in a layer
+	for x, layer in enumerate(bone.layers):
+		if obj.data.layers[x] == False and layer == True:
+			obj.data.layers[x] = True
+	
+	bpy.ops.pose.select_all(action='DESELECT')
+	obj.data.bones.active = bone
+	bone.select = True		
+	
+	bpy.ops.view3d.view_selected()
+	return obj
+
+
 
 def TryToCorrectPotentialError(errorIndex):
 	#Try to correct potential error

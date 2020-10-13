@@ -1676,12 +1676,18 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
 class BFU_OT_UnrealPotentialError(bpy.types.PropertyGroup):
 	type: IntProperty(default=0) #0:Info, 1:Warning, 2:Error
 	object: PointerProperty(type=bpy.types.Object)
-	vertexErrorType: StringProperty(default="None") #0:Info, 1:Warning, 2:Error
+	###
+	selectObjectButton: BoolProperty(default=True)
+	selectVertexButton: BoolProperty(default=False)
+	selectPoseBoneButton: BoolProperty(default=False)
+	###
+	selectOption: StringProperty(default="None") #0:VertexWithZeroWeight
 	itemName: StringProperty(default="None")
 	text: StringProperty(default="Unknown")
 	correctRef: StringProperty(default="None")
 	correctlabel: StringProperty(default="Fix it !")
 	correctDesc: StringProperty(default="Correct target error")
+	docsOcticon: StringProperty(default="None")
 
 
 class BFU_PT_Export(bpy.types.Panel):
@@ -1751,10 +1757,10 @@ class BFU_PT_Export(bpy.types.Panel):
 				self.report({'INFO'}, result)
 				return {'FINISHED'}
 
-		class BFU_OT_SelectObjetButton(Operator):
-			bl_label = "Select"
+		class BFU_OT_SelectObjectButton(Operator):
+			bl_label = "Select(Object)"
 			bl_idname = "object.select_error_objet"
-			bl_description = "Select target objet."
+			bl_description = "Select target Object."
 			errorIndex : bpy.props.IntProperty(default=-1)
 
 			def execute(self, context):
@@ -1764,11 +1770,31 @@ class BFU_PT_Export(bpy.types.Panel):
 		class BFU_OT_SelectVertexButton(Operator):
 			bl_label = "Select(Vertex)"
 			bl_idname = "object.select_error_vertex"
-			bl_description = "Select target vertex."
+			bl_description = "Select target Vertex."
 			errorIndex : bpy.props.IntProperty(default=-1)
 
 			def execute(self, context):
 				result = SelectPotentialErrorVertex(self.errorIndex)
+				return {'FINISHED'}		
+				
+		class BFU_OT_SelectPoseBoneButton(Operator):
+			bl_label = "Select(PoseBone)"
+			bl_idname = "object.select_error_posebone"
+			bl_description = "Select target Pose Bone."
+			errorIndex : bpy.props.IntProperty(default=-1)
+
+			def execute(self, context):
+				result = SelectPotentialErrorPoseBone(self.errorIndex)
+				return {'FINISHED'}
+				
+		class BFU_OT_OpenPotentialErrorDocs(Operator):
+			bl_label = "Open docs"
+			bl_idname = "object.open_potential_error_docs"
+			bl_description = "Open potential error docs."
+			octicon: StringProperty(default="")
+
+			def execute(self, context):		
+				os.system("start \"\" https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/Potential%20Error%20with%20Blender%20export%20to%20Unreal.md#"+self.octicon)
 				return {'FINISHED'}
 
 		def execute(self, context):
@@ -1822,26 +1848,41 @@ class BFU_PT_Export(bpy.types.Panel):
 					msgType = 'ERROR'
 					msgIcon = 'CANCEL'
 				#----
-				errorFullMsg = msgType+": "+error.text
+
+				
+				#Text
 				TextLine = myLine.column()
+				errorFullMsg = msgType+": "+error.text
 				splitedText = errorFullMsg.split("\n")
 
 				for text, Line in enumerate(splitedText):
 					if (text<1):
-						TextLine.label(text=Line, icon=msgIcon)
+						
+						FisrtTextLine = TextLine.row()
+						if (error.docsOcticon != "None"): #Doc button
+							props = FisrtTextLine.operator("object.open_potential_error_docs", icon= "HELP", text="")
+							props.octicon = error.docsOcticon
+						
+						FisrtTextLine.label(text=Line, icon=msgIcon)
 					else:
 						TextLine.label(text=Line)
-
+	
+				#Select and fix button
 				ButtonLine = myLine.column()
 				if (error.correctRef != "None"):
 					props = ButtonLine.operator("object.fixit_objet", text=error.correctlabel)
-					props.errorIndex = x
+					props.errorIndex = x				
 				if (error.object is not None):
-					props = ButtonLine.operator("object.select_error_objet")
-					props.errorIndex = x
-					if (error.vertexErrorType != "None"):
-						props = ButtonLine.operator("object.select_error_vertex")
+					if (error.selectObjectButton == True):
+						props = ButtonLine.operator("object.select_error_objet")
 						props.errorIndex = x
+					if (error.selectVertexButton == True):
+						props = ButtonLine.operator("object.select_error_vertex")
+						props.errorIndex = x					
+					if (error.selectPoseBoneButton == True):
+						props = ButtonLine.operator("object.select_error_posebone")
+						props.errorIndex = x
+
 
 
 	class BFU_OT_ExportForUnrealEngineButton(Operator):
@@ -2155,8 +2196,10 @@ classes = (
 	BFU_PT_Export.BFU_OT_ShowAssetToExport,
 	BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup,
 	BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup.BFU_OT_FixitTarget,
-	BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup.BFU_OT_SelectObjetButton,
+	BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup.BFU_OT_SelectObjectButton,
 	BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup.BFU_OT_SelectVertexButton,
+	BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup.BFU_OT_SelectPoseBoneButton,
+	BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup.BFU_OT_OpenPotentialErrorDocs,
 	BFU_PT_Export.BFU_OT_ExportForUnrealEngineButton,
 
 	BFU_PT_Clipboard,

@@ -35,7 +35,7 @@ from .bfu_Utils import *
 
 def ApplyProxyData(obj):
 	
-	#Apphy proxy data if needed.
+	#Apply proxy data if needed.
 	if obj.ExportProxyChild is not None:
 		
 		def ReasignProxySkeleton(newArmature, oldArmature):
@@ -67,20 +67,20 @@ def ApplyProxyData(obj):
 
 
 
-		#Get old armature
+		#Get old armature in selected objects
 		OldProxyChildArmature = None
 		for selectedObj in bpy.context.selected_objects:
 			if selectedObj != obj:
 				if selectedObj.type == "ARMATURE":
 					OldProxyChildArmature = selectedObj
 				
-		if OldProxyChildArmature is not None:
-			
-			#Re set parent + add to remove	
+		#Reasing parent + add to remove	
+		if OldProxyChildArmature is not None:	
 			ToRemove = []
 			for selectedObj in bpy.context.selected_objects:
 				if selectedObj != obj:
 					if selectedObj.parent == OldProxyChildArmature:
+						#Reasing parent and keep position
 						SavedPos = selectedObj.matrix_world.copy()
 						selectedObj.name += "_UEProxyChild"
 						selectedObj.parent = obj

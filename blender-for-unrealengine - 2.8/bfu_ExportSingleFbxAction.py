@@ -97,6 +97,8 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 		RescaleSelectCurveHook(1/rrf)
 		ResetArmaturePose(active)
 		RescaleRigConsraints(active, rrf)
+		
+		
 	if (scene.is_nla_tweakmode == True):
 		active.animation_data.use_tweak_mode = False #animation_data.action is ReadOnly with tweakmode in 2.8
 
@@ -112,6 +114,8 @@ def ExportSingleFbxAction(originalScene, dirpath, filename, obj, targetAction, a
 
 	#Set rename temporarily the Armature as "Armature"
 	oldArmatureName = RenameArmatureAsExportName(active)
+	
+
 	bpy.ops.export_scene.fbx(
 		filepath=fullpath,
 		check_existing=False,
