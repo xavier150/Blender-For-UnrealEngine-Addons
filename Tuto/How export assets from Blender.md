@@ -162,6 +162,8 @@ Now we can export all assets.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocConsoleLog.jpg">
 4. The files are placed by default at the location of the blender(.blend) file in the folder ExportedFbx.
 
+   - [Potential Error with Blender export to Unreal](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/Potential%20Error%20with%20Blender%20export%20to%20Unreal.md)
+
 # Import process
 Read this doc: [How to import assets from Blender to Unreal](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20import%20assets%20from%20Blender%20to%20Unreal.md).
 
