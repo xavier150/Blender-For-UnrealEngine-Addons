@@ -159,20 +159,31 @@ def SetSocketsExportTransform(obj):
 			socket.location = savedLocation
 	
 def AddSocketsTempName(obj):
-	#Add _UE4Socket_TempName at end
+	#Add _UE4Socket_TempName at end of the name
 	
 	for socket in GetSocketDesiredChild(obj):
 		socket.name += "_UE4Socket_TempName"
 		
 def RemoveDuplicatedSocketsTempName(obj):
-	#Remove _UE4Socket_TempName at end
+	#Remove _UE4Socket_TempName at end of the name
 	
 	for socket in GetSocketDesiredChild(obj):
 		ToRemove = "_UE4Socket_TempName.xxx"
 		socket.name = socket.name[:-len(ToRemove)]
+		
+def TryToApplyCustomSocketsName(obj):
+	#Try to apply the custom SocketName
+	scene = bpy.context.scene
+	
+	for socket in GetSocketDesiredChild(obj):
+		if socket.usesocketcustomName == True:
+			if socket.socketcustomName not in scene.objects:
+				socket.name = "SOCKET_"+socket.socketcustomName
+			else:
+				print('Can\'t rename socket "'+socket.name+'" to "'+socket.socketcustomName+'".')
 	
 def RemoveSocketsTempName(obj):
-	#Remove _UE4Socket_TempName at end
+	#Remove _UE4Socket_TempName at end of the name
 	for socket in GetSocketDesiredChild(obj):
 		ToRemove = "_UE4Socket_TempName"
 		socket.name = socket.name[:-len(ToRemove)]

@@ -86,6 +86,7 @@ def ExportSingleStaticMesh(originalScene, dirpath, filename, obj):
 	SetSocketsExportTransform(active)
 	
 	RemoveDuplicatedSocketsTempName(active)
+	TryToApplyCustomSocketsName(active)
 			
 
 	bpy.ops.export_scene.fbx(

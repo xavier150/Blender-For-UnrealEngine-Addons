@@ -93,6 +93,7 @@ def ExportSingleSkeletalMesh(originalScene, dirpath, filename, obj):
 			
 	SetSocketsExportTransform(active)
 	RemoveDuplicatedSocketsTempName(active)
+	TryToApplyCustomSocketsName(active)
 
 	
 	#Set rename temporarily the Armature as "Armature"

@@ -1279,6 +1279,18 @@ class BFU_PT_CollisionsAndSockets(bpy.types.Panel):
 	bl_region_type = "UI"
 	bl_category = "Unreal Engine 4"
 	bl_parent_id = "BFU_PT_BlenderForUnreal"
+	
+	bpy.types.Object.usesocketcustomName = BoolProperty(
+		name = "Socket custom name",
+		description = 'Use a custom name in Unreal Engine for this socket?',
+		default=False
+		)	
+	
+	bpy.types.Object.socketcustomName = StringProperty(
+		name = "",
+		description = '',
+		default="MySocket"
+		)
 
 	class BFU_OT_ConvertToCollisionButtonBox(Operator):
 		bl_label = "Convert to box (UBX)"
@@ -1411,6 +1423,15 @@ class BFU_PT_CollisionsAndSockets(bpy.types.Panel):
 			convertSkeletalSocketButtons = convertButtons.column()
 			convertSkeletalSocketButtons.enabled = ActiveModeIs("POSE") and ActiveTypeIs("ARMATURE") and FoundTypeInSelect("EMPTY")
 			convertSkeletalSocketButtons.operator("object.converttoskeletalsocket", icon='OUTLINER_DATA_EMPTY')
+			
+		obj = context.object
+		if obj.type == "EMPTY":
+			socketName = layout.column()
+			socketName.prop(obj, "usesocketcustomName")
+			socketNameText = socketName.column()
+			socketNameText.enabled = obj.usesocketcustomName
+			socketNameText.prop(obj, "socketcustomName")
+			
 
 
 class BFU_PT_Nomenclature(bpy.types.Panel):
