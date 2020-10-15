@@ -47,6 +47,7 @@ It possible to create collisions (StaticMesh) and sockets (Static/SkeletalMesh) 
 Note: The addon will export the socket with +90 degrees on X. You have an option for this in addon preferences
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocSocket90degrees.jpg">
 
+Note2: (For next update) Blender not allowing you to have multiple objects having the same name. If you need multiple objects with the same socketnames you can set a custom name used at export in Collisions and Sockets panel.
 
 # Level of details
 This works only on StaticMesh with importing.
