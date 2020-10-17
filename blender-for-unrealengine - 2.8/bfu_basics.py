@@ -1,4 +1,4 @@
-#====================== BEGIN GPL LICENSE BLOCK ============================
+# ====================== BEGIN GPL LICENSE BLOCK ============================
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -14,237 +14,242 @@
 #  along with this program.	 If not, see <http://www.gnu.org/licenses/>.
 #  All rights reserved.
 #
-#======================= END GPL LICENSE BLOCK =============================
+# ======================= END GPL LICENSE BLOCK =============================
 
 import sys
 import bpy
 import os
 import string
+from pathlib import Path
 import shutil
 import bmesh
-import requests 
+import requests
 import json
 import addon_utils
 from mathutils import Vector
 from mathutils import Quaternion
 
-def GetCurrentAddonRelase():
-	#addon_ = bpy.context.preferences.addons["blender-for-unrealengine"]
-	mod = sys.modules["blender-for-unrealengine"]
-	v = mod.bl_info.get('version')
-	letter = ""
-	if len(v) > 3:
-		if	v[3] == 1: letter = "b"
-		if	v[3] == 2: letter = "c"
-		if	v[3] == 3: letter = "d"
-		if	v[3] == 4: letter = "e"
-		if	v[3] == 5: letter = "f"
-		if	v[3] == 6: letter = "g"
-		
-	return "v."+str(v[0])+"."+str(v[1])+"."+str(v[2])+letter
 
 def is_deleted(o):
-	try:
-		return not (o.name in bpy.data.objects)
-	except:
-		return True
-	
-	
+    return not (o.name in bpy.data.objects)
+    # try:
+    #     return not (o.name in bpy.data.objects)
+    # except:
+    #     return True
+
+
 def MoveToGlobalView():
-	for area in bpy.context.screen.areas:
-		if area.type == 'VIEW_3D':
-			space = area.spaces[0]
-			if space.local_view: #check if using local view
-				for region in area.regions:
-					if region.type == 'WINDOW':
-						override = {'area': area, 'region': region} #override context
-						bpy.ops.view3d.localview(override) #switch to global view
+    for area in bpy.context.screen.areas:
+        if area.type == 'VIEW_3D':
+            space = area.spaces[0]
+            if space.local_view:  # check if using local view
+                for region in area.regions:
+                    if region.type == 'WINDOW':
+                        # override context and switch to global view
+                        override = {'area': area, 'region': region}
+                        bpy.ops.view3d.localview(override)
+
 
 def GetCurrentSelect():
-	#Return array for selected and the active
+    # Return array for selected and the active
 
-	activeObj = bpy.context.view_layer.objects.active
-	SelectedObjs = bpy.context.selected_objects.copy()
-	return([activeObj, SelectedObjs])
+    activeObj = bpy.context.view_layer.objects.active
+    SelectedObjs = bpy.context.selected_objects.copy()
+    return([activeObj, SelectedObjs])
+
 
 def SetCurrentSelect(SelectArray):
-	#Get array select object and the active
-	
-	bpy.ops.object.select_all(action='DESELECT')
-	for obj in SelectArray[1]:
-		if not is_deleted(obj):
-			if obj.name in bpy.context.window.view_layer.objects:
-				obj.select_set(True)
-	SelectArray[0].select_set(True)
-	bpy.context.view_layer.objects.active = SelectArray[0]
-	
+    # Get array select object and the active
+
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj in SelectArray[1]:
+        if not is_deleted(obj):
+            if obj.name in bpy.context.window.view_layer.objects:
+                obj.select_set(True)
+    SelectArray[0].select_set(True)
+    bpy.context.view_layer.objects.active = SelectArray[0]
+
+
 def SelectSpecificObject(obj):
-	
-	bpy.ops.object.select_all(action='DESELECT')
-	if obj.name in bpy.context.window.view_layer.objects:
-		obj.select_set(True)
-	bpy.context.view_layer.objects.active = obj	
-	
+
+    bpy.ops.object.select_all(action='DESELECT')
+    if obj.name in bpy.context.window.view_layer.objects:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
 
 
 def ChecksRelationship(arrayA, arrayB):
-	#Checks if it exits an identical variable in two lists
-	
-	for a in arrayA:
-		for b in arrayB:
-			if a == b:
-				return True
-	return False
-	
-# compute power of two greater than or equal to n
+    # Checks if it exits an identical variable in two lists
+
+    for a in arrayA:
+        for b in arrayB:
+            if a == b:
+                return True
+    return False
+
+
 def nextPowerOfTwo(n):
+    # compute power of two greater than or equal to n
 
-	# decrement n (to handle cases when n itself
-	# is a power of 2)
-	n = n - 1
+    # decrement n (to handle cases when n itself
+    # is a power of 2)
+    n = n - 1
 
-	# do till only one bit is left
-	while n & n - 1:
-		n = n & n - 1  # unset rightmost bit
+    # do till only one bit is left
+    while n & n - 1:
+        n = n & n - 1  # unset rightmost bit
 
-	# n is now a power of two (less than n)
-	return n << 1
+    # n is now a power of two (less than n)
+    return n << 1
 
-# compute power of two less than or equal to n
+
 def previousPowerOfTwo(n):
+    # compute power of two less than or equal to n
 
-	# do till only one bit is left
-	while (n & n - 1):
-		n = n & n - 1		# unset rightmost bit
+    # do till only one bit is left
+    while (n & n - 1):
+        n = n & n - 1		# unset rightmost bit
 
-	# n is now a power of two (less than or equal to n)
-	return n
-	
+    # n is now a power of two (less than or equal to n)
+    return n
+
+
 def nearestPowerOfTwo(value):
-	if value < 2:
-		return 2
-		
-	a = previousPowerOfTwo(value)
-	b = nextPowerOfTwo(value)
-	
-	if value - a < b - value:
-		return a
-	else:
-		return b
+    if value < 2:
+        return 2
+
+    a = previousPowerOfTwo(value)
+    b = nextPowerOfTwo(value)
+
+    if value - a < b - value:
+        return a
+    else:
+        return b
+
 
 def RemoveFolderTree(folder):
-	try:
-		if os.path.isdir(folder):
-			shutil.rmtree(folder)
-	except:
-		print("remove folder fail. "+folder)
+    dirpath = Path(folder)
+    if dirpath.exists() and dirpath.is_dir():
+        shutil.rmtree(dirpath, ignore_errors=True)
+
 
 def GetChilds(obj):
-	#Get all direct childs of a object
+    # Get all direct childs of a object
 
-	ChildsObj = []
-	for childObj in bpy.data.objects:
-		if childObj.library == None:
-			pare = childObj.parent
-			if pare is not None:
-				if pare.name == obj.name:
-					ChildsObj.append(childObj)
+    ChildsObj = []
+    for childObj in bpy.data.objects:
+        if childObj.library is None:
+            pare = childObj.parent
+            if pare is not None:
+                if pare.name == obj.name:
+                    ChildsObj.append(childObj)
 
-	return ChildsObj
+    return ChildsObj
+
 
 def getRootBoneParent(bone):
-	if bone.parent is not None:
-		return getRootBoneParent(bone.parent)
-	return bone
+    if bone.parent is not None:
+        return getRootBoneParent(bone.parent)
+    return bone
+
 
 def getFirstDeformBoneParent(bone):
-	if bone.parent is not None:
-		if bone.use_deform == True:
-			return bone
-		else:
-			return getFirstDeformBoneParent(bone.parent)
-	return bone
+    if bone.parent is not None:
+        if bone.use_deform is True:
+            return bone
+        else:
+            return getFirstDeformBoneParent(bone.parent)
+    return bone
+
 
 def SetCollectionUse(collection):
-	#Set if collection is hide and selectable
-	collection.hide_viewport = False
-	collection.hide_select = False
-	try:
-		bpy.context.view_layer.layer_collection.children[collection.name].hide_viewport = False
-	except:
-		print(collection.name," not found in view_layer.layer_collection")
-		pass
+    # Set if collection is hide and selectable
+    collection.hide_viewport = False
+    collection.hide_select = False
+    layer_collection = bpy.context.view_layer.layer_collection
+    if collection.name in layer_collection.children:
+        layer_collection.children[collection.name].hide_viewport = False
+    else:
+        print(collection.name, " not found in view_layer.layer_collection")
+
 
 def GetRecursiveChilds(obj):
-	#Get all recursive childs of a object
+    # Get all recursive childs of a object
 
-	saveObjs = []
+    saveObjs = []
 
-	def tryAppend(obj):
-		if obj.name in bpy.context.scene.objects:
-			saveObjs.append(obj)
+    def tryAppend(obj):
+        if obj.name in bpy.context.scene.objects:
+            saveObjs.append(obj)
 
-	for newobj in GetChilds(obj):
-		for childs in GetRecursiveChilds(newobj):
-			tryAppend(childs)
-		tryAppend(newobj)
-	return saveObjs
+    for newobj in GetChilds(obj):
+        for childs in GetRecursiveChilds(newobj):
+            tryAppend(childs)
+        tryAppend(newobj)
+    return saveObjs
+
 
 def ConvertToConvexHull(obj):
-	#Convert obj to Convex Hull
-	mesh = obj.data
-	if not mesh.is_editmode:
-		bm = bmesh.new()
-		bm.from_mesh(mesh) #Mesh to Bmesh
-		acb = bmesh.ops.convex_hull(bm, input=bm.verts, use_existing_faces=True)
-		#acb = bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-		bm.to_mesh(mesh) #BMesh to Mesh
+    # Convert obj to Convex Hull
+    mesh = obj.data
+    if not mesh.is_editmode:
+        bm = bmesh.new()
+        bm.from_mesh(mesh)  # Mesh to Bmesh
+        convex_hull = bmesh.ops.convex_hull(
+            bm, input=bm.verts,
+            use_existing_faces=True
+        )
+        # convex_hull = bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        bm.to_mesh(mesh)  # BMesh to Mesh
+
 
 def VerifiDirs(directory):
-	#Check and create a folder if it does not exist
+    # Check and create a folder if it does not exist
 
-	if not os.path.exists(directory):
-		os.makedirs(directory)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 
 def ValidFilename(filename):
-	# remove not allowed characters
+    # remove not allowed characters
 
-	valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
-	filename = ''.join(c for c in filename if c in valid_chars)
-	return filename
+    valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+    filename = ''.join(c for c in filename if c in valid_chars)
+    return filename
 
 
 def ResetArmaturePose(obj):
-	#Reset armature pose
+    # Reset armature pose
 
-	for b in obj.pose.bones:
-		b.rotation_quaternion = Quaternion((0,0,0),0)
-		b.rotation_euler = Vector((0,0,0))
-		b.scale = Vector((1,1,1))
-		b.location = Vector((0,0,0))
+    for b in obj.pose.bones:
+        b.rotation_quaternion = Quaternion((0, 0, 0), 0)
+        b.rotation_euler = Vector((0, 0, 0))
+        b.scale = Vector((1, 1, 1))
+        b.location = Vector((0, 0, 0))
+
 
 def GetIfActionIsAssociated(action, boneNames):
-	for group in action.groups:
-		for fcurve in group.channels:
-			s=fcurve.data_path
-			start = s.find('["')
-			end = s.rfind('"]')
-			if start>0 and end>0:
-				substring = s[start+2:end]
-				if substring in boneNames:
-					return True
-	return False
-	pass
+    for group in action.groups:
+        for fcurve in group.channels:
+            s = fcurve.data_path
+            start = s.find('["')
+            end = s.rfind('"]')
+            if start > 0 and end > 0:
+                substring = s[start+2:end]
+                if substring in boneNames:
+                    return True
+    return False
+    pass
+
 
 def GetSurfaceArea(obj):
-	bm = bmesh.new()
-	bm.from_mesh(obj.data)
-	area = sum(f.calc_area() for f in bm.faces)
-	bm.free()	
-	return area
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    area = sum(f.calc_area() for f in bm.faces)
+    bm.free()
+    return area
+
 
 def setWindowsClipboard(text):
-	bpy.context.window_manager.clipboard = text
-	#bpy.context.window_manager.clipboard.encode('utf8')
-
+    bpy.context.window_manager.clipboard = text
+    # bpy.context.window_manager.clipboard.encode('utf8')
