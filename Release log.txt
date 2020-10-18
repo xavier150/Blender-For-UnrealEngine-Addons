@@ -303,6 +303,8 @@ It is now possible to force the duration of an animation according to the scene 
 - New: New button for update light map res depending on the surface Area
 - New: You can now use ../ for up one directory in folder names
 - New: You can now set Socket name in object property if needed
+- New: You can now set skeleton name to use for import script (Proxy use)
+- New: More option for action names
 - Change: Error message "Not found assets with Export recursive"
 - Change: New potential error: Check if the unit scale is equal to 0.01 (You can disable this potential error in addon_prefs)
 - Change: Better check and potential errors info for Armature.
@@ -312,6 +314,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Change: Simple others change in property values and texts.
 - Change: Return to the user mode (OBJECT, EDIT, [...]) after the export
 - Change: Import Script values are now saved with Nomenclature Presets.
+- Change: "Include armature in animation file name" option moved to Animation Properties Panel
 - Fixed: Export fail if the object consraint shapes keys and modifiers.
 - Fixed: Export fail if UserMode not set
 - Fixed: Create PhysicsAsset option in skeletalMesh alway create PhysicsAsset.
