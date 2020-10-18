@@ -82,8 +82,10 @@ def CleanJoinSelect():
 
 def CleanDeleteSelect():
 
+    removed_objects = []
     oldDataToRemove = []
     for obj in bpy.context.selected_objects:
+        removed_objects.append(obj.name)
         if obj.data is not None:
             oldDataToRemove.append([obj.data.name, obj.type])
 
@@ -92,9 +94,14 @@ def CleanDeleteSelect():
     for data in oldDataToRemove:
         RemoveUselessSpecificData(data[0], data[1])
 
+    return removed_objects
+
 
 def CleanDeleteObjects(objs):
 
+    objs = list(dict.fromkeys(objs))
+
+    removed_objects = []
     for obj in objs:
 
         souldRemoveData = False
@@ -103,10 +110,13 @@ def CleanDeleteObjects(objs):
             oldDataTypeToRemove = obj.type
             souldRemoveData = True
 
+        removed_objects.append(obj.name)
         bpy.data.objects.remove(obj)
 
         if souldRemoveData:
             RemoveUselessSpecificData(oldDataToRemove, oldDataTypeToRemove)
+
+    return removed_objects
 
 
 def GetAllobjectsByExportType(exportType):
@@ -256,8 +266,9 @@ def GetActionToExport(obj):
         # the same bones of the armature
         objBoneNames = [bone.name for bone in obj.data.bones]
         for action in bpy.data.actions:
-            if GetIfActionIsAssociated(action, objBoneNames):
-                TargetActionToExport.append(action)
+            if action.library is None:
+                if GetIfActionIsAssociated(action, objBoneNames):
+                    TargetActionToExport.append(action)
     return TargetActionToExport
 
 
@@ -276,9 +287,9 @@ def GetDesiredActionStartEndTime(obj, action):
 
     elif obj.AnimStartEndTimeEnum == "with_keyframes":
         # GetFirstActionFrame + Offset
-        startTime = action.frame_range.x + obj.StartFramesOffset
+        startTime = int(action.frame_range.x) + obj.StartFramesOffset
         # GetLastActionFrame + Offset
-        endTime = action.frame_range.y + obj.EndFramesOffset
+        endTime = int(action.frame_range.y) + obj.EndFramesOffset
         if endTime <= startTime:
             endTime = startTime+1
         return (startTime, endTime)
@@ -311,7 +322,7 @@ def GetExportRealSurfaceArea(obj):
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT')
 
-    SavedSelect = GetCurrentSelect()
+    SavedSelect = GetCurrentSelection()
     SelectParentAndDesiredChilds(obj)
 
     bpy.ops.object.duplicate()
@@ -343,7 +354,7 @@ def GetExportRealSurfaceArea(obj):
     active = bpy.context.view_layer.objects.active
     area = GetSurfaceArea(active)
     CleanDeleteObjects(bpy.context.selected_objects)
-    SetCurrentSelect(SavedSelect)
+    SetCurrentSelection(SavedSelect)
     return area
 
 
@@ -448,7 +459,7 @@ def GoToMeshEditMode():
 
 def ApplyNeededModifierToSelect():
 
-    SavedSelect = GetCurrentSelect()
+    SavedSelect = GetCurrentSelection()
     for obj in bpy.context.selected_objects:
         if obj.type == "MESH":
             SelectSpecificObject(obj)
@@ -459,7 +470,7 @@ def ApplyNeededModifierToSelect():
                     if bpy.ops.object.modifier_apply.poll():
                         bpy.ops.object.modifier_apply(modifier=mod.name)
 
-    SetCurrentSelect(SavedSelect)
+    SetCurrentSelection(SavedSelect)
 
 
 def CorrectExtremeUV(stepScale=2):
@@ -835,10 +846,12 @@ def GetActionExportFileName(obj, action, fileType=".fbx"):
     # Generate action file name
 
     scene = bpy.context.scene
-    if scene.include_armature_export_name:
+    if obj.bfu_anim_naming_type == "include_armature_name":
         ArmatureName = obj.name+"_"
-    else:
+    if obj.bfu_anim_naming_type == "action_name":
         ArmatureName = ""
+    if obj.bfu_anim_naming_type == "include_custom_name":
+        ArmatureName = obj.bfu_anim_naming_custom+"_"
 
     animType = GetActionType(action)
     if animType == "NlAnim" or animType == "Action":
@@ -854,10 +867,12 @@ def GetNLAExportFileName(obj, fileType=".fbx"):
     # Generate action file name
 
     scene = bpy.context.scene
-    if scene.include_armature_export_name:
+    if obj.bfu_anim_naming_type == "include_armature_name":
         ArmatureName = obj.name+"_"
-    else:
+    if obj.bfu_anim_naming_type == "action_name":
         ArmatureName = ""
+    if obj.bfu_anim_naming_type == "include_custom_name":
+        ArmatureName = obj.bfu_anim_naming_custom+"_"
 
     return scene.anim_prefix_export_name+ArmatureName+obj.NLAAnimName+fileType
 

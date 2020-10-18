@@ -69,11 +69,11 @@ def ExportSingleStaticMesh(
     DuplicateSelectForExport()
 
     if addon_prefs.correctExtremUVScale:
-        SavedSelect = GetCurrentSelect()
+        SavedSelect = GetCurrentSelection()
         if GoToMeshEditMode():
             CorrectExtremeUV(2)
         bpy.ops.object.mode_set(mode='OBJECT')
-        SetCurrentSelect(SavedSelect)
+        SetCurrentSelection(SavedSelect)
 
     ApplyNeededModifierToSelect()
 

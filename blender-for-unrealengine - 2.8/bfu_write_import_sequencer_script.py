@@ -32,9 +32,9 @@ from . import bfu_utils
 importlib.reload(bfu_utils)
 from .bfu_utils import *
 
-from . import bfu_write_text
-importlib.reload(bfu_write_text)
-from .bfu_write_text import *
+from . import bfu_write_utils
+importlib.reload(bfu_write_utils)
+from .bfu_write_utils import *
 
 
 def WriteImportSequencerScript():

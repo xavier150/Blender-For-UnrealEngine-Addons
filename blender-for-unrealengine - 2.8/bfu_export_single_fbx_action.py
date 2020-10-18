@@ -85,14 +85,15 @@ def ExportSingleFbxAction(
     scene.frame_end = GetDesiredActionStartEndTime(active, targetAction)[1]
 
     active.animation_data.action = targetAction  # Apply desired action
+    export_procedure = active.bfu_export_procedure
 
     if addon_prefs.bakeArmatureAction:
         BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)
 
     ApplyExportTransform(active)
 
-    # This will recale the rig and unit scale to get a root bone egal to 1
-    ShouldRescaleRig = GetShouldRescaleRig()
+    # This will rescale the rig and unit scale to get a root bone egal to 1
+    ShouldRescaleRig = GetShouldRescaleRig(active)
     if ShouldRescaleRig:
 
         rrf = GetRescaleRigFactor()  # rigRescaleFactor
@@ -124,29 +125,39 @@ def ExportSingleFbxAction(
     # Set rename temporarily the Armature as "Armature"
     oldArmatureName = RenameArmatureAsExportName(active)
 
-    bpy.ops.export_scene.fbx(
-        filepath=fullpath,
-        check_existing=False,
-        use_selection=True,
-        global_scale=GetObjExportScale(active),
-        object_types={'ARMATURE', 'EMPTY', 'MESH'},
-        use_custom_props=addon_prefs.exportWithCustomProps,
-        mesh_smooth_type="FACE",
-        add_leaf_bones=False,
-        use_armature_deform_only=active.exportDeformOnly,
-        bake_anim=True,
-        bake_anim_use_nla_strips=False,
-        bake_anim_use_all_actions=False,
-        bake_anim_force_startend_keying=True,
-        bake_anim_step=GetAnimSample(active),
-        bake_anim_simplify_factor=active.SimplifyAnimForExport,
-        use_metadata=addon_prefs.exportWithMetaData,
-        primary_bone_axis=active.exportPrimaryBaneAxis,
-        secondary_bone_axis=active.exporSecondaryBoneAxis,
-        axis_forward=active.exportAxisForward,
-        axis_up=active.exportAxisUp,
-        bake_space_transform=False
-        )
+    if (export_procedure == "normal"):
+        bpy.ops.export_scene.fbx(
+            filepath=fullpath,
+            check_existing=False,
+            use_selection=True,
+            global_scale=GetObjExportScale(active),
+            object_types={'ARMATURE', 'EMPTY', 'MESH'},
+            use_custom_props=addon_prefs.exportWithCustomProps,
+            mesh_smooth_type="FACE",
+            add_leaf_bones=False,
+            use_armature_deform_only=active.exportDeformOnly,
+            bake_anim=True,
+            bake_anim_use_nla_strips=False,
+            bake_anim_use_all_actions=False,
+            bake_anim_force_startend_keying=True,
+            bake_anim_step=GetAnimSample(active),
+            bake_anim_simplify_factor=active.SimplifyAnimForExport,
+            use_metadata=addon_prefs.exportWithMetaData,
+            primary_bone_axis=active.exportPrimaryBaneAxis,
+            secondary_bone_axis=active.exporSecondaryBoneAxis,
+            axis_forward=active.exportAxisForward,
+            axis_up=active.exportAxisUp,
+            bake_space_transform=False
+            )
+
+    if (export_procedure == "auto-rig-pro"):
+        ExportAutoProRig(
+            filepath=fullpath,
+            # export_rig_name=GetDesiredExportArmatureName(),
+            bake_anim=True,
+            anim_export_name_string=active.animation_data.action.name,
+            mesh_smooth_type="FACE"
+            )
 
     # Reset armature name
     ResetArmatureName(active, oldArmatureName, )
@@ -162,7 +173,7 @@ def ExportSingleFbxAction(
     # Reset Transform
     obj.matrix_world = BaseTransform
 
-    # This will recale the rig and unit scale to get a root bone egal to 1
+    # This will rescale the rig and unit scale to get a root bone egal to 1
     if ShouldRescaleRig:
         # Reset Curve an unit
         bpy.context.scene.unit_settings.scale_length = savedUnitLength

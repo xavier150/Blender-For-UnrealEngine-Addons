@@ -418,6 +418,8 @@ class BFU_PT_BlenderForUnreal(bpy.types.Panel):
                             'obj.Ue4Lod4',
                             'obj.Ue4Lod5',
                             'obj.CreatePhysicsAsset',
+                            'obj.UseTargetCustomSkeletonName',
+                            'obj.TargetCustomSkeletonName',
                             'obj.UseStaticMeshLODGroup',
                             'obj.StaticMeshLODGroup',
                             'obj.StaticMeshLightMapEnum',
@@ -441,6 +443,8 @@ class BFU_PT_BlenderForUnreal(bpy.types.Panel):
                             'obj.SimplifyAnimForExport',
                             'obj.ExportNLA',
                             'obj.NLAAnimName',
+                            'obj.bfu_anim_naming_type',
+                            'obj.bfu_anim_naming_custom',
                             'obj.exportGlobalScale',
                             'obj.exportAxisForward',
                             'obj.exportAxisUp',
@@ -697,6 +701,22 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
         description="If checked, create a PhysicsAsset when is imported",
         default=True
         )
+
+    bpy.types.Object.UseTargetCustomSkeletonName = BoolProperty(
+        name="Skeleton name in Unreal",
+        description=(
+            "Addon will use armature name" +
+            " for found skeleton in Unreal." +
+            " If you use a proxy you need set name manually."),
+        default=False
+        )
+
+    bpy.types.Object.TargetCustomSkeletonName = StringProperty(
+        name="",
+        description="The name of the Skeleton in Unreal",
+        default="SK_MySketonName_Skeleton"
+        )
+
 
     # StaticMeshImportData
     # https://api.unrealengine.com/INT/API/Editor/UnrealEd/Factories/UFbxStaticMeshImportData/index.html
@@ -1022,6 +1042,13 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
                         CreatePhysicsAsset = layout.row()
                         CreatePhysicsAsset.prop(obj, "CreatePhysicsAsset")
 
+                        Ue4Skeleton = layout.row()
+                        Ue4Skeleton.prop(obj, "UseTargetCustomSkeletonName")
+                        useSkeleton = obj.UseTargetCustomSkeletonName
+                        Ue4SkeletonText = Ue4Skeleton.column()
+                        Ue4SkeletonText.prop(obj, "TargetCustomSkeletonName")
+                        Ue4SkeletonText.enabled = useSkeleton
+
             else:
                 layout.label(text='(No properties to show.)')
         else:
@@ -1218,6 +1245,27 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
         subtype='FILE_NAME'
         )
 
+    bpy.types.Object.bfu_anim_naming_type = EnumProperty(
+        name="Naming type",
+        items=[
+            ('action_name', "Action name", 'Exemple: "Anim_MyAction"'),
+            ('include_armature_name',
+                "Include Armature Name",
+                'Include armature name in animation export file name.' +
+                ' Exemple: "Anim_MyArmature_MyAction"'),
+            ('include_custom_name', 
+                "Include custom name", 
+                'Include custom name in animation export file name.' +
+                ' Exemple: "Anim_MyCustomName_MyAction"'),
+            ],
+        default='include_armature_name'
+        )
+
+    bpy.types.Object.bfu_anim_naming_custom = StringProperty(
+        name="Export name",
+        default='MyCustomName'
+        )
+
     class BFU_OT_UpdateObjActionListButton(Operator):
         bl_label = "Update action list"
         bl_idname = "object.updateobjactionlist"
@@ -1257,25 +1305,55 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
 
         def execute(self, context):
             obj = context.object
-            actions = GetActionToExport(obj)
+            animation_to_export = GetActionToExport(obj)
+
             popup_title = "Action list"
-            if len(actions) > 0:
+            if len(animation_to_export) > 0:
+                animationNumber = len(animation_to_export)
+                if obj.ExportNLA:
+                    animationNumber += 1
                 popup_title = (
-                    str(len(actions)) +
-                    ' action(s) found for obj named "'+obj.name+'".'
+                    str(animationNumber) +
+                    ' animation(s) found for obj named "'+obj.name+'".'
                     )
             else:
-                popup_title = 'No actions found for obj named "'+obj.name+'".'
+                popup_title = (
+                    'No animation found for obj named "' +
+                    obj.name+'".')
 
             def draw(self, context):
                 col = self.layout.column()
-                for action in actions:
+
+                def addAnimRow(
+                        action_name,
+                        action_type,
+                        frame_start,
+                        frame_end):
                     row = col.row()
-                    Frames = GetDesiredActionStartEndTime(obj, action)
                     row.label(
-                        text="- "+action.name+GetActionType(action) +
-                        " From "+str(Frames[0])+" to "+str(Frames[1])
+                        text="- ["+action_name +
+                        "] Frame "+frame_start+" to "+frame_end +
+                        " ("+action_type+")"
                         )
+
+                for action in animation_to_export:
+                    Frames = GetDesiredActionStartEndTime(obj, action)
+                    frame_start = str(Frames[0])
+                    frame_end = str(Frames[1])
+                    addAnimRow(
+                        action.name,
+                        GetActionType(action),
+                        frame_start,
+                        frame_end)
+                if obj.ExportNLA:
+                    scene = context.scene
+                    addAnimRow(
+                        obj.NLAAnimName,
+                        "NlAnim",
+                        str(scene.frame_start + obj.StartFramesOffset),
+                        str(scene.frame_end + obj.EndFramesOffset)
+                        )
+
             bpy.context.window_manager.popup_menu(
                 draw,
                 title=popup_title,
@@ -1334,35 +1412,47 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
                         if obj.exportActionEnum == "export_specific_prefix":
                             ActionListProperty.prop(obj, 'PrefixNameToExport')
 
-                    # Action fbx properties
-                    if GetAssetType(obj) != "Alembic":
-                        propsFbx = layout.row()
-                        propsFbx.prop(obj, 'SampleAnimForExport')
-                        propsFbx.prop(obj, 'SimplifyAnimForExport')
-
-                    # Armature export action list feedback
-                    if GetAssetType(obj) == "SkeletalMesh":
-                        ArmaturePropertyInfo = (
-                            layout.row().box().split(factor=0.75)
-                            )
-                        ActionNum = len(GetActionToExport(obj))
-                        actionFeedback = (
-                            str(ActionNum) +
-                            " Action(s) will be exported with this armature.")
-                        ArmaturePropertyInfo.label(
-                            text=actionFeedback,
-                            icon='INFO')
-                        ArmaturePropertyInfo.operator("object.showobjaction")
-                        layout.label(
-                            text='Note: The Action with only one' +
-                            ' frame are exported like Pose.')
-
+                    # NLA
                     if GetAssetType(obj) == "SkeletalMesh":
                         NLAAnim = layout.row()
                         NLAAnim.prop(obj, 'ExportNLA')
                         NLAAnimChild = NLAAnim.column()
                         NLAAnimChild.enabled = obj.ExportNLA
                         NLAAnimChild.prop(obj, 'NLAAnimName')
+
+                    # Animation fbx properties
+                    if (GetAssetType(obj) != "Alembic"):
+                        propsFbx = layout.row()
+                        propsFbx.prop(obj, 'SampleAnimForExport')
+                        propsFbx.prop(obj, 'SimplifyAnimForExport')
+
+                    # Nomenclature
+                    if GetAssetType(obj) == "SkeletalMesh":
+                        export_anim_naming = layout.column()
+                        export_anim_naming.prop(obj, 'bfu_anim_naming_type')
+                        if obj.bfu_anim_naming_type == "include_custom_name":
+                            export_anim_naming_text = export_anim_naming.column()
+                            export_anim_naming_text.prop(obj, 'bfu_anim_naming_custom')
+
+                    # Armature export action list feedback
+                    if GetAssetType(obj) == "SkeletalMesh":
+                        layout.label(
+                            text='Note: The Action with only one' +
+                            ' frame are exported like Pose.')
+                        ArmaturePropertyInfo = (
+                            layout.row().box().split(factor=0.75)
+                            )
+                        ActionNum = len(GetActionToExport(obj))
+                        if obj.ExportNLA:
+                            ActionNum += 1
+                        actionFeedback = (
+                            str(ActionNum) +
+                            " Animation(s) will be exported with this object.")
+                        ArmaturePropertyInfo.label(
+                            text=actionFeedback,
+                            icon='INFO')
+                        ArmaturePropertyInfo.operator("object.showobjaction")
+
                 else:
                     layout.label(
                         text='(This assets is not a SkeletalMesh or Camera)')
@@ -1933,7 +2023,6 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
                             'scene.anim_prefix_export_name',
                             'scene.pose_prefix_export_name',
                             'scene.camera_prefix_export_name',
-                            'scene.include_armature_export_name',
                             'scene.anim_subfolder_name',
                             'scene.export_static_file_path',
                             'scene.export_skeletal_file_path',
@@ -1990,11 +2079,6 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
         description="Prefix of camera animations",
         maxlen=32,
         default="Cam_")
-
-    SceneProp.include_armature_export_name = bpy.props.BoolProperty(
-        name="Include armature in animations file name",
-        description="Include armature name in animation export file name",
-        default=True)
 
     # Sub folder
     SceneProp.anim_subfolder_name = bpy.props.StringProperty(
@@ -2087,7 +2171,6 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
         propsPrefix.prop(scn, 'anim_prefix_export_name', icon='OBJECT_DATA')
         propsPrefix.prop(scn, 'pose_prefix_export_name', icon='OBJECT_DATA')
         propsPrefix.prop(scn, 'camera_prefix_export_name', icon='OBJECT_DATA')
-        propsPrefix.prop(scn, 'include_armature_export_name')
 
         # Sub folder
         propsSub = self.layout.row()

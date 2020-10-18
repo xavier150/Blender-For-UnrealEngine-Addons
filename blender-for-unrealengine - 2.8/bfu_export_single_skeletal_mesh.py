@@ -20,6 +20,7 @@
 import bpy
 import time
 import math
+import os
 
 if "bpy" in locals():
     import importlib
@@ -69,11 +70,11 @@ def ExportSingleSkeletalMesh(
     DuplicateSelectForExport()
 
     if addon_prefs.correctExtremUVScale:
-        SavedSelect = GetCurrentSelect()
+        SavedSelect = GetCurrentSelection()
         if GoToMeshEditMode():
             CorrectExtremeUV(2)
         bpy.ops.object.mode_set(mode='OBJECT')
-        SetCurrentSelect(SavedSelect)
+        SetCurrentSelection(SavedSelect)
 
     ApplyNeededModifierToSelect()
 
@@ -81,13 +82,15 @@ def ExportSingleSkeletalMesh(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
         )
     active = bpy.context.view_layer.objects.active
+    export_procedure = active.bfu_export_procedure
+
     if active.ExportAsProxy:
         ApplyProxyData(active)
 
     ApplyExportTransform(active)
 
-    # This will recale the rig and unit scale to get a root bone egal to 1
-    ShouldRescaleRig = GetShouldRescaleRig()
+    # This will rescale the rig and unit scale to get a root bone egal to 1
+    ShouldRescaleRig = GetShouldRescaleRig(active)
     if ShouldRescaleRig:
 
         rrf = GetRescaleRigFactor()  # rigRescaleFactor
@@ -110,26 +113,41 @@ def ExportSingleSkeletalMesh(
     RemoveAllConsraints(active)
     bpy.context.object.data.pose_position = 'REST'
 
-    bpy.ops.export_scene.fbx(
-        filepath=fullpath,
-        check_existing=False,
-        use_selection=True,
-        global_scale=GetObjExportScale(active),
-        object_types={'ARMATURE', 'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
-        use_custom_props=addon_prefs.exportWithCustomProps,
-        mesh_smooth_type="FACE",
-        add_leaf_bones=False,
-        use_armature_deform_only=active.exportDeformOnly,
-        bake_anim=False,
-        use_metadata=addon_prefs.exportWithMetaData,
-        primary_bone_axis=active.exportPrimaryBaneAxis,
-        secondary_bone_axis=active.exporSecondaryBoneAxis,
-        axis_forward=active.exportAxisForward,
-        axis_up=active.exportAxisUp,
-        bake_space_transform=False
-        )
+    if (export_procedure == "normal"):
+        bpy.ops.export_scene.fbx(
+            filepath=fullpath,
+            check_existing=False,
+            use_selection=True,
+            global_scale=GetObjExportScale(active),
+            object_types={
+                'ARMATURE',
+                'EMPTY',
+                'CAMERA',
+                'LIGHT',
+                'MESH',
+                'OTHER'},
+            use_custom_props=addon_prefs.exportWithCustomProps,
+            mesh_smooth_type="FACE",
+            add_leaf_bones=False,
+            use_armature_deform_only=active.exportDeformOnly,
+            bake_anim=False,
+            use_metadata=addon_prefs.exportWithMetaData,
+            primary_bone_axis=active.exportPrimaryBaneAxis,
+            secondary_bone_axis=active.exporSecondaryBoneAxis,
+            axis_forward=active.exportAxisForward,
+            axis_up=active.exportAxisUp,
+            bake_space_transform=False
+            )
 
-    # This will recale the rig and unit scale to get a root bone egal to 1
+    if (export_procedure == "auto-rig-pro"):
+        ExportAutoProRig(
+            filepath=fullpath,
+            #export_rig_name=GetDesiredExportArmatureName(),
+            bake_anim=False,
+            mesh_smooth_type="FACE"
+            )
+
+    # This will rescale the rig and unit scale to get a root bone egal to 1
     if ShouldRescaleRig:
         # Reset Curve an unit
         bpy.context.scene.unit_settings.scale_length = savedUnitLength

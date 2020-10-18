@@ -81,6 +81,7 @@ def ApplyProxyData(obj):
         # Reasing parent + add to remove
         if OldProxyChildArmature is not None:
             ToRemove = []
+            ToRemove.append(OldProxyChildArmature)
             for selectedObj in bpy.context.selected_objects:
                 if selectedObj != obj:
                     if selectedObj.parent == OldProxyChildArmature:
@@ -91,18 +92,16 @@ def ApplyProxyData(obj):
                         selectedObj.matrix_world = SavedPos
                     else:
                         ToRemove.append(selectedObj)
-
             ReasignProxySkeleton(obj, OldProxyChildArmature)
-
-            SavedSelect = GetCurrentSelect()
-            SetCurrentSelect([OldProxyChildArmature, ToRemove])
-            CleanDeleteSelect()
-            SetCurrentSelect(SavedSelect)
+            SavedSelect = GetCurrentSelection()
+            RemovedObjects = CleanDeleteObjects(ToRemove)
+            SavedSelect.RemoveFromListByName(RemovedObjects)
+            SetCurrentSelection(SavedSelect)
 
 
 def BakeArmatureAnimation(armature, frame_start, frame_end):
     # Change to pose mode
-    SavedSelect = GetCurrentSelect()
+    SavedSelect = GetCurrentSelection()
     bpy.ops.object.select_all(action='DESELECT')
     SelectSpecificObject(armature)
     bpy.ops.nla.bake(
@@ -115,7 +114,7 @@ def BakeArmatureAnimation(armature, frame_start, frame_end):
         bake_types={'POSE'}
         )
     bpy.ops.object.select_all(action='DESELECT')
-    SetCurrentSelect(SavedSelect)
+    SetCurrentSelection(SavedSelect)
 
 
 def DuplicateSelectForExport():
@@ -203,8 +202,11 @@ def RemoveSocketsTempName(obj):
         socket.name = socket.name[:-len(ToRemove)]
 
 
-def GetShouldRescaleRig():
+def GetShouldRescaleRig(obj):
     # This will return if the rig should be rescale.
+
+    if obj.bfu_export_procedure == "auto-rig-pro":
+        return False
 
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
     if addon_prefs.rescaleFullRigAtExport == "auto":
@@ -258,6 +260,35 @@ def GetRescaleSocketFactor():
         return 1/(100*bpy.context.scene.unit_settings.scale_length)
     else:
         return addon_prefs.staticSocketsImportedSize
+
+
+def ExportAutoProRig(
+        filepath,
+        use_selection=True,
+        export_rig_name="root",
+        bake_anim=True,
+        anim_export_name_string="",
+        mesh_smooth_type="OFF"
+        ):
+    bpy.context.scene.arp_engine_type = 'unreal'
+    bpy.context.scene.arp_export_rig_type = 'mped'  # types: 'humanoid', 'mped'
+    bpy.context.scene.arp_ge_sel_only = use_selection
+    bpy.context.scene.arp_export_rig_name = export_rig_name
+    # bpy.context.scene.arp_keep_bend_bones = True
+    bpy.context.scene.arp_units_x100 = False
+    bpy.context.scene.arp_bake_actions = bake_anim
+    bpy.context.scene.arp_export_h_actions = False
+    bpy.context.scene.arp_export_name_actions = True
+    bpy.context.scene.arp_export_name_string = anim_export_name_string
+    # bpy.context.scene.arp_export_name_actions = True
+    # bpy.context.scene.arp_export_name_string = "test"
+    bpy.context.scene.arp_mesh_smooth_type = mesh_smooth_type
+    bpy.context.scene.arp_ue_root_motion = False
+    bpy.context.scene.arp_export_noparent = False
+    bpy.context.scene.arp_export_twist = False
+    
+    # export it
+    bpy.ops.id.arp_export_fbx_panel(filepath=filepath)
 
 
 def ExportSingleAdditionalTrackCamera(dirpath, filename, obj):

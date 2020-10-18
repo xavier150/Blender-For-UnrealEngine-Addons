@@ -28,15 +28,15 @@ if "bpy" in locals():
         importlib.reload(bfu_basics)
     if "bfu_utils" in locals():
         importlib.reload(bfu_utils)
-    if "bfu_write_text" in locals():
-        importlib.reload(bfu_write_text)
+    if "bfu_write_utils" in locals():
+        importlib.reload(bfu_write_utils)
 
 from . import bfu_basics
 from .bfu_basics import *
 from . import bfu_utils
 from .bfu_utils import *
-from . import bfu_write_text
-from .bfu_write_text import *
+from . import bfu_write_utils
+from .bfu_write_utils import *
 
 
 def GetFBXImportType(assetType):
@@ -54,7 +54,7 @@ def WriteImportPythonHeader():
     GetImportSequencerScriptCommand()
     scene = bpy.context.scene
 
-    #Import
+    # Import
     ImportScript = "import os.path" + "\n"
     ImportScript += "import ConfigParser" + "\n"
 
@@ -63,7 +63,7 @@ def WriteImportPythonHeader():
     ImportScript += "\n"
     ImportScript += "\n"
 
-    #Prepare var and def
+    # Prepare var and def
     ImportScript += "#Prepare var and def" + "\n"
     ImportScript += "unrealImportLocation = r'/Game/" + scene.unreal_import_location + "'" + "\n"
     ImportScript += "ImportedList = []" + "\n"
@@ -71,6 +71,7 @@ def WriteImportPythonHeader():
     ImportScript += "\n"
 
     return ImportScript
+
 
 def WriteImportPythonDef():
 
@@ -177,7 +178,11 @@ def WriteOneAssetTaskDef(asset):
     ImportScript += "\t" + "AssetImportPath = (os.path.join(unrealImportLocation, r'"+AssetRelatifImportPath+r"').replace('\\','/')).rstrip('/')" + "\n"
 
     if GetIsAnimation(asset.assetType):
-        SkeletonName = scene.skeletal_prefix_export_name+obj.name+"_Skeleton."+scene.skeletal_prefix_export_name+obj.name+"_Skeleton"
+        if(obj.UseTargetCustomSkeletonName):
+            customName = obj.TargetCustomSkeletonName
+            SkeletonName = customName+"."+customName
+        else:
+            SkeletonName = scene.skeletal_prefix_export_name+obj.name+"_Skeleton."+scene.skeletal_prefix_export_name+obj.name+"_Skeleton"
         SkeletonLoc = os.path.join(obj.exportFolderName,SkeletonName)
         ImportScript += "\t" + "SkeletonLocation = os.path.join(unrealImportLocation, r'" + SkeletonLoc + r"').replace('\\','/')" + "\n"
 
@@ -275,10 +280,14 @@ def WriteOneAssetTaskDef(asset):
     if asset.assetType == "Action" or asset.assetType == "Pose" or asset.assetType == "NlAnim":
 
         ImportScript += "\t" + "p = task.imported_object_paths[0]" + "\n"
-        ImportScript += "\t" + "animAsset = unreal.find_asset(p.split('.')[0]+'_anim.'+p.split('.')[1]+'_anim')" + "\n"
+        ImportScript += "\t" + "animAssetName = p.split('.')[0]+'_anim.'+p.split('.')[1]+'_anim'" + "\n"
+        ImportScript += "\t" + "animAssetNameDesiredPath = p.split('.')[0]+'.'+p.split('.')[1]" + "\n"
+        ImportScript += "\t" + "animAsset = unreal.find_asset(animAssetName)" + "\n"
         ImportScript += "\t" + "unreal.EditorAssetLibrary.delete_asset(task.imported_object_paths[0])" + "\n"
-        ImportScript += "\t" + "if animAsset == None:" + "\n"
-        ImportScript += "\t\t" + "ImportFailList.append('animAsset \""+obj.name+"\" not found for after inport')" + "\n"
+        ImportScript += "\t" + "if animAsset is not None:" + "\n"
+        ImportScript += "\t\t" + "unreal.EditorAssetLibrary.rename_asset(animAssetName, animAssetNameDesiredPath)" + "\n"
+        ImportScript += "\t" + "else:" + "\n"
+        ImportScript += "\t\t" + "ImportFailList.append('animAsset \""+obj.name+"\" not found for after inport: '+animAssetName)" + "\n"
         ImportScript += "\t\t" + "return" + "\n"
 
 

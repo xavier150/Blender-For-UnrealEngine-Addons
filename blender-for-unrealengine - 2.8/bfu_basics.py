@@ -31,11 +31,10 @@ from mathutils import Quaternion
 
 
 def is_deleted(o):
-    return not (o.name in bpy.data.objects)
-    # try:
-    #     return not (o.name in bpy.data.objects)
-    # except:
-    #     return True
+    if o and o is not None:
+        return not (o.name in bpy.data.objects)
+    else:
+        return True
 
 
 def MoveToGlobalView():
@@ -50,24 +49,53 @@ def MoveToGlobalView():
                         bpy.ops.view3d.localview(override)
 
 
-def GetCurrentSelect():
+def GetCurrentSelection():
     # Return array for selected and the active
+    class MyClass():
+        def __init__(self):
+            self.active = None
+            self.selected_objects = []
+            self.old_name = []
 
-    activeObj = bpy.context.view_layer.objects.active
-    SelectedObjs = bpy.context.selected_objects.copy()
-    return([activeObj, SelectedObjs])
+        def RemoveFromList(self, objs):
+            for x, obj in enumerate(objs):
+                if obj in self.selected_objects:
+                    self.selected_objects.remove(obj)
+                    self.old_name.remove(self.old_name[x])
+
+        def RemoveFromListByName(self, name_list):
+
+            for obj_name in name_list:
+                if obj_name in self.old_name:
+                    x = self.old_name.index(obj_name)
+                    del self.selected_objects[x]
+                    del self.old_name[x]
+
+        def DebugObjectList(self):
+            print("##########################################")
+            print(self.selected_objects)
+            print(self.old_name)
+
+    Selected = MyClass()
+    Selected.active = bpy.context.view_layer.objects.active
+    Selected.selected_objects = bpy.context.selected_objects.copy()
+    for sel in Selected.selected_objects:
+        Selected.old_name.append(sel.name)
+    return(Selected)
 
 
-def SetCurrentSelect(SelectArray):
+def SetCurrentSelection(selection):
     # Get array select object and the active
 
     bpy.ops.object.select_all(action='DESELECT')
-    for obj in SelectArray[1]:
+    for x, obj in enumerate(selection.selected_objects):
+        print(obj)
+        print(selection.old_name[x])
         if not is_deleted(obj):
             if obj.name in bpy.context.window.view_layer.objects:
                 obj.select_set(True)
-    SelectArray[0].select_set(True)
-    bpy.context.view_layer.objects.active = SelectArray[0]
+    selection.active.select_set(True)
+    bpy.context.view_layer.objects.active = selection.active
 
 
 def SelectSpecificObject(obj):

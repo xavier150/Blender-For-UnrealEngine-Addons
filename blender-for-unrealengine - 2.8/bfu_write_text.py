@@ -28,7 +28,6 @@ if "bpy" in locals():
     import importlib
     if "bfu_basics" in locals():
         importlib.reload(bfu_basics)
-
     if "bfu_utils" in locals():
         importlib.reload(bfu_utils)
     if "bfu_write_import_asset_script" in locals():
@@ -145,42 +144,7 @@ def WriteExportLog():
     return ExportLog
 
 
-def WriteImportPythonHeadComment(useSequencer=False):
 
-    scene = bpy.context.scene
-
-    # Comment
-    ImportScript = (
-        "#This script was generated with the addons Blender for UnrealEngine" +
-        " : https://github.com/xavier150/Blender-For-UnrealEngine-Addons" +
-        "\n"
-        )
-    if useSequencer:
-        ImportScript += (
-            "#It will import into Unreal Engine all the assets of type" +
-            " StaticMesh, SkeletalMesh, Animation and Pose" +
-            "\n")
-    else:
-        ImportScript += (
-            "#This script will import in unreal" +
-            " all camera in target sequencer" +
-            "\n")
-
-    ImportScript += (
-        "#The script must be used in Unreal Engine Editor" +
-        " with Python plugins : " +
-        "https://docs.unrealengine.com/en-US/Engine/" +
-        "Editor/ScriptingAndAutomation/Python" +
-        "\n"
-        )
-
-    if useSequencer:
-        ImportScript += "#Use this command : " + GetImportSequencerScriptCommand() + "\n"
-    else:
-        ImportScript += "#Use this command : " + GetImportAssetScriptCommand() + "\n"
-    ImportScript += "\n"
-    ImportScript += "\n"
-    return ImportScript
 
 
 def WriteExportedAssetsDetail():
