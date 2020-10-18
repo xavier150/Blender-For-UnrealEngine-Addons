@@ -69,6 +69,8 @@ For the Action:
 
 3. In the Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality, and select the animations to export. 
 
+
+
 Note if your animation is not a cycle set 'Offset at start frame' on 0
 'Offset at start frame' are set on 1 by default because in the animation cycles, unreal will play the first and the last frame so twice the same.
 
@@ -85,9 +87,15 @@ For the NLA:
 2. In Animation panel Properties you can set the animations property of your skeletal mesh like Animation time, Quality.
 3. If you just want the NLAnimation set Action to export as Not exported and check the box Export Nla with your desired name.
 
-# Export animation with Proxys (In next version)
-If you want export the animations of a Skeletal Mesh with Proxys you should set 'Export recursive' on the proxy. Tick 'The armature is a Proxy ?' and select the child proxy.
+# Export animation with Proxys
+If you want export the animations of a Skeletal Mesh with Proxys you should set 'Export recursive' on the proxy.
+Tick 'The armature is a Proxy ?' and select the child proxy.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocActionWithProxyV2.jpg"> 
+
+For importing animations with import script Blender For Unreal Engine Need know the skeleton name in Ue4. 
+This is detected automatically but for the proxy since the armature don't have the same name it will have to be defined manually.
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ExportAssetDocSkeletonName.jpg"> 
+
 
 
 # Alembic animation
