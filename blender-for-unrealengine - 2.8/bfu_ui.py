@@ -574,6 +574,21 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
         default=True
         )
 
+    bpy.types.Object.bfu_use_custom_export_name = BoolProperty(
+        name="Export with custom name.",
+        description=(
+            "Only write deforming bones" +
+            " (and non-deforming ones when they have deforming children)"
+            ),
+        default=False
+        )
+
+    bpy.types.Object.bfu_custom_export_name = StringProperty(
+        name="",
+        description="The name of exported file",
+        default="MyObjectExportName.fbx"
+        )
+
     def draw(self, context):
 
         layout = self.layout
@@ -647,6 +662,14 @@ class BFU_PT_ObjectProperties(bpy.types.Panel):
                                 AssetType2.prop(obj, "ForceStaticMesh")
                                 if GetAssetType(obj) == "SkeletalMesh":
                                     AssetType2.prop(obj, 'exportDeformOnly')
+
+                        # exportCustomName
+                        exportCustomName = layout.row()
+                        exportCustomName.prop(obj, "bfu_use_custom_export_name")
+                        useCustomName = obj.bfu_use_custom_export_name
+                        exportCustomNameText = exportCustomName.column()
+                        exportCustomNameText.prop(obj, "bfu_custom_export_name")
+                        exportCustomNameText.enabled = useCustomName
 
         else:
             layout.label(text='(No properties to show.)')

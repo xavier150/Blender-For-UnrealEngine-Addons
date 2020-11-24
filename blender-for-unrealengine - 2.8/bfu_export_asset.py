@@ -124,7 +124,7 @@ def ExportAllAssetByList(
                         GetObjExportFileName(obj),
                         obj
                     )
-                if obj.ExportAsLod:
+                if obj.ExportAsLod is False:
                     if (scene.text_AdditionalData and
                             addon_prefs.useGeneratedScripts):
                         ExportSingleAdditionalTrackCamera(

@@ -121,6 +121,13 @@ def DuplicateSelectForExport():
     # Note: Need look for a optimized duplicate, This is too long
 
     scene = bpy.context.scene
+
+    # Save action befor export
+    actionNames = []
+    for action in bpy.data.actions:
+        print(action.name)
+        actionNames.append(action.name)
+
     bpy.ops.object.duplicate()
 
     # Save the name for found after "Make Instances Real"
@@ -144,6 +151,13 @@ def DuplicateSelectForExport():
             oldData = objScene.data.name
             objScene.data = objScene.data.copy()
             RemoveUselessSpecificData(oldData, objScene.type)
+
+    print("#Clean")
+    # Clean create actions by duplication
+    for action in bpy.data.actions:
+        print(action.name)
+        if action.name not in actionNames:
+            bpy.data.actions.remove(action)
 
 
 def SetSocketsExportTransform(obj):
@@ -270,23 +284,26 @@ def ExportAutoProRig(
         anim_export_name_string="",
         mesh_smooth_type="OFF"
         ):
+
+
     bpy.context.scene.arp_engine_type = 'unreal'
     bpy.context.scene.arp_export_rig_type = 'mped'  # types: 'humanoid', 'mped'
     bpy.context.scene.arp_ge_sel_only = use_selection
     bpy.context.scene.arp_export_rig_name = export_rig_name
-    # bpy.context.scene.arp_keep_bend_bones = True
-    bpy.context.scene.arp_units_x100 = False
+
+    bpy.context.scene.arp_units_x100 = True
     bpy.context.scene.arp_bake_actions = bake_anim
-    bpy.context.scene.arp_export_h_actions = False
+    bpy.context.scene.arp_export_h_actions = True
+    bpy.context.scene.arp_simplify_fac = 0.0
     bpy.context.scene.arp_export_name_actions = True
     bpy.context.scene.arp_export_name_string = anim_export_name_string
-    # bpy.context.scene.arp_export_name_actions = True
-    # bpy.context.scene.arp_export_name_string = "test"
     bpy.context.scene.arp_mesh_smooth_type = mesh_smooth_type
     bpy.context.scene.arp_ue_root_motion = False
     bpy.context.scene.arp_export_noparent = False
     bpy.context.scene.arp_export_twist = False
-    
+    bpy.context.scene.arp_fix_fbx_matrix = True
+    bpy.context.scene.arp_fix_fbx_rot = True
+
     # export it
     bpy.ops.id.arp_export_fbx_panel(filepath=filepath)
 

@@ -121,7 +121,6 @@ def CleanDeleteObjects(objs):
 
 def GetAllobjectsByExportType(exportType):
     # Find all objects with a specific ExportEnum property
-
     targetObj = []
     for obj in bpy.context.scene.objects:
         prop = obj.ExportEnum
@@ -829,6 +828,8 @@ def GetObjExportFileName(obj, fileType=".fbx"):
     # Generate assset file name
 
     scene = bpy.context.scene
+    if obj.bfu_use_custom_export_name:
+        return obj.bfu_custom_export_name+fileType
     assetType = GetAssetType(obj)
     if assetType == "Camera":
         return scene.camera_prefix_export_name+obj.name+fileType

@@ -74,6 +74,7 @@ def ExportSingleFbxAction(
         bpy.ops.object.mode_set(mode='OBJECT')
 
     SelectParentAndDesiredChilds(obj)
+
     DuplicateSelectForExport()
 
     BaseTransform = obj.matrix_world.copy()

@@ -320,10 +320,18 @@ def WriteSingleCameraAdditionalTrack(obj):
 
     # Write FocalLength keys
     ImportScript += "[FocalLength]" + "\n"
-    for key in getAllKeysByFcurves(obj, "angle", obj.data.angle):
-        # Fov type return auto to lens
-        angle = key[1]
-        lens = 12/tan(angle/2)
+    #for key in getAllAngleKeys(obj):
+
+    #anglesKeys = getAllKeysByFcurves(obj, "angle", obj.data.angle) #Deprecated 
+    #for key in anglesKeys:
+    #    # Fov type return auto to lens
+    #    angle = key[1]
+    #    lens = 12/tan(angle/2)
+    #    ImportScript += str(key[0])+": "+str(lens) + "\n"
+
+    lensKeys = getAllKeysByFcurves(obj, "lens", obj.data.lens)
+    for key in lensKeys:
+        lens = key[1]
         ImportScript += str(key[0])+": "+str(lens) + "\n"
     ImportScript += "\n\n\n"
 
