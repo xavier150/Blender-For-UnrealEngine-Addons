@@ -304,7 +304,8 @@ It is now possible to force the duration of an animation according to the scene 
 - New: You can now use ../ for up one directory in folder names
 - New: You can now set Socket name in object property if needed
 - New: You can now set skeleton name to use for import script (Proxy use)
-- New: More option for action names
+- New: You can now set directly the desired export name for each objects.
+- New: More option for action names.
 - Change: Error message "Not found assets with Export recursive"
 - Change: New potential error: Check if the unit scale is equal to 0.01 (You can disable this potential error in addon_prefs)
 - Change: Better check and potential errors info for Armature.
@@ -321,6 +322,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Useless data created by the export are not removed
 - Fixed: Potential error (multiple roots bones) Doesn't count bones correctly
 - Fixed: With Unit Scale not at 0.01 F-Curve modifier are 100 times too small.
+- Fixed: Focal length in additional tracks are not updated
 
 
 
