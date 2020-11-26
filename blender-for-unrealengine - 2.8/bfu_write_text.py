@@ -320,19 +320,23 @@ def WriteSingleCameraAdditionalTrack(obj):
 
     # Write FocalLength keys
     ImportScript += "[FocalLength]" + "\n"
-    #for key in getAllAngleKeys(obj):
-
-    #anglesKeys = getAllKeysByFcurves(obj, "angle", obj.data.angle) #Deprecated 
-    #for key in anglesKeys:
-    #    # Fov type return auto to lens
-    #    angle = key[1]
-    #    lens = 12/tan(angle/2)
-    #    ImportScript += str(key[0])+": "+str(lens) + "\n"
-
     lensKeys = getAllKeysByFcurves(obj, "lens", obj.data.lens)
     for key in lensKeys:
-        lens = key[1]
-        ImportScript += str(key[0])+": "+str(lens) + "\n"
+        ImportScript += str(key[0])+": "+str(key[1]) + "\n"
+    ImportScript += "\n\n\n"
+
+    # Write FocalLength keys
+    ImportScript += "[SensorWidth]" + "\n"
+    lensKeys = getAllKeysByFcurves(obj, "sensor_width", obj.data.sensor_width)
+    for key in lensKeys:
+        ImportScript += str(key[0])+": "+str(key[1]) + "\n"
+    ImportScript += "\n\n\n"
+
+    # Write FocalLength keys
+    ImportScript += "[SensorHeight]" + "\n"
+    lensKeys = getAllKeysByFcurves(obj, "sensor_height", obj.data.sensor_height)
+    for key in lensKeys:
+        ImportScript += str(key[0])+": "+str(key[1]) + "\n"
     ImportScript += "\n\n\n"
 
     # Write FocusDistance keys
