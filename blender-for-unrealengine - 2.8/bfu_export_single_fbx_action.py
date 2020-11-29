@@ -85,6 +85,19 @@ def ExportSingleFbxAction(
     scene.frame_start = GetDesiredActionStartEndTime(active, targetAction)[0]
     scene.frame_end = GetDesiredActionStartEndTime(active, targetAction)[1]
 
+    print(obj.name)
+    print(obj.name)
+    print(obj.name)
+    print(obj.name)
+    print(obj.name)
+    print(obj.name)
+
+    if obj.ExportAsProxy:
+        if obj.ExportProxyChild is not None:
+            obj.animation_data.action = targetAction  # Apply desired action
+
+
+     
     active.animation_data.action = targetAction  # Apply desired action
     export_procedure = active.bfu_export_procedure
 
@@ -151,6 +164,11 @@ def ExportSingleFbxAction(
             bake_space_transform=False
             )
 
+    # Rename Action name for export
+    TempName = "ActionAutoRigProTempExportNameForUnreal"
+    OriginalActionName = active.animation_data.action.name
+    active.animation_data.action.name = TempName
+
     if (export_procedure == "auto-rig-pro"):
         ExportAutoProRig(
             filepath=fullpath,
@@ -159,6 +177,9 @@ def ExportSingleFbxAction(
             anim_export_name_string=active.animation_data.action.name,
             mesh_smooth_type="FACE"
             )
+
+    # Reset Action name
+    active.animation_data.action.name = OriginalActionName
 
     # Reset armature name
     ResetArmatureName(active, oldArmatureName, )

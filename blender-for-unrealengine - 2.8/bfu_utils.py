@@ -790,6 +790,15 @@ def GetCollectionExportDir(abspath=False):
         return os.path.join(scene.export_static_file_path, "")
 
 
+def GetObjExportName(obj):
+    # Return Proxy Name for Proxy and Object Name for other
+    if GetAssetType(obj) == "SkeletalMesh":
+        if obj.ExportAsProxy:
+            if obj.ExportProxyChild is not None:
+                return obj.ExportProxyChild.name
+    return obj.name
+
+
 def GetObjExportDir(obj, abspath=False):
     # Generate assset folder path
     scene = bpy.context.scene
@@ -797,7 +806,7 @@ def GetObjExportDir(obj, abspath=False):
         dirpath = os.path.join(
             scene.export_skeletal_file_path,
             obj.exportFolderName,
-            obj.name)
+            GetObjExportName(obj))
     if GetAssetType(obj) == "Alembic":
         dirpath = os.path.join(
             scene.export_alembic_file_path,

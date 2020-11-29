@@ -2109,7 +2109,7 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
         description=(
             "The name of sub folder for animations New." +
             " You can now use ../ for up one directory."),
-        maxlen=32,
+        maxlen=512,
         default="Anim")
 
     # File path

@@ -285,26 +285,35 @@ def ExportAutoProRig(
         mesh_smooth_type="OFF"
         ):
 
-
     bpy.context.scene.arp_engine_type = 'unreal'
     bpy.context.scene.arp_export_rig_type = 'mped'  # types: 'humanoid', 'mped'
     bpy.context.scene.arp_ge_sel_only = use_selection
-    bpy.context.scene.arp_export_rig_name = export_rig_name
 
+    # Rig
+    bpy.context.scene.arp_export_twist = False
+    bpy.context.scene.arp_export_noparent = False
     bpy.context.scene.arp_units_x100 = True
+    bpy.context.scene.arp_ue_root_motion = True
+
+    # Anim
     bpy.context.scene.arp_bake_actions = bake_anim
-    bpy.context.scene.arp_export_h_actions = True
-    bpy.context.scene.arp_simplify_fac = 0.0
     bpy.context.scene.arp_export_name_actions = True
     bpy.context.scene.arp_export_name_string = anim_export_name_string
+    bpy.context.scene.arp_simplify_fac = 0.0
+
+    # Misc
     bpy.context.scene.arp_mesh_smooth_type = mesh_smooth_type
-    bpy.context.scene.arp_ue_root_motion = False
-    bpy.context.scene.arp_export_noparent = False
-    bpy.context.scene.arp_export_twist = False
-    bpy.context.scene.arp_fix_fbx_matrix = True
-    bpy.context.scene.arp_fix_fbx_rot = True
+    bpy.context.scene.arp_use_tspace = False
+    bpy.context.scene.arp_fix_fbx_matrix = False
+    bpy.context.scene.arp_fix_fbx_rot = False
+    bpy.context.scene.arp_init_fbx_rot = False
+    bpy.context.scene.arp_bone_axis_primary_export = 'Y'
+    bpy.context.scene.arp_bone_axis_secondary_export = 'X'
+    bpy.context.scene.arp_export_rig_name = export_rig_name
 
     # export it
+    print("Start AutoProRig Export")
+    
     bpy.ops.id.arp_export_fbx_panel(filepath=filepath)
 
 

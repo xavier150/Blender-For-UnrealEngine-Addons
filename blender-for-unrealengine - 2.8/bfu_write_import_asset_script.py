@@ -275,20 +275,25 @@ def WriteOneAssetTaskDef(asset):
     ImportScript += "\t\t" + "asset = None" + "\n"
 
     ImportScript += "\t" + "if asset == None:" + "\n"
-    ImportScript += "\t\t" + "ImportFailList.append('Asset \""+obj.name+"\" not found for after inport')" + "\n"
+    ImportScript += "\t\t" + "ImportFailList.append('Error zero imported object for \""+obj.name+"\" ')" + "\n"
     ImportScript += "\t\t" + "return" + "\n"
+
     if asset.assetType == "Action" or asset.assetType == "Pose" or asset.assetType == "NlAnim":
+        #Remove extra mesh
+        ImportScript += "\t" + "# For animation remove the extra mesh" + "\n"
 
         ImportScript += "\t" + "p = task.imported_object_paths[0]" + "\n"
-        ImportScript += "\t" + "animAssetName = p.split('.')[0]+'_anim.'+p.split('.')[1]+'_anim'" + "\n"
-        ImportScript += "\t" + "animAssetNameDesiredPath = p.split('.')[0]+'.'+p.split('.')[1]" + "\n"
-        ImportScript += "\t" + "animAsset = unreal.find_asset(animAssetName)" + "\n"
-        ImportScript += "\t" + "unreal.EditorAssetLibrary.delete_asset(task.imported_object_paths[0])" + "\n"
-        ImportScript += "\t" + "if animAsset is not None:" + "\n"
-        ImportScript += "\t\t" + "unreal.EditorAssetLibrary.rename_asset(animAssetName, animAssetNameDesiredPath)" + "\n"
-        ImportScript += "\t" + "else:" + "\n"
-        ImportScript += "\t\t" + "ImportFailList.append('animAsset \""+obj.name+"\" not found for after inport: '+animAssetName)" + "\n"
-        ImportScript += "\t\t" + "return" + "\n"
+        ImportScript += "\t" + "if type(unreal.find_asset(p)) is not unreal.AnimSequence:" + "\n"
+        ImportScript += "\t\t" + "animAssetName = p.split('.')[0]+'_anim.'+p.split('.')[1]+'_anim'" + "\n"
+        ImportScript += "\t\t" + "animAssetNameDesiredPath = p.split('.')[0]+'.'+p.split('.')[1]" + "\n"
+        ImportScript += "\t\t" + "animAsset = unreal.find_asset(animAssetName)" + "\n"
+        ImportScript += "\t\t" + "if animAsset is not None:" + "\n"
+        ImportScript += "\t\t\t" + "unreal.EditorAssetLibrary.delete_asset(p)" + "\n"
+        ImportScript += "\t\t\t" + "unreal.EditorAssetLibrary.rename_asset(animAssetName, animAssetNameDesiredPath)" + "\n"
+        ImportScript += "\t\t\t" + "asset = animAsset" + "\n"
+        ImportScript += "\t\t" + "else:" + "\n"
+        ImportScript += "\t\t\t" + "ImportFailList.append('animAsset \""+obj.name+"\" not found for after inport: '+animAssetName)" + "\n"
+        ImportScript += "\t\t\t" + "return" + "\n"
 
 
     ################[ Post treatment ]################
@@ -372,10 +377,7 @@ def WriteOneAssetTaskDef(asset):
     if asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh":
         ImportScript += "\t" + "unreal.EditorAssetLibrary.save_loaded_asset(asset)" + "\n"
 
-    if asset.assetType == "Action" or asset.assetType == "Pose" or asset.assetType == "NlAnim":
-        ImportScript += "\t" + "ImportedList.append([animAsset, '" + asset.assetType + "'])" + "\n"
-    else:
-        ImportScript += "\t" + "ImportedList.append([asset, '" + asset.assetType + "'])" + "\n"
+    ImportScript += "\t" + "ImportedList.append([asset, '" + asset.assetType + "'])" + "\n"
     ImportScript += "CreateTask_"+assetUseName + "()" + "\n"
     ImportScript += "\n"
     ImportScript += "\n"
