@@ -56,10 +56,15 @@ def WriteImportPythonHeader():
 
     # Import
     ImportScript = "import os.path" + "\n"
-    ImportScript += "import ConfigParser" + "\n"
 
     ImportScript += "import ast" + "\n"
     ImportScript += "import unreal" + "\n"
+
+    ImportScript += "if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:" + "\n"
+    ImportScript += "\t" + "import configparser as ConfigParser" + "\n"
+    ImportScript += "else:" + "\n"
+    ImportScript += "\t" + "import ConfigParser" + "\n"
+    
     ImportScript += "\n"
     ImportScript += "\n"
 
