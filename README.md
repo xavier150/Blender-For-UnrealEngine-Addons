@@ -31,7 +31,7 @@ If you would like to have the Add-on enabled every time you start Blender, click
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/InstallationScreen3.jpg" width="600">
 
 # Download and installation from sources
-1. Download source file as Zip file.
+1. Download source file as Zip file. (You can use Dev Branch for last edit)
 2. Extract "blender-for-unrealengine - 2.8" folder
 3. Rename "blender-for-unrealengine - 2.8" to "blender-for-unrealengine"
 3. Compress "blender-for-unrealengine" as new Zip file.
