@@ -60,7 +60,6 @@ def ExportSingleFbxAction(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-    filename = ValidFilenameForUnreal(filename)
     s = CounterStart()
 
     if obj.animation_data is None:

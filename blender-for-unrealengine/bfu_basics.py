@@ -239,9 +239,18 @@ def VerifiDirs(directory):
 
 
 def ValidFilename(filename):
-    # remove not allowed characters
+    # Normalizes string, removes non-alpha characters
+    # File name use
 
     valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+    filename = ''.join(c for c in filename if c in valid_chars)
+    return filename
+
+def ValidDefname(filename):
+    # Normalizes string, removes non-alpha characters
+    # Def name use
+
+    valid_chars = "_%s%s" % (string.ascii_letters, string.digits)
     filename = ''.join(c for c in filename if c in valid_chars)
     return filename
 

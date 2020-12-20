@@ -46,7 +46,6 @@ from . import bfu_write_import_sequencer_script
 def ExportSingleText(text, dirpath, filename):
     # Export single text
 
-    filename = ValidFilename(filename)
     s = CounterStart()
 
     absdirpath = bpy.path.abspath(dirpath)
@@ -64,7 +63,6 @@ def ExportSingleText(text, dirpath, filename):
 def ExportSingleConfigParser(config, dirpath, filename):
     # Export single ConfigParser
 
-    filename = ValidFilename(filename)
     s = CounterStart()
 
     absdirpath = bpy.path.abspath(dirpath)
@@ -462,7 +460,7 @@ def WriteAllTextFiles():
     if scene.text_ExportLog:
         Text = WriteExportLog()
         if Text is not None:
-            Filename = scene.file_export_log_name
+            Filename = ValidFilename(scene.file_export_log_name)
             ExportSingleText(Text, scene.export_other_file_path, Filename)
 
     # Import script
@@ -470,14 +468,14 @@ def WriteAllTextFiles():
         addon_prefs = bpy.context.preferences.addons[__package__].preferences
         Text = bfu_write_import_asset_script.WriteImportAssetScript()
         if Text is not None:
-            Filename = scene.file_import_asset_script_name
+            Filename = ValidFilename(scene.file_import_asset_script_name)
             ExportSingleText(Text, scene.export_other_file_path, Filename)
 
     if scene.text_ImportSequenceScript:
         addon_prefs = bpy.context.preferences.addons[__package__].preferences
         Text = bfu_write_import_sequencer_script.WriteImportSequencerScript()
         if Text is not None:
-            Filename = scene.file_import_sequencer_script_name
+            Filename = ValidFilename(scene.file_import_sequencer_script_name)
             ExportSingleText(Text, scene.export_other_file_path, Filename)
 
     # ConfigParser

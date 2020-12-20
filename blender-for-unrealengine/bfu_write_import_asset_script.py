@@ -168,8 +168,10 @@ def WriteOneAssetTaskDef(asset):
     AdditionalParameterLoc = (os.path.join(asset.exportPath, GetObjExportFileName(asset.object,"_AdditionalParameter.ini")))
 
 
-    assetUseName = asset.assetName[:-4].replace(' ','_').replace('-','_')
-    ImportScript += "def CreateTask_"+ assetUseName + "():" + "\n"
+    assetUseName = ValidDefname(asset.assetName[:-4]) #Remove .fbx and fix name
+    functionName = "ImportTask_"+ ValidDefname(assetUseName) + "()"
+
+    ImportScript += "def " + functionName + ":" + "\n"
     ################[ New import task ]################
     ImportScript += "\t" + "################[ Import "+obj.name+" as "+asset.assetType+" type ]################" + "\n"
     ImportScript += "\t" + "print('================[ New import task : "+obj.name+" as "+asset.assetType+" type ]================')" + "\n"
@@ -184,10 +186,11 @@ def WriteOneAssetTaskDef(asset):
 
     if GetIsAnimation(asset.assetType):
         if(obj.UseTargetCustomSkeletonName):
-            customName = obj.TargetCustomSkeletonName
-            SkeletonName = customName+"."+customName
+            customName = ValidUnrealAssetename(obj.TargetCustomSkeletonName)
+            
         else:
-            SkeletonName = scene.skeletal_prefix_export_name+obj.name+"_Skeleton."+scene.skeletal_prefix_export_name+obj.name+"_Skeleton"
+            customName = scene.skeletal_prefix_export_name+ValidUnrealAssetename(obj.name)+"_Skeleton"
+        SkeletonName = customName+"."+customName
         SkeletonLoc = os.path.join(obj.exportFolderName,SkeletonName)
         ImportScript += "\t" + "SkeletonLocation = os.path.join(unrealImportLocation, r'" + SkeletonLoc + r"').replace('\\','/')" + "\n"
 
@@ -383,7 +386,7 @@ def WriteOneAssetTaskDef(asset):
         ImportScript += "\t" + "unreal.EditorAssetLibrary.save_loaded_asset(asset)" + "\n"
 
     ImportScript += "\t" + "ImportedList.append([asset, '" + asset.assetType + "'])" + "\n"
-    ImportScript += "CreateTask_"+assetUseName + "()" + "\n"
+    ImportScript += functionName + "\n"
     ImportScript += "\n"
     ImportScript += "\n"
     ImportScript += "\n"

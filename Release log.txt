@@ -321,6 +321,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Change: Return to the user mode (OBJECT, EDIT, [...]) after the export
 - Change: Import Script values are now saved with Nomenclature Presets.
 - Change: "Include armature in animation file name" option moved to Animation Properties Panel
+- Change: Clean illegal char, you can now use complex assets name without problem.
 - Fixed: Export fail if the object consraint shapes keys and modifiers.
 - Fixed: Export fail if UserMode not set
 - Fixed: Create PhysicsAsset option in skeletalMesh alway create PhysicsAsset.
@@ -329,6 +330,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: With Unit Scale not at 0.01 F-Curve modifier are 100 times too small.
 - Fixed: Focal length in additional tracks are not updated
 - Fixed: import script error with 4.26, ConfigParser import changed to configparser.
+- Fixed: If armature name contain illegal char, in Unreal the Skeletal Mesh is not found by Anim assets.
 
 
 

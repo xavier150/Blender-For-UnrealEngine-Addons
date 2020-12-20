@@ -59,7 +59,6 @@ def ExportSingleSkeletalMesh(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-    filename = ValidFilenameForUnreal(filename)
     s = CounterStart()
 
     if bpy.ops.object.mode_set.poll():

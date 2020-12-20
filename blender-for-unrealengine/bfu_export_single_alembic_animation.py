@@ -56,7 +56,6 @@ def ExportSingleAlembicAnimation(
     # Export a single alembic animation
 
     scene = bpy.context.scene
-    filename = ValidFilenameForUnreal(filename)
     s = CounterStart()
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT')

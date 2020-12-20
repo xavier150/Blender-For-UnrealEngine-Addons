@@ -779,6 +779,18 @@ def ValidFilenameForUnreal(filename):
     newfilename = ValidFilename(os.path.splitext(filename)[0])
     return (''.join(c for c in newfilename if c != ".")+extension)
 
+def ValidUnrealAssetename(filename):
+    # Normalizes string, removes non-alpha characters
+    # Asset name in Unreal use
+
+    filename = filename.replace('.','_')
+    filename = filename.replace('(','_')
+    filename = filename.replace(')','_')
+    filename = filename.replace(' ','_')
+    valid_chars = "-_%s%s" % (string.ascii_letters, string.digits)
+    filename = ''.join(c for c in filename if c in valid_chars)
+    return filename
+
 
 def GetCollectionExportDir(abspath=False):
     # Generate assset folder path
@@ -796,7 +808,7 @@ def GetObjExportName(obj):
         if obj.ExportAsProxy:
             if obj.ExportProxyChild is not None:
                 return obj.ExportProxyChild.name
-    return obj.name
+    return ValidFilename(obj.name)
 
 
 def GetObjExportDir(obj, abspath=False):
@@ -838,16 +850,16 @@ def GetObjExportFileName(obj, fileType=".fbx"):
 
     scene = bpy.context.scene
     if obj.bfu_use_custom_export_name:
-        return obj.bfu_custom_export_name+fileType
+        return ValidFilename(obj.bfu_custom_export_name+fileType)
     assetType = GetAssetType(obj)
     if assetType == "Camera":
-        return scene.camera_prefix_export_name+obj.name+fileType
+        return ValidFilename(scene.camera_prefix_export_name+obj.name+fileType)
     elif assetType == "StaticMesh":
-        return scene.static_prefix_export_name+obj.name+fileType
+        return ValidFilename(scene.static_prefix_export_name+obj.name+fileType)
     elif assetType == "SkeletalMesh":
-        return scene.skeletal_prefix_export_name+obj.name+fileType
+        return ValidFilename(scene.skeletal_prefix_export_name+obj.name+fileType)
     elif assetType == "Alembic":
-        return scene.alembic_prefix_export_name+obj.name+fileType
+        return ValidFilename(scene.alembic_prefix_export_name+obj.name+fileType)
     else:
         return None
 
@@ -866,9 +878,9 @@ def GetActionExportFileName(obj, action, fileType=".fbx"):
     animType = GetActionType(action)
     if animType == "NlAnim" or animType == "Action":
         # Nla can be exported as action
-        return scene.anim_prefix_export_name+ArmatureName+action.name+fileType
+        return ValidFilename(scene.anim_prefix_export_name+ArmatureName+action.name+fileType)
     elif animType == "Pose":
-        return scene.pose_prefix_export_name+ArmatureName+action.name+fileType
+        return ValidFilename(scene.pose_prefix_export_name+ArmatureName+action.name+fileType)
     else:
         return None
 
@@ -884,7 +896,7 @@ def GetNLAExportFileName(obj, fileType=".fbx"):
     if obj.bfu_anim_naming_type == "include_custom_name":
         ArmatureName = obj.bfu_anim_naming_custom+"_"
 
-    return scene.anim_prefix_export_name+ArmatureName+obj.NLAAnimName+fileType
+    return ValidFilename(scene.anim_prefix_export_name+ArmatureName+obj.NLAAnimName+fileType)
 
 
 def GetImportAssetScriptCommand():
