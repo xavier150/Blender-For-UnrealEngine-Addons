@@ -296,6 +296,10 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Animation bake don't work on all constraints.
 - Change: New potential error: Check if the ARMATURE use the same value on all scale axes.
 
+== Rev 0.2.7.5 ==
+
+- HotFix: import script error with 4.26, ConfigParser import changed to configparser.
+
 == Rev 0.2.8 ==
 
 - New: You can now choose the preview collision color.
@@ -324,6 +328,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Potential error (multiple roots bones) Doesn't count bones correctly
 - Fixed: With Unit Scale not at 0.01 F-Curve modifier are 100 times too small.
 - Fixed: Focal length in additional tracks are not updated
+- Fixed: import script error with 4.26, ConfigParser import changed to configparser.
 
 
 
