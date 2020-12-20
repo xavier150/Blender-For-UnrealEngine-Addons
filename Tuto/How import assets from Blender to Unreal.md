@@ -36,6 +36,7 @@ Alembic example:
 6. In Python Console run the copied command: 
 	- `unreal_engine.py_exec(r"C:\[Folder]\ImportSequencerScript.py")` with your Script file location. 
 	- The file ImportAssetScript.py is placed by default at the location of the blender file in folder ExportedFbx\
+7. 
 	
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocImportScript.jpg">
 Example video: https://youtu.be/FOFBfiE5EEQ
@@ -52,6 +53,10 @@ It is possible to import complete sequence from blender to unreal with camera cu
 6. In Output Log run the command: 
 	- `py "C:\[Folder]\ImportSequencerScript.py"` with your ImportSequencerScript file location. 
 	- The file ImportAssetScript.py is placed by default at the location of the blender file in folder ExportedFbx\
+7. Please note that the sequencer will be override on each import. I strongly recommend to use a separate sequencer for your cameras
+	- So you can manage your assets in a sequencer and keep another sequencer to override for your cameras.
+
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocSequencerSeparateCamera.jpg">
 
 # Import Blender camera to Unreal Sequencer with UnrealEnginePython
 It is possible to import complete sequence from blender to unreal with camera cut management and animations on special tracks like FOV (FocalLength), Aperture (F-stop), and Focus Distance. The Camera cuts are generated with Markers https://docs.blender.org/manual/en/dev/animation/markers.html#bind-camera-to-marker
