@@ -38,6 +38,8 @@ Example video: https://youtu.be/FOFBfiE5EEQ
 # Import Blender camera to Unreal Sequencer with python
 It is possible to import complete sequence from blender to unreal with camera cut management and animations on special tracks like FOV (FocalLength), Aperture (F-stop), and Focus Distance. The Camera cuts are generated with Markers https://docs.blender.org/manual/en/dev/animation/markers.html#bind-camera-to-marker
 
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocSequencerScriptExample.gif">
+
 1. In Blender open the panel Import Script and define the location where you want to import the sequencer into Unreal Engine with the name.
 2. Select your scene camera and set the Export type property on "Export recursive". Now repeat the task for all the camera.
 3. Check potential errors and process the export.
@@ -50,7 +52,5 @@ It is possible to import complete sequence from blender to unreal with camera cu
 7. Please note that the sequencer will be override on each import. I strongly recommend to use a separate sequencer for your cameras
 	- So you can manage your assets in a sequencer and keep another sequencer to override for your cameras.
 
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocSequencerSeparateCamera.jpg">
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocSequencerScriptExample.gif">
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/ImportAssetDocSequencerScript.jpg">
 Example video: https://youtu.be/0PQlN-y2h2Q
