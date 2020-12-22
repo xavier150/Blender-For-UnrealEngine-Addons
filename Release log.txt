@@ -298,7 +298,7 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.2.7.5 ==
 
-- HotFix: import script error with 4.26, ConfigParser import changed to configparser.
+- HotFix: Assets import script error with 4.26, ConfigParser import changed to configparser.
 
 == Rev 0.2.8 ==
 
@@ -329,7 +329,9 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Potential error (multiple roots bones) Doesn't count bones correctly
 - Fixed: With Unit Scale not at 0.01 F-Curve modifier are 100 times too small.
 - Fixed: Focal length in additional tracks are not updated
-- Fixed: import script error with 4.26, ConfigParser import changed to configparser.
+- Fixed: Sequencer import script error with 4.26, ConfigParser import changed to configparser.
+- Fixed: Assets import script error with 4.26, ConfigParser import changed to configparser.
+- Fixed: Camera cut in Imported sequencer was not visible in other sequencer (CameraBindingID)
 - Fixed: If armature name contain illegal char, in Unreal the Skeletal Mesh is not found by Anim assets.
 
 

@@ -40,21 +40,25 @@ from .bfu_write_utils import *
 def WriteImportSequencerScript():
     GetImportSequencerScriptCommand()
     scene = bpy.context.scene
+    IsSpawnableCamera = True
 
     #Import
     ImportScript = ""
     ImportScript += "\t" + "import os.path" + "\n"
     ImportScript += "\t" + "import time" + "\n"
 
-    ImportScript += "\t" + "import ConfigParser" + "\n"
     ImportScript += "\t" + "import unreal" + "\n"
+
+    ImportScript += "\t" "if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:" + "\n"
+    ImportScript += "\t\t" + "import configparser as ConfigParser" + "\n"
+    ImportScript += "\t" "else:" + "\n"
+    ImportScript += "\t\t" + "import ConfigParser" + "\n"
 
     ImportScript += "\n"
     ImportScript += "\n"
 
 
     #Prepare var
-    ImportScript += '\t' + 'seqPath = r"'+os.path.join(r'/Game/',scene.unreal_levelsequence_import_location)+'"' + '\n'
     ImportScript += "\t" + "seqName = r'"+scene.unreal_levelsequence_name+"'" + "\n"
     ImportScript += "\t" + "seqTempName = r'"+scene.unreal_levelsequence_name+"'+str(time.time())" + "\n"
 
@@ -118,7 +122,7 @@ def WriteImportSequencerScript():
     ImportScript += "\t" + 'print("Warning this file already exists")' + "\n"
     ImportScript += "\t" + "factory = unreal.LevelSequenceFactoryNew()" + "\n"
     ImportScript += "\t" + "asset_tools = unreal.AssetToolsHelpers.get_asset_tools()" + "\n"
-    ImportScript += "\t" + "seq = asset_tools.create_asset_with_dialog(seqName.replace('.',''), seqPath, None, factory)" + "\n"
+    ImportScript += "\t" + "seq = asset_tools.create_asset_with_dialog('MySequence', '/Game', None, factory)" + "\n"
     #ImportScript += "unreal.EditorAssetLibrary.save_loaded_asset(seq)" + "\n"
 
     ImportScript += "\t" + "if seq is None:" + "\n"
@@ -145,6 +149,9 @@ def WriteImportSequencerScript():
     ImportScript += "\t" + "seq.set_playback_end_seconds((endFrame-secureCrop)/float(frameRateNumerator))" + "\n"
     ImportScript += "\t" + "seq.set_playback_start_seconds(startFrame/float(frameRateNumerator))" + "\n" #set_playback_end_seconds
     ImportScript += "\t" + "camera_cut_track = seq.add_master_track(unreal.MovieSceneCameraCutTrack)" + "\n"
+    ImportScript += "\t" + "camera_cut_track.set_editor_property('display_name', 'Imported Camera Cuts')" + "\n"
+    ImportScript += "\t" + "camera_cut_track.set_color_tint(unreal.Color(b=200, g=0, r=0, a=0))" + "\n"
+     
     #ImportScript += "\t" + "world = unreal.EditorLevelLibrary.get_editor_world()" + "\n"
 
     ImportScript += "\n"
@@ -158,9 +165,22 @@ def WriteImportSequencerScript():
             ImportScript += "\t" + 'print("Start import ' + camera.name + '")' + "\n"
             ImportScript += "\t" + "\n"
 
+            ImportScript += "\t" + "#Import fbx transform" + "\n"
+            AdditionalTracksLoc = (os.path.join(asset.exportPath, GetObjExportFileName(asset.object,"_AdditionalTrack.ini")))
+            ImportScript += '\t' + 'AdditionalTracksLoc = os.path.join(r"'+AdditionalTracksLoc+'")' + '\n'
+            fbxFilePath = (os.path.join(asset.exportPath, GetObjExportFileName(camera)))
+            ImportScript += '\t' + 'fbxFilePath = os.path.join(r"'+fbxFilePath+'")' + '\n'
+            
+
             #Create spawnable camera
             ImportScript += "\t" + "#Create spawnable camera" + "\n"
 
+
+
+            ImportScript += "\t" + "cine_camera_actor = unreal.EditorLevelLibrary().spawn_actor_from_class(unreal.CineCameraActor, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0)) #Add camera in sequencer" + "\n"
+
+            
+            '''
             ImportScript += "\t" + "cine_camera_actor = unreal.EditorLevelLibrary.spawn_actor_from_class(unreal.CineCameraActor,  [0,0,0]) #Add camera in sequencer" + "\n"
             ImportScript += "\t" + "cine_camera_actor.set_actor_label('" + camera.name + "')" + "\n"
             resX = bpy.context.scene.render.resolution_x
@@ -171,6 +191,7 @@ def WriteImportSequencerScript():
             ImportScript += "\t" + "camera_spawnable = seq.add_possessable(cine_camera_actor) #Add camera in sequencer" + "\n"
             ImportScript += "\t" + "ImportedCamera.append(('"+camera.name+"', camera_spawnable))" + "\n"
             '''
+            '''
             ImportScript += "\t" + "camera_spawnable = seq.add_spawnable_from_class(unreal.CineCameraActor) #Add camera in sequencer" + "\n"
             ImportScript += "\t" + "camera_spawnable.get_object_template().set_actor_label('" + camera.name + "')" + "\n"
             ImportScript += "\t" + "camera_spawnable.get_object_template().camera_component.lens_settings.min_f_stop = 0" + "\n"
@@ -179,33 +200,14 @@ def WriteImportSequencerScript():
             '''
             ImportScript += "\n"
 
-            #Import fbx transform
-            ImportScript += "\t" + "#Import fbx transform" + "\n"
-            AdditionalTracksLoc = (os.path.join(asset.exportPath, GetObjExportFileName(asset.object,"_AdditionalTrack.ini")))
-            ImportScript += '\t' + 'AdditionalTracksLoc = os.path.join(r"'+AdditionalTracksLoc+'")' + '\n'
-            fbxFilePath = (os.path.join(asset.exportPath, GetObjExportFileName(camera)))
-            ImportScript += '\t' + 'fbxFilePath = os.path.join(r"'+fbxFilePath+'")' + '\n'
-
-            ImportScript += "\t" + "transform_track = camera_spawnable.add_track(unreal.MovieScene3DTransformTrack)" + "\n"
-            ImportScript += "\t" + "transform_section = transform_track.add_section()" + "\n"
-            ImportScript += "\t" + "transform_section.set_end_frame_bounded(False)" + "\n"
-            ImportScript += "\t" + "transform_section.set_start_frame_bounded(False)" + "\n"
-            ImportScript += "\t" + "AddSequencerSectionTransformKeysByIniFile(transform_section, 'Transform', AdditionalTracksLoc)" + "\n"
-            '''
-            ImportScript += "\n"
-            ImportScript += "\t" + "#Spawned tracks" + "\n"
-            ImportScript += "\t" + "spawned_track = camera_spawnable.get_tracks()[0]" + "\n"  #Spawn tracks with 0
-            ImportScript += "\t" + "spawned_section = spawned_track.get_sections()[0]" + "\n"
-            ImportScript += "\t" + "AddSequencerSectionBoolKeysByIniFile(spawned_section, 'Spawned', AdditionalTracksLoc)" + "\n"
-            '''
-            ImportScript += "\n"
-
             #Import additional tracks
-            ImportScript += "\t" + "#Import additional tracks (camera_component)" + "\n"
 
-            ImportScript += "\t" + "camera_component = seq.add_possessable(cine_camera_actor.camera_component) #Get the last" + "\n"
+            ImportScript += "\t" + "#Import additional tracks (camera_component)" + "\n"
+        
+            ImportScript += "\t" + "camera_component_binding = seq.add_possessable(cine_camera_actor.get_cine_camera_component()) #Get the last" + "\n"
             ImportScript += "\n"
-            ImportScript += "\t" + "TrackFocalLength = camera_component.add_track(unreal.MovieSceneFloatTrack)" + "\n"
+
+            ImportScript += "\t" + "TrackFocalLength = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)" + "\n"
             ImportScript += "\t" + "TrackFocalLength.set_property_name_and_path('CurrentFocalLength', 'CurrentFocalLength')" + "\n"
             ImportScript += "\t" + "TrackFocalLength.set_editor_property('display_name', 'Current Focal Length')" + "\n"
             ImportScript += "\t" + "sectionFocalLength = TrackFocalLength.add_section()" + "\n"
@@ -213,7 +215,8 @@ def WriteImportSequencerScript():
             ImportScript += "\t" + "sectionFocalLength.set_start_frame_bounded(False)" + "\n"
             ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionFocalLength, 'FocalLength', AdditionalTracksLoc)" + "\n"
             ImportScript += "\n"
-            ImportScript += "\t" + "TrackSensorWidth = camera_component.add_track(unreal.MovieSceneFloatTrack)" + "\n"
+
+            ImportScript += "\t" + "TrackSensorWidth = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)" + "\n"
             ImportScript += "\t" + "TrackSensorWidth.set_property_name_and_path('Filmback.SensorWidth', 'Filmback.SensorWidth')" + "\n"
             ImportScript += "\t" + "TrackSensorWidth.set_editor_property('display_name', 'Sensor Width (Filmback)')" + "\n"
             ImportScript += "\t" + "sectionSensorWidth = TrackSensorWidth.add_section()" + "\n"
@@ -221,7 +224,8 @@ def WriteImportSequencerScript():
             ImportScript += "\t" + "sectionSensorWidth.set_start_frame_bounded(False)" + "\n"
             ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionSensorWidth, 'SensorWidth', AdditionalTracksLoc)" + "\n"
             ImportScript += "\n"
-            ImportScript += "\t" + "TrackSensorHeight = camera_component.add_track(unreal.MovieSceneFloatTrack)" + "\n"
+
+            ImportScript += "\t" + "TrackSensorHeight = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)" + "\n"
             ImportScript += "\t" + "TrackSensorHeight.set_property_name_and_path('Filmback.SensorHeight', 'Filmback.SensorHeight')" + "\n"
             ImportScript += "\t" + "TrackSensorHeight.set_editor_property('display_name', 'Sensor Height (Filmback)')" + "\n"
             ImportScript += "\t" + "sectionSensorHeight = TrackSensorHeight.add_section()" + "\n"
@@ -229,7 +233,8 @@ def WriteImportSequencerScript():
             ImportScript += "\t" + "sectionSensorHeight.set_start_frame_bounded(False)" + "\n"
             ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionSensorHeight, 'SensorHeight', AdditionalTracksLoc)" + "\n"
             ImportScript += "\n"
-            ImportScript += "\t" + "TrackFocusDistance = camera_component.add_track(unreal.MovieSceneFloatTrack)" + "\n"
+
+            ImportScript += "\t" + "TrackFocusDistance = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)" + "\n"
             ImportScript += "\t" + "if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 24:" + "\n"
             ImportScript += "\t\t" + "TrackFocusDistance.set_property_name_and_path('CurrentFocusDistance', 'CurrentFocusDistance')" + "\n"
             ImportScript += "\t" + "else:" + "\n"
@@ -240,13 +245,95 @@ def WriteImportSequencerScript():
             ImportScript += "\t" + "sectionFocusDistance.set_start_frame_bounded(False)" + "\n"
             ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionFocusDistance, 'FocusDistance', AdditionalTracksLoc)" + "\n"
             ImportScript += "\n"
-            ImportScript += "\t" + "TracknAperture = camera_component.add_track(unreal.MovieSceneFloatTrack)" + "\n"
+
+            ImportScript += "\t" + "TracknAperture = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)" + "\n"
             ImportScript += "\t" + "TracknAperture.set_property_name_and_path('CurrentAperture', 'CurrentAperture')" + "\n"
             ImportScript += "\t" + "TracknAperture.set_editor_property('display_name', 'Current Aperture')" + "\n"
             ImportScript += "\t" + "sectionAperture = TracknAperture.add_section()" + "\n"
             ImportScript += "\t" + "sectionAperture.set_end_frame_bounded(False)" + "\n"
             ImportScript += "\t" + "sectionAperture.set_start_frame_bounded(False)" + "\n"
             ImportScript += "\t" + "AddSequencerSectionFloatKeysByIniFile(sectionAperture, 'Aperture', AdditionalTracksLoc)" + "\n"
+            ImportScript += "\n"
+
+ 
+
+            
+
+            # add a binding for the camera
+
+            ImportScript += "\t" + "camera_binding = seq.add_possessable(cine_camera_actor)" + "\n"
+
+            #Transfer to spawnable camera
+
+            if IsSpawnableCamera:
+                ImportScript += "\t" + "camera_spawnable = seq.add_spawnable_from_class(unreal.CineCameraActor) #Add camera in sequencer" + "\n"
+                ImportScript += "\t" + "camera_component_binding.set_parent(camera_spawnable)" + "\n"
+
+            # Import fbx transform
+
+            if IsSpawnableCamera: 
+                ImportScript += "\t" + "transform_track = camera_spawnable.add_track(unreal.MovieScene3DTransformTrack)" + "\n"
+            else:
+                ImportScript += "\t" + "transform_track = camera_binding.add_track(unreal.MovieScene3DTransformTrack)" + "\n"
+            ImportScript += "\t" + "transform_section = transform_track.add_section()" + "\n"
+            ImportScript += "\t" + "transform_section.set_end_frame_bounded(False)" + "\n"
+            ImportScript += "\t" + "transform_section.set_start_frame_bounded(False)" + "\n"
+            ImportScript += "\t" + "AddSequencerSectionTransformKeysByIniFile(transform_section, 'Transform', AdditionalTracksLoc)" + "\n"
+
+            
+            
+            # Set property binding
+            if IsSpawnableCamera:
+                ImportScript += "\t" + "current_camera_binding = camera_spawnable" + "\n"
+            else:
+                ImportScript += "\t" + "current_camera_binding = camera_binding" + "\n"
+            ImportScript += "\t" + "current_camera_binding.set_display_name('" + camera.name + "')" + "\n"
+
+
+            ImportScript += "\t" + "tracksSpawned = current_camera_binding.find_tracks_by_exact_type(unreal.MovieSceneSpawnTrack)" + "\n"
+            ImportScript += "\t" + "if len(tracksSpawned) > 0:" + "\n"
+            #ImportScript += "\t\t" + "trackSpawned.set_property_name_and_path('Spawned', 'Spawned')" + "\n"
+            #ImportScript += "\t\t" + "trackSpawned.set_editor_property('display_name', 'Spawned')" + "\n"
+            ImportScript += "\t\t" + "sectionSpawned = tracksSpawned[0].get_sections()[0]" + "\n"
+            #ImportScript += "\t\t" + "sectionSpawned.set_end_frame_bounded(False)" + "\n"
+            #ImportScript += "\t\t" + "sectionSpawned.set_start_frame_bounded(False)" + "\n"
+            ImportScript += "\t\t" + "AddSequencerSectionBoolKeysByIniFile(sectionSpawned, 'Spawned', AdditionalTracksLoc)" + "\n"
+            ImportScript += "\n"
+
+            # Set property actor
+            if IsSpawnableCamera:
+                ImportScript += "\t" + "current_cine_camera_actor = camera_spawnable.get_object_template()" + "\n"
+            else:
+                ImportScript += "\t" + "current_cine_camera_actor = cine_camera_actor" + "\n"
+                
+            ImportScript += "\t" + "current_cine_camera_actor.set_actor_label('" + camera.name + "')" + "\n"
+
+                
+
+            # Set property component
+            ImportScript += "\t" + "camera_component = cine_camera_actor.camera_component" + "\n"
+            resX = bpy.context.scene.render.resolution_x
+            resY = bpy.context.scene.render.resolution_y
+            ImportScript += "\t" + "camera_component.aspect_ratio = " + str(resX/resY) + "\n"
+            ImportScript += "\t" + "camera_component.lens_settings.min_f_stop = 0" + "\n"
+            ImportScript += "\t" + "camera_component.lens_settings.max_f_stop = 1000" + "\n"
+
+            # Clean the created assets
+            if IsSpawnableCamera: 
+                ImportScript += "\t" + "cine_camera_actor.destroy_actor()" + "\n"
+                ImportScript += "\t" + "camera_binding.remove()" + "\n"
+                
+                
+
+                
+
+
+
+
+            if IsSpawnableCamera:
+                ImportScript += "\t" + "ImportedCamera.append(('"+camera.name+"', camera_spawnable))" + "\n"
+            else:
+                ImportScript += "\t" + "ImportedCamera.append(('"+camera.name+"', camera_binding))" + "\n"
 
             ImportScript += "\n"
             ImportScript += "\n\n"
@@ -284,7 +371,7 @@ def WriteImportSequencerScript():
         return sectionCuts
 
     for section in getMarkerSceneSections():
-                #Camera cut sections
+            #Camera cut sections
             ImportScript += "\t" + "#Import camera cut section" + "\n"
 
             ImportScript += "\t" + "camera_cut_section = camera_cut_track.add_section()" + "\n"
@@ -293,7 +380,8 @@ def WriteImportSequencerScript():
                     ImportScript += "\t" + "for camera in ImportedCamera:" + "\n"
                     ImportScript += "\t\t" + "if camera[0] == '"+section[2].name+"':" + "\n"
                     ImportScript += "\t\t\t" + "camera_binding_id = unreal.MovieSceneObjectBindingID()" + "\n"
-                    ImportScript += "\t\t\t" + "camera_binding_id.set_editor_property('guid', camera[1].get_id())" + "\n"
+                    #ImportScript += "\t\t\t" + "camera_binding_id.set_editor_property('guid', camera[1].get_id())" + "\n"
+                    ImportScript += "\t\t\t" + "camera_binding_id = seq.make_binding_id(camera[1], unreal.MovieSceneObjectBindingSpace.LOCAL)" + "\n"
                     ImportScript += "\t\t\t" + "camera_cut_section.set_camera_binding_id(camera_binding_id)" + "\n"
                 else:
                     ImportScript += "\t" + "#Not camera found for this section" + "\n"
@@ -304,6 +392,7 @@ def WriteImportSequencerScript():
 
             ImportScript += "\t" + "camera_cut_section.set_end_frame_seconds(("+str(section[1])+"-secureCrop)/float(frameRateNumerator))" + "\n"
             ImportScript += "\t" + "camera_cut_section.set_start_frame_seconds("+str(section[0])+"/float(frameRateNumerator))" + "\n"
+            ImportScript += "\t" + "\n"
 
     #import result
     ImportScript += "\t" + "print('========================= Imports completed ! =========================')" + "\n"
@@ -316,10 +405,11 @@ def WriteImportSequencerScript():
 
     ImportScript += "#Select and open seq in content browser" + "\n"
 
-
-    ImportScript += "\t" + "unreal.AssetToolsHelpers.get_asset_tools().open_editor_for_assets([unreal.load_asset(seqPath+'/'+seqName.replace('.',''))])" + "\n"
-    ImportScript += "\t" + "unreal.EditorAssetLibrary.sync_browser_to_objects([seqPath+'/'+seqName.replace('.','')])" + "\n"
-
+    ImportScript += "\t" + "if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:" + "\n"
+    ImportScript += "\t\t" + "unreal.AssetEditorSubsystem.open_editor_for_assets(unreal.AssetEditorSubsystem(), [unreal.load_asset(seq.get_path_name())])" + "\n"
+    ImportScript += "\t" + "else:" + "\n"
+    ImportScript += "\t\t" + "unreal.AssetToolsHelpers.get_asset_tools().open_editor_for_assets([unreal.load_asset(seq.get_path_name())])" + "\n"
+    ImportScript += "\t" + "unreal.EditorAssetLibrary.sync_browser_to_objects([seq.get_path_name()])" + "\n"
     ImportScript += "\t" + "return 'Sequencer created with success !' " + "\n"
 
 
