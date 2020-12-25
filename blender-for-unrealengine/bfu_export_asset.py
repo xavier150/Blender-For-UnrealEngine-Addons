@@ -100,6 +100,12 @@ def IsValidActionForExport(scene, obj, animType):
                 return True 
         else:
             False
+    if animType == "NLA": 
+        if scene.anin_export:
+            return False
+                #Auto Rig Pro don't support NLA
+        else:
+            False
 
 def IsValidObjectForExport(scene, obj):
     objType = GetAssetType(obj)
@@ -270,7 +276,7 @@ def ExportAllAssetByList(
                             UpdateProgress()
 
                         # pose
-                        if animType == "Pose" and IsValidActionForExport(animType, obj):
+                        if animType == "Pose" and IsValidActionForExport(originalScene, animType, obj):
                             # Save current start/end frame
                             UserStartFrame = scene.frame_start
                             UserEndFrame = scene.frame_end
@@ -288,7 +294,7 @@ def ExportAllAssetByList(
                             UpdateProgress()
 
                 # NLA animation
-                if bpy.context.scene.anin_export:
+                if IsValidActionForExport(originalScene, "NLA", obj):
                     if obj.ExportNLA:
                         scene.frame_end += 1
                         ExportSingleFbxNLAAnim(

@@ -59,9 +59,6 @@ def WriteImportSequencerScript():
 
 
     #Prepare var
-    ImportScript += "\t" + "seqName = r'"+scene.unreal_levelsequence_name+"'" + "\n"
-    ImportScript += "\t" + "seqTempName = r'"+scene.unreal_levelsequence_name+"'+str(time.time())" + "\n"
-
     ImportScript += "\t" + "startFrame = " + str(scene.frame_start) + "\n"
     ImportScript += "\t" + "endFrame = " + str(scene.frame_end+1) + "\n"
     ImportScript += "\t" + "frameRateDenominator = " + str(scene.render.fps_base) + "\n"

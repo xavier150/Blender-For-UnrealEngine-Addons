@@ -2057,8 +2057,6 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
                             'scene.file_import_sequencer_script_name',
                             # Import location:
                             'scene.unreal_import_location',
-                            'scene.unreal_levelsequence_import_location',
-                            'scene.unreal_levelsequence_name',
                         ]
 
         # Directory to store the presets
@@ -2237,21 +2235,9 @@ class BFU_PT_ImportScript(bpy.types.Panel):
     SceneProp = bpy.types.Scene
     SceneProp.unreal_import_location = bpy.props.StringProperty(
         name="Unreal import location",
-        description="Unreal assets import location in /Game/",
+        description="Unreal assets import location in Content folder(/Game/)",
         maxlen=512,
         default='ImportedFbx')
-
-    SceneProp.unreal_levelsequence_import_location = bpy.props.StringProperty(
-        name="Unreal sequencer import location",
-        description="Unreal sequencer import location in /Game/",
-        maxlen=512,
-        default=r'ImportedFbx/Sequencer')
-
-    SceneProp.unreal_levelsequence_name = bpy.props.StringProperty(
-        name="Unreal sequencer name",
-        description="Unreal sequencer name",
-        maxlen=512,
-        default='MySequence')
 
     def draw(self, context):
         scn = context.scene
@@ -2265,14 +2251,6 @@ class BFU_PT_ImportScript(bpy.types.Panel):
                 scn,
                 'unreal_import_location',
                 icon='FILE_FOLDER')
-            propsSub.prop(
-                scn,
-                'unreal_levelsequence_import_location',
-                icon='FILE_FOLDER')
-            propsSub.prop(
-                scn,
-                'unreal_levelsequence_name',
-                icon='FILE')
         else:
             self.layout.label(text='(Generated scripts are deactivated.)')
 
