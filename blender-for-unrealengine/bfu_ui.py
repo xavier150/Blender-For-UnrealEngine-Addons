@@ -2529,75 +2529,82 @@ class BFU_PT_Export(bpy.types.Panel):
         def execute(self, context):
             scene = bpy.context.scene
 
-            def CheckIfFbxPluginIsActivated():
-                is_enabled, is_loaded = addon_utils.check("io_scene_fbx")
-                if is_enabled and is_enabled:
-                    return True
-                return False
+            def isReadyForExport():
 
-            def GetIfOneTypeCheck():
-                if (scene.static_export
-                        or scene.static_collection_export
-                        or scene.skeletal_export
-                        or scene.anin_export
-                        or scene.alembic_export
-                        or scene.camera_export):
-                    return True
-                else:
-                    return False
-
-            if not CheckIfFbxPluginIsActivated():
-                self.report(
-                    {'WARNING'},
-                    'Add-on FBX format is not activated!' +
-                    ' Edit > Preferences > Add-ons > And check "FBX format"')
-                return {'FINISHED'}
-
-            if GetIfOneTypeCheck():
-                # Primary check	if file is saved
-                # to avoid windows PermissionError
-
-                if bpy.data.is_saved:
-                    scene.UnrealExportedAssetsList.clear()
-                    s = CounterStart()
-                    UpdateNameHierarchy()
-                    bfu_export_asset.ExportForUnrealEngine()
-                    bfu_write_text.WriteAllTextFiles()
-
-                    if len(scene.UnrealExportedAssetsList) > 0:
-                        self.report(
-                            {'INFO'},
-                            "Export of " +
-                            str(len(scene.UnrealExportedAssetsList)) +
-                            " asset(s) has been finalized in " +
-                            str(round(CounterEnd(s), 2)) +
-                            "seconds. Look in console for more info.")
-                        print(
-                            "=========================" +
-                            " Exported asset(s) " +
-                            "=========================")
-                        print("")
-                        lines = bfu_write_text.WriteExportLog().splitlines()
-                        for line in lines:
-                            print(line)
-                        print("")
-                        print(
-                            "=========================" +
-                            " ... " +
-                            "=========================")
+                def GetIfOneTypeCheck():
+                    if (scene.static_export
+                            or scene.static_collection_export
+                            or scene.skeletal_export
+                            or scene.anin_export
+                            or scene.alembic_export
+                            or scene.camera_export):
+                        return True
                     else:
-                        self.report(
-                            {'WARNING'},
-                            "Not found assets with" +
-                            " \"Export recursive\" properties " +
-                            "or collection to export.")
-                else:
+                        return False
+
+                if not CheckPluginIsActivated("io_scene_fbx"):
                     self.report(
                         {'WARNING'},
-                        "Please save this blend file before export")
-            else:
-                self.report({'WARNING'}, "No asset type is checked.")
+                        'Add-on FBX format is not activated!' +
+                        ' Edit > Preferences > Add-ons > And check "FBX format"')
+                    return False
+
+                if not GetIfOneTypeCheck():
+                    self.report(
+                        {'WARNING'},
+                        "No asset type is checked.")
+                    return False
+
+                if not len(GetFinalAssetToExport()) > 0:
+                    self.report(
+                        {'WARNING'},
+                        "Not found assets with" +
+                        " \"Export recursive\" properties " +
+                        "or collection to export.")
+                    return False
+
+                if not bpy.data.is_saved:
+                    # Primary check	if file is saved
+                    # to avoid windows PermissionError
+                    self.report(
+                        {'WARNING'},
+                        "Please save this .blend file before export")
+                    return False
+                    
+                return True
+
+            if not isReadyForExport():
                 return {'FINISHED'}
+
+            scene.UnrealExportedAssetsList.clear()
+            s = CounterStart()
+            UpdateNameHierarchy()
+            bfu_export_asset.ExportForUnrealEngine()
+            bfu_write_text.WriteAllTextFiles()
+
+
+            self.report(
+                {'INFO'},
+                "Export of " +
+                str(len(scene.UnrealExportedAssetsList)) +
+                " asset(s) has been finalized in " +
+                str(round(CounterEnd(s), 2)) +
+                "seconds. Look in console for more info.")
+            print(
+                "=========================" +
+                " Exported asset(s) " +
+                "=========================")
+            print("")
+            lines = bfu_write_text.WriteExportLog().splitlines()
+            for line in lines:
+                print(line)
+            print("")
+            print(
+                "=========================" +
+                " ... " +
+                "=========================")
+
+
             return {'FINISHED'}
 
     # Categories :

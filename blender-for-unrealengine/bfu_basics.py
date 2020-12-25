@@ -37,6 +37,11 @@ def is_deleted(o):
         return True
 
 
+def CheckPluginIsActivated(PluginName):
+    is_enabled, is_loaded = addon_utils.check("io_scene_fbx")
+    return is_enabled and is_loaded
+    
+
 def MoveToGlobalView():
     for area in bpy.context.screen.areas:
         if area.type == 'VIEW_3D':

@@ -302,6 +302,7 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.2.8 ==
 
+- New: Auto-Rig Pro support (Needed for convert armature durring the export)
 - New: You can now choose the preview collision color.
 - New: You can set a light map res depending on the surface Area
 - New: New button for update light map res depending on the surface Area
@@ -311,7 +312,6 @@ It is now possible to force the duration of an animation according to the scene 
 - New: You can now set directly the desired export name for each objects.
 - New: More option for action names.
 - New: Camera Sensor Width and Height are now added in additional tracks.
-- Change: Error message "Not found assets with Export recursive"
 - Change: New potential error: Check if the unit scale is equal to 0.01 (You can disable this potential error in addon_prefs)
 - Change: Better check and potential errors info for Armature.
 - Change: Some potential errors can have button to the documentation.
@@ -333,6 +333,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Assets import script error with 4.26, ConfigParser import changed to configparser.
 - Fixed: Camera cut in Imported sequencer was not visible in other sequencer (CameraBindingID)
 - Fixed: If armature name contain illegal char, in Unreal the Skeletal Mesh is not found by Anim assets.
+- Fixed: T
 
 
 

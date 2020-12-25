@@ -43,6 +43,7 @@ import bpy
 import time
 import math
 
+import addon_utils
 
 from . import bfu_write_text
 from . import bfu_basics
@@ -69,6 +70,58 @@ from .bfu_export_single_static_mesh import *
 
 from . import bfu_export_single_static_mesh_collection
 from .bfu_export_single_static_mesh_collection import *
+
+class ExportSigleObjects():
+
+    def SaveDataForSigneExport():
+        pass
+
+    def ResetDataAfterSigneExport():
+        pass
+
+
+def IsValidActionForExport(scene, obj, animType):
+     
+    if animType == "Action": 
+        if scene.anin_export:
+            if obj.bfu_export_procedure == 'auto-rig-pro':
+                if CheckPluginIsActivated('auto_rig_pro-master'):
+                    return True 
+            else:
+                return True 
+        else:
+            False
+    if animType == "Pose": 
+        if scene.anin_export:
+            if obj.bfu_export_procedure == 'auto-rig-pro':
+                if CheckPluginIsActivated('auto_rig_pro-master'):
+                    return True 
+            else:
+                return True 
+        else:
+            False
+
+def IsValidObjectForExport(scene, obj):
+    objType = GetAssetType(obj)
+
+    if objType == "Camera":
+        return scene.camera_export
+    if objType == "StaticMesh":
+        return scene.static_export
+    if objType == "SkeletalMesh":
+        if scene.skeletal_export:
+            if obj.bfu_export_procedure == 'auto-rig-pro':
+                if CheckPluginIsActivated('auto_rig_pro-master'):
+                    return True 
+            else:
+                return True 
+        else:
+            False
+    if objType == "Alembic":
+        return scene.alembic_export
+
+    return False
+
 
 
 def ExportAllAssetByList(
@@ -97,6 +150,7 @@ def ExportAllAssetByList(
         )
     UpdateProgress()
 
+    # Export collections
     if scene.static_collection_export:
         for col in GetCollectionToExport(originalScene):
             if col in targetcollection:
@@ -109,12 +163,12 @@ def ExportAllAssetByList(
                 )
                 UpdateProgress()
 
+    # Export assets
     for obj in targetobjects:
-
         if obj.ExportEnum == "export_recursive":
 
             # Camera
-            if GetAssetType(obj) == "Camera" and scene.camera_export:
+            if GetAssetType(obj) == "Camera" and IsValidObjectForExport(originalScene, obj):
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end
@@ -138,7 +192,7 @@ def ExportAllAssetByList(
                 UpdateProgress()
 
             # StaticMesh
-            if GetAssetType(obj) == "StaticMesh" and scene.static_export:
+            if GetAssetType(obj) == "StaticMesh" and IsValidObjectForExport(originalScene, obj):
                 ExportSingleStaticMesh(
                     originalScene,
                     GetObjExportDir(obj),
@@ -159,7 +213,7 @@ def ExportAllAssetByList(
                 UpdateProgress()
 
             # SkeletalMesh
-            if GetAssetType(obj) == "SkeletalMesh" and scene.skeletal_export:
+            if GetAssetType(obj) == "SkeletalMesh" and IsValidObjectForExport(originalScene, obj):
                 ExportSingleSkeletalMesh(
                     originalScene,
                     GetObjExportDir(obj),
@@ -178,7 +232,7 @@ def ExportAllAssetByList(
                 UpdateProgress()
 
             # Alembic
-            if GetAssetType(obj) == "Alembic" and scene.alembic_export:
+            if GetAssetType(obj) == "Alembic" and IsValidObjectForExport(originalScene, obj):
                 ExportSingleAlembicAnimation(
                     originalScene,
                     GetObjExportDir(obj),
@@ -198,7 +252,7 @@ def ExportAllAssetByList(
                         animType = GetActionType(action)
 
                         # Action
-                        if animType == "Action" and scene.anin_export:
+                        if animType == "Action" and IsValidActionForExport(originalScene, obj, animType):
                             # Save current start/end frame
                             UserStartFrame = scene.frame_start
                             UserEndFrame = scene.frame_end
@@ -216,7 +270,7 @@ def ExportAllAssetByList(
                             UpdateProgress()
 
                         # pose
-                        if animType == "Pose" and scene.anin_export:
+                        if animType == "Pose" and IsValidActionForExport(animType, obj):
                             # Save current start/end frame
                             UserStartFrame = scene.frame_start
                             UserEndFrame = scene.frame_end
