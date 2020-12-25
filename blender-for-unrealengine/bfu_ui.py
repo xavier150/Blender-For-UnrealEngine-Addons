@@ -1395,7 +1395,7 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
                         GetAssetType(obj) == "Alembic"):
 
                     # Action time
-                    if obj.type != "CAMERA":
+                    if obj.type != "CAMERA" and obj.bfu_export_procedure != "auto-rig-pro":
                         ActionTimeProperty = layout.column()
                         ActionTimeProperty.prop(obj, 'AnimStartEndTimeEnum')
                         if obj.AnimStartEndTimeEnum == "with_customframes":
@@ -1436,7 +1436,7 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
                             ActionListProperty.prop(obj, 'PrefixNameToExport')
 
                     # NLA
-                    if GetAssetType(obj) == "SkeletalMesh":
+                    if GetAssetType(obj) == "SkeletalMesh" and obj.bfu_export_procedure != "auto-rig-pro":
                         NLAAnim = layout.row()
                         NLAAnim.prop(obj, 'ExportNLA')
                         NLAAnimChild = NLAAnim.column()
@@ -1446,7 +1446,8 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
                     # Animation fbx properties
                     if (GetAssetType(obj) != "Alembic"):
                         propsFbx = layout.row()
-                        propsFbx.prop(obj, 'SampleAnimForExport')
+                        if obj.bfu_export_procedure != "auto-rig-pro":
+                            propsFbx.prop(obj, 'SampleAnimForExport')
                         propsFbx.prop(obj, 'SimplifyAnimForExport')
 
                     # Nomenclature
@@ -2197,6 +2198,13 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
         propsSub = self.layout.row()
         propsSub = propsSub.column()
         propsSub.prop(scn, 'anim_subfolder_name', icon='FILE_FOLDER')
+        
+        if addon_prefs.useGeneratedScripts:
+            unreal_import_location = propsSub.column()
+            unreal_import_location.prop(
+                scn,
+                'unreal_import_location',
+                icon='FILE_FOLDER')
 
         # File path
         filePath = self.layout.row()
@@ -2206,6 +2214,7 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
         filePath.prop(scn, 'export_alembic_file_path')
         filePath.prop(scn, 'export_camera_file_path')
         filePath.prop(scn, 'export_other_file_path')
+
 
         # File name
         fileName = self.layout.row()
@@ -2220,39 +2229,6 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
                 scn,
                 'file_import_sequencer_script_name',
                 icon='FILE')
-
-
-class BFU_PT_ImportScript(bpy.types.Panel):
-    # Is Import script panel
-
-    bl_idname = "BFU_PT_ImportScript"
-    bl_label = "Import Script"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "Unreal Engine 4"
-    bl_parent_id = "BFU_PT_BlenderForUnreal"
-
-    SceneProp = bpy.types.Scene
-    SceneProp.unreal_import_location = bpy.props.StringProperty(
-        name="Unreal import location",
-        description="Unreal assets import location in Content folder(/Game/)",
-        maxlen=512,
-        default='ImportedFbx')
-
-    def draw(self, context):
-        scn = context.scene
-        addon_prefs = bpy.context.preferences.addons[__package__].preferences
-
-        # Sub folder
-        if addon_prefs.useGeneratedScripts:
-            propsSub = self.layout.row()
-            propsSub = propsSub.column()
-            propsSub.prop(
-                scn,
-                'unreal_import_location',
-                icon='FILE_FOLDER')
-        else:
-            self.layout.label(text='(Generated scripts are deactivated.)')
 
 
 class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
@@ -2848,8 +2824,6 @@ classes = (
     BFU_PT_Nomenclature,
     BFU_PT_Nomenclature.BFU_MT_NomenclaturePresets,
     BFU_PT_Nomenclature.BFU_OT_AddNomenclaturePreset,
-
-    BFU_PT_ImportScript,
 
     BFU_PT_Export,
     BFU_PT_Export.BFU_OT_ShowAssetToExport,

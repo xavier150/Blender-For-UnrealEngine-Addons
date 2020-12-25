@@ -282,7 +282,8 @@ def ExportAutoProRig(
         export_rig_name="root",
         bake_anim=True,
         anim_export_name_string="",
-        mesh_smooth_type="OFF"
+        mesh_smooth_type="OFF",
+        arp_simplify_fac=0.0
         ):
 
     bpy.context.scene.arp_engine_type = 'unreal'
@@ -299,7 +300,7 @@ def ExportAutoProRig(
     bpy.context.scene.arp_bake_actions = bake_anim
     bpy.context.scene.arp_export_name_actions = True
     bpy.context.scene.arp_export_name_string = anim_export_name_string
-    bpy.context.scene.arp_simplify_fac = 0.0
+    bpy.context.scene.arp_simplify_fac = arp_simplify_fac
 
     # Misc
     bpy.context.scene.arp_mesh_smooth_type = mesh_smooth_type
@@ -313,7 +314,6 @@ def ExportAutoProRig(
 
     # export it
     print("Start AutoProRig Export")
-    
     bpy.ops.id.arp_export_fbx_panel(filepath=filepath)
 
 

@@ -174,7 +174,8 @@ def ExportSingleFbxAction(
             # export_rig_name=GetDesiredExportArmatureName(),
             bake_anim=True,
             anim_export_name_string=active.animation_data.action.name,
-            mesh_smooth_type="FACE"
+            mesh_smooth_type="FACE",
+            arp_simplify_fac=active.SimplifyAnimForExport
             )
 
     # Reset Action name
