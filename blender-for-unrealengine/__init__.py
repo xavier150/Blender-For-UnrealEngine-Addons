@@ -60,7 +60,7 @@ bl_info = {
     'warning': '',
     "wiki_url": "https://github.com/xavier150/" \
                 "Blender-For-UnrealEngine-Addons" \
-                "/blob/master/Tuto/How%20export%20assets%20from%20Blender.md",
+                "/blob/master/docs/How%20export%20assets%20from%20Blender.md",
     'tracker_url': '',
     'support': 'COMMUNITY',
     'category': 'Import-Export'}

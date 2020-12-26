@@ -247,7 +247,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
             os.system(
                 "start \"\" " +
                 "https://github.com/xavier150/" +
-                "Blender-For-UnrealEngine-Addons/blob/master/Tuto/" +
+                "Blender-For-UnrealEngine-Addons/blob/master/docs/" +
                 "How%20export%20assets%20from%20Blender.md"+self.octicon
                 )
             return {'FINISHED'}
@@ -363,7 +363,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 "start \"\" " +
                 "https://github.com/xavier150/" +
                 "Blender-For-UnrealEngine-Addons/blob/master/" +
-                "Tuto/How%20export%20assets%20from%20Blender.md"
+                "docs/How%20export%20assets%20from%20Blender.md"
                 )
             return {'FINISHED'}
 
@@ -2374,7 +2374,7 @@ class BFU_PT_Export(bpy.types.Panel):
                     "start \"\" " +
                     "https://github.com/xavier150/" +
                     "Blender-For-UnrealEngine-Addons/" +
-                    "blob/master/Tuto/" +
+                    "blob/master/docs/" +
                     "Potential%20Error%20with%20Blender%20export%20" +
                     "to%20Unreal.md#"+self.octicon)
                 return {'FINISHED'}
