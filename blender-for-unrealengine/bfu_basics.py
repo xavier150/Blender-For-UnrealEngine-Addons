@@ -38,7 +38,7 @@ def is_deleted(o):
 
 
 def CheckPluginIsActivated(PluginName):
-    is_enabled, is_loaded = addon_utils.check("io_scene_fbx")
+    is_enabled, is_loaded = addon_utils.check(PluginName)
     return is_enabled and is_loaded
     
 
