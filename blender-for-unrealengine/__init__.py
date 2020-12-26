@@ -55,13 +55,13 @@ bl_info = {
     "objects at the same time for use in unreal engine 4.",
     'author': 'Loux Xavier (BleuRaven)',
     'version': (0, 2, 8, 0),  # Rev 0.2.8.0
-    'blender': (2, 90, 0),
+    'blender': (2, 83, 0),
     'location': 'View3D > UI > Unreal Engine 4',
     'warning': '',
     "wiki_url": "https://github.com/xavier150/" \
                 "Blender-For-UnrealEngine-Addons" \
                 "/blob/master/docs/How%20export%20assets%20from%20Blender.md",
-    'tracker_url': '',
+    'tracker_url': 'https://github.com/xavier150/Blender-For-UnrealEngine-Addons/issues',
     'support': 'COMMUNITY',
     'category': 'Import-Export'}
 
