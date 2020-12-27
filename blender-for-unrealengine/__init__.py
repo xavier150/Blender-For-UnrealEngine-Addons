@@ -24,6 +24,18 @@
 #  xavierloux.com
 # ----------------------------------------------
 
+import os
+import bpy
+import fnmatch
+import time
+import addon_utils
+
+from . import bfu_ui
+from . import bfu_export_asset
+from . import bfu_write_text
+from . import bfu_basics
+from . import bfu_utils
+
 if "bpy" in locals():
     import importlib
     if "bfu_ui" in locals():
@@ -36,18 +48,6 @@ if "bpy" in locals():
         importlib.reload(bfu_basics)
     if "bfu_utils" in locals():
         importlib.reload(bfu_utils)
-
-import os
-import bpy
-import fnmatch
-import time
-import addon_utils
-
-from . import bfu_ui
-from . import bfu_export_asset
-from . import bfu_write_text
-from . import bfu_basics
-from . import bfu_utils
 
 bl_info = {
     'name': 'Blender for UnrealEngine',

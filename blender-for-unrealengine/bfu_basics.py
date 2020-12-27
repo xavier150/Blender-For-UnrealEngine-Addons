@@ -16,15 +16,12 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-import sys
-import bpy
 import os
 import string
 from pathlib import Path
 import shutil
+import bpy
 import bmesh
-import requests
-import json
 import addon_utils
 from mathutils import Vector
 from mathutils import Quaternion
@@ -40,7 +37,7 @@ def is_deleted(o):
 def CheckPluginIsActivated(PluginName):
     is_enabled, is_loaded = addon_utils.check(PluginName)
     return is_enabled and is_loaded
-    
+
 
 def MoveToGlobalView():
     for area in bpy.context.screen.areas:
@@ -250,6 +247,7 @@ def ValidFilename(filename):
     valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
     filename = ''.join(c for c in filename if c in valid_chars)
     return filename
+
 
 def ValidDefname(filename):
     # Normalizes string, removes non-alpha characters

@@ -142,9 +142,6 @@ def WriteExportLog():
     return ExportLog
 
 
-
-
-
 def WriteExportedAssetsDetail():
     # Generate a config file for import assets in Ue4
     scene = bpy.context.scene
@@ -181,28 +178,26 @@ def WriteExportedAssetsDetail():
             config.set(AssetSectionName, 'material_search_location', obj.MaterialSearchLocation)
             config.set(AssetSectionName, 'generate_lightmap_uvs', str(obj.GenerateLightmapUVs))
             config.set(AssetSectionName, 'create_physics_asset', str(obj.CreatePhysicsAsset))
-            if (obj.UseStaticMeshLODGroup == True):
+            if (obj.UseStaticMeshLODGroup):
                 config.set(AssetSectionName, 'static_mesh_lod_group', obj.StaticMeshLODGroup)
-            if (ExportCompuntedLightMapValue(obj) == True):
+            if (ExportCompuntedLightMapValue(obj)):
                 config.set(AssetSectionName, 'light_map_resolution', str(GetCompuntedLightMap(obj)))
 
         # Anim only
         if GetIsAnimation(asset.assetType):
             actionIndex = 0
             animOption = "anim"+str(actionIndex)
-            while config.has_option(AssetSectionName, animOption+'_fbx_path') == True:
+            while config.has_option(AssetSectionName, animOption+'_fbx_path'):
                 actionIndex += 1
                 animOption = "anim"+str(actionIndex)
 
             fbx_path = (os.path.join(asset.exportPath, asset.assetName))
             config.set(AssetSectionName, animOption+'_fbx_path', fbx_path)
-            config.set(AssetSectionName, animOption+'_import_path', os.path.join(obj.exportFolderName, scene.anim_subfolder_name) )
+            config.set(AssetSectionName, animOption+'_import_path', os.path.join(obj.exportFolderName, scene.anim_subfolder_name))
 
     AssetForImport = []
     for asset in scene.UnrealExportedAssetsList:
-        if (asset.assetType == "StaticMesh"
-        or asset.assetType == "SkeletalMesh"
-        or GetIsAnimation(asset.assetType)):
+        if (asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh" or GetIsAnimation(asset.assetType)):
             AssetForImport.append(asset)
 
     # Comment
@@ -301,11 +296,11 @@ def WriteSingleCameraAdditionalTrack(obj):
     for key in getAllKeysByMatrix(obj):
         # GetWorldPostion
         matrix = key[1] @ Matrix.Rotation(radians(90.0), 4, 'Y') @ Matrix.Rotation(radians(-90.0), 4, 'X')
-        l = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
+        t = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
         r = matrix.to_euler()
         s = matrix.to_scale()
 
-        array_location = [l[0], l[1]*-1, l[2]]
+        array_location = [t[0], t[1]*-1, t[2]]
         array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]
         array_scale = [s[0], s[1], s[2]]
 
@@ -359,14 +354,14 @@ def WriteSingleCameraAdditionalTrack(obj):
             ImportScript += str(key[0])+": "+str(key[1]) + "\n"
 
     else:
-        ImportScript += "0: 21\n" #21 is default value in ue4
+        ImportScript += "0: 21\n"  # 21 is default value in ue4
     ImportScript += "\n\n\n"
 
     # Write Spawned keys
     ImportScript += "[Spawned]" + "\n"
     lastKeyValue = None
     for key in getAllKeysByFcurves(obj, "hide_viewport", obj.hide_viewport, False):
-        boolKey = (key[1] < 1) # Inversed for convert hide to spawn
+        boolKey = (key[1] < 1)  # Inversed for convert hide to spawn
         if lastKeyValue is None:
             ImportScript += str(key[0])+": "+str(boolKey) + "\n"
             lastKeyValue = boolKey
@@ -393,11 +388,11 @@ def WriteSingleMeshAdditionalParameter(obj):
     config.set('Comment', '; This file contains Additional StaticMesh and SkeletalMesh parameters informations that is not supported with .fbx files')
     config.set('Comment', '; The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python')
 
-    #Defaultsettings
+    # Defaultsettings
     config.add_section('DefaultSettings')
-    #config.set('Defaultsettings', 'SocketNumber', str(len(sockets)))
+    # config.set('Defaultsettings', 'SocketNumber', str(len(sockets)))
 
-    #Level of detail
+    # Level of detail
     config.add_section("LevelOfDetail")
     if obj.Ue4Lod1 is not None:
         loc = os.path.join(GetObjExportDir(obj.Ue4Lod1, True), GetObjExportFileName(obj.Ue4Lod1))
@@ -415,7 +410,7 @@ def WriteSingleMeshAdditionalParameter(obj):
         loc = os.path.join(GetObjExportDir(obj.Ue4Lod5, True), GetObjExportFileName(obj.Ue4Lod5))
         config.set('LevelOfDetail', 'lod_5', str(loc))
 
-    #Sockets
+    # Sockets
     if GetAssetType(obj) == "SkeletalMesh":
 
         config.add_section('Sockets')
@@ -435,16 +430,16 @@ def WriteSingleMeshAdditionalParameter(obj):
 
             ResetArmaturePose(socket.parent)
             # GetRelativePostion
-            bml = b.matrix_local # Bone
-            am = socket.parent.matrix_world # Armature
-            em = socket.matrix_world # Socket
+            bml = b.matrix_local  # Bone
+            am = socket.parent.matrix_world  # Armature
+            em = socket.matrix_world  # Socket
             RelativeMatrix = (bml.inverted() @ am.inverted() @ em)
-            l = RelativeMatrix.to_translation()
+            t = RelativeMatrix.to_translation()
             r = RelativeMatrix.to_euler()
             s = socket.scale*addon_prefs.skeletalSocketsImportedSize
 
             # Convet to array for configparser and convert value for Unreal
-            array_location = [l[0], l[1]*-1, l[2]]
+            array_location = [t[0], t[1]*-1, t[2]]
             array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]
             array_scale = [s[0], s[1], s[2]]
 

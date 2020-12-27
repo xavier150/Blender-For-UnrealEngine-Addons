@@ -95,8 +95,6 @@ def ExportSingleFbxAction(
         if obj.ExportProxyChild is not None:
             obj.animation_data.action = targetAction  # Apply desired action
 
-
-     
     active.animation_data.action = targetAction  # Apply desired action
     export_procedure = active.bfu_export_procedure
 

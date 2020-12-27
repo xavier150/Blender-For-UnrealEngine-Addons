@@ -779,14 +779,15 @@ def ValidFilenameForUnreal(filename):
     newfilename = ValidFilename(os.path.splitext(filename)[0])
     return (''.join(c for c in newfilename if c != ".")+extension)
 
+
 def ValidUnrealAssetename(filename):
     # Normalizes string, removes non-alpha characters
     # Asset name in Unreal use
 
-    filename = filename.replace('.','_')
-    filename = filename.replace('(','_')
-    filename = filename.replace(')','_')
-    filename = filename.replace(' ','_')
+    filename = filename.replace('.', '_')
+    filename = filename.replace('(', '_')
+    filename = filename.replace(')', '_')
+    filename = filename.replace(' ', '_')
     valid_chars = "-_%s%s" % (string.ascii_letters, string.digits)
     filename = ''.join(c for c in filename if c in valid_chars)
     return filename

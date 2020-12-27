@@ -740,7 +740,6 @@ class BFU_PT_ObjectImportProperties(bpy.types.Panel):
         default="SK_MySketonName_Skeleton"
         )
 
-
     # StaticMeshImportData
     # https://api.unrealengine.com/INT/API/Editor/UnrealEd/Factories/UFbxStaticMeshImportData/index.html
 
@@ -1276,8 +1275,8 @@ class BFU_PT_AnimProperties(bpy.types.Panel):
                 "Include Armature Name",
                 'Include armature name in animation export file name.' +
                 ' Exemple: "Anim_MyArmature_MyAction"'),
-            ('include_custom_name', 
-                "Include custom name", 
+            ('include_custom_name',
+                "Include custom name",
                 'Include custom name in animation export file name.' +
                 ' Exemple: "Anim_MyCustomName_MyAction"'),
             ],
@@ -2198,7 +2197,7 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
         propsSub = self.layout.row()
         propsSub = propsSub.column()
         propsSub.prop(scn, 'anim_subfolder_name', icon='FILE_FOLDER')
-        
+
         if addon_prefs.useGeneratedScripts:
             unreal_import_location = propsSub.column()
             unreal_import_location.prop(
@@ -2214,7 +2213,6 @@ class BFU_PT_Nomenclature(bpy.types.Panel):
         filePath.prop(scn, 'export_alembic_file_path')
         filePath.prop(scn, 'export_camera_file_path')
         filePath.prop(scn, 'export_other_file_path')
-
 
         # File name
         fileName = self.layout.row()
@@ -2524,7 +2522,7 @@ class BFU_PT_Export(bpy.types.Panel):
                         {'WARNING'},
                         "Please save this .blend file before export")
                     return False
-                    
+
                 return True
 
             if not isReadyForExport():
@@ -2535,7 +2533,6 @@ class BFU_PT_Export(bpy.types.Panel):
             UpdateNameHierarchy()
             bfu_export_asset.ExportForUnrealEngine()
             bfu_write_text.WriteAllTextFiles()
-
 
             self.report(
                 {'INFO'},
@@ -2557,7 +2554,6 @@ class BFU_PT_Export(bpy.types.Panel):
                 "=========================" +
                 " ... " +
                 "=========================")
-
 
             return {'FINISHED'}
 

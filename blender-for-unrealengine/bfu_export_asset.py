@@ -71,6 +71,7 @@ from .bfu_export_single_static_mesh import *
 from . import bfu_export_single_static_mesh_collection
 from .bfu_export_single_static_mesh_collection import *
 
+
 class ExportSigleObjects():
 
     def SaveDataForSigneExport():
@@ -81,31 +82,32 @@ class ExportSigleObjects():
 
 
 def IsValidActionForExport(scene, obj, animType):
-     
-    if animType == "Action": 
+
+    if animType == "Action":
         if scene.anin_export:
             if obj.bfu_export_procedure == 'auto-rig-pro':
                 if CheckPluginIsActivated('auto_rig_pro-master'):
-                    return True 
+                    return True
             else:
-                return True 
+                return True
         else:
             False
-    if animType == "Pose": 
+    if animType == "Pose":
         if scene.anin_export:
             if obj.bfu_export_procedure == 'auto-rig-pro':
                 if CheckPluginIsActivated('auto_rig_pro-master'):
-                    return True 
+                    return True
             else:
-                return True 
+                return True
         else:
             False
-    if animType == "NLA": 
+    if animType == "NLA":
         if scene.anin_export:
             return False
-                #Auto Rig Pro don't support NLA
+            # Auto Rig Pro don't support NLA
         else:
             False
+
 
 def IsValidObjectForExport(scene, obj):
     objType = GetAssetType(obj)
@@ -118,16 +120,15 @@ def IsValidObjectForExport(scene, obj):
         if scene.skeletal_export:
             if obj.bfu_export_procedure == 'auto-rig-pro':
                 if CheckPluginIsActivated('auto_rig_pro-master'):
-                    return True 
+                    return True
             else:
-                return True 
+                return True
         else:
             False
     if objType == "Alembic":
         return scene.alembic_export
 
     return False
-
 
 
 def ExportAllAssetByList(
