@@ -1833,6 +1833,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         addon_prefs = bpy.context.preferences.addons[__package__].preferences
         layout = self.layout
         scene = bpy.context.scene
+        obj = context.object
 
         def ActiveModeIs(targetMode):
             # Return True is active mode ==
@@ -1853,73 +1854,82 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         def FoundTypeInSelect(targetType):
             # Return True if a specific type is found
             for obj in bpy.context.selected_objects:
-                if obj != bpy.context.active_object:
-                    if obj.type == targetType:
-                        return True
+                if obj.type == targetType:
+                    return True
             return False
 
+        ready_for_convert_collider = False
+        ready_for_convert_socket = False
 
         bfu_ui_utils.LayoutSection(layout, "bfu_collision_socket_expanded", "Collision and Socket")
         if scene.bfu_collision_socket_expanded:
+            if not ActiveModeIs("OBJECT"):
+                layout.label(text="Switch to Object Mode.", icon='INFO')
+            else:
+                if FoundTypeInSelect("MESH"):
+                    if ActiveTypeIs("MESH") and len(bpy.context.selected_objects) > 1:
+                        layout.label(text="Click on button for convert to collider.", icon='INFO')
+                        ready_for_convert_collider = True
+                    else:
+                        layout.label(text="Select with [SHIFT] the collider owner.", icon='INFO')
 
+                elif FoundTypeInSelect("EMPTY"):
+                    if ActiveTypeIs("MESH") and len(bpy.context.selected_objects) > 1:
+                        layout.label(text="Click on button for convert to Socket.", icon='INFO')
+                        ready_for_convert_socket = True
+                    else:
+                        layout.label(text="Select with [SHIFT] the socket owner.", icon='INFO')
+                else:
+                    layout.label(text="Select your collider Object(s) or socket Empty(s).", icon='INFO')
 
-            layout.label(
-                text="Convert selected object to Unreal collision or socket",
-                icon='PHYSICS')
-
-            layout.label(
-                text="Select your collider shape(s)" +
-                " or Empty(s) then the owner object.")
             convertButtons = layout.row().split(factor=0.80)
             convertStaticCollisionButtons = convertButtons.column()
-            if (ActiveModeIs("OBJECT") and
-                    ActiveTypeIs("MESH") and
-                    FoundTypeInSelect("MESH")):
-                convertStaticCollisionButtons.enabled = True
-            else:
-                convertStaticCollisionButtons.enabled = False
-            convertStaticCollisionButtons.operator(
-                "object.converttoboxcollision",
-                icon='MESH_CUBE')
-            convertStaticCollisionButtons.operator(
-                "object.converttoconvexcollision",
-                icon='MESH_ICOSPHERE')
-            convertStaticCollisionButtons.operator(
-                "object.converttocapsulecollision",
-                icon='MESH_CAPSULE')
-            convertStaticCollisionButtons.operator(
-                "object.converttospherecollision",
-                icon='MESH_UVSPHERE')
+            convertStaticCollisionButtons.enabled = ready_for_convert_collider
+            convertStaticCollisionButtons.operator("object.converttoboxcollision", icon='MESH_CUBE')
+            convertStaticCollisionButtons.operator("object.converttoconvexcollision", icon='MESH_ICOSPHERE')
+            convertStaticCollisionButtons.operator("object.converttocapsulecollision", icon='MESH_CAPSULE')
+            convertStaticCollisionButtons.operator("object.converttospherecollision", icon='MESH_UVSPHERE')
 
-            convertButtons = self.layout.row().split(factor=0.80)
+            convertButtons = layout.row().split(factor=0.80)
             convertStaticSocketButtons = convertButtons.column()
-            if (ActiveModeIs("OBJECT") and
-                    ActiveTypeIs("MESH") and
-                    FoundTypeInSelect("EMPTY")):
-                convertStaticSocketButtons.enabled = True
-            else:
-                convertStaticSocketButtons.enabled = False
+            convertStaticSocketButtons.enabled = ready_for_convert_socket
             convertStaticSocketButtons.operator(
                 "object.converttostaticsocket",
                 icon='OUTLINER_DATA_EMPTY')
 
             if addon_prefs.useGeneratedScripts:
-                layout.label(
-                    text="Select the Empty(s)" +
-                    " then the owner bone in PoseMode.")
+
+                ready_for_convert_skeletal_socket = False
+                part2 = False
+                if not ActiveModeIs("OBJECT"):
+                    if not ActiveTypeIs("ARMATURE"):
+                        if not FoundTypeInSelect("EMPTY"):
+                            layout.label(text="Switch to Object Mode.", icon='INFO')
+                else:
+                    if FoundTypeInSelect("EMPTY"):
+                        if ActiveTypeIs("ARMATURE") and len(bpy.context.selected_objects) > 1:
+                            layout.label(text="Switch to Pose Mode.", icon='INFO')
+                            part2 = True
+                        else:
+                            layout.label(text="Select with [SHIFT] the armature owner.", icon='INFO')
+                    else:
+                        layout.label(text="Select your socket Empty(s).", icon='INFO')
+
+                if part2:
+                    if ActiveModeIs("POSE"):
+                        if len(bpy.context.selected_pose_bones) > 0:
+                            layout.label(text="Click on button for convert to Socket.", icon='INFO')
+                            ready_for_convert_skeletal_socket = True
+                        else:
+                            layout.label(text="Select the owner bone.", icon='INFO')
+
                 convertButtons = self.layout.row().split(factor=0.80)
                 convertSkeletalSocketButtons = convertButtons.column()
-                if (ActiveModeIs("POSE") and
-                        ActiveTypeIs("ARMATURE") and
-                        FoundTypeInSelect("EMPTY")):
-                    convertSkeletalSocketButtons.enabled = True
-                else:
-                    convertSkeletalSocketButtons.enabled = False
+                convertSkeletalSocketButtons.enabled = ready_for_convert_skeletal_socket
                 convertSkeletalSocketButtons.operator(
                     "object.converttoskeletalsocket",
                     icon='OUTLINER_DATA_EMPTY')
 
-            obj = context.object
             if obj is not None:
                 if obj.type == "EMPTY":
                     socketName = layout.column()

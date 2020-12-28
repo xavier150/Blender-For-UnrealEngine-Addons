@@ -302,6 +302,7 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.2.8 ==
 
+- New: Change: Better UI and Optimized 
 - New: Auto-Rig Pro support (Needed for convert armature durring the export)
 - New: You can now choose the preview collision color.
 - New: You can set a light map res depending on the surface Area
@@ -333,8 +334,5 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Assets import script error with 4.26, ConfigParser import changed to configparser.
 - Fixed: Camera cut in Imported sequencer was not visible in other sequencer (CameraBindingID)
 - Fixed: If armature name contain illegal char, in Unreal the Skeletal Mesh is not found by Anim assets.
-- Fixed: T
 
 
-
-Cheak vertex_color_import_option + normal_import_method 
