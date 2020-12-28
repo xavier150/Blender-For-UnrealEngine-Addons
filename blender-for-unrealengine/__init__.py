@@ -67,8 +67,36 @@ bl_info = {
 
 
 def register():
+    bpy.types.Scene.bfu_object_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_import_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_anim_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_collection_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_avanced_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_nomencalture_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_export_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_script_tool_expanded = bpy.props.BoolProperty()
+
+    bpy.types.Scene.bfu_active_object_tab = bpy.props.EnumProperty(
+        items=(
+            ('PROP', 'Object', 'Object Tab'),
+            ('ANIM', 'Animations', 'Animations Tab'),
+            ('SCENE', 'Scene', 'Scene anf global Tab')
+            ))
+
     bfu_ui.register()
 
 
 def unregister():
+
+    del bpy.types.Scene.bfu_object_properties_expanded
+    del bpy.types.Scene.bfu_object_import_properties_expanded
+    del bpy.types.Scene.bfu_anim_properties_expanded
+    del bpy.types.Scene.bfu_collection_properties_expanded
+    del bpy.types.Scene.bfu_object_avanced_properties_expanded
+    del bpy.types.Scene.bfu_nomencalture_properties_expanded
+    del bpy.types.Scene.bfu_export_properties_expanded
+    del bpy.types.Scene.bfu_script_tool_expanded
+
+    del bpy.types.Scene.bfu_active_object_tab
+
     bfu_ui.unregister()
