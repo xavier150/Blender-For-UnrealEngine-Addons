@@ -1798,7 +1798,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     {'INFO'},
                     str(len(ConvertedObj)) +
                     " object(s) of the selection have be" +
-                    " converted to to UE4 Socket.")
+                    " converted to UE4 Socket. (Static)")
             else:
                 self.report(
                     {'WARNING'},
@@ -1820,7 +1820,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     {'INFO'},
                     str(len(ConvertedObj)) +
                     " object(s) of the selection have" +
-                    " be converted to to UE4 Socket.")
+                    " be converted to UE4 Socket. (Skeletal)")
             else:
                 self.report(
                     {'WARNING'},
@@ -1900,7 +1900,6 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
             if addon_prefs.useGeneratedScripts:
 
                 ready_for_convert_skeletal_socket = False
-                part2 = False
                 if not ActiveModeIs("OBJECT"):
                     if not ActiveTypeIs("ARMATURE"):
                         if not FoundTypeInSelect("EMPTY"):
@@ -1909,19 +1908,17 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     if FoundTypeInSelect("EMPTY"):
                         if ActiveTypeIs("ARMATURE") and len(bpy.context.selected_objects) > 1:
                             layout.label(text="Switch to Pose Mode.", icon='INFO')
-                            part2 = True
                         else:
-                            layout.label(text="Select with [SHIFT] the armature owner.", icon='INFO')
+                            layout.label(text="Select with [SHIFT] the socket owner. (Armature)", icon='INFO')
                     else:
                         layout.label(text="Select your socket Empty(s).", icon='INFO')
 
-                if part2:
-                    if ActiveModeIs("POSE"):
-                        if len(bpy.context.selected_pose_bones) > 0:
-                            layout.label(text="Click on button for convert to Socket.", icon='INFO')
-                            ready_for_convert_skeletal_socket = True
-                        else:
-                            layout.label(text="Select the owner bone.", icon='INFO')
+                if ActiveModeIs("POSE") and ActiveTypeIs("ARMATURE") and FoundTypeInSelect("EMPTY"):
+                    if len(bpy.context.selected_pose_bones) > 0:
+                        layout.label(text="Click on button for convert to Socket.", icon='INFO')
+                        ready_for_convert_skeletal_socket = True
+                    else:
+                        layout.label(text="Select the owner bone.", icon='INFO')
 
                 convertButtons = self.layout.row().split(factor=0.80)
                 convertSkeletalSocketButtons = convertButtons.column()
