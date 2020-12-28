@@ -32,11 +32,9 @@ from . import bfu_basics
 from .bfu_basics import *
 
 
-def LayoutSection(layout, scenePropName, PropLabel):
+def LayoutSection(layout, PropName, PropLabel):
     scene = bpy.context.scene
-    row = layout.row()
-    row.prop(scene, scenePropName,
-            icon="TRIA_DOWN" if eval("scene."+scenePropName) else "TRIA_RIGHT",
-            icon_only=True,
-            text=PropLabel,
-            emboss=False)
+    expanded = eval("scene."+PropName)
+    tria_icon = "TRIA_DOWN" if expanded else "TRIA_RIGHT"
+    layout.row().prop(scene, PropName, icon=tria_icon, icon_only=True, text=PropLabel, emboss=False)
+    return expanded

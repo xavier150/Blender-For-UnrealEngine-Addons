@@ -213,7 +213,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         default=False,
         )
 
-    useGeneratedScripts:  BoolProperty(
+    useGeneratedScripts: BoolProperty(
         name='Use generated script for import assets and sequencer.',
         description=(
             'If false the all properties that only works' +
@@ -615,7 +615,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         description=(
             "If not that will use the object scale."
             ),
-        default=True
+        default=False
         )
 
     bpy.types.Object.GenerateLightmapUVs = BoolProperty(
@@ -1016,8 +1016,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             obj.computedStaticMeshLightMapRes = GetExportRealSurfaceArea(obj)
             self.report(
                 {'INFO'},
-                "Light map area updated to " +
-                str(round(obj.computedStaticMeshLightMapRes)) + ".")
+                "Light map area updated to " + str(round(obj.computedStaticMeshLightMapRes)) + ". " +
+                "Compunted Light map: " + str(GetCompuntedLightMap(obj)))
             return {'FINISHED'}
 
     class BFU_OT_ComputAllLightMap(Operator):
@@ -1287,7 +1287,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         bl_description = "Update collection list"
 
         def execute(self, context):
-            def UpdateExportCollectionList(scn):
+            def UpdateExportCollectionList(scene):
                 # Update the provisional collection list known by the object
 
                 def SetUseFromLast(list, CollectionName):
@@ -1298,15 +1298,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     return False
 
                 colSave = [["", False]]
-                for col in scn.CollectionExportList:  # CollectionProperty
+                for col in scene.CollectionExportList:  # CollectionProperty
                     name = col.name
                     use = col.use
                     colSave.append([name, use])
-                scn.CollectionExportList.clear()
+                scene.CollectionExportList.clear()
                 for col in bpy.data.collections:
-                    scn.CollectionExportList.add().name = col.name
+                    scene.CollectionExportList.add().name = col.name
                     useFromLast = SetUseFromLast(colSave, col.name)
-                    scn.CollectionExportList[col.name].use = useFromLast
+                    scene.CollectionExportList[col.name].use = useFromLast
             UpdateExportCollectionList(context.scene)
             return {'FINISHED'}
 
@@ -1316,8 +1316,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         bl_description = "Click to show collections to export"
 
         def execute(self, context):
-            scn = context.scene
-            collections = GetCollectionToExport(scn)
+            scene = context.scene
+            collections = GetCollectionToExport(scene)
             popup_title = "Collection list"
             if len(collections) > 0:
                 popup_title = (
@@ -1487,31 +1487,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 CustomLightMap.prop(obj, 'customStaticMeshLightMapRes')
                             if obj.StaticMeshLightMapEnum == "SurfaceArea":
                                 SurfaceAreaLightMap = StaticMeshLightMapRes.column()
-                                SurfaceAreaLightMap.operator(
-                                    "object.computlightmap",
-                                    icon='TEXTURE'
-                                    )
-                                SurfaceAreaLightMap.operator(
-                                    "object.computalllightmap",
-                                    icon='TEXTURE'
-                                    )
-                                SurfaceAreaLightMap.prop(
-                                    obj,
-                                    'useStaticMeshLightMapWorldScale'
-                                    )
-                                SurfaceAreaLightMap.prop(
-                                    obj,
-                                    'staticMeshLightMapSurfaceScale'
-                                    )
-                                SurfaceAreaLightMap.prop(
-                                    obj,
-                                    'staticMeshLightMapRoundPowerOfTwo'
-                                    )
-                            StaticMeshLightMapRes.label(
-                                text='Compunted light map: ' +
-                                str(GetCompuntedLightMap(obj))
-                                )
-
+                                SurfaceAreaLightMapButton = SurfaceAreaLightMap.row()
+                                SurfaceAreaLightMapButton.operator("object.computlightmap", icon='TEXTURE')
+                                SurfaceAreaLightMapButton.operator("object.computalllightmap", icon='TEXTURE')
+                                SurfaceAreaLightMap.prop(obj, 'useStaticMeshLightMapWorldScale')
+                                SurfaceAreaLightMap.prop(obj, 'staticMeshLightMapSurfaceScale')
+                                SurfaceAreaLightMap.prop(obj, 'staticMeshLightMapRoundPowerOfTwo')
+                            if obj.StaticMeshLightMapEnum != "Default":
+                                StaticMeshLightMapRes.label(text='Compunted light map: ' + str(GetCompuntedLightMap(obj)))
                             GenerateLightmapUVs = layout.row()
                             GenerateLightmapUVs.prop(obj, 'GenerateLightmapUVs')
 
@@ -1848,6 +1831,8 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
     def draw(self, context):
 
         addon_prefs = bpy.context.preferences.addons[__package__].preferences
+        layout = self.layout
+        scene = bpy.context.scene
 
         def ActiveModeIs(targetMode):
             # Return True is active mode ==
@@ -1873,71 +1858,80 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                         return True
             return False
 
-        layout = self.layout
-        layout.label(
-            text="Convert selected object to Unreal collision or socket",
-            icon='PHYSICS')
 
-        layout.label(
-            text="Select your collider shape(s)" +
-            " or Empty(s) then the owner object.")
-        convertButtons = layout.row().split(factor=0.80)
-        convertStaticCollisionButtons = convertButtons.column()
-        if (ActiveModeIs("OBJECT") and
-                ActiveTypeIs("MESH") and
-                FoundTypeInSelect("MESH")):
-            convertStaticCollisionButtons.enabled = True
-        else:
-            convertStaticCollisionButtons.enabled = False
-        convertStaticCollisionButtons.operator(
-            "object.converttoboxcollision",
-            icon='MESH_CUBE')
-        convertStaticCollisionButtons.operator(
-            "object.converttoconvexcollision",
-            icon='MESH_ICOSPHERE')
-        convertStaticCollisionButtons.operator(
-            "object.converttocapsulecollision",
-            icon='MESH_CAPSULE')
-        convertStaticCollisionButtons.operator(
-            "object.converttospherecollision",
-            icon='MESH_UVSPHERE')
+        bfu_ui_utils.LayoutSection(layout, "bfu_collision_socket_expanded", "Collision and Socket")
+        if scene.bfu_collision_socket_expanded:
 
-        convertButtons = self.layout.row().split(factor=0.80)
-        convertStaticSocketButtons = convertButtons.column()
-        if (ActiveModeIs("OBJECT") and
-                ActiveTypeIs("MESH") and
-                FoundTypeInSelect("EMPTY")):
-            convertStaticSocketButtons.enabled = True
-        else:
-            convertStaticSocketButtons.enabled = False
-        convertStaticSocketButtons.operator(
-            "object.converttostaticsocket",
-            icon='OUTLINER_DATA_EMPTY')
 
-        if addon_prefs.useGeneratedScripts:
             layout.label(
-                text="Select the Empty(s)" +
-                " then the owner bone in PoseMode.")
-            convertButtons = self.layout.row().split(factor=0.80)
-            convertSkeletalSocketButtons = convertButtons.column()
-            if (ActiveModeIs("POSE") and
-                    ActiveTypeIs("ARMATURE") and
-                    FoundTypeInSelect("EMPTY")):
-                convertSkeletalSocketButtons.enabled = True
+                text="Convert selected object to Unreal collision or socket",
+                icon='PHYSICS')
+
+            layout.label(
+                text="Select your collider shape(s)" +
+                " or Empty(s) then the owner object.")
+            convertButtons = layout.row().split(factor=0.80)
+            convertStaticCollisionButtons = convertButtons.column()
+            if (ActiveModeIs("OBJECT") and
+                    ActiveTypeIs("MESH") and
+                    FoundTypeInSelect("MESH")):
+                convertStaticCollisionButtons.enabled = True
             else:
-                convertSkeletalSocketButtons.enabled = False
-            convertSkeletalSocketButtons.operator(
-                "object.converttoskeletalsocket",
+                convertStaticCollisionButtons.enabled = False
+            convertStaticCollisionButtons.operator(
+                "object.converttoboxcollision",
+                icon='MESH_CUBE')
+            convertStaticCollisionButtons.operator(
+                "object.converttoconvexcollision",
+                icon='MESH_ICOSPHERE')
+            convertStaticCollisionButtons.operator(
+                "object.converttocapsulecollision",
+                icon='MESH_CAPSULE')
+            convertStaticCollisionButtons.operator(
+                "object.converttospherecollision",
+                icon='MESH_UVSPHERE')
+
+            convertButtons = self.layout.row().split(factor=0.80)
+            convertStaticSocketButtons = convertButtons.column()
+            if (ActiveModeIs("OBJECT") and
+                    ActiveTypeIs("MESH") and
+                    FoundTypeInSelect("EMPTY")):
+                convertStaticSocketButtons.enabled = True
+            else:
+                convertStaticSocketButtons.enabled = False
+            convertStaticSocketButtons.operator(
+                "object.converttostaticsocket",
                 icon='OUTLINER_DATA_EMPTY')
 
-        obj = context.object
-        if obj is not None:
-            if obj.type == "EMPTY":
-                socketName = layout.column()
-                socketName.prop(obj, "usesocketcustomName")
-                socketNameText = socketName.column()
-                socketNameText.enabled = obj.usesocketcustomName
-                socketNameText.prop(obj, "socketcustomName")
+            if addon_prefs.useGeneratedScripts:
+                layout.label(
+                    text="Select the Empty(s)" +
+                    " then the owner bone in PoseMode.")
+                convertButtons = self.layout.row().split(factor=0.80)
+                convertSkeletalSocketButtons = convertButtons.column()
+                if (ActiveModeIs("POSE") and
+                        ActiveTypeIs("ARMATURE") and
+                        FoundTypeInSelect("EMPTY")):
+                    convertSkeletalSocketButtons.enabled = True
+                else:
+                    convertSkeletalSocketButtons.enabled = False
+                convertSkeletalSocketButtons.operator(
+                    "object.converttoskeletalsocket",
+                    icon='OUTLINER_DATA_EMPTY')
+
+            obj = context.object
+            if obj is not None:
+                if obj.type == "EMPTY":
+                    socketName = layout.column()
+                    socketName.prop(obj, "usesocketcustomName")
+                    socketNameText = socketName.column()
+                    socketNameText.enabled = obj.usesocketcustomName
+                    socketNameText.prop(obj, "socketcustomName")
+
+        bfu_ui_utils.LayoutSection(layout, "bfu_lightmap_expanded", "Light Map")
+        if scene.bfu_lightmap_expanded:
+            checkButton = layout.column()
+            checkButton.operator("object.computalllightmap", icon='TEXTURE')
 
 
 class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
@@ -1975,47 +1969,45 @@ class BFU_PT_Export(bpy.types.Panel):
     bl_region_type = "UI"
     bl_category = "Unreal Engine"
 
-    SceneProp = bpy.types.Scene
-
     # Prefix
-    SceneProp.static_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.static_prefix_export_name = bpy.props.StringProperty(
         name="StaticMesh Prefix",
         description="Prefix of staticMesh",
         maxlen=32,
         default="SM_")
 
-    SceneProp.skeletal_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.skeletal_prefix_export_name = bpy.props.StringProperty(
         name="SkeletalMesh Prefix ",
         description="Prefix of SkeletalMesh",
         maxlen=32,
         default="SK_")
 
-    SceneProp.alembic_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.alembic_prefix_export_name = bpy.props.StringProperty(
         name="Alembic Prefix ",
         description="Prefix of Alembic (SkeletalMesh in unreal)",
         maxlen=32,
         default="SK_")
 
-    SceneProp.anim_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.anim_prefix_export_name = bpy.props.StringProperty(
         name="AnimationSequence Prefix",
         description="Prefix of AnimationSequence",
         maxlen=32,
         default="Anim_")
 
-    SceneProp.pose_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.pose_prefix_export_name = bpy.props.StringProperty(
         name="AnimationSequence(Pose) Prefix",
         description="Prefix of AnimationSequence with only one frame",
         maxlen=32,
         default="Pose_")
 
-    SceneProp.camera_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.camera_prefix_export_name = bpy.props.StringProperty(
         name="Camera anim Prefix",
         description="Prefix of camera animations",
         maxlen=32,
         default="Cam_")
 
     # Sub folder
-    SceneProp.anim_subfolder_name = bpy.props.StringProperty(
+    bpy.types.Scene.anim_subfolder_name = bpy.props.StringProperty(
         name="Animations sub folder name",
         description=(
             "The name of sub folder for animations New." +
@@ -2024,35 +2016,35 @@ class BFU_PT_Export(bpy.types.Panel):
         default="Anim")
 
     # File path
-    SceneProp.export_static_file_path = bpy.props.StringProperty(
+    bpy.types.Scene.export_static_file_path = bpy.props.StringProperty(
         name="StaticMesh export file path",
         description="Choose a directory to export StaticMesh(s)",
         maxlen=512,
         default=os.path.join("//", "ExportedFbx", "StaticMesh"),
         subtype='DIR_PATH')
 
-    SceneProp.export_skeletal_file_path = bpy.props.StringProperty(
+    bpy.types.Scene.export_skeletal_file_path = bpy.props.StringProperty(
         name="SkeletalMesh export file path",
         description="Choose a directory to export SkeletalMesh(s)",
         maxlen=512,
         default=os.path.join("//", "ExportedFbx", "SkeletalMesh"),
         subtype='DIR_PATH')
 
-    SceneProp.export_alembic_file_path = bpy.props.StringProperty(
+    bpy.types.Scene.export_alembic_file_path = bpy.props.StringProperty(
         name="Alembic export file path",
         description="Choose a directory to export Alembic(s)",
         maxlen=512,
         default=os.path.join("//", "ExportedFbx", "Alembic"),
         subtype='DIR_PATH')
 
-    SceneProp.export_camera_file_path = bpy.props.StringProperty(
+    bpy.types.Scene.export_camera_file_path = bpy.props.StringProperty(
         name="Camera export file path",
         description="Choose a directory to export Camera(s)",
         maxlen=512,
         default=os.path.join("//", "ExportedFbx", "Sequencer"),
         subtype='DIR_PATH')
 
-    SceneProp.export_other_file_path = bpy.props.StringProperty(
+    bpy.types.Scene.export_other_file_path = bpy.props.StringProperty(
         name="Other export file path",
         description="Choose a directory to export text file and other",
         maxlen=512,
@@ -2060,13 +2052,13 @@ class BFU_PT_Export(bpy.types.Panel):
         subtype='DIR_PATH')
 
     # File name
-    SceneProp.file_export_log_name = bpy.props.StringProperty(
+    bpy.types.Scene.file_export_log_name = bpy.props.StringProperty(
         name="Export log name",
         description="Export log name",
         maxlen=64,
         default="ExportLog.txt")
 
-    SceneProp.file_import_asset_script_name = bpy.props.StringProperty(
+    bpy.types.Scene.file_import_asset_script_name = bpy.props.StringProperty(
         name="Import asset script Name",
         description="Import asset script name",
         maxlen=64,
@@ -2074,13 +2066,13 @@ class BFU_PT_Export(bpy.types.Panel):
 
     default = "file_import_sequencer_script_namea.py"
 
-    SceneProp.file_import_sequencer_script_name = bpy.props.StringProperty(
+    bpy.types.Scene.file_import_sequencer_script_name = bpy.props.StringProperty(
         name="Import sequencer script Name1",
         description="Import sequencer script name",
         maxlen=64,
         default="ImportSequencerScript.py")
 
-    SceneProp.unreal_import_location = bpy.props.StringProperty(
+    bpy.types.Scene.unreal_import_location = bpy.props.StringProperty(
         name="Unreal import location",
         description="Unreal assets import location in /Game/",
         maxlen=512,
@@ -2428,11 +2420,11 @@ class BFU_PT_Export(bpy.types.Panel):
         bl_description = "Copy Import Asset Script command"
 
         def execute(self, context):
-            scn = context.scene
+            scene = context.scene
             setWindowsClipboard(GetImportAssetScriptCommand())
             self.report(
                 {'INFO'},
-                "command for "+scn.file_import_asset_script_name +
+                "command for "+scene.file_import_asset_script_name +
                 " copied")
             return {'FINISHED'}
 
@@ -2442,11 +2434,11 @@ class BFU_PT_Export(bpy.types.Panel):
         bl_description = "Copy Import Sequencer Script command"
 
         def execute(self, context):
-            scn = context.scene
+            scene = context.scene
             setWindowsClipboard(GetImportSequencerScriptCommand())
             self.report(
                 {'INFO'},
-                "command for "+scn.file_import_sequencer_script_name +
+                "command for "+scene.file_import_sequencer_script_name +
                 " copied")
             return {'FINISHED'}
 
@@ -2524,7 +2516,7 @@ class BFU_PT_Export(bpy.types.Panel):
         )
 
     def draw(self, context):
-        scn = context.scene
+        scene = context.scene
         scene = context.scene
         addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
@@ -2546,48 +2538,48 @@ class BFU_PT_Export(bpy.types.Panel):
             # Prefix
             propsPrefix = self.layout.row()
             propsPrefix = propsPrefix.column()
-            propsPrefix.prop(scn, 'static_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'static_prefix_export_name', icon='OBJECT_DATA')
             propsPrefix.prop(
-                scn,
+                scene,
                 'skeletal_prefix_export_name',
                 icon='OBJECT_DATA')
-            propsPrefix.prop(scn, 'alembic_prefix_export_name', icon='OBJECT_DATA')
-            propsPrefix.prop(scn, 'anim_prefix_export_name', icon='OBJECT_DATA')
-            propsPrefix.prop(scn, 'pose_prefix_export_name', icon='OBJECT_DATA')
-            propsPrefix.prop(scn, 'camera_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'alembic_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'anim_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'pose_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'camera_prefix_export_name', icon='OBJECT_DATA')
 
             # Sub folder
             propsSub = self.layout.row()
             propsSub = propsSub.column()
-            propsSub.prop(scn, 'anim_subfolder_name', icon='FILE_FOLDER')
+            propsSub.prop(scene, 'anim_subfolder_name', icon='FILE_FOLDER')
 
             if addon_prefs.useGeneratedScripts:
                 unreal_import_location = propsSub.column()
                 unreal_import_location.prop(
-                    scn,
+                    scene,
                     'unreal_import_location',
                     icon='FILE_FOLDER')
 
             # File path
             filePath = self.layout.row()
             filePath = filePath.column()
-            filePath.prop(scn, 'export_static_file_path')
-            filePath.prop(scn, 'export_skeletal_file_path')
-            filePath.prop(scn, 'export_alembic_file_path')
-            filePath.prop(scn, 'export_camera_file_path')
-            filePath.prop(scn, 'export_other_file_path')
+            filePath.prop(scene, 'export_static_file_path')
+            filePath.prop(scene, 'export_skeletal_file_path')
+            filePath.prop(scene, 'export_alembic_file_path')
+            filePath.prop(scene, 'export_camera_file_path')
+            filePath.prop(scene, 'export_other_file_path')
 
             # File name
             fileName = self.layout.row()
             fileName = fileName.column()
-            fileName.prop(scn, 'file_export_log_name', icon='FILE')
+            fileName.prop(scene, 'file_export_log_name', icon='FILE')
             if addon_prefs.useGeneratedScripts:
                 fileName.prop(
-                    scn,
+                    scene,
                     'file_import_asset_script_name',
                     icon='FILE')
                 fileName.prop(
-                    scn,
+                    scene,
                     'file_import_sequencer_script_name',
                     icon='FILE')
 
@@ -2599,22 +2591,22 @@ class BFU_PT_Export(bpy.types.Panel):
             col = row.column()
             AssetsCol = row.column()
             AssetsCol.label(text="Asset types to export", icon='PACKAGE')
-            AssetsCol.prop(scn, 'static_export')
-            AssetsCol.prop(scn, 'static_collection_export')
-            AssetsCol.prop(scn, 'skeletal_export')
-            AssetsCol.prop(scn, 'anin_export')
-            AssetsCol.prop(scn, 'alembic_export')
-            AssetsCol.prop(scn, 'camera_export')
+            AssetsCol.prop(scene, 'static_export')
+            AssetsCol.prop(scene, 'static_collection_export')
+            AssetsCol.prop(scene, 'skeletal_export')
+            AssetsCol.prop(scene, 'anin_export')
+            AssetsCol.prop(scene, 'alembic_export')
+            AssetsCol.prop(scene, 'camera_export')
             layout.separator()
 
             # Additional file
             FileCol = row.column()
             FileCol.label(text="Additional file", icon='PACKAGE')
-            FileCol.prop(scn, 'text_ExportLog')
-            FileCol.prop(scn, 'text_ImportAssetScript')
-            FileCol.prop(scn, 'text_ImportSequenceScript')
+            FileCol.prop(scene, 'text_ExportLog')
+            FileCol.prop(scene, 'text_ImportAssetScript')
+            FileCol.prop(scene, 'text_ImportSequenceScript')
             if addon_prefs.useGeneratedScripts:
-                FileCol.prop(scn, 'text_AdditionalData')
+                FileCol.prop(scene, 'text_AdditionalData')
 
             # Feedback info :
             AssetNum = len(GetFinalAssetToExport())
@@ -2626,11 +2618,10 @@ class BFU_PT_Export(bpy.types.Panel):
             # Export button :
             checkButton = layout.column()
             checkButton.operator("object.checkpotentialerror", icon='FILE_TICK')
-            checkButton.operator("object.computalllightmap", icon='TEXTURE')
 
             # exportProperty
             exportOnlySelect = layout.row()
-            exportOnlySelect.prop(scn, 'export_ExportOnlySelected')
+            exportOnlySelect.prop(scene, 'export_ExportOnlySelected')
 
             exportButton = layout.row()
             exportButton.scale_y = 2.0
@@ -2700,7 +2691,6 @@ classes = (
     BFU_PT_BlenderForUnrealObject.BFU_OT_AddObjectGlobalPropertiesPreset,
     BFU_PT_BlenderForUnrealObject.BFU_OT_OpenDocumentationPage,
     BFU_PT_BlenderForUnrealObject.BFU_OT_ComputLightMap,
-    BFU_PT_BlenderForUnrealObject.BFU_OT_ComputAllLightMap,
     BFU_PT_BlenderForUnrealObject.BFU_UL_ActionExportTarget,
     BFU_PT_BlenderForUnrealObject.BFU_OT_UpdateObjActionListButton,
     BFU_PT_BlenderForUnrealObject.BFU_OT_ShowActionToExport,
@@ -2715,6 +2705,7 @@ classes = (
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToCollisionButtonConvex,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToStaticSocketButton,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToSkeletalSocketButton,
+    BFU_PT_BlenderForUnrealObject.BFU_OT_ComputAllLightMap,
 
     BFU_PT_Export,
     BFU_PT_Export.BFU_MT_NomenclaturePresets,
