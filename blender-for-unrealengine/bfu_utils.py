@@ -371,7 +371,10 @@ def GetCompuntedLightMap(obj):
 
         if obj.useStaticMeshLightMapWorldScale:
             # Turn area at world scale
-            objScale = (obj.scale.x + obj.scale.y + obj.scale.z)/3
+            x = max(obj.scale.x, obj.scale.x*-1)
+            y = max(obj.scale.y, obj.scale.y*-1)
+            z = max(obj.scale.z, obj.scale.z*-1)
+            objScale = (x + y + z)/3
             area *= objScale
 
         # Computed light map equal light map scale for a plane vvv
