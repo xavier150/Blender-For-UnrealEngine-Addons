@@ -1705,6 +1705,7 @@ def TryToCorrectPotentialError(errorIndex):
     UsedViewLayerCollectionHideViewport = []
     UsedCollectionHideViewport = []
     UsedCollectionHideselect = []
+    view_layer = bpy.context.view_layer
     for collection in bpy.data.collections:
         # Save previous collections visibility
         layer_collection = view_layer.layer_collection

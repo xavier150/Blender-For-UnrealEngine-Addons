@@ -65,6 +65,22 @@ bl_info = {
     'support': 'COMMUNITY',
     'category': 'Import-Export'}
 
+class BFU_OT_UnrealPotentialError(bpy.types.PropertyGroup):
+    type: bpy.props.IntProperty(default=0)  # 0:Info, 1:Warning, 2:Error
+    object: bpy.props.PointerProperty(type=bpy.types.Object)
+    ###
+    selectObjectButton: bpy.props.BoolProperty(default=True)
+    selectVertexButton: bpy.props.BoolProperty(default=False)
+    selectPoseBoneButton: bpy.props.BoolProperty(default=False)
+    ###
+    selectOption: bpy.props.StringProperty(default="None")  # 0:VertexWithZeroWeight
+    itemName: bpy.props.StringProperty(default="None")
+    text: bpy.props.StringProperty(default="Unknown")
+    correctRef: bpy.props.StringProperty(default="None")
+    correctlabel: bpy.props.StringProperty(default="Fix it !")
+    correctDesc: bpy.props.StringProperty(default="Correct target error")
+    docsOcticon: bpy.props.StringProperty(default="None")
+
 
 def register():
     bpy.types.Scene.bfu_object_properties_expanded = bpy.props.BoolProperty()
@@ -85,6 +101,9 @@ def register():
             ('SCENE', 'Scene', 'Scene anf global Tab')
             ))
 
+    bpy.utils.register_class(BFU_OT_UnrealPotentialError)
+    bpy.types.Scene.potentialErrorList = bpy.props.CollectionProperty(type=BFU_OT_UnrealPotentialError)
+
     bfu_ui.register()
 
 
@@ -102,5 +121,8 @@ def unregister():
     del bpy.types.Scene.bfu_script_tool_expanded
 
     del bpy.types.Scene.bfu_active_object_tab
+
+    bpy.utils.unregister_class(BFU_OT_UnrealPotentialError)
+    del bpy.types.Scene.potentialErrorList
 
     bfu_ui.unregister()

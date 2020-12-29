@@ -18,8 +18,6 @@
 
 import os
 import bpy
-import fnmatch
-import time
 import addon_utils
 
 if "bpy" in locals():
@@ -32,6 +30,8 @@ if "bpy" in locals():
         importlib.reload(bfu_basics)
     if "bfu_utils" in locals():
         importlib.reload(bfu_utils)
+    if "bfu_check_potential_error" in locals():
+        importlib.reload(bfu_check_potential_error)
     if "bfu_ui_utils" in locals():
         importlib.reload(bfu_ui_utils)
 
@@ -40,6 +40,7 @@ from . import bfu_write_text
 from . import bfu_basics
 from .bfu_basics import *
 from . import bfu_utils
+from . import bfu_check_potential_error
 from .bfu_utils import *
 from . import bfu_ui_utils
 
@@ -1953,23 +1954,6 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     object: PointerProperty(type=bpy.types.Object)
 
 
-class BFU_OT_UnrealPotentialError(bpy.types.PropertyGroup):
-    type: IntProperty(default=0)  # 0:Info, 1:Warning, 2:Error
-    object: PointerProperty(type=bpy.types.Object)
-    ###
-    selectObjectButton: BoolProperty(default=True)
-    selectVertexButton: BoolProperty(default=False)
-    selectPoseBoneButton: BoolProperty(default=False)
-    ###
-    selectOption: StringProperty(default="None")  # 0:VertexWithZeroWeight
-    itemName: StringProperty(default="None")
-    text: StringProperty(default="Unknown")
-    correctRef: StringProperty(default="None")
-    correctlabel: StringProperty(default="Fix it !")
-    correctDesc: StringProperty(default="Correct target error")
-    docsOcticon: StringProperty(default="None")
-
-
 class BFU_PT_Export(bpy.types.Panel):
     # Is Export panel
 
@@ -2185,7 +2169,21 @@ class BFU_PT_Export(bpy.types.Panel):
         bl_label = "Check potential errors"
         bl_idname = "object.checkpotentialerror"
         bl_description = "Check potential errors"
-        correctedProperty = 0
+        text = "none"
+
+        def execute(self, context):
+            correctedProperty = bfu_check_potential_error.CorrectBadProperty()
+            bfu_check_potential_error.UpdateNameHierarchy()
+            bfu_check_potential_error.UpdateUnrealPotentialError()
+            bpy.ops.object.openpotentialerror("INVOKE_DEFAULT", correctedProperty = correctedProperty)
+            print(self.text)
+            return {'FINISHED'}
+
+    class BFU_OT_OpenPotentialErrorPopup(Operator):
+        bl_label = "Open potential errors"
+        bl_idname = "object.openpotentialerror"
+        bl_description = "Open potential errors"
+        correctedProperty: bpy.props.IntProperty(default=0)
 
         class BFU_OT_FixitTarget(Operator):
             bl_label = "Fix it !"
@@ -2245,15 +2243,15 @@ class BFU_PT_Export(bpy.types.Panel):
                 return {'FINISHED'}
 
         def execute(self, context):
-            self.correctedProperty = CorrectBadProperty()
-            UpdateNameHierarchy()
-            UpdateUnrealPotentialError()
+            #self.correctedProperty = bfu_check_potential_error.CorrectBadProperty()
+            #bfu_check_potential_error.UpdateNameHierarchy()
+            #bfu_check_potential_error.UpdateUnrealPotentialError()
             return {'FINISHED'}
 
         def invoke(self, context, event):
-            self.correctedProperty = CorrectBadProperty()
-            UpdateNameHierarchy()
-            UpdateUnrealPotentialError()
+            #self.correctedProperty = bfu_check_potential_error.CorrectBadProperty()
+            #bfu_check_potential_error.UpdateNameHierarchy()
+            #bfu_check_potential_error.UpdateUnrealPotentialError()
             wm = context.window_manager
             return wm.invoke_popup(self, width=1020)
 
@@ -2626,8 +2624,9 @@ class BFU_PT_Export(bpy.types.Panel):
             AssetInfo.operator("object.showasset")
 
             # Export button :
-            checkButton = layout.column()
+            checkButton = layout.row(align=True)
             checkButton.operator("object.checkpotentialerror", icon='FILE_TICK')
+            checkButton.operator("object.openpotentialerror", icon='LOOP_BACK', text="")
 
             # exportProperty
             exportOnlySelect = layout.row()
@@ -2722,11 +2721,12 @@ classes = (
     BFU_PT_Export.BFU_OT_AddNomenclaturePreset,
     BFU_PT_Export.BFU_OT_ShowAssetToExport,
     BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup,
-    BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup.BFU_OT_FixitTarget,
-    BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup.BFU_OT_SelectObjectButton,
-    BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup.BFU_OT_SelectVertexButton,
-    BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup.BFU_OT_SelectPoseBoneButton,
-    BFU_PT_Export.BFU_OT_CheckPotentialErrorPopup.BFU_OT_OpenPotentialErrorDocs,
+    BFU_PT_Export.BFU_OT_OpenPotentialErrorPopup,
+    BFU_PT_Export.BFU_OT_OpenPotentialErrorPopup.BFU_OT_FixitTarget,
+    BFU_PT_Export.BFU_OT_OpenPotentialErrorPopup.BFU_OT_SelectObjectButton,
+    BFU_PT_Export.BFU_OT_OpenPotentialErrorPopup.BFU_OT_SelectVertexButton,
+    BFU_PT_Export.BFU_OT_OpenPotentialErrorPopup.BFU_OT_SelectPoseBoneButton,
+    BFU_PT_Export.BFU_OT_OpenPotentialErrorPopup.BFU_OT_OpenPotentialErrorDocs,
     BFU_PT_Export.BFU_OT_ExportForUnrealEngineButton,
     BFU_PT_Export.BFU_OT_CopyImportAssetScriptCommand,
     BFU_PT_Export.BFU_OT_CopyImportSequencerScriptCommand,
@@ -2757,9 +2757,8 @@ def register():
     bpy.utils.register_class(BFU_OT_UnrealExportedAsset)
     bpy.types.Scene.UnrealExportedAssetsList = CollectionProperty(
         type=BFU_OT_UnrealExportedAsset)
-    bpy.utils.register_class(BFU_OT_UnrealPotentialError)
-    bpy.types.Scene.potentialErrorList = CollectionProperty(
-        type=BFU_OT_UnrealPotentialError)
+    
+    
 
     bpy.types.VIEW3D_MT_uv_map.append(menu_func)
 
@@ -2773,6 +2772,5 @@ def unregister():
     bpy.utils.unregister_class(BFU_OT_ObjExportAction)
     bpy.utils.unregister_class(BFU_OT_SceneCollectionExport)
     bpy.utils.unregister_class(BFU_OT_UnrealExportedAsset)
-    bpy.utils.unregister_class(BFU_OT_UnrealPotentialError)
 
     bpy.types.VIEW3D_MT_uv_map.remove(menu_func)
