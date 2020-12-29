@@ -1342,9 +1342,12 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         addon_prefs = bpy.context.preferences.addons[__package__].preferences
         layout = self.layout
 
-        releaseVersion = None  # GetGitHubLastRelaseVersion()
+        version = [addon.bl_info.get('version', (-1, -1, -1)) for addon in addon_utils.modules() if addon.bl_info['name'] == "Blender for UnrealEngine"][0]
 
-        layout.row().operator("object.open_documentation_page", icon="HELP")
+        credit_box = layout.box()
+        credit_box.label(text='Blender for Unreal Engine ' + str(version) + ' by Xavier Loux.')
+        credit_box.operator("object.open_documentation_page", icon="HELP")
+
         row = layout.row(align=True)
         row.menu(
             'BFU_MT_ObjectGlobalPropertiesPresets',
