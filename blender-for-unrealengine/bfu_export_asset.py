@@ -316,50 +316,23 @@ def PrepareAndSaveDataForExport():
 
     MoveToGlobalView()
 
-    mode_set = bpy.ops.object.mode_set
+    MyCurrentDataSave = UserSceneSave()
+    MyCurrentDataSave.SaveCurrentScene()
 
-    # ----------------------------------------Save data
-    # This can take time
-
-    actionNames = []
-    for action in bpy.data.actions:
-        actionNames.append(action.name)
-
-    collectionNames = []
-    for collection in bpy.data.collections:
-        collectionNames.append(collection.name)
-
-    UserObjHide = []
     for object in bpy.data.objects:
-        UserObjHide.append((
-                object.name,
-                object.hide_select,
-                object.hide_viewport
-                )
-            )
         if object.hide_select:
             object.hide_select = False
         if object.hide_viewport:
             object.hide_viewport = False
 
-    UserColHide = []
     for col in bpy.data.collections:
-        UserColHide.append((col.name, col.hide_select, col.hide_viewport))
         if col.hide_select:
             col.hide_select = False
         if col.hide_viewport:
             col.hide_viewport = False
 
-    UserVLayerHide = []
     for vlayer in bpy.context.scene.view_layers:
         for childCol in vlayer.layer_collection.children:
-            UserVLayerHide.append((
-                    vlayer.name,
-                    childCol.name,
-                    childCol.exclude,
-                    childCol.hide_viewport
-                    )
-                )
             if childCol.exclude:
                 childCol.exclude = False
             if childCol.hide_viewport:
@@ -369,14 +342,7 @@ def PrepareAndSaveDataForExport():
     copyScene.name = "ue4-export_Temp"
     bpy.context.window.scene = copyScene  # Switch the scene but can take time
 
-    UserActive = bpy.context.active_object  # Save current active object
-    if mode_set.poll():
-        UserMode = UserActive.mode  # Save current mode
-    else:
-        UserMode = None
-
-    if UserActive and UserActive.mode != 'OBJECT' and mode_set.poll():
-        mode_set(mode='OBJECT')
+    SafeModeSet(MyCurrentDataSave.UserActive, 'OBJECT')
 
     if addon_prefs.revertExportPath:
         RemoveFolderTree(bpy.path.abspath(scene.export_static_file_path))
@@ -385,15 +351,9 @@ def PrepareAndSaveDataForExport():
         RemoveFolderTree(bpy.path.abspath(scene.export_camera_file_path))
         RemoveFolderTree(bpy.path.abspath(scene.export_other_file_path))
 
-    assetList = []  # Do a simple lit of objects to export
-    for Asset in GetFinalAssetToExport():
-        if Asset.obj in GetAllobjectsByExportType("export_recursive"):
-            if Asset.obj not in assetList:
-                assetList.append(Asset.obj)
-
     ExportAllAssetByList(
         originalScene=scene,
-        targetobjects=assetList,
+        targetobjects=GetFinalAssetToExport(),
         targetActionName=actionNames,
         targetcollection=collectionNames,
     )
@@ -401,46 +361,14 @@ def PrepareAndSaveDataForExport():
     bpy.context.window.scene = scene
     bpy.data.scenes.remove(copyScene)
 
-    # UserActive = bpy.context.active_object #Save current active object
-    if UserMode:
-        bpy.ops.object.mode_set(mode=UserMode)
+    MyCurrentDataSave.ResetSelectByName()
+    MyCurrentDataSave.ResetSceneAtSave()
+    
 
     # Clean actions
     for action in bpy.data.actions:
-        if action.name not in actionNames:
+        if action.name not in MyCurrentDataSave.action_names:
             bpy.data.actions.remove(action)
-
-    # Reset hide and select (bpy.data.objects)
-    for object in UserObjHide:
-        if object[0] in bpy.data.objects:
-            if bpy.data.objects[object[0]].hide_select != object[1]:
-                bpy.data.objects[object[0]].hide_select = object[1]
-            if bpy.data.objects[object[0]].hide_select != object[2]:
-                bpy.data.objects[object[0]].hide_viewport = object[2]
-            pass
-        else:
-            print("/!\\ "+object[0]+" not found in bpy.data.objects")
-
-    # Reset hide and select (collections)
-    for col in UserColHide:
-        if col[0] in bpy.data.collections:
-            if bpy.data.collections[col[0]].hide_select != col[1]:
-                bpy.data.collections[col[0]].hide_select = col[1]
-            if bpy.data.collections[col[0]].hide_select != col[2]:
-                bpy.data.collections[col[0]].hide_viewport = col[2]
-            pass
-        else:
-            print("/!\\ "+col[0]+" not found in bpy.data.collections")
-
-    # Reset hide in and viewport (collections)
-    for childCol in UserVLayerHide:
-        view_layer = scene.view_layers[childCol[0]]
-        layer_col_children = view_layer.layer_collection.children[childCol[1]]
-
-        if layer_col_children.exclude != childCol[2]:
-            layer_col_children.exclude = childCol[2]
-        if layer_col_children.hide_viewport != childCol[3]:
-            layer_col_children.hide_viewport = childCol[3]
 
 
 def ExportForUnrealEngine():

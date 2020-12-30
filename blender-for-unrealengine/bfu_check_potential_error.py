@@ -562,35 +562,14 @@ def TryToCorrectPotentialError(errorIndex):
     error = scene.potentialErrorList[errorIndex]
     global successCorrect
     successCorrect = False
-    # ----------------------------------------Save data
-    UserActive = bpy.context.active_object  # Save current active object
-    UserMode = None
-    if (UserActive and
-            UserActive.mode != 'OBJECT' and
-            bpy.ops.object.mode_set.poll()):
-        UserMode = UserActive.mode  # Save current mode
-        bpy.ops.object.mode_set(mode='OBJECT')
-    # Save current selected objects
-    UserSelected = bpy.context.selected_objects
-    UsedViewLayerCollectionHideViewport = []
-    UsedCollectionHideViewport = []
-    UsedCollectionHideselect = []
-    view_layer = bpy.context.view_layer
-    for collection in bpy.data.collections:
-        # Save previous collections visibility
-        layer_collection = view_layer.layer_collection
-        if collection.name in layer_collection.children:
-            layer_children = layer_collection.children[collection.name]
-            UsedViewLayerCollectionHideViewport.append(
-                layer_children.hide_viewport)
-        else:
-            print(collection.name, " not found in layer_collection")
-            pass
-        UsedCollectionHideViewport.append(collection.hide_viewport)
-        UsedCollectionHideselect.append(collection.hide_select)
-        SetCollectionUse(collection)
 
-    # ----------------------------------------
+    MoveToGlobalView()
+
+    MyCurrentDataSave = UserSceneSave()
+    MyCurrentDataSave.SaveCurrentScene()
+
+    SafeModeSet(MyCurrentDataSave.user_active, 'OBJECT')
+
     print("Start correct")
 
     def SelectObj(obj):
@@ -653,25 +632,9 @@ def TryToCorrectPotentialError(errorIndex):
         successCorrect = True
 
     # ----------------------------------------Reset data
-    for x, collection in enumerate(bpy.data.collections):
-        layer_collection = view_layer.layer_collection
-        if collection.name in layer_collection.children:
-            layer_child = layer_collection.children[collection.name]
-            layer_child.hide_viewport = UsedViewLayerCollectionHideViewport[x]
-        else:
-            print(collection.name, " not found in layer_collection")
+    MyCurrentDataSave.ResetSelectByName()
+    MyCurrentDataSave.ResetSceneAtSave()
 
-        collection.hide_viewport = UsedCollectionHideViewport[x]
-        collection.hide_select = UsedCollectionHideselect[x]
-
-    bpy.ops.object.select_all(action='DESELECT')
-    for obj in UserSelected:  # Resets previous selected object if still exist
-        if obj.name in scene.objects:
-            obj.select_set(True)
-    bpy.context.view_layer.objects.active = UserActive
-    # Resets previous active object
-    if UserActive and UserMode and bpy.ops.object.mode_set.poll():
-        bpy.ops.object.mode_set(mode=UserMode)  # Resets previous mode
     # ----------------------------------------
 
     if successCorrect:

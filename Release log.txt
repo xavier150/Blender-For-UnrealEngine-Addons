@@ -334,5 +334,5 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Assets import script error with 4.26, ConfigParser import changed to configparser.
 - Fixed: Camera cut in Imported sequencer was not visible in other sequencer (CameraBindingID)
 - Fixed: If armature name contain illegal char, in Unreal the Skeletal Mesh is not found by Anim assets.
-
+- Fixed: Fix potential error with popup can do script errors.
 

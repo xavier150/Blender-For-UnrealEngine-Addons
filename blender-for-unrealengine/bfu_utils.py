@@ -32,6 +32,148 @@ from . import bfu_basics
 from .bfu_basics import *
 
 
+class SavedObject():
+
+    def __init__(self, obj):
+        if obj:
+            self.name = obj.name
+            self.select = obj.select_get()
+            self.hide_select = obj.hide_select
+            self.hide_viewport = obj.hide_viewport
+
+
+class SavedCollection():
+
+    def __init__(self, col):
+        if col:
+            self.name = col.name
+            self.hide_select = col.hide_select
+            self.hide_viewport = col.hide_viewport
+
+
+class SavedViewLayerChildren():
+
+    def __init__(self, vlayer, childCol):
+        if childCol:
+            self.vlayer_name = vlayer.name
+            self.name = childCol.name
+            self.exclude = childCol.exclude
+            self.hide_viewport = childCol.hide_viewport
+
+
+class UserSceneSave():
+
+    def __init__(self):
+
+        # Select
+        self.user_active = None
+        self.user_active_name = None
+        self.user_selected = []
+
+        # Stats
+        self.user_mode = None
+
+        # Data
+        self.objects = []
+        self.collections = []
+        self.view_layers_children = []
+        self.action_names = []
+        self.collection_names = []
+
+    def SaveCurrentScene(self):
+        # Save data (This can take time)
+
+        c = bpy.context
+        # Select
+        self.user_active = c.active_object  # Save current active object
+        if self.user_active:
+            self.user_active_name = self.user_active.name
+        self.user_selected = c.selected_objects  # Save current selected objects
+
+        # Stats
+        if self.user_active:
+            if bpy.ops.object.mode_set.poll():
+                self.user_mode = self.user_active.mode  # Save current mode
+
+        # Data
+        for obj in bpy.data.objects:
+            self.objects.append(SavedObject(obj))
+        for col in bpy.data.collections:
+            self.collections.append(SavedCollection(col))
+        for vlayer in c.scene.view_layers:
+            for childCol in vlayer.layer_collection.children:
+                self.view_layers_children.append(SavedViewLayerChildren(vlayer, childCol))
+        for action in bpy.data.actions:
+            self.action_names.append(action.name)
+        for collection in bpy.data.collections:
+            self.collection_names.append(collection.name)
+
+    def ResetSelectByRef(self):
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in bpy.data.objects:  # Resets previous selected object if still exist
+            if obj in self.user_selected:
+                obj.select_set(True)
+
+        bpy.context.view_layer.objects.active = self.user_active
+
+    def ResetSelectByName(self):
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in self.objects:  # Resets previous selected object if still exist
+            if obj.select:
+                if obj.name in bpy.data.objects:
+                    bpy.data.objects[obj.name].select_set(True)
+
+        if self.user_active_name:
+            if self.user_active_name in bpy.data.objects:
+                bpy.context.view_layer.objects.active = bpy.data.objects[self.user_active_name]
+
+    def ResetSceneAtSave(self):
+        scene = bpy.context.scene
+        if self.user_mode:
+            if bpy.ops.object:
+                SafeModeSet(bpy.ops.object, "OBJECT")
+
+        # Reset hide and select (bpy.data.objects)
+        for obj in self.objects:
+            if obj.name in bpy.data.objects:
+                if bpy.data.objects[obj.name].hide_select != obj.hide_select:
+                    bpy.data.objects[obj.name].hide_select = obj.hide_select
+                if bpy.data.objects[obj.name].hide_viewport != obj.hide_viewport:
+                    bpy.data.objects[obj.name].hide_viewport = obj.hide_viewport
+            else:
+                print("/!\\ "+object[0]+" not found in bpy.data.objects")
+
+        # Reset hide and select (bpy.data.collections)
+        for col in self.collections:
+            if col.name in bpy.data.collections:
+                if bpy.data.collections[col.name].hide_select != col.hide_select:
+                    bpy.data.collections[col.name].hide_select = col.hide_select
+                if bpy.data.collections[col.name].hide_viewport != col.hide_viewport:
+                    bpy.data.collections[col.name].hide_viewport = col.hide_viewport
+            else:
+                print("/!\\ "+col[0]+" not found in bpy.data.collections")
+
+        # Reset hide in and viewport (collections from view_layers)
+        for childCol in self.view_layers_children:
+            if childCol.vlayer_name in scene.view_layers:
+                view_layer = scene.view_layers[childCol.vlayer_name]
+                if childCol.name in view_layer.layer_collection.children:
+                    layer_col_children = view_layer.layer_collection.children[childCol.name]
+
+                    if layer_col_children.exclude != childCol.exclude:
+                        layer_col_children.exclude = childCol.exclude
+                    if layer_col_children.hide_viewport != childCol.hide_viewport:
+                        layer_col_children.hide_viewport = childCol.hide_viewport
+
+
+def SafeModeSet(obj, target_mode='OBJECT'):
+    if obj:
+        if obj.mode != target_mode:
+            if bpy.ops.object.mode_set.poll():
+                bpy.ops.object.mode_set(mode=target_mode)
+    return False
+
+
 def CounterStart():
     return time.perf_counter()
 
@@ -1143,8 +1285,6 @@ def UpdateUe4Name(SubType, objList):
                             obj.name = GenerateUe4Name("SOCKET_"+obj.name)
 
 
-
-
 def UpdateAreaLightMapList(list=None):
     # Updates area LightMap
 
@@ -1168,10 +1308,6 @@ def UpdateAreaLightMapList(list=None):
             (UpdatedRes/len(objs)),
             CounterEnd(s))
     return UpdatedRes
-
-
-
-
 
 
 def AddFrontEachLine(ImportScript, text="\t"):

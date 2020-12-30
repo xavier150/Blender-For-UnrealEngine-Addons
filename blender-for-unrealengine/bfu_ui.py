@@ -2192,7 +2192,7 @@ class BFU_PT_Export(bpy.types.Panel):
             errorIndex: bpy.props.IntProperty(default=-1)
 
             def execute(self, context):
-                result = TryToCorrectPotentialError(self.errorIndex)
+                result = bfu_check_potential_error.TryToCorrectPotentialError(self.errorIndex)
                 self.report({'INFO'}, result)
                 return {'FINISHED'}
 
@@ -2203,7 +2203,7 @@ class BFU_PT_Export(bpy.types.Panel):
             errorIndex: bpy.props.IntProperty(default=-1)
 
             def execute(self, context):
-                result = SelectPotentialErrorObject(self.errorIndex)
+                result = bfu_check_potential_error.SelectPotentialErrorObject(self.errorIndex)
                 return {'FINISHED'}
 
         class BFU_OT_SelectVertexButton(Operator):
@@ -2213,7 +2213,7 @@ class BFU_PT_Export(bpy.types.Panel):
             errorIndex: bpy.props.IntProperty(default=-1)
 
             def execute(self, context):
-                result = SelectPotentialErrorVertex(self.errorIndex)
+                result = bfu_check_potential_error.SelectPotentialErrorVertex(self.errorIndex)
                 return {'FINISHED'}
 
         class BFU_OT_SelectPoseBoneButton(Operator):
@@ -2223,7 +2223,7 @@ class BFU_PT_Export(bpy.types.Panel):
             errorIndex: bpy.props.IntProperty(default=-1)
 
             def execute(self, context):
-                result = SelectPotentialErrorPoseBone(self.errorIndex)
+                result = bfu_check_potential_error.SelectPotentialErrorPoseBone(self.errorIndex)
                 return {'FINISHED'}
 
         class BFU_OT_OpenPotentialErrorDocs(Operator):
