@@ -1343,7 +1343,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         addon_prefs = bpy.context.preferences.addons[__package__].preferences
         layout = self.layout
 
-        version = [addon.bl_info.get('version', (-1, -1, -1)) for addon in addon_utils.modules() if addon.bl_info['name'] == "Blender for UnrealEngine"][0]
+        version = "-1"
+        for addon in addon_utils.modules():
+            if addon.bl_info['name'] == "Blender for UnrealEngine":
+                version = addon.bl_info.get('version', (-1, -1, -1))[0]
 
         credit_box = layout.box()
         credit_box.label(text='Blender for Unreal Engine ' + str(version) + ' by Xavier Loux.')
@@ -1498,7 +1501,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 SurfaceAreaLightMap.prop(obj, 'staticMeshLightMapSurfaceScale')
                                 SurfaceAreaLightMap.prop(obj, 'staticMeshLightMapRoundPowerOfTwo')
                             if obj.StaticMeshLightMapEnum != "Default":
-                                StaticMeshLightMapRes.label(text='Compunted light map: ' + str(GetCompuntedLightMap(obj)))
+                                CompuntedLightMap = str(GetCompuntedLightMap(obj))
+                                StaticMeshLightMapRes.label(text='Compunted light map: ' + CompuntedLightMap)
                             GenerateLightmapUVs = layout.row()
                             GenerateLightmapUVs.prop(obj, 'GenerateLightmapUVs')
 
@@ -2175,7 +2179,7 @@ class BFU_PT_Export(bpy.types.Panel):
             correctedProperty = bfu_check_potential_error.CorrectBadProperty()
             bfu_check_potential_error.UpdateNameHierarchy()
             bfu_check_potential_error.UpdateUnrealPotentialError()
-            bpy.ops.object.openpotentialerror("INVOKE_DEFAULT", correctedProperty = correctedProperty)
+            bpy.ops.object.openpotentialerror("INVOKE_DEFAULT", correctedProperty=correctedProperty)
             print(self.text)
             return {'FINISHED'}
 
@@ -2243,15 +2247,9 @@ class BFU_PT_Export(bpy.types.Panel):
                 return {'FINISHED'}
 
         def execute(self, context):
-            #self.correctedProperty = bfu_check_potential_error.CorrectBadProperty()
-            #bfu_check_potential_error.UpdateNameHierarchy()
-            #bfu_check_potential_error.UpdateUnrealPotentialError()
             return {'FINISHED'}
 
         def invoke(self, context, event):
-            #self.correctedProperty = bfu_check_potential_error.CorrectBadProperty()
-            #bfu_check_potential_error.UpdateNameHierarchy()
-            #bfu_check_potential_error.UpdateUnrealPotentialError()
             wm = context.window_manager
             return wm.invoke_popup(self, width=1020)
 
@@ -2757,8 +2755,6 @@ def register():
     bpy.utils.register_class(BFU_OT_UnrealExportedAsset)
     bpy.types.Scene.UnrealExportedAssetsList = CollectionProperty(
         type=BFU_OT_UnrealExportedAsset)
-    
-    
 
     bpy.types.VIEW3D_MT_uv_map.append(menu_func)
 

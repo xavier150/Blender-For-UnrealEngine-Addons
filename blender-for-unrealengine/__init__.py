@@ -65,6 +65,7 @@ bl_info = {
     'support': 'COMMUNITY',
     'category': 'Import-Export'}
 
+
 class BFU_OT_UnrealPotentialError(bpy.types.PropertyGroup):
     type: bpy.props.IntProperty(default=0)  # 0:Info, 1:Warning, 2:Error
     object: bpy.props.PointerProperty(type=bpy.types.Object)

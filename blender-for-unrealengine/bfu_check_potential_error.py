@@ -486,7 +486,6 @@ def UpdateUnrealPotentialError():
     return PotentialErrors
 
 
-
 def SelectPotentialErrorObject(errorIndex):
     # Select potential error
 
@@ -644,10 +643,10 @@ def TryToCorrectPotentialError(errorIndex):
     print("end correct, Error not found")
     return "Correct fail"
 
+
 def register():
     from bpy.utils import register_class
 
 
 def unregister():
     from bpy.utils import unregister_class
-
