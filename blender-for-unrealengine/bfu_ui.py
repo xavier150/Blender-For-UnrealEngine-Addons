@@ -2395,7 +2395,7 @@ class BFU_PT_Export(bpy.types.Panel):
 
             scene.UnrealExportedAssetsList.clear()
             s = CounterStart()
-            UpdateNameHierarchy()
+            bfu_check_potential_error.UpdateNameHierarchy()
             bfu_export_asset.ExportForUnrealEngine()
             bfu_write_text.WriteAllTextFiles()
 

@@ -342,7 +342,7 @@ def PrepareAndSaveDataForExport():
     copyScene.name = "ue4-export_Temp"
     bpy.context.window.scene = copyScene  # Switch the scene but can take time
 
-    SafeModeSet(MyCurrentDataSave.UserActive, 'OBJECT')
+    SafeModeSet(MyCurrentDataSave.user_active, 'OBJECT')
 
     if addon_prefs.revertExportPath:
         RemoveFolderTree(bpy.path.abspath(scene.export_static_file_path))
@@ -351,11 +351,17 @@ def PrepareAndSaveDataForExport():
         RemoveFolderTree(bpy.path.abspath(scene.export_camera_file_path))
         RemoveFolderTree(bpy.path.abspath(scene.export_other_file_path))
 
+    assetList = []  # Do a simple lit of objects to export
+    for Asset in GetFinalAssetToExport():
+        if Asset.obj in GetAllobjectsByExportType("export_recursive"):
+            if Asset.obj not in assetList:
+                assetList.append(Asset.obj)
+
     ExportAllAssetByList(
         originalScene=scene,
-        targetobjects=GetFinalAssetToExport(),
-        targetActionName=actionNames,
-        targetcollection=collectionNames,
+        targetobjects=assetList,
+        targetActionName=MyCurrentDataSave.action_names,
+        targetcollection=MyCurrentDataSave.collection_names,
     )
 
     bpy.context.window.scene = scene
@@ -363,7 +369,6 @@ def PrepareAndSaveDataForExport():
 
     MyCurrentDataSave.ResetSelectByName()
     MyCurrentDataSave.ResetSceneAtSave()
-    
 
     # Clean actions
     for action in bpy.data.actions:

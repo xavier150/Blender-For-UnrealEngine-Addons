@@ -236,6 +236,7 @@ def WriteOneAssetTaskDef(asset):
         if asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh":
             # unreal.FbxTextureImportData
 
+            python_MaterialSearchLocation = "LOCAL"
             if obj.MaterialSearchLocation == "Local":
                 python_MaterialSearchLocation = "LOCAL"
             if obj.MaterialSearchLocation == "UnderParent":
@@ -245,7 +246,7 @@ def WriteOneAssetTaskDef(asset):
             if obj.MaterialSearchLocation == "AllAssets":
                 python_MaterialSearchLocation = "ALL_ASSETS"
             ImportScript += "\t" + "task.get_editor_property('options').texture_import_data.set_editor_property('material_search_location', unreal.MaterialSearchLocation."
-            ImportScript += + python_MaterialSearchLocation + ")" + "\n"
+            ImportScript += python_MaterialSearchLocation + ")" + "\n"
 
         if asset.assetType == "StaticMesh":
             # unreal.FbxStaticMeshImportData

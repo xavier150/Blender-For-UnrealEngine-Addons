@@ -32,6 +32,8 @@ if "bpy" in locals():
         importlib.reload(bfu_utils)
     if "bfu_export_utils" in locals():
         importlib.reload(bfu_export_utils)
+    if "bfu_check_potential_error" in locals():
+        importlib.reload(bfu_check_potential_error)
 
 from . import bfu_write_text
 from . import bfu_basics
@@ -40,6 +42,7 @@ from . import bfu_utils
 from .bfu_utils import *
 from . import bfu_export_utils
 from .bfu_export_utils import *
+from . import bfu_check_potential_error
 
 
 def ExportSingleSkeletalMesh(
@@ -77,7 +80,7 @@ def ExportSingleSkeletalMesh(
 
     ApplyNeededModifierToSelect()
 
-    UpdateNameHierarchy(
+    bfu_check_potential_error.UpdateNameHierarchy(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
         )
     active = bpy.context.view_layer.objects.active
