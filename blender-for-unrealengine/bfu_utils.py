@@ -7,11 +7,11 @@
 #
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with this program.	 If not, see <http://www.gnu.org/licenses/>.
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  All rights reserved.
 #
 # ======================= END GPL LICENSE BLOCK =============================
@@ -42,6 +42,15 @@ class SavedObject():
             self.hide_viewport = obj.hide_viewport
 
 
+class SavedBones():
+
+    def __init__(self, bone):
+        if bone:
+            self.name = bone.name
+            self.select = bone.select
+            self.hide = bone.hide
+
+
 class SavedCollection():
 
     def __init__(self, col):
@@ -68,13 +77,17 @@ class UserSceneSave():
         # Select
         self.user_active = None
         self.user_active_name = None
+        self.user_bone_active = None
+        self.user_bone_active_name = None
         self.user_selected = []
 
         # Stats
         self.user_mode = None
+        self.use_simplify = False
 
         # Data
         self.objects = []
+        self.object_bones = []
         self.collections = []
         self.view_layers_children = []
         self.action_names = []
@@ -94,6 +107,7 @@ class UserSceneSave():
         if self.user_active:
             if bpy.ops.object.mode_set.poll():
                 self.user_mode = self.user_active.mode  # Save current mode
+        self.use_simplify = bpy.context.scene.render.use_simplify
 
         # Data
         for obj in bpy.data.objects:
@@ -108,7 +122,17 @@ class UserSceneSave():
         for collection in bpy.data.collections:
             self.collection_names.append(collection.name)
 
+        # Data for armature
+        if self.user_active:
+            if self.user_active.type == "ARMATURE":
+                if self.user_active.data.bones.active:
+                    self.user_bone_active = self.user_active.data.bones.active
+                    self.user_bone_active_name = self.user_active.data.bones.active.name
+                for bone in self.user_active.data.bones:
+                    self.object_bones.append(SavedBones(bone))
+
     def ResetSelectByRef(self):
+        SafeModeSet(bpy.ops.object, "OBJECT")
         bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.data.objects:  # Resets previous selected object if still exist
             if obj in self.user_selected:
@@ -116,7 +140,11 @@ class UserSceneSave():
 
         bpy.context.view_layer.objects.active = self.user_active
 
+        self.ResetModeAtSave()
+        self.ResetBonesSelectByName()
+
     def ResetSelectByName(self):
+        SafeModeSet(bpy.ops.object, "OBJECT")
         bpy.ops.object.select_all(action='DESELECT')
         for obj in self.objects:  # Resets previous selected object if still exist
             if obj.select:
@@ -127,11 +155,37 @@ class UserSceneSave():
             if self.user_active_name in bpy.data.objects:
                 bpy.context.view_layer.objects.active = bpy.data.objects[self.user_active_name]
 
-    def ResetSceneAtSave(self):
-        scene = bpy.context.scene
+        self.ResetModeAtSave()
+        self.ResetBonesSelectByName()
+
+    def ResetBonesSelectByName(self):
+        # Work only in pose mode!
+        if len(self.object_bones) > 0:
+            if self.user_active:
+                if bpy.ops.object.mode_set.poll():
+                    if self.user_active.mode == "POSE":
+                        bpy.ops.pose.select_all(action='DESELECT')
+                        for bone in self.object_bones:
+                            if bone.select:
+                                if bone.name in self.user_active.data.bones:
+                                    self.user_active.data.bones[bone.name].select = True
+
+                        if self.user_bone_active_name is not None:
+                            if self.user_bone_active_name in self.user_active.data.bones:
+                                new_active = self.user_active.data.bones[self.user_bone_active_name]
+                                self.user_active.data.bones.active = new_active
+                                print(new_active.name)
+
+    def ResetModeAtSave(self):
         if self.user_mode:
             if bpy.ops.object:
-                SafeModeSet(bpy.ops.object, "OBJECT")
+                SafeModeSet(bpy.ops.object, self.user_mode)
+
+    def ResetSceneAtSave(self):
+        scene = bpy.context.scene
+        self.ResetModeAtSave()
+
+        bpy.context.scene.render.use_simplify = self.use_simplify
 
         # Reset hide and select (bpy.data.objects)
         for obj in self.objects:
@@ -191,7 +245,7 @@ def update_progress(job_title, progress, time=None):
         "#"*block + "-"*(length-block),
         round(progress*100, 2))
     if progress >= 1:
-        if time is not None	:
+        if time is not None:
             msg += " DONE IN " + str(round(time, 2)) + "s\r\n"
         else:
             msg += " DONE\r\n"
