@@ -174,7 +174,6 @@ class UserSceneSave():
                             if self.user_bone_active_name in self.user_active.data.bones:
                                 new_active = self.user_active.data.bones[self.user_bone_active_name]
                                 self.user_active.data.bones.active = new_active
-                                print(new_active.name)
 
     def ResetModeAtSave(self):
         if self.user_mode:
