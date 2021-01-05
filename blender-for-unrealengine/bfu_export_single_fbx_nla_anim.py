@@ -64,7 +64,7 @@ def ExportSingleFbxNLAAnim(
     s = CounterStart()
 
     SelectParentAndDesiredChilds(obj)
-    DuplicateSelectForExport()
+    data_to_remove = DuplicateSelectForExport()
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
     export_procedure = active.bfu_export_procedure
@@ -157,6 +157,8 @@ def ExportSingleFbxNLAAnim(
         RescaleAllActionCurve(1/(rrf*oldScale))
 
     CleanDeleteObjects(bpy.context.selected_objects)
+    for data in data_to_remove:
+        data.RemoveData()
 
     MyAsset = originalScene.UnrealExportedAssetsList.add()
     MyAsset.assetName = filename

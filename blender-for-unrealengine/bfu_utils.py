@@ -253,7 +253,6 @@ def update_progress(job_title, progress, time=None):
 
 
 def RemoveUselessSpecificData(name, type):
-
     if type == "MESH":
         oldData = bpy.data.meshes[name]
         if oldData.users == 0:

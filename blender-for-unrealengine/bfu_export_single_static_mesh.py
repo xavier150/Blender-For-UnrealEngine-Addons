@@ -68,7 +68,7 @@ def ExportSingleStaticMesh(
 
     SelectParentAndDesiredChilds(obj)
     AddSocketsTempName(obj)
-    DuplicateSelectForExport()
+    data_to_remove = DuplicateSelectForExport()
 
     if addon_prefs.correctExtremUVScale:
         SavedSelect = GetCurrentSelection()
@@ -117,6 +117,8 @@ def ExportSingleStaticMesh(
         )
 
     CleanDeleteObjects(bpy.context.selected_objects)
+    for data in data_to_remove:
+        data.RemoveData()
     RemoveSocketsTempName(obj)
 
     exportTime = CounterEnd(s)

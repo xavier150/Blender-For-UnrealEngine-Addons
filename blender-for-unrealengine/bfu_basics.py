@@ -91,8 +91,6 @@ def SetCurrentSelection(selection):
 
     bpy.ops.object.select_all(action='DESELECT')
     for x, obj in enumerate(selection.selected_objects):
-        print(obj)
-        print(selection.old_name[x])
         if not is_deleted(obj):
             if obj.name in bpy.context.window.view_layer.objects:
                 obj.select_set(True)

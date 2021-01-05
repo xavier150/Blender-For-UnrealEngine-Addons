@@ -77,7 +77,7 @@ def ExportSingleFbxAction(
 
     SelectParentAndDesiredChilds(obj)
 
-    DuplicateSelectForExport()
+    data_to_remove = DuplicateSelectForExport()
 
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
@@ -86,13 +86,6 @@ def ExportSingleFbxAction(
 
     scene.frame_start = GetDesiredActionStartEndTime(active, targetAction)[0]
     scene.frame_end = GetDesiredActionStartEndTime(active, targetAction)[1]
-
-    print(obj.name)
-    print(obj.name)
-    print(obj.name)
-    print(obj.name)
-    print(obj.name)
-    print(obj.name)
 
     if obj.ExportAsProxy:
         if obj.ExportProxyChild is not None:
@@ -203,6 +196,8 @@ def ExportSingleFbxAction(
         RescaleAllActionCurve(1/(rrf*oldScale))
 
     CleanDeleteObjects(bpy.context.selected_objects)
+    for data in data_to_remove:
+        data.RemoveData()
 
     exportTime = CounterEnd(s)
     MyAsset = originalScene.UnrealExportedAssetsList.add()

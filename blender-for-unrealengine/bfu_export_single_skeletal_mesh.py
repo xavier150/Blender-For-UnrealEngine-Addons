@@ -69,7 +69,7 @@ def ExportSingleSkeletalMesh(
 
     SelectParentAndDesiredChilds(obj)
     AddSocketsTempName(obj)
-    DuplicateSelectForExport()
+    data_to_remove = DuplicateSelectForExport()
 
     if addon_prefs.correctExtremUVScale:
         SavedSelect = GetCurrentSelection()
@@ -116,6 +116,7 @@ def ExportSingleSkeletalMesh(
     bpy.context.object.data.pose_position = 'REST'
 
     if (export_procedure == "normal"):
+        pass
         bpy.ops.export_scene.fbx(
             filepath=fullpath,
             check_existing=False,
@@ -158,6 +159,8 @@ def ExportSingleSkeletalMesh(
 
     ResetArmatureName(active, oldArmatureName)
     CleanDeleteObjects(bpy.context.selected_objects)
+    for data in data_to_remove:
+        data.RemoveData()
 
     RemoveSocketsTempName(obj)
 

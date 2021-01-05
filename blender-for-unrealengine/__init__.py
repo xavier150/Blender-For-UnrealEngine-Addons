@@ -55,7 +55,7 @@ bl_info = {
     "objects at the same time for use in unreal engine 4.",
     'author': 'Loux Xavier (BleuRaven)',
     'version': (0, 2, 8, 0),  # Rev 0.2.8.0
-    'blender': (2, 83, 0),
+    'blender': (2, 80, 0),
     'location': 'View3D > UI > Unreal Engine 4',
     'warning': '',
     "wiki_url": "https://github.com/xavier150/" \

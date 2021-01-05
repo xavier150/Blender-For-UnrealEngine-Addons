@@ -122,10 +122,21 @@ def DuplicateSelectForExport():
 
     scene = bpy.context.scene
 
+    class DelegateOldData():
+        # contain a data to remove and function for remove
+
+        def __init__(self, data_name, data_type):
+            self.data_name = data_name
+            self.data_type = data_type
+
+        def RemoveData(self):
+            RemoveUselessSpecificData(self.data_name, self.data_type)
+
+    data_to_remove = []
+
     # Save action befor export
     actionNames = []
     for action in bpy.data.actions:
-        print(action.name)
         actionNames.append(action.name)
 
     bpy.ops.object.duplicate()
@@ -150,14 +161,15 @@ def DuplicateSelectForExport():
         if objScene.data is not None:
             oldData = objScene.data.name
             objScene.data = objScene.data.copy()
-            RemoveUselessSpecificData(oldData, objScene.type)
+            #RemoveUselessSpecificData(oldData, objScene.type)
+            data_to_remove.append(DelegateOldData(oldData, objScene.type))
 
-    print("#Clean")
     # Clean create actions by duplication
     for action in bpy.data.actions:
-        print(action.name)
         if action.name not in actionNames:
             bpy.data.actions.remove(action)
+
+    return data_to_remove
 
 
 def SetSocketsExportTransform(obj):
