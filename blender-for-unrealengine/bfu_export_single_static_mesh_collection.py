@@ -33,6 +33,8 @@ if "bpy" in locals():
         importlib.reload(bfu_export_utils)
     if "bfu_export_single_static_mesh" in locals():
         importlib.reload(bfu_export_single_static_mesh)
+    if "bfu_check_potential_error" in locals():
+        importlib.reload(bfu_check_potential_error)
 
 from . import bfu_write_text
 from . import bfu_basics
@@ -43,6 +45,7 @@ from . import bfu_export_utils
 from .bfu_export_utils import *
 from . import bfu_export_single_static_mesh
 from .bfu_export_single_static_mesh import *
+from . import bfu_check_potential_error
 
 
 def ExportSingleStaticMeshCollection(

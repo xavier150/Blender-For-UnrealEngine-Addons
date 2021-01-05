@@ -10,9 +10,9 @@ You can precisely choose which animations need to be exported.
 It includes a error checker to prevent potential problems and generate python scripts that can be used in Unreal Engine 4 to import the Camera Objects and Animations from your Blender project to a Level Sequence in Unreal Engine 4. All Camera Objects and their animations will import as Camera Actors.
 
 You can see the tutorials and documentation here:
-  - [How export assets from blender](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20export%20assets%20from%20Blender.md) </br>
-  - [How import assets from Blender to Unreal](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/How%20import%20assets%20from%20Blender%20to%20Unreal.md)
-   - [Potential Error with Blender export to Unreal](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/Potential%20Error%20with%20Blender%20export%20to%20Unreal.md)
+  - [How export assets from blender](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/How%20export%20assets%20from%20Blender.md) </br>
+  - [How import assets from Blender to Unreal](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/How%20import%20assets%20from%20Blender%20to%20Unreal.md)
+   - [Potential Error with Blender export to Unreal](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/Potential%20Error%20with%20Blender%20export%20to%20Unreal.md)
 
 # Download and installation
 1. Download addon :
@@ -23,13 +23,13 @@ You can see the tutorials and documentation here:
 Or previous versions : [Releases page](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases)
 
 2. Open User Preferences (Ctrl+Alt+U) and under Add-ons, click Install from File. Then navigate to the .zip file you downloaded and select it.
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/InstallationScreen1.jpg" width="600">
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/InstallationScreen1.jpg" width="600">
 3. It should now appear in the window and you can tick the checkbox in the upper right to enable it.
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/InstallationScreen2.jpg" width="600">
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/InstallationScreen2.jpg" width="600">
 If you would like to have the Add-on enabled every time you start Blender, click Save User Settings at the bottom of the user settings window
 
 4. You can found the addons in the right side panel (N)
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/Tuto/InstallationScreen3.jpg" width="600">
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/InstallationScreen3.jpg" width="600">
 
 # Download and installation from dev Branch
 1. Switch Branch to Dev

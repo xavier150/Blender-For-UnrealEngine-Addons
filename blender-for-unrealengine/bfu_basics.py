@@ -16,15 +16,12 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-import sys
-import bpy
 import os
 import string
 from pathlib import Path
 import shutil
+import bpy
 import bmesh
-import requests
-import json
 import addon_utils
 from mathutils import Vector
 from mathutils import Quaternion
@@ -35,6 +32,11 @@ def is_deleted(o):
         return not (o.name in bpy.data.objects)
     else:
         return True
+
+
+def CheckPluginIsActivated(PluginName):
+    is_enabled, is_loaded = addon_utils.check(PluginName)
+    return is_enabled and is_loaded
 
 
 def MoveToGlobalView():
@@ -89,8 +91,6 @@ def SetCurrentSelection(selection):
 
     bpy.ops.object.select_all(action='DESELECT')
     for x, obj in enumerate(selection.selected_objects):
-        print(obj)
-        print(selection.old_name[x])
         if not is_deleted(obj):
             if obj.name in bpy.context.window.view_layer.objects:
                 obj.select_set(True)
@@ -245,6 +245,7 @@ def ValidFilename(filename):
     valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
     filename = ''.join(c for c in filename if c in valid_chars)
     return filename
+
 
 def ValidDefname(filename):
     # Normalizes string, removes non-alpha characters

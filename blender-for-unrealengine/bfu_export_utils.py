@@ -122,10 +122,21 @@ def DuplicateSelectForExport():
 
     scene = bpy.context.scene
 
+    class DelegateOldData():
+        # contain a data to remove and function for remove
+
+        def __init__(self, data_name, data_type):
+            self.data_name = data_name
+            self.data_type = data_type
+
+        def RemoveData(self):
+            RemoveUselessSpecificData(self.data_name, self.data_type)
+
+    data_to_remove = []
+
     # Save action befor export
     actionNames = []
     for action in bpy.data.actions:
-        print(action.name)
         actionNames.append(action.name)
 
     bpy.ops.object.duplicate()
@@ -150,14 +161,14 @@ def DuplicateSelectForExport():
         if objScene.data is not None:
             oldData = objScene.data.name
             objScene.data = objScene.data.copy()
-            RemoveUselessSpecificData(oldData, objScene.type)
+            data_to_remove.append(DelegateOldData(oldData, objScene.type))
 
-    print("#Clean")
     # Clean create actions by duplication
     for action in bpy.data.actions:
-        print(action.name)
         if action.name not in actionNames:
             bpy.data.actions.remove(action)
+
+    return data_to_remove
 
 
 def SetSocketsExportTransform(obj):
@@ -282,7 +293,8 @@ def ExportAutoProRig(
         export_rig_name="root",
         bake_anim=True,
         anim_export_name_string="",
-        mesh_smooth_type="OFF"
+        mesh_smooth_type="OFF",
+        arp_simplify_fac=0.0
         ):
 
     bpy.context.scene.arp_engine_type = 'unreal'
@@ -299,7 +311,7 @@ def ExportAutoProRig(
     bpy.context.scene.arp_bake_actions = bake_anim
     bpy.context.scene.arp_export_name_actions = True
     bpy.context.scene.arp_export_name_string = anim_export_name_string
-    bpy.context.scene.arp_simplify_fac = 0.0
+    bpy.context.scene.arp_simplify_fac = arp_simplify_fac
 
     # Misc
     bpy.context.scene.arp_mesh_smooth_type = mesh_smooth_type
@@ -313,7 +325,6 @@ def ExportAutoProRig(
 
     # export it
     print("Start AutoProRig Export")
-    
     bpy.ops.id.arp_export_fbx_panel(filepath=filepath)
 
 

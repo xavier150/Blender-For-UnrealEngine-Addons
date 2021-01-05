@@ -31,6 +31,8 @@ if "bpy" in locals():
         importlib.reload(bfu_utils)
     if "bfu_export_utils" in locals():
         importlib.reload(bfu_export_utils)
+    if "bfu_check_potential_error" in locals():
+        importlib.reload(bfu_check_potential_error)
 
 from . import bfu_write_text
 from . import bfu_basics
@@ -39,6 +41,7 @@ from . import bfu_utils
 from .bfu_utils import *
 from . import bfu_export_utils
 from .bfu_export_utils import *
+from . import bfu_check_potential_error
 
 
 def ExportSingleFbxNLAAnim(
@@ -61,7 +64,7 @@ def ExportSingleFbxNLAAnim(
     s = CounterStart()
 
     SelectParentAndDesiredChilds(obj)
-    DuplicateSelectForExport()
+    data_to_remove = DuplicateSelectForExport()
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
     export_procedure = active.bfu_export_procedure
@@ -130,7 +133,8 @@ def ExportSingleFbxNLAAnim(
             # export_rig_name=GetDesiredExportArmatureName(),
             bake_anim=True,
             anim_export_name_string=active.animation_data.action.name,
-            mesh_smooth_type="FACE"
+            mesh_smooth_type="FACE",
+            arp_simplify_fac=active.SimplifyAnimForExport
             )
 
     ResetArmaturePose(active)
@@ -153,6 +157,8 @@ def ExportSingleFbxNLAAnim(
         RescaleAllActionCurve(1/(rrf*oldScale))
 
     CleanDeleteObjects(bpy.context.selected_objects)
+    for data in data_to_remove:
+        data.RemoveData()
 
     MyAsset = originalScene.UnrealExportedAssetsList.add()
     MyAsset.assetName = filename

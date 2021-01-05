@@ -31,6 +31,8 @@ if "bpy" in locals():
         importlib.reload(bfu_utils)
     if "bfu_export_utils" in locals():
         importlib.reload(bfu_export_utils)
+    if "bfu_check_potential_error" in locals():
+        importlib.reload(bfu_check_potential_error)
 
 from . import bfu_write_text
 from . import bfu_basics
@@ -39,6 +41,7 @@ from . import bfu_utils
 from .bfu_utils import *
 from . import bfu_export_utils
 from .bfu_export_utils import *
+from . import bfu_check_potential_error
 
 
 def ExportSingleFbxAction(
@@ -74,7 +77,7 @@ def ExportSingleFbxAction(
 
     SelectParentAndDesiredChilds(obj)
 
-    DuplicateSelectForExport()
+    data_to_remove = DuplicateSelectForExport()
 
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
@@ -84,19 +87,10 @@ def ExportSingleFbxAction(
     scene.frame_start = GetDesiredActionStartEndTime(active, targetAction)[0]
     scene.frame_end = GetDesiredActionStartEndTime(active, targetAction)[1]
 
-    print(obj.name)
-    print(obj.name)
-    print(obj.name)
-    print(obj.name)
-    print(obj.name)
-    print(obj.name)
-
     if obj.ExportAsProxy:
         if obj.ExportProxyChild is not None:
             obj.animation_data.action = targetAction  # Apply desired action
 
-
-     
     active.animation_data.action = targetAction  # Apply desired action
     export_procedure = active.bfu_export_procedure
 
@@ -174,7 +168,8 @@ def ExportSingleFbxAction(
             # export_rig_name=GetDesiredExportArmatureName(),
             bake_anim=True,
             anim_export_name_string=active.animation_data.action.name,
-            mesh_smooth_type="FACE"
+            mesh_smooth_type="FACE",
+            arp_simplify_fac=active.SimplifyAnimForExport
             )
 
     # Reset Action name
@@ -201,6 +196,8 @@ def ExportSingleFbxAction(
         RescaleAllActionCurve(1/(rrf*oldScale))
 
     CleanDeleteObjects(bpy.context.selected_objects)
+    for data in data_to_remove:
+        data.RemoveData()
 
     exportTime = CounterEnd(s)
     MyAsset = originalScene.UnrealExportedAssetsList.add()

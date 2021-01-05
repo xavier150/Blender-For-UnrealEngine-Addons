@@ -43,6 +43,7 @@ import bpy
 import time
 import math
 
+import addon_utils
 
 from . import bfu_write_text
 from . import bfu_basics
@@ -71,6 +72,66 @@ from . import bfu_export_single_static_mesh_collection
 from .bfu_export_single_static_mesh_collection import *
 
 
+class ExportSigleObjects():
+
+    def SaveDataForSigneExport():
+        pass
+
+    def ResetDataAfterSigneExport():
+        pass
+
+
+def IsValidActionForExport(scene, obj, animType):
+
+    if animType == "Action":
+        if scene.anin_export:
+            if obj.bfu_export_procedure == 'auto-rig-pro':
+                if CheckPluginIsActivated('auto_rig_pro-master'):
+                    return True
+            else:
+                return True
+        else:
+            False
+    if animType == "Pose":
+        if scene.anin_export:
+            if obj.bfu_export_procedure == 'auto-rig-pro':
+                if CheckPluginIsActivated('auto_rig_pro-master'):
+                    return True
+            else:
+                return True
+        else:
+            False
+    if animType == "NLA":
+        if scene.anin_export:
+            return False
+            # Auto Rig Pro don't support NLA
+        else:
+            False
+    return False
+
+
+def IsValidObjectForExport(scene, obj):
+    objType = GetAssetType(obj)
+
+    if objType == "Camera":
+        return scene.camera_export
+    if objType == "StaticMesh":
+        return scene.static_export
+    if objType == "SkeletalMesh":
+        if scene.skeletal_export:
+            if obj.bfu_export_procedure == 'auto-rig-pro':
+                if CheckPluginIsActivated('auto_rig_pro-master'):
+                    return True
+            else:
+                return True
+        else:
+            False
+    if objType == "Alembic":
+        return scene.alembic_export
+
+    return False
+
+
 def ExportAllAssetByList(
     originalScene,
     targetobjects,
@@ -97,6 +158,7 @@ def ExportAllAssetByList(
         )
     UpdateProgress()
 
+    # Export collections
     if scene.static_collection_export:
         for col in GetCollectionToExport(originalScene):
             if col in targetcollection:
@@ -109,12 +171,12 @@ def ExportAllAssetByList(
                 )
                 UpdateProgress()
 
+    # Export assets
     for obj in targetobjects:
-
         if obj.ExportEnum == "export_recursive":
 
             # Camera
-            if GetAssetType(obj) == "Camera" and scene.camera_export:
+            if GetAssetType(obj) == "Camera" and IsValidObjectForExport(originalScene, obj):
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end
@@ -138,7 +200,7 @@ def ExportAllAssetByList(
                 UpdateProgress()
 
             # StaticMesh
-            if GetAssetType(obj) == "StaticMesh" and scene.static_export:
+            if GetAssetType(obj) == "StaticMesh" and IsValidObjectForExport(originalScene, obj):
                 ExportSingleStaticMesh(
                     originalScene,
                     GetObjExportDir(obj),
@@ -159,7 +221,7 @@ def ExportAllAssetByList(
                 UpdateProgress()
 
             # SkeletalMesh
-            if GetAssetType(obj) == "SkeletalMesh" and scene.skeletal_export:
+            if GetAssetType(obj) == "SkeletalMesh" and IsValidObjectForExport(originalScene, obj):
                 ExportSingleSkeletalMesh(
                     originalScene,
                     GetObjExportDir(obj),
@@ -178,7 +240,7 @@ def ExportAllAssetByList(
                 UpdateProgress()
 
             # Alembic
-            if GetAssetType(obj) == "Alembic" and scene.alembic_export:
+            if GetAssetType(obj) == "Alembic" and IsValidObjectForExport(originalScene, obj):
                 ExportSingleAlembicAnimation(
                     originalScene,
                     GetObjExportDir(obj),
@@ -198,7 +260,7 @@ def ExportAllAssetByList(
                         animType = GetActionType(action)
 
                         # Action
-                        if animType == "Action" and scene.anin_export:
+                        if animType == "Action" and IsValidActionForExport(originalScene, obj, animType):
                             # Save current start/end frame
                             UserStartFrame = scene.frame_start
                             UserEndFrame = scene.frame_end
@@ -216,7 +278,7 @@ def ExportAllAssetByList(
                             UpdateProgress()
 
                         # pose
-                        if animType == "Pose" and scene.anin_export:
+                        if animType == "Pose" and IsValidActionForExport(originalScene, obj, animType):
                             # Save current start/end frame
                             UserStartFrame = scene.frame_start
                             UserEndFrame = scene.frame_end
@@ -234,7 +296,7 @@ def ExportAllAssetByList(
                             UpdateProgress()
 
                 # NLA animation
-                if bpy.context.scene.anin_export:
+                if IsValidActionForExport(originalScene, "NLA", obj):
                     if obj.ExportNLA:
                         scene.frame_end += 1
                         ExportSingleFbxNLAAnim(
@@ -255,50 +317,23 @@ def PrepareAndSaveDataForExport():
 
     MoveToGlobalView()
 
-    mode_set = bpy.ops.object.mode_set
+    MyCurrentDataSave = UserSceneSave()
+    MyCurrentDataSave.SaveCurrentScene()
 
-    # ----------------------------------------Save data
-    # This can take time
-
-    actionNames = []
-    for action in bpy.data.actions:
-        actionNames.append(action.name)
-
-    collectionNames = []
-    for collection in bpy.data.collections:
-        collectionNames.append(collection.name)
-
-    UserObjHide = []
     for object in bpy.data.objects:
-        UserObjHide.append((
-                object.name,
-                object.hide_select,
-                object.hide_viewport
-                )
-            )
         if object.hide_select:
             object.hide_select = False
         if object.hide_viewport:
             object.hide_viewport = False
 
-    UserColHide = []
     for col in bpy.data.collections:
-        UserColHide.append((col.name, col.hide_select, col.hide_viewport))
         if col.hide_select:
             col.hide_select = False
         if col.hide_viewport:
             col.hide_viewport = False
 
-    UserVLayerHide = []
     for vlayer in bpy.context.scene.view_layers:
         for childCol in vlayer.layer_collection.children:
-            UserVLayerHide.append((
-                    vlayer.name,
-                    childCol.name,
-                    childCol.exclude,
-                    childCol.hide_viewport
-                    )
-                )
             if childCol.exclude:
                 childCol.exclude = False
             if childCol.hide_viewport:
@@ -308,14 +343,7 @@ def PrepareAndSaveDataForExport():
     copyScene.name = "ue4-export_Temp"
     bpy.context.window.scene = copyScene  # Switch the scene but can take time
 
-    UserActive = bpy.context.active_object  # Save current active object
-    if mode_set.poll():
-        UserMode = UserActive.mode  # Save current mode
-    else:
-        UserMode = None
-
-    if UserActive and UserActive.mode != 'OBJECT' and mode_set.poll():
-        mode_set(mode='OBJECT')
+    SafeModeSet(MyCurrentDataSave.user_active, 'OBJECT')
 
     if addon_prefs.revertExportPath:
         RemoveFolderTree(bpy.path.abspath(scene.export_static_file_path))
@@ -333,53 +361,20 @@ def PrepareAndSaveDataForExport():
     ExportAllAssetByList(
         originalScene=scene,
         targetobjects=assetList,
-        targetActionName=actionNames,
-        targetcollection=collectionNames,
+        targetActionName=MyCurrentDataSave.action_names,
+        targetcollection=MyCurrentDataSave.collection_names,
     )
 
     bpy.context.window.scene = scene
     bpy.data.scenes.remove(copyScene)
 
-    # UserActive = bpy.context.active_object #Save current active object
-    if UserMode:
-        bpy.ops.object.mode_set(mode=UserMode)
+    MyCurrentDataSave.ResetSelectByName()
+    MyCurrentDataSave.ResetSceneAtSave()
 
     # Clean actions
     for action in bpy.data.actions:
-        if action.name not in actionNames:
+        if action.name not in MyCurrentDataSave.action_names:
             bpy.data.actions.remove(action)
-
-    # Reset hide and select (bpy.data.objects)
-    for object in UserObjHide:
-        if object[0] in bpy.data.objects:
-            if bpy.data.objects[object[0]].hide_select != object[1]:
-                bpy.data.objects[object[0]].hide_select = object[1]
-            if bpy.data.objects[object[0]].hide_select != object[2]:
-                bpy.data.objects[object[0]].hide_viewport = object[2]
-            pass
-        else:
-            print("/!\\ "+object[0]+" not found in bpy.data.objects")
-
-    # Reset hide and select (collections)
-    for col in UserColHide:
-        if col[0] in bpy.data.collections:
-            if bpy.data.collections[col[0]].hide_select != col[1]:
-                bpy.data.collections[col[0]].hide_select = col[1]
-            if bpy.data.collections[col[0]].hide_select != col[2]:
-                bpy.data.collections[col[0]].hide_viewport = col[2]
-            pass
-        else:
-            print("/!\\ "+col[0]+" not found in bpy.data.collections")
-
-    # Reset hide in and viewport (collections)
-    for childCol in UserVLayerHide:
-        view_layer = scene.view_layers[childCol[0]]
-        layer_col_children = view_layer.layer_collection.children[childCol[1]]
-
-        if layer_col_children.exclude != childCol[2]:
-            layer_col_children.exclude = childCol[2]
-        if layer_col_children.hide_viewport != childCol[3]:
-            layer_col_children.hide_viewport = childCol[3]
 
 
 def ExportForUnrealEngine():
