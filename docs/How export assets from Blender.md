@@ -119,9 +119,18 @@ Materials are not imported, you must create them in Unreal Engine.
 4. If you don't use the import script, you need to set the Material > Search Location in Unreal with your desired location when you import.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/ExportAssetDocMaterial.jpg">
 
-# LightMap (For next update)
+# LightMap
 You can specify how the light map resolution will be generated
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/ExportAssetDocLightMapType.jpg">
+- Default: Has no effect on light maps
+- Custom map: Set the custom light map resolution
+- surface Area: Set light map resolution depending on the surface Area
+
+With surface area you need click first on "Calculate surface area" button.
+This will calculate the object with all modifiers for update the calculated surface of the object.
+This value will then be used to calculate the lightmap taking into account the size of the object and your desired settings.
+
+
 
 # Skeleton & Root bone
 Blender exports the armature like a root bone. To remove this bone check the box "Remove root bone" in Addon Preferences.
