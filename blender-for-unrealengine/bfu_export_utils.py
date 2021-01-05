@@ -161,7 +161,6 @@ def DuplicateSelectForExport():
         if objScene.data is not None:
             oldData = objScene.data.name
             objScene.data = objScene.data.copy()
-            #RemoveUselessSpecificData(oldData, objScene.type)
             data_to_remove.append(DelegateOldData(oldData, objScene.type))
 
     # Clean create actions by duplication

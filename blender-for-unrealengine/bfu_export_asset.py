@@ -107,6 +107,7 @@ def IsValidActionForExport(scene, obj, animType):
             # Auto Rig Pro don't support NLA
         else:
             False
+    return False
 
 
 def IsValidObjectForExport(scene, obj):
@@ -277,7 +278,7 @@ def ExportAllAssetByList(
                             UpdateProgress()
 
                         # pose
-                        if animType == "Pose" and IsValidActionForExport(originalScene, animType, obj):
+                        if animType == "Pose" and IsValidActionForExport(originalScene, obj, animType):
                             # Save current start/end frame
                             UserStartFrame = scene.frame_start
                             UserEndFrame = scene.frame_end
