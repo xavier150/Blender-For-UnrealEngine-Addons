@@ -19,8 +19,8 @@
 import os
 import string
 from pathlib import Path
-import shutil
 import bpy
+import shutil
 import bmesh
 import addon_utils
 from mathutils import Vector

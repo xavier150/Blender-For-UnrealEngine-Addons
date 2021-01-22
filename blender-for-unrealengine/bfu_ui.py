@@ -1346,10 +1346,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         version = "-1"
         for addon in addon_utils.modules():
             if addon.bl_info['name'] == "Blender for UnrealEngine":
-                version = addon.bl_info.get('version', (-1, -1, -1))[0]
+                version = addon.bl_info.get('version', (-1, -1, -1))
 
         credit_box = layout.box()
-        credit_box.label(text='Blender for Unreal Engine ' + str(version) + ' by Xavier Loux.')
+        credit_box.label(text='Blender for Unreal Engine by Xavier Loux. Version: '+str(version))
         credit_box.operator("object.open_documentation_page", icon="HELP")
 
         row = layout.row(align=True)
@@ -1531,8 +1531,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 else:
                     layout.label(text='(Generated scripts are deactivated.)')
 
-            bfu_ui_utils.LayoutSection(layout, "bfu_object_avanced_properties_expanded", "Object avanced Properties")
-            if scene.bfu_object_avanced_properties_expanded:
+            bfu_ui_utils.LayoutSection(layout, "bfu_object_advanced_properties_expanded", "Object advanced Properties")
+            if scene.bfu_object_advanced_properties_expanded:
                 if obj is not None:
                     if obj.ExportEnum == "export_recursive":
 

@@ -194,7 +194,7 @@ class UserSceneSave():
                 if bpy.data.objects[obj.name].hide_viewport != obj.hide_viewport:
                     bpy.data.objects[obj.name].hide_viewport = obj.hide_viewport
             else:
-                print("/!\\ "+object[0]+" not found in bpy.data.objects")
+                print("/!\\ "+obj.name+" not found in bpy.data.objects")
 
         # Reset hide and select (bpy.data.collections)
         for col in self.collections:
@@ -204,7 +204,7 @@ class UserSceneSave():
                 if bpy.data.collections[col.name].hide_viewport != col.hide_viewport:
                     bpy.data.collections[col.name].hide_viewport = col.hide_viewport
             else:
-                print("/!\\ "+col[0]+" not found in bpy.data.collections")
+                print("/!\\ "+col.name+" not found in bpy.data.collections")
 
         # Reset hide in and viewport (collections from view_layers)
         for childCol in self.view_layers_children:
