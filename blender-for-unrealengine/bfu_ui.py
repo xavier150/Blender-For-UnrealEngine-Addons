@@ -20,6 +20,18 @@ import os
 import bpy
 import addon_utils
 
+from . import bfu_export_asset
+from . import bfu_write_text
+from . import bfu_basics
+from .bfu_basics import *
+from . import bfu_utils
+from . import bfu_check_potential_error
+from .bfu_utils import *
+from . import bfu_ui_utils
+from . import languages
+from .languages import *
+
+
 if "bpy" in locals():
     import importlib
     if "bfu_export_asset" in locals():
@@ -34,15 +46,9 @@ if "bpy" in locals():
         importlib.reload(bfu_check_potential_error)
     if "bfu_ui_utils" in locals():
         importlib.reload(bfu_ui_utils)
+    if "languages" in locals():
+        importlib.reload(languages)
 
-from . import bfu_export_asset
-from . import bfu_write_text
-from . import bfu_basics
-from .bfu_basics import *
-from . import bfu_utils
-from . import bfu_check_potential_error
-from .bfu_utils import *
-from . import bfu_ui_utils
 
 from bpy.props import (
         StringProperty,
@@ -1349,7 +1355,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 version = addon.bl_info.get('version', (-1, -1, -1))
 
         credit_box = layout.box()
-        credit_box.label(text='Blender for Unreal Engine by Xavier Loux. Version: '+str(version))
+        credit_box.label(text=languages.t('intro')+' Version: '+str(version))
         credit_box.operator("object.open_documentation_page", icon="HELP")
 
         row = layout.row(align=True)
