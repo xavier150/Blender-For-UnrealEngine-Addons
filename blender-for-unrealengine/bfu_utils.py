@@ -439,13 +439,16 @@ class CachedAction():
         self.name = ""
         self.is_cached = False
         self.stored_actions = []
-        self.total_actions_len = 0
+        self.total_action_len = 0
+        self.total_bone_len = 0
 
     def CheckCache(self, obj):
         # Check if the cache need update
         if self.name != obj.name:
             MyCachedActions.is_cached = False
-        if len(bpy.data.actions) != self.total_actions_len:
+        if len(bpy.data.actions) != self.total_action_len:
+            MyCachedActions.is_cached = False
+        if len(obj.data.bones) != self.total_bone_len:
             MyCachedActions.is_cached = False
 
         return MyCachedActions.is_cached
@@ -458,7 +461,8 @@ class CachedAction():
         for action in actions:
             action_name_list.append(action.name)
         self.stored_actions = action_name_list
-        self.total_actions_len = len(bpy.data.actions)
+        self.total_action_len = len(bpy.data.actions)
+        self.total_bone_len = len(obj.data.bones)
 
     def GetStoredActions(self):
         actions = []
@@ -477,7 +481,7 @@ MyCachedActions = CachedAction()
 def GetCachedExportAutoActionList(obj):
     # This will cheak if the action contains
     # the same bones of the armature
-    
+
     actions = []
 
     # Use the cache
