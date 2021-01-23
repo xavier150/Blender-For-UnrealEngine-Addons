@@ -427,6 +427,78 @@ def GetCollectionToExport(scene):
     return colExport
 
 
+class CachedAction():
+
+    '''
+    I can't use bpy.types.Scene or bpy.types.Object Property.
+    "Writing to ID classes in this context is not allowed"
+    So I use simple python var
+    '''
+
+    def __init__(self):
+        self.name = ""
+        self.is_cached = False
+        self.stored_actions = []
+        self.total_actions_len = 0
+
+    def CheckCache(self, obj):
+        # Check if the cache need update
+        if self.name != obj.name:
+            MyCachedActions.is_cached = False
+        if len(bpy.data.actions) != self.total_actions_len:
+            MyCachedActions.is_cached = False
+
+        return MyCachedActions.is_cached
+
+    def StoreActions(self, obj, actions):
+        # Update new cache
+        self.is_cached = True
+        self.name = obj.name
+        action_name_list = []
+        for action in actions:
+            action_name_list.append(action.name)
+        self.stored_actions = action_name_list
+        self.total_actions_len = len(bpy.data.actions)
+
+    def GetStoredActions(self):
+        actions = []
+        for action_name in self.stored_actions:
+            if action_name in bpy.data.actions:
+                actions.append(bpy.data.actions[action_name])
+        return actions
+
+    def Clear(self):
+        pass
+
+
+MyCachedActions = CachedAction()
+
+
+def GetCachedExportAutoActionList(obj):
+    # This will cheak if the action contains
+    # the same bones of the armature
+    
+    actions = []
+
+    # Use the cache
+    if MyCachedActions.CheckCache(obj):
+        actions = MyCachedActions.GetStoredActions()
+
+    else:
+        MyCachedActions.Clear()
+
+        objBoneNames = [bone.name for bone in obj.data.bones]
+        for action in bpy.data.actions:
+            if action.library is None:
+                if GetIfActionIsAssociated(action, objBoneNames):
+                    actions.append(action)
+
+        # Update the cache
+        MyCachedActions.StoreActions(obj, actions)
+        print("Up")
+    return actions
+
+
 def GetActionToExport(obj):
     # Returns only the actions that will be exported with the Armature
 
@@ -455,13 +527,8 @@ def GetActionToExport(obj):
                 TargetActionToExport.append(action)
 
     elif obj.exportActionEnum == "export_auto":
-        # This will cheak if the action contains
-        # the same bones of the armature
-        objBoneNames = [bone.name for bone in obj.data.bones]
-        for action in bpy.data.actions:
-            if action.library is None:
-                if GetIfActionIsAssociated(action, objBoneNames):
-                    TargetActionToExport.append(action)
+        TargetActionToExport = GetCachedExportAutoActionList(obj)
+
     return TargetActionToExport
 
 

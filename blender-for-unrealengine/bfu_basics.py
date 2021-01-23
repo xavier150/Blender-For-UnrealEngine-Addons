@@ -266,7 +266,7 @@ def ResetArmaturePose(obj):
         b.location = Vector((0, 0, 0))
 
 
-def GetIfActionIsAssociated(action, boneNames):
+def GetIfActionIsAssociated(action, bone_names):
     for group in action.groups:
         for fcurve in group.channels:
             s = fcurve.data_path
@@ -274,10 +274,9 @@ def GetIfActionIsAssociated(action, boneNames):
             end = s.rfind('"]')
             if start > 0 and end > 0:
                 substring = s[start+2:end]
-                if substring in boneNames:
+                if substring in bone_names:
                     return True
     return False
-    pass
 
 
 def GetSurfaceArea(obj):
