@@ -83,6 +83,10 @@ class BFU_OT_UnrealPotentialError(bpy.types.PropertyGroup):
     docsOcticon: bpy.props.StringProperty(default="None")
 
 
+class BFU_CachedAction(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty()
+
+
 classes = (
 
 )
@@ -93,8 +97,6 @@ def register():
     bpy.types.Scene.bfu_cache_obj_name = bpy.props.StringProperty()
     bpy.types.Scene.bfu_export_auto_cached = bpy.props.BoolProperty(default=False)
 
-    class BFU_CachedAction(bpy.types.PropertyGroup):
-        name: bpy.props.StringProperty()
     bpy.utils.register_class(BFU_CachedAction)
     bpy.types.Scene.bfu_export_auto_cached_actions = bpy.props.CollectionProperty(type=BFU_CachedAction)
     bpy.types.Scene.bfu_export_auto_cached_actions_len = bpy.props.IntProperty()

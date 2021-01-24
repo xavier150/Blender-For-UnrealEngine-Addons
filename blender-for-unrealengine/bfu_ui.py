@@ -72,160 +72,124 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __package__
 
     bakeArmatureAction: BoolProperty(
-        name='Bake Armature animation',
-        description=(
-            'Bake Armature animation for export' +
-            ' (Export will take more time)'
-            ),
+        name=(ti('bake_armature_action_name')),
+        description=(tt('bake_armature_action_desc')),
         default=False,
         )
 
     correctExtremUVScale: BoolProperty(
-        name='Correct Extrem UV Scale',
-        description=(
-            'Correct Extrem UV Scale for better UV quality in UE4' +
-            ' (Export will take more time)'
-            ),
+        name=(ti('correct_extrem_uv_scale_name')),
+        description=(tt('correct_extrem_uv_scale_desc')),
         default=False,
         )
 
     removeSkeletonRootBone: BoolProperty(
-        name='Remove root bone',
-        description='Remove the armature root bone',
+        name=(ti('remove_skeleton_root_bone_name')),
+        description=(tt('remove_skeleton_root_bone_desc')),
         default=True,
         )
 
     skeletonRootBoneName: StringProperty(
-        name='Skeleton root bone name',
-        description=(
-            'Name of the armature when exported.' +
-            ' This is used to change the root bone name.' +
-            ' If egal "Armature" Ue4 will remove the Armature root bone.'
-            ),
+        name=(ti('skeleton_root_bone_name_name')),
+        description=(tt('skeleton_root_bone_name_desc')),
         default="ArmatureRoot",
         )
 
     rescaleFullRigAtExport: EnumProperty(
-        name='Rescale exported rig',
-        description=(
-            'This will rescale the full rig' +
-            ' at the export with the all constraints.'
-            ),
+        name=(ti('rescale_full_rig_at_export_name')),
+        description=(tt('rescale_full_rig_at_export_desc')),
         items=[
             ("auto",
-                "Auto",
-                "Rescale only if the the Unit Scale is not = to 0.01",
+                ti('rescale_full_rig_at_export_auto_name'),
+                tt('rescale_full_rig_at_export_auto_desc'),
                 "SHADERFX",
                 1),
             ("custom_rescale",
-                "Custom Rescale",
-                "You can choose how rescale the rig at the export",
+                ti('rescale_full_rig_at_export_custom_rescale_name'),
+                tt('rescale_full_rig_at_export_custom_rescale_desc'),
                 "MODIFIER",
                 2),
             ("dont_rescale",
-                "Dont Rescale",
-                "Will not rescale the rig",
+                ti('rescale_full_rig_at_export_dont_rescale_name'),
+                tt('rescale_full_rig_at_export_dont_rescale_desc'),
                 "CANCEL",
                 3)
             ]
         )
 
     newRigScale: FloatProperty(
-        name='New scale',
-        description=(
-            'The new rig scale. AUTO: [New scale} = 100 * [Unit scale]'
-            ),
+        name=(ti('new_rig_scale_name')),
+        description=(tt('new_rig_scale_desc')),
         default=100,
         )
 
     staticSocketsAdd90X: BoolProperty(
-        name='Export StaticMesh Sockets with +90 degrees on X',
-        description=(
-            'On StaticMesh the sockets are auto imported by unreal' +
-            ' with -90 degrees on X'
-            ),
+        name=(ti('static_sockets_add_90_x_name')),
+        description=(tt('static_sockets_add_90_x_desc')),
         default=True,
         )
 
     rescaleSocketsAtExport: EnumProperty(
-        name='Rescale exported sockets',
-        description='This will rescale the all sockets at the export.',
+        name=(ti('rescale_sockets_at_export_name')),
+        description=(tt('rescale_sockets_at_export_desc')),
         items=[
             ("auto",
-                "Auto",
-                "Rescale only if the the Unit Scale is not = to 0.01",
+                ti('rescale_sockets_at_export_auto_name'),
+                tt('rescale_sockets_at_export_auto_desc'),
                 "SHADERFX",
                 1),
             ("custom_rescale",
-                "Custom Rescale",
-                "You can choose how rescale the sockets at the export",
+                ti('rescale_sockets_at_export_custom_rescale_name'),
+                tt('rescale_sockets_at_export_custom_rescale_desc'),
                 "MODIFIER",
                 2),
             ("dont_rescale",
-                "Dont Rescale",
-                "Will not rescale the sockets",
+                ti('rescale_sockets_at_export_dont_rescale_name'),
+                tt('rescale_sockets_at_export_dont_rescale_desc'),
                 "CANCEL",
                 3)
             ]
         )
 
     staticSocketsImportedSize: FloatProperty(
-        name='StaticMesh sockets import size',
-        description=(
-            'Size of the socket when imported in Unreal Engine.' +
-            ' AUTO: 1 ( [New scale} = 100 / [Unit scale] )'
-            ),
+        name=(ti('static_sockets_imported_size_name')),
+        description=(tt('static_sockets_imported_size_desc')),
         default=1,
         )
 
     skeletalSocketsImportedSize: FloatProperty(
-        name='SkeletalMesh sockets import size',
-        description=(
-            'Size of the socket when imported in Unreal Engine.' +
-            ' AUTO: 1 ( [New scale} = 100 / [Unit scale] )'
-            ),
+        name=(ti('skeletal_sockets_imported_size_name')),
+        description=(tt('skeletal_sockets_imported_size_desc')),
         default=1,
         )
 
     ignoreNLAForAction: BoolProperty(
-        name='Ignore NLA for Actions',
-        description=(
-            'This will export the action and ignore' +
-            ' the all layer in Nonlinear Animation'
-            ),
+        name=(ti('ignore_nla_for_action_name')),
+        description=(tt('ignore_nla_for_action_desc')),
         default=False,
         )
 
     exportWithCustomProps: BoolProperty(
-        name='Export custom properties',
-        description=(
-            'Process export with custom properties' +
-            ' (Can be used for Metadata)'
-            ),
+        name=(ti('export_with_custom_props_name')),
+        description=(tt('export_with_custom_props_desc')),
         default=False,
         )
 
     exportWithMetaData: BoolProperty(
-        name='Export meta data',
-        description='Process export with meta data',
+        name=(ti('export_with_meta_data_name')),
+        description=(tt('export_with_meta_data_desc')),
         default=False,
         )
 
     revertExportPath: BoolProperty(
-        name='Revert all export path at each export',
-        description=(
-            'will remove the folder of' +
-            ' the all export path at each export'
-            ),
+        name=(ti('revert_export_path_name')),
+        description=(tt('revert_export_path_desc')),
         default=False,
         )
 
     useGeneratedScripts: BoolProperty(
-        name='Use generated script for import assets and sequencer.',
-        description=(
-            'If false the all properties that only works' +
-            ' with import scripts will be disabled'
-            ),
+        name=(ti('use_generated_scripts_name')),
+        description=(tt('use_generated_scripts_desc')),
         default=True,
         )
 
@@ -1355,7 +1319,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 version = addon.bl_info.get('version', (-1, -1, -1))
 
         credit_box = layout.box()
-        credit_box.label(text=languages.t('intro')+' Version: '+str(version))
+        credit_box.label(text=ti('intro')+' Version: '+str(version))
         credit_box.operator("object.open_documentation_page", icon="HELP")
 
         row = layout.row(align=True)
