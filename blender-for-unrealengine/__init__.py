@@ -30,6 +30,7 @@ import fnmatch
 import time
 import addon_utils
 
+from . import bfu_addon_pref
 from . import bfu_ui
 from . import bfu_export_asset
 from . import bfu_write_text
@@ -38,6 +39,8 @@ from . import bfu_utils
 
 if "bpy" in locals():
     import importlib
+    if "bfu_addon_pref" in locals():
+        importlib.reload(bfu_addon_pref)
     if "bfu_ui" in locals():
         importlib.reload(bfu_ui)
     if "bfu_export_asset" in locals():
@@ -125,6 +128,7 @@ def register():
     for cls in classes:
         register_class(cls)
 
+    bfu_addon_pref.register()
     bfu_ui.register()
 
 
@@ -155,4 +159,5 @@ def unregister():
     for cls in classes:
         unregister_class(cls)
 
+    bfu_addon_pref.unregister()
     bfu_ui.unregister()
