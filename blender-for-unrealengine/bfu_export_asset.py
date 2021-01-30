@@ -180,12 +180,13 @@ def ExportAllAssetByList(
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end
-                ExportSingleFbxCamera(
-                        originalScene,
-                        GetObjExportDir(obj),
-                        GetObjExportFileName(obj),
-                        obj
-                    )
+                if obj.bfu_export_fbx_camera:
+                    ExportSingleFbxCamera(
+                            originalScene,
+                            GetObjExportDir(obj),
+                            GetObjExportFileName(obj),
+                            obj
+                        )
                 if obj.ExportAsLod is False:
                     if (scene.text_AdditionalData and
                             addon_prefs.useGeneratedScripts):

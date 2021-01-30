@@ -120,6 +120,16 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         subtype='FILE_NAME'
         )
 
+    bpy.types.Object.bfu_export_fbx_camera = BoolProperty(
+        name="Export camera fbx",
+        description=(
+            'True: export .Fbx object and AdditionalTrack.ini ' +
+            'Else: export only AdditionalTrack.ini'
+            ),
+
+        default=False,
+        )
+
     bpy.types.Object.bfu_export_procedure = EnumProperty(
         name="Export procedure",
         description=(
@@ -912,6 +922,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         # Properties to store in the preset
         preset_values = [
                             'obj.exportFolderName',
+                            'obj.bfu_export_fbx_camera',
                             'obj.ExportAsAlembic',
                             'obj.ExportAsLod',
                             'obj.ForceStaticMesh',
@@ -1112,7 +1123,11 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             icon='FILE_FOLDER'
                             )
 
-                        if obj.type != "CAMERA":
+                        if obj.type == "CAMERA":
+                            CameraProp = layout.column()
+                            CameraProp.prop(obj, 'bfu_export_fbx_camera')
+
+                        else:
                             ProxyProp = layout.column()
                             ProxyProp.prop(obj, 'ExportAsProxy')
                             if obj.ExportAsProxy:
