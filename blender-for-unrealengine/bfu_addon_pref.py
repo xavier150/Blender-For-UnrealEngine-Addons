@@ -318,7 +318,6 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         updateButton.operator("object.new_release_info", icon="TIME")
 
 
-
 classes = (
     BFU_AP_AddonPreferences,
     BFU_AP_AddonPreferences.BFU_OT_NewReleaseInfo,

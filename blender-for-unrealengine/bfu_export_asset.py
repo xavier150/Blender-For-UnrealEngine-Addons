@@ -192,7 +192,7 @@ def ExportAllAssetByList(
                             addon_prefs.useGeneratedScripts):
                         ExportSingleAdditionalTrackCamera(
                             GetObjExportDir(obj),
-                            GetObjExportFileName(obj, "_AdditionalTrack.ini"),
+                            GetObjExportFileName(obj, "_AdditionalTrack.json"),
                             obj
                             )
                 # Resets previous start/end frame

@@ -24,6 +24,9 @@
         "use_generated_scripts_name": "Use generated script for import assets and sequencer.",
         "collision_color_name": "Collision color",
         "notify_unit_scale_potential_error_name": "Notify UnitScale (PotentialError)",
+        "write_text_additional_track_start": "This file was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons",
+        "write_text_additional_track_end": "The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python",
+        "write_text_additional_track_camera": "This file contains additional Camera animation informations that is not supported with .fbx files",
         "end": "end"
     },
     "tooltips": {
