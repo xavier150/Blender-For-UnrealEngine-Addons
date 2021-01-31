@@ -44,8 +44,44 @@ from .bfu_export_utils import *
 from . import bfu_check_potential_error
 
 
+def ProcessCameraExport(obj):
+    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    counter = CounterTimer()
+    dirpath = GetObjExportDir(obj)
+    absdirpath = bpy.path.abspath(dirpath)
+    scene = bpy.context.scene
+
+    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset.asset_name = obj.name
+    MyAsset.asset_type = "Camera"
+    MyAsset.object = obj
+
+    if obj.bfu_export_fbx_camera:
+        ExportSingleFbxCamera(
+            dirpath,
+            GetObjExportFileName(obj),
+            obj
+            )
+        file = MyAsset.files.add()
+        file.name = GetObjExportFileName(obj)
+        file.path = absdirpath
+
+    if obj.ExportAsLod is False:
+        if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
+            ExportSingleAdditionalTrackCamera(
+                dirpath,
+                GetObjExportFileName(obj, "_AdditionalTrack.json"),
+                obj
+                )
+            file = MyAsset.files.add()
+            file.name = GetObjExportFileName(obj, "_AdditionalTrack.json")
+            file.path = absdirpath
+
+    MyAsset.export_time = counter.GetTime()
+    return MyAsset
+
+
 def ExportSingleFbxCamera(
-        originalScene,
         dirpath,
         filename,
         obj
@@ -65,7 +101,7 @@ def ExportSingleFbxCamera(
     if obj.type != 'CAMERA':
         return
 
-    s = CounterStart()
+    
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -109,12 +145,4 @@ def ExportSingleFbxCamera(
     # Reset camera scale
     obj.delta_scale *= 100
 
-    exportTime = CounterEnd(s)
 
-    MyAsset = originalScene.UnrealExportedAssetsList.add()
-    MyAsset.assetName = filename
-    MyAsset.assetType = "Camera"
-    MyAsset.exportPath = absdirpath
-    MyAsset.exportTime = exportTime
-    MyAsset.object = obj
-    return MyAsset

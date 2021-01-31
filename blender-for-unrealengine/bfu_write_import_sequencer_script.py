@@ -153,16 +153,16 @@ def WriteImportSequencerScript():
 
     # Import camera
     for asset in scene.UnrealExportedAssetsList:
-        if (asset.assetType == "Camera"):
+        if (asset.asset_type == "Camera"):
             camera = asset.object
             ImportScript += "\t" + "#import " + camera.name + "\n"
             ImportScript += "\t" + 'print("Start import ' + camera.name + '")' + "\n"
             ImportScript += "\t" + "\n"
 
             ImportScript += "\t" + "#Import fbx transform" + "\n"
-            AdditionalTracksLoc = (os.path.join(asset.exportPath, GetObjExportFileName(asset.object, "_AdditionalTrack.ini")))
+            AdditionalTracksLoc = (os.path.join(asset.export_path, GetObjExportFileName(asset.object, "_AdditionalTrack.ini")))
             ImportScript += '\t' + 'AdditionalTracksLoc = os.path.join(r"'+AdditionalTracksLoc+'")' + '\n'
-            fbxFilePath = (os.path.join(asset.exportPath, GetObjExportFileName(camera)))
+            fbxFilePath = (os.path.join(asset.export_path, GetObjExportFileName(camera)))
             ImportScript += '\t' + 'fbxFilePath = os.path.join(r"'+fbxFilePath+'")' + '\n'
 
             # Create spawnable camera

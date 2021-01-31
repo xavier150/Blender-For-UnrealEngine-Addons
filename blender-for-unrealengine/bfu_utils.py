@@ -227,6 +227,18 @@ def SafeModeSet(obj, target_mode='OBJECT'):
     return False
 
 
+class CounterTimer():
+
+    def __init__(self):
+        self.start = time.perf_counter()
+
+    def ResetTime(self):
+        self.start = time.perf_counter()
+
+    def GetTime(self):
+        return time.perf_counter()-self.start
+
+
 def CounterStart():
     return time.perf_counter()
 

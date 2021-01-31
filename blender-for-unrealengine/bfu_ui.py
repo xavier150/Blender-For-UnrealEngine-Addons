@@ -1682,12 +1682,20 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
             checkButton.operator("object.computalllightmap", icon='TEXTURE')
 
 
+class BFU_OT_FileExport(bpy.types.PropertyGroup):
+    name = StringProperty()
+    path = StringProperty()
+
+
 class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     # [AssetName , AssetType , ExportPath, ExportTime]
-    assetName: StringProperty(default="None")
-    assetType: StringProperty(default="None")  # return from GetAssetType()
-    exportPath: StringProperty(default="None")
-    exportTime: FloatProperty(default=0)
+
+    asset_name: StringProperty(default="None")
+    asset_type: StringProperty(default="None")  # return from GetAssetType()
+    file_name: StringProperty(default="None")
+    files: CollectionProperty(type=BFU_OT_FileExport)
+    export_path: StringProperty(default="None")
+    export_time: FloatProperty(default=0)
     object: PointerProperty(type=bpy.types.Object)
 
 
@@ -2481,6 +2489,8 @@ def register():
     bpy.utils.register_class(BFU_OT_SceneCollectionExport)
     bpy.types.Scene.CollectionExportList = CollectionProperty(
         type=BFU_OT_SceneCollectionExport)
+        
+    bpy.utils.register_class(BFU_OT_FileExport)
     bpy.utils.register_class(BFU_OT_UnrealExportedAsset)
     bpy.types.Scene.UnrealExportedAssetsList = CollectionProperty(
         type=BFU_OT_UnrealExportedAsset)
@@ -2496,6 +2506,7 @@ def unregister():
 
     bpy.utils.unregister_class(BFU_OT_ObjExportAction)
     bpy.utils.unregister_class(BFU_OT_SceneCollectionExport)
+    bpy.utils.unregister_class(BFU_OT_FileExport)
     bpy.utils.unregister_class(BFU_OT_UnrealExportedAsset)
 
     bpy.types.VIEW3D_MT_uv_map.remove(menu_func)

@@ -146,32 +146,32 @@ def WriteOneAssetTaskDef(asset):
     ImportScript = ""
     ImportScript += "\n"
     if not asset.object.ExportAsLod:
-        if (asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh" or asset.assetType == "Alembic" or GetIsAnimation(asset.assetType)):
+        if (asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh" or asset.asset_type == "Alembic" or GetIsAnimation(asset.asset_type)):
             pass
     else:
         return ImportScript
 
-    if asset.assetType == "Alembic":
+    if asset.asset_type == "Alembic":
         FileType = "ABC"
     else:
         FileType = "FBX"
 
     obj = asset.object
-    if GetIsAnimation(asset.assetType):
+    if GetIsAnimation(asset.asset_type):
         AssetRelatifImportPath = os.path.join(obj.exportFolderName, scene.anim_subfolder_name)
     else:
         AssetRelatifImportPath = obj.exportFolderName
-    FilePath = (os.path.join(asset.exportPath, asset.assetName))
-    AdditionalParameterLoc = (os.path.join(asset.exportPath, GetObjExportFileName(asset.object, "_AdditionalParameter.ini")))
+    FilePath = (os.path.join(asset.export_path, asset.file_name))
+    AdditionalParameterLoc = (os.path.join(asset.export_path, GetObjExportFileName(asset.object, "_AdditionalParameter.ini")))
 
-    assetUseName = ValidDefname(asset.assetName[:-4])  # Remove .fbx and fix name
+    assetUseName = ValidDefname(asset.file_name[:-4])  # Remove .fbx and fix name
     functionName = "ImportTask_" + ValidDefname(assetUseName) + "()"
 
     ImportScript += "def " + functionName + ":" + "\n"
 
     # ###############[ New import task ]################
-    ImportScript += "\t" + "################[ Import "+obj.name+" as "+asset.assetType+" type ]################" + "\n"
-    ImportScript += "\t" + "print('================[ New import task : "+obj.name+" as "+asset.assetType+" type ]================')" + "\n"
+    ImportScript += "\t" + "################[ Import "+obj.name+" as "+asset.asset_type+" type ]################" + "\n"
+    ImportScript += "\t" + "print('================[ New import task : "+obj.name+" as "+asset.asset_type+" type ]================')" + "\n"
 
     # #################################[Change]
 
@@ -180,7 +180,7 @@ def WriteOneAssetTaskDef(asset):
     ImportScript += "\t" + "AdditionalParameterLoc = os.path.join(r'"+AdditionalParameterLoc+"')" + "\n"
     ImportScript += "\t" + "AssetImportPath = (os.path.join(unrealImportLocation, r'"+AssetRelatifImportPath+r"').replace('\\','/')).rstrip('/')" + "\n"
 
-    if GetIsAnimation(asset.assetType):
+    if GetIsAnimation(asset.asset_type):
         if(obj.UseTargetCustomSkeletonName):
             customName = ValidUnrealAssetename(obj.TargetCustomSkeletonName)
 
@@ -206,7 +206,7 @@ def WriteOneAssetTaskDef(asset):
 
     # unreal.FbxImportUI
     if FileType == "FBX":
-        if GetIsAnimation(asset.assetType):
+        if GetIsAnimation(asset.asset_type):
             ImportScript += "\t" + "if OriginSkeleton:" + "\n"
 
             ImportScript += "\t\t" + "task.get_editor_property('options').set_editor_property('Skeleton', OriginSkeleton)" + "\n"
@@ -215,15 +215,15 @@ def WriteOneAssetTaskDef(asset):
             ImportScript += "\t\t" + "ImportFailList.append('Skeleton \"'+SkeletonLocation+'\" Not found for \""+obj.name+"\" asset ')" + "\n"
             ImportScript += "\t\t" + "return" + "\n"
 
-        ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('original_import_type', unreal.FBXImportType."+GetFBXImportType(asset.assetType)+")" + "\n"
+        ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('original_import_type', unreal.FBXImportType."+GetFBXImportType(asset.asset_type)+")" + "\n"
 
-        if GetIsAnimation(asset.assetType):
+        if GetIsAnimation(asset.asset_type):
             ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('import_materials', False)" + "\n"
         else:
             ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('import_materials', True)" + "\n"
         ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('import_textures', False)" + "\n"
 
-        if GetIsAnimation(asset.assetType):
+        if GetIsAnimation(asset.asset_type):
             ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('import_animations', True)" + "\n"
             ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('import_mesh', False)" + "\n"
             ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('create_physics_asset',False)" + "\n"
@@ -233,7 +233,7 @@ def WriteOneAssetTaskDef(asset):
             ImportScript += "\t" + "task.get_editor_property('options').set_editor_property('create_physics_asset', " + str(obj.CreatePhysicsAsset) + ")" + "\n"
 
         # unreal.FbxMeshImportData
-        if asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh":
+        if asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh":
             # unreal.FbxTextureImportData
 
             python_MaterialSearchLocation = "LOCAL"
@@ -248,7 +248,7 @@ def WriteOneAssetTaskDef(asset):
             ImportScript += "\t" + "task.get_editor_property('options').texture_import_data.set_editor_property('material_search_location', unreal.MaterialSearchLocation."
             ImportScript += python_MaterialSearchLocation + ")" + "\n"
 
-        if asset.assetType == "StaticMesh":
+        if asset.asset_type == "StaticMesh":
             # unreal.FbxStaticMeshImportData
 
             ImportScript += "\t" + "task.get_editor_property('options').static_mesh_import_data.set_editor_property('combine_meshes', True)" + "\n"
@@ -259,7 +259,7 @@ def WriteOneAssetTaskDef(asset):
                 ImportScript += "\t" + "task.get_editor_property('options').static_mesh_import_data.set_editor_property('static_mesh_lod_group', 'None')" + "\n"
             ImportScript += "\t" + "task.get_editor_property('options').static_mesh_import_data.set_editor_property('generate_lightmap_u_vs', " + str(obj.GenerateLightmapUVs) + ")" + "\n"
 
-        if asset.assetType == "SkeletalMesh" or GetIsAnimation(asset.assetType):
+        if asset.asset_type == "SkeletalMesh" or GetIsAnimation(asset.asset_type):
             # unreal.FbxSkeletalMeshImportData
             ImportScript += "\t" + "task.get_editor_property('options').skeletal_mesh_import_data.set_editor_property('import_morph_targets', True)" + "\n"
             ImportScript += "\t" + "task.get_editor_property('options').skeletal_mesh_import_data.set_editor_property('convert_scene', True)" + "\n"
@@ -283,7 +283,7 @@ def WriteOneAssetTaskDef(asset):
     ImportScript += "\t\t" + "ImportFailList.append('Error zero imported object for \""+obj.name+"\" ')" + "\n"
     ImportScript += "\t\t" + "return" + "\n"
 
-    if asset.assetType == "Action" or asset.assetType == "Pose" or asset.assetType == "NlAnim":
+    if asset.asset_type == "Action" or asset.asset_type == "Pose" or asset.asset_type == "NlAnim":
         # Remove extra mesh
         ImportScript += "\t" + "# For animation remove the extra mesh" + "\n"
 
@@ -303,7 +303,7 @@ def WriteOneAssetTaskDef(asset):
     # ###############[ Post treatment ]################
     ImportScript += "\t" + "print('========================= Imports of "+obj.name+" completed ! Post treatment started...	=========================')" + "\n"
 
-    if asset.assetType == "StaticMesh":
+    if asset.asset_type == "StaticMesh":
 
         if (obj.UseStaticMeshLODGroup):
             ImportScript += "\t" "asset.set_editor_property('lod_group', '" + obj.StaticMeshLODGroup + "')" + "\n"
@@ -328,12 +328,12 @@ def WriteOneAssetTaskDef(asset):
         ImportScript += "\t" + "asset.get_editor_property('asset_import_data').set_editor_property('vertex_color_import_option', unreal.VertexColorImportOption."
         ImportScript += python_VertexColorImportOption + ") " + "\n"
 
-    if asset.assetType == "SkeletalMesh":
+    if asset.asset_type == "SkeletalMesh":
 
         ImportScript += "\t" + "asset.get_editor_property('asset_import_data').set_editor_property('normal_import_method', unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS) " + "\n"
 
     # Socket
-    if asset.assetType == "SkeletalMesh":
+    if asset.asset_type == "SkeletalMesh":
 
         ImportScript += "\n\t" + "#Import the SkeletalMesh socket(s)" + "\n"  # Import the SkeletalMesh  Socket(s)
         ImportScript += "\t" + "sockets_to_add = GetOptionByIniFile(AdditionalParameterLoc, 'Sockets', True)" + "\n"
@@ -348,18 +348,18 @@ def WriteOneAssetTaskDef(asset):
         # ImportScript += "\t\t" + "new_socket.SocketName = socket[0]" + "\n"
 
     # Lod
-    if asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh":
-        if asset.assetType == "StaticMesh":
+    if asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh":
+        if asset.asset_type == "StaticMesh":
             ImportScript += "\n\t" + "#Import the StaticMesh lod(s)" + "\n"  # Import the StaticMesh lod(s)
             ImportScript += "\t" + "unreal.EditorStaticMeshLibrary.remove_lods(asset)" + "\n"
 
-        if asset.assetType == "SkeletalMesh":
+        if asset.asset_type == "SkeletalMesh":
             ImportScript += "\n\t" + "#Import the SkeletalMesh lod(s)" + "\n"  # Import the SkeletalMesh  lod(s)
 
         ImportScript += "\t" + "lods_to_add = GetOptionByIniFile(AdditionalParameterLoc, 'LevelOfDetail')" + "\n"
         ImportScript += "\t" + "for x, lod in enumerate(lods_to_add):" + "\n"
 
-        if asset.assetType == "StaticMesh":
+        if asset.asset_type == "StaticMesh":
 
             ImportScript += "\t\t" + "lodTask = unreal.AssetImportTask()" + "\n"
             ImportScript += "\t\t" + "lodTask.filename = lod" + "\n"
@@ -370,7 +370,7 @@ def WriteOneAssetTaskDef(asset):
             ImportScript += "\t\t" + "lodAsset = unreal.find_asset(lodTask.imported_object_paths[0])" + "\n"
             ImportScript += "\t\t" + "slot_replaced = unreal.EditorStaticMeshLibrary.set_lod_from_static_mesh(asset, x+1, lodAsset, 0, True)" + "\n"
             ImportScript += "\t\t" + "unreal.EditorAssetLibrary.delete_asset(lodTask.imported_object_paths[0])" + "\n"
-        elif asset.assetType == "SkeletalMesh":
+        elif asset.asset_type == "SkeletalMesh":
 
             ImportScript += "\t\t" + "pass" + "\n"
             # ImportScript += "\t\t" + "unreal.FbxMeshUtils.ImportSkeletalMeshLOD(asset, lod, x+1)" + "\n" #Vania unreal python dont have unreal.FbxMeshUtils.
@@ -381,10 +381,10 @@ def WriteOneAssetTaskDef(asset):
 
     ImportScript += "\t" + "print('========================= Post treatment of "+obj.name+" completed !	 =========================')" + "\n"
 
-    if asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh":
+    if asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh":
         ImportScript += "\t" + "unreal.EditorAssetLibrary.save_loaded_asset(asset)" + "\n"
 
-    ImportScript += "\t" + "ImportedList.append([asset, '" + asset.assetType + "'])" + "\n"
+    ImportScript += "\t" + "ImportedList.append([asset, '" + asset.asset_type + "'])" + "\n"
     ImportScript += functionName + "\n"
     ImportScript += "\n"
     ImportScript += "\n"
@@ -432,7 +432,7 @@ def WriteImportAssetScript():
         ImportScript += "print('========================= Creating "+desiredTaskType+" tasks... =========================')" + "\n"
 
         for asset in scene.UnrealExportedAssetsList:
-            if desiredTaskType == asset.assetType or (GetIsAnimation(asset.assetType) and desiredTaskType == "Animation"):
+            if desiredTaskType == asset.asset_type or (GetIsAnimation(asset.asset_type) and desiredTaskType == "Animation"):
                 ImportScript += WriteOneAssetTaskDef(asset)
 
         ImportScript += "\n"
@@ -442,9 +442,9 @@ def WriteImportAssetScript():
     def ExsitTypeInExportedAssets(desiredTaskType):
         # Cree un groupe de tache uniquement si il trouve des taches a faire si non return
         for asset in scene.UnrealExportedAssetsList:
-            if asset.assetType == desiredTaskType:
+            if asset.asset_type == desiredTaskType:
                 return True
-            if GetIsAnimation(asset.assetType) and desiredTaskType == "Animation":
+            if GetIsAnimation(asset.asset_type) and desiredTaskType == "Animation":
                 return True
         return False
 

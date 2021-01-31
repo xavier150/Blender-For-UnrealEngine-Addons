@@ -84,9 +84,9 @@ def ExportSingleAlembicAnimation(
     exportTime = CounterEnd(s)
 
     MyAsset = originalScene.UnrealExportedAssetsList.add()
-    MyAsset.assetName = filename
-    MyAsset.assetType = "Alembic"
-    MyAsset.exportPath = absdirpath
-    MyAsset.exportTime = exportTime
+    MyAsset.file_name = filename
+    MyAsset.asset_type = "Alembic"
+    MyAsset.export_path = absdirpath
+    MyAsset.export_time = exportTime
     MyAsset.object = obj
     return MyAsset

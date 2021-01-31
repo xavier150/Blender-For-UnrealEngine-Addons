@@ -27,6 +27,7 @@
         "write_text_additional_track_start": "This file was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons",
         "write_text_additional_track_end": "The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python",
         "write_text_additional_track_camera": "This file contains additional Camera animation informations that is not supported with .fbx files",
+        "write_text_additional_track_all": "It used for import into Unreal Engine all the assets of type StaticMesh, SkeletalMesh, Animation, Pose, Camera, [...]",
         "end": "end"
     },
     "tooltips": {

@@ -109,22 +109,25 @@ def WriteExportLog():
     AnimNum = 0
     CameraNum = 0
 
+    # Get number per asset type
     for assets in scene.UnrealExportedAssetsList:
-        if assets.assetType == "StaticMesh":
+        if assets.asset_type == "StaticMesh":
             StaticNum += 1
-        if assets.assetType == "SkeletalMesh":
+        if assets.asset_type == "SkeletalMesh":
             SkeletalNum += 1
-        if assets.assetType == "Alembic":
+        if assets.asset_type == "Alembic":
             AlembicNum += 1
-        if GetIsAnimation(assets.assetType):
+        if GetIsAnimation(assets.asset_type):
             AnimNum += 1
-        if assets.assetType == "Camera":
+        if assets.asset_type == "Camera":
             CameraNum += 1
+
     asset_number = len(scene.UnrealExportedAssetsList)
     exported_assets = StaticNum+SkeletalNum+AlembicNum+AnimNum+CameraNum
 
     OtherNum = asset_number - exported_assets
 
+    # Asset number string
     AssetNumberByType = str(StaticNum)+" StaticMesh(s) | "
     AssetNumberByType += str(SkeletalNum)+" SkeletalMesh(s) | "
     AssetNumberByType += str(AlembicNum)+" Alembic(s) | "
@@ -132,33 +135,27 @@ def WriteExportLog():
     AssetNumberByType += str(CameraNum)+" Camera(s) | "
     AssetNumberByType += str(OtherNum)+" Other(s)" + "\n"
 
-    ExportLog = "..." + "\n"
+    ExportLog = ""
     ExportLog += AssetNumberByType
     ExportLog += "\n"
     for asset in scene.UnrealExportedAssetsList:
 
-        if (asset.assetType == "NlAnim"):
-            primaryInfo = "Animation"
-            secondaryInfo = "(NLA)"
-        elif (asset.assetType == "Action"):
-            primaryInfo = "Animation"
-            secondaryInfo = "(Action)"
-        elif (asset.assetType == "Pose"):
-            primaryInfo = "Animation"
-            secondaryInfo = "(Pose)"
+        if (asset.asset_type == "NlAnim"):
+            primaryInfo = "Animation (NLA)"
+        elif (asset.asset_type == "Action"):
+            primaryInfo = "Animation (Action)"
+        elif (asset.asset_type == "Pose"):
+            primaryInfo = "Animation (Pose)"
         else:
-            primaryInfo = asset.assetType
             if asset.object.ExportAsLod:
-                secondaryInfo = " (LOD)"
+                primaryInfo = asset.asset_type+" (LOD)"
             else:
-                secondaryInfo = ""
+                primaryInfo = asset.asset_type
 
         ExportLog += (
-            "["+primaryInfo+"]"+secondaryInfo+" -> " +
-            "\""+asset.assetName+"\" EXPORTED IN " +
-            str(round(asset.exportTime, 2))+"s\r\n"
-            )
-        ExportLog += (asset.exportPath + "\n")
+            asset.asset_name+" ["+primaryInfo+"] EXPORTED IN " + str(round(asset.export_time, 2))+"s\r\n")
+        for file in asset.files:
+            ExportLog += (file.path + "\\" + file.name + "\n")
         ExportLog += "\n"
 
     return ExportLog
@@ -193,10 +190,10 @@ def WriteExportedAssetsDetail():
             )
 
         # Mesh only
-        if (asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh"):
-            fbx_path = (os.path.join(asset.exportPath, asset.assetName))
+        if (asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh"):
+            fbx_path = (os.path.join(asset.export_path, asset.file_name))
             config.set(AssetSectionName, 'lod0_fbx_path', fbx_path)
-            config.set(AssetSectionName, 'asset_type', asset.assetType)
+            config.set(AssetSectionName, 'asset_type', asset.asset_type)
             config.set(AssetSectionName, 'material_search_location', obj.MaterialSearchLocation)
             config.set(AssetSectionName, 'generate_lightmap_uvs', str(obj.GenerateLightmapUVs))
             config.set(AssetSectionName, 'create_physics_asset', str(obj.CreatePhysicsAsset))
@@ -206,27 +203,25 @@ def WriteExportedAssetsDetail():
                 config.set(AssetSectionName, 'light_map_resolution', str(GetCompuntedLightMap(obj)))
 
         # Anim only
-        if GetIsAnimation(asset.assetType):
+        if GetIsAnimation(asset.asset_type):
             actionIndex = 0
             animOption = "anim"+str(actionIndex)
             while config.has_option(AssetSectionName, animOption+'_fbx_path'):
                 actionIndex += 1
                 animOption = "anim"+str(actionIndex)
 
-            fbx_path = (os.path.join(asset.exportPath, asset.assetName))
+            fbx_path = (os.path.join(asset.export_path, asset.file_name))
             config.set(AssetSectionName, animOption+'_fbx_path', fbx_path)
             config.set(AssetSectionName, animOption+'_import_path', os.path.join(obj.exportFolderName, scene.anim_subfolder_name))
 
     AssetForImport = []
     for asset in scene.UnrealExportedAssetsList:
-        if (asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh" or GetIsAnimation(asset.assetType)):
+        if (asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh" or GetIsAnimation(asset.asset_type)):
             AssetForImport.append(asset)
 
     # Comment
     config.add_section('Comment')
-    config.set('Comment', '; This config file was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons')
-    config.set('Comment', '; The config must be used in Unreal Engine Editor with the plugin BlenderImporter : ...')
-    config.set('Comment', '; It used for import into Unreal Engine all the assets of type StaticMesh, SkeletalMesh, Animation and Pose')
+    config.set('Comment', '; '+ti(write_text_additional_track_start))
 
     config.add_section('Defaultsettings')
     config.set('Defaultsettings', 'unreal_import_location', r'/Game/'+scene.unreal_import_location)
@@ -271,8 +266,6 @@ def WriteCameraAnimationTracks(obj):
             keys.append((frame, v))
         scene.frame_set(saveFrame)  # Resets previous start frame
         return keys
-
-
 
     def getOneKeysByFcurves(obj, DataPath, DataValue, Frame, IsData=True):
         scene = bpy.context.scene
@@ -499,7 +492,9 @@ def WriteAllTextFiles():
 
     scene = bpy.context.scene
     if scene.text_ExportLog:
-        Text = WriteExportLog()
+        Text = ti("write_text_additional_track_start") + "\n"
+        Text += "" + "\n"
+        Text += WriteExportLog()
         if Text is not None:
             Filename = ValidFilename(scene.file_export_log_name)
             ExportSingleText(Text, scene.export_other_file_path, Filename)

@@ -28,8 +28,8 @@ if "bpy" in locals():
         importlib.reload(bfu_export_single_alembic_animation)
     if "bfu_export_single_fbx_action" in locals():
         importlib.reload(bfu_export_single_fbx_action)
-    if "bfu_export_single_fbx_camera" in locals():
-        importlib.reload(bfu_export_single_fbx_camera)
+    if "bfu_export_single_camera" in locals():
+        importlib.reload(bfu_export_single_camera)
     if "bfu_export_single_fbx_nla_anim" in locals():
         importlib.reload(bfu_export_single_fbx_nla_anim)
     if "bfu_export_single_skeletal_mesh" in locals():
@@ -56,8 +56,8 @@ from .bfu_export_single_alembic_animation import *
 from . import bfu_export_single_fbx_action
 from .bfu_export_single_fbx_action import *
 
-from . import bfu_export_single_fbx_camera
-from .bfu_export_single_fbx_camera import *
+from . import bfu_export_single_camera
+from .bfu_export_single_camera import *
 
 from . import bfu_export_single_fbx_nla_anim
 from .bfu_export_single_fbx_nla_anim import *
@@ -133,7 +133,7 @@ def IsValidObjectForExport(scene, obj):
 
 
 def ExportAllAssetByList(
-    originalScene,
+
     targetobjects,
     targetActionName,
     targetcollection
@@ -153,18 +153,18 @@ def ExportAllAssetByList(
     def UpdateProgress(time=None):
         update_progress(
             "Export assets",
-            len(originalScene.UnrealExportedAssetsList)/NumberAssetToExport,
+            len(scene.UnrealExportedAssetsList)/NumberAssetToExport,
             time
         )
     UpdateProgress()
 
     # Export collections
     if scene.static_collection_export:
-        for col in GetCollectionToExport(originalScene):
+        for col in GetCollectionToExport(scene):
             if col in targetcollection:
                 # StaticMesh collection
                 ExportSingleStaticMeshCollection(
-                    originalScene,
+                    scene,
                     GetCollectionExportDir(),
                     GetCollectionExportFileName(col),
                     col
@@ -176,34 +176,21 @@ def ExportAllAssetByList(
         if obj.ExportEnum == "export_recursive":
 
             # Camera
-            if GetAssetType(obj) == "Camera" and IsValidObjectForExport(originalScene, obj):
+            if GetAssetType(obj) == "Camera" and IsValidObjectForExport(scene, obj):
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end
-                if obj.bfu_export_fbx_camera:
-                    ExportSingleFbxCamera(
-                            originalScene,
-                            GetObjExportDir(obj),
-                            GetObjExportFileName(obj),
-                            obj
-                        )
-                if obj.ExportAsLod is False:
-                    if (scene.text_AdditionalData and
-                            addon_prefs.useGeneratedScripts):
-                        ExportSingleAdditionalTrackCamera(
-                            GetObjExportDir(obj),
-                            GetObjExportFileName(obj, "_AdditionalTrack.json"),
-                            obj
-                            )
+                ProcessCameraExport(obj)
+
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
                 scene.frame_end = UserEndFrame
                 UpdateProgress()
 
             # StaticMesh
-            if GetAssetType(obj) == "StaticMesh" and IsValidObjectForExport(originalScene, obj):
+            if GetAssetType(obj) == "StaticMesh" and IsValidObjectForExport(scene, obj):
                 ExportSingleStaticMesh(
-                    originalScene,
+                    scene,
                     GetObjExportDir(obj),
                     GetObjExportFileName(obj),
                     obj
@@ -222,9 +209,9 @@ def ExportAllAssetByList(
                 UpdateProgress()
 
             # SkeletalMesh
-            if GetAssetType(obj) == "SkeletalMesh" and IsValidObjectForExport(originalScene, obj):
+            if GetAssetType(obj) == "SkeletalMesh" and IsValidObjectForExport(scene, obj):
                 ExportSingleSkeletalMesh(
-                    originalScene,
+                    scene,
                     GetObjExportDir(obj),
                     GetObjExportFileName(obj),
                     obj
@@ -241,9 +228,9 @@ def ExportAllAssetByList(
                 UpdateProgress()
 
             # Alembic
-            if GetAssetType(obj) == "Alembic" and IsValidObjectForExport(originalScene, obj):
+            if GetAssetType(obj) == "Alembic" and IsValidObjectForExport(scene, obj):
                 ExportSingleAlembicAnimation(
-                    originalScene,
+                    scene,
                     GetObjExportDir(obj),
                     GetObjExportFileName(obj, ".abc"),
                     obj
@@ -261,12 +248,12 @@ def ExportAllAssetByList(
                         animType = GetActionType(action)
 
                         # Action
-                        if animType == "Action" and IsValidActionForExport(originalScene, obj, animType):
+                        if animType == "Action" and IsValidActionForExport(scene, obj, animType):
                             # Save current start/end frame
                             UserStartFrame = scene.frame_start
                             UserEndFrame = scene.frame_end
                             ExportSingleFbxAction(
-                                originalScene,
+                                scene,
                                 animExportDir,
                                 GetActionExportFileName(obj, action),
                                 obj,
@@ -279,12 +266,12 @@ def ExportAllAssetByList(
                             UpdateProgress()
 
                         # pose
-                        if animType == "Pose" and IsValidActionForExport(originalScene, obj, animType):
+                        if animType == "Pose" and IsValidActionForExport(scene, obj, animType):
                             # Save current start/end frame
                             UserStartFrame = scene.frame_start
                             UserEndFrame = scene.frame_end
                             ExportSingleFbxAction(
-                                originalScene,
+                                scene,
                                 animExportDir,
                                 GetActionExportFileName(obj, action),
                                 obj,
@@ -297,11 +284,11 @@ def ExportAllAssetByList(
                             UpdateProgress()
 
                 # NLA animation
-                if IsValidActionForExport(originalScene, "NLA", obj):
+                if IsValidActionForExport(scene, "NLA", obj):
                     if obj.ExportNLA:
                         scene.frame_end += 1
                         ExportSingleFbxNLAAnim(
-                            originalScene,
+                            scene,
                             animExportDir,
                             GetNLAExportFileName(obj),
                             obj
@@ -340,10 +327,6 @@ def PrepareAndSaveDataForExport():
             if childCol.hide_viewport:
                 childCol.hide_viewport = False
 
-    copyScene = bpy.context.scene.copy()
-    copyScene.name = "ue4-export_Temp"
-    bpy.context.window.scene = copyScene  # Switch the scene but can take time
-
     SafeModeSet(MyCurrentDataSave.user_active, 'OBJECT')
 
     if addon_prefs.revertExportPath:
@@ -360,14 +343,10 @@ def PrepareAndSaveDataForExport():
                 assetList.append(Asset.obj)
 
     ExportAllAssetByList(
-        originalScene=scene,
         targetobjects=assetList,
         targetActionName=MyCurrentDataSave.action_names,
         targetcollection=MyCurrentDataSave.collection_names,
     )
-
-    bpy.context.window.scene = scene
-    bpy.data.scenes.remove(copyScene)
 
     MyCurrentDataSave.ResetSelectByName()
     MyCurrentDataSave.ResetSceneAtSave()
