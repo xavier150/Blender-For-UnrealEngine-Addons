@@ -266,12 +266,13 @@ def WriteCameraAnimationTracks(obj):
         saveFrame = scene.frame_current  # Save current frame
         keys = []
         for frame in range(scene.frame_start, scene.frame_end+1):
-            print("a")
             scene.frame_set(frame)
             v = obj.matrix_world*1
             keys.append((frame, v))
         scene.frame_set(saveFrame)  # Resets previous start frame
         return keys
+
+
 
     def getOneKeysByFcurves(obj, DataPath, DataValue, Frame, IsData=True):
         scene = bpy.context.scene
@@ -329,13 +330,12 @@ def WriteCameraAnimationTracks(obj):
 
                 # Get Transfrom
                 matrix = camera.matrix_world @ Matrix.Rotation(radians(90.0), 4, 'Y') @ Matrix.Rotation(radians(-90.0), 4, 'X')
-                t = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
-                r = matrix.to_euler()
-                s = matrix.to_scale()
+                loc, rot, scale = obj.matrix_world.decompose()
+                loc = loc * 100 * bpy.context.scene.unit_settings.scale_length
 
-                array_location = [t[0], t[1]*-1, t[2]]
-                array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]
-                array_scale = [s[0], s[1], s[2]]
+                array_location = [loc[0], loc[1]*-1, loc[2]]
+                array_rotation = [degrees(rot[0]), degrees(rot[1])*-1, degrees(rot[2])*-1]
+                array_scale = [scale[0], scale[1], scale[2]]
 
                 transform = {}
                 transform["location_x"] = array_location[0]
