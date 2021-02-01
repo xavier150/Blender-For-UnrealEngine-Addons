@@ -65,6 +65,7 @@ def ProcessCameraExport(obj):
         file = MyAsset.files.add()
         file.name = GetObjExportFileName(obj)
         file.path = absdirpath
+        file.type = "FBX"
 
     if obj.ExportAsLod is False:
         if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
@@ -76,6 +77,7 @@ def ProcessCameraExport(obj):
             file = MyAsset.files.add()
             file.name = GetObjExportFileName(obj, "_AdditionalTrack.json")
             file.path = absdirpath
+            file.type = "AdditionalTrack"
 
     MyAsset.export_time = counter.GetTime()
     return MyAsset

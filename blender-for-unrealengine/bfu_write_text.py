@@ -25,6 +25,7 @@ from mathutils import Matrix
 import json
 from . import languages
 from .languages import *
+from shutil import copyfile
 
 
 if "bpy" in locals():
@@ -316,19 +317,20 @@ def WriteCameraAnimationTracks(obj):
             self.hide_viewport = {}
 
         def EvaluateTracks(self, camera, frame_start, frame_end):
-
             saveFrame = scene.frame_current
             for frame in range(frame_start, frame_end+1):
                 scene.frame_set(frame)
 
                 # Get Transfrom
+
                 matrix = camera.matrix_world @ Matrix.Rotation(radians(90.0), 4, 'Y') @ Matrix.Rotation(radians(-90.0), 4, 'X')
-                loc, rot, scale = obj.matrix_world.decompose()
-                loc = loc * 100 * bpy.context.scene.unit_settings.scale_length
+                loc = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
+                r = matrix.to_euler()
+                s = matrix.to_scale()
 
                 array_location = [loc[0], loc[1]*-1, loc[2]]
-                array_rotation = [degrees(rot[0]), degrees(rot[1])*-1, degrees(rot[2])*-1]
-                array_scale = [scale[0], scale[1], scale[2]]
+                array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]
+                array_scale = [s[0], s[1], s[2]]
 
                 transform = {}
                 transform["location_x"] = array_location[0]
@@ -349,10 +351,10 @@ def WriteCameraAnimationTracks(obj):
 
                 # Get FocusDistance
                 if camera.data.dof.focus_object is not None:
-                    key = getCameraFocusDistance(camera, camera.data.dof.focus_object) * 100
+                    key = getCameraFocusDistance(camera, camera.data.dof.focus_object) * 100 * bpy.context.scene.unit_settings.scale_length
 
                 else:
-                    key = getOneKeysByFcurves(camera, "dof.focus_distance", camera.data.dof.focus_distance, frame) * 100
+                    key = getOneKeysByFcurves(camera, "dof.focus_distance", camera.data.dof.focus_distance, frame) * 100 * bpy.context.scene.unit_settings.scale_length
 
                 if key > 0:
                     self.focus_distance[frame] = key
@@ -366,19 +368,18 @@ def WriteCameraAnimationTracks(obj):
                     self.aperture_fstop[frame] = 21  # 21 is default value in ue4
 
                 boolKey = getOneKeysByFcurves(camera, "hide_viewport", camera.hide_viewport, frame, False)
-                self.hide_viewport = (boolKey < 1)  # Inversed for convert hide to spawn
+                self.hide_viewport[frame] = (boolKey < 1)  # Inversed for convert hide to spawn
             scene.frame_set(saveFrame)
 
         pass
 
     scene = bpy.context.scene
     data = {}
-    data['Info'] = []
-    data['Info'].append({
-        'Info 1': ti('write_text_additional_track_start'),
-        'Info 2': ti('write_text_additional_track_camera'),
-        'Info 3': ti('write_text_additional_track_end'),
-    })
+    data['Coment'] = {
+        '1/3': ti('write_text_additional_track_start'),
+        '2/3': ti('write_text_additional_track_camera'),
+        '3/3': ti('write_text_additional_track_end'),
+    }
 
     data['Frames'] = []
     data['Frames'].append({
@@ -389,26 +390,13 @@ def WriteCameraAnimationTracks(obj):
     camera_tracks = CameraDataAtFrame()
     camera_tracks.EvaluateTracks(obj, scene.frame_start, scene.frame_end)
 
-    data['Camera transform'] = []
-    data['Camera transform'].append(camera_tracks.transform_track)
-
-    data['Camera FocalLength'] = []
-    data['Camera FocalLength'].append(camera_tracks.lens)
-
-    data['Camera SensorWidth'] = []
-    data['Camera SensorWidth'].append(camera_tracks.sensor_width)
-
-    data['Camera SensorHeight'] = []
-    data['Camera SensorHeight'].append(camera_tracks.sensor_height)
-
-    data['Camera FocusDistance'] = []
-    data['Camera FocusDistance'].append(camera_tracks.focus_distance)
-
-    data['Camera Aperture'] = []
-    data['Camera Aperture'].append(camera_tracks.aperture_fstop)
-
-    data['Camera Spawned'] = []
-    data['Camera Spawned'].append(camera_tracks.hide_viewport)
+    data['Camera transform'] = camera_tracks.transform_track
+    data['Camera FocalLength'] = camera_tracks.lens
+    data['Camera SensorWidth'] = camera_tracks.sensor_width
+    data['Camera SensorHeight'] = camera_tracks.sensor_height
+    data['Camera FocusDistance'] = camera_tracks.focus_distance
+    data['Camera Aperture'] = camera_tracks.aperture_fstop
+    data['Camera Spawned'] = camera_tracks.hide_viewport
 
     return data
 
@@ -491,6 +479,8 @@ def WriteSingleMeshAdditionalParameter(obj):
 def WriteAllTextFiles():
 
     scene = bpy.context.scene
+    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+
     if scene.text_ExportLog:
         Text = ti("write_text_additional_track_start") + "\n"
         Text += "" + "\n"
@@ -501,18 +491,21 @@ def WriteAllTextFiles():
 
     # Import script
     if scene.text_ImportAssetScript:
-        addon_prefs = bpy.context.preferences.addons[__package__].preferences
         Text = bfu_write_import_asset_script.WriteImportAssetScript()
-        if Text is not None:
-            Filename = ValidFilename(scene.file_import_asset_script_name)
-            ExportSingleText(Text, scene.export_other_file_path, Filename)
+        Filename = ValidFilename(scene.file_import_asset_script_name)
+        ExportSingleText(Text, scene.export_other_file_path, Filename)
 
     if scene.text_ImportSequenceScript:
-        addon_prefs = bpy.context.preferences.addons[__package__].preferences
-        Text = bfu_write_import_sequencer_script.WriteImportSequencerScript()
-        if Text is not None:
-            Filename = ValidFilename(scene.file_import_sequencer_script_name)
-            ExportSingleText(Text, scene.export_other_file_path, Filename)
+        json_data = bfu_write_import_sequencer_script.WriteImportSequencerTracks()
+        ExportSingleJson(json_data, scene.export_other_file_path, "ImportSequencerData.json")
+
+        source = os.path.join(bpy.utils.user_resource('SCRIPTS', r"addons\blender-for-unrealengine\import"), "sequencer_import_script.py")
+        filename = ValidFilename(scene.file_import_sequencer_script_name)
+        destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
+        copyfile(source, destination)
+
+
+
 
     # ConfigParser
     '''

@@ -1685,6 +1685,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
 class BFU_OT_FileExport(bpy.types.PropertyGroup):
     name = StringProperty()
     path = StringProperty()
+    type = StringProperty()
 
 
 class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
@@ -1692,9 +1693,7 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
 
     asset_name: StringProperty(default="None")
     asset_type: StringProperty(default="None")  # return from GetAssetType()
-    file_name: StringProperty(default="None")
     files: CollectionProperty(type=BFU_OT_FileExport)
-    export_path: StringProperty(default="None")
     export_time: FloatProperty(default=0)
     object: PointerProperty(type=bpy.types.Object)
 
@@ -1803,10 +1802,8 @@ class BFU_PT_Export(bpy.types.Panel):
         maxlen=64,
         default="ImportAssetScript.py")
 
-    default = "file_import_sequencer_script_namea.py"
-
     bpy.types.Scene.file_import_sequencer_script_name = bpy.props.StringProperty(
-        name="Import sequencer script Name1",
+        name="Import sequencer script Name",
         description="Import sequencer script name",
         maxlen=64,
         default="ImportSequencerScript.py")
