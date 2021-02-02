@@ -228,7 +228,7 @@ def SafeModeSet(obj, target_mode='OBJECT'):
 
 
 class CounterTimer():
-
+    
     def __init__(self):
         self.start = time.perf_counter()
 
@@ -237,14 +237,6 @@ class CounterTimer():
 
     def GetTime(self):
         return time.perf_counter()-self.start
-
-
-def CounterStart():
-    return time.perf_counter()
-
-
-def CounterEnd(start):
-    return time.perf_counter()-start
 
 
 def update_progress(job_title, progress, time=None):
@@ -1434,14 +1426,14 @@ def UpdateAreaLightMapList(list=None):
 
     UpdatedRes = 0
 
-    s = CounterStart()
+    counter = CounterTimer()
     for obj in objs:
         obj.computedStaticMeshLightMapRes = GetExportRealSurfaceArea(obj)
         UpdatedRes += 1
         update_progress(
             "Update LightMap",
             (UpdatedRes/len(objs)),
-            CounterEnd(s))
+            counter.GetTime())
     return UpdatedRes
 
 

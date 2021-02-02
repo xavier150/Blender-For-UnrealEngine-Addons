@@ -1688,7 +1688,10 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
 class BFU_OT_FileExport(bpy.types.PropertyGroup):
     name: StringProperty()
     path: StringProperty()
-    type: StringProperty()
+    type: StringProperty()  # FBX, AdditionalTrack
+
+    def GetFullPath(self):
+        return os.path.join(self.path, self.name)
 
 
 class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
@@ -1699,6 +1702,12 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     files: CollectionProperty(type=BFU_OT_FileExport)
     export_time: FloatProperty(default=0)
     object: PointerProperty(type=bpy.types.Object)
+
+    def GetFileByType(self, type: str):
+        for file in self.files:
+            if file.type == type:
+                return file
+        print("File type not found in this assets:", type)
 
 
 class BFU_PT_Export(bpy.types.Panel):
@@ -2133,7 +2142,7 @@ class BFU_PT_Export(bpy.types.Panel):
                 return {'FINISHED'}
 
             scene.UnrealExportedAssetsList.clear()
-            s = CounterStart()
+            counter = CounterTimer()
             bfu_check_potential_error.UpdateNameHierarchy()
             bfu_export_asset.ExportForUnrealEngine()
             bfu_write_text.WriteAllTextFiles()
@@ -2143,7 +2152,7 @@ class BFU_PT_Export(bpy.types.Panel):
                 "Export of " +
                 str(len(scene.UnrealExportedAssetsList)) +
                 " asset(s) has been finalized in " +
-                str(round(CounterEnd(s), 2)) +
+                str(round(counter.GetTime(), 2)) +
                 "seconds. Look in console for more info.")
             print(
                 "=========================" +

@@ -21,6 +21,8 @@ import bpy
 import time
 import configparser
 from math import degrees
+from . import languages
+from .languages import *
 
 if "bpy" in locals():
     import importlib
@@ -30,6 +32,8 @@ if "bpy" in locals():
         importlib.reload(bfu_utils)
     if "bfu_write_utils" in locals():
         importlib.reload(bfu_write_utils)
+    if "languages" in locals():
+        importlib.reload(languages)
 
 from . import bfu_basics
 from .bfu_basics import *
@@ -161,8 +165,9 @@ def WriteOneAssetTaskDef(asset):
         AssetRelatifImportPath = os.path.join(obj.exportFolderName, scene.anim_subfolder_name)
     else:
         AssetRelatifImportPath = obj.exportFolderName
-    FilePath = (os.path.join(asset.export_path, asset.file_name))
-    AdditionalParameterLoc = (os.path.join(asset.export_path, GetObjExportFileName(asset.object, "_AdditionalParameter.ini")))
+
+    fbx_file_path = asset.GetFileByType("FBX").GetFullPath()
+    additional_track_file_path = asset.GetFileByType("AdditionalTrack").GetFullPath()
 
     assetUseName = ValidDefname(asset.file_name[:-4])  # Remove .fbx and fix name
     functionName = "ImportTask_" + ValidDefname(assetUseName) + "()"
@@ -176,8 +181,8 @@ def WriteOneAssetTaskDef(asset):
     # #################################[Change]
 
     # Property
-    ImportScript += "\t" + "FilePath = os.path.join(r'"+FilePath+"')" + "\n"
-    ImportScript += "\t" + "AdditionalParameterLoc = os.path.join(r'"+AdditionalParameterLoc+"')" + "\n"
+    ImportScript += "\t" + "FilePath = os.path.join(r'"+fbx_file_path+"')" + "\n"
+    ImportScript += "\t" + "AdditionalParameterLoc = os.path.join(r'"+additional_track_file_path+"')" + "\n"
     ImportScript += "\t" + "AssetImportPath = (os.path.join(unrealImportLocation, r'"+AssetRelatifImportPath+r"').replace('\\','/')).rstrip('/')" + "\n"
 
     if GetIsAnimation(asset.asset_type):

@@ -61,7 +61,7 @@ def ExportSingleFbxNLAAnim(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-    s = CounterStart()
+    counter = CounterTimer()
 
     SelectParentAndDesiredChilds(obj)
     data_to_remove = DuplicateSelectForExport()
@@ -140,7 +140,7 @@ def ExportSingleFbxNLAAnim(
     ResetArmaturePose(active)
     scene.frame_start -= active.StartFramesOffset
     scene.frame_end -= active.EndFramesOffset
-    exportTime = CounterEnd(s)
+    exportTime = counter.GetTime()
 
     # Reset armature name
     ResetArmatureName(active, oldArmatureName)
@@ -161,9 +161,11 @@ def ExportSingleFbxNLAAnim(
         data.RemoveData()
 
     MyAsset = originalScene.UnrealExportedAssetsList.add()
-    MyAsset.file_name = filename
     MyAsset.asset_type = "NlAnim"
-    MyAsset.export_path = absdirpath
     MyAsset.export_time = exportTime
     MyAsset.object = obj
+    file = MyAsset.files.add()
+    file.name = filename
+    file.path = absdirpath
+    file.type = "FBX"
     return MyAsset

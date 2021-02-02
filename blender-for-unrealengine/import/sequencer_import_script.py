@@ -88,6 +88,8 @@ def CreateSequencer():
     print("Sequencer reference created")
     print(seq)
     ImportedCamera = [] #(CameraName, CameraGuid)
+
+    #Process import
     print("========================= Import started ! =========================")
 
     # Set frame rate

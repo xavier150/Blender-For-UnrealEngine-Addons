@@ -52,7 +52,7 @@ from . import bfu_write_import_sequencer_script
 def ExportSingleText(text, dirpath, filename):
     # Export single text
 
-    s = CounterStart()
+    counter = CounterTimer()
 
     absdirpath = bpy.path.abspath(dirpath)
     VerifiDirs(absdirpath)
@@ -61,7 +61,7 @@ def ExportSingleText(text, dirpath, filename):
     with open(fullpath, "w") as file:
         file.write(text)
 
-    exportTime = CounterEnd(s)
+    exportTime = counter.GetTime()
     # This return [AssetName , AssetType , ExportPath, ExportTime]
     return([filename, "TextFile", absdirpath, exportTime])
 
@@ -69,7 +69,7 @@ def ExportSingleText(text, dirpath, filename):
 def ExportSingleConfigParser(config_data, dirpath, filename):
     # Export single ConfigParser
 
-    s = CounterStart()
+    counter = CounterTimer()
 
     absdirpath = bpy.path.abspath(dirpath)
     VerifiDirs(absdirpath)
@@ -78,7 +78,7 @@ def ExportSingleConfigParser(config_data, dirpath, filename):
     with open(fullpath, "w") as config_file:
         config_data.write(config_file)
 
-    exportTime = CounterEnd(s)
+    exportTime = counter.GetTime()
     # This return [AssetName , AssetType , ExportPath, ExportTime]
     return([filename, "TextFile", absdirpath, exportTime])
 
@@ -86,7 +86,7 @@ def ExportSingleConfigParser(config_data, dirpath, filename):
 def ExportSingleJson(json_data, dirpath, filename):
     # Export single ConfigParser
 
-    s = CounterStart()
+    counter = CounterTimer()
 
     absdirpath = bpy.path.abspath(dirpath)
     VerifiDirs(absdirpath)
@@ -95,7 +95,7 @@ def ExportSingleJson(json_data, dirpath, filename):
     with open(fullpath, 'w') as json_file:
         json.dump(json_data, json_file, ensure_ascii=False, sort_keys=False, indent=4)
 
-    exportTime = CounterEnd(s)
+    exportTime = counter.GetTime()
     # This return [AssetName , AssetType , ExportPath, ExportTime]
     return([filename, "TextFile", absdirpath, exportTime])
 
@@ -192,7 +192,7 @@ def WriteExportedAssetsDetail():
 
         # Mesh only
         if (asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh"):
-            fbx_path = (os.path.join(asset.export_path, asset.file_name))
+            fbx_file_path = asset.GetFileByType("FBX").GetFullPath()
             config.set(AssetSectionName, 'lod0_fbx_path', fbx_path)
             config.set(AssetSectionName, 'asset_type', asset.asset_type)
             config.set(AssetSectionName, 'material_search_location', obj.MaterialSearchLocation)
@@ -211,7 +211,7 @@ def WriteExportedAssetsDetail():
                 actionIndex += 1
                 animOption = "anim"+str(actionIndex)
 
-            fbx_path = (os.path.join(asset.export_path, asset.file_name))
+            fbx_file_path = asset.GetFileByType("FBX").GetFullPath()
             config.set(AssetSectionName, animOption+'_fbx_path', fbx_path)
             config.set(AssetSectionName, animOption+'_import_path', os.path.join(obj.exportFolderName, scene.anim_subfolder_name))
 

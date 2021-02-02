@@ -63,7 +63,7 @@ def ExportSingleFbxAction(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-    s = CounterStart()
+    counter = CounterTimer()
 
     if obj.animation_data is None:
         obj.animation_data_create()
@@ -199,11 +199,13 @@ def ExportSingleFbxAction(
     for data in data_to_remove:
         data.RemoveData()
 
-    exportTime = CounterEnd(s)
+    exportTime = counter.GetTime()
     MyAsset = originalScene.UnrealExportedAssetsList.add()
-    MyAsset.file_name = filename
     MyAsset.asset_type = actionType
-    MyAsset.export_path = absdirpath
     MyAsset.export_time = exportTime
     MyAsset.object = obj
+    file = MyAsset.files.add()
+    file.name = filename
+    file.path = absdirpath
+    file.type = "FBX"
     return MyAsset

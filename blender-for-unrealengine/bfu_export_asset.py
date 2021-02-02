@@ -82,7 +82,6 @@ class ExportSigleObjects():
 
 
 def IsValidActionForExport(scene, obj, animType):
-    print("T1")
     if animType == "Action":
         if scene.anin_export:
             if obj.bfu_export_procedure == 'auto-rig-pro':
@@ -102,13 +101,10 @@ def IsValidActionForExport(scene, obj, animType):
         else:
             False
     elif animType == "NLA":
-        print("T2")
         if scene.anin_export:
-            print("T3")
             if obj.bfu_export_procedure == 'auto-rig-pro':
                 return False
             else:
-                print("T4")
                 return True
         else:
             False
@@ -139,12 +135,7 @@ def IsValidObjectForExport(scene, obj):
     return False
 
 
-def ExportAllAssetByList(
-
-    targetobjects,
-    targetActionName,
-    targetcollection
-):
+def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
     # Export all objects that need to be exported from a list
 
     if len(targetobjects) < 1 and len(targetcollection) < 1:
@@ -153,7 +144,7 @@ def ExportAllAssetByList(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-    s = CounterStart()
+    counter = CounterTimer()
 
     NumberAssetToExport = len(GetFinalAssetToExport())
 
@@ -302,11 +293,10 @@ def ExportAllAssetByList(
                             )
                         scene.frame_end -= 1
 
-    UpdateProgress(CounterEnd(s))
+    UpdateProgress(counter.GetTime())
 
 
-def PrepareAndSaveDataForExport():
-
+def ExportForUnrealEngine():
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
@@ -362,7 +352,3 @@ def PrepareAndSaveDataForExport():
     for action in bpy.data.actions:
         if action.name not in MyCurrentDataSave.action_names:
             bpy.data.actions.remove(action)
-
-
-def ExportForUnrealEngine():
-    PrepareAndSaveDataForExport()

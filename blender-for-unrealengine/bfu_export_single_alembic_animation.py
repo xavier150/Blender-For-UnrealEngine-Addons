@@ -59,7 +59,7 @@ def ExportSingleAlembicAnimation(
     # Export a single alembic animation
 
     scene = bpy.context.scene
-    s = CounterStart()
+    counter = CounterTimer()
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -81,12 +81,14 @@ def ExportSingleAlembicAnimation(
 
     scene.frame_start -= obj.StartFramesOffset
     scene.frame_end -= obj.EndFramesOffset
-    exportTime = CounterEnd(s)
+    exportTime = counter.GetTime()
 
     MyAsset = originalScene.UnrealExportedAssetsList.add()
-    MyAsset.file_name = filename
     MyAsset.asset_type = "Alembic"
-    MyAsset.export_path = absdirpath
     MyAsset.export_time = exportTime
     MyAsset.object = obj
+    file = MyAsset.files.add()
+    file.name = filename
+    file.path = absdirpath
+    file.type = "FBX"
     return MyAsset
