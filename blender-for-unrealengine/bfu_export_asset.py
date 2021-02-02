@@ -82,7 +82,7 @@ class ExportSigleObjects():
 
 
 def IsValidActionForExport(scene, obj, animType):
-
+    print("T1")
     if animType == "Action":
         if scene.anin_export:
             if obj.bfu_export_procedure == 'auto-rig-pro':
@@ -92,7 +92,7 @@ def IsValidActionForExport(scene, obj, animType):
                 return True
         else:
             False
-    if animType == "Pose":
+    elif animType == "Pose":
         if scene.anin_export:
             if obj.bfu_export_procedure == 'auto-rig-pro':
                 if CheckPluginIsActivated('auto_rig_pro-master'):
@@ -101,12 +101,19 @@ def IsValidActionForExport(scene, obj, animType):
                 return True
         else:
             False
-    if animType == "NLA":
+    elif animType == "NLA":
+        print("T2")
         if scene.anin_export:
-            return False
-            # Auto Rig Pro don't support NLA
+            print("T3")
+            if obj.bfu_export_procedure == 'auto-rig-pro':
+                return False
+            else:
+                print("T4")
+                return True
         else:
             False
+    else:
+        print("Error in IsValidActionForExport() animType not found: ", animType)
     return False
 
 
@@ -284,7 +291,7 @@ def ExportAllAssetByList(
                             UpdateProgress()
 
                 # NLA animation
-                if IsValidActionForExport(scene, "NLA", obj):
+                if IsValidActionForExport(scene, obj, "NLA"):
                     if obj.ExportNLA:
                         scene.frame_end += 1
                         ExportSingleFbxNLAAnim(

@@ -582,14 +582,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.ExportNLA = BoolProperty(
         name="Export NLA (Nonlinear Animation)",
         description=(
-            "If checked, exports the all animation of the scene with the NLA"
+            "If checked, exports the all animation of the scene with the NLA (Don't work with Auto-Rig Pro for the moment.)"
             ),
         default=False
         )
 
     bpy.types.Object.NLAAnimName = StringProperty(
         name="NLA export name",
-        description='Export NLA name',
+        description="Export NLA name (Don't work with Auto-Rig Pro for the moment.)",
         maxlen=64,
         default="NLA_animation",
         subtype='FILE_NAME'
@@ -1338,12 +1338,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                     ActionListProperty.prop(obj, 'PrefixNameToExport')
 
                             # NLA
-                            if GetAssetType(obj) == "SkeletalMesh" and obj.bfu_export_procedure != "auto-rig-pro":
+                            if GetAssetType(obj) == "SkeletalMesh":
                                 NLAAnim = layout.row()
                                 NLAAnim.prop(obj, 'ExportNLA')
                                 NLAAnimChild = NLAAnim.column()
                                 NLAAnimChild.enabled = obj.ExportNLA
                                 NLAAnimChild.prop(obj, 'NLAAnimName')
+                                if obj.bfu_export_procedure == "auto-rig-pro":
+                                    NLAAnim.enabled = False
+                                    NLAAnimChild.enabled = False
 
                             # Animation fbx properties
                             if (GetAssetType(obj) != "Alembic"):
@@ -1683,9 +1686,9 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
 
 
 class BFU_OT_FileExport(bpy.types.PropertyGroup):
-    name = StringProperty()
-    path = StringProperty()
-    type = StringProperty()
+    name: StringProperty()
+    path: StringProperty()
+    type: StringProperty()
 
 
 class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
