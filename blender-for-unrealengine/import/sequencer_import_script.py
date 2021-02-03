@@ -6,12 +6,12 @@
 
 def CheckTasks():
     import unreal
-    if hasattr(unreal, 'EditorAssetLibrary') == False:
+    if not hasattr(unreal, 'EditorAssetLibrary'):
         print('--------------------------------------------------')
         print('/!\ Warning: Editor Scripting Utilities should be activated.')
         print('Plugin > Scripting > Editor Scripting Utilities.')
         return False
-    if hasattr(unreal.MovieSceneSequence, 'set_display_rate') == False:
+    if not hasattr(unreal.MovieSceneSequence, 'set_display_rate'):
         print('--------------------------------------------------')
         print('/!\ Warning: Editor Scripting Utilities should be activated.')
         print('Plugin > Scripting > Sequencer Scripting.')
@@ -21,10 +21,10 @@ def CheckTasks():
 
 def CreateSequencer():
 
+    import unreal
     import os.path
     import sys
     import time
-    import unreal
     import json
 
     '''
@@ -49,6 +49,8 @@ def CreateSequencer():
     frameRateDenominator = sequence_data['frameRateDenominator']
     frameRateNumerator = sequence_data['frameRateNumerator']
     secureCrop = sequence_data['secureCrop']  # add end crop for avoid section overlay
+    unreal_import_location = sequence_data['unreal_import_location']
+    ImportedCamera = []  # (CameraName, CameraGuid)
 
     def AddSequencerSectionTransformKeysByIniFile(sequencer_section, track_dict):
         for key in track_dict.keys():
@@ -87,9 +89,8 @@ def CreateSequencer():
 
     print("Sequencer reference created")
     print(seq)
-    ImportedCamera = [] #(CameraName, CameraGuid)
 
-    #Process import
+    # Process import
     print("========================= Import started ! =========================")
 
     # Set frame rate

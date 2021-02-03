@@ -59,7 +59,7 @@ def WriteImportSequencerTracks():
     data['render_resolution_x'] = bpy.context.scene.render.resolution_x
     data['render_resolution_y'] = bpy.context.scene.render.resolution_y
     data['secureCrop'] = 0.0001  # add end crop for avoid section overlay
-
+    data['unreal_import_location'] = scene.unreal_import_location
 
     # Import camera
     data['cameras'] = []

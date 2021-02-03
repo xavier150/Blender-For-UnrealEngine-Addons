@@ -491,9 +491,13 @@ def WriteAllTextFiles():
 
     # Import script
     if scene.text_ImportAssetScript:
-        Text = bfu_write_import_asset_script.WriteImportAssetScript()
-        Filename = ValidFilename(scene.file_import_asset_script_name)
-        ExportSingleText(Text, scene.export_other_file_path, Filename)
+        json_data = bfu_write_import_asset_script.WriteImportAssetScript()
+        ExportSingleJson(json_data, scene.export_other_file_path, "ImportAssetData.json")
+
+        source = os.path.join(bpy.utils.user_resource('SCRIPTS', r"addons\blender-for-unrealengine\import"), "asset_import_script.py")
+        filename = ValidFilename(scene.file_import_asset_script_name)
+        destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
+        copyfile(source, destination)
 
     if scene.text_ImportSequenceScript:
         json_data = bfu_write_import_sequencer_script.WriteImportSequencerTracks()
@@ -503,9 +507,6 @@ def WriteAllTextFiles():
         filename = ValidFilename(scene.file_import_sequencer_script_name)
         destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
         copyfile(source, destination)
-
-
-
 
     # ConfigParser
     '''

@@ -254,19 +254,45 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=True
         )
 
-    bpy.types.Object.UseTargetCustomSkeletonName = BoolProperty(
-        name="Skeleton name in Unreal",
-        description=(
-            "Addon will use armature name" +
-            " for found skeleton in Unreal." +
-            " If you use a proxy you need set name manually."),
-        default=False
+    bpy.types.Object.bfu_skeleton_search_mode = EnumProperty(
+        name="Skeleton search mode",
+        description='Specify the skeleton location in Unreal',
+        items=[
+            ("auto",
+                "Auto",
+                "...",
+                1),
+            ("custom_name",
+                "Custom name",
+                "Default location with custom name",
+                2),
+            ("custom_path_name",
+                "Custom path and name",
+                "Set the custom light map resolution",
+                3),
+            ("custom_reference",
+                "custom reference",
+                "Reference from Unreal.",
+                4)
+            ]
         )
 
-    bpy.types.Object.TargetCustomSkeletonName = StringProperty(
+    bpy.types.Object.bfu_target_skeleton_custom_path = StringProperty(
         name="",
-        description="The name of the Skeleton in Unreal",
+        description="The path of the Skeleton in Unreal. Skeleton not the skeletal mesh.",
+        default="ImportedFbx"
+        )
+
+    bpy.types.Object.bfu_target_skeleton_custom_name = StringProperty(
+        name="",
+        description="The name of the Skeleton in Unreal. Skeleton not the skeletal mesh.",
         default="SK_MySketonName_Skeleton"
+        )
+
+    bpy.types.Object.bfu_target_skeleton_custom_ref = StringProperty(
+        name="",
+        description="The full reference of the skeleton in Unreal. Skeleton not the skeletal mesh. (Use right clic on asset and copy reference.)",
+        default="SkeletalMesh'/Game/ImportedFbx/SK_MySketonName_Skeleton.SK_MySketonName_Skeleton'"
         )
 
     # StaticMeshImportData
@@ -933,7 +959,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.Ue4Lod4',
                             'obj.Ue4Lod5',
                             'obj.CreatePhysicsAsset',
-                            'obj.UseTargetCustomSkeletonName',
+                            'obj.bfu_skeleton_search_mode',
+                            'obj.bfu_target_skeleton_custom_path',
+                            'obj.bfu_target_skeleton_custom_name',
+                            'obj.bfu_target_skeleton_custom_ref',
                             'obj.TargetCustomSkeletonName',
                             'obj.UseStaticMeshLODGroup',
                             'obj.StaticMeshLODGroup',
@@ -1252,12 +1281,18 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 CreatePhysicsAsset = layout.row()
                                 CreatePhysicsAsset.prop(obj, "CreatePhysicsAsset")
 
-                                Ue4Skeleton = layout.row()
-                                Ue4Skeleton.prop(obj, "UseTargetCustomSkeletonName")
-                                useSkeleton = obj.UseTargetCustomSkeletonName
-                                Ue4SkeletonText = Ue4Skeleton.column()
-                                Ue4SkeletonText.prop(obj, "TargetCustomSkeletonName")
-                                Ue4SkeletonText.enabled = useSkeleton
+                                Ue4Skeleton = layout.column()
+                                Ue4Skeleton.prop(obj, "bfu_skeleton_search_mode")
+                                if obj.bfu_skeleton_search_mode == "auto":
+                                    pass
+                                if obj.bfu_skeleton_search_mode == "custom_name":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
+                                if obj.bfu_skeleton_search_mode == "custom_path_name":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_path")
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
+                                if obj.bfu_skeleton_search_mode == "custom_reference":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
+
 
                     else:
                         layout.label(text='(No properties to show.)')
