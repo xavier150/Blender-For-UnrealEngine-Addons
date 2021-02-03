@@ -59,7 +59,7 @@ def WriteImportSequencerTracks():
     data['render_resolution_x'] = bpy.context.scene.render.resolution_x
     data['render_resolution_y'] = bpy.context.scene.render.resolution_y
     data['secureCrop'] = 0.0001  # add end crop for avoid section overlay
-    data['unreal_import_location'] = scene.unreal_import_location
+    data['unreal_import_location'] = "/Game/" + scene.unreal_import_location
 
     # Import camera
     data['cameras'] = []
@@ -69,10 +69,7 @@ def WriteImportSequencerTracks():
 
             camera_data = {}
             camera_data["name"] = camera.name
-            for file in asset.files:
-                if file.type == "AdditionalTrack":
-                    camera_data["additional_tracks_path"] = os.path.join(file.path, file.name)
-                    break
+            camera_data["additional_tracks_path"] = asset.GetFileByType("AdditionalTrack").GetAbsolutePath()
             data['cameras'].append(camera_data)
 
     def getMarkerSceneSections():

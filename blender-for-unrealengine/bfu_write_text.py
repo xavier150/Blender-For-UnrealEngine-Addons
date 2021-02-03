@@ -154,7 +154,7 @@ def WriteExportLog():
                 primaryInfo = asset.asset_type
 
         ExportLog += (
-            asset.asset_name+" ["+primaryInfo+"] EXPORTED IN " + str(round(asset.export_time, 2))+"s\r\n")
+            asset.asset_name+" ["+primaryInfo+"] EXPORTED IN " + str(round(asset.GetExportTime(), 2))+"s\r\n")
         for file in asset.files:
             ExportLog += (file.path + "\\" + file.name + "\n")
         ExportLog += "\n"
@@ -192,7 +192,7 @@ def WriteExportedAssetsDetail():
 
         # Mesh only
         if (asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh"):
-            fbx_file_path = asset.GetFileByType("FBX").GetFullPath()
+            fbx_file_path = asset.GetFileByType("FBX").GetAbsolutePath()
             config.set(AssetSectionName, 'lod0_fbx_path', fbx_path)
             config.set(AssetSectionName, 'asset_type', asset.asset_type)
             config.set(AssetSectionName, 'material_search_location', obj.MaterialSearchLocation)
@@ -211,7 +211,7 @@ def WriteExportedAssetsDetail():
                 actionIndex += 1
                 animOption = "anim"+str(actionIndex)
 
-            fbx_file_path = asset.GetFileByType("FBX").GetFullPath()
+            fbx_file_path = asset.GetFileByType("FBX").GetAbsolutePath()
             config.set(AssetSectionName, animOption+'_fbx_path', fbx_path)
             config.set(AssetSectionName, animOption+'_import_path', os.path.join(obj.exportFolderName, scene.anim_subfolder_name))
 
@@ -404,45 +404,48 @@ def WriteCameraAnimationTracks(obj):
 def WriteSingleMeshAdditionalParameter(obj):
 
     scene = bpy.context.scene
-    config = configparser.ConfigParser(allow_no_value=True)
+    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+
     sockets = []
     for socket in GetSocketDesiredChild(obj):
         sockets.append(socket)
 
+    data = {}
+
     # Comment
-    config.add_section('Comment')
-    config.set('Comment', '; This file was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons')
-    config.set('Comment', '; This file contains Additional StaticMesh and SkeletalMesh parameters informations that is not supported with .fbx files')
-    config.set('Comment', '; The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python')
+    data['Coment'] = {
+        '1/3': ti('write_text_additional_track_start'),
+        '2/3': ti('write_text_additional_track_all'),
+        '3/3': ti('write_text_additional_track_end'),
+    }
 
     # Defaultsettings
-    config.add_section('DefaultSettings')
+    data['DefaultSettings'] = {}
     # config.set('Defaultsettings', 'SocketNumber', str(len(sockets)))
 
     # Level of detail
-    config.add_section("LevelOfDetail")
+    data['LevelOfDetail'] = {}
     if obj.Ue4Lod1 is not None:
         loc = os.path.join(GetObjExportDir(obj.Ue4Lod1, True), GetObjExportFileName(obj.Ue4Lod1))
-        config.set('LevelOfDetail', 'lod_1', str(loc))
+        data['LevelOfDetail']['lod_1'] = loc
     if obj.Ue4Lod2 is not None:
         loc = os.path.join(GetObjExportDir(obj.Ue4Lod2, True), GetObjExportFileName(obj.Ue4Lod2))
-        config.set('LevelOfDetail', 'lod_2', str(loc))
+        data['LevelOfDetail']['lod_2'] = loc
     if obj.Ue4Lod3 is not None:
         loc = os.path.join(GetObjExportDir(obj.Ue4Lod3, True), GetObjExportFileName(obj.Ue4Lod3))
-        config.set('LevelOfDetail', 'lod_3', str(loc))
+        data['LevelOfDetail']['lod_3'] = loc
     if obj.Ue4Lod4 is not None:
         loc = os.path.join(GetObjExportDir(obj.Ue4Lod4, True), GetObjExportFileName(obj.Ue4Lod4))
-        config.set('LevelOfDetail', 'lod_4', str(loc))
+        data['LevelOfDetail']['lod_4'] = loc
     if obj.Ue4Lod5 is not None:
         loc = os.path.join(GetObjExportDir(obj.Ue4Lod5, True), GetObjExportFileName(obj.Ue4Lod5))
-        config.set('LevelOfDetail', 'lod_5', str(loc))
+        data['LevelOfDetail']['lod_5'] = loc
 
     # Sockets
     if GetAssetType(obj) == "SkeletalMesh":
 
-        config.add_section('Sockets')
-        config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
-        addon_prefs = bpy.context.preferences.addons[__package__].preferences
+        data['Sockets'] = {}
+        #config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
 
         for i, socket in enumerate(sockets):
             if socket.name.startswith("SOCKET_"):
@@ -471,9 +474,9 @@ def WriteSingleMeshAdditionalParameter(obj):
             array_scale = [s[0], s[1], s[2]]
 
             MySocket = [SocketName, b.name.replace('.', '_'), array_location, array_rotation, array_scale]
-            config.set('Sockets', 'socket_'+str(i), str(MySocket))
+            data['Sockets']['socket_'+str(i)] = MySocket
 
-    return config
+    return data
 
 
 def WriteAllTextFiles():

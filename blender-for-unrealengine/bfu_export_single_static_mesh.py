@@ -125,7 +125,6 @@ def ExportSingleStaticMesh(
 
     MyAsset = originalScene.UnrealExportedAssetsList.add()
     MyAsset.asset_type = meshType
-    MyAsset.export_time = exportTime
     MyAsset.object = obj
     file = MyAsset.files.add()
     file.name = filename

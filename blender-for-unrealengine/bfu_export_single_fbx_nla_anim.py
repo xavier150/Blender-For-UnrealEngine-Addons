@@ -44,8 +44,28 @@ from .bfu_export_utils import *
 from . import bfu_check_potential_error
 
 
+def ProcessNLAAnimExport(obj):
+    scene = bpy.context.scene
+    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    dirpath = os.path.join(GetObjExportDir(obj), scene.anim_subfolder_name)
+
+    scene.frame_end += 1  # Why ?
+
+    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset.StartAssetExport(obj)
+    MyAsset.asset_type = "NlAnim"
+
+    ExportSingleFbxNLAAnim(dirpath, GetNLAExportFileName(obj), obj)
+    file = MyAsset.files.add()
+    file.name = GetNLAExportFileName(obj)
+    file.path = dirpath
+    file.type = "FBX"
+
+    MyAsset.EndAssetExport(True)
+    return MyAsset
+
+
 def ExportSingleFbxNLAAnim(
-        originalScene,
         dirpath,
         filename,
         obj
@@ -61,7 +81,6 @@ def ExportSingleFbxNLAAnim(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-    counter = CounterTimer()
 
     SelectParentAndDesiredChilds(obj)
     data_to_remove = DuplicateSelectForExport()
@@ -103,6 +122,7 @@ def ExportSingleFbxNLAAnim(
     # Set rename temporarily the Armature as "Armature"
     oldArmatureName = RenameArmatureAsExportName(active)
 
+
     if (export_procedure == "normal"):
         bpy.ops.export_scene.fbx(
             filepath=fullpath,
@@ -140,7 +160,6 @@ def ExportSingleFbxNLAAnim(
     ResetArmaturePose(active)
     scene.frame_start -= active.StartFramesOffset
     scene.frame_end -= active.EndFramesOffset
-    exportTime = counter.GetTime()
 
     # Reset armature name
     ResetArmatureName(active, oldArmatureName)
@@ -159,13 +178,3 @@ def ExportSingleFbxNLAAnim(
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in data_to_remove:
         data.RemoveData()
-
-    MyAsset = originalScene.UnrealExportedAssetsList.add()
-    MyAsset.asset_type = "NlAnim"
-    MyAsset.export_time = exportTime
-    MyAsset.object = obj
-    file = MyAsset.files.add()
-    file.name = filename
-    file.path = absdirpath
-    file.type = "FBX"
-    return MyAsset

@@ -45,6 +45,33 @@ from .bfu_export_utils import *
 from . import bfu_check_potential_error
 
 
+def ProcessSkeletalMeshExport(obj):
+    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    dirpath = GetObjExportDir(obj)
+    absdirpath = bpy.path.abspath(dirpath)
+    scene = bpy.context.scene
+
+    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset.StartAssetExport(obj)
+
+    ExportSingleSkeletalMesh(scene, absdirpath, GetObjExportFileName(obj), obj)
+    file = MyAsset.files.add()
+    file.name = GetObjExportFileName(obj)
+    file.path = dirpath
+    file.type = "FBX"
+
+    if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
+
+        ExportSingleAdditionalParameterMesh(absdirpath, GetObjExportFileName(obj, "_AdditionalTrack.json"), obj)
+        file = MyAsset.files.add()
+        file.name = GetObjExportFileName(obj, "_AdditionalTrack.json")
+        file.path = dirpath
+        file.type = "AdditionalTrack"
+
+    MyAsset.EndAssetExport(True)
+    return MyAsset
+
+
 def ExportSingleSkeletalMesh(
         originalScene,
         dirpath,
@@ -62,7 +89,7 @@ def ExportSingleSkeletalMesh(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-    counter = CounterTimer()
+
 
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT')
@@ -164,13 +191,4 @@ def ExportSingleSkeletalMesh(
 
     RemoveSocketsTempName(obj)
 
-    exportTime = counter.GetTime()
-    MyAsset = originalScene.UnrealExportedAssetsList.add()
-    MyAsset.asset_type = meshType
-    MyAsset.export_time = exportTime
-    MyAsset.object = obj
-    file = MyAsset.files.add()
-    file.name = filename
-    file.path = absdirpath
-    file.type = "FBX"
-    return MyAsset
+

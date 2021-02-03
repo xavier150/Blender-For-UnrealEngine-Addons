@@ -19,6 +19,7 @@
 import os
 import bpy
 import addon_utils
+import time
 
 from . import bfu_export_asset
 from . import bfu_write_text
@@ -1725,8 +1726,14 @@ class BFU_OT_FileExport(bpy.types.PropertyGroup):
     path: StringProperty()
     type: StringProperty()  # FBX, AdditionalTrack
 
-    def GetFullPath(self):
+    def __init__(self, name):
+        pass
+
+    def GetRelativePath(self):
         return os.path.join(self.path, self.name)
+
+    def GetAbsolutePath(self):
+        return os.path.join(bpy.path.abspath(self.path), self.name)
 
 
 class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
@@ -1735,8 +1742,26 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     asset_name: StringProperty(default="None")
     asset_type: StringProperty(default="None")  # return from GetAssetType()
     files: CollectionProperty(type=BFU_OT_FileExport)
-    export_time: FloatProperty(default=0)
     object: PointerProperty(type=bpy.types.Object)
+    export_start_time: FloatProperty(default=0)
+    export_end_time: FloatProperty(default=0)
+    export_success: BoolProperty(default=False)
+
+    def StartAssetExport(self, obj, action=None):
+        self.object = obj
+        self.asset_name = obj.name
+        if action:
+            self.asset_type = GetActionType(action)
+        else:
+            self.asset_type = GetAssetType(obj)
+        self.export_start_time = time.perf_counter()
+
+    def EndAssetExport(self, success):
+        self.export_end_time = time.perf_counter()
+        self.export_success = success
+
+    def GetExportTime(self):
+        return self.export_end_time - self.export_start_time
 
     def GetFileByType(self, type: str):
         for file in self.files:

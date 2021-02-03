@@ -79,17 +79,17 @@ def WriteImportAssetScript():
         asset_data["full_import_path"] = "/Game/" + os.path.join(scene.unreal_import_location, relative_import_path).replace('\\','/').rstrip('/')
 
         if asset.GetFileByType("FBX"):
-            asset_data["fbx_path"] = asset.GetFileByType("FBX").GetFullPath()
+            asset_data["fbx_path"] = asset.GetFileByType("FBX").GetAbsolutePath()
         else:
             asset_data["fbx_path"] = None
 
         if asset.GetFileByType("ABC"):
-            asset_data["abc_path"] = asset.GetFileByType("ABC").GetFullPath()
+            asset_data["abc_path"] = asset.GetFileByType("ABC").GetAbsolutePath()
         else:
             asset_data["abc_path"] = None
 
         if asset.GetFileByType("AdditionalTrack"):
-            asset_data["additional_tracks_path"] = asset.GetFileByType("AdditionalTrack").GetFullPath()
+            asset_data["additional_tracks_path"] = asset.GetFileByType("AdditionalTrack").GetAbsolutePath()
         else:
             asset_data["additional_tracks_path"] = None
 

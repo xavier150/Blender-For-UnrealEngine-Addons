@@ -351,7 +351,7 @@ def ExportSingleAdditionalParameterMesh(dirpath, filename, obj):
     absdirpath = bpy.path.abspath(dirpath)
     VerifiDirs(absdirpath)
     AdditionalTrack = bfu_write_text.WriteSingleMeshAdditionalParameter(obj)
-    return bfu_write_text.ExportSingleConfigParser(
+    return bfu_write_text.ExportSingleJson(
         AdditionalTrack,
         absdirpath,
         filename

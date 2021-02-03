@@ -503,7 +503,6 @@ def GetCachedExportAutoActionList(obj):
 
         # Update the cache
         MyCachedActions.StoreActions(obj, actions)
-        print("Up")
     return actions
 
 

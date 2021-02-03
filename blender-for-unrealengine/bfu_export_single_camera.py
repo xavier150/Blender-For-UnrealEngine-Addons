@@ -52,9 +52,7 @@ def ProcessCameraExport(obj):
     scene = bpy.context.scene
 
     MyAsset = scene.UnrealExportedAssetsList.add()
-    MyAsset.asset_name = obj.name
-    MyAsset.asset_type = "Camera"
-    MyAsset.object = obj
+    MyAsset.StartAssetExport(obj)
 
     if obj.bfu_export_fbx_camera:
         ExportSingleFbxCamera(
@@ -64,7 +62,7 @@ def ProcessCameraExport(obj):
             )
         file = MyAsset.files.add()
         file.name = GetObjExportFileName(obj)
-        file.path = absdirpath
+        file.path = dirpath
         file.type = "FBX"
 
     if obj.ExportAsLod is False:
@@ -76,10 +74,10 @@ def ProcessCameraExport(obj):
                 )
             file = MyAsset.files.add()
             file.name = GetObjExportFileName(obj, "_AdditionalTrack.json")
-            file.path = absdirpath
+            file.path = dirpath
             file.type = "AdditionalTrack"
 
-    MyAsset.export_time = counter.GetTime()
+    MyAsset.EndAssetExport(True)
     return MyAsset
 
 

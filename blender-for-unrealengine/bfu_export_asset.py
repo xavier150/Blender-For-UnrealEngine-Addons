@@ -208,21 +208,15 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
 
             # SkeletalMesh
             if GetAssetType(obj) == "SkeletalMesh" and IsValidObjectForExport(scene, obj):
-                ExportSingleSkeletalMesh(
-                    scene,
-                    GetObjExportDir(obj),
-                    GetObjExportFileName(obj),
-                    obj
-                    )
 
-                if (scene.text_AdditionalData and
-                        addon_prefs.useGeneratedScripts):
+                # Save current start/end frame
+                UserStartFrame = scene.frame_start
+                UserEndFrame = scene.frame_end
+                ProcessSkeletalMeshExport(obj)
 
-                    ExportSingleAdditionalParameterMesh(
-                        GetObjExportDir(obj),
-                        GetObjExportFileName(obj, "_AdditionalParameter.ini"),
-                        obj
-                        )
+                # Resets previous start/end frame
+                scene.frame_start = UserStartFrame
+                scene.frame_end = UserEndFrame
                 UpdateProgress()
 
             # Alembic
@@ -237,61 +231,38 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
 
             # Action animation
             if GetAssetType(obj) == "SkeletalMesh" and obj.visible_get():
-                animExportDir = os.path.join(
-                    GetObjExportDir(obj),
-                    scene.anim_subfolder_name
-                    )
                 for action in GetActionToExport(obj):
                     if action.name in targetActionName:
                         animType = GetActionType(action)
 
-                        # Action
-                        if animType == "Action" and IsValidActionForExport(scene, obj, animType):
-                            # Save current start/end frame
-                            UserStartFrame = scene.frame_start
-                            UserEndFrame = scene.frame_end
-                            ExportSingleFbxAction(
-                                scene,
-                                animExportDir,
-                                GetActionExportFileName(obj, action),
-                                obj,
-                                action,
-                                "Action"
-                                )
-                            # Resets previous start/end frame
-                            scene.frame_start = UserStartFrame
-                            scene.frame_end = UserEndFrame
-                            UpdateProgress()
+                        # Action and Pose
+                        if IsValidActionForExport(scene, obj, animType):
+                            if animType == "Action" or animType == "Pose":
+                                # Save current start/end frame
+                                UserStartFrame = scene.frame_start
+                                UserEndFrame = scene.frame_end
+                                ProcessActionExport(obj, action)
 
-                        # pose
-                        if animType == "Pose" and IsValidActionForExport(scene, obj, animType):
-                            # Save current start/end frame
-                            UserStartFrame = scene.frame_start
-                            UserEndFrame = scene.frame_end
-                            ExportSingleFbxAction(
-                                scene,
-                                animExportDir,
-                                GetActionExportFileName(obj, action),
-                                obj,
-                                action,
-                                "Pose"
-                                )
-                            # Resets previous start/end frame
-                            scene.frame_start = UserStartFrame
-                            scene.frame_end = UserEndFrame
-                            UpdateProgress()
+                                # Resets previous start/end frame
+                                scene.frame_start = UserStartFrame
+                                scene.frame_end = UserEndFrame
+                                UpdateProgress()
 
                 # NLA animation
                 if IsValidActionForExport(scene, obj, "NLA"):
                     if obj.ExportNLA:
-                        scene.frame_end += 1
-                        ExportSingleFbxNLAAnim(
-                            scene,
-                            animExportDir,
-                            GetNLAExportFileName(obj),
-                            obj
-                            )
-                        scene.frame_end -= 1
+                        # Save current start/end frame
+                        UserStartFrame = scene.frame_start
+                        UserEndFrame = scene.frame_end
+
+                        ProcessNLAAnimExport(obj)
+                        
+
+                        
+                        # Resets previous start/end frame
+                        scene.frame_start = UserStartFrame
+                        scene.frame_end = UserEndFrame
+                    
 
     UpdateProgress(counter.GetTime())
 

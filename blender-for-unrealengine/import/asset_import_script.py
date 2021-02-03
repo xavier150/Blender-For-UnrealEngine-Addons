@@ -28,6 +28,7 @@ def ImportAllAssets():
         import ConfigParser
     '''
 
+
     # Prepare process import
     json_data_file = 'ImportAssetData.json'
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -40,6 +41,9 @@ def ImportAllAssets():
     ImportFailList = []
 
     def GetOptionByIniFile(FileLoc, OptionName, literal=False):
+        return []
+
+        #To do with Json
         Config = ConfigParser.ConfigParser()
         Config.read(FileLoc)
         Options = []
@@ -61,7 +65,7 @@ def ImportAllAssets():
         return target_assets
 
     def ImportAsset(asset_data):
-        counter = str(len(ImportedList)) + "/" + str(len(import_assets_data["assets"]))
+        counter = str(len(ImportedList)+1) + "/" + str(len(import_assets_data["assets"]))
         print("Import asset " + counter + ": ", asset_data["name"])
 
         if asset_data["type"] == "StaticMesh" or asset_data["type"] == "SkeletalMesh":
@@ -161,7 +165,8 @@ def ImportAllAssets():
 
             # ###############[ import asset ]################
 
-            unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+            print("Import task")
+            print(unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task]))
             if len(task.imported_object_paths) > 0:
                 asset = unreal.find_asset(task.imported_object_paths[0])
             else:
@@ -209,6 +214,9 @@ def ImportAllAssets():
             if asset_data["type"] == "SkeletalMesh":
                 asset.get_editor_property('asset_import_data').set_editor_property('normal_import_method', unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS)
 
+            #with open(asset_data["additional_tracks_path"], "r") as json_file:
+                #asset_tracks = json.load(json_file)
+            
             # Socket
             if asset_data["type"] == "SkeletalMesh":
                 # Import the SkeletalMesh socket(s)

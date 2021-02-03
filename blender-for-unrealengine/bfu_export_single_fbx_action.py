@@ -44,13 +44,30 @@ from .bfu_export_utils import *
 from . import bfu_check_potential_error
 
 
+def ProcessActionExport(obj, action):
+    scene = bpy.context.scene
+    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    dirpath = os.path.join(GetObjExportDir(obj), scene.anim_subfolder_name)
+
+    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset.StartAssetExport(obj, action)
+
+    ExportSingleFbxAction(scene, dirpath, GetActionExportFileName(obj, action), obj, action)
+    file = MyAsset.files.add()
+    file.name = GetActionExportFileName(obj, action)
+    file.path = dirpath
+    file.type = "FBX"
+
+    MyAsset.EndAssetExport(True)
+    return MyAsset
+
+
 def ExportSingleFbxAction(
         originalScene,
         dirpath,
         filename,
         obj,
-        targetAction,
-        actionType
+        targetAction
         ):
 
     '''
@@ -63,7 +80,6 @@ def ExportSingleFbxAction(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-    counter = CounterTimer()
 
     if obj.animation_data is None:
         obj.animation_data_create()
@@ -198,14 +214,3 @@ def ExportSingleFbxAction(
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in data_to_remove:
         data.RemoveData()
-
-    exportTime = counter.GetTime()
-    MyAsset = originalScene.UnrealExportedAssetsList.add()
-    MyAsset.asset_type = actionType
-    MyAsset.export_time = exportTime
-    MyAsset.object = obj
-    file = MyAsset.files.add()
-    file.name = filename
-    file.path = absdirpath
-    file.type = "FBX"
-    return MyAsset
