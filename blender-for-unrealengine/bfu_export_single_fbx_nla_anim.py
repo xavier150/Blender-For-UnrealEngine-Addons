@@ -87,6 +87,16 @@ def ExportSingleFbxNLAAnim(
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
     export_procedure = active.bfu_export_procedure
+    
+    active.animation_data_create()
+    print(active)
+    print(active.animation_data.action)
+    active.animation_data.action = obj.animation_data.action
+    print(active.animation_data.action)
+    active.animation_data.action_extrapolation = obj.animation_data.action_extrapolation
+    active.animation_data.action_blend_type = obj.animation_data.action_blend_type
+    active.animation_data.action_influence = obj.animation_data.action_influence
+
 
     if active.ExportAsProxy:
         ApplyProxyData(active)
@@ -121,7 +131,6 @@ def ExportSingleFbxNLAAnim(
 
     # Set rename temporarily the Armature as "Armature"
     oldArmatureName = RenameArmatureAsExportName(active)
-
 
     if (export_procedure == "normal"):
         bpy.ops.export_scene.fbx(
