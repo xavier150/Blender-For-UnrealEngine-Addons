@@ -1636,7 +1636,8 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
             select = bpy.context.selected_objects
             if not include_active:
                 if bpy.context.active_object:
-                    select.remove(bpy.context.active_object)
+                    if bpy.context.active_object in select:
+                        select.remove(bpy.context.active_object)
 
             for obj in select:
                 if obj.type == targetType:
