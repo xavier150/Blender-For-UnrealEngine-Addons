@@ -38,6 +38,7 @@ class SavedObject():
         if obj:
             self.name = obj.name
             self.select = obj.select_get()
+            self.hide = obj.hide_get()
             self.hide_select = obj.hide_select
             self.hide_viewport = obj.hide_viewport
 
@@ -193,6 +194,9 @@ class UserSceneSave():
                     bpy.data.objects[obj.name].hide_select = obj.hide_select
                 if bpy.data.objects[obj.name].hide_viewport != obj.hide_viewport:
                     bpy.data.objects[obj.name].hide_viewport = obj.hide_viewport
+                if bpy.data.objects[obj.name].hide_get() != obj.hide:
+                    bpy.data.objects[obj.name].hide_set(obj.hide)
+                
             else:
                 print("/!\\ "+obj.name+" not found in bpy.data.objects")
 

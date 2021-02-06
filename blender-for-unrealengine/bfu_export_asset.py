@@ -248,13 +248,9 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                         UserEndFrame = scene.frame_end
 
                         ProcessNLAAnimExport(obj)
-                        
-
-                        
                         # Resets previous start/end frame
                         scene.frame_start = UserStartFrame
                         scene.frame_end = UserEndFrame
-                    
 
     UpdateProgress(counter.GetTime())
 
@@ -268,11 +264,13 @@ def ExportForUnrealEngine():
     MyCurrentDataSave = UserSceneSave()
     MyCurrentDataSave.SaveCurrentScene()
 
-    for object in bpy.data.objects:
-        if object.hide_select:
-            object.hide_select = False
-        if object.hide_viewport:
-            object.hide_viewport = False
+    for obj in bpy.data.objects:
+        if obj.hide_select:
+            obj.hide_select = False
+        if obj.hide_viewport:
+            obj.hide_viewport = False
+        if obj.hide_get():
+            obj.hide_set(False)
 
     for col in bpy.data.collections:
         if col.hide_select:

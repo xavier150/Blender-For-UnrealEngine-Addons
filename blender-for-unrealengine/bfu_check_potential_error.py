@@ -499,6 +499,7 @@ def SelectPotentialErrorObject(errorIndex):
 
     bpy.ops.object.select_all(action='DESELECT')
     obj.hide_viewport = False
+    obj.hide_set(False)
     obj.select_set(True)
     bpy.context.view_layer.objects.active = obj
 
