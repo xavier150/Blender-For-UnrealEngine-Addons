@@ -2329,12 +2329,17 @@ class BFU_PT_Export(bpy.types.Panel):
         )
 
     # exportProperty
-    bpy.types.Scene.export_ExportOnlySelected = bpy.props.BoolProperty(
+    bpy.types.Scene.bfu_export_filter = bpy.props.EnumProperty(
         name="Export only select",
+        items=[
+            ('default', "No Filter", "Export as normal all objects with the recursive export option.", 0),
+            ('only_object', "Only select", "Export only the selected object(s)", 1),
+            ('only_object_action', "Only select and active action", "Export only the selected object(s) and active action on this object", 2),
+            ],
         description=(
             "Check mark to export only selected export group." +
             " (export_recursive objects and auto childs) "),
-        default=False
+        default="default"
         )
 
     def draw(self, context):
@@ -2444,7 +2449,7 @@ class BFU_PT_Export(bpy.types.Panel):
 
             # exportProperty
             exportOnlySelect = layout.row()
-            exportOnlySelect.prop(scene, 'export_ExportOnlySelected')
+            exportOnlySelect.prop(scene, 'bfu_export_filter')
 
             exportButton = layout.row()
             exportButton.scale_y = 2.0

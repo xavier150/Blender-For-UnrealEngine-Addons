@@ -294,15 +294,20 @@ def ExportForUnrealEngine():
         RemoveFolderTree(bpy.path.abspath(scene.export_camera_file_path))
         RemoveFolderTree(bpy.path.abspath(scene.export_other_file_path))
 
-    assetList = []  # Do a simple lit of objects to export
-    for Asset in GetFinalAssetToExport():
-        if Asset.obj in GetAllobjectsByExportType("export_recursive"):
-            if Asset.obj not in assetList:
-                assetList.append(Asset.obj)
+    obj_list = []  # Do a simple lit of objects to export
+    action_list = []  # Do a simple lit of objects to export
+    AssetToExport = GetFinalAssetToExport()
+    for Asset in AssetToExport:
+        if Asset.type == "NlAnim" or Asset.type == "Action" or Asset.type == "Pose":
+            if Asset.obj not in action_list:
+                action_list.append(Asset.action.name)
+        else:
+            if Asset.obj not in obj_list:
+                obj_list.append(Asset.obj)
 
     ExportAllAssetByList(
-        targetobjects=assetList,
-        targetActionName=MyCurrentDataSave.action_names,
+        targetobjects=obj_list,
+        targetActionName=action_list,
         targetcollection=MyCurrentDataSave.collection_names,
     )
 

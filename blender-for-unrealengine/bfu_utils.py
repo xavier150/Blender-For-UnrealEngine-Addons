@@ -969,9 +969,14 @@ def GetFinalAssetToExport():
             self.action = action
             self.type = type
 
-    if scene.export_ExportOnlySelected:
-        objList = []
-        collectionList = []
+    objList = []
+    collectionList = []
+
+    if scene.bfu_export_filter == "default":
+        objList = GetAllobjectsByExportType("export_recursive")
+        collectionList = GetCollectionToExport(scene)
+
+    elif scene.bfu_export_filter == "only_object" or scene.bfu_export_filter == "only_object_action":
         recuList = GetAllobjectsByExportType("export_recursive")
 
         for obj in bpy.context.selected_objects:
@@ -983,10 +988,6 @@ def GetFinalAssetToExport():
                 if parentTarget not in objList:
                     objList.append(parentTarget)
 
-    else:
-        objList = GetAllobjectsByExportType("export_recursive")
-        collectionList = GetCollectionToExport(scene)
-
     for collection in collectionList:
         # Collection
         if scene.static_collection_export:
@@ -996,7 +997,6 @@ def GetFinalAssetToExport():
                 "Collection StaticMesh"))
 
     for obj in objList:
-
         if GetAssetType(obj) == "Alembic":
             # Alembic
             if scene.alembic_export:
@@ -1026,10 +1026,12 @@ def GetFinalAssetToExport():
                 # Action
                 if scene.anin_export:
                     if GetActionType(action) == "Action":
-                        TargetAssetToExport.append(AssetToExport(
-                            obj,
-                            action,
-                            "Action"))
+                        if scene.bfu_export_filter == "only_object_action":
+                            if obj.animation_data:
+                                if obj.animation_data.action == action:
+                                    TargetAssetToExport.append(AssetToExport(obj, action, "Action"))
+                        else:
+                            TargetAssetToExport.append(AssetToExport(obj, action, "Action"))
 
                 # Pose
                 if scene.anin_export:
