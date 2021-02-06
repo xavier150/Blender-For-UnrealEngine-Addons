@@ -461,6 +461,9 @@ class CachedAction():
             MyCachedActions.is_cached = False
         if len(obj.data.bones) != self.total_bone_len:
             MyCachedActions.is_cached = False
+        for action in self.stored_actions:
+            if action not in bpy.data.actions:
+                MyCachedActions.is_cached = False
 
         return MyCachedActions.is_cached
 
@@ -505,6 +508,7 @@ def GetCachedExportAutoActionList(obj):
         objBoneNames = [bone.name for bone in obj.data.bones]
         for action in bpy.data.actions:
             if action.library is None:
+                print(action)
                 if GetIfActionIsAssociated(action, objBoneNames):
                     actions.append(action)
 
