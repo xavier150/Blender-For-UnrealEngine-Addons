@@ -2273,7 +2273,7 @@ class BFU_PT_Export(bpy.types.Panel):
     bpy.types.Scene.static_collection_export = bpy.props.BoolProperty(
         name="Collection(s) ",
         description="Check mark to export Collection(s)",
-        default=False
+        default=True
         )
 
     bpy.types.Scene.skeletal_export = bpy.props.BoolProperty(
@@ -2291,13 +2291,13 @@ class BFU_PT_Export(bpy.types.Panel):
     bpy.types.Scene.alembic_export = bpy.props.BoolProperty(
         name="Alembic animation(s)",
         description="Check mark to export Alembic animation(s)",
-        default=False
+        default=True
         )
 
     bpy.types.Scene.camera_export = bpy.props.BoolProperty(
         name="Camera(s)",
         description="Check mark to export Camera(s)",
-        default=False
+        default=True
         )
 
     # Additional file
