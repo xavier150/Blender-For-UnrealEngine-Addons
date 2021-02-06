@@ -187,23 +187,15 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
 
             # StaticMesh
             if GetAssetType(obj) == "StaticMesh" and IsValidObjectForExport(scene, obj):
-                ExportSingleStaticMesh(
-                    scene,
-                    GetObjExportDir(obj),
-                    GetObjExportFileName(obj),
-                    obj
-                    )
-                if obj.ExportAsLod is False:
-                    if (scene.text_AdditionalData and
-                            addon_prefs.useGeneratedScripts):
-                        ExportSingleAdditionalParameterMesh(
-                            GetObjExportDir(obj),
-                            GetObjExportFileName(
-                                obj,
-                                "_AdditionalParameter.ini"
-                                ),
-                            obj
-                            )
+
+                # Save current start/end frame
+                UserStartFrame = scene.frame_start
+                UserEndFrame = scene.frame_end
+                ProcessStaticMeshExport(obj)
+
+                # Resets previous start/end frame
+                scene.frame_start = UserStartFrame
+                scene.frame_end = UserEndFrame
                 UpdateProgress()
 
             # SkeletalMesh

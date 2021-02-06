@@ -359,8 +359,11 @@ def GetExportDesiredChilds(obj):
 
 
 def GetSocketDesiredChild(targetObj):
-    socket = [obj for obj in GetExportDesiredChilds(targetObj) if (
-        fnmatch.fnmatchcase(obj.name, "SOCKET*"))]
+    socket = []
+    for obj in GetExportDesiredChilds(targetObj):
+        if IsASocket(obj):
+            socket.append(obj)
+
     return socket
 
 
@@ -1350,7 +1353,7 @@ def Ue4SubObj_set(SubType):
             # StaticMesh Socket
             if obj.type == 'EMPTY' and SubType == "ST_Socket":
                 if ownerObj.type == 'MESH':
-                    if not obj.name.startswith("SOCKET_"):
+                    if not IsASocket(obj):
                         obj.name = GenerateUe4Name("SOCKET_"+obj.name)
                     bpy.ops.object.parent_set(
                         type='OBJECT',
@@ -1360,7 +1363,8 @@ def Ue4SubObj_set(SubType):
             # SkeletalMesh Socket
             if obj.type == 'EMPTY' and SubType == "SK_Socket":
                 if ownerObj.type == 'ARMATURE':
-                    if not obj.name.startswith("SOCKET_"):
+
+                    if not IsASocket(obj):
                         obj.name = GenerateUe4Name("SOCKET_"+obj.name)
                     bpy.ops.object.parent_set(type='BONE')
                     ConvertedObjs.append(obj)
@@ -1401,14 +1405,23 @@ def UpdateUe4Name(SubType, objList):
                 # StaticMesh Socket
                 if obj.type == 'EMPTY' and SubType == "ST_Socket":
                     if ownerObj.type == 'MESH':
-                        if not obj.name.startswith("SOCKET_"):
+                        if not IsASocket(obj):
                             obj.name = GenerateUe4Name("SOCKET_"+obj.name)
 
                 # SkeletalMesh Socket
                 if obj.type == 'EMPTY' and SubType == "SK_Socket":
                     if ownerObj.type == 'ARMATURE':
-                        if not obj.name.startswith("SOCKET_"):
+                        if not IsASocket(obj):
                             obj.name = GenerateUe4Name("SOCKET_"+obj.name)
+
+
+def IsASocket(obj):
+    if obj.type == "EMPTY":
+        cap_name = obj.name.upper()
+        if cap_name.startswith("SOCKET_"):
+            return True
+
+    return False
 
 
 def UpdateAreaLightMapList(list=None):

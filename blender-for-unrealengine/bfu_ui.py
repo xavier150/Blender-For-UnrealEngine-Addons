@@ -1631,9 +1631,14 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     return True
             return False
 
-        def FoundTypeInSelect(targetType):
+        def FoundTypeInSelect(targetType, include_active=True):
             # Return True if a specific type is found
-            for obj in bpy.context.selected_objects:
+            select = bpy.context.selected_objects
+            if not include_active:
+                if bpy.context.active_object:
+                    select.remove(bpy.context.active_object)
+
+            for obj in select:
                 if obj.type == targetType:
                     return True
             return False
@@ -1646,14 +1651,14 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
             if not ActiveModeIs("OBJECT"):
                 layout.label(text="Switch to Object Mode.", icon='INFO')
             else:
-                if FoundTypeInSelect("MESH"):
+                if FoundTypeInSelect("MESH", False):
                     if ActiveTypeIs("MESH") and len(bpy.context.selected_objects) > 1:
                         layout.label(text="Click on button for convert to collider.", icon='INFO')
                         ready_for_convert_collider = True
                     else:
                         layout.label(text="Select with [SHIFT] the collider owner.", icon='INFO')
 
-                elif FoundTypeInSelect("EMPTY"):
+                elif FoundTypeInSelect("EMPTY", False):
                     if ActiveTypeIs("MESH") and len(bpy.context.selected_objects) > 1:
                         layout.label(text="Click on button for convert to Socket.", icon='INFO')
                         ready_for_convert_socket = True

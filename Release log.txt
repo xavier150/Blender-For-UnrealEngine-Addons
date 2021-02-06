@@ -343,3 +343,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: If armature name contain illegal char, in Unreal the Skeletal Mesh is not found by Anim assets.
 - Fixed: Fix potential error with popup can do script errors.
 - Fixed: FBX export do crash in Blender 2.8 when not used data is removed before export.
+- Fixed: Socket object with lower char are not updated during export. (Custom name and +90X)

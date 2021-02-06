@@ -445,10 +445,10 @@ def WriteSingleMeshAdditionalParameter(obj):
     if GetAssetType(obj) == "SkeletalMesh":
 
         data['Sockets'] = {}
-        #config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
+        # config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
 
         for i, socket in enumerate(sockets):
-            if socket.name.startswith("SOCKET_"):
+            if IsASocket(socket):
                 SocketName = socket.name[7:]
             else:
                 socket.name

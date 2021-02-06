@@ -1,0 +1,9 @@
+{
+    "Coment": {
+        "1/3": "This file was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons",
+        "2/3": "It used for import into Unreal Engine all the assets of type StaticMesh, SkeletalMesh, Animation, Pose, Camera, [...]",
+        "3/3": "The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python"
+    },
+    "DefaultSettings": {},
+    "LevelOfDetail": {}
+}
