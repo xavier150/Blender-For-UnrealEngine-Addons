@@ -88,7 +88,10 @@ def ImportAllAssets():
                 OriginSkeleton = unreal.find_asset(asset_data["animation_skeleton_path"])
 
             task = unreal.AssetImportTask()
-            task.filename = asset_data["fbx_path"]
+            if asset_data["type"] == "Alembic":
+                task.filename = asset_data["abc_path"]
+            else:
+                task.filename = asset_data["fbx_path"]
             task.destination_path = os.path.normpath(asset_data["full_import_path"]).replace('\\','/')
             task.automated = True
             task.save = True

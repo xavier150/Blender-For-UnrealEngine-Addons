@@ -213,12 +213,14 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
 
             # Alembic
             if GetAssetType(obj) == "Alembic" and IsValidObjectForExport(scene, obj):
-                ExportSingleAlembicAnimation(
-                    scene,
-                    GetObjExportDir(obj),
-                    GetObjExportFileName(obj, ".abc"),
-                    obj
-                    )
+                # Save current start/end frame
+                UserStartFrame = scene.frame_start
+                UserEndFrame = scene.frame_end
+                ProcessAlembicExport(obj)
+
+                # Resets previous start/end frame
+                scene.frame_start = UserStartFrame
+                scene.frame_end = UserEndFrame
                 UpdateProgress()
 
             # Action animation

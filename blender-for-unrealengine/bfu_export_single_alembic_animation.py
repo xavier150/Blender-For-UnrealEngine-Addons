@@ -44,8 +44,26 @@ from .bfu_export_utils import *
 from . import bfu_check_potential_error
 
 
+def ProcessAlembicExport(obj):
+    scene = bpy.context.scene
+    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    dirpath = GetObjExportDir(obj)
+
+    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset.StartAssetExport(obj)
+    MyAsset.asset_type = "Alembic"
+
+    ExportSingleAlembicAnimation(dirpath, GetObjExportFileName(obj, ".abc"), obj)
+    file = MyAsset.files.add()
+    file.name = GetObjExportFileName(obj, ".abc")
+    file.path = dirpath
+    file.type = "ABC"
+
+    MyAsset.EndAssetExport(True)
+    return MyAsset
+
+
 def ExportSingleAlembicAnimation(
-        originalScene,
         dirpath,
         filename,
         obj
@@ -59,7 +77,6 @@ def ExportSingleAlembicAnimation(
     # Export a single alembic animation
 
     scene = bpy.context.scene
-    counter = CounterTimer()
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -76,18 +93,8 @@ def ExportSingleAlembicAnimation(
         filepath=fullpath,
         check_existing=False,
         selected=True,
-        triangulate=False,
+        triangulate=True,
         )
 
     scene.frame_start -= obj.StartFramesOffset
     scene.frame_end -= obj.EndFramesOffset
-    exportTime = counter.GetTime()
-
-    MyAsset = originalScene.UnrealExportedAssetsList.add()
-    MyAsset.asset_type = "Alembic"
-    MyAsset.object = obj
-    file = MyAsset.files.add()
-    file.name = filename
-    file.path = absdirpath
-    file.type = "FBX"
-    return MyAsset
