@@ -150,12 +150,12 @@ class UserSceneSave():
         for obj in self.objects:  # Resets previous selected object if still exist
             if obj.select:
                 if obj.name in bpy.data.objects:
-                    if obj.name in bpy.context.view_layer:
+                    if obj.name in bpy.context.view_layer.objects:
                         bpy.data.objects[obj.name].select_set(True)
 
         if self.user_active_name:
             if self.user_active_name in bpy.data.objects:
-                if self.user_active_name in bpy.context.view_layer:
+                if self.user_active_name in bpy.context.view_layer.objects:
                     bpy.context.view_layer.objects.active = bpy.data.objects[self.user_active_name]
 
         self.ResetModeAtSave()
