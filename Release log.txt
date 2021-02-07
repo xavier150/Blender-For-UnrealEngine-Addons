@@ -346,3 +346,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: FBX export do crash in Blender 2.8 when not used data is removed before export.
 - Fixed: Socket object with lower char are not updated during export. (Custom name and +90X)
 - Fixed: Select Vertex in potential error do a script error if the model is hiden
+- Fixed: In Check potential error create UV Project do error in Blender 2.9

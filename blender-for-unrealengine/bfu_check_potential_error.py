@@ -604,8 +604,11 @@ def TryToCorrectPotentialError(errorIndex):
     if error.correctRef == "CreateUV":
         obj = error.object
         SelectObj(obj)
-        bpy.ops.uv.smart_project()
-        successCorrect = True
+        if SafeModeSet(obj, "EDIT"):
+            bpy.ops.uv.smart_project()
+            successCorrect = True
+        else:
+            successCorrect = False
 
     if error.correctRef == "RemoveModfier":
         obj = error.object

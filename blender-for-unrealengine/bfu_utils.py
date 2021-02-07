@@ -230,6 +230,7 @@ def SafeModeSet(obj, target_mode='OBJECT'):
         if obj.mode != target_mode:
             if bpy.ops.object.mode_set.poll():
                 bpy.ops.object.mode_set(mode=target_mode)
+                return True
     return False
 
 
