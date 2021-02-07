@@ -313,11 +313,19 @@ It is now possible to force the duration of an animation according to the scene 
 - New: You can now set directly the desired export name for each objects.
 - New: More option for action names.
 - New: Camera Sensor Width and Height are now added in additional tracks.
+- New: Cached animation to export in UI for better optimisation
+- New: Skeleton search mode for import animation with specific skeleton 
+- New: Option for export only selected object and active action
 - Change: New potential error: Check if the unit scale is equal to 0.01 (You can disable this potential error in addon_prefs)
 - Change: Better check and potential errors info for Armature.
 - Change: Some potential errors can have button to the documentation.
 - Change: Potential error (inherit_scale = False) bone removed.
 - Change: 20 Tab python integration is now not supported
+- Change: Better import script for Assets
+- Change: Better import script for Sequencer
+- Change: Asset export now use json open data
+- Change: Camera export now use json open data
+- Change: Camera export optimisated
 - Change: Simple others change in property values and texts.
 - Change: Return to the user mode (OBJECT, EDIT, [...]) after the export
 - Change: Import Script values are now saved with Nomenclature Presets.
@@ -336,3 +344,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: If armature name contain illegal char, in Unreal the Skeletal Mesh is not found by Anim assets.
 - Fixed: Fix potential error with popup can do script errors.
 - Fixed: FBX export do crash in Blender 2.8 when not used data is removed before export.
+- Fixed: Socket object with lower char are not updated during export. (Custom name and +90X)
+- Fixed: Select Vertex in potential error do a script error if the model is hiden
+- Fixed: In Check potential error create UV Project do error in Blender 2.9
+- Fixed: Alambic export do error if face consisting more than 4 vertices.

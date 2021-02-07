@@ -19,6 +19,19 @@
 import os
 import bpy
 import addon_utils
+import time
+
+from . import bfu_export_asset
+from . import bfu_write_text
+from . import bfu_basics
+from .bfu_basics import *
+from . import bfu_utils
+from . import bfu_check_potential_error
+from .bfu_utils import *
+from . import bfu_ui_utils
+from . import languages
+from .languages import *
+
 
 if "bpy" in locals():
     import importlib
@@ -34,15 +47,9 @@ if "bpy" in locals():
         importlib.reload(bfu_check_potential_error)
     if "bfu_ui_utils" in locals():
         importlib.reload(bfu_ui_utils)
+    if "languages" in locals():
+        importlib.reload(languages)
 
-from . import bfu_export_asset
-from . import bfu_write_text
-from . import bfu_basics
-from .bfu_basics import *
-from . import bfu_utils
-from . import bfu_check_potential_error
-from .bfu_utils import *
-from . import bfu_ui_utils
 
 from bpy.props import (
         StringProperty,
@@ -58,294 +65,6 @@ from bpy.props import (
 from bpy.types import (
         Operator,
         )
-
-
-class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
-    # this must match the addon name, use '__package__'
-    # when defining this in a submodule of a python package.
-    bl_idname = __package__
-
-    bakeArmatureAction: BoolProperty(
-        name='Bake Armature animation',
-        description=(
-            'Bake Armature animation for export' +
-            ' (Export will take more time)'
-            ),
-        default=False,
-        )
-
-    correctExtremUVScale: BoolProperty(
-        name='Correct Extrem UV Scale',
-        description=(
-            'Correct Extrem UV Scale for better UV quality in UE4' +
-            ' (Export will take more time)'
-            ),
-        default=False,
-        )
-
-    removeSkeletonRootBone: BoolProperty(
-        name='Remove root bone',
-        description='Remove the armature root bone',
-        default=True,
-        )
-
-    skeletonRootBoneName: StringProperty(
-        name='Skeleton root bone name',
-        description=(
-            'Name of the armature when exported.' +
-            ' This is used to change the root bone name.' +
-            ' If egal "Armature" Ue4 will remove the Armature root bone.'
-            ),
-        default="ArmatureRoot",
-        )
-
-    rescaleFullRigAtExport: EnumProperty(
-        name='Rescale exported rig',
-        description=(
-            'This will rescale the full rig' +
-            ' at the export with the all constraints.'
-            ),
-        items=[
-            ("auto",
-                "Auto",
-                "Rescale only if the the Unit Scale is not = to 0.01",
-                "SHADERFX",
-                1),
-            ("custom_rescale",
-                "Custom Rescale",
-                "You can choose how rescale the rig at the export",
-                "MODIFIER",
-                2),
-            ("dont_rescale",
-                "Dont Rescale",
-                "Will not rescale the rig",
-                "CANCEL",
-                3)
-            ]
-        )
-
-    newRigScale: FloatProperty(
-        name='New scale',
-        description=(
-            'The new rig scale. AUTO: [New scale} = 100 * [Unit scale]'
-            ),
-        default=100,
-        )
-
-    staticSocketsAdd90X: BoolProperty(
-        name='Export StaticMesh Sockets with +90 degrees on X',
-        description=(
-            'On StaticMesh the sockets are auto imported by unreal' +
-            ' with -90 degrees on X'
-            ),
-        default=True,
-        )
-
-    rescaleSocketsAtExport: EnumProperty(
-        name='Rescale exported sockets',
-        description='This will rescale the all sockets at the export.',
-        items=[
-            ("auto",
-                "Auto",
-                "Rescale only if the the Unit Scale is not = to 0.01",
-                "SHADERFX",
-                1),
-            ("custom_rescale",
-                "Custom Rescale",
-                "You can choose how rescale the sockets at the export",
-                "MODIFIER",
-                2),
-            ("dont_rescale",
-                "Dont Rescale",
-                "Will not rescale the sockets",
-                "CANCEL",
-                3)
-            ]
-        )
-
-    staticSocketsImportedSize: FloatProperty(
-        name='StaticMesh sockets import size',
-        description=(
-            'Size of the socket when imported in Unreal Engine.' +
-            ' AUTO: 1 ( [New scale} = 100 / [Unit scale] )'
-            ),
-        default=1,
-        )
-
-    skeletalSocketsImportedSize: FloatProperty(
-        name='SkeletalMesh sockets import size',
-        description=(
-            'Size of the socket when imported in Unreal Engine.' +
-            ' AUTO: 1 ( [New scale} = 100 / [Unit scale] )'
-            ),
-        default=1,
-        )
-
-    ignoreNLAForAction: BoolProperty(
-        name='Ignore NLA for Actions',
-        description=(
-            'This will export the action and ignore' +
-            ' the all layer in Nonlinear Animation'
-            ),
-        default=False,
-        )
-
-    exportWithCustomProps: BoolProperty(
-        name='Export custom properties',
-        description=(
-            'Process export with custom properties' +
-            ' (Can be used for Metadata)'
-            ),
-        default=False,
-        )
-
-    exportWithMetaData: BoolProperty(
-        name='Export meta data',
-        description='Process export with meta data',
-        default=False,
-        )
-
-    revertExportPath: BoolProperty(
-        name='Revert all export path at each export',
-        description=(
-            'will remove the folder of' +
-            ' the all export path at each export'
-            ),
-        default=False,
-        )
-
-    useGeneratedScripts: BoolProperty(
-        name='Use generated script for import assets and sequencer.',
-        description=(
-            'If false the all properties that only works' +
-            ' with import scripts will be disabled'
-            ),
-        default=True,
-        )
-
-    collisionColor:  FloatVectorProperty(
-        name='Collision color.',
-        description='Color of the collision in Blender',
-        subtype='COLOR',
-        size=4,
-        default=(0, 0.6, 0, 0.11),
-        min=0.0, max=1.0,
-        )
-
-    notifyUnitScalePotentialError: BoolProperty(
-        name='Notify UnitScale (PotentialError)',
-        description=(
-            'Notify as potential error' +
-            ' if the unit scale is not equal to 0.01.'
-            ),
-        default=True,
-        )
-
-    class BFU_OT_OpenDocumentationTargetPage(Operator):
-        bl_label = "Documentation"
-        bl_idname = "object.open_documentation_target_page"
-        bl_description = "Clic for open documentation page on GitHub"
-        octicon: StringProperty(default="")
-
-        def execute(self, context):
-            os.system(
-                "start \"\" " +
-                "https://github.com/xavier150/" +
-                "Blender-For-UnrealEngine-Addons/blob/master/docs/" +
-                "How%20export%20assets%20from%20Blender.md"+self.octicon
-                )
-            return {'FINISHED'}
-
-    class BFU_OT_NewReleaseInfo(Operator):
-        bl_label = "Open last release page"
-        bl_idname = "object.new_release_info"
-        bl_description = "Clic for open latest release page."
-
-        def execute(self, context):
-            os.system(
-                "start \"\" https://github.com/xavier150/" +
-                "Blender-For-UnrealEngine-Addons/releases/latest"
-                )
-            return {'FINISHED'}
-
-    def draw(self, context):
-        layout = self.layout
-
-        def LabelWithDocButton(tagetlayout, name, docOcticon):
-            newRow = tagetlayout.row()
-            newRow.label(text=name)
-            docOperator = newRow.operator(
-                "object.open_documentation_target_page",
-                icon="HELP",
-                text=""
-                )
-            docOperator.octicon = docOcticon
-
-        def PropWithDocButton(tagetlayout, name, docOcticon):
-            newRow = tagetlayout.row()
-            newRow.prop(self, name)
-            docOperator = newRow.operator(
-                "object.open_documentation_target_page",
-                icon="HELP",
-                text=""
-                )
-            docOperator.octicon = docOcticon
-
-        boxColumn = layout.column().split(
-            factor=0.5
-            )
-
-        rootBone = boxColumn.box()
-
-        LabelWithDocButton(
-            rootBone,
-            "SKELETON & ROOT BONE",
-            "#skeleton--root-bone"
-            )
-        rootBone.prop(self, "removeSkeletonRootBone")
-        rootBoneName = rootBone.column()
-        rootBoneName.enabled = not self.removeSkeletonRootBone
-        rootBoneName.prop(self, "skeletonRootBoneName")
-
-        rootBone.prop(self, "rescaleFullRigAtExport")
-        newRigScale = rootBone.column()
-        newRigScale.enabled = self.rescaleFullRigAtExport == "custom_rescale"
-        newRigScale.prop(self, "newRigScale")
-
-        socket = boxColumn.box()
-        socket.label(text='SOCKET')
-        socket.prop(self, "staticSocketsAdd90X")
-        socket.prop(self, "rescaleSocketsAtExport")
-        socketRescale = socket.column()
-        socketRescale.enabled = self.rescaleSocketsAtExport == "custom_rescale"
-        socketRescale.prop(self, "staticSocketsImportedSize")
-        socketRescale.prop(self, "skeletalSocketsImportedSize")
-
-        boxColumn = layout.column().split(factor=0.5)
-
-        data = boxColumn.box()
-        data.label(text='DATA')
-        data.prop(self, "ignoreNLAForAction")
-        PropWithDocButton(data, "correctExtremUVScale", "#uv")
-        data.prop(self, "bakeArmatureAction")
-        data.prop(self, "exportWithCustomProps")
-        data.prop(self, "exportWithMetaData")
-        data.prop(self, "revertExportPath")
-
-        script = boxColumn.box()
-        script.label(text='IMPORT SCRIPT')
-        script.prop(self, "useGeneratedScripts")
-
-        boxColumn = layout.column().split(factor=0.5)
-
-        other = boxColumn.box()
-        other.label(text='OTHER')
-        other.prop(self, "collisionColor")
-        other.prop(self, "notifyUnitScalePotentialError")
-
-        updateButton = layout.row()
-        updateButton.scale_y = 2.0
-        updateButton.operator("object.new_release_info", icon="TIME")
 
 
 class BFU_OT_ObjExportAction(bpy.types.PropertyGroup):
@@ -400,6 +119,16 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         maxlen=64,
         default="",
         subtype='FILE_NAME'
+        )
+
+    bpy.types.Object.bfu_export_fbx_camera = BoolProperty(
+        name="Export camera fbx",
+        description=(
+            'True: export .Fbx object and AdditionalTrack.ini ' +
+            'Else: export only AdditionalTrack.ini'
+            ),
+
+        default=False,
         )
 
     bpy.types.Object.bfu_export_procedure = EnumProperty(
@@ -526,19 +255,45 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=True
         )
 
-    bpy.types.Object.UseTargetCustomSkeletonName = BoolProperty(
-        name="Skeleton name in Unreal",
-        description=(
-            "Addon will use armature name" +
-            " for found skeleton in Unreal." +
-            " If you use a proxy you need set name manually."),
-        default=False
+    bpy.types.Object.bfu_skeleton_search_mode = EnumProperty(
+        name="Skeleton search mode",
+        description='Specify the skeleton location in Unreal',
+        items=[
+            ("auto",
+                "Auto",
+                "...",
+                1),
+            ("custom_name",
+                "Custom name",
+                "Default location with custom name",
+                2),
+            ("custom_path_name",
+                "Custom path and name",
+                "Set the custom light map resolution",
+                3),
+            ("custom_reference",
+                "custom reference",
+                "Reference from Unreal.",
+                4)
+            ]
         )
 
-    bpy.types.Object.TargetCustomSkeletonName = StringProperty(
+    bpy.types.Object.bfu_target_skeleton_custom_path = StringProperty(
         name="",
-        description="The name of the Skeleton in Unreal",
+        description="The path of the Skeleton in Unreal. Skeleton not the skeletal mesh.",
+        default="ImportedFbx"
+        )
+
+    bpy.types.Object.bfu_target_skeleton_custom_name = StringProperty(
+        name="",
+        description="The name of the Skeleton in Unreal. Skeleton not the skeletal mesh.",
         default="SK_MySketonName_Skeleton"
+        )
+
+    bpy.types.Object.bfu_target_skeleton_custom_ref = StringProperty(
+        name="",
+        description="The full reference of the skeleton in Unreal. Skeleton not the skeletal mesh. (Use right clic on asset and copy reference.)",
+        default="SkeletalMesh'/Game/ImportedFbx/SK_MySketonName_Skeleton.SK_MySketonName_Skeleton'"
         )
 
     # StaticMeshImportData
@@ -854,14 +609,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.ExportNLA = BoolProperty(
         name="Export NLA (Nonlinear Animation)",
         description=(
-            "If checked, exports the all animation of the scene with the NLA"
+            "If checked, exports the all animation of the scene with the NLA (Don't work with Auto-Rig Pro for the moment.)"
             ),
         default=False
         )
 
     bpy.types.Object.NLAAnimName = StringProperty(
         name="NLA export name",
-        description='Export NLA name',
+        description="Export NLA name (Don't work with Auto-Rig Pro for the moment.)",
         maxlen=64,
         default="NLA_animation",
         subtype='FILE_NAME'
@@ -1194,6 +949,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         # Properties to store in the preset
         preset_values = [
                             'obj.exportFolderName',
+                            'obj.bfu_export_fbx_camera',
                             'obj.ExportAsAlembic',
                             'obj.ExportAsLod',
                             'obj.ForceStaticMesh',
@@ -1204,7 +960,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.Ue4Lod4',
                             'obj.Ue4Lod5',
                             'obj.CreatePhysicsAsset',
-                            'obj.UseTargetCustomSkeletonName',
+                            'obj.bfu_skeleton_search_mode',
+                            'obj.bfu_target_skeleton_custom_path',
+                            'obj.bfu_target_skeleton_custom_name',
+                            'obj.bfu_target_skeleton_custom_ref',
                             'obj.TargetCustomSkeletonName',
                             'obj.UseStaticMeshLODGroup',
                             'obj.StaticMeshLODGroup',
@@ -1346,10 +1105,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         version = "-1"
         for addon in addon_utils.modules():
             if addon.bl_info['name'] == "Blender for UnrealEngine":
-                version = addon.bl_info.get('version', (-1, -1, -1))[0]
+                version = addon.bl_info.get('version', (-1, -1, -1))
 
         credit_box = layout.box()
-        credit_box.label(text='Blender for Unreal Engine ' + str(version) + ' by Xavier Loux.')
+        credit_box.label(text=ti('intro')+' Version: '+str(version))
         credit_box.operator("object.open_documentation_page", icon="HELP")
 
         row = layout.row(align=True)
@@ -1394,7 +1153,11 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             icon='FILE_FOLDER'
                             )
 
-                        if obj.type != "CAMERA":
+                        if obj.type == "CAMERA":
+                            CameraProp = layout.column()
+                            CameraProp.prop(obj, 'bfu_export_fbx_camera')
+
+                        else:
                             ProxyProp = layout.column()
                             ProxyProp.prop(obj, 'ExportAsProxy')
                             if obj.ExportAsProxy:
@@ -1519,20 +1282,26 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 CreatePhysicsAsset = layout.row()
                                 CreatePhysicsAsset.prop(obj, "CreatePhysicsAsset")
 
-                                Ue4Skeleton = layout.row()
-                                Ue4Skeleton.prop(obj, "UseTargetCustomSkeletonName")
-                                useSkeleton = obj.UseTargetCustomSkeletonName
-                                Ue4SkeletonText = Ue4Skeleton.column()
-                                Ue4SkeletonText.prop(obj, "TargetCustomSkeletonName")
-                                Ue4SkeletonText.enabled = useSkeleton
+                                Ue4Skeleton = layout.column()
+                                Ue4Skeleton.prop(obj, "bfu_skeleton_search_mode")
+                                if obj.bfu_skeleton_search_mode == "auto":
+                                    pass
+                                if obj.bfu_skeleton_search_mode == "custom_name":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
+                                if obj.bfu_skeleton_search_mode == "custom_path_name":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_path")
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
+                                if obj.bfu_skeleton_search_mode == "custom_reference":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
+
 
                     else:
                         layout.label(text='(No properties to show.)')
                 else:
                     layout.label(text='(Generated scripts are deactivated.)')
 
-            bfu_ui_utils.LayoutSection(layout, "bfu_object_avanced_properties_expanded", "Object avanced Properties")
-            if scene.bfu_object_avanced_properties_expanded:
+            bfu_ui_utils.LayoutSection(layout, "bfu_object_advanced_properties_expanded", "Object advanced Properties")
+            if scene.bfu_object_advanced_properties_expanded:
                 if obj is not None:
                     if obj.ExportEnum == "export_recursive":
 
@@ -1605,12 +1374,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                     ActionListProperty.prop(obj, 'PrefixNameToExport')
 
                             # NLA
-                            if GetAssetType(obj) == "SkeletalMesh" and obj.bfu_export_procedure != "auto-rig-pro":
+                            if GetAssetType(obj) == "SkeletalMesh":
                                 NLAAnim = layout.row()
                                 NLAAnim.prop(obj, 'ExportNLA')
                                 NLAAnimChild = NLAAnim.column()
                                 NLAAnimChild.enabled = obj.ExportNLA
                                 NLAAnimChild.prop(obj, 'NLAAnimName')
+                                if obj.bfu_export_procedure == "auto-rig-pro":
+                                    NLAAnim.enabled = False
+                                    NLAAnimChild.enabled = False
 
                             # Animation fbx properties
                             if (GetAssetType(obj) != "Alembic"):
@@ -1859,9 +1631,15 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     return True
             return False
 
-        def FoundTypeInSelect(targetType):
+        def FoundTypeInSelect(targetType, include_active=True):
             # Return True if a specific type is found
-            for obj in bpy.context.selected_objects:
+            select = bpy.context.selected_objects
+            if not include_active:
+                if bpy.context.active_object:
+                    if bpy.context.active_object in select:
+                        select.remove(bpy.context.active_object)
+
+            for obj in select:
                 if obj.type == targetType:
                     return True
             return False
@@ -1874,14 +1652,14 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
             if not ActiveModeIs("OBJECT"):
                 layout.label(text="Switch to Object Mode.", icon='INFO')
             else:
-                if FoundTypeInSelect("MESH"):
+                if FoundTypeInSelect("MESH", False):
                     if ActiveTypeIs("MESH") and len(bpy.context.selected_objects) > 1:
                         layout.label(text="Click on button for convert to collider.", icon='INFO')
                         ready_for_convert_collider = True
                     else:
                         layout.label(text="Select with [SHIFT] the collider owner.", icon='INFO')
 
-                elif FoundTypeInSelect("EMPTY"):
+                elif FoundTypeInSelect("EMPTY", False):
                     if ActiveTypeIs("MESH") and len(bpy.context.selected_objects) > 1:
                         layout.label(text="Click on button for convert to Socket.", icon='INFO')
                         ready_for_convert_socket = True
@@ -1949,13 +1727,53 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
             checkButton.operator("object.computalllightmap", icon='TEXTURE')
 
 
+class BFU_OT_FileExport(bpy.types.PropertyGroup):
+    name: StringProperty()
+    path: StringProperty()
+    type: StringProperty()  # FBX, AdditionalTrack
+
+    def __init__(self, name):
+        pass
+
+    def GetRelativePath(self):
+        return os.path.join(self.path, self.name)
+
+    def GetAbsolutePath(self):
+        return os.path.join(bpy.path.abspath(self.path), self.name)
+
+
 class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     # [AssetName , AssetType , ExportPath, ExportTime]
-    assetName: StringProperty(default="None")
-    assetType: StringProperty(default="None")  # return from GetAssetType()
-    exportPath: StringProperty(default="None")
-    exportTime: FloatProperty(default=0)
+
+    asset_name: StringProperty(default="None")
+    asset_type: StringProperty(default="None")  # return from GetAssetType()
+    files: CollectionProperty(type=BFU_OT_FileExport)
     object: PointerProperty(type=bpy.types.Object)
+    export_start_time: FloatProperty(default=0)
+    export_end_time: FloatProperty(default=0)
+    export_success: BoolProperty(default=False)
+
+    def StartAssetExport(self, obj, action=None):
+        self.object = obj
+        self.asset_name = obj.name
+        if action:
+            self.asset_type = GetActionType(action)
+        else:
+            self.asset_type = GetAssetType(obj)
+        self.export_start_time = time.perf_counter()
+
+    def EndAssetExport(self, success):
+        self.export_end_time = time.perf_counter()
+        self.export_success = success
+
+    def GetExportTime(self):
+        return self.export_end_time - self.export_start_time
+
+    def GetFileByType(self, type: str):
+        for file in self.files:
+            if file.type == type:
+                return file
+        print("File type not found in this assets:", type)
 
 
 class BFU_PT_Export(bpy.types.Panel):
@@ -2062,10 +1880,8 @@ class BFU_PT_Export(bpy.types.Panel):
         maxlen=64,
         default="ImportAssetScript.py")
 
-    default = "file_import_sequencer_script_namea.py"
-
     bpy.types.Scene.file_import_sequencer_script_name = bpy.props.StringProperty(
-        name="Import sequencer script Name1",
+        name="Import sequencer script Name",
         description="Import sequencer script name",
         maxlen=64,
         default="ImportSequencerScript.py")
@@ -2392,7 +2208,7 @@ class BFU_PT_Export(bpy.types.Panel):
                 return {'FINISHED'}
 
             scene.UnrealExportedAssetsList.clear()
-            s = CounterStart()
+            counter = CounterTimer()
             bfu_check_potential_error.UpdateNameHierarchy()
             bfu_export_asset.ExportForUnrealEngine()
             bfu_write_text.WriteAllTextFiles()
@@ -2402,7 +2218,7 @@ class BFU_PT_Export(bpy.types.Panel):
                 "Export of " +
                 str(len(scene.UnrealExportedAssetsList)) +
                 " asset(s) has been finalized in " +
-                str(round(CounterEnd(s), 2)) +
+                str(round(counter.GetTime(), 2)) +
                 "seconds. Look in console for more info.")
             print(
                 "=========================" +
@@ -2458,7 +2274,7 @@ class BFU_PT_Export(bpy.types.Panel):
     bpy.types.Scene.static_collection_export = bpy.props.BoolProperty(
         name="Collection(s) ",
         description="Check mark to export Collection(s)",
-        default=False
+        default=True
         )
 
     bpy.types.Scene.skeletal_export = bpy.props.BoolProperty(
@@ -2476,13 +2292,13 @@ class BFU_PT_Export(bpy.types.Panel):
     bpy.types.Scene.alembic_export = bpy.props.BoolProperty(
         name="Alembic animation(s)",
         description="Check mark to export Alembic animation(s)",
-        default=False
+        default=True
         )
 
     bpy.types.Scene.camera_export = bpy.props.BoolProperty(
         name="Camera(s)",
         description="Check mark to export Camera(s)",
-        default=False
+        default=True
         )
 
     # Additional file
@@ -2513,12 +2329,17 @@ class BFU_PT_Export(bpy.types.Panel):
         )
 
     # exportProperty
-    bpy.types.Scene.export_ExportOnlySelected = bpy.props.BoolProperty(
+    bpy.types.Scene.bfu_export_filter = bpy.props.EnumProperty(
         name="Export only select",
+        items=[
+            ('default', "No Filter", "Export as normal all objects with the recursive export option.", 0),
+            ('only_object', "Only select", "Export only the selected object(s)", 1),
+            ('only_object_action', "Only select and active action", "Export only the selected object(s) and active action on this object", 2),
+            ],
         description=(
             "Check mark to export only selected export group." +
             " (export_recursive objects and auto childs) "),
-        default=False
+        default="default"
         )
 
     def draw(self, context):
@@ -2628,7 +2449,7 @@ class BFU_PT_Export(bpy.types.Panel):
 
             # exportProperty
             exportOnlySelect = layout.row()
-            exportOnlySelect.prop(scene, 'export_ExportOnlySelected')
+            exportOnlySelect.prop(scene, 'bfu_export_filter')
 
             exportButton = layout.row()
             exportButton.scale_y = 2.0
@@ -2689,10 +2510,6 @@ class BFU_PT_CorrectAndImprov(bpy.types.Panel):
 
 
 classes = (
-    BFU_AP_AddonPreferences,
-    BFU_AP_AddonPreferences.BFU_OT_NewReleaseInfo,
-    BFU_AP_AddonPreferences.BFU_OT_OpenDocumentationTargetPage,
-
     BFU_PT_BlenderForUnrealObject,
     BFU_PT_BlenderForUnrealObject.BFU_MT_ObjectGlobalPropertiesPresets,
     BFU_PT_BlenderForUnrealObject.BFU_OT_AddObjectGlobalPropertiesPreset,
@@ -2752,6 +2569,8 @@ def register():
     bpy.utils.register_class(BFU_OT_SceneCollectionExport)
     bpy.types.Scene.CollectionExportList = CollectionProperty(
         type=BFU_OT_SceneCollectionExport)
+        
+    bpy.utils.register_class(BFU_OT_FileExport)
     bpy.utils.register_class(BFU_OT_UnrealExportedAsset)
     bpy.types.Scene.UnrealExportedAssetsList = CollectionProperty(
         type=BFU_OT_UnrealExportedAsset)
@@ -2767,6 +2586,7 @@ def unregister():
 
     bpy.utils.unregister_class(BFU_OT_ObjExportAction)
     bpy.utils.unregister_class(BFU_OT_SceneCollectionExport)
+    bpy.utils.unregister_class(BFU_OT_FileExport)
     bpy.utils.unregister_class(BFU_OT_UnrealExportedAsset)
 
     bpy.types.VIEW3D_MT_uv_map.remove(menu_func)

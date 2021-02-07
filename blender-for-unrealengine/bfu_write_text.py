@@ -22,6 +22,10 @@ import time
 import configparser
 from math import degrees, radians, tan
 from mathutils import Matrix
+import json
+from . import languages
+from .languages import *
+from shutil import copyfile
 
 
 if "bpy" in locals():
@@ -34,6 +38,8 @@ if "bpy" in locals():
         importlib.reload(bfu_write_import_asset_script)
     if "bfu_write_import_sequencer_script" in locals():
         importlib.reload(bfu_write_import_sequencer_script)
+    if "languages" in locals():
+        importlib.reload(languages)
 
 from . import bfu_basics
 from .bfu_basics import *
@@ -46,7 +52,7 @@ from . import bfu_write_import_sequencer_script
 def ExportSingleText(text, dirpath, filename):
     # Export single text
 
-    s = CounterStart()
+    counter = CounterTimer()
 
     absdirpath = bpy.path.abspath(dirpath)
     VerifiDirs(absdirpath)
@@ -55,24 +61,41 @@ def ExportSingleText(text, dirpath, filename):
     with open(fullpath, "w") as file:
         file.write(text)
 
-    exportTime = CounterEnd(s)
+    exportTime = counter.GetTime()
     # This return [AssetName , AssetType , ExportPath, ExportTime]
     return([filename, "TextFile", absdirpath, exportTime])
 
 
-def ExportSingleConfigParser(config, dirpath, filename):
+def ExportSingleConfigParser(config_data, dirpath, filename):
     # Export single ConfigParser
 
-    s = CounterStart()
+    counter = CounterTimer()
 
     absdirpath = bpy.path.abspath(dirpath)
     VerifiDirs(absdirpath)
     fullpath = os.path.join(absdirpath, filename)
 
-    with open(fullpath, "w") as configfile:
-        config.write(configfile)
+    with open(fullpath, "w") as config_file:
+        config_data.write(config_file)
 
-    exportTime = CounterEnd(s)
+    exportTime = counter.GetTime()
+    # This return [AssetName , AssetType , ExportPath, ExportTime]
+    return([filename, "TextFile", absdirpath, exportTime])
+
+
+def ExportSingleJson(json_data, dirpath, filename):
+    # Export single ConfigParser
+
+    counter = CounterTimer()
+
+    absdirpath = bpy.path.abspath(dirpath)
+    VerifiDirs(absdirpath)
+    fullpath = os.path.join(absdirpath, filename)
+
+    with open(fullpath, 'w') as json_file:
+        json.dump(json_data, json_file, ensure_ascii=False, sort_keys=False, indent=4)
+
+    exportTime = counter.GetTime()
     # This return [AssetName , AssetType , ExportPath, ExportTime]
     return([filename, "TextFile", absdirpath, exportTime])
 
@@ -87,22 +110,25 @@ def WriteExportLog():
     AnimNum = 0
     CameraNum = 0
 
+    # Get number per asset type
     for assets in scene.UnrealExportedAssetsList:
-        if assets.assetType == "StaticMesh":
+        if assets.asset_type == "StaticMesh":
             StaticNum += 1
-        if assets.assetType == "SkeletalMesh":
+        if assets.asset_type == "SkeletalMesh":
             SkeletalNum += 1
-        if assets.assetType == "Alembic":
+        if assets.asset_type == "Alembic":
             AlembicNum += 1
-        if GetIsAnimation(assets.assetType):
+        if GetIsAnimation(assets.asset_type):
             AnimNum += 1
-        if assets.assetType == "Camera":
+        if assets.asset_type == "Camera":
             CameraNum += 1
+
     asset_number = len(scene.UnrealExportedAssetsList)
     exported_assets = StaticNum+SkeletalNum+AlembicNum+AnimNum+CameraNum
 
     OtherNum = asset_number - exported_assets
 
+    # Asset number string
     AssetNumberByType = str(StaticNum)+" StaticMesh(s) | "
     AssetNumberByType += str(SkeletalNum)+" SkeletalMesh(s) | "
     AssetNumberByType += str(AlembicNum)+" Alembic(s) | "
@@ -110,33 +136,27 @@ def WriteExportLog():
     AssetNumberByType += str(CameraNum)+" Camera(s) | "
     AssetNumberByType += str(OtherNum)+" Other(s)" + "\n"
 
-    ExportLog = "..." + "\n"
+    ExportLog = ""
     ExportLog += AssetNumberByType
     ExportLog += "\n"
     for asset in scene.UnrealExportedAssetsList:
 
-        if (asset.assetType == "NlAnim"):
-            primaryInfo = "Animation"
-            secondaryInfo = "(NLA)"
-        elif (asset.assetType == "Action"):
-            primaryInfo = "Animation"
-            secondaryInfo = "(Action)"
-        elif (asset.assetType == "Pose"):
-            primaryInfo = "Animation"
-            secondaryInfo = "(Pose)"
+        if (asset.asset_type == "NlAnim"):
+            primaryInfo = "Animation (NLA)"
+        elif (asset.asset_type == "Action"):
+            primaryInfo = "Animation (Action)"
+        elif (asset.asset_type == "Pose"):
+            primaryInfo = "Animation (Pose)"
         else:
-            primaryInfo = asset.assetType
             if asset.object.ExportAsLod:
-                secondaryInfo = " (LOD)"
+                primaryInfo = asset.asset_type+" (LOD)"
             else:
-                secondaryInfo = ""
+                primaryInfo = asset.asset_type
 
         ExportLog += (
-            "["+primaryInfo+"]"+secondaryInfo+" -> " +
-            "\""+asset.assetName+"\" EXPORTED IN " +
-            str(round(asset.exportTime, 2))+"s\r\n"
-            )
-        ExportLog += (asset.exportPath + "\n")
+            asset.asset_name+" ["+primaryInfo+"] EXPORTED IN " + str(round(asset.GetExportTime(), 2))+"s\r\n")
+        for file in asset.files:
+            ExportLog += (file.path + "\\" + file.name + "\n")
         ExportLog += "\n"
 
     return ExportLog
@@ -171,10 +191,10 @@ def WriteExportedAssetsDetail():
             )
 
         # Mesh only
-        if (asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh"):
-            fbx_path = (os.path.join(asset.exportPath, asset.assetName))
+        if (asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh"):
+            fbx_file_path = asset.GetFileByType("FBX").GetAbsolutePath()
             config.set(AssetSectionName, 'lod0_fbx_path', fbx_path)
-            config.set(AssetSectionName, 'asset_type', asset.assetType)
+            config.set(AssetSectionName, 'asset_type', asset.asset_type)
             config.set(AssetSectionName, 'material_search_location', obj.MaterialSearchLocation)
             config.set(AssetSectionName, 'generate_lightmap_uvs', str(obj.GenerateLightmapUVs))
             config.set(AssetSectionName, 'create_physics_asset', str(obj.CreatePhysicsAsset))
@@ -184,27 +204,25 @@ def WriteExportedAssetsDetail():
                 config.set(AssetSectionName, 'light_map_resolution', str(GetCompuntedLightMap(obj)))
 
         # Anim only
-        if GetIsAnimation(asset.assetType):
+        if GetIsAnimation(asset.asset_type):
             actionIndex = 0
             animOption = "anim"+str(actionIndex)
             while config.has_option(AssetSectionName, animOption+'_fbx_path'):
                 actionIndex += 1
                 animOption = "anim"+str(actionIndex)
 
-            fbx_path = (os.path.join(asset.exportPath, asset.assetName))
+            fbx_file_path = asset.GetFileByType("FBX").GetAbsolutePath()
             config.set(AssetSectionName, animOption+'_fbx_path', fbx_path)
             config.set(AssetSectionName, animOption+'_import_path', os.path.join(obj.exportFolderName, scene.anim_subfolder_name))
 
     AssetForImport = []
     for asset in scene.UnrealExportedAssetsList:
-        if (asset.assetType == "StaticMesh" or asset.assetType == "SkeletalMesh" or GetIsAnimation(asset.assetType)):
+        if (asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh" or GetIsAnimation(asset.asset_type)):
             AssetForImport.append(asset)
 
     # Comment
     config.add_section('Comment')
-    config.set('Comment', '; This config file was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons')
-    config.set('Comment', '; The config must be used in Unreal Engine Editor with the plugin BlenderImporter : ...')
-    config.set('Comment', '; It used for import into Unreal Engine all the assets of type StaticMesh, SkeletalMesh, Animation and Pose')
+    config.set('Comment', '; '+ti(write_text_additional_track_start))
 
     config.add_section('Defaultsettings')
     config.set('Defaultsettings', 'unreal_import_location', r'/Game/'+scene.unreal_import_location)
@@ -216,7 +234,8 @@ def WriteExportedAssetsDetail():
     return config
 
 
-def WriteSingleCameraAdditionalTrack(obj):
+def WriteCameraAnimationTracks(obj):
+    # Write as json file
 
     def getCameraFocusDistance(Camera, Target):
         transA = Camera.matrix_world.copy()
@@ -285,140 +304,151 @@ def WriteSingleCameraAdditionalTrack(obj):
             return keys
         return[(scene.frame_start, DataValue)]
 
+    class CameraDataAtFrame():
+
+        def __init__(self):
+            scene = bpy.context.scene
+            self.transform_track = {}
+            self.lens = {}
+            self.sensor_width = {}
+            self.sensor_height = {}
+            self.focus_distance = {}
+            self.aperture_fstop = {}
+            self.hide_viewport = {}
+
+        def EvaluateTracks(self, camera, frame_start, frame_end):
+            saveFrame = scene.frame_current
+            for frame in range(frame_start, frame_end+1):
+                scene.frame_set(frame)
+
+                # Get Transfrom
+
+                matrix = camera.matrix_world @ Matrix.Rotation(radians(90.0), 4, 'Y') @ Matrix.Rotation(radians(-90.0), 4, 'X')
+                loc = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
+                r = matrix.to_euler()
+                s = matrix.to_scale()
+
+                array_location = [loc[0], loc[1]*-1, loc[2]]
+                array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]
+                array_scale = [s[0], s[1], s[2]]
+
+                transform = {}
+                transform["location_x"] = array_location[0]
+                transform["location_y"] = array_location[1]
+                transform["location_z"] = array_location[2]
+                transform["rotation_x"] = array_rotation[0]
+                transform["rotation_y"] = array_rotation[1]
+                transform["rotation_z"] = array_rotation[2]
+                transform["scale_x"] = array_scale[0]
+                transform["scale_y"] = array_scale[1]
+                transform["scale_z"] = array_scale[2]
+                self.transform_track[frame] = transform
+
+                # Get FocalLength SensorWidth SensorHeight
+                self.lens[frame] = getOneKeysByFcurves(camera, "lens", camera.data.lens, frame)
+                self.sensor_width[frame] = getOneKeysByFcurves(camera, "sensor_width", camera.data.sensor_width, frame)
+                self.sensor_height[frame] = getOneKeysByFcurves(camera, "sensor_height", camera.data.sensor_height, frame)
+
+                # Get FocusDistance
+                if camera.data.dof.focus_object is not None:
+                    key = getCameraFocusDistance(camera, camera.data.dof.focus_object) * 100 * bpy.context.scene.unit_settings.scale_length
+
+                else:
+                    key = getOneKeysByFcurves(camera, "dof.focus_distance", camera.data.dof.focus_distance, frame) * 100 * bpy.context.scene.unit_settings.scale_length
+
+                if key > 0:
+                    self.focus_distance[frame] = key
+                else:
+                    self.focus_distance[frame] = 100000  # 100000 is default value in ue4
+
+                # Write Aperture (Depth of Field) keys
+                if scene.render.engine == "BLENDER_EEVEE" or scene.render.engine == "CYCLES" or scene.render.engine == "BLENDER_WORKBENCH":
+                    self.aperture_fstop[frame] = getOneKeysByFcurves(camera, "dof.aperture_fstop", camera.data.dof.aperture_fstop, frame)
+                else:
+                    self.aperture_fstop[frame] = 21  # 21 is default value in ue4
+
+                boolKey = getOneKeysByFcurves(camera, "hide_viewport", camera.hide_viewport, frame, False)
+                self.hide_viewport[frame] = (boolKey < 1)  # Inversed for convert hide to spawn
+            scene.frame_set(saveFrame)
+
+        pass
+
     scene = bpy.context.scene
-    ImportScript = ";This file was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons" + "\n"
-    ImportScript += ";This file contains additional Camera animation informations that is not supported with .fbx files" + "\n"
-    ImportScript += ";The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python" + "\n"
-    ImportScript += "\n\n\n"
+    data = {}
+    data['Coment'] = {
+        '1/3': ti('write_text_additional_track_start'),
+        '2/3': ti('write_text_additional_track_camera'),
+        '3/3': ti('write_text_additional_track_end'),
+    }
 
-    # Write TransformMatrix keys
-    ImportScript += "[Transform]" + "\n"
-    for key in getAllKeysByMatrix(obj):
-        # GetWorldPostion
-        matrix = key[1] @ Matrix.Rotation(radians(90.0), 4, 'Y') @ Matrix.Rotation(radians(-90.0), 4, 'X')
-        t = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
-        r = matrix.to_euler()
-        s = matrix.to_scale()
+    data['Frames'] = []
+    data['Frames'].append({
+        'frame_start': scene.frame_start,
+        'frame_end': scene.frame_end,
+    })
 
-        array_location = [t[0], t[1]*-1, t[2]]
-        array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]
-        array_scale = [s[0], s[1], s[2]]
+    camera_tracks = CameraDataAtFrame()
+    camera_tracks.EvaluateTracks(obj, scene.frame_start, scene.frame_end)
 
-        transform = [array_location[0], array_location[1], array_location[2], array_rotation[0], array_rotation[1], array_rotation[2], array_scale[0], array_scale[1], array_scale[2]]
-        strTransform = ""
-        for t in transform:
-            strTransform += str(t)+","
-        ImportScript += str(key[0])+": " + strTransform + "\n"
-    ImportScript += "\n\n\n"
+    data['Camera transform'] = camera_tracks.transform_track
+    data['Camera FocalLength'] = camera_tracks.lens
+    data['Camera SensorWidth'] = camera_tracks.sensor_width
+    data['Camera SensorHeight'] = camera_tracks.sensor_height
+    data['Camera FocusDistance'] = camera_tracks.focus_distance
+    data['Camera Aperture'] = camera_tracks.aperture_fstop
+    data['Camera Spawned'] = camera_tracks.hide_viewport
 
-    # Write FocalLength keys
-    ImportScript += "[FocalLength]" + "\n"
-    lensKeys = getAllKeysByFcurves(obj, "lens", obj.data.lens)
-    for key in lensKeys:
-        ImportScript += str(key[0])+": "+str(key[1]) + "\n"
-    ImportScript += "\n\n\n"
-
-    # Write FocalLength keys
-    ImportScript += "[SensorWidth]" + "\n"
-    lensKeys = getAllKeysByFcurves(obj, "sensor_width", obj.data.sensor_width)
-    for key in lensKeys:
-        ImportScript += str(key[0])+": "+str(key[1]) + "\n"
-    ImportScript += "\n\n\n"
-
-    # Write FocalLength keys
-    ImportScript += "[SensorHeight]" + "\n"
-    lensKeys = getAllKeysByFcurves(obj, "sensor_height", obj.data.sensor_height)
-    for key in lensKeys:
-        ImportScript += str(key[0])+": "+str(key[1]) + "\n"
-    ImportScript += "\n\n\n"
-
-    # Write FocusDistance keys
-    ImportScript += "[FocusDistance]" + "\n"
-    if obj.data.dof.focus_object is None:
-        DataKeys = getAllKeysByFcurves(obj, "dof.focus_distance", obj.data.dof.focus_distance)
-    else:
-        DataKeys = getAllCamDistKeys(obj, obj.data.dof.focus_object)
-    for key in DataKeys:
-        CorrectedValue = key[1]*100
-        if CorrectedValue > 0:
-            ImportScript += str(key[0])+": "+str(CorrectedValue) + "\n"
-        else:
-            ImportScript += str(key[0])+": "+str(100000) + "\n"  # 100000 is default value in ue4
-    ImportScript += "\n\n\n"
-
-    # Write Aperture (Depth of Field) keys
-    ImportScript += "[Aperture]" + "\n"
-    if scene.render.engine == "BLENDER_EEVEE" or scene.render.engine == "CYCLES" or scene.render.engine == "BLENDER_WORKBENCH":
-        DataKeys = getAllKeysByFcurves(obj, "dof.aperture_fstop", obj.data.dof.aperture_fstop)
-        for key in DataKeys:
-            ImportScript += str(key[0])+": "+str(key[1]) + "\n"
-
-    else:
-        ImportScript += "0: 21\n"  # 21 is default value in ue4
-    ImportScript += "\n\n\n"
-
-    # Write Spawned keys
-    ImportScript += "[Spawned]" + "\n"
-    lastKeyValue = None
-    for key in getAllKeysByFcurves(obj, "hide_viewport", obj.hide_viewport, False):
-        boolKey = (key[1] < 1)  # Inversed for convert hide to spawn
-        if lastKeyValue is None:
-            ImportScript += str(key[0])+": "+str(boolKey) + "\n"
-            lastKeyValue = boolKey
-        else:
-            if boolKey != lastKeyValue:
-                ImportScript += str(key[0])+": "+str(boolKey) + "\n"
-                lastKeyValue = boolKey
-    ImportScript += "\n\n\n"
-
-    return ImportScript
+    return data
 
 
 def WriteSingleMeshAdditionalParameter(obj):
 
     scene = bpy.context.scene
-    config = configparser.ConfigParser(allow_no_value=True)
+    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+
     sockets = []
     for socket in GetSocketDesiredChild(obj):
         sockets.append(socket)
 
+    data = {}
+
     # Comment
-    config.add_section('Comment')
-    config.set('Comment', '; This file was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons')
-    config.set('Comment', '; This file contains Additional StaticMesh and SkeletalMesh parameters informations that is not supported with .fbx files')
-    config.set('Comment', '; The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python')
+    data['Coment'] = {
+        '1/3': ti('write_text_additional_track_start'),
+        '2/3': ti('write_text_additional_track_all'),
+        '3/3': ti('write_text_additional_track_end'),
+    }
 
     # Defaultsettings
-    config.add_section('DefaultSettings')
+    data['DefaultSettings'] = {}
     # config.set('Defaultsettings', 'SocketNumber', str(len(sockets)))
 
     # Level of detail
-    config.add_section("LevelOfDetail")
+    data['LevelOfDetail'] = {}
     if obj.Ue4Lod1 is not None:
         loc = os.path.join(GetObjExportDir(obj.Ue4Lod1, True), GetObjExportFileName(obj.Ue4Lod1))
-        config.set('LevelOfDetail', 'lod_1', str(loc))
+        data['LevelOfDetail']['lod_1'] = loc
     if obj.Ue4Lod2 is not None:
         loc = os.path.join(GetObjExportDir(obj.Ue4Lod2, True), GetObjExportFileName(obj.Ue4Lod2))
-        config.set('LevelOfDetail', 'lod_2', str(loc))
+        data['LevelOfDetail']['lod_2'] = loc
     if obj.Ue4Lod3 is not None:
         loc = os.path.join(GetObjExportDir(obj.Ue4Lod3, True), GetObjExportFileName(obj.Ue4Lod3))
-        config.set('LevelOfDetail', 'lod_3', str(loc))
+        data['LevelOfDetail']['lod_3'] = loc
     if obj.Ue4Lod4 is not None:
         loc = os.path.join(GetObjExportDir(obj.Ue4Lod4, True), GetObjExportFileName(obj.Ue4Lod4))
-        config.set('LevelOfDetail', 'lod_4', str(loc))
+        data['LevelOfDetail']['lod_4'] = loc
     if obj.Ue4Lod5 is not None:
         loc = os.path.join(GetObjExportDir(obj.Ue4Lod5, True), GetObjExportFileName(obj.Ue4Lod5))
-        config.set('LevelOfDetail', 'lod_5', str(loc))
+        data['LevelOfDetail']['lod_5'] = loc
 
     # Sockets
     if GetAssetType(obj) == "SkeletalMesh":
 
-        config.add_section('Sockets')
-        config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
-        addon_prefs = bpy.context.preferences.addons[__package__].preferences
+        data['Sockets'] = {}
+        # config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
 
         for i, socket in enumerate(sockets):
-            if socket.name.startswith("SOCKET_"):
+            if IsASocket(socket):
                 SocketName = socket.name[7:]
             else:
                 socket.name
@@ -444,34 +474,42 @@ def WriteSingleMeshAdditionalParameter(obj):
             array_scale = [s[0], s[1], s[2]]
 
             MySocket = [SocketName, b.name.replace('.', '_'), array_location, array_rotation, array_scale]
-            config.set('Sockets', 'socket_'+str(i), str(MySocket))
+            data['Sockets']['socket_'+str(i)] = MySocket
 
-    return config
+    return data
 
 
 def WriteAllTextFiles():
 
     scene = bpy.context.scene
+    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+
     if scene.text_ExportLog:
-        Text = WriteExportLog()
+        Text = ti("write_text_additional_track_start") + "\n"
+        Text += "" + "\n"
+        Text += WriteExportLog()
         if Text is not None:
             Filename = ValidFilename(scene.file_export_log_name)
             ExportSingleText(Text, scene.export_other_file_path, Filename)
 
     # Import script
     if scene.text_ImportAssetScript:
-        addon_prefs = bpy.context.preferences.addons[__package__].preferences
-        Text = bfu_write_import_asset_script.WriteImportAssetScript()
-        if Text is not None:
-            Filename = ValidFilename(scene.file_import_asset_script_name)
-            ExportSingleText(Text, scene.export_other_file_path, Filename)
+        json_data = bfu_write_import_asset_script.WriteImportAssetScript()
+        ExportSingleJson(json_data, scene.export_other_file_path, "ImportAssetData.json")
+
+        source = os.path.join(bpy.utils.user_resource('SCRIPTS', r"addons\blender-for-unrealengine\import"), "asset_import_script.py")
+        filename = ValidFilename(scene.file_import_asset_script_name)
+        destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
+        copyfile(source, destination)
 
     if scene.text_ImportSequenceScript:
-        addon_prefs = bpy.context.preferences.addons[__package__].preferences
-        Text = bfu_write_import_sequencer_script.WriteImportSequencerScript()
-        if Text is not None:
-            Filename = ValidFilename(scene.file_import_sequencer_script_name)
-            ExportSingleText(Text, scene.export_other_file_path, Filename)
+        json_data = bfu_write_import_sequencer_script.WriteImportSequencerTracks()
+        ExportSingleJson(json_data, scene.export_other_file_path, "ImportSequencerData.json")
+
+        source = os.path.join(bpy.utils.user_resource('SCRIPTS', r"addons\blender-for-unrealengine\import"), "sequencer_import_script.py")
+        filename = ValidFilename(scene.file_import_sequencer_script_name)
+        destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
+        copyfile(source, destination)
 
     # ConfigParser
     '''

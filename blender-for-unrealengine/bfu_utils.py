@@ -38,6 +38,7 @@ class SavedObject():
         if obj:
             self.name = obj.name
             self.select = obj.select_get()
+            self.hide = obj.hide_get()
             self.hide_select = obj.hide_select
             self.hide_viewport = obj.hide_viewport
 
@@ -149,11 +150,13 @@ class UserSceneSave():
         for obj in self.objects:  # Resets previous selected object if still exist
             if obj.select:
                 if obj.name in bpy.data.objects:
-                    bpy.data.objects[obj.name].select_set(True)
+                    if obj.name in bpy.context.view_layer.objects:
+                        bpy.data.objects[obj.name].select_set(True)
 
         if self.user_active_name:
             if self.user_active_name in bpy.data.objects:
-                bpy.context.view_layer.objects.active = bpy.data.objects[self.user_active_name]
+                if self.user_active_name in bpy.context.view_layer.objects:
+                    bpy.context.view_layer.objects.active = bpy.data.objects[self.user_active_name]
 
         self.ResetModeAtSave()
         self.ResetBonesSelectByName()
@@ -193,8 +196,11 @@ class UserSceneSave():
                     bpy.data.objects[obj.name].hide_select = obj.hide_select
                 if bpy.data.objects[obj.name].hide_viewport != obj.hide_viewport:
                     bpy.data.objects[obj.name].hide_viewport = obj.hide_viewport
+                if bpy.data.objects[obj.name].hide_get() != obj.hide:
+                    bpy.data.objects[obj.name].hide_set(obj.hide)
+                
             else:
-                print("/!\\ "+object[0]+" not found in bpy.data.objects")
+                print("/!\\ "+obj.name+" not found in bpy.data.objects")
 
         # Reset hide and select (bpy.data.collections)
         for col in self.collections:
@@ -204,7 +210,7 @@ class UserSceneSave():
                 if bpy.data.collections[col.name].hide_viewport != col.hide_viewport:
                     bpy.data.collections[col.name].hide_viewport = col.hide_viewport
             else:
-                print("/!\\ "+col[0]+" not found in bpy.data.collections")
+                print("/!\\ "+col.name+" not found in bpy.data.collections")
 
         # Reset hide in and viewport (collections from view_layers)
         for childCol in self.view_layers_children:
@@ -224,15 +230,20 @@ def SafeModeSet(obj, target_mode='OBJECT'):
         if obj.mode != target_mode:
             if bpy.ops.object.mode_set.poll():
                 bpy.ops.object.mode_set(mode=target_mode)
+                return True
     return False
 
 
-def CounterStart():
-    return time.perf_counter()
+class CounterTimer():
+    
+    def __init__(self):
+        self.start = time.perf_counter()
 
+    def ResetTime(self):
+        self.start = time.perf_counter()
 
-def CounterEnd(start):
-    return time.perf_counter()-start
+    def GetTime(self):
+        return time.perf_counter()-self.start
 
 
 def update_progress(job_title, progress, time=None):
@@ -355,8 +366,11 @@ def GetExportDesiredChilds(obj):
 
 
 def GetSocketDesiredChild(targetObj):
-    socket = [obj for obj in GetExportDesiredChilds(targetObj) if (
-        fnmatch.fnmatchcase(obj.name, "SOCKET*"))]
+    socket = []
+    for obj in GetExportDesiredChilds(targetObj):
+        if IsASocket(obj):
+            socket.append(obj)
+
     return socket
 
 
@@ -427,6 +441,85 @@ def GetCollectionToExport(scene):
     return colExport
 
 
+class CachedAction():
+
+    '''
+    I can't use bpy.types.Scene or bpy.types.Object Property.
+    "Writing to ID classes in this context is not allowed"
+    So I use simple python var
+    '''
+
+    def __init__(self):
+        self.name = ""
+        self.is_cached = False
+        self.stored_actions = []
+        self.total_action_len = 0
+        self.total_bone_len = 0
+
+    def CheckCache(self, obj):
+        # Check if the cache need update
+        if self.name != obj.name:
+            MyCachedActions.is_cached = False
+        if len(bpy.data.actions) != self.total_action_len:
+            MyCachedActions.is_cached = False
+        if len(obj.data.bones) != self.total_bone_len:
+            MyCachedActions.is_cached = False
+        for action in self.stored_actions:
+            if action not in bpy.data.actions:
+                MyCachedActions.is_cached = False
+
+        return MyCachedActions.is_cached
+
+    def StoreActions(self, obj, actions):
+        # Update new cache
+        self.is_cached = True
+        self.name = obj.name
+        action_name_list = []
+        for action in actions:
+            action_name_list.append(action.name)
+        self.stored_actions = action_name_list
+        self.total_action_len = len(bpy.data.actions)
+        self.total_bone_len = len(obj.data.bones)
+
+    def GetStoredActions(self):
+        actions = []
+        for action_name in self.stored_actions:
+            if action_name in bpy.data.actions:
+                actions.append(bpy.data.actions[action_name])
+        return actions
+
+    def Clear(self):
+        pass
+
+
+MyCachedActions = CachedAction()
+
+
+def GetCachedExportAutoActionList(obj):
+    # This will cheak if the action contains
+    # the same bones of the armature
+
+    actions = []
+
+    # Use the cache
+    if MyCachedActions.CheckCache(obj):
+        actions = MyCachedActions.GetStoredActions()
+
+    else:
+        MyCachedActions.Clear()
+
+        objBoneNames = [bone.name for bone in obj.data.bones]
+        for action in bpy.data.actions:
+            if action.library is None:
+                print(action)
+                if GetIfActionIsAssociated(action, objBoneNames):
+                    actions.append(action)
+
+        # Update the cache
+        MyCachedActions.StoreActions(obj, actions)
+    return actions
+
+
 def GetActionToExport(obj):
     # Returns only the actions that will be exported with the Armature
 
@@ -455,13 +548,8 @@ def GetActionToExport(obj):
                 TargetActionToExport.append(action)
 
     elif obj.exportActionEnum == "export_auto":
-        # This will cheak if the action contains
-        # the same bones of the armature
-        objBoneNames = [bone.name for bone in obj.data.bones]
-        for action in bpy.data.actions:
-            if action.library is None:
-                if GetIfActionIsAssociated(action, objBoneNames):
-                    TargetActionToExport.append(action)
+        TargetActionToExport = GetCachedExportAutoActionList(obj)
+
     return TargetActionToExport
 
 
@@ -884,9 +972,14 @@ def GetFinalAssetToExport():
             self.action = action
             self.type = type
 
-    if scene.export_ExportOnlySelected:
-        objList = []
-        collectionList = []
+    objList = []
+    collectionList = []
+
+    if scene.bfu_export_filter == "default":
+        objList = GetAllobjectsByExportType("export_recursive")
+        collectionList = GetCollectionToExport(scene)
+
+    elif scene.bfu_export_filter == "only_object" or scene.bfu_export_filter == "only_object_action":
         recuList = GetAllobjectsByExportType("export_recursive")
 
         for obj in bpy.context.selected_objects:
@@ -898,10 +991,6 @@ def GetFinalAssetToExport():
                 if parentTarget not in objList:
                     objList.append(parentTarget)
 
-    else:
-        objList = GetAllobjectsByExportType("export_recursive")
-        collectionList = GetCollectionToExport(scene)
-
     for collection in collectionList:
         # Collection
         if scene.static_collection_export:
@@ -911,7 +1000,6 @@ def GetFinalAssetToExport():
                 "Collection StaticMesh"))
 
     for obj in objList:
-
         if GetAssetType(obj) == "Alembic":
             # Alembic
             if scene.alembic_export:
@@ -941,10 +1029,12 @@ def GetFinalAssetToExport():
                 # Action
                 if scene.anin_export:
                     if GetActionType(action) == "Action":
-                        TargetAssetToExport.append(AssetToExport(
-                            obj,
-                            action,
-                            "Action"))
+                        if scene.bfu_export_filter == "only_object_action":
+                            if obj.animation_data:
+                                if obj.animation_data.action == action:
+                                    TargetAssetToExport.append(AssetToExport(obj, action, "Action"))
+                        else:
+                            TargetAssetToExport.append(AssetToExport(obj, action, "Action"))
 
                 # Pose
                 if scene.anin_export:
@@ -1276,7 +1366,7 @@ def Ue4SubObj_set(SubType):
             # StaticMesh Socket
             if obj.type == 'EMPTY' and SubType == "ST_Socket":
                 if ownerObj.type == 'MESH':
-                    if not obj.name.startswith("SOCKET_"):
+                    if not IsASocket(obj):
                         obj.name = GenerateUe4Name("SOCKET_"+obj.name)
                     bpy.ops.object.parent_set(
                         type='OBJECT',
@@ -1286,7 +1376,8 @@ def Ue4SubObj_set(SubType):
             # SkeletalMesh Socket
             if obj.type == 'EMPTY' and SubType == "SK_Socket":
                 if ownerObj.type == 'ARMATURE':
-                    if not obj.name.startswith("SOCKET_"):
+
+                    if not IsASocket(obj):
                         obj.name = GenerateUe4Name("SOCKET_"+obj.name)
                     bpy.ops.object.parent_set(type='BONE')
                     ConvertedObjs.append(obj)
@@ -1327,14 +1418,23 @@ def UpdateUe4Name(SubType, objList):
                 # StaticMesh Socket
                 if obj.type == 'EMPTY' and SubType == "ST_Socket":
                     if ownerObj.type == 'MESH':
-                        if not obj.name.startswith("SOCKET_"):
+                        if not IsASocket(obj):
                             obj.name = GenerateUe4Name("SOCKET_"+obj.name)
 
                 # SkeletalMesh Socket
                 if obj.type == 'EMPTY' and SubType == "SK_Socket":
                     if ownerObj.type == 'ARMATURE':
-                        if not obj.name.startswith("SOCKET_"):
+                        if not IsASocket(obj):
                             obj.name = GenerateUe4Name("SOCKET_"+obj.name)
+
+
+def IsASocket(obj):
+    if obj.type == "EMPTY":
+        cap_name = obj.name.upper()
+        if cap_name.startswith("SOCKET_"):
+            return True
+
+    return False
 
 
 def UpdateAreaLightMapList(list=None):
@@ -1351,14 +1451,14 @@ def UpdateAreaLightMapList(list=None):
 
     UpdatedRes = 0
 
-    s = CounterStart()
+    counter = CounterTimer()
     for obj in objs:
         obj.computedStaticMeshLightMapRes = GetExportRealSurfaceArea(obj)
         UpdatedRes += 1
         update_progress(
             "Update LightMap",
             (UpdatedRes/len(objs)),
-            CounterEnd(s))
+            counter.GetTime())
     return UpdatedRes
 
 

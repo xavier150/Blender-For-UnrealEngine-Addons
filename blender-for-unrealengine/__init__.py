@@ -30,6 +30,7 @@ import fnmatch
 import time
 import addon_utils
 
+from . import bfu_addon_pref
 from . import bfu_ui
 from . import bfu_export_asset
 from . import bfu_write_text
@@ -38,6 +39,8 @@ from . import bfu_utils
 
 if "bpy" in locals():
     import importlib
+    if "bfu_addon_pref" in locals():
+        importlib.reload(bfu_addon_pref)
     if "bfu_ui" in locals():
         importlib.reload(bfu_ui)
     if "bfu_export_asset" in locals():
@@ -83,12 +86,29 @@ class BFU_OT_UnrealPotentialError(bpy.types.PropertyGroup):
     docsOcticon: bpy.props.StringProperty(default="None")
 
 
+class BFU_CachedAction(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty()
+
+
+classes = (
+
+)
+
+
 def register():
+    from bpy.utils import register_class
+    bpy.types.Scene.bfu_cache_obj_name = bpy.props.StringProperty()
+    bpy.types.Scene.bfu_export_auto_cached = bpy.props.BoolProperty(default=False)
+
+    bpy.utils.register_class(BFU_CachedAction)
+    bpy.types.Scene.bfu_export_auto_cached_actions = bpy.props.CollectionProperty(type=BFU_CachedAction)
+    bpy.types.Scene.bfu_export_auto_cached_actions_len = bpy.props.IntProperty()
+
     bpy.types.Scene.bfu_object_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_object_import_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_anim_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_collection_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_object_avanced_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_advanced_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_collision_socket_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_lightmap_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_nomencalture_properties_expanded = bpy.props.BoolProperty()
@@ -105,16 +125,26 @@ def register():
     bpy.utils.register_class(BFU_OT_UnrealPotentialError)
     bpy.types.Scene.potentialErrorList = bpy.props.CollectionProperty(type=BFU_OT_UnrealPotentialError)
 
+    for cls in classes:
+        register_class(cls)
+
+    bfu_addon_pref.register()
     bfu_ui.register()
 
 
 def unregister():
+    from bpy.utils import unregister_class
+
+    del bpy.types.Scene.bfu_export_auto_cached
+    del bpy.types.Scene.bfu_export_auto_cached_actions
+    del bpy.types.Scene.bfu_export_auto_cached_actions_len
+    bpy.utils.unregister_class(BFU_CachedAction)
 
     del bpy.types.Scene.bfu_object_properties_expanded
     del bpy.types.Scene.bfu_object_import_properties_expanded
     del bpy.types.Scene.bfu_anim_properties_expanded
     del bpy.types.Scene.bfu_collection_properties_expanded
-    del bpy.types.Scene.bfu_object_avanced_properties_expanded
+    del bpy.types.Scene.bfu_object_advanced_properties_expanded
     del bpy.types.Scene.bfu_collision_socket_expanded
     del bpy.types.Scene.bfu_lightmap_expanded
     del bpy.types.Scene.bfu_nomencalture_properties_expanded
@@ -126,4 +156,8 @@ def unregister():
     bpy.utils.unregister_class(BFU_OT_UnrealPotentialError)
     del bpy.types.Scene.potentialErrorList
 
+    for cls in classes:
+        unregister_class(cls)
+
+    bfu_addon_pref.unregister()
     bfu_ui.unregister()

@@ -44,8 +44,28 @@ from .bfu_export_utils import *
 from . import bfu_check_potential_error
 
 
+def ProcessNLAAnimExport(obj):
+    scene = bpy.context.scene
+    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    dirpath = os.path.join(GetObjExportDir(obj), scene.anim_subfolder_name)
+
+    scene.frame_end += 1  # Why ?
+
+    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset.StartAssetExport(obj)
+    MyAsset.asset_type = "NlAnim"
+
+    ExportSingleFbxNLAAnim(dirpath, GetNLAExportFileName(obj), obj)
+    file = MyAsset.files.add()
+    file.name = GetNLAExportFileName(obj)
+    file.path = dirpath
+    file.type = "FBX"
+
+    MyAsset.EndAssetExport(True)
+    return MyAsset
+
+
 def ExportSingleFbxNLAAnim(
-        originalScene,
         dirpath,
         filename,
         obj
@@ -61,13 +81,22 @@ def ExportSingleFbxNLAAnim(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-    s = CounterStart()
 
     SelectParentAndDesiredChilds(obj)
     data_to_remove = DuplicateSelectForExport()
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
     export_procedure = active.bfu_export_procedure
+    
+    active.animation_data_create()
+    print(active)
+    print(active.animation_data.action)
+    active.animation_data.action = obj.animation_data.action
+    print(active.animation_data.action)
+    active.animation_data.action_extrapolation = obj.animation_data.action_extrapolation
+    active.animation_data.action_blend_type = obj.animation_data.action_blend_type
+    active.animation_data.action_influence = obj.animation_data.action_influence
+
 
     if active.ExportAsProxy:
         ApplyProxyData(active)
@@ -140,7 +169,6 @@ def ExportSingleFbxNLAAnim(
     ResetArmaturePose(active)
     scene.frame_start -= active.StartFramesOffset
     scene.frame_end -= active.EndFramesOffset
-    exportTime = CounterEnd(s)
 
     # Reset armature name
     ResetArmatureName(active, oldArmatureName)
@@ -159,11 +187,3 @@ def ExportSingleFbxNLAAnim(
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in data_to_remove:
         data.RemoveData()
-
-    MyAsset = originalScene.UnrealExportedAssetsList.add()
-    MyAsset.assetName = filename
-    MyAsset.assetType = "NlAnim"
-    MyAsset.exportPath = absdirpath
-    MyAsset.exportTime = exportTime
-    MyAsset.object = obj
-    return MyAsset

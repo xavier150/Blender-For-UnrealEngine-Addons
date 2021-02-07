@@ -499,6 +499,7 @@ def SelectPotentialErrorObject(errorIndex):
 
     bpy.ops.object.select_all(action='DESELECT')
     obj.hide_viewport = False
+    obj.hide_set(False)
     obj.select_set(True)
     bpy.context.view_layer.objects.active = obj
 
@@ -603,8 +604,11 @@ def TryToCorrectPotentialError(errorIndex):
     if error.correctRef == "CreateUV":
         obj = error.object
         SelectObj(obj)
-        bpy.ops.uv.smart_project()
-        successCorrect = True
+        if SafeModeSet(obj, "EDIT"):
+            bpy.ops.uv.smart_project()
+            successCorrect = True
+        else:
+            successCorrect = False
 
     if error.correctRef == "RemoveModfier":
         obj = error.object

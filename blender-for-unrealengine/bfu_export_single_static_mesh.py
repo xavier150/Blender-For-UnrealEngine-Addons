@@ -44,6 +44,33 @@ from .bfu_export_utils import *
 from . import bfu_check_potential_error
 
 
+def ProcessStaticMeshExport(obj):
+    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    dirpath = GetObjExportDir(obj)
+    absdirpath = bpy.path.abspath(dirpath)
+    scene = bpy.context.scene
+
+    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset.StartAssetExport(obj)
+
+    ExportSingleStaticMesh(scene, dirpath, GetObjExportFileName(obj), obj)
+    file = MyAsset.files.add()
+    file.name = GetObjExportFileName(obj)
+    file.path = dirpath
+    file.type = "FBX"
+
+    if not obj.ExportAsLod:
+        if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
+            ExportSingleAdditionalParameterMesh(absdirpath, GetObjExportFileName(obj, "_AdditionalTrack.json"), obj)
+            file = MyAsset.files.add()
+            file.name = GetObjExportFileName(obj, "_AdditionalTrack.json")
+            file.path = dirpath
+            file.type = "AdditionalTrack"
+
+    MyAsset.EndAssetExport(True)
+    return MyAsset
+
+
 def ExportSingleStaticMesh(
         originalScene,
         dirpath,
@@ -60,8 +87,6 @@ def ExportSingleStaticMesh(
 
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
-
-    s = CounterStart()
 
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT')
@@ -120,13 +145,3 @@ def ExportSingleStaticMesh(
     for data in data_to_remove:
         data.RemoveData()
     RemoveSocketsTempName(obj)
-
-    exportTime = CounterEnd(s)
-
-    MyAsset = originalScene.UnrealExportedAssetsList.add()
-    MyAsset.assetName = filename
-    MyAsset.assetType = meshType
-    MyAsset.exportPath = absdirpath
-    MyAsset.exportTime = exportTime
-    MyAsset.object = obj
-    return MyAsset
