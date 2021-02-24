@@ -497,7 +497,7 @@ def WriteAllTextFiles():
         json_data = bfu_write_import_asset_script.WriteImportAssetScript()
         ExportSingleJson(json_data, scene.export_other_file_path, "ImportAssetData.json")
 
-        source = os.path.join(bpy.utils.user_resource('SCRIPTS', r"addons\blender-for-unrealengine\import"), "asset_import_script.py")
+        source = os.path.join(bpy.utils.user_resource('SCRIPTS', os.path.join("addons", "blender-for-unrealengine", "import")), "asset_import_script.py")
         filename = ValidFilename(scene.file_import_asset_script_name)
         destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
         copyfile(source, destination)
@@ -506,7 +506,7 @@ def WriteAllTextFiles():
         json_data = bfu_write_import_sequencer_script.WriteImportSequencerTracks()
         ExportSingleJson(json_data, scene.export_other_file_path, "ImportSequencerData.json")
 
-        source = os.path.join(bpy.utils.user_resource('SCRIPTS', r"addons\blender-for-unrealengine\import"), "sequencer_import_script.py")
+        source = os.path.join(bpy.utils.user_resource('SCRIPTS', os.path.join("addons", "blender-for-unrealengine", "import")), "sequencer_import_script.py")
         filename = ValidFilename(scene.file_import_sequencer_script_name)
         destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
         copyfile(source, destination)
