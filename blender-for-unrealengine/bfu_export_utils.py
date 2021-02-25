@@ -187,6 +187,8 @@ def SetSocketsExportTransform(obj):
             socket.scale = savedScale
             socket.location = savedLocation
 
+# Sockets
+
 
 def AddSocketsTempName(obj):
     # Add _UE4Socket_TempName at end of the name
@@ -225,6 +227,23 @@ def RemoveSocketsTempName(obj):
     for socket in GetSocketDesiredChild(obj):
         ToRemove = "_UE4Socket_TempName"
         socket.name = socket.name[:-len(ToRemove)]
+
+
+# Collisons
+
+# UVs
+
+def CorrectExtremUVAtExport():
+    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    if addon_prefs.correctExtremUVScale:
+        SavedSelect = GetCurrentSelection()
+        if GoToMeshEditMode():
+            CorrectExtremeUV(2)
+            SafeModeSet('OBJECT')
+            SetCurrentSelection(SavedSelect)
+            return True
+    return False
+
 
 
 def GetShouldRescaleRig(obj):

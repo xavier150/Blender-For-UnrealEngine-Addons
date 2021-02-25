@@ -89,17 +89,11 @@ def ExportSingleStaticMesh(
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
     SafeModeSet('OBJECT')
-    
+
     SelectParentAndDesiredChilds(obj)
     AddSocketsTempName(obj)
     data_to_remove = DuplicateSelectForExport()
-
-    if addon_prefs.correctExtremUVScale:
-        SavedSelect = GetCurrentSelection()
-        if GoToMeshEditMode():
-            CorrectExtremeUV(2)
-        SafeModeSet('OBJECT')
-        SetCurrentSelection(SavedSelect)
+    CorrectExtremUVAtExport()
 
     ApplyNeededModifierToSelect()
 
@@ -143,4 +137,5 @@ def ExportSingleStaticMesh(
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in data_to_remove:
         data.RemoveData()
+
     RemoveSocketsTempName(obj)

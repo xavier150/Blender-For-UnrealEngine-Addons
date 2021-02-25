@@ -198,7 +198,7 @@ class UserSceneSave():
                     bpy.data.objects[obj.name].hide_viewport = obj.hide_viewport
                 if bpy.data.objects[obj.name].hide_get() != obj.hide:
                     bpy.data.objects[obj.name].hide_set(obj.hide)
-                
+
             else:
                 print("/!\\ "+obj.name+" not found in bpy.data.objects")
 

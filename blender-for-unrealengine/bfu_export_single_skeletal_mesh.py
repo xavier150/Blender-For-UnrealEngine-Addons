@@ -94,13 +94,7 @@ def ExportSingleSkeletalMesh(
     SelectParentAndDesiredChilds(obj)
     AddSocketsTempName(obj)
     data_to_remove = DuplicateSelectForExport()
-
-    if addon_prefs.correctExtremUVScale:
-        SavedSelect = GetCurrentSelection()
-        if GoToMeshEditMode():
-            CorrectExtremeUV(2)
-        SafeModeSet('OBJECT')
-        SetCurrentSelection(SavedSelect)
+    CorrectExtremUVAtExport()
 
     ApplyNeededModifierToSelect()
 
@@ -187,5 +181,3 @@ def ExportSingleSkeletalMesh(
         data.RemoveData()
 
     RemoveSocketsTempName(obj)
-
-
