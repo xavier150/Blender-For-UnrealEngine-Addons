@@ -91,13 +91,15 @@ def ExportSingleStaticMesh(
     SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
-    AddSocketsTempName(obj)
+    AddSubObjectTempName(obj)
+    asset_name = PrepareExportName(obj, False)
     data_to_remove = DuplicateSelectForExport()
     CorrectExtremUVAtExport()
 
     ApplyNeededModifierToSelect()
 
     active = bpy.context.view_layer.objects.active
+    asset_name.target_object = active
 
     bfu_check_potential_error.UpdateNameHierarchy(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
@@ -112,8 +114,9 @@ def ExportSingleStaticMesh(
 
     SetSocketsExportTransform(active)
 
-    RemoveDuplicatedSocketsTempName(active)
+    RemoveDuplicatedSubObjectTempName(active)
     TryToApplyCustomSocketsName(active)
+    asset_name.SetExportName()
 
     bpy.ops.export_scene.fbx(
         filepath=fullpath,
@@ -134,8 +137,10 @@ def ExportSingleStaticMesh(
         bake_space_transform=False
         )
 
+    asset_name.ResetNames()
+
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in data_to_remove:
         data.RemoveData()
 
-    RemoveSocketsTempName(obj)
+    RemoveSubObjectTempName(obj)

@@ -92,7 +92,8 @@ def ExportSingleSkeletalMesh(
     SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
-    AddSocketsTempName(obj)
+    AddSubObjectTempName(obj)
+    asset_name = PrepareExportName(obj, False)
     data_to_remove = DuplicateSelectForExport()
     CorrectExtremUVAtExport()
 
@@ -102,6 +103,7 @@ def ExportSingleSkeletalMesh(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
         )
     active = bpy.context.view_layer.objects.active
+    asset_name.target_object = active
     export_procedure = active.bfu_export_procedure
 
     if active.ExportAsProxy:
@@ -124,15 +126,16 @@ def ExportSingleSkeletalMesh(
     meshType = GetAssetType(active)
 
     SetSocketsExportTransform(active)
-    RemoveDuplicatedSocketsTempName(active)
+    RemoveDuplicatedSubObjectTempName(active)
     TryToApplyCustomSocketsName(active)
 
     # Set rename temporarily the Armature as "Armature"
-    oldArmatureName = RenameArmatureAsExportName(active)
+    asset_name.SetExportName()
 
     RemoveAllConsraints(active)
     bpy.context.object.data.pose_position = 'REST'
 
+    k=k
     if (export_procedure == "normal"):
         pass
         bpy.ops.export_scene.fbx(
@@ -173,11 +176,10 @@ def ExportSingleSkeletalMesh(
         # Reset Curve an unit
         bpy.context.scene.unit_settings.scale_length = savedUnitLength
 
-    # Reset armature name
+    asset_name.ResetNames()
 
-    ResetArmatureName(active, oldArmatureName)
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in data_to_remove:
         data.RemoveData()
 
-    RemoveSocketsTempName(obj)
+    RemoveSubObjectTempName(obj)

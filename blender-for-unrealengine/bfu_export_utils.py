@@ -187,26 +187,101 @@ def SetSocketsExportTransform(obj):
             socket.scale = savedScale
             socket.location = savedLocation
 
+
+# Main asset
+
+dup_temp_name = "DuplicateTemporarilyNameForUe4Export"
+
+
+class PrepareExportName():
+    def __init__(self, obj, is_armature):
+        # Rename temporarily the assets
+        if obj:
+
+            self.target_object = obj
+            self.is_armature = is_armature
+            self.old_asset_name = ""
+            self.new_asset_name = ""
+
+            scene = bpy.context.scene
+            if self.is_armature:
+                self.new_asset_name = GetDesiredExportArmatureName()
+            else:
+                self.new_asset_name = obj.name  # Keep the same name
+
+    def SetExportName(self):
+        '''
+        Set the name of the asset for export
+        '''
+
+        scene = bpy.context.scene
+        obj = self.target_object
+        if obj.name != self.new_asset_name:
+            self.old_asset_name = obj.name
+            # Avoid same name for two assets
+            if self.new_asset_name in scene.objects:
+                confli_asset = scene.objects[self.new_asset_name]
+                confli_asset.name = dup_temp_name
+            obj.name = self.new_asset_name
+
+    def ResetNames(self):
+        '''
+        Reset names after export
+        '''
+
+        scene = bpy.context.scene
+        if self.old_asset_name != "":
+            obj = self.target_object
+            obj.name = self.old_asset_name
+
+            if dup_temp_name in scene.objects:
+                armature = scene.objects[dup_temp_name]
+                armature.name = self.new_asset_name
+
+        pass
+
+# Sockets and Collisons
+
+
+ExportTempPreFix = "_ExportSubObject_TempName"
+
+
+def AddSubObjectTempName(obj):
+    '''
+    This function add _ExportSubObject_TempName (Var ExportTempPreFix) at end of the name of sub objects.
+    '''
+
+    for sub_object in GetSubObjectDesiredChild(obj):
+        sub_object.name += ExportTempPreFix
+
+
+def RemoveDuplicatedSubObjectTempName(obj):
+    '''
+    This function remove _ExportSubObject_TempName + Index (Var ExportTempPreFix) at end of the name of sub objects.
+    '''
+
+    for sub_object in GetSubObjectDesiredChild(obj):
+        ToRemove = ExportTempPreFix+".xxx"
+        sub_object.name = sub_object.name[:-len(ToRemove)]
+
+
+def RemoveSubObjectTempName(obj):
+    '''
+    This function remove _ExportSubObject_TempName (Var ExportTempPreFix) at end of the name of sub objects.
+    '''
+
+    for sub_object in GetSubObjectDesiredChild(obj):
+        ToRemove = ExportTempPreFix
+        sub_object.name = sub_object.name[:-len(ToRemove)]
+
 # Sockets
 
 
-def AddSocketsTempName(obj):
-    # Add _UE4Socket_TempName at end of the name
-
-    for socket in GetSocketDesiredChild(obj):
-        socket.name += "_UE4Socket_TempName"
-
-
-def RemoveDuplicatedSocketsTempName(obj):
-    # Remove _UE4Socket_TempName at end of the name
-
-    for socket in GetSocketDesiredChild(obj):
-        ToRemove = "_UE4Socket_TempName.xxx"
-        socket.name = socket.name[:-len(ToRemove)]
-
-
 def TryToApplyCustomSocketsName(obj):
-    # Try to apply the custom SocketName
+    '''
+    Try to apply the custom SocketName
+    '''
+
     scene = bpy.context.scene
 
     for socket in GetSocketDesiredChild(obj):
@@ -222,16 +297,8 @@ def TryToApplyCustomSocketsName(obj):
                     )
 
 
-def RemoveSocketsTempName(obj):
-    # Remove _UE4Socket_TempName at end of the name
-    for socket in GetSocketDesiredChild(obj):
-        ToRemove = "_UE4Socket_TempName"
-        socket.name = socket.name[:-len(ToRemove)]
-
-
-# Collisons
-
 # UVs
+
 
 def CorrectExtremUVAtExport():
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
@@ -243,7 +310,6 @@ def CorrectExtremUVAtExport():
             SetCurrentSelection(SavedSelect)
             return True
     return False
-
 
 
 def GetShouldRescaleRig(obj):

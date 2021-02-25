@@ -18,7 +18,8 @@
 
 '''
 This addons allows to easily export several objects, animation, cameras, [...] at the same time for use in game engines
-like Unreal Engine of Unity by removing the usual constraints while respecting engine naming conventions and a clean tree structure.
+like Unreal Engine of Unity by removing the usual constraints while respecting engine naming conventions
+and a clean tree structure.
 It also contains a small toolkit for collisions and sockets.
 
 Asset = Object to export in game engine.

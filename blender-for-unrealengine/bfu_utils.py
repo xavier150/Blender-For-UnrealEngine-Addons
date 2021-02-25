@@ -371,12 +371,21 @@ def GetExportDesiredChilds(obj):
 
 
 def GetSocketDesiredChild(targetObj):
-    socket = []
+    sockets = []
     for obj in GetExportDesiredChilds(targetObj):
         if IsASocket(obj):
-            socket.append(obj)
+            sockets.append(obj)
 
-    return socket
+    return sockets
+
+
+def GetSubObjectDesiredChild(targetObj):
+    sub_objects = []
+    for obj in GetExportDesiredChilds(targetObj):
+        if IsASubObject(obj):
+            sub_objects.append(obj)
+
+    return sub_objects
 
 
 def RemoveAllConsraints(obj):
@@ -1229,33 +1238,6 @@ def GetObjExportScale(obj):
     return obj.exportGlobalScale
 
 
-def RenameArmatureAsExportName(obj):
-    # Rename temporarily the Armature as DefaultArmature
-
-    scene = bpy.context.scene
-    oldArmatureName = None
-    newArmatureName = GetDesiredExportArmatureName()
-    if obj.name != newArmatureName:
-        oldArmatureName = obj.name
-        # Avoid same name for two armature
-        if newArmatureName in scene.objects:
-            newArmature = scene.objects[newArmatureName]
-            newArmature.name = "ArmatureTemporarilyNameForUe4Export"
-        obj.name = newArmatureName
-    return oldArmatureName
-
-
-def ResetArmatureName(obj, oldArmatureName):
-    # Reset armature name
-
-    scene = bpy.context.scene
-    if oldArmatureName is not None:
-        obj.name = oldArmatureName
-        if "ArmatureTemporarilyNameForUe4Export" in scene.objects:
-            armature = scene.objects["ArmatureTemporarilyNameForUe4Export"]
-            armature.name = GetDesiredExportArmatureName()
-
-
 def GenerateUe4Name(name):
     # Generate a new name with suffix number
 
@@ -1434,11 +1416,43 @@ def UpdateUe4Name(SubType, objList):
 
 
 def IsASocket(obj):
+    '''
+    Retrun True is object is an Socket.
+    https://docs.unrealengine.com/en-US/WorkingWithContent/Importing/FBX/StaticMeshes/#sockets
+    '''
     if obj.type == "EMPTY":
         cap_name = obj.name.upper()
         if cap_name.startswith("SOCKET_"):
             return True
 
+    return False
+
+
+def IsACollision(obj):
+    '''
+    Retrun True is object is an Collision.
+    https://docs.unrealengine.com/en-US/WorkingWithContent/Importing/FBX/StaticMeshes/#collision
+    '''
+    if obj.type == "MESH":
+        cap_name = obj.name.upper()
+        if cap_name.startswith("UBX_"):
+            return True
+        elif cap_name.startswith("UCP_"):
+            return True
+        elif cap_name.startswith("USP_"):
+            return True
+        elif cap_name.startswith("UCX_"):
+            return True
+
+    return False
+
+
+def IsASubObject(obj):
+    '''
+    Retrun True is object is an Socket or and Collision.
+    '''
+    if IsASocket(obj) or IsACollision(obj):
+        return True
     return False
 
 
