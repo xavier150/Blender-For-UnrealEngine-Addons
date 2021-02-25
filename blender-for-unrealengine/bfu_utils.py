@@ -133,7 +133,7 @@ class UserSceneSave():
                     self.object_bones.append(SavedBones(bone))
 
     def ResetSelectByRef(self):
-        SafeModeSet(bpy.ops.object, "OBJECT")
+        SafeModeSet("OBJECT", bpy.ops.object)
         bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.data.objects:  # Resets previous selected object if still exist
             if obj in self.user_selected:
@@ -145,7 +145,7 @@ class UserSceneSave():
         self.ResetBonesSelectByName()
 
     def ResetSelectByName(self):
-        SafeModeSet(bpy.ops.object, "OBJECT")
+        SafeModeSet("OBJECT", bpy.ops.object)
         bpy.ops.object.select_all(action='DESELECT')
         for obj in self.objects:  # Resets previous selected object if still exist
             if obj.select:
@@ -181,7 +181,7 @@ class UserSceneSave():
     def ResetModeAtSave(self):
         if self.user_mode:
             if bpy.ops.object:
-                SafeModeSet(bpy.ops.object, self.user_mode)
+                SafeModeSet(self.user_mode, bpy.ops.object)
 
     def ResetSceneAtSave(self):
         scene = bpy.context.scene
@@ -225,17 +225,22 @@ class UserSceneSave():
                         layer_col_children.hide_viewport = childCol.hide_viewport
 
 
-def SafeModeSet(obj, target_mode='OBJECT'):
-    if obj:
-        if obj.mode != target_mode:
-            if bpy.ops.object.mode_set.poll():
+def SafeModeSet(target_mode='OBJECT', obj=None):
+    if bpy.ops.object.mode_set.poll():
+        if obj:
+            if obj.mode != target_mode:
                 bpy.ops.object.mode_set(mode=target_mode)
                 return True
+
+        else:
+            bpy.ops.object.mode_set(mode=target_mode)
+            return True
+
     return False
 
 
 class CounterTimer():
-    
+
     def __init__(self):
         self.start = time.perf_counter()
 
@@ -600,8 +605,7 @@ def GetExportRealSurfaceArea(obj):
     scene = bpy.context.scene
 
     MoveToGlobalView()
-    if bpy.ops.object.mode_set.poll():
-        bpy.ops.object.mode_set(mode='OBJECT')
+    SafeModeSet('OBJECT')
 
     SavedSelect = GetCurrentSelection()
     SelectParentAndDesiredChilds(obj)
@@ -736,7 +740,8 @@ def GoToMeshEditMode():
     for obj in bpy.context.selected_objects:
         if obj.type == "MESH":
             bpy.context.view_layer.objects.active = obj
-            bpy.ops.object.mode_set(mode='EDIT')
+            SafeModeSet('EDIT')
+
             return True
     return False
 

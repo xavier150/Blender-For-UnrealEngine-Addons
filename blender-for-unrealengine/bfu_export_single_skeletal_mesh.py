@@ -89,10 +89,7 @@ def ExportSingleSkeletalMesh(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-
-
-    if bpy.ops.object.mode_set.poll():
-        bpy.ops.object.mode_set(mode='OBJECT')
+    SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
     AddSocketsTempName(obj)
@@ -102,7 +99,7 @@ def ExportSingleSkeletalMesh(
         SavedSelect = GetCurrentSelection()
         if GoToMeshEditMode():
             CorrectExtremeUV(2)
-        bpy.ops.object.mode_set(mode='OBJECT')
+        SafeModeSet('OBJECT')
         SetCurrentSelection(SavedSelect)
 
     ApplyNeededModifierToSelect()

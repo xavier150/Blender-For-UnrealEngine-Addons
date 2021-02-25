@@ -80,7 +80,6 @@ def ExportSingleFbxAction(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-
     if obj.animation_data is None:
         obj.animation_data_create()
     userAction = obj.animation_data.action  # Save current action
@@ -88,8 +87,7 @@ def ExportSingleFbxAction(
     userAction_blend_type = obj.animation_data.action_blend_type
     userAction_influence = obj.animation_data.action_influence
 
-    if bpy.ops.object.mode_set.poll():
-        bpy.ops.object.mode_set(mode='OBJECT')
+    SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
 

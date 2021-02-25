@@ -101,9 +101,7 @@ def ExportSingleFbxCamera(
     if obj.type != 'CAMERA':
         return
 
-    
-    if bpy.ops.object.mode_set.poll():
-        bpy.ops.object.mode_set(mode='OBJECT')
+    SafeModeSet('OBJECT')
 
     # Select and rescale camera for export
     bpy.ops.object.select_all(action='DESELECT')
@@ -144,5 +142,4 @@ def ExportSingleFbxCamera(
 
     # Reset camera scale
     obj.delta_scale *= 100
-
 

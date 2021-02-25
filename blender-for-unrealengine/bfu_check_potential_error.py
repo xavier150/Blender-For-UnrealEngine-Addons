@@ -489,10 +489,7 @@ def UpdateUnrealPotentialError():
 def SelectPotentialErrorObject(errorIndex):
     # Select potential error
 
-    if (bpy.context.active_object and
-            bpy.context.active_object.mode != 'OBJECT' and
-            bpy.ops.object.mode_set.poll()):
-        bpy.ops.object.mode_set(mode="OBJECT")
+    SafeModeSet('OBJECT', bpy.context.active_object)
     scene = bpy.context.scene
     error = scene.potentialErrorList[errorIndex]
     obj = error.object
@@ -515,7 +512,7 @@ def SelectPotentialErrorObject(errorIndex):
 def SelectPotentialErrorVertex(errorIndex):
     # Select potential error
     SelectPotentialErrorObject(errorIndex)
-    bpy.ops.object.mode_set(mode="EDIT")
+    SafeModeSet('EDIT')
 
     scene = bpy.context.scene
     error = scene.potentialErrorList[errorIndex]
@@ -523,11 +520,11 @@ def SelectPotentialErrorVertex(errorIndex):
     bpy.ops.mesh.select_mode(type="VERT")
     bpy.ops.mesh.select_all(action='DESELECT')
 
-    bpy.ops.object.mode_set(mode='OBJECT')
+    SafeModeSet('OBJECT')
     if error.selectOption == "VertexWithZeroWeight":
         for vertex in GetVertexWithZeroWeight(obj.parent, obj):
             vertex.select = True
-    bpy.ops.object.mode_set(mode='EDIT')
+    SafeModeSet('EDIT')
     bpy.ops.view3d.view_selected()
     return obj
 
@@ -535,7 +532,7 @@ def SelectPotentialErrorVertex(errorIndex):
 def SelectPotentialErrorPoseBone(errorIndex):
     # Select potential error
     SelectPotentialErrorObject(errorIndex)
-    bpy.ops.object.mode_set(mode="POSE")
+    SafeModeSet('POSE')
 
     scene = bpy.context.scene
     error = scene.potentialErrorList[errorIndex]
@@ -568,7 +565,7 @@ def TryToCorrectPotentialError(errorIndex):
     MyCurrentDataSave = UserSceneSave()
     MyCurrentDataSave.SaveCurrentScene()
 
-    SafeModeSet(MyCurrentDataSave.user_active, 'OBJECT')
+    SafeModeSet('OBJECT', MyCurrentDataSave.user_active)
 
     print("Start correct")
 
@@ -604,7 +601,7 @@ def TryToCorrectPotentialError(errorIndex):
     if error.correctRef == "CreateUV":
         obj = error.object
         SelectObj(obj)
-        if SafeModeSet(obj, "EDIT"):
+        if SafeModeSet("EDIT", obj):
             bpy.ops.uv.smart_project()
             successCorrect = True
         else:

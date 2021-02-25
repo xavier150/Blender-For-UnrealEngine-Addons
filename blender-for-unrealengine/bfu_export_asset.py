@@ -287,7 +287,7 @@ def ExportForUnrealEngine():
             if childCol.hide_viewport:
                 childCol.hide_viewport = False
 
-    SafeModeSet(MyCurrentDataSave.user_active, 'OBJECT')
+    SafeModeSet('OBJECT', MyCurrentDataSave.user_active)
 
     if addon_prefs.revertExportPath:
         RemoveFolderTree(bpy.path.abspath(scene.export_static_file_path))

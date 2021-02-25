@@ -87,7 +87,7 @@ def ExportSingleFbxNLAAnim(
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
     export_procedure = active.bfu_export_procedure
-    
+
     active.animation_data_create()
     print(active)
     print(active.animation_data.action)
