@@ -146,7 +146,6 @@ def ExportSingleFbxAction(
 
     asset_name.SetExportName()
 
-
     if (export_procedure == "normal"):
         bpy.ops.export_scene.fbx(
             filepath=fullpath,

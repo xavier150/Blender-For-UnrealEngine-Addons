@@ -135,7 +135,6 @@ def ExportSingleSkeletalMesh(
     RemoveAllConsraints(active)
     bpy.context.object.data.pose_position = 'REST'
 
-    k=k
     if (export_procedure == "normal"):
         pass
         bpy.ops.export_scene.fbx(
