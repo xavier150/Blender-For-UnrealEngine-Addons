@@ -31,14 +31,14 @@ How to import assets in Unreal Engine [Doc](https://github.com/xavier150/Blender
 
 
 # Collisions and Sockets 
-It possible to create collisions (StaticMesh) and sockets (Static/SkeletalMesh) for your Assets directly in blender. Work only with 20Tab integration.
+It possible to create collisions (StaticMesh) and sockets (Static/SkeletalMesh) for your Assets directly in blender.
 
 1. Create a new mesh, it will be your collider shape (For a socket create a Empty object). 
 	- An asset can contain multiple collider shapes but each collider must use a different object.
 2. Select your collider Shape(s) or Empty(s) and at the end select the owner object.
 	- For the SkeletalMesh select the Empty(s) then the owner bone in PoseMode.
 3. Open Collisions and Sockets panel and click on the appropriate button to convert the selection to either collider or socket (Converted collider are green are now the child of the asset). 
-	- About StaticMeshes collision:	https://docs.unrealengine.com/en-us/Engine/Content/FBX/StaticMeshes#collision.
+	- About StaticMeshes: [collision docs](https://docs.unrealengine.com/en-US/WorkingWithContent/Importing/FBX/StaticMeshes/#collision). [Socket doc](https://docs.unrealengine.com/en-US/WorkingWithContent/Importing/FBX/StaticMeshes/#sockets).
 	- If you want to create a capsule use 2 sphere in a same object. <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/ExportAssetDocCollisionCapsule.gif">
 	- If a "Not exported" child contains a collider, the collider will not be exported as the child.
 	- If you change the name of the object that contains the collider you will need to click on the Check potential errors button to update hierarchy name of all the colliders.
