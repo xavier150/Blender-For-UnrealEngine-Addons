@@ -129,6 +129,12 @@ def WriteImportAssetScript():
         asset_data["light_map_resolution"] = GetCompuntedLightMap(asset.object)
         asset_data["collision_trace_flag"] = asset.object.CollisionTraceFlag
         asset_data["vertex_color_import_option"] = asset.object.VertexColorImportOption
+        vertex_override_color = (
+            asset.object.VertexOverrideColor[0],  # R
+            asset.object.VertexOverrideColor[1],  # G
+            asset.object.VertexOverrideColor[2]  # B
+          )  # Color to Json
+        asset_data["vertex_override_color"] = vertex_override_color
         data['assets'].append(asset_data)
 
     return data

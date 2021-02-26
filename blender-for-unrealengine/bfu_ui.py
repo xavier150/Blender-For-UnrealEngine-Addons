@@ -483,6 +483,18 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default="REPLACE"
         )
 
+    bpy.types.Object.VertexOverrideColor = FloatVectorProperty(
+            name="Vertex Override Color",
+            subtype='COLOR',
+            description="Specify override color in the case that VertexColorImportOption is set to Override",
+            default=(1.0, 1.0, 1.0),
+            min=0.0, 
+            max=1.0
+            # Vania python
+            # https://docs.unrealengine.com/en-US/PythonAPI/class/FbxSkeletalMeshImportData.html
+        )
+
+
     bpy.types.Object.exportActionEnum = EnumProperty(
         name="Action to export",
         description="Export procedure for actions (Animations and poses)",
@@ -974,6 +986,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.MaterialSearchLocation',
                             'obj.CollisionTraceFlag',
                             'obj.VertexColorImportOption',
+                            'obj.VertexOverrideColor ',
                             'obj.exportActionEnum',
                             'obj.PrefixNameToExport',
                             'obj.AnimStartEndTimeEnum',
@@ -1270,11 +1283,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     if obj.ExportEnum == "export_recursive":
 
                         # Vertex color
-                        StaticMeshVertexColorImportOption = layout.row()
-                        StaticMeshVertexColorImportOption.prop(
-                            obj,
-                            'VertexColorImportOption'
-                            )
+                        StaticMeshVertexColorImportOption = layout.column()
+                        StaticMeshVertexColorImportOption.prop(obj, 'VertexColorImportOption')
+                        StaticMeshVertexColorImportOptionColor = StaticMeshVertexColorImportOption.row()
+                        StaticMeshVertexColorImportOptionColor.prop(obj, 'VertexOverrideColor')
+                        if obj.VertexColorImportOption == "OVERRIDE":
+                            StaticMeshVertexColorImportOptionColor.enabled = True
+                        else:
+                            StaticMeshVertexColorImportOptionColor.enabled = False
 
             bfu_ui_utils.LayoutSection(layout, "bfu_object_light_map_properties_expanded", "Light map")
             if scene.bfu_object_light_map_properties_expanded:

@@ -163,8 +163,13 @@ def ImportAllAssets():
                     task.get_editor_property('options').static_mesh_import_data.set_editor_property('generate_lightmap_u_vs', asset_data["generate_lightmap_u_vs"])
 
                 if asset_data["type"] == "StaticMesh" or asset_data["type"] == "SkeletalMesh":
-                    
+
                     vertex_color_import_option = unreal.VertexColorImportOption.REPLACE  # Default
+                    vertex_override_color = unreal.LinearColor(
+                        asset_data["vertex_override_color"][0],
+                        asset_data["vertex_override_color"][1],
+                        asset_data["vertex_override_color"][2]
+                        )
 
                     if asset_data["vertex_color_import_option"] == "IGNORE":
                         vertex_color_import_option = unreal.VertexColorImportOption.IGNORE
@@ -176,10 +181,12 @@ def ImportAllAssets():
                 if asset_data["type"] == "StaticMesh":
                     # unreal.FbxSkeletalMeshImportData
                     task.get_editor_property('options').static_mesh_import_data.set_editor_property('vertex_color_import_option', vertex_color_import_option)
+                    task.get_editor_property('options').static_mesh_import_data.set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
 
                 if asset_data["type"] == "SkeletalMesh":
                     # unreal.FbxSkeletalMeshImportData
                     task.get_editor_property('options').skeletal_mesh_import_data.set_editor_property('vertex_color_import_option', vertex_color_import_option)
+                    task.get_editor_property('options').skeletal_mesh_import_data.set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
 
                 if asset_data["type"] == "SkeletalMesh" or asset_data["type"] == "Animation":
                     # unreal.FbxSkeletalMeshImportData
@@ -233,6 +240,11 @@ def ImportAllAssets():
 
             if asset_data["type"] == "StaticMesh" or asset_data["type"] == "SkeletalMesh":
                 vertex_color_import_option = unreal.VertexColorImportOption.REPLACE  # Default
+                vertex_override_color = unreal.LinearColor(
+                    asset_data["vertex_override_color"][0],
+                    asset_data["vertex_override_color"][1],
+                    asset_data["vertex_override_color"][2]
+                    )
 
                 if asset_data["vertex_color_import_option"] == "IGNORE":
                     vertex_color_import_option = unreal.VertexColorImportOption.IGNORE
@@ -242,6 +254,7 @@ def ImportAllAssets():
                     vertex_color_import_option = unreal.VertexColorImportOption.REPLACE
 
                 asset.get_editor_property('asset_import_data').set_editor_property('vertex_color_import_option', vertex_color_import_option)
+                asset.get_editor_property('asset_import_data').set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
 
             if asset_data["type"] == "SkeletalMesh":
                 asset.get_editor_property('asset_import_data').set_editor_property('normal_import_method', unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS)
