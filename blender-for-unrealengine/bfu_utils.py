@@ -282,13 +282,12 @@ def RemoveUselessSpecificData(name, type):
 
 def CleanJoinSelect():
     view_layer = bpy.context.view_layer
-    if len(bpy.context.selected_objects) < 1:
+    if len(bpy.context.selected_objects) > 1:
         if view_layer.objects.active is None:
             view_layer.objects.active = bpy.context.selected_objects[0]
 
         if bpy.ops.object.convert.poll():
             bpy.ops.object.join()
-
 
 def CleanDeleteSelect():
 
@@ -735,13 +734,15 @@ def SelectParentAndDesiredChilds(obj):
                 selectObj.select_set(True)
                 selectedObjs.append(selectObj)
 
-    obj.select_set(True)
+    if obj.name in bpy.context.view_layer.objects:
+        obj.select_set(True)
     if obj.ExportAsProxy:
         if obj.ExportProxyChild is not None:
             obj.ExportProxyChild.select_set(True)
 
     selectedObjs.append(obj)
-    bpy.context.view_layer.objects.active = obj
+    if obj.name in bpy.context.view_layer.objects:
+        bpy.context.view_layer.objects.active = obj
     return selectedObjs
 
 
