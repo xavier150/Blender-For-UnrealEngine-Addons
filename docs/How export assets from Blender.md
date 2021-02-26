@@ -122,6 +122,7 @@ Materials are not imported, you must create them in Unreal Engine.
 # Vertex Color
 Unreal suport only one Vertex Color per mesh.
 In Blender You can choose how import vertex color in Unreal Engine the target Vertex Color.
+Note: In some case it will be necessary to re import the mesh twice for update the vertex color.
 
 
 # LightMap
