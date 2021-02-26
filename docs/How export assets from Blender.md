@@ -119,6 +119,11 @@ Materials are not imported, you must create them in Unreal Engine.
 4. If you don't use the import script, you need to set the Material > Search Location in Unreal with your desired location when you import.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/ExportAssetDocMaterial.jpg">
 
+# Vertex Color
+Unreal suport only one Vertex Color per mesh.
+In Blender You can choose how import vertex color in Unreal Engine the target Vertex Color.
+
+
 # LightMap
 You can specify how the light map resolution will be generated
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/ExportAssetDocLightMapType.jpg">
