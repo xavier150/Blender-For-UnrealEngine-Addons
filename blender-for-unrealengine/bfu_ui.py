@@ -473,17 +473,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         # C++ API
         # https://docs.unrealengine.com/en-US/API/Editor/UnrealEd/Factories/EVertexColorImportOption__Type/index.html
         items=[
-            ("VCIO_Ignore",
-                "Ignore",
-                "Ignore vertex colors from the FBX file," +
-                " and keep the existing mesh vertex colors.",
-                1),
-            ("VCIO_Replace",
-                "Replace",
-                "Import the static mesh using the" +
-                " vertex colors from the FBX file.",
-                2)
-            ]
+            ("IGNORE", "Ignore",
+                "Ignore vertex colors, and keep the existing mesh vertex colors.", 1),
+            ("OVERRIDE", "Override",
+                "Override all vertex colors with the specified color.", 2),
+            ("REPLACE", "Replace",
+                "Import the static mesh using the target vertex colors.", 0)
+            ],
+        default="REPLACE"
         )
 
     bpy.types.Object.exportActionEnum = EnumProperty(
@@ -1273,13 +1270,11 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     if obj.ExportEnum == "export_recursive":
 
                         # Vertex color
-                        if GetAssetType(obj) == "StaticMesh":
-
-                            StaticMeshVertexColorImportOption = layout.row()
-                            StaticMeshVertexColorImportOption.prop(
-                                obj,
-                                'VertexColorImportOption'
-                                )
+                        StaticMeshVertexColorImportOption = layout.row()
+                        StaticMeshVertexColorImportOption.prop(
+                            obj,
+                            'VertexColorImportOption'
+                            )
 
             bfu_ui_utils.LayoutSection(layout, "bfu_object_light_map_properties_expanded", "Light map")
             if scene.bfu_object_light_map_properties_expanded:

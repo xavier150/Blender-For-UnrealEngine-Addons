@@ -350,3 +350,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Alambic export do error if face consisting more than 4 vertices.
 - Fixed: Hard coded windows path don't work on Linux.
 - Fixed: Some collisions and sockets can be exported with wrong name (Wrong rename after duplicate during export)
+- Fixed: Vertex color are imported only with an reimport.
