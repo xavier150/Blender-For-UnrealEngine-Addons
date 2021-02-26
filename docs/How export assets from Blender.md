@@ -120,10 +120,10 @@ Materials are not imported, you must create them in Unreal Engine.
 <img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/ExportAssetDocMaterial.jpg">
 
 # Vertex Color
-Unreal suport only one Vertex Color per mesh.
+Unreal suport only one Vertex Color per mesh. Fbx export will export only the primary vertex color.
 In Blender You can choose how import vertex color in Unreal Engine the target Vertex Color.
 Note: In some case it will be necessary to re import the mesh twice for update the vertex color.
-
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/ExportAssetDocVertexColor.jpg">
 
 # LightMap
 You can specify how the light map resolution will be generated
