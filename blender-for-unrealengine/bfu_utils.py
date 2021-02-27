@@ -225,6 +225,30 @@ class UserSceneSave():
                         layer_col_children.hide_viewport = childCol.hide_viewport
 
 
+class AnimationManagment():
+    def __init__(self):
+        self.action = None
+        self.action_extrapolation = None
+        self.action_blend_type = None
+        self.action_influence = None
+
+    def SaveAnimationData(self, obj):
+        self.action = obj.animation_data.action
+        self.action_extrapolation = obj.animation_data.action_extrapolation
+        self.action_blend_type = obj.animation_data.action_blend_type
+        self.action_influence = obj.animation_data.action_influence
+
+    def ClearAnimationData(self, obj):
+        obj.animation_data_clear()
+
+    def SetAnimationData(self, obj):
+        obj.animation_data_create()
+        obj.animation_data.action = self.action
+        obj.animation_data.action_extrapolation = self.action_extrapolation
+        obj.animation_data.action_blend_type = self.action_blend_type
+        obj.animation_data.action_influence = self.action_influence
+
+
 def SafeModeSet(target_mode='OBJECT', obj=None):
     if bpy.ops.object.mode_set.poll():
         if obj:
@@ -270,14 +294,16 @@ def update_progress(job_title, progress, time=None):
 
 def RemoveUselessSpecificData(name, type):
     if type == "MESH":
-        oldData = bpy.data.meshes[name]
-        if oldData.users == 0:
-            bpy.data.meshes.remove(oldData)
+        if name in bpy.data.meshes:
+            oldData = bpy.data.meshes[name]
+            if oldData.users == 0:
+                bpy.data.meshes.remove(oldData)
 
     if type == "ARMATURE":
-        oldData = bpy.data.armatures[name]
-        if oldData.users == 0:
-            bpy.data.armatures.remove(oldData)
+        if name in bpy.data.armatures:
+            oldData = bpy.data.armatures[name]
+            if oldData.users == 0:
+                bpy.data.armatures.remove(oldData)
 
 
 def CleanJoinSelect():
@@ -524,7 +550,6 @@ def GetCachedExportAutoActionList(obj):
         objBoneNames = [bone.name for bone in obj.data.bones]
         for action in bpy.data.actions:
             if action.library is None:
-                print(action)
                 if GetIfActionIsAssociated(action, objBoneNames):
                     actions.append(action)
 
@@ -885,15 +910,22 @@ def ApplyExportTransform(obj):
     obj.scale = saveScale
 
 
-def ApplySkeletalExportScale(obj, rescale):
-    # That a correct name ?
-    obj.scale = obj.scale*rescale
+def ApplySkeletalExportScale(armature, rescale):
+    # This function will rescale the armature and applys the new scale
+
+    animation_data = AnimationManagment()
+    animation_data.SaveAnimationData(armature)
+    animation_data.ClearAnimationData(armature)
+
+    armature.scale = armature.scale*rescale
     bpy.ops.object.transform_apply(
         location=True,
         scale=True,
         rotation=True,
         properties=True
         )
+
+    animation_data.SetAnimationData(armature)
 
 
 def RescaleSelectCurveHook(scale):

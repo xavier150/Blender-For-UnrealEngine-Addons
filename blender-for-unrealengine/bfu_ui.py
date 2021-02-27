@@ -2035,7 +2035,6 @@ class BFU_PT_Export(bpy.types.Panel):
             bfu_check_potential_error.UpdateNameHierarchy()
             bfu_check_potential_error.UpdateUnrealPotentialError()
             bpy.ops.object.openpotentialerror("INVOKE_DEFAULT", correctedProperty=correctedProperty)
-            print(self.text)
             return {'FINISHED'}
 
     class BFU_OT_OpenPotentialErrorPopup(Operator):

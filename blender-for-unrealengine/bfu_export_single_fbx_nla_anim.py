@@ -81,29 +81,27 @@ def ExportSingleFbxNLAAnim(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
+    SafeModeSet('OBJECT')
+
     SelectParentAndDesiredChilds(obj)
     asset_name = PrepareExportName(obj, True)
     data_to_remove = DuplicateSelectForExport()
+
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
+
     export_procedure = active.bfu_export_procedure
 
-    active.animation_data_create()
-    print(active)
-    print(active.animation_data.action)
-    active.animation_data.action = obj.animation_data.action
-    print(active.animation_data.action)
-    active.animation_data.action_extrapolation = obj.animation_data.action_extrapolation
-    active.animation_data.action_blend_type = obj.animation_data.action_blend_type
-    active.animation_data.action_influence = obj.animation_data.action_influence
+    animation_data = AnimationManagment()
+    animation_data.SaveAnimationData(obj)
+    animation_data.SetAnimationData(active)
 
     if active.ExportAsProxy:
         ApplyProxyData(active)
 
     if addon_prefs.bakeArmatureAction:
         BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)
-
     ApplyExportTransform(active)
 
     # This will rescale the rig and unit scale to get a root bone egal to 1

@@ -57,7 +57,7 @@ def ImportAllAssets():
             print("/!\ Option: "+OptionName+" not found in file: "+FileLoc)
         return Options
 
-    def GetAssetByType(type: str):
+    def GetAssetByType(type):
         target_assets = []
         for asset in import_assets_data["assets"]:
             if asset["type"] == type:
