@@ -888,11 +888,11 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     animationNumber += 1
                 popup_title = (
                     str(animationNumber) +
-                    ' animation(s) found for obj named "'+obj.name+'".'
+                    ' action(s) found for obj named "'+obj.name+'".'
                     )
             else:
                 popup_title = (
-                    'No animation found for obj named "' +
+                    'No action found for obj named "' +
                     obj.name+'".')
 
             def draw(self, context):
@@ -924,8 +924,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     addAnimRow(
                         obj.NLAAnimName,
                         "NlAnim",
-                        str(scene.frame_start + obj.StartFramesOffset),
-                        str(scene.frame_end + obj.EndFramesOffset)
+                        str(scene.frame_start),
+                        str(scene.frame_end)
                         )
 
             bpy.context.window_manager.popup_menu(

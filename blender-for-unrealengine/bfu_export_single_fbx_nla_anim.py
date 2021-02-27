@@ -121,8 +121,8 @@ def ExportSingleFbxNLAAnim(
         ResetArmaturePose(active)
         RescaleRigConsraints(active, rrf)
 
-    scene.frame_start += active.StartFramesOffset
-    scene.frame_end += active.EndFramesOffset
+    #scene.frame_start += active.StartFramesOffset
+    #scene.frame_end += active.EndFramesOffset
     absdirpath = bpy.path.abspath(dirpath)
     VerifiDirs(absdirpath)
     fullpath = os.path.join(absdirpath, filename)
@@ -163,8 +163,8 @@ def ExportSingleFbxNLAAnim(
             )
 
     ResetArmaturePose(active)
-    scene.frame_start -= active.StartFramesOffset
-    scene.frame_end -= active.EndFramesOffset
+    #scene.frame_start -= active.StartFramesOffset
+    #scene.frame_end -= active.EndFramesOffset
 
     asset_name.ResetNames()
 

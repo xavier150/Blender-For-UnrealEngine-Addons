@@ -146,12 +146,30 @@ def CreateSequencer():
         sectionSensorHeight = TrackSensorHeight.add_section()
         sectionSensorHeight.set_end_frame_bounded(False)
         sectionSensorHeight.set_start_frame_bounded(False)
-        AddSequencerSectionFloatKeysByIniFile(sectionSensorHeight, camera_tracks['Camera SensorHeight'])
+
+        crop_camera_sensor_height = {}
+        for key in camera_tracks['Camera SensorHeight'].keys():
+            original_width = float(camera_tracks['Camera SensorWidth'][key])
+            original_height = float(camera_tracks['Camera SensorHeight'][key])
+            res_x = float(sequence_data['render_resolution_x'])
+            res_y = float(sequence_data['render_resolution_y'])
+            pixel_x = float(sequence_data['pixel_aspect_x'])
+            pixel_y = float(sequence_data['pixel_aspect_y'])
+            res_ratio = res_x / res_y
+            pixel_ratio = pixel_x / pixel_y
+            print(pixel_x, pixel_y, pixel_ratio)
+
+            crop_camera_sensor_height[key] = (original_width / (res_ratio * pixel_ratio))
+
+        AddSequencerSectionFloatKeysByIniFile(sectionSensorHeight, crop_camera_sensor_height)
 
         TrackFocusDistance = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)
 
         # Wtf this var name change every version or I do someting wrong??? :v
         if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:
+            TrackFocusDistance.set_property_name_and_path('FocusSettings.ManualFocusDistance', 'FocusSettings.ManualFocusDistance')
+            TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance (Focus Settings)')
+        elif int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 25:
             TrackFocusDistance.set_property_name_and_path('FocusSettings.ManualFocusDistance', 'FocusSettings.ManualFocusDistance')
             TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance (Focus Settings)')
         elif int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 24:
