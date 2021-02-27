@@ -93,7 +93,7 @@ def ExportSingleSkeletalMesh(
 
     SelectParentAndDesiredChilds(obj)
     AddSubObjectTempName(obj)
-    asset_name = PrepareExportName(obj, False)
+    asset_name = PrepareExportName(obj, True)
     data_to_remove = DuplicateSelectForExport()
     CorrectExtremUVAtExport()
 

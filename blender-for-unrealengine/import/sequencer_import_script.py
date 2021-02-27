@@ -104,7 +104,10 @@ def CreateSequencer():
     seq.set_playback_start_seconds(startFrame/float(frameRateNumerator))  # set_playback_end_seconds
     camera_cut_track = seq.add_master_track(unreal.MovieSceneCameraCutTrack)
     camera_cut_track.set_editor_property('display_name', 'Imported Camera Cuts')
-    camera_cut_track.set_color_tint(unreal.Color(b=200, g=0, r=0, a=0))
+    if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:
+        camera_cut_track.set_color_tint(unreal.Color(b=200, g=0, r=0, a=0))
+    else:
+        pass
 
     for x, camera_data in enumerate(sequence_data["cameras"]):
         # import camera
@@ -194,7 +197,10 @@ def CreateSequencer():
         else:
             current_camera_binding = camera_binding
 
-        current_camera_binding.set_display_name(camera_data["name"])
+        if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:
+            current_camera_binding.set_display_name(camera_data["name"])
+        else:
+            pass
         tracksSpawned = current_camera_binding.find_tracks_by_exact_type(unreal.MovieSceneSpawnTrack)
         if len(tracksSpawned) > 0:
             sectionSpawned = tracksSpawned[0].get_sections()[0]

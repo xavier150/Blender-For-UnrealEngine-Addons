@@ -128,7 +128,6 @@ def ExportSingleFbxNLAAnim(
     fullpath = os.path.join(absdirpath, filename)
 
     asset_name.SetExportName()
-
     if (export_procedure == "normal"):
         bpy.ops.export_scene.fbx(
             filepath=fullpath,
