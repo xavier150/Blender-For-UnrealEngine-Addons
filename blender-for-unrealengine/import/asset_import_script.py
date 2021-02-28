@@ -255,6 +255,8 @@ def ImportAllAssets():
 
                 asset.get_editor_property('asset_import_data').set_editor_property('vertex_color_import_option', vertex_color_import_option)
                 asset.get_editor_property('asset_import_data').set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
+                asset.get_editor_property('asset_import_data').set_editor_property('generate_lightmap_u_vs', asset_data["generate_lightmap_u_vs"])  # Import data
+                unreal.EditorStaticMeshLibrary.set_generate_lightmap_uv(asset, asset_data["generate_lightmap_u_vs"])  # Build settings at lod
 
             if asset_data["type"] == "SkeletalMesh":
                 asset.get_editor_property('asset_import_data').set_editor_property('normal_import_method', unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS)
