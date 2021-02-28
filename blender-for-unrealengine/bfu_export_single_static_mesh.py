@@ -88,39 +88,36 @@ def ExportSingleStaticMesh(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-    if bpy.ops.object.mode_set.poll():
-        bpy.ops.object.mode_set(mode='OBJECT')
+    SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
-    AddSocketsTempName(obj)
+    AddSubObjectTempName(obj)
+    asset_name = PrepareExportName(obj, False)
     data_to_remove = DuplicateSelectForExport()
-
-    if addon_prefs.correctExtremUVScale:
-        SavedSelect = GetCurrentSelection()
-        if GoToMeshEditMode():
-            CorrectExtremeUV(2)
-        bpy.ops.object.mode_set(mode='OBJECT')
-        SetCurrentSelection(SavedSelect)
+    CorrectExtremUVAtExport()
 
     ApplyNeededModifierToSelect()
 
     active = bpy.context.view_layer.objects.active
+    asset_name.target_object = active
 
-    bfu_check_potential_error.UpdateNameHierarchy(
-        GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
-        )
+
 
     ApplyExportTransform(active)
-
     absdirpath = bpy.path.abspath(dirpath)
     VerifiDirs(absdirpath)
     fullpath = os.path.join(absdirpath, filename)
     meshType = GetAssetType(active)
-
     SetSocketsExportTransform(active)
 
-    RemoveDuplicatedSocketsTempName(active)
+    RemoveDuplicatedSubObjectTempName(active)
+
     TryToApplyCustomSocketsName(active)
+    asset_name.SetExportName()
+
+    bfu_check_potential_error.UpdateNameHierarchy(
+        GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
+        )
 
     bpy.ops.export_scene.fbx(
         filepath=fullpath,
@@ -141,7 +138,10 @@ def ExportSingleStaticMesh(
         bake_space_transform=False
         )
 
+    asset_name.ResetNames()
+
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in data_to_remove:
         data.RemoveData()
-    RemoveSocketsTempName(obj)
+
+    RemoveSubObjectTempName(obj)

@@ -287,7 +287,7 @@ def ExportForUnrealEngine():
             if childCol.hide_viewport:
                 childCol.hide_viewport = False
 
-    SafeModeSet(MyCurrentDataSave.user_active, 'OBJECT')
+    SafeModeSet('OBJECT', MyCurrentDataSave.user_active)
 
     if addon_prefs.revertExportPath:
         RemoveFolderTree(bpy.path.abspath(scene.export_static_file_path))
@@ -296,11 +296,11 @@ def ExportForUnrealEngine():
         RemoveFolderTree(bpy.path.abspath(scene.export_camera_file_path))
         RemoveFolderTree(bpy.path.abspath(scene.export_other_file_path))
 
-    obj_list = []  # Do a simple lit of objects to export
-    action_list = []  # Do a simple lit of objects to export
+    obj_list = []  # Do a simple list of objects to export
+    action_list = []  # Do a simple list of objects to export
     AssetToExport = GetFinalAssetToExport()
     for Asset in AssetToExport:
-        if Asset.type == "NlAnim" or Asset.type == "Action" or Asset.type == "Pose":
+        if Asset.type == "Action" or Asset.type == "Pose":
             if Asset.obj not in action_list:
                 action_list.append(Asset.action.name)
         else:

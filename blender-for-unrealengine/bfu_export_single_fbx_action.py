@@ -80,7 +80,6 @@ def ExportSingleFbxAction(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-
     if obj.animation_data is None:
         obj.animation_data_create()
     userAction = obj.animation_data.action  # Save current action
@@ -88,15 +87,15 @@ def ExportSingleFbxAction(
     userAction_blend_type = obj.animation_data.action_blend_type
     userAction_influence = obj.animation_data.action_influence
 
-    if bpy.ops.object.mode_set.poll():
-        bpy.ops.object.mode_set(mode='OBJECT')
+    SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
-
+    asset_name = PrepareExportName(obj, True)
     data_to_remove = DuplicateSelectForExport()
 
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
+    asset_name.target_object = active
     if active.ExportAsProxy:
         ApplyProxyData(active)
 
@@ -145,8 +144,7 @@ def ExportSingleFbxAction(
     VerifiDirs(absdirpath)
     fullpath = os.path.join(absdirpath, filename)
 
-    # Set rename temporarily the Armature as "Armature"
-    oldArmatureName = RenameArmatureAsExportName(active)
+    asset_name.SetExportName()
 
     if (export_procedure == "normal"):
         bpy.ops.export_scene.fbx(
@@ -191,8 +189,7 @@ def ExportSingleFbxAction(
     # Reset Action name
     active.animation_data.action.name = OriginalActionName
 
-    # Reset armature name
-    ResetArmatureName(active, oldArmatureName, )
+    asset_name.ResetNames()
 
     ResetArmaturePose(obj)
 

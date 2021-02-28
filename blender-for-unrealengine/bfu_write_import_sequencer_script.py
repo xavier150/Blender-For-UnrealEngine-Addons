@@ -56,6 +56,8 @@ def WriteImportSequencerTracks():
     data['endFrame'] = scene.frame_end
     data['frameRateDenominator'] = scene.render.fps_base
     data['frameRateNumerator'] = scene.render.fps
+    data['pixel_aspect_x'] = bpy.context.scene.render.pixel_aspect_x
+    data['pixel_aspect_y'] = bpy.context.scene.render.pixel_aspect_y
     data['render_resolution_x'] = bpy.context.scene.render.resolution_x
     data['render_resolution_y'] = bpy.context.scene.render.resolution_y
     data['secureCrop'] = 0.0001  # add end crop for avoid section overlay

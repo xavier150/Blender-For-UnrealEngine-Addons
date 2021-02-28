@@ -16,13 +16,19 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-# ----------------------------------------------
-#  This addons allows to easily export several objects at the same time in .fbx
-#  for use in unreal engine 4 by removing the usual constraints
-#  while respecting UE4 naming conventions and a clean tree structure.
-#  It also contains a small toolkit for collisions and sockets
-#  xavierloux.com
-# ----------------------------------------------
+'''
+This addons allows to easily export several objects, animation, cameras, [...] at the same time for use in game engines
+like Unreal Engine of Unity by removing the usual constraints while respecting engine naming conventions
+and a clean tree structure.
+It also contains a small toolkit for collisions and sockets.
+
+Asset = Object to export in game engine.
+Sub object are object in assets like collision or sockets.
+
+Addon for Blender by Xavier Loux (BleuRaven)
+xavierloux.com
+xavierloux.loux@gmail.com
+'''
 
 import os
 import bpy
@@ -106,7 +112,13 @@ def register():
 
     bpy.types.Scene.bfu_object_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_object_import_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_lod_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_collision_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_material_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_vertex_color_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_light_map_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_anim_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_skeleton_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_collection_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_object_advanced_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_collision_socket_expanded = bpy.props.BoolProperty()

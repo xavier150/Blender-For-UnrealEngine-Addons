@@ -8,7 +8,7 @@ def CheckTasks():
     import unreal
     if not hasattr(unreal, 'EditorAssetLibrary'):
         print('--------------------------------------------------')
-        print('/!\ Warning: Editor Scripting Utilities should be activated.')
+        print('WARNING: Editor Scripting Utilities should be activated.')
         print('Plugin > Scripting > Editor Scripting Utilities.')
         return False
     return True
@@ -54,10 +54,10 @@ def ImportAllAssets():
                 else:
                     Options.append(Config.get(OptionName, option))
         else:
-            print("/!\ Option: "+OptionName+" not found in file: "+FileLoc)
+            print("WARNING: Option: "+OptionName+" not found in file: "+FileLoc)
         return Options
 
-    def GetAssetByType(type: str):
+    def GetAssetByType(type):
         target_assets = []
         for asset in import_assets_data["assets"]:
             if asset["type"] == type:
@@ -105,6 +105,7 @@ def ImportAllAssets():
             # #################################[Change]
             
             # unreal.FbxImportUI
+            # https://docs.unrealengine.com/en-US/PythonAPI/class/FbxImportUI.html?highlight=fbximportui#unreal.FbxImportUI
             if asset_data["type"] == "Alembic":
                 task.get_editor_property('options').set_editor_property('import_type', unreal.AlembicImportType.SKELETAL)
 
@@ -161,6 +162,32 @@ def ImportAllAssets():
                         task.get_editor_property('options').static_mesh_import_data.set_editor_property('static_mesh_lod_group', asset_data["static_mesh_lod_group"])
                     task.get_editor_property('options').static_mesh_import_data.set_editor_property('generate_lightmap_u_vs', asset_data["generate_lightmap_u_vs"])
 
+                if asset_data["type"] == "StaticMesh" or asset_data["type"] == "SkeletalMesh":
+
+                    vertex_color_import_option = unreal.VertexColorImportOption.REPLACE  # Default
+                    vertex_override_color = unreal.LinearColor(
+                        asset_data["vertex_override_color"][0],
+                        asset_data["vertex_override_color"][1],
+                        asset_data["vertex_override_color"][2]
+                        )
+
+                    if asset_data["vertex_color_import_option"] == "IGNORE":
+                        vertex_color_import_option = unreal.VertexColorImportOption.IGNORE
+                    elif asset_data["vertex_color_import_option"] == "OVERRIDE":
+                        vertex_color_import_option = unreal.VertexColorImportOption.OVERRIDE
+                    elif asset_data["vertex_color_import_option"] == "REPLACE":
+                        vertex_color_import_option = unreal.VertexColorImportOption.REPLACE
+
+                if asset_data["type"] == "StaticMesh":
+                    # unreal.FbxSkeletalMeshImportData
+                    task.get_editor_property('options').static_mesh_import_data.set_editor_property('vertex_color_import_option', vertex_color_import_option)
+                    task.get_editor_property('options').static_mesh_import_data.set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
+
+                if asset_data["type"] == "SkeletalMesh":
+                    # unreal.FbxSkeletalMeshImportData
+                    task.get_editor_property('options').skeletal_mesh_import_data.set_editor_property('vertex_color_import_option', vertex_color_import_option)
+                    task.get_editor_property('options').skeletal_mesh_import_data.set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
+
                 if asset_data["type"] == "SkeletalMesh" or asset_data["type"] == "Animation":
                     # unreal.FbxSkeletalMeshImportData
                     task.get_editor_property('options').skeletal_mesh_import_data.set_editor_property('import_morph_targets', True)
@@ -211,17 +238,32 @@ def ImportAllAssets():
                 elif asset_data["collision_trace_flag"] == "CTF_UseComplexAsSimple":
                     asset.get_editor_property('body_setup').set_editor_property('collision_trace_flag', unreal.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE)
 
-                if asset_data["vertex_color_import_option"] == "VCIO_Ignore":
-                    asset.get_editor_property('asset_import_data').set_editor_property('vertex_color_import_option', unreal.VertexColorImportOption.IGNORE)
-                elif asset_data["vertex_color_import_option"] == "VCIO_Replace":
-                    asset.get_editor_property('asset_import_data').set_editor_property('vertex_color_import_option', unreal.VertexColorImportOption.REPLACE)
+            if asset_data["type"] == "StaticMesh" or asset_data["type"] == "SkeletalMesh":
+                vertex_color_import_option = unreal.VertexColorImportOption.REPLACE  # Default
+                vertex_override_color = unreal.LinearColor(
+                    asset_data["vertex_override_color"][0],
+                    asset_data["vertex_override_color"][1],
+                    asset_data["vertex_override_color"][2]
+                    )
+
+                if asset_data["vertex_color_import_option"] == "IGNORE":
+                    vertex_color_import_option = unreal.VertexColorImportOption.IGNORE
+                elif asset_data["vertex_color_import_option"] == "OVERRIDE":
+                    vertex_color_import_option = unreal.VertexColorImportOption.OVERRIDE
+                elif asset_data["vertex_color_import_option"] == "REPLACE":
+                    vertex_color_import_option = unreal.VertexColorImportOption.REPLACE
+
+                asset.get_editor_property('asset_import_data').set_editor_property('vertex_color_import_option', vertex_color_import_option)
+                asset.get_editor_property('asset_import_data').set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
+                asset.get_editor_property('asset_import_data').set_editor_property('generate_lightmap_u_vs', asset_data["generate_lightmap_u_vs"])  # Import data
+                unreal.EditorStaticMeshLibrary.set_generate_lightmap_uv(asset, asset_data["generate_lightmap_u_vs"])  # Build settings at lod
 
             if asset_data["type"] == "SkeletalMesh":
                 asset.get_editor_property('asset_import_data').set_editor_property('normal_import_method', unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS)
 
-            #with open(asset_data["additional_tracks_path"], "r") as json_file:
-                #asset_tracks = json.load(json_file)
-            
+            # with open(asset_data["additional_tracks_path"], "r") as json_file:
+                # asset_tracks = json.load(json_file)
+
             # Socket
             if asset_data["type"] == "SkeletalMesh":
                 # Import the SkeletalMesh socket(s)

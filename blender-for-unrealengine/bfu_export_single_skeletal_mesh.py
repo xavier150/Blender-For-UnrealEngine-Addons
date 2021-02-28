@@ -89,28 +89,18 @@ def ExportSingleSkeletalMesh(
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-
-
-    if bpy.ops.object.mode_set.poll():
-        bpy.ops.object.mode_set(mode='OBJECT')
+    SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
-    AddSocketsTempName(obj)
+    AddSubObjectTempName(obj)
+    asset_name = PrepareExportName(obj, True)
     data_to_remove = DuplicateSelectForExport()
-
-    if addon_prefs.correctExtremUVScale:
-        SavedSelect = GetCurrentSelection()
-        if GoToMeshEditMode():
-            CorrectExtremeUV(2)
-        bpy.ops.object.mode_set(mode='OBJECT')
-        SetCurrentSelection(SavedSelect)
+    CorrectExtremUVAtExport()
 
     ApplyNeededModifierToSelect()
 
-    bfu_check_potential_error.UpdateNameHierarchy(
-        GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
-        )
     active = bpy.context.view_layer.objects.active
+    asset_name.target_object = active
     export_procedure = active.bfu_export_procedure
 
     if active.ExportAsProxy:
@@ -133,11 +123,15 @@ def ExportSingleSkeletalMesh(
     meshType = GetAssetType(active)
 
     SetSocketsExportTransform(active)
-    RemoveDuplicatedSocketsTempName(active)
+    RemoveDuplicatedSubObjectTempName(active)
     TryToApplyCustomSocketsName(active)
 
     # Set rename temporarily the Armature as "Armature"
-    oldArmatureName = RenameArmatureAsExportName(active)
+    asset_name.SetExportName()
+
+    bfu_check_potential_error.UpdateNameHierarchy(
+        GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
+        )
 
     RemoveAllConsraints(active)
     bpy.context.object.data.pose_position = 'REST'
@@ -182,13 +176,10 @@ def ExportSingleSkeletalMesh(
         # Reset Curve an unit
         bpy.context.scene.unit_settings.scale_length = savedUnitLength
 
-    # Reset armature name
+    asset_name.ResetNames()
 
-    ResetArmatureName(active, oldArmatureName)
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in data_to_remove:
         data.RemoveData()
 
-    RemoveSocketsTempName(obj)
-
-
+    RemoveSubObjectTempName(obj)

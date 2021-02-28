@@ -133,7 +133,7 @@ class UserSceneSave():
                     self.object_bones.append(SavedBones(bone))
 
     def ResetSelectByRef(self):
-        SafeModeSet(bpy.ops.object, "OBJECT")
+        SafeModeSet("OBJECT", bpy.ops.object)
         bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.data.objects:  # Resets previous selected object if still exist
             if obj in self.user_selected:
@@ -145,7 +145,7 @@ class UserSceneSave():
         self.ResetBonesSelectByName()
 
     def ResetSelectByName(self):
-        SafeModeSet(bpy.ops.object, "OBJECT")
+        SafeModeSet("OBJECT", bpy.ops.object)
         bpy.ops.object.select_all(action='DESELECT')
         for obj in self.objects:  # Resets previous selected object if still exist
             if obj.select:
@@ -181,7 +181,7 @@ class UserSceneSave():
     def ResetModeAtSave(self):
         if self.user_mode:
             if bpy.ops.object:
-                SafeModeSet(bpy.ops.object, self.user_mode)
+                SafeModeSet(self.user_mode, bpy.ops.object)
 
     def ResetSceneAtSave(self):
         scene = bpy.context.scene
@@ -198,7 +198,7 @@ class UserSceneSave():
                     bpy.data.objects[obj.name].hide_viewport = obj.hide_viewport
                 if bpy.data.objects[obj.name].hide_get() != obj.hide:
                     bpy.data.objects[obj.name].hide_set(obj.hide)
-                
+
             else:
                 print("/!\\ "+obj.name+" not found in bpy.data.objects")
 
@@ -225,17 +225,46 @@ class UserSceneSave():
                         layer_col_children.hide_viewport = childCol.hide_viewport
 
 
-def SafeModeSet(obj, target_mode='OBJECT'):
-    if obj:
-        if obj.mode != target_mode:
-            if bpy.ops.object.mode_set.poll():
+class AnimationManagment():
+    def __init__(self):
+        self.action = None
+        self.action_extrapolation = None
+        self.action_blend_type = None
+        self.action_influence = None
+
+    def SaveAnimationData(self, obj):
+        self.action = obj.animation_data.action
+        self.action_extrapolation = obj.animation_data.action_extrapolation
+        self.action_blend_type = obj.animation_data.action_blend_type
+        self.action_influence = obj.animation_data.action_influence
+
+    def ClearAnimationData(self, obj):
+        obj.animation_data_clear()
+
+    def SetAnimationData(self, obj):
+        obj.animation_data_create()
+        obj.animation_data.action = self.action
+        obj.animation_data.action_extrapolation = self.action_extrapolation
+        obj.animation_data.action_blend_type = self.action_blend_type
+        obj.animation_data.action_influence = self.action_influence
+
+
+def SafeModeSet(target_mode='OBJECT', obj=None):
+    if bpy.ops.object.mode_set.poll():
+        if obj:
+            if obj.mode != target_mode:
                 bpy.ops.object.mode_set(mode=target_mode)
                 return True
+
+        else:
+            bpy.ops.object.mode_set(mode=target_mode)
+            return True
+
     return False
 
 
 class CounterTimer():
-    
+
     def __init__(self):
         self.start = time.perf_counter()
 
@@ -265,19 +294,21 @@ def update_progress(job_title, progress, time=None):
 
 def RemoveUselessSpecificData(name, type):
     if type == "MESH":
-        oldData = bpy.data.meshes[name]
-        if oldData.users == 0:
-            bpy.data.meshes.remove(oldData)
+        if name in bpy.data.meshes:
+            oldData = bpy.data.meshes[name]
+            if oldData.users == 0:
+                bpy.data.meshes.remove(oldData)
 
     if type == "ARMATURE":
-        oldData = bpy.data.armatures[name]
-        if oldData.users == 0:
-            bpy.data.armatures.remove(oldData)
+        if name in bpy.data.armatures:
+            oldData = bpy.data.armatures[name]
+            if oldData.users == 0:
+                bpy.data.armatures.remove(oldData)
 
 
 def CleanJoinSelect():
     view_layer = bpy.context.view_layer
-    if len(bpy.context.selected_objects) < 1:
+    if len(bpy.context.selected_objects) > 1:
         if view_layer.objects.active is None:
             view_layer.objects.active = bpy.context.selected_objects[0]
 
@@ -366,12 +397,21 @@ def GetExportDesiredChilds(obj):
 
 
 def GetSocketDesiredChild(targetObj):
-    socket = []
+    sockets = []
     for obj in GetExportDesiredChilds(targetObj):
         if IsASocket(obj):
-            socket.append(obj)
+            sockets.append(obj)
 
-    return socket
+    return sockets
+
+
+def GetSubObjectDesiredChild(targetObj):
+    sub_objects = []
+    for obj in GetExportDesiredChilds(targetObj):
+        if IsASubObject(obj):
+            sub_objects.append(obj)
+
+    return sub_objects
 
 
 def RemoveAllConsraints(obj):
@@ -511,7 +551,6 @@ def GetCachedExportAutoActionList(obj):
         objBoneNames = [bone.name for bone in obj.data.bones]
         for action in bpy.data.actions:
             if action.library is None:
-                print(action)
                 if GetIfActionIsAssociated(action, objBoneNames):
                     actions.append(action)
 
@@ -600,8 +639,7 @@ def GetExportRealSurfaceArea(obj):
     scene = bpy.context.scene
 
     MoveToGlobalView()
-    if bpy.ops.object.mode_set.poll():
-        bpy.ops.object.mode_set(mode='OBJECT')
+    SafeModeSet('OBJECT')
 
     SavedSelect = GetCurrentSelection()
     SelectParentAndDesiredChilds(obj)
@@ -722,13 +760,15 @@ def SelectParentAndDesiredChilds(obj):
                 selectObj.select_set(True)
                 selectedObjs.append(selectObj)
 
-    obj.select_set(True)
+    if obj.name in bpy.context.view_layer.objects:
+        obj.select_set(True)
     if obj.ExportAsProxy:
         if obj.ExportProxyChild is not None:
             obj.ExportProxyChild.select_set(True)
 
     selectedObjs.append(obj)
-    bpy.context.view_layer.objects.active = obj
+    if obj.name in bpy.context.view_layer.objects:
+        bpy.context.view_layer.objects.active = obj
     return selectedObjs
 
 
@@ -736,7 +776,8 @@ def GoToMeshEditMode():
     for obj in bpy.context.selected_objects:
         if obj.type == "MESH":
             bpy.context.view_layer.objects.active = obj
-            bpy.ops.object.mode_set(mode='EDIT')
+            SafeModeSet('EDIT')
+
             return True
     return False
 
@@ -870,15 +911,22 @@ def ApplyExportTransform(obj):
     obj.scale = saveScale
 
 
-def ApplySkeletalExportScale(obj, rescale):
-    # That a correct name ?
-    obj.scale = obj.scale*rescale
+def ApplySkeletalExportScale(armature, rescale):
+    # This function will rescale the armature and applys the new scale
+
+    animation_data = AnimationManagment()
+    animation_data.SaveAnimationData(armature)
+    animation_data.ClearAnimationData(armature)
+
+    armature.scale = armature.scale*rescale
     bpy.ops.object.transform_apply(
         location=True,
         scale=True,
         rotation=True,
         properties=True
         )
+
+    animation_data.SetAnimationData(armature)
 
 
 def RescaleSelectCurveHook(scale):
@@ -1224,33 +1272,6 @@ def GetObjExportScale(obj):
     return obj.exportGlobalScale
 
 
-def RenameArmatureAsExportName(obj):
-    # Rename temporarily the Armature as DefaultArmature
-
-    scene = bpy.context.scene
-    oldArmatureName = None
-    newArmatureName = GetDesiredExportArmatureName()
-    if obj.name != newArmatureName:
-        oldArmatureName = obj.name
-        # Avoid same name for two armature
-        if newArmatureName in scene.objects:
-            newArmature = scene.objects[newArmatureName]
-            newArmature.name = "ArmatureTemporarilyNameForUe4Export"
-        obj.name = newArmatureName
-    return oldArmatureName
-
-
-def ResetArmatureName(obj, oldArmatureName):
-    # Reset armature name
-
-    scene = bpy.context.scene
-    if oldArmatureName is not None:
-        obj.name = oldArmatureName
-        if "ArmatureTemporarilyNameForUe4Export" in scene.objects:
-            armature = scene.objects["ArmatureTemporarilyNameForUe4Export"]
-            armature.name = GetDesiredExportArmatureName()
-
-
 def GenerateUe4Name(name):
     # Generate a new name with suffix number
 
@@ -1429,11 +1450,43 @@ def UpdateUe4Name(SubType, objList):
 
 
 def IsASocket(obj):
+    '''
+    Retrun True is object is an Socket.
+    https://docs.unrealengine.com/en-US/WorkingWithContent/Importing/FBX/StaticMeshes/#sockets
+    '''
     if obj.type == "EMPTY":
         cap_name = obj.name.upper()
         if cap_name.startswith("SOCKET_"):
             return True
 
+    return False
+
+
+def IsACollision(obj):
+    '''
+    Retrun True is object is an Collision.
+    https://docs.unrealengine.com/en-US/WorkingWithContent/Importing/FBX/StaticMeshes/#collision
+    '''
+    if obj.type == "MESH":
+        cap_name = obj.name.upper()
+        if cap_name.startswith("UBX_"):
+            return True
+        elif cap_name.startswith("UCP_"):
+            return True
+        elif cap_name.startswith("USP_"):
+            return True
+        elif cap_name.startswith("UCX_"):
+            return True
+
+    return False
+
+
+def IsASubObject(obj):
+    '''
+    Retrun True is object is an Socket or and Collision.
+    '''
+    if IsASocket(obj) or IsACollision(obj):
+        return True
     return False
 
 

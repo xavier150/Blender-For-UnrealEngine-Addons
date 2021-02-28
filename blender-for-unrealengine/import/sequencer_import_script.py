@@ -8,12 +8,12 @@ def CheckTasks():
     import unreal
     if not hasattr(unreal, 'EditorAssetLibrary'):
         print('--------------------------------------------------')
-        print('/!\ Warning: Editor Scripting Utilities should be activated.')
+        print('WARNING: Editor Scripting Utilities should be activated.')
         print('Plugin > Scripting > Editor Scripting Utilities.')
         return False
     if not hasattr(unreal.MovieSceneSequence, 'set_display_rate'):
         print('--------------------------------------------------')
-        print('/!\ Warning: Editor Scripting Utilities should be activated.')
+        print('WARNING: Editor Scripting Utilities should be activated.')
         print('Plugin > Scripting > Sequencer Scripting.')
         return False
     return True
@@ -85,7 +85,7 @@ def CreateSequencer():
     asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
     seq = asset_tools.create_asset_with_dialog('MySequence', '/Game', None, factory)
     if seq is None:
-        return 'Error /!\ level sequencer factory_create fail'
+        return 'ERROR: level sequencer factory_create fail'
 
     print("Sequencer reference created")
     print(seq)
@@ -104,7 +104,10 @@ def CreateSequencer():
     seq.set_playback_start_seconds(startFrame/float(frameRateNumerator))  # set_playback_end_seconds
     camera_cut_track = seq.add_master_track(unreal.MovieSceneCameraCutTrack)
     camera_cut_track.set_editor_property('display_name', 'Imported Camera Cuts')
-    camera_cut_track.set_color_tint(unreal.Color(b=200, g=0, r=0, a=0))
+    if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:
+        camera_cut_track.set_color_tint(unreal.Color(b=200, g=0, r=0, a=0))
+    else:
+        pass
 
     for x, camera_data in enumerate(sequence_data["cameras"]):
         # import camera
@@ -115,10 +118,10 @@ def CreateSequencer():
             camera_tracks = json.load(json_file)
 
         # Create spawnable camera and add camera in sequencer
-        cine_camera_actor = unreal.EditorLevelLibrary().spawn_actor_from_class(unreal.CineCameraActor, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0)) #
+        cine_camera_actor = unreal.EditorLevelLibrary().spawn_actor_from_class(unreal.CineCameraActor, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
 
         # Import additional tracks (camera_component)
-        camera_component_binding = seq.add_possessable(cine_camera_actor.get_cine_camera_component())  
+        camera_component_binding = seq.add_possessable(cine_camera_actor.get_cine_camera_component())
         # Get the last
 
         TrackFocalLength = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)
@@ -143,12 +146,30 @@ def CreateSequencer():
         sectionSensorHeight = TrackSensorHeight.add_section()
         sectionSensorHeight.set_end_frame_bounded(False)
         sectionSensorHeight.set_start_frame_bounded(False)
-        AddSequencerSectionFloatKeysByIniFile(sectionSensorHeight, camera_tracks['Camera SensorHeight'])
+
+        crop_camera_sensor_height = {}
+        for key in camera_tracks['Camera SensorHeight'].keys():
+            original_width = float(camera_tracks['Camera SensorWidth'][key])
+            original_height = float(camera_tracks['Camera SensorHeight'][key])
+            res_x = float(sequence_data['render_resolution_x'])
+            res_y = float(sequence_data['render_resolution_y'])
+            pixel_x = float(sequence_data['pixel_aspect_x'])
+            pixel_y = float(sequence_data['pixel_aspect_y'])
+            res_ratio = res_x / res_y
+            pixel_ratio = pixel_x / pixel_y
+            print(pixel_x, pixel_y, pixel_ratio)
+
+            crop_camera_sensor_height[key] = (original_width / (res_ratio * pixel_ratio))
+
+        AddSequencerSectionFloatKeysByIniFile(sectionSensorHeight, crop_camera_sensor_height)
 
         TrackFocusDistance = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)
 
         # Wtf this var name change every version or I do someting wrong??? :v
         if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:
+            TrackFocusDistance.set_property_name_and_path('FocusSettings.ManualFocusDistance', 'FocusSettings.ManualFocusDistance')
+            TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance (Focus Settings)')
+        elif int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 25:
             TrackFocusDistance.set_property_name_and_path('FocusSettings.ManualFocusDistance', 'FocusSettings.ManualFocusDistance')
             TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance (Focus Settings)')
         elif int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 24:
@@ -194,7 +215,10 @@ def CreateSequencer():
         else:
             current_camera_binding = camera_binding
 
-        current_camera_binding.set_display_name(camera_data["name"])
+        if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:
+            current_camera_binding.set_display_name(camera_data["name"])
+        else:
+            pass
         tracksSpawned = current_camera_binding.find_tracks_by_exact_type(unreal.MovieSceneSpawnTrack)
         if len(tracksSpawned) > 0:
             sectionSpawned = tracksSpawned[0].get_sections()[0]
@@ -250,6 +274,7 @@ def CreateSequencer():
 
     unreal.EditorAssetLibrary.sync_browser_to_objects([seq.get_path_name()])
     return 'Sequencer created with success !'
+
 
 print("Start")
 

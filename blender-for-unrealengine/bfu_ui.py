@@ -292,7 +292,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
     bpy.types.Object.bfu_target_skeleton_custom_ref = StringProperty(
         name="",
-        description="The full reference of the skeleton in Unreal. Skeleton not the skeletal mesh. (Use right clic on asset and copy reference.)",
+        description=(
+            "The full reference of the skeleton in Unreal. " +
+            "Skeleton not the skeletal mesh. (Use right clic on asset and copy reference.)"
+            ),
         default="SkeletalMesh'/Game/ImportedFbx/SK_MySketonName_Skeleton.SK_MySketonName_Skeleton'"
         )
 
@@ -473,17 +476,25 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         # C++ API
         # https://docs.unrealengine.com/en-US/API/Editor/UnrealEd/Factories/EVertexColorImportOption__Type/index.html
         items=[
-            ("VCIO_Ignore",
-                "Ignore",
-                "Ignore vertex colors from the FBX file," +
-                " and keep the existing mesh vertex colors.",
-                1),
-            ("VCIO_Replace",
-                "Replace",
-                "Import the static mesh using the" +
-                " vertex colors from the FBX file.",
-                2)
-            ]
+            ("IGNORE", "Ignore",
+                "Ignore vertex colors, and keep the existing mesh vertex colors.", 1),
+            ("OVERRIDE", "Override",
+                "Override all vertex colors with the specified color.", 2),
+            ("REPLACE", "Replace",
+                "Import the static mesh using the target vertex colors.", 0)
+            ],
+        default="REPLACE"
+        )
+
+    bpy.types.Object.VertexOverrideColor = FloatVectorProperty(
+            name="Vertex Override Color",
+            subtype='COLOR',
+            description="Specify override color in the case that VertexColorImportOption is set to Override",
+            default=(1.0, 1.0, 1.0),
+            min=0.0,
+            max=1.0
+            # Vania python
+            # https://docs.unrealengine.com/en-US/PythonAPI/class/FbxSkeletalMeshImportData.html
         )
 
     bpy.types.Object.exportActionEnum = EnumProperty(
@@ -609,7 +620,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.ExportNLA = BoolProperty(
         name="Export NLA (Nonlinear Animation)",
         description=(
-            "If checked, exports the all animation of the scene with the NLA (Don't work with Auto-Rig Pro for the moment.)"
+            "If checked, exports the all animation of the scene with the NLA " +
+            "(Don't work with Auto-Rig Pro for the moment.)"
             ),
         default=False
         )
@@ -879,11 +891,11 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     animationNumber += 1
                 popup_title = (
                     str(animationNumber) +
-                    ' animation(s) found for obj named "'+obj.name+'".'
+                    ' action(s) found for obj named "'+obj.name+'".'
                     )
             else:
                 popup_title = (
-                    'No animation found for obj named "' +
+                    'No action found for obj named "' +
                     obj.name+'".')
 
             def draw(self, context):
@@ -915,8 +927,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     addAnimRow(
                         obj.NLAAnimName,
                         "NlAnim",
-                        str(scene.frame_start + obj.StartFramesOffset),
-                        str(scene.frame_end + obj.EndFramesOffset)
+                        str(scene.frame_start),
+                        str(scene.frame_end)
                         )
 
             bpy.context.window_manager.popup_menu(
@@ -977,6 +989,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.MaterialSearchLocation',
                             'obj.CollisionTraceFlag',
                             'obj.VertexColorImportOption',
+                            'obj.VertexOverrideColor ',
                             'obj.exportActionEnum',
                             'obj.PrefixNameToExport',
                             'obj.AnimStartEndTimeEnum',
@@ -1198,8 +1211,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 exportCustomNameText.prop(obj, "bfu_custom_export_name")
                                 exportCustomNameText.enabled = useCustomName
 
-            bfu_ui_utils.LayoutSection(layout, "bfu_object_import_properties_expanded", "Object Import Properties")
-            if scene.bfu_object_import_properties_expanded:
+            bfu_ui_utils.LayoutSection(layout, "bfu_object_lod_properties_expanded", "Lod")
+            if scene.bfu_object_lod_properties_expanded:
                 if addon_prefs.useGeneratedScripts and obj is not None:
                     if obj.ExportEnum == "export_recursive":
 
@@ -1213,15 +1226,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 LodList.prop(obj, 'Ue4Lod3')
                                 LodList.prop(obj, 'Ue4Lod4')
                                 LodList.prop(obj, 'Ue4Lod5')
-
-                        # MaterialSearchLocation
-                        if not obj.ExportAsLod:
-                            if (GetAssetType(obj) == "StaticMesh" or
-                                    GetAssetType(obj) == "SkeletalMesh" or
-                                    GetAssetType(obj) == "Alembic"):
-                                MaterialSearchLocation = layout.row()
-                                MaterialSearchLocation.prop(
-                                    obj, 'MaterialSearchLocation')
 
                         # StaticMesh prop
                         if GetAssetType(obj) == "StaticMesh":
@@ -1238,18 +1242,66 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                     'StaticMeshLODGroup'
                                     )
 
+            bfu_ui_utils.LayoutSection(layout, "bfu_object_collision_properties_expanded", "Collision")
+            if scene.bfu_object_collision_properties_expanded:
+                if addon_prefs.useGeneratedScripts and obj is not None:
+                    if obj.ExportEnum == "export_recursive":
+
+                        # StaticMesh prop
+                        if GetAssetType(obj) == "StaticMesh":
                             StaticMeshCollisionTraceFlag = layout.row()
                             StaticMeshCollisionTraceFlag.prop(
                                 obj,
                                 'CollisionTraceFlag'
                                 )
+                            if not obj.ExportAsLod:
+                                AutoGenerateCollision = layout.row()
+                                AutoGenerateCollision.prop(
+                                    obj,
+                                    'AutoGenerateCollision'
+                                    )
+                        # SkeletalMesh prop
+                        if GetAssetType(obj) == "SkeletalMesh":
+                            if not obj.ExportAsLod:
+                                CreatePhysicsAsset = layout.row()
+                                CreatePhysicsAsset.prop(obj, "CreatePhysicsAsset")
 
-                            StaticMeshVertexColorImportOption = layout.row()
-                            StaticMeshVertexColorImportOption.prop(
-                                obj,
-                                'VertexColorImportOption'
-                                )
+            bfu_ui_utils.LayoutSection(layout, "bfu_object_material_properties_expanded", "Material")
+            if scene.bfu_object_material_properties_expanded:
+                if addon_prefs.useGeneratedScripts and obj is not None:
+                    if obj.ExportEnum == "export_recursive":
 
+                        # MaterialSearchLocation
+                        if not obj.ExportAsLod:
+                            if (GetAssetType(obj) == "StaticMesh" or
+                                    GetAssetType(obj) == "SkeletalMesh" or
+                                    GetAssetType(obj) == "Alembic"):
+                                MaterialSearchLocation = layout.row()
+                                MaterialSearchLocation.prop(
+                                    obj, 'MaterialSearchLocation')
+
+            bfu_ui_utils.LayoutSection(layout, "bfu_object_vertex_color_properties_expanded", "Vertex color")
+            if scene.bfu_object_vertex_color_properties_expanded:
+                if addon_prefs.useGeneratedScripts and obj is not None:
+                    if obj.ExportEnum == "export_recursive":
+
+                        # Vertex color
+                        StaticMeshVertexColorImportOption = layout.column()
+                        StaticMeshVertexColorImportOption.prop(obj, 'VertexColorImportOption')
+                        StaticMeshVertexColorImportOptionColor = StaticMeshVertexColorImportOption.row()
+                        StaticMeshVertexColorImportOptionColor.prop(obj, 'VertexOverrideColor')
+                        if obj.VertexColorImportOption == "OVERRIDE":
+                            StaticMeshVertexColorImportOptionColor.enabled = True
+                        else:
+                            StaticMeshVertexColorImportOptionColor.enabled = False
+
+            bfu_ui_utils.LayoutSection(layout, "bfu_object_light_map_properties_expanded", "Light map")
+            if scene.bfu_object_light_map_properties_expanded:
+                if addon_prefs.useGeneratedScripts and obj is not None:
+                    if obj.ExportEnum == "export_recursive":
+
+                        # UV
+                        if GetAssetType(obj) == "StaticMesh":
                             StaticMeshLightMapRes = layout.box()
                             StaticMeshLightMapRes.prop(obj, 'StaticMeshLightMapEnum')
                             if obj.StaticMeshLightMapEnum == "CustomMap":
@@ -1268,37 +1320,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 StaticMeshLightMapRes.label(text='Compunted light map: ' + CompuntedLightMap)
                             GenerateLightmapUVs = layout.row()
                             GenerateLightmapUVs.prop(obj, 'GenerateLightmapUVs')
-
-                            if not obj.ExportAsLod:
-                                AutoGenerateCollision = layout.row()
-                                AutoGenerateCollision.prop(
-                                    obj,
-                                    'AutoGenerateCollision'
-                                    )
-
-                        # SkeletalMesh prop
-                        if GetAssetType(obj) == "SkeletalMesh":
-                            if not obj.ExportAsLod:
-                                CreatePhysicsAsset = layout.row()
-                                CreatePhysicsAsset.prop(obj, "CreatePhysicsAsset")
-
-                                Ue4Skeleton = layout.column()
-                                Ue4Skeleton.prop(obj, "bfu_skeleton_search_mode")
-                                if obj.bfu_skeleton_search_mode == "auto":
-                                    pass
-                                if obj.bfu_skeleton_search_mode == "custom_name":
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
-                                if obj.bfu_skeleton_search_mode == "custom_path_name":
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_path")
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
-                                if obj.bfu_skeleton_search_mode == "custom_reference":
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
-
-
-                    else:
-                        layout.label(text='(No properties to show.)')
-                else:
-                    layout.label(text='(Generated scripts are deactivated.)')
 
             bfu_ui_utils.LayoutSection(layout, "bfu_object_advanced_properties_expanded", "Object advanced Properties")
             if scene.bfu_object_advanced_properties_expanded:
@@ -1425,6 +1446,27 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         layout.label(text='(No properties to show.)')
                 else:
                     layout.label(text='(No properties to show.)')
+
+            bfu_ui_utils.LayoutSection(layout, "bfu_skeleton_properties_expanded", "Skeleton")
+            if scene.bfu_skeleton_properties_expanded:
+                if addon_prefs.useGeneratedScripts and obj is not None:
+                    if obj.ExportEnum == "export_recursive":
+
+                        # SkeletalMesh prop
+                        if GetAssetType(obj) == "SkeletalMesh":
+                            if not obj.ExportAsLod:
+
+                                Ue4Skeleton = layout.column()
+                                Ue4Skeleton.prop(obj, "bfu_skeleton_search_mode")
+                                if obj.bfu_skeleton_search_mode == "auto":
+                                    pass
+                                if obj.bfu_skeleton_search_mode == "custom_name":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
+                                if obj.bfu_skeleton_search_mode == "custom_path_name":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_path")
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
+                                if obj.bfu_skeleton_search_mode == "custom_reference":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
 
         if scene.bfu_active_object_tab == "SCENE":
 
@@ -1996,7 +2038,6 @@ class BFU_PT_Export(bpy.types.Panel):
             bfu_check_potential_error.UpdateNameHierarchy()
             bfu_check_potential_error.UpdateUnrealPotentialError()
             bpy.ops.object.openpotentialerror("INVOKE_DEFAULT", correctedProperty=correctedProperty)
-            print(self.text)
             return {'FINISHED'}
 
     class BFU_OT_OpenPotentialErrorPopup(Operator):
@@ -2334,7 +2375,8 @@ class BFU_PT_Export(bpy.types.Panel):
         items=[
             ('default', "No Filter", "Export as normal all objects with the recursive export option.", 0),
             ('only_object', "Only select", "Export only the selected object(s)", 1),
-            ('only_object_action', "Only select and active action", "Export only the selected object(s) and active action on this object", 2),
+            ('only_object_action', "Only select and active action",
+                "Export only the selected object(s) and active action on this object", 2),
             ],
         description=(
             "Check mark to export only selected export group." +
@@ -2569,7 +2611,7 @@ def register():
     bpy.utils.register_class(BFU_OT_SceneCollectionExport)
     bpy.types.Scene.CollectionExportList = CollectionProperty(
         type=BFU_OT_SceneCollectionExport)
-        
+
     bpy.utils.register_class(BFU_OT_FileExport)
     bpy.utils.register_class(BFU_OT_UnrealExportedAsset)
     bpy.types.Scene.UnrealExportedAssetsList = CollectionProperty(
