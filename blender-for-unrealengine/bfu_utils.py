@@ -315,6 +315,7 @@ def CleanJoinSelect():
         if bpy.ops.object.convert.poll():
             bpy.ops.object.join()
 
+
 def CleanDeleteSelect():
 
     removed_objects = []

@@ -292,7 +292,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
     bpy.types.Object.bfu_target_skeleton_custom_ref = StringProperty(
         name="",
-        description="The full reference of the skeleton in Unreal. Skeleton not the skeletal mesh. (Use right clic on asset and copy reference.)",
+        description=(
+            "The full reference of the skeleton in Unreal. " +
+            "Skeleton not the skeletal mesh. (Use right clic on asset and copy reference.)"
+            ),
         default="SkeletalMesh'/Game/ImportedFbx/SK_MySketonName_Skeleton.SK_MySketonName_Skeleton'"
         )
 
@@ -488,12 +491,11 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             subtype='COLOR',
             description="Specify override color in the case that VertexColorImportOption is set to Override",
             default=(1.0, 1.0, 1.0),
-            min=0.0, 
+            min=0.0,
             max=1.0
             # Vania python
             # https://docs.unrealengine.com/en-US/PythonAPI/class/FbxSkeletalMeshImportData.html
         )
-
 
     bpy.types.Object.exportActionEnum = EnumProperty(
         name="Action to export",
@@ -618,7 +620,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.ExportNLA = BoolProperty(
         name="Export NLA (Nonlinear Animation)",
         description=(
-            "If checked, exports the all animation of the scene with the NLA (Don't work with Auto-Rig Pro for the moment.)"
+            "If checked, exports the all animation of the scene with the NLA " +
+            "(Don't work with Auto-Rig Pro for the moment.)"
             ),
         default=False
         )
@@ -2372,7 +2375,8 @@ class BFU_PT_Export(bpy.types.Panel):
         items=[
             ('default', "No Filter", "Export as normal all objects with the recursive export option.", 0),
             ('only_object', "Only select", "Export only the selected object(s)", 1),
-            ('only_object_action', "Only select and active action", "Export only the selected object(s) and active action on this object", 2),
+            ('only_object_action', "Only select and active action",
+                "Export only the selected object(s) and active action on this object", 2),
             ],
         description=(
             "Check mark to export only selected export group." +

@@ -8,7 +8,7 @@ def CheckTasks():
     import unreal
     if not hasattr(unreal, 'EditorAssetLibrary'):
         print('--------------------------------------------------')
-        print('/!\ Warning: Editor Scripting Utilities should be activated.')
+        print('WARNING: Editor Scripting Utilities should be activated.')
         print('Plugin > Scripting > Editor Scripting Utilities.')
         return False
     return True
@@ -54,7 +54,7 @@ def ImportAllAssets():
                 else:
                     Options.append(Config.get(OptionName, option))
         else:
-            print("/!\ Option: "+OptionName+" not found in file: "+FileLoc)
+            print("WARNING: Option: "+OptionName+" not found in file: "+FileLoc)
         return Options
 
     def GetAssetByType(type):
@@ -174,9 +174,9 @@ def ImportAllAssets():
                     if asset_data["vertex_color_import_option"] == "IGNORE":
                         vertex_color_import_option = unreal.VertexColorImportOption.IGNORE
                     elif asset_data["vertex_color_import_option"] == "OVERRIDE":
-                        vertex_color_import_option =unreal.VertexColorImportOption.OVERRIDE
+                        vertex_color_import_option = unreal.VertexColorImportOption.OVERRIDE
                     elif asset_data["vertex_color_import_option"] == "REPLACE":
-                        vertex_color_import_option =unreal.VertexColorImportOption.REPLACE
+                        vertex_color_import_option = unreal.VertexColorImportOption.REPLACE
 
                 if asset_data["type"] == "StaticMesh":
                     # unreal.FbxSkeletalMeshImportData

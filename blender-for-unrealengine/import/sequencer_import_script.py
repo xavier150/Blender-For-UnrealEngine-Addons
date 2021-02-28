@@ -8,12 +8,12 @@ def CheckTasks():
     import unreal
     if not hasattr(unreal, 'EditorAssetLibrary'):
         print('--------------------------------------------------')
-        print('/!\ Warning: Editor Scripting Utilities should be activated.')
+        print('WARNING: Editor Scripting Utilities should be activated.')
         print('Plugin > Scripting > Editor Scripting Utilities.')
         return False
     if not hasattr(unreal.MovieSceneSequence, 'set_display_rate'):
         print('--------------------------------------------------')
-        print('/!\ Warning: Editor Scripting Utilities should be activated.')
+        print('WARNING: Editor Scripting Utilities should be activated.')
         print('Plugin > Scripting > Sequencer Scripting.')
         return False
     return True
@@ -85,7 +85,7 @@ def CreateSequencer():
     asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
     seq = asset_tools.create_asset_with_dialog('MySequence', '/Game', None, factory)
     if seq is None:
-        return 'Error /!\ level sequencer factory_create fail'
+        return 'ERROR: level sequencer factory_create fail'
 
     print("Sequencer reference created")
     print(seq)
@@ -118,10 +118,10 @@ def CreateSequencer():
             camera_tracks = json.load(json_file)
 
         # Create spawnable camera and add camera in sequencer
-        cine_camera_actor = unreal.EditorLevelLibrary().spawn_actor_from_class(unreal.CineCameraActor, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0)) #
+        cine_camera_actor = unreal.EditorLevelLibrary().spawn_actor_from_class(unreal.CineCameraActor, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
 
         # Import additional tracks (camera_component)
-        camera_component_binding = seq.add_possessable(cine_camera_actor.get_cine_camera_component())  
+        camera_component_binding = seq.add_possessable(cine_camera_actor.get_cine_camera_component())
         # Get the last
 
         TrackFocalLength = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)
@@ -274,6 +274,7 @@ def CreateSequencer():
 
     unreal.EditorAssetLibrary.sync_browser_to_objects([seq.get_path_name()])
     return 'Sequencer created with success !'
+
 
 print("Start")
 
