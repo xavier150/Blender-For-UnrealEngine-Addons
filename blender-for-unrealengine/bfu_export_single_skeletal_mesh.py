@@ -99,9 +99,6 @@ def ExportSingleSkeletalMesh(
 
     ApplyNeededModifierToSelect()
 
-    bfu_check_potential_error.UpdateNameHierarchy(
-        GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
-        )
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
     export_procedure = active.bfu_export_procedure
@@ -131,6 +128,10 @@ def ExportSingleSkeletalMesh(
 
     # Set rename temporarily the Armature as "Armature"
     asset_name.SetExportName()
+
+    bfu_check_potential_error.UpdateNameHierarchy(
+        GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
+        )
 
     RemoveAllConsraints(active)
     bpy.context.object.data.pose_position = 'REST'

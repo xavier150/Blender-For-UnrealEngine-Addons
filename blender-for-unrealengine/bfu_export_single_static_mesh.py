@@ -101,22 +101,23 @@ def ExportSingleStaticMesh(
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
 
-    bfu_check_potential_error.UpdateNameHierarchy(
-        GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
-        )
+
 
     ApplyExportTransform(active)
-
     absdirpath = bpy.path.abspath(dirpath)
     VerifiDirs(absdirpath)
     fullpath = os.path.join(absdirpath, filename)
     meshType = GetAssetType(active)
-
     SetSocketsExportTransform(active)
 
     RemoveDuplicatedSubObjectTempName(active)
+
     TryToApplyCustomSocketsName(active)
     asset_name.SetExportName()
+
+    bfu_check_potential_error.UpdateNameHierarchy(
+        GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
+        )
 
     bpy.ops.export_scene.fbx(
         filepath=fullpath,
