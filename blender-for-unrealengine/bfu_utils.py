@@ -714,6 +714,12 @@ def GetActionType(action):
     return "Action"
 
 
+def GetCollectionType(collection):
+    # return collection type
+
+    return "Collection StaticMesh"
+
+
 def GetIsAnimation(type):
     # return True if type(string) is a animation
     if (type == "NlAnim" or type == "Action" or type == "Pose"):

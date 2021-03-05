@@ -148,8 +148,11 @@ def WriteExportLog():
         elif (asset.asset_type == "Pose"):
             primaryInfo = "Animation (Pose)"
         else:
-            if asset.object.ExportAsLod:
-                primaryInfo = asset.asset_type+" (LOD)"
+            if asset.object:
+                if asset.object.ExportAsLod:
+                    primaryInfo = asset.asset_type+" (LOD)"
+                else:
+                    primaryInfo = asset.asset_type
             else:
                 primaryInfo = asset.asset_type
 

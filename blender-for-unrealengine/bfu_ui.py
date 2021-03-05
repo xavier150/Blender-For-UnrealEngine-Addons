@@ -1789,19 +1789,29 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
 
     asset_name: StringProperty(default="None")
     asset_type: StringProperty(default="None")  # return from GetAssetType()
+    folder_name: StringProperty(default="None")
     files: CollectionProperty(type=BFU_OT_FileExport)
     object: PointerProperty(type=bpy.types.Object)
     export_start_time: FloatProperty(default=0)
     export_end_time: FloatProperty(default=0)
     export_success: BoolProperty(default=False)
 
-    def StartAssetExport(self, obj, action=None):
+    def SetObjData(self, obj):
         self.object = obj
         self.asset_name = obj.name
-        if action:
-            self.asset_type = GetActionType(action)
-        else:
+        self.folder_name = obj.exportFolderName
+
+    def StartAssetExport(self, obj=None, action=None, collection=None):
+        if obj:
+            SetObjData(obj)
+
+        if obj:
             self.asset_type = GetAssetType(obj)
+        elif action:
+            self.asset_type = GetActionType(action)
+        elif collection:
+            self.asset_type = GetCollectionType(collection)
+
         self.export_start_time = time.perf_counter()
 
     def EndAssetExport(self, success):
