@@ -63,6 +63,8 @@ def WriteImportAssetScript():
         asset_data["name"] = asset.asset_name
         if GetIsAnimation(asset.asset_type):
             asset_data["type"] = "Animation"
+        elif asset.asset_type == "Collection StaticMesh":
+            asset_data["type"] = "StaticMesh"
         else:
             asset_data["type"] = asset.asset_type
         if asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh":
