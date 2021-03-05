@@ -1511,7 +1511,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 collectionNum = len(GetCollectionToExport(scene))
                 collectionFeedback = (
                     str(collectionNum) +
-                    " Collection(s) will be exported with this armature.")
+                    " Collection(s) will be exported.")
                 collectionPropertyInfo.label(text=collectionFeedback, icon='INFO')
                 collectionPropertyInfo.operator("object.showscenecollection")
                 layout.label(text='Note: The collection are exported like StaticMesh.')
