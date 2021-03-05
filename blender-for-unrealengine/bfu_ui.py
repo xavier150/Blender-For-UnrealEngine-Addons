@@ -1056,7 +1056,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         "name",
                         text="",
                         emboss=False,
-                        icon="GROUP")
+                        icon="OUTLINER_COLLECTION")
                     layout.prop(item, "use", text="")
                 else:
                     dataText = (
