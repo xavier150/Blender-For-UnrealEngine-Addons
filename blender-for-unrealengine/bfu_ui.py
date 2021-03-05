@@ -121,6 +121,18 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         subtype='FILE_NAME'
         )
 
+    bpy.types.Collection.exportFolderName = StringProperty(
+        name="Sub folder name",
+        description=(
+            'The name of sub folder.' +
+            ' You can now use ../ for up one directory.'
+            ),
+
+        maxlen=64,
+        default="",
+        subtype='FILE_NAME'
+        )
+
     bpy.types.Object.bfu_export_fbx_camera = BoolProperty(
         name="Export camera fbx",
         description=(
@@ -955,12 +967,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         # Common variable used for all preset values
         preset_defines = [
                             'obj = bpy.context.object',
+                            'col = bpy.context.collection',
                             'scene = bpy.context.scene'
                          ]
 
         # Properties to store in the preset
         preset_values = [
                             'obj.exportFolderName',
+                            'col.exportFolderName',
                             'obj.bfu_export_fbx_camera',
                             'obj.ExportAsAlembic',
                             'obj.ExportAsLod',
@@ -1018,6 +1032,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         preset_subdir = 'blender-for-unrealengine/global-properties-presets'
 
     class BFU_UL_CollectionExportTarget(bpy.types.UIList):
+
         def draw_item(
                 self,
                 context,
@@ -1486,6 +1501,11 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 collectionListProperty.operator(
                     "object.updatecollectionlist",
                     icon='RECOVER_LAST')
+                
+                col_name = scene.CollectionExportList[scene.active_CollectionExportList].name
+                col = bpy.data.collections[col_name]
+                col_prop = layout
+                col_prop.prop(col,'exportFolderName',icon='FILE_FOLDER')
 
                 collectionPropertyInfo = layout.row().box().split(factor=0.75)
                 collectionNum = len(GetCollectionToExport(scene))
