@@ -302,20 +302,21 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.2.8 ==
 
-- New: Change: Better UI and Optimized 
+- New: Change: Better UI and Optimized.
 - New: Auto-Rig Pro support (Needed for convert armature durring the export)
 - New: You can now choose the preview collision color.
-- New: You can set a light map res depending on the surface Area
-- New: New button for update light map res depending on the surface Area
-- New: You can now use ../ for up one directory in folder names
-- New: You can now set Socket name in object property if needed
+- New: You can set a light map res depending on the surface Area.
+- New: New button for update light map res depending on the surface Area.
+- New: You can now use ../ for up one directory in folder names.
+- New: You can now set Socket name in object property if needed.
 - New: You can now set skeleton name to use for import script (Proxy use)
 - New: You can now set directly the desired export name for each objects.
 - New: More option for action names.
 - New: Camera Sensor Width and Height are now added in additional tracks.
-- New: Cached animation to export in UI for better optimisation
-- New: Skeleton search mode for import animation with specific skeleton 
-- New: Option for export only selected object and active action
+- New: Cached animation to export in UI for better optimisation.
+- New: Skeleton search mode for import animation with specific skeleton.
+- New: Option for export only selected object and active action.
+- New: Option for export collections with Subfolder.
 - Change: New potential error: Check if the unit scale is equal to 0.01 (You can disable this potential error in addon_prefs)
 - Change: Better check and potential errors info for Armature.
 - Change: Some potential errors can have button to the documentation.
