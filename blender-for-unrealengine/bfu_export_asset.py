@@ -306,6 +306,8 @@ def ExportForUnrealEngine():
         if Asset.type == "Action" or Asset.type == "Pose":
             if Asset.obj not in action_list:
                 action_list.append(Asset.action.name)
+            if Asset.obj not in obj_list:
+                obj_list.append(Asset.obj)
 
         elif Asset.type == "Collection StaticMesh":
             if Asset.obj not in col_list:

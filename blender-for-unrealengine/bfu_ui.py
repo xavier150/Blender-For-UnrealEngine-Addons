@@ -1827,10 +1827,10 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
 
         if obj:
             self.asset_type = GetAssetType(obj)
-        elif action:
-            self.asset_type = GetActionType(action)
-        elif collection:
-            self.asset_type = GetCollectionType(collection)
+        if action:
+            self.asset_type = GetActionType(action)  # Override
+        if collection:
+            self.asset_type = GetCollectionType(collection)  # Override
 
         self.export_start_time = time.perf_counter()
 

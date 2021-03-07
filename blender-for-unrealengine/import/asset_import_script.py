@@ -111,7 +111,6 @@ def ImportAllAssets():
                 task.get_editor_property('options').set_editor_property('import_type', unreal.AlembicImportType.SKELETAL)
 
             else:
-
                 if asset_data["type"] == "Animation":
                     if OriginSkeleton:
                         task.get_editor_property('options').set_editor_property('Skeleton', OriginSkeleton)
