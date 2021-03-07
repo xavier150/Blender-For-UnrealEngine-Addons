@@ -1823,7 +1823,7 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
 
     def StartAssetExport(self, obj=None, action=None, collection=None):
         if obj:
-            SetObjData(obj)
+            self.SetObjData(obj)
 
         if obj:
             self.asset_type = GetAssetType(obj)
