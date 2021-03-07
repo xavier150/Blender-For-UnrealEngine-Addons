@@ -275,6 +275,7 @@ def ImportAllAssets():
                     asset.get_editor_property('asset_import_data').set_editor_property('vertex_color_import_option', vertex_color_import_option)
                 if "vertex_override_color" in asset_data:
                     asset.get_editor_property('asset_import_data').set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
+            if asset_data["type"] == "StaticMesh":
                 if "generate_lightmap_u_vs" in asset_data:
                     asset.get_editor_property('asset_import_data').set_editor_property('generate_lightmap_u_vs', asset_data["generate_lightmap_u_vs"])  # Import data
                     unreal.EditorStaticMeshLibrary.set_generate_lightmap_uv(asset, asset_data["generate_lightmap_u_vs"])  # Build settings at lod
