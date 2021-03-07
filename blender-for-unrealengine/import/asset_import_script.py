@@ -86,7 +86,14 @@ def ImportAllAssets():
             # New import task
             # Property
             if asset_data["type"] == "Animation":
-                OriginSkeleton = unreal.find_asset(asset_data["animation_skeleton_path"])
+                find_asset = unreal.find_asset(asset_data["animation_skeleton_path"])
+                if  isinstance(find_asset, unreal.Skeleton):
+                    OriginSkeleton = find_asset
+                elif  isinstance(find_asset, unreal.SkeletalMesh):
+                    OriginSkeleton = find_asset.skeleton
+                else:
+                    OriginSkeleton =  None
+                
 
             task = unreal.AssetImportTask()
             if asset_data["type"] == "Alembic":

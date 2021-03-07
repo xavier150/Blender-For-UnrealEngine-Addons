@@ -306,7 +306,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         name="",
         description=(
             "The full reference of the skeleton in Unreal. " +
-            "Skeleton not the skeletal mesh. (Use right clic on asset and copy reference.)"
+            "(Use right clic on asset and copy reference.)"
             ),
         default="SkeletalMesh'/Game/ImportedFbx/SK_MySketonName_Skeleton.SK_MySketonName_Skeleton'"
         )
