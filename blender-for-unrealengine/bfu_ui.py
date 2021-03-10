@@ -780,9 +780,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         def execute(self, context):
             os.system(
                 "start \"\" " +
-                "https://github.com/xavier150/" +
-                "Blender-For-UnrealEngine-Addons/blob/master/" +
-                "docs/How%20export%20assets%20from%20Blender.md"
+                "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki"
                 )
             return {'FINISHED'}
 
@@ -2126,11 +2124,8 @@ class BFU_PT_Export(bpy.types.Panel):
             def execute(self, context):
                 os.system(
                     "start \"\" " +
-                    "https://github.com/xavier150/" +
-                    "Blender-For-UnrealEngine-Addons/" +
-                    "blob/master/docs/" +
-                    "Potential%20Error%20with%20Blender%20export%20" +
-                    "to%20Unreal.md#"+self.octicon)
+                    "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/How-avoid-potential-errors" +
+                    "#"+self.octicon)
                 return {'FINISHED'}
 
         def execute(self, context):

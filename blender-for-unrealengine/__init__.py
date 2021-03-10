@@ -67,9 +67,7 @@ bl_info = {
     'blender': (2, 80, 0),
     'location': 'View3D > UI > Unreal Engine 4',
     'warning': '',
-    "wiki_url": "https://github.com/xavier150/" \
-                "Blender-For-UnrealEngine-Addons" \
-                "/blob/master/docs/How%20export%20assets%20from%20Blender.md",
+    "wiki_url": "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki",
     'tracker_url': 'https://github.com/xavier150/Blender-For-UnrealEngine-Addons/issues',
     'support': 'COMMUNITY',
     'category': 'Import-Export'}
