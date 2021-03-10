@@ -774,7 +774,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
     class BFU_OT_OpenDocumentationPage(Operator):
         bl_label = "Documentation"
-        bl_idname = "object.open_documentation_page"
+        bl_idname = "object.bfu_open_documentation_page"
         bl_description = "Clic for open documentation page on GitHub"
 
         def execute(self, context):
@@ -1135,7 +1135,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
         credit_box = layout.box()
         credit_box.label(text=ti('intro')+' Version: '+str(version))
-        credit_box.operator("object.open_documentation_page", icon="HELP")
+        credit_box.operator("object.bfu_open_documentation_page", icon="HELP")
 
         row = layout.row(align=True)
         row.menu(
