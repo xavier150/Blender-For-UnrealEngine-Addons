@@ -43,5 +43,5 @@ If you would like to have the Add-on enabled every time you start Blender, click
 [Download and installation](#download-and-installation)
 
 # Other
-About the next version: [Trello](https://trello.com/b/32g729kg/blender-for-unreal-engine-addon) </br>
-If you want support me you can buy the addon on [gumroad](https://gumroad.com/l/blenderforunreal) or [blendermarket](https://blendermarket.com/products/blender-for-unreal-engine)
+About the next versions: [Trello page](https://trello.com/b/32g729kg/blender-for-unreal-engine-addon) </br>
+If you want support: [Support page](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Support) <3
