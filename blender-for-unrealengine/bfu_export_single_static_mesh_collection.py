@@ -48,8 +48,39 @@ from .bfu_export_single_static_mesh import *
 from . import bfu_check_potential_error
 
 
+def ProcessCollectionExport(col):
+
+    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    dirpath = GetCollectionExportDir(bpy.data.collections[col])
+    absdirpath = bpy.path.abspath(dirpath)
+    scene = bpy.context.scene
+
+    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset.StartAssetExport(collection=col)
+
+    obj = ExportSingleStaticMeshCollection(dirpath, GetCollectionExportFileName(col), col)
+
+    MyAsset.SetObjData(obj)
+
+    file = MyAsset.files.add()
+    file.name = GetCollectionExportFileName(col)
+    file.path = dirpath
+    file.type = "FBX"
+
+    if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
+
+        ExportSingleAdditionalParameterMesh(absdirpath, GetCollectionExportFileName(col, "_AdditionalTrack.json"), obj)
+        file = MyAsset.files.add()
+        file.name = GetCollectionExportFileName(col, "_AdditionalTrack.json")
+        file.path = dirpath
+        file.type = "AdditionalTrack"
+
+    CleanSingleStaticMeshCollection(obj)
+    MyAsset.EndAssetExport(True)
+    return MyAsset
+
+
 def ExportSingleStaticMeshCollection(
-        originalScene,
         dirpath,
         filename,
         collectionName
@@ -60,13 +91,19 @@ def ExportSingleStaticMeshCollection(
             #COLLECTION
     #####################################################
     '''
+    collection = bpy.data.collections[collectionName]
+
     # create collection and export it
     obj = bpy.data.objects.new("EmptyCollectionForUnrealExport_Temp", None)
     bpy.context.scene.collection.objects.link(obj)
     obj.instance_type = 'COLLECTION'
-    obj.instance_collection = bpy.data.collections[collectionName]
-    ExportSingleStaticMesh(originalScene, dirpath, filename, obj)
+    obj.instance_collection = collection
+    ExportSingleStaticMesh(dirpath, filename, obj)
+    obj.exportFolderName = collection.exportFolderName
+    return obj
 
+
+def CleanSingleStaticMeshCollection(obj):
     # Remove the created collection
     SelectSpecificObject(obj)
     CleanDeleteObjects(bpy.context.selected_objects)

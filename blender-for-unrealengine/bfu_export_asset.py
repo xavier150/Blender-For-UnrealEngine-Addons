@@ -160,13 +160,15 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
     if scene.static_collection_export:
         for col in GetCollectionToExport(scene):
             if col in targetcollection:
-                # StaticMesh collection
-                ExportSingleStaticMeshCollection(
-                    scene,
-                    GetCollectionExportDir(),
-                    GetCollectionExportFileName(col),
-                    col
-                )
+                # Save current start/end frame
+                UserStartFrame = scene.frame_start
+                UserEndFrame = scene.frame_end
+
+                ProcessCollectionExport(col)
+
+                # Resets previous start/end frame
+                scene.frame_start = UserStartFrame
+                scene.frame_end = UserEndFrame
                 UpdateProgress()
 
     # Export assets
@@ -296,13 +298,21 @@ def ExportForUnrealEngine():
         RemoveFolderTree(bpy.path.abspath(scene.export_camera_file_path))
         RemoveFolderTree(bpy.path.abspath(scene.export_other_file_path))
 
-    obj_list = []  # Do a simple list of objects to export
-    action_list = []  # Do a simple list of objects to export
+    obj_list = []  # Do a simple list of Objects to export
+    action_list = []  # Do a simple list of Action to export
+    col_list = []  # Do a simple list of Collection to export
     AssetToExport = GetFinalAssetToExport()
     for Asset in AssetToExport:
         if Asset.type == "Action" or Asset.type == "Pose":
             if Asset.obj not in action_list:
                 action_list.append(Asset.action.name)
+            if Asset.obj not in obj_list:
+                obj_list.append(Asset.obj)
+
+        elif Asset.type == "Collection StaticMesh":
+            if Asset.obj not in col_list:
+                col_list.append(Asset.obj)
+
         else:
             if Asset.obj not in obj_list:
                 obj_list.append(Asset.obj)
@@ -310,7 +320,7 @@ def ExportForUnrealEngine():
     ExportAllAssetByList(
         targetobjects=obj_list,
         targetActionName=action_list,
-        targetcollection=MyCurrentDataSave.collection_names,
+        targetcollection=col_list,
     )
 
     MyCurrentDataSave.ResetSelectByName()

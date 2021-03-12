@@ -148,8 +148,11 @@ def WriteExportLog():
         elif (asset.asset_type == "Pose"):
             primaryInfo = "Animation (Pose)"
         else:
-            if asset.object.ExportAsLod:
-                primaryInfo = asset.asset_type+" (LOD)"
+            if asset.object:
+                if asset.object.ExportAsLod:
+                    primaryInfo = asset.asset_type+" (LOD)"
+                else:
+                    primaryInfo = asset.asset_type
             else:
                 primaryInfo = asset.asset_type
 
@@ -363,9 +366,10 @@ def WriteCameraAnimationTracks(obj):
 
                 # Write Aperture (Depth of Field) keys
                 if scene.render.engine == "BLENDER_EEVEE" or scene.render.engine == "CYCLES" or scene.render.engine == "BLENDER_WORKBENCH":
-                    self.aperture_fstop[frame] = getOneKeysByFcurves(camera, "dof.aperture_fstop", camera.data.dof.aperture_fstop, frame)
+                    key = getOneKeysByFcurves(camera, "dof.aperture_fstop", camera.data.dof.aperture_fstop, frame)
+                    self.aperture_fstop[frame] = key / bpy.context.scene.unit_settings.scale_length
                 else:
-                    self.aperture_fstop[frame] = 21  # 21 is default value in ue4
+                    self.aperture_fstop[frame] = 2.8  # 2.8 is default value in ue4
 
                 boolKey = getOneKeysByFcurves(camera, "hide_viewport", camera.hide_viewport, frame, False)
                 self.hide_viewport[frame] = (boolKey < 1)  # Inversed for convert hide to spawn

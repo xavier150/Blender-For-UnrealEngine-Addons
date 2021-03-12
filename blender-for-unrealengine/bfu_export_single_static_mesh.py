@@ -53,7 +53,7 @@ def ProcessStaticMeshExport(obj):
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.StartAssetExport(obj)
 
-    ExportSingleStaticMesh(scene, dirpath, GetObjExportFileName(obj), obj)
+    ExportSingleStaticMesh(dirpath, GetObjExportFileName(obj), obj)
     file = MyAsset.files.add()
     file.name = GetObjExportFileName(obj)
     file.path = dirpath
@@ -72,7 +72,6 @@ def ProcessStaticMeshExport(obj):
 
 
 def ExportSingleStaticMesh(
-        originalScene,
         dirpath,
         filename,
         obj

@@ -220,9 +220,8 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         def execute(self, context):
             os.system(
                 "start \"\" " +
-                "https://github.com/xavier150/" +
-                "Blender-For-UnrealEngine-Addons/blob/master/docs/" +
-                "How%20export%20assets%20from%20Blender.md"+self.octicon
+                "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/How-export-assets" +
+                "#"+self.octicon
                 )
             return {'FINISHED'}
 
@@ -270,7 +269,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         LabelWithDocButton(
             rootBone,
             "SKELETON & ROOT BONE",
-            "#skeleton--root-bone"
+            "skeleton--root-bone"
             )
         rootBone.prop(self, "removeSkeletonRootBone")
         rootBoneName = rootBone.column()
@@ -296,7 +295,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         data = boxColumn.box()
         data.label(text='DATA')
         data.prop(self, "ignoreNLAForAction")
-        PropWithDocButton(data, "correctExtremUVScale", "#uv")
+        PropWithDocButton(data, "correctExtremUVScale", "uv")
         data.prop(self, "bakeArmatureAction")
         data.prop(self, "exportWithCustomProps")
         data.prop(self, "exportWithMetaData")

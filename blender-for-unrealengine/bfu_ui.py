@@ -121,6 +121,18 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         subtype='FILE_NAME'
         )
 
+    bpy.types.Collection.exportFolderName = StringProperty(
+        name="Sub folder name",
+        description=(
+            'The name of sub folder.' +
+            ' You can now use ../ for up one directory.'
+            ),
+
+        maxlen=64,
+        default="",
+        subtype='FILE_NAME'
+        )
+
     bpy.types.Object.bfu_export_fbx_camera = BoolProperty(
         name="Export camera fbx",
         description=(
@@ -294,7 +306,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         name="",
         description=(
             "The full reference of the skeleton in Unreal. " +
-            "Skeleton not the skeletal mesh. (Use right clic on asset and copy reference.)"
+            "(Use right clic on asset and copy reference.)"
             ),
         default="SkeletalMesh'/Game/ImportedFbx/SK_MySketonName_Skeleton.SK_MySketonName_Skeleton'"
         )
@@ -762,15 +774,13 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
     class BFU_OT_OpenDocumentationPage(Operator):
         bl_label = "Documentation"
-        bl_idname = "object.open_documentation_page"
+        bl_idname = "object.bfu_open_documentation_page"
         bl_description = "Clic for open documentation page on GitHub"
 
         def execute(self, context):
             os.system(
                 "start \"\" " +
-                "https://github.com/xavier150/" +
-                "Blender-For-UnrealEngine-Addons/blob/master/" +
-                "docs/How%20export%20assets%20from%20Blender.md"
+                "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki"
                 )
             return {'FINISHED'}
 
@@ -955,12 +965,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         # Common variable used for all preset values
         preset_defines = [
                             'obj = bpy.context.object',
+                            'col = bpy.context.collection',
                             'scene = bpy.context.scene'
                          ]
 
         # Properties to store in the preset
         preset_values = [
                             'obj.exportFolderName',
+                            'col.exportFolderName',
                             'obj.bfu_export_fbx_camera',
                             'obj.ExportAsAlembic',
                             'obj.ExportAsLod',
@@ -1018,6 +1030,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         preset_subdir = 'blender-for-unrealengine/global-properties-presets'
 
     class BFU_UL_CollectionExportTarget(bpy.types.UIList):
+
         def draw_item(
                 self,
                 context,
@@ -1041,7 +1054,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         "name",
                         text="",
                         emboss=False,
-                        icon="GROUP")
+                        icon="OUTLINER_COLLECTION")
                     layout.prop(item, "use", text="")
                 else:
                     dataText = (
@@ -1122,7 +1135,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
         credit_box = layout.box()
         credit_box.label(text=ti('intro')+' Version: '+str(version))
-        credit_box.operator("object.open_documentation_page", icon="HELP")
+        credit_box.operator("object.bfu_open_documentation_page", icon="HELP")
 
         row = layout.row(align=True)
         row.menu(
@@ -1487,11 +1500,16 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     "object.updatecollectionlist",
                     icon='RECOVER_LAST')
 
+                col_name = scene.CollectionExportList[scene.active_CollectionExportList].name
+                col = bpy.data.collections[col_name]
+                col_prop = layout
+                col_prop.prop(col, 'exportFolderName', icon='FILE_FOLDER')
+
                 collectionPropertyInfo = layout.row().box().split(factor=0.75)
                 collectionNum = len(GetCollectionToExport(scene))
                 collectionFeedback = (
                     str(collectionNum) +
-                    " Collection(s) will be exported with this armature.")
+                    " Collection(s) will be exported.")
                 collectionPropertyInfo.label(text=collectionFeedback, icon='INFO')
                 collectionPropertyInfo.operator("object.showscenecollection")
                 layout.label(text='Note: The collection are exported like StaticMesh.')
@@ -1789,19 +1807,29 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
 
     asset_name: StringProperty(default="None")
     asset_type: StringProperty(default="None")  # return from GetAssetType()
+    folder_name: StringProperty(default="None")
     files: CollectionProperty(type=BFU_OT_FileExport)
     object: PointerProperty(type=bpy.types.Object)
     export_start_time: FloatProperty(default=0)
     export_end_time: FloatProperty(default=0)
     export_success: BoolProperty(default=False)
 
-    def StartAssetExport(self, obj, action=None):
+    def SetObjData(self, obj):
         self.object = obj
         self.asset_name = obj.name
-        if action:
-            self.asset_type = GetActionType(action)
-        else:
+        self.folder_name = obj.exportFolderName
+
+    def StartAssetExport(self, obj=None, action=None, collection=None):
+        if obj:
+            self.SetObjData(obj)
+
+        if obj:
             self.asset_type = GetAssetType(obj)
+        if action:
+            self.asset_type = GetActionType(action)  # Override
+        if collection:
+            self.asset_type = GetCollectionType(collection)  # Override
+
         self.export_start_time = time.perf_counter()
 
     def EndAssetExport(self, success):
@@ -2096,11 +2124,8 @@ class BFU_PT_Export(bpy.types.Panel):
             def execute(self, context):
                 os.system(
                     "start \"\" " +
-                    "https://github.com/xavier150/" +
-                    "Blender-For-UnrealEngine-Addons/" +
-                    "blob/master/docs/" +
-                    "Potential%20Error%20with%20Blender%20export%20" +
-                    "to%20Unreal.md#"+self.octicon)
+                    "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/How-avoid-potential-errors" +
+                    "#"+self.octicon)
                 return {'FINISHED'}
 
         def execute(self, context):

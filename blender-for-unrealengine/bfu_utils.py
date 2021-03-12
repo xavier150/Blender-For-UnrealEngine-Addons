@@ -714,6 +714,12 @@ def GetActionType(action):
     return "Action"
 
 
+def GetCollectionType(collection):
+    # return collection type
+
+    return "Collection StaticMesh"
+
+
 def GetIsAnimation(type):
     # return True if type(string) is a animation
     if (type == "NlAnim" or type == "Action" or type == "Pose"):
@@ -1128,14 +1134,18 @@ def ValidUnrealAssetename(filename):
     return filename
 
 
-def GetCollectionExportDir(abspath=False):
+def GetCollectionExportDir(col, abspath=False):
     # Generate assset folder path
     scene = bpy.context.scene
+
+    dirpath = os.path.join(
+        scene.export_static_file_path,
+        col.exportFolderName)
 
     if abspath:
         return bpy.path.abspath(dirpath)
     else:
-        return os.path.join(scene.export_static_file_path, "")
+        return dirpath
 
 
 def GetObjExportName(obj):

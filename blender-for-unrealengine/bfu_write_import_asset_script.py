@@ -60,9 +60,11 @@ def WriteImportAssetScript():
     data['assets'] = []
     for asset in scene.UnrealExportedAssetsList:
         asset_data = {}
-        asset_data["name"] = asset.object.name
+        asset_data["name"] = asset.asset_name
         if GetIsAnimation(asset.asset_type):
             asset_data["type"] = "Animation"
+        elif asset.asset_type == "Collection StaticMesh":
+            asset_data["type"] = "StaticMesh"
         else:
             asset_data["type"] = asset.asset_type
         if asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh":
@@ -72,9 +74,9 @@ def WriteImportAssetScript():
                 asset_data["lod"] = 0
 
         if GetIsAnimation(asset.asset_type):
-            relative_import_path = os.path.join(asset.object.exportFolderName, scene.anim_subfolder_name)
+            relative_import_path = os.path.join(asset.folder_name, scene.anim_subfolder_name)
         else:
-            relative_import_path = asset.object.exportFolderName
+            relative_import_path = asset.folder_name
 
         asset_data["full_import_path"] = "/Game/" + os.path.join(scene.unreal_import_location, relative_import_path).replace('\\', '/').rstrip('/')
 
@@ -95,15 +97,15 @@ def WriteImportAssetScript():
 
         if GetIsAnimation(asset.asset_type):
             if(asset.object.bfu_skeleton_search_mode) == "auto":
-                customName = scene.skeletal_prefix_export_name+ValidUnrealAssetename(asset.object.name)+"_Skeleton"
+                customName = scene.skeletal_prefix_export_name+ValidUnrealAssetename(asset.asset_name)+"_Skeleton"
                 SkeletonName = customName+"."+customName
-                SkeletonLoc = os.path.join(asset.object.exportFolderName, SkeletonName)
+                SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
                 asset_data["animation_skeleton_path"] = os.path.join("/Game/", scene.unreal_import_location, SkeletonLoc).replace('\\', '/')
 
             elif(asset.object.bfu_skeleton_search_mode) == "custom_name":
                 customName = ValidUnrealAssetename(asset.object.bfu_target_skeleton_custom_name)
                 SkeletonName = customName+"."+customName
-                SkeletonLoc = os.path.join(asset.object.exportFolderName, SkeletonName)
+                SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
                 asset_data["animation_skeleton_path"] = os.path.join("/Game/", scene.unreal_import_location, SkeletonLoc).replace('\\', '/')
 
             elif(asset.object.bfu_skeleton_search_mode) == "custom_path_name":
@@ -115,26 +117,27 @@ def WriteImportAssetScript():
             elif(asset.object.bfu_skeleton_search_mode) == "custom_reference":
                 asset_data["animation_skeleton_path"] = asset.object.bfu_target_skeleton_custom_ref.replace('\\', '/')
 
-        asset_data["create_physics_asset"] = asset.object.CreatePhysicsAsset
-        asset_data["material_search_location"] = asset.object.MaterialSearchLocation
+        if asset.object:
+            asset_data["create_physics_asset"] = asset.object.CreatePhysicsAsset
+            asset_data["material_search_location"] = asset.object.MaterialSearchLocation
 
-        asset_data["auto_generate_collision"] = asset.object.AutoGenerateCollision
-        if (asset.object.UseStaticMeshLODGroup):
-            asset_data["static_mesh_lod_group"] = asset.object.StaticMeshLODGroup
-        else:
-            asset_data["static_mesh_lod_group"] = None
-        asset_data["generate_lightmap_u_vs"] = asset.object.GenerateLightmapUVs
+            asset_data["auto_generate_collision"] = asset.object.AutoGenerateCollision
+            if (asset.object.UseStaticMeshLODGroup):
+                asset_data["static_mesh_lod_group"] = asset.object.StaticMeshLODGroup
+            else:
+                asset_data["static_mesh_lod_group"] = None
+            asset_data["generate_lightmap_u_vs"] = asset.object.GenerateLightmapUVs
 
-        asset_data["custom_light_map_resolution"] = ExportCompuntedLightMapValue(asset.object)
-        asset_data["light_map_resolution"] = GetCompuntedLightMap(asset.object)
-        asset_data["collision_trace_flag"] = asset.object.CollisionTraceFlag
-        asset_data["vertex_color_import_option"] = asset.object.VertexColorImportOption
-        vertex_override_color = (
-            asset.object.VertexOverrideColor[0],  # R
-            asset.object.VertexOverrideColor[1],  # G
-            asset.object.VertexOverrideColor[2]  # B
-          )  # Color to Json
-        asset_data["vertex_override_color"] = vertex_override_color
+            asset_data["custom_light_map_resolution"] = ExportCompuntedLightMapValue(asset.object)
+            asset_data["light_map_resolution"] = GetCompuntedLightMap(asset.object)
+            asset_data["collision_trace_flag"] = asset.object.CollisionTraceFlag
+            asset_data["vertex_color_import_option"] = asset.object.VertexColorImportOption
+            vertex_override_color = (
+                asset.object.VertexOverrideColor[0],  # R
+                asset.object.VertexOverrideColor[1],  # G
+                asset.object.VertexOverrideColor[2]  # B
+            )  # Color to Json
+            asset_data["vertex_override_color"] = vertex_override_color
         data['assets'].append(asset_data)
 
     return data

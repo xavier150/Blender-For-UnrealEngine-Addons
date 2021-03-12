@@ -236,6 +236,8 @@ def VerifiDirs(directory):
 
     if not os.path.exists(directory):
         os.makedirs(directory)
+        return True
+    return False
 
 
 def ValidFilename(filename):
