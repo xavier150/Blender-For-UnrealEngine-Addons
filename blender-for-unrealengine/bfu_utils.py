@@ -914,7 +914,10 @@ def ApplyExportTransform(obj):
     AddMat = mat_loc @ mat_rot.to_4x4()
 
     obj.matrix_world = newMatrix @ AddMat
-    obj.scale = saveScale
+    if obj.type == "ARMATURE":
+        obj.scale = (1.0, 1.0, 1.0) #That remove some errors
+    else:
+        obj.scale = saveScale
 
 
 def ApplySkeletalExportScale(armature, rescale):
