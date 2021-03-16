@@ -988,7 +988,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.bfu_target_skeleton_custom_path',
                             'obj.bfu_target_skeleton_custom_name',
                             'obj.bfu_target_skeleton_custom_ref',
-                            'obj.TargetCustomSkeletonName',
                             'obj.UseStaticMeshLODGroup',
                             'obj.StaticMeshLODGroup',
                             'obj.StaticMeshLightMapEnum',
