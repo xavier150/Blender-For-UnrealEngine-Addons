@@ -2427,8 +2427,8 @@ class BFU_PT_Export(bpy.types.Panel):
             text='',
             icon='REMOVE').remove_active = True
 
-        bfu_ui_utils.LayoutSection(layout, "bfu_nomencalture_properties_expanded", "Nomencalture")
-        if scene.bfu_nomencalture_properties_expanded:
+        bfu_ui_utils.LayoutSection(layout, "bfu_nomenclature_properties_expanded", "Nomenclature")
+        if scene.bfu_nomenclature_properties_expanded:
 
             # Prefix
             propsPrefix = self.layout.row()

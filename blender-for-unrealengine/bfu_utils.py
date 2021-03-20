@@ -554,7 +554,6 @@ def GetCachedExportAutoActionList(obj):
             if action.library is None:
                 if GetIfActionIsAssociated(action, objBoneNames):
                     actions.append(action)
-
         # Update the cache
         MyCachedActions.StoreActions(obj, actions)
     return actions
