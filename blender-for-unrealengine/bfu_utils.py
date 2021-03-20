@@ -1083,23 +1083,20 @@ def GetFinalAssetToExport():
                         "NlAnim"))
 
             for action in GetActionToExport(obj):
-                # Action
-                if scene.anin_export:
-                    if GetActionType(action) == "Action":
-                        if scene.bfu_export_filter == "only_object_action":
-                            if obj.animation_data:
-                                if obj.animation_data.action == action:
-                                    TargetAssetToExport.append(AssetToExport(obj, action, "Action"))
-                        else:
+                if scene.bfu_export_filter == "only_object_action":
+                    if obj.animation_data:
+                        if obj.animation_data.action == action:
+                            TargetAssetToExport.append(AssetToExport(obj, action, "Action"))
+                else:
+                    # Action
+                    if scene.anin_export:
+                        if GetActionType(action) == "Action":
                             TargetAssetToExport.append(AssetToExport(obj, action, "Action"))
 
-                # Pose
-                if scene.anin_export:
-                    if GetActionType(action) == "Pose":
-                        TargetAssetToExport.append(AssetToExport(
-                            obj,
-                            action,
-                            "Pose"))
+                    # Pose
+                    if scene.anin_export:
+                        if GetActionType(action) == "Pose":
+                            TargetAssetToExport.append(AssetToExport(obj, action, "Pose"))
         # Camera
         if GetAssetType(obj) == "Camera" and scene.camera_export:
             TargetAssetToExport.append(AssetToExport(
