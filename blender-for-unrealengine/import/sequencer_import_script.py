@@ -276,9 +276,9 @@ def CreateSequencer():
     return 'Sequencer created with success !'
 
 
-print("Start")
+print("Start importing sequencer.")
 
 if CheckTasks():
     print(CreateSequencer())
 
-print("End")
+print("Importing sequencer finished.")
