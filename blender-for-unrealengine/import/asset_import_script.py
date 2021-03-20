@@ -387,9 +387,9 @@ def ImportAllAssets():
         return 'Assets imported with success !'
 
 
-print("Start")
+print("Start importing assets.")
 
 if CheckTasks():
     print(ImportAllAssets())
 
-print("End")
+print("Importing assets finished.")
