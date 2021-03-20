@@ -1826,6 +1826,8 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
             self.asset_type = GetAssetType(obj)
         if action:
             self.asset_type = GetActionType(action)  # Override
+        if obj and action:
+            self.asset_name = GetActionExportFileName(obj, action, "")
         if collection:
             self.asset_type = GetCollectionType(collection)  # Override
 

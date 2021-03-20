@@ -82,6 +82,7 @@ def WriteImportAssetScript():
 
         if asset.GetFileByType("FBX"):
             asset_data["fbx_path"] = asset.GetFileByType("FBX").GetAbsolutePath()
+            asset_data["asset_filename"] = asset.GetFileByType("FBX").GetAbsolutePath()
         else:
             asset_data["fbx_path"] = None
 
