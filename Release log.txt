@@ -357,3 +357,5 @@ It is now possible to force the duration of an animation according to the scene 
 == Rev 0.2.8.1 ==
 
 - Fixed: Do a new preset do a script error.
+- Change: The skeletal mesh are exported with scale at 1.0.
+- Fixed: Export filter "Only select and active action" don't work with poses.
