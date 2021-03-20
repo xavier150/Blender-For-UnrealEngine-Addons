@@ -499,20 +499,19 @@ class CachedAction():
     def CheckCache(self, obj):
         # Check if the cache need update
         if self.name != obj.name:
-            MyCachedActions.is_cached = False
+            self.is_cached = False
         if len(bpy.data.actions) != self.total_action_len:
-            MyCachedActions.is_cached = False
+            self.is_cached = False
         if len(obj.data.bones) != self.total_bone_len:
-            MyCachedActions.is_cached = False
-        for action in self.stored_actions:
-            if action not in bpy.data.actions:
-                MyCachedActions.is_cached = False
+            self.is_cached = False
+        for action_name in self.stored_actions:
+            if action_name not in bpy.data.actions:
+                self.is_cached = False
 
-        return MyCachedActions.is_cached
+        return self.is_cached
 
     def StoreActions(self, obj, actions):
         # Update new cache
-        self.is_cached = True
         self.name = obj.name
         action_name_list = []
         for action in actions:
@@ -520,6 +519,8 @@ class CachedAction():
         self.stored_actions = action_name_list
         self.total_action_len = len(bpy.data.actions)
         self.total_bone_len = len(obj.data.bones)
+        self.is_cached = True
+        print("Stored action cache updated.")
 
     def GetStoredActions(self):
         actions = []
