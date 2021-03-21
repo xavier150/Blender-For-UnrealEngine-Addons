@@ -584,15 +584,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.StartFramesOffset = IntProperty(
         name="Offset at start frame",
         description="Offset for the start frame.",
-        default=1
+        default=0
     )
 
     bpy.types.Object.EndFramesOffset = IntProperty(
         name="Offset at end frame",
         description=(
             "Offset for the end frame. +1" +
-            " is recommended for the sequences, 0 is recommended" +
-            " for UnrealEngine cycles, -1 is recommended for Sketchfab cycles"
+            " is recommended for the sequences | 0 is recommended" +
+            " for UnrealEngine cycles | -1 is recommended for Sketchfab cycles"
             ),
         default=0
     )
@@ -659,7 +659,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 'Include custom name in animation export file name.' +
                 ' Exemple: "Anim_MyCustomName_MyAction"'),
             ],
-        default='include_armature_name'
+        default='action_name'
         )
 
     bpy.types.Object.bfu_anim_naming_custom = StringProperty(
