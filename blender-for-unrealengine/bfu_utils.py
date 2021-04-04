@@ -543,14 +543,21 @@ class CachedAction():
 
 MyCachedActions = CachedAction()
 
+def UpdateActionCache(obj):
+    # Force update cache export auto action list
+    return GetCachedExportAutoActionList(obj, True)
 
-def GetCachedExportAutoActionList(obj):
+
+def GetCachedExportAutoActionList(obj, force_update_cache=False):
     # This will cheak if the action contains
     # the same bones of the armature
 
     actions = []
 
     # Use the cache
+    if force_update_cache:
+        MyCachedActions.is_cached = False
+
     if MyCachedActions.CheckCache(obj):
         actions = MyCachedActions.GetStoredActions()
 

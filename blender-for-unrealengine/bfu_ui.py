@@ -892,6 +892,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
         def execute(self, context):
             obj = context.object
+            UpdateActionCache(obj)
             animation_to_export = GetActionToExport(obj)
 
             popup_title = "Action list"
@@ -2014,6 +2015,7 @@ class BFU_PT_Export(bpy.types.Panel):
 
         def execute(self, context):
             obj = context.object
+            UpdateActionCache(obj)
             assets = GetFinalAssetToExport()
             popup_title = "Assets list"
             if len(assets) > 0:
