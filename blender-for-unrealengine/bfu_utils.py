@@ -489,20 +489,26 @@ class CachedAction():
     So I use simple python var
     '''
 
+    class ActionFromCache():
+        #Info about actions from last cache.
+            def __init__(self, action):
+                self.total_action_fcurves_len = len(action.fcurves)
+
+
     def __init__(self):
         self.name = ""
         self.is_cached = False
         self.stored_actions = []
-        self.total_action_len = 0
-        self.total_bone_len = 0
+        self.total_actions =[]
+        self.total_rig_bone_len = 0
 
     def CheckCache(self, obj):
         # Check if the cache need update
         if self.name != obj.name:
             self.is_cached = False
-        if len(bpy.data.actions) != self.total_action_len:
+        if len(bpy.data.actions) != len(self.total_actions):
             self.is_cached = False
-        if len(obj.data.bones) != self.total_bone_len:
+        if len(obj.data.bones) != self.total_rig_bone_len:
             self.is_cached = False
         for action_name in self.stored_actions:
             if action_name not in bpy.data.actions:
@@ -517,8 +523,10 @@ class CachedAction():
         for action in actions:
             action_name_list.append(action.name)
         self.stored_actions = action_name_list
-        self.total_action_len = len(bpy.data.actions)
-        self.total_bone_len = len(obj.data.bones)
+        self.total_actions.clear()
+        for action in bpy.data.actions:
+            self.total_actions.append(self.ActionFromCache(action))
+        self.total_rig_bone_len = len(obj.data.bones)
         self.is_cached = True
         print("Stored action cache updated.")
 
