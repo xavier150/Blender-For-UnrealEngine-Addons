@@ -489,37 +489,46 @@ class CachedAction():
     So I use simple python var
     '''
 
+    class ActionFromCache():
+        #Info about actions from last cache.
+            def __init__(self, action):
+                self.total_action_fcurves_len = len(action.fcurves)
+
+
     def __init__(self):
         self.name = ""
         self.is_cached = False
         self.stored_actions = []
-        self.total_action_len = 0
-        self.total_bone_len = 0
+        self.total_actions =[]
+        self.total_rig_bone_len = 0
 
     def CheckCache(self, obj):
         # Check if the cache need update
         if self.name != obj.name:
-            MyCachedActions.is_cached = False
-        if len(bpy.data.actions) != self.total_action_len:
-            MyCachedActions.is_cached = False
-        if len(obj.data.bones) != self.total_bone_len:
-            MyCachedActions.is_cached = False
-        for action in self.stored_actions:
-            if action not in bpy.data.actions:
-                MyCachedActions.is_cached = False
+            self.is_cached = False
+        if len(bpy.data.actions) != len(self.total_actions):
+            self.is_cached = False
+        if len(obj.data.bones) != self.total_rig_bone_len:
+            self.is_cached = False
+        for action_name in self.stored_actions:
+            if action_name not in bpy.data.actions:
+                self.is_cached = False
 
-        return MyCachedActions.is_cached
+        return self.is_cached
 
     def StoreActions(self, obj, actions):
         # Update new cache
-        self.is_cached = True
         self.name = obj.name
         action_name_list = []
         for action in actions:
             action_name_list.append(action.name)
         self.stored_actions = action_name_list
-        self.total_action_len = len(bpy.data.actions)
-        self.total_bone_len = len(obj.data.bones)
+        self.total_actions.clear()
+        for action in bpy.data.actions:
+            self.total_actions.append(self.ActionFromCache(action))
+        self.total_rig_bone_len = len(obj.data.bones)
+        self.is_cached = True
+        print("Stored action cache updated.")
 
     def GetStoredActions(self):
         actions = []
@@ -534,14 +543,21 @@ class CachedAction():
 
 MyCachedActions = CachedAction()
 
+def UpdateActionCache(obj):
+    # Force update cache export auto action list
+    return GetCachedExportAutoActionList(obj, True)
 
-def GetCachedExportAutoActionList(obj):
+
+def GetCachedExportAutoActionList(obj, force_update_cache=False):
     # This will cheak if the action contains
     # the same bones of the armature
 
     actions = []
 
     # Use the cache
+    if force_update_cache:
+        MyCachedActions.is_cached = False
+
     if MyCachedActions.CheckCache(obj):
         actions = MyCachedActions.GetStoredActions()
 
@@ -553,7 +569,6 @@ def GetCachedExportAutoActionList(obj):
             if action.library is None:
                 if GetIfActionIsAssociated(action, objBoneNames):
                     actions.append(action)
-
         # Update the cache
         MyCachedActions.StoreActions(obj, actions)
     return actions
@@ -914,7 +929,10 @@ def ApplyExportTransform(obj):
     AddMat = mat_loc @ mat_rot.to_4x4()
 
     obj.matrix_world = newMatrix @ AddMat
-    obj.scale = saveScale
+    if obj.type == "ARMATURE":
+        obj.scale = (1.0, 1.0, 1.0) #That remove some errors
+    else:
+        obj.scale = saveScale
 
 
 def ApplySkeletalExportScale(armature, rescale):
@@ -1080,23 +1098,20 @@ def GetFinalAssetToExport():
                         "NlAnim"))
 
             for action in GetActionToExport(obj):
-                # Action
-                if scene.anin_export:
-                    if GetActionType(action) == "Action":
-                        if scene.bfu_export_filter == "only_object_action":
-                            if obj.animation_data:
-                                if obj.animation_data.action == action:
-                                    TargetAssetToExport.append(AssetToExport(obj, action, "Action"))
-                        else:
+                if scene.bfu_export_filter == "only_object_action":
+                    if obj.animation_data:
+                        if obj.animation_data.action == action:
+                            TargetAssetToExport.append(AssetToExport(obj, action, "Action"))
+                else:
+                    # Action
+                    if scene.anin_export:
+                        if GetActionType(action) == "Action":
                             TargetAssetToExport.append(AssetToExport(obj, action, "Action"))
 
-                # Pose
-                if scene.anin_export:
-                    if GetActionType(action) == "Pose":
-                        TargetAssetToExport.append(AssetToExport(
-                            obj,
-                            action,
-                            "Pose"))
+                    # Pose
+                    if scene.anin_export:
+                        if GetActionType(action) == "Pose":
+                            TargetAssetToExport.append(AssetToExport(obj, action, "Pose"))
         # Camera
         if GetAssetType(obj) == "Camera" and scene.camera_export:
             TargetAssetToExport.append(AssetToExport(

@@ -584,15 +584,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.StartFramesOffset = IntProperty(
         name="Offset at start frame",
         description="Offset for the start frame.",
-        default=1
+        default=0
     )
 
     bpy.types.Object.EndFramesOffset = IntProperty(
         name="Offset at end frame",
         description=(
             "Offset for the end frame. +1" +
-            " is recommended for the sequences, 0 is recommended" +
-            " for UnrealEngine cycles, -1 is recommended for Sketchfab cycles"
+            " is recommended for the sequences | 0 is recommended" +
+            " for UnrealEngine cycles | -1 is recommended for Sketchfab cycles"
             ),
         default=0
     )
@@ -659,7 +659,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 'Include custom name in animation export file name.' +
                 ' Exemple: "Anim_MyCustomName_MyAction"'),
             ],
-        default='include_armature_name'
+        default='action_name'
         )
 
     bpy.types.Object.bfu_anim_naming_custom = StringProperty(
@@ -892,6 +892,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
         def execute(self, context):
             obj = context.object
+            UpdateActionCache(obj)
             animation_to_export = GetActionToExport(obj)
 
             popup_title = "Action list"
@@ -988,7 +989,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.bfu_target_skeleton_custom_path',
                             'obj.bfu_target_skeleton_custom_name',
                             'obj.bfu_target_skeleton_custom_ref',
-                            'obj.TargetCustomSkeletonName',
                             'obj.UseStaticMeshLODGroup',
                             'obj.StaticMeshLODGroup',
                             'obj.StaticMeshLightMapEnum',
@@ -1827,6 +1827,8 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
             self.asset_type = GetAssetType(obj)
         if action:
             self.asset_type = GetActionType(action)  # Override
+        if obj and action:
+            self.asset_name = GetActionExportFileName(obj, action, "")
         if collection:
             self.asset_type = GetCollectionType(collection)  # Override
 
@@ -2013,6 +2015,7 @@ class BFU_PT_Export(bpy.types.Panel):
 
         def execute(self, context):
             obj = context.object
+            UpdateActionCache(obj)
             assets = GetFinalAssetToExport()
             popup_title = "Assets list"
             if len(assets) > 0:
@@ -2426,8 +2429,8 @@ class BFU_PT_Export(bpy.types.Panel):
             text='',
             icon='REMOVE').remove_active = True
 
-        bfu_ui_utils.LayoutSection(layout, "bfu_nomencalture_properties_expanded", "Nomencalture")
-        if scene.bfu_nomencalture_properties_expanded:
+        bfu_ui_utils.LayoutSection(layout, "bfu_nomenclature_properties_expanded", "Nomenclature")
+        if scene.bfu_nomenclature_properties_expanded:
 
             # Prefix
             propsPrefix = self.layout.row()

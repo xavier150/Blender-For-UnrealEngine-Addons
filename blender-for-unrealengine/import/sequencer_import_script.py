@@ -54,10 +54,9 @@ def CreateSequencer():
 
     def AddSequencerSectionTransformKeysByIniFile(sequencer_section, track_dict):
         for key in track_dict.keys():
-            frame = float(key)/float(frameRateNumerator)  # FrameRate
             value = track_dict[key]  # (x,y,z x,y,z x,y,z)
+            frame = unreal.FrameNumber(int(key))
 
-            frame = unreal.FrameNumber(frame*float(frameRateNumerator))
             sequencer_section.get_channels()[0].add_key(frame, value["location_x"])
             sequencer_section.get_channels()[1].add_key(frame, value["location_y"])
             sequencer_section.get_channels()[2].add_key(frame, value["location_z"])
@@ -70,15 +69,15 @@ def CreateSequencer():
 
     def AddSequencerSectionFloatKeysByIniFile(sequencer_section, track_dict):
         for key in track_dict.keys():
-            frame = float(key)/float(frameRateNumerator)  # FrameRate
+            frame = unreal.FrameNumber(int(key))
             value = track_dict[key]
-            sequencer_section.get_channels()[0].add_key(unreal.FrameNumber(frame*float(frameRateNumerator)), value)
+            sequencer_section.get_channels()[0].add_key(frame, value)
 
     def AddSequencerSectionBoolKeysByIniFile(sequencer_section, track_dict):
         for key in track_dict.keys():
-            frame = float(key)/float(frameRateNumerator)  # FrameRate
+            frame = unreal.FrameNumber(int(key))
             value = track_dict[key]
-            sequencer_section.get_channels()[0].add_key(unreal.FrameNumber(frame*float(frameRateNumerator)), value)
+            sequencer_section.get_channels()[0].add_key(frame, value)
 
     print("Warning this file already exists")  # ???
     factory = unreal.LevelSequenceFactoryNew()
@@ -157,7 +156,6 @@ def CreateSequencer():
             pixel_y = float(sequence_data['pixel_aspect_y'])
             res_ratio = res_x / res_y
             pixel_ratio = pixel_x / pixel_y
-            print(pixel_x, pixel_y, pixel_ratio)
 
             crop_camera_sensor_height[key] = (original_width / (res_ratio * pixel_ratio))
 
@@ -276,9 +274,9 @@ def CreateSequencer():
     return 'Sequencer created with success !'
 
 
-print("Start")
+print("Start importing sequencer.")
 
 if CheckTasks():
     print(CreateSequencer())
 
-print("End")
+print("Importing sequencer finished.")

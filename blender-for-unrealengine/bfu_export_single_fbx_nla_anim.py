@@ -102,8 +102,7 @@ def ExportSingleFbxNLAAnim(
 
     if addon_prefs.bakeArmatureAction:
         BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)
-    ApplyExportTransform(active)
-
+    
     # This will rescale the rig and unit scale to get a root bone egal to 1
     ShouldRescaleRig = GetShouldRescaleRig(active)
     if ShouldRescaleRig:
@@ -120,6 +119,8 @@ def ExportSingleFbxNLAAnim(
         RescaleSelectCurveHook(1/rrf)
         ResetArmaturePose(active)
         RescaleRigConsraints(active, rrf)
+    
+    ApplyExportTransform(active)
 
     # scene.frame_start += active.StartFramesOffset
     # scene.frame_end += active.EndFramesOffset
@@ -128,6 +129,7 @@ def ExportSingleFbxNLAAnim(
     fullpath = os.path.join(absdirpath, filename)
 
     asset_name.SetExportName()
+
     if (export_procedure == "normal"):
         bpy.ops.export_scene.fbx(
             filepath=fullpath,

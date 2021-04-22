@@ -216,6 +216,17 @@ def ImportAllAssets():
             # ###############[ import asset ]################
 
             print("Import task")
+            if asset_data["type"] == "Animation":
+                '''
+                For animation the script will import a skeletal mesh and remove after. 
+                If the skeletal mesh alredy exist try to remove.
+                '''
+                # task.destination_name = "TempAnimationImportName"
+                # unreal.EditorAssetLibrary.delete_asset("SkeletalMesh'"+asset_data["full_import_path"]+"/TempAnimationImportName.TempAnimationImportName'")
+
+                unreal.EditorAssetLibrary.delete_asset("SkeletalMesh'"+asset_data["full_import_path"]+"/"+asset_data["name"]+"."+asset_data["name"]+"'")
+                
+                
             print(unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task]))
             if len(task.imported_object_paths) > 0:
                 asset = unreal.find_asset(task.imported_object_paths[0])
@@ -387,9 +398,9 @@ def ImportAllAssets():
         return 'Assets imported with success !'
 
 
-print("Start")
+print("Start importing assets.")
 
 if CheckTasks():
     print(ImportAllAssets())
 
-print("End")
+print("Importing assets finished.")
