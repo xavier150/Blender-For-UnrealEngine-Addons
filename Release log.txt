@@ -1,4 +1,4 @@
-== Rev 0.1.3 ==
+﻿== Rev 0.1.3 ==
 
 Initial release.
 
@@ -354,7 +354,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Vertex color are imported only with an reimport.
 - Fixed: (Re-)Import of Generate Lightmap UVs option not updated.
 
-== Rev 0.2.8.1 ==
+== Rev 0.2.9 ==
 
 - Change: The skeletal mesh are exported with scale at 1.0.
 - Change: You can use "Show Asset(s)" and "Show Action(s)" buttons for force to update the action cache.
