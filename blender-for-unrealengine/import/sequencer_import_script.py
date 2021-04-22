@@ -156,7 +156,6 @@ def CreateSequencer():
             pixel_y = float(sequence_data['pixel_aspect_y'])
             res_ratio = res_x / res_y
             pixel_ratio = pixel_x / pixel_y
-            print(pixel_x, pixel_y, pixel_ratio)
 
             crop_camera_sensor_height[key] = (original_width / (res_ratio * pixel_ratio))
 
