@@ -2015,7 +2015,8 @@ class BFU_PT_Export(bpy.types.Panel):
 
         def execute(self, context):
             obj = context.object
-            UpdateActionCache(obj)
+            if obj.type == "ARMATURE":
+                UpdateActionCache(obj)
             assets = GetFinalAssetToExport()
             popup_title = "Assets list"
             if len(assets) > 0:
