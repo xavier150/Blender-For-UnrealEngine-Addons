@@ -39,7 +39,7 @@ If you would like to have the Add-on enabled every time you start Blender, click
 # Download and installation from dev Branch
 1. Switch Branch to Dev
 2. 
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/SwitchBranchToDev.jpg" width="600">
+<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/SwitchBranchToDev.jpg">
 
 3. Download source file as Zip file.
 4. Extract "blender-for-unrealengine" folder
