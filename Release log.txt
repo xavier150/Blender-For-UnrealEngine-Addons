@@ -362,3 +362,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Export filter "Only select and active action" don't work with poses.
 - Fixed: The export action cache is not correctly updated.
 - Fixed: In camera sequencer with some frame rates the frame keys can be shifted.
+- Fixed: Export SkeletalMesh without animation_data make script fail.
