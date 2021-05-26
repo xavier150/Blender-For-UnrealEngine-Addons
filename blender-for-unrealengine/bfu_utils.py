@@ -1245,8 +1245,10 @@ def GetActionExportFileName(obj, action, fileType=".fbx"):
     if animType == "NlAnim" or animType == "Action":
         # Nla can be exported as action
         return ValidFilename(scene.anim_prefix_export_name+ArmatureName+action.name+fileType)
+
     elif animType == "Pose":
         return ValidFilename(scene.pose_prefix_export_name+ArmatureName+action.name+fileType)
+
     else:
         return None
 
