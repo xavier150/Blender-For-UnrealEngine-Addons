@@ -93,7 +93,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         items=[
             ("auto",
                 "Auto",
-                "Exports only if one of the parents is \"Export recursive\"",
+                "Export with the parent if the parents is \"Export recursive\"",
                 "BOIDS",
                 1),
             ("export_recursive",
