@@ -1806,6 +1806,7 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     # [AssetName , AssetType , ExportPath, ExportTime]
 
     asset_name: StringProperty(default="None")
+    skeleton_name: StringProperty(default="None")
     asset_type: StringProperty(default="None")  # return from GetAssetType()
     folder_name: StringProperty(default="None")
     files: CollectionProperty(type=BFU_OT_FileExport)
@@ -1829,6 +1830,7 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
             self.asset_type = GetActionType(action)  # Override
         if obj and action:
             self.asset_name = GetActionExportFileName(obj, action, "")
+            self.skeleton_name = obj.name
         if collection:
             self.asset_type = GetCollectionType(collection)  # Override
 
