@@ -243,7 +243,7 @@ class PrepareExportName():
 # Sockets and Collisons
 
 
-ExportTempPreFix = "_ExportSubObject_TempName"
+ExportTempPreFix = "_ESO_Temp" #_ExportSubObject_TempName
 
 
 def AddSubObjectTempName(obj):

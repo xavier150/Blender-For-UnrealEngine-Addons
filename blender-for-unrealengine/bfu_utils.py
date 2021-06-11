@@ -227,26 +227,31 @@ class UserSceneSave():
 
 class AnimationManagment():
     def __init__(self):
+        self.use_animation_data = False
         self.action = None
-        self.action_extrapolation = None
-        self.action_blend_type = None
-        self.action_influence = None
+        self.action_extrapolation = "HOLD" # Default value
+        self.action_blend_type = "REPLACE" # Default value
+        self.action_influence = 1.0 # Default value
 
     def SaveAnimationData(self, obj):
-        self.action = obj.animation_data.action
-        self.action_extrapolation = obj.animation_data.action_extrapolation
-        self.action_blend_type = obj.animation_data.action_blend_type
-        self.action_influence = obj.animation_data.action_influence
+        if obj.animation_data is not None:
+            self.action = obj.animation_data.action
+            self.action_extrapolation = obj.animation_data.action_extrapolation
+            self.action_blend_type = obj.animation_data.action_blend_type
+            self.action_influence = obj.animation_data.action_influence
 
     def ClearAnimationData(self, obj):
         obj.animation_data_clear()
 
     def SetAnimationData(self, obj):
-        obj.animation_data_create()
-        obj.animation_data.action = self.action
-        obj.animation_data.action_extrapolation = self.action_extrapolation
-        obj.animation_data.action_blend_type = self.action_blend_type
-        obj.animation_data.action_influence = self.action_influence
+        if self.use_animation_data:
+            obj.animation_data_create()
+
+        if obj.animation_data is not None:
+            obj.animation_data.action = self.action
+            obj.animation_data.action_extrapolation = self.action_extrapolation
+            obj.animation_data.action_blend_type = self.action_blend_type
+            obj.animation_data.action_influence = self.action_influence
 
 
 def SafeModeSet(target_mode='OBJECT', obj=None):
@@ -1240,8 +1245,10 @@ def GetActionExportFileName(obj, action, fileType=".fbx"):
     if animType == "NlAnim" or animType == "Action":
         # Nla can be exported as action
         return ValidFilename(scene.anim_prefix_export_name+ArmatureName+action.name+fileType)
+
     elif animType == "Pose":
         return ValidFilename(scene.pose_prefix_export_name+ArmatureName+action.name+fileType)
+
     else:
         return None
 

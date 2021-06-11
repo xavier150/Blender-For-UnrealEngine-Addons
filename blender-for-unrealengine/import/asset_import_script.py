@@ -13,13 +13,13 @@ def CheckTasks():
         return False
     return True
 
-
 def ImportAllAssets():
 
     import unreal
     import os.path
     import ast
     import json
+    import string
 
     '''
     if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:
@@ -39,6 +39,19 @@ def ImportAllAssets():
     unreal_import_location = import_assets_data['unreal_import_location']
     ImportedList = []
     ImportFailList = []
+
+    def ValidUnrealAssetename(filename):
+        # Normalizes string, removes non-alpha characters
+        # Asset name in Unreal use
+
+        filename = filename.replace('.', '_')
+        filename = filename.replace('(', '_')
+        filename = filename.replace(')', '_')
+        filename = filename.replace(' ', '_')
+        valid_chars = "-_%s%s" % (string.ascii_letters, string.digits)
+        filename = ''.join(c for c in filename if c in valid_chars)
+        return filename
+
 
     def GetOptionByIniFile(FileLoc, OptionName, literal=False):
         return []
@@ -221,11 +234,15 @@ def ImportAllAssets():
                 For animation the script will import a skeletal mesh and remove after. 
                 If the skeletal mesh alredy exist try to remove.
                 '''
-                # task.destination_name = "TempAnimationImportName"
-                # unreal.EditorAssetLibrary.delete_asset("SkeletalMesh'"+asset_data["full_import_path"]+"/TempAnimationImportName.TempAnimationImportName'")
-
-                unreal.EditorAssetLibrary.delete_asset("SkeletalMesh'"+asset_data["full_import_path"]+"/"+asset_data["name"]+"."+asset_data["name"]+"'")
                 
+                AssetName = asset_data["name"]
+                AssetName = ValidUnrealAssetename(AssetName)
+                AssetPath = "SkeletalMesh'"+asset_data["full_import_path"]+"/"+AssetName+"."+AssetName+"'"
+
+                if unreal.EditorAssetLibrary.does_asset_exist(AssetPath):
+                    oldAsset = unreal.EditorAssetLibrary.find_asset_data(AssetPath)
+                    if oldAsset.asset_class == "SkeletalMesh":
+                        unreal.EditorAssetLibrary.delete_asset(AssetPath)
                 
             print(unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task]))
             if len(task.imported_object_paths) > 0:

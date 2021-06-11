@@ -93,7 +93,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         items=[
             ("auto",
                 "Auto",
-                "Exports only if one of the parents is \"Export recursive\"",
+                "Export with the parent if the parents is \"Export recursive\"",
                 "BOIDS",
                 1),
             ("export_recursive",
@@ -1806,6 +1806,7 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     # [AssetName , AssetType , ExportPath, ExportTime]
 
     asset_name: StringProperty(default="None")
+    skeleton_name: StringProperty(default="None")
     asset_type: StringProperty(default="None")  # return from GetAssetType()
     folder_name: StringProperty(default="None")
     files: CollectionProperty(type=BFU_OT_FileExport)
@@ -1829,6 +1830,7 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
             self.asset_type = GetActionType(action)  # Override
         if obj and action:
             self.asset_name = GetActionExportFileName(obj, action, "")
+            self.skeleton_name = obj.name
         if collection:
             self.asset_type = GetCollectionType(collection)  # Override
 
@@ -2015,7 +2017,8 @@ class BFU_PT_Export(bpy.types.Panel):
 
         def execute(self, context):
             obj = context.object
-            UpdateActionCache(obj)
+            if obj.type == "ARMATURE":
+                UpdateActionCache(obj)
             assets = GetFinalAssetToExport()
             popup_title = "Assets list"
             if len(assets) > 0:
