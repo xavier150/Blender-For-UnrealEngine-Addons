@@ -46,6 +46,7 @@ class VertexColorExportData:
         self.color = (1.0, 1.0, 1.0)
         self.index = -1
 
+
         if self.GetPropertyOwner():
             if self.GetPropertyOwner().VertexColorImportOption == "IGNORE":
                 self.export_type = "IGNORE"
@@ -70,6 +71,8 @@ class VertexColorExportData:
                 
     def GetChosenVertexIndex(self):
         obj = self.obj
+        if obj.type != "Mesh":
+            return -1
         VertexColorToUse = self.GetPropertyOwner().VertexColorToUse
         VertexColorIndexToUse = self.GetPropertyOwner().VertexColorIndexToUse
         if obj:
@@ -92,15 +95,18 @@ class VertexColorExportData:
         return -1
 
     def GetChosenVertexName(self):
+
         index = self.GetChosenVertexIndex()
         if index == -1:
             return "None"
+
         
         obj = self.obj
         if obj: 
-            if obj.data:
-                if obj.VertexColorIndexToUse < len(obj.data.vertex_colors):
-                    return obj.data.vertex_colors[index].name
+            if obj.type == "Mesh":
+                if obj.data:
+                    if obj.VertexColorIndexToUse < len(obj.data.vertex_colors):
+                        return obj.data.vertex_colors[index].name
 
         return "None"
 

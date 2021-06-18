@@ -1340,12 +1340,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 StaticMeshVertexColorImportOptionIndexCustom.prop(obj, 'VertexColorIndexToUse')
                             
                             StaticMeshVertexColorFeedback = StaticMeshVertexColorImportOption.row()
-                            vced = VertexColorExportData(obj)
-                            if  vced.export_type == "REPLACE":
-                                StaticMeshVertexColorFeedback.label(text='Vertex color nammed "' + vced.name + '" will be used.', icon='INFO')
+                            if obj.type == "Mesh":
+                                vced = VertexColorExportData(obj)
+                                if  vced.export_type == "REPLACE":
+                                    StaticMeshVertexColorFeedback.label(text='Vertex color nammed "' + vced.name + '" will be used.', icon='INFO')
+                                else:
+                                    StaticMeshVertexColorFeedback.label(text='No vertex color found at this index.', icon='ERROR')
                             else:
-                                StaticMeshVertexColorFeedback.label(text='No vertex color found at this index.', icon='ERROR')
-                            
+                                StaticMeshVertexColorFeedback.label(text='Vertex color property will be apply on the childrens.', icon='INFO')
+
                         
                         
 
