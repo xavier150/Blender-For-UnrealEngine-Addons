@@ -521,7 +521,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 "Use the the first index in Object Data -> Vertex Color.", 0),
             ("LastIndex", "Last Index",
                 "Use the the last index in Object Data -> Vertex Color.", 1),
-            ("ActiveIndex", "Active",
+            ("ActiveIndex", "Active Render",
                 "Use the the active index in Object Data -> Vertex Color.", 2),
             ("CustomIndex", "CustomIndex",
                 "Use a specific Vertex Color in Object Data -> Vertex Color.", 3)

@@ -118,6 +118,8 @@ def ExportSingleStaticMesh(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
         )
 
+    SetVertexColorForUnrealExport(active)
+
     bpy.ops.export_scene.fbx(
         filepath=fullpath,
         check_existing=False,

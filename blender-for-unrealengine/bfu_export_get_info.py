@@ -38,46 +38,57 @@ from .bfu_utils import *
 from enum import Enum
 
 class VertexColorExportData:
-    def __init__(self, obj):
+    def __init__(self, obj, parent = None):
         self.obj = obj
+        self.parent = parent
         self.export_type = "IGNORE"
         self.name = ""
         self.color = (1.0, 1.0, 1.0)
         self.index = -1
-        if self.obj:
-            if obj.VertexColorImportOption == "IGNORE":
+
+        if self.GetPropertyOwner():
+            if self.GetPropertyOwner().VertexColorImportOption == "IGNORE":
                 self.export_type = "IGNORE"
 
-            if obj.VertexColorImportOption == "OVERRIDE":
-                self.color = obj.VertexOverrideColor
+            if self.GetPropertyOwner().VertexColorImportOption == "OVERRIDE":
+                self.color = self.GetPropertyOwner().VertexOverrideColor
                 self.export_type = "OVERRIDE"
 
-            if obj.VertexColorImportOption == "REPLACE":
+            if self.GetPropertyOwner().VertexColorImportOption == "REPLACE":
                 index = self.GetChosenVertexIndex()
                 if index != -1:
                     self.index = index
                     self.name = self.GetChosenVertexName()
                     self.export_type = "REPLACE"
+
+    def GetPropertyOwner(self):
+        #Return the object to use for the property or return self if none
+        if self.parent:
+            return self.parent
+        return self.obj
+
                 
     def GetChosenVertexIndex(self):
         obj = self.obj
+        VertexColorToUse = self.GetPropertyOwner().VertexColorToUse
+        VertexColorIndexToUse = self.GetPropertyOwner().VertexColorIndexToUse
         if obj:
             if obj.data:
                 if len(obj.data.vertex_colors) > 0:
-                    if obj.VertexColorToUse == "FirstIndex":
+                    if VertexColorToUse == "FirstIndex":
                         return 0
 
-                    if obj.VertexColorToUse == "LastIndex":
+                    if VertexColorToUse == "LastIndex":
                         return len(obj.data.vertex_colors)-1
                     
-                    if obj.VertexColorToUse == "ActiveIndex":
+                    if VertexColorToUse == "ActiveIndex":
                         for index, vertex_color in enumerate(obj.data.vertex_colors):
                             if vertex_color.active_render == True:
                                 return index
                     
-                    if obj.VertexColorToUse == "CustomIndex":
-                        if obj.VertexColorIndexToUse < len(obj.data.vertex_colors):
-                            return obj.VertexColorIndexToUse
+                    if VertexColorToUse == "CustomIndex":
+                        if VertexColorIndexToUse < len(obj.data.vertex_colors):
+                            return VertexColorIndexToUse
         return -1
 
     def GetChosenVertexName(self):
