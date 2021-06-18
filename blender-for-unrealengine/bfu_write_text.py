@@ -496,7 +496,14 @@ def WriteSingleMeshAdditionalParameter(obj):
         )  # Color to Json
         data["vertex_override_color"] = vertex_override_color
 
-        return data
+    # preview_import_path
+    #SkeletonName = customName+"."+customName
+    #SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
+    #asset_data["animation_skeleton_path"] = os.path.join("/Game/", scene.unreal_import_location, SkeletonLoc).replace('\\', '/')
+
+    data["preview_import_path"] = GetObjExportFileName(obj, "")
+    
+    return data
 
 
 def WriteAllTextFiles():
