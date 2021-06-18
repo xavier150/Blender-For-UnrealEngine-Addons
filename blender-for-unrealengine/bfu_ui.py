@@ -26,8 +26,10 @@ from . import bfu_write_text
 from . import bfu_basics
 from .bfu_basics import *
 from . import bfu_utils
-from . import bfu_check_potential_error
 from .bfu_utils import *
+from . import bfu_export_get_info
+from .bfu_export_get_info import *
+from . import bfu_check_potential_error
 from . import bfu_ui_utils
 from . import languages
 from .languages import *
@@ -43,6 +45,8 @@ if "bpy" in locals():
         importlib.reload(bfu_basics)
     if "bfu_utils" in locals():
         importlib.reload(bfu_utils)
+    if "bfu_export_get_info" in locals():
+        importlib.reload(bfu_export_get_info)
     if "bfu_check_potential_error" in locals():
         importlib.reload(bfu_check_potential_error)
     if "bfu_ui_utils" in locals():
@@ -1336,8 +1340,11 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 StaticMeshVertexColorImportOptionIndexCustom.prop(obj, 'VertexColorIndexToUse')
                             
                             StaticMeshVertexColorFeedback = StaticMeshVertexColorImportOption.row()
-                            StaticMeshVertexColorFeedback.label(text='No vertex color found at this index.', icon='INFO')
-                            StaticMeshVertexColorFeedback.label(text='No vertex color found at this index.', icon='ERROR')
+                            vced = VertexColorExportData(obj)
+                            if  vced.export_type == "REPLACE":
+                                StaticMeshVertexColorFeedback.label(text='Vertex color nammed "' + vced.name + '" will be used.', icon='INFO')
+                            else:
+                                StaticMeshVertexColorFeedback.label(text='No vertex color found at this index.', icon='ERROR')
                             
                         
                         
