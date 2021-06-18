@@ -40,6 +40,8 @@ if "bpy" in locals():
         importlib.reload(bfu_write_import_sequencer_script)
     if "languages" in locals():
         importlib.reload(languages)
+    if "bfu_export_get_info" in locals():
+        importlib.reload(bfu_export_get_info)
 
 from . import bfu_basics
 from .bfu_basics import *
@@ -47,6 +49,8 @@ from . import bfu_utils
 from .bfu_utils import *
 from . import bfu_write_import_asset_script
 from . import bfu_write_import_sequencer_script
+from . import bfu_export_get_info
+from .bfu_export_get_info import *
 
 
 def ExportSingleText(text, dirpath, filename):
@@ -426,6 +430,7 @@ def WriteSingleMeshAdditionalParameter(obj):
     # Defaultsettings
     data['DefaultSettings'] = {}
     # config.set('Defaultsettings', 'SocketNumber', str(len(sockets)))
+    
 
     # Level of detail
     data['LevelOfDetail'] = {}
@@ -480,7 +485,18 @@ def WriteSingleMeshAdditionalParameter(obj):
             MySocket = [SocketName, b.name.replace('.', '_'), array_location, array_rotation, array_scale]
             data['Sockets']['socket_'+str(i)] = MySocket
 
-    return data
+    # Vertex Color
+    if GetAssetType(obj) == "SkeletalMesh" or GetAssetType(obj) == "StaticMesh":
+        vced = VertexColorExportData(obj)
+        data["vertex_color_import_option"] = vced.export_type
+        vertex_override_color = (
+            vced.color[0],  # R
+            vced.color[1],  # G
+            vced.color[2]  # B
+        )  # Color to Json
+        data["vertex_override_color"] = vertex_override_color
+
+        return data
 
 
 def WriteAllTextFiles():
