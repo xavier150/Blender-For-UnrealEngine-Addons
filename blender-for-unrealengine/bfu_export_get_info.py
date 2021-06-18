@@ -65,10 +65,10 @@ class VertexColorExportData:
             if obj.data:
                 if len(obj.data.vertex_colors) > 0:
                     if obj.VertexColorToUse == "FirstIndex":
-                        return 1
-                    
+                        return 0
+
                     if obj.VertexColorToUse == "LastIndex":
-                        return -1
+                        return len(obj.data.vertex_colors)-1
                     
                     if obj.VertexColorToUse == "ActiveIndex":
                         for index, vertex_color in enumerate(obj.data.vertex_colors):
