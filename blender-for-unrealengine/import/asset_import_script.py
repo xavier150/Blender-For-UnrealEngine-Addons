@@ -40,7 +40,7 @@ def ImportAllAssets():
     ImportedList = []
     ImportFailList = []
 
-    def ValidUnrealAssetename(filename):
+    def ValidUnrealAssetsName(filename):
         # Normalizes string, removes non-alpha characters
         # Asset name in Unreal use
 
@@ -284,7 +284,7 @@ def ImportAllAssets():
                 '''
                 
                 AssetName = asset_data["name"]
-                AssetName = ValidUnrealAssetename(AssetName)
+                AssetName = ValidUnrealAssetsName(AssetName)
                 AssetPath = "SkeletalMesh'"+asset_data["full_import_path"]+"/"+AssetName+"."+AssetName+"'"
 
                 if unreal.EditorAssetLibrary.does_asset_exist(AssetPath):
