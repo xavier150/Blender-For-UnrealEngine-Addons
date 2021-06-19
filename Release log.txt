@@ -367,3 +367,5 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Button "Show Asset(s)" make script fail when the selected actor is not a SkeletalMesh.
 - Fixed: Animation file with space can do error durring import
 - Fixed: Vertex color updated only in import option when reimport.
+- Fixed: With Unit Scale not at 0.01 SkeletalMesh have a wrong scale.
+- Fixed: Import NLA animation with script don't work
