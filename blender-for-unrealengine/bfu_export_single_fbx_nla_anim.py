@@ -54,6 +54,7 @@ def ProcessNLAAnimExport(obj):
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.StartAssetExport(obj)
     MyAsset.asset_type = "NlAnim"
+    MyAsset.asset_name = GetNLAExportFileName(obj)
 
     ExportSingleFbxNLAAnim(dirpath, GetNLAExportFileName(obj), obj)
     file = MyAsset.files.add()

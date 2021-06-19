@@ -1868,14 +1868,16 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     def StartAssetExport(self, obj=None, action=None, collection=None):
         if obj:
             self.SetObjData(obj)
-
-        if obj:
             self.asset_type = GetAssetType(obj)
+            if obj.type == "ARMATURE":
+                self.skeleton_name = obj.name
+
         if action:
             self.asset_type = GetActionType(action)  # Override
+
         if obj and action:
             self.asset_name = GetActionExportFileName(obj, action, "")
-            self.skeleton_name = obj.name
+
         if collection:
             self.asset_type = GetCollectionType(collection)  # Override
 
