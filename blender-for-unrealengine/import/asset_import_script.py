@@ -33,8 +33,8 @@ def ImportAllAssets():
     json_data_file = 'ImportAssetData.json'
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
-    with open(os.path.join(dir_path, json_data_file), "r") as json_file:
-        import_assets_data = json.load(json_file)
+    with open(os.path.join(dir_path, json_data_file), "r", encoding="utf8") as json_file:
+        import_assets_data = json.load(json_file, encoding="utf8")
 
     unreal_import_location = import_assets_data['unreal_import_location']
     ImportedList = []
@@ -99,8 +99,8 @@ def ImportAllAssets():
         def GetAdditionalData():
             if "additional_tracks_path" in asset_data:
                 if asset_data["additional_tracks_path"] is not None:
-                    with open(asset_data["additional_tracks_path"], "r") as json_file:
-                        additional_data = json.load(json_file)
+                    with open(asset_data["additional_tracks_path"], "r", encoding="utf8") as json_file:
+                        additional_data = json.load(json_file, encoding="utf8")
                         return additional_data
             return None
         
@@ -344,9 +344,6 @@ def ImportAllAssets():
 
             if asset_data["type"] == "SkeletalMesh":
                 asset_import_data.set_editor_property('normal_import_method', unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS)
-
-            # with open(asset_data["additional_tracks_path"], "r") as json_file:
-                # asset_tracks = json.load(json_file)
 
             # Socket
             if asset_data["type"] == "SkeletalMesh":

@@ -38,8 +38,8 @@ def CreateSequencer():
     json_data_file = 'ImportSequencerData.json'
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
-    with open(os.path.join(dir_path, json_data_file), "r") as json_file:
-        sequence_data = json.load(json_file)
+    with open(os.path.join(dir_path, json_data_file), "r", encoding="utf8") as json_file:
+        sequence_data = json.load(json_file, encoding="utf8")
 
     spawnable_camera = sequence_data['spawnable_camera']
     startFrame = sequence_data['startFrame']
@@ -113,8 +113,8 @@ def CreateSequencer():
         print("Start camera import " + str(x+1) + "/" + str(len(sequence_data["cameras"])) + " :" + camera_data["name"])
         # Import camera tracks transform
 
-        with open(camera_data["additional_tracks_path"], "r") as json_file:
-            camera_tracks = json.load(json_file)
+        with open(camera_data["additional_tracks_path"], "r", encoding="utf8") as json_file:
+            camera_tracks = json.load(json_file, encoding="utf8")
 
         # Create spawnable camera and add camera in sequencer
         cine_camera_actor = unreal.EditorLevelLibrary().spawn_actor_from_class(unreal.CineCameraActor, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))

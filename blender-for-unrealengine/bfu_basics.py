@@ -241,15 +241,21 @@ def VerifiDirs(directory):
 
 
 def ValidFilename(filename):
+    # https://gist.github.com/seanh/93666
     # Normalizes string, removes non-alpha characters
     # File name use
 
+    illegal_chars = r'\/:*?"<>|'
     valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+
+    filename = ''.join(c for c in filename if c not in illegal_chars)
     filename = ''.join(c for c in filename if c in valid_chars)
+    
     return filename
 
 
 def ValidDefname(filename):
+    # https://gist.github.com/seanh/93666
     # Normalizes string, removes non-alpha characters
     # Def name use
 
