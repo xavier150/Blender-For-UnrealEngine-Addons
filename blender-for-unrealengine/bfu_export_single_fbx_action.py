@@ -129,7 +129,7 @@ def ExportSingleFbxAction(
         ResetArmaturePose(active)
         RescaleRigConsraints(active, rrf)
 
-    ApplyExportTransform(active)
+    ApplyExportTransform(active) # Apply export transform after rescale
 
     # animation_data.action is ReadOnly with tweakmode in 2.8
     if (scene.is_nla_tweakmode):

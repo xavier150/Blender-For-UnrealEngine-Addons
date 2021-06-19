@@ -949,8 +949,9 @@ def ApplySkeletalExportScale(armature, rescale):
     animation_data = AnimationManagment()
     animation_data.SaveAnimationData(armature)
     animation_data.ClearAnimationData(armature)
-
+    
     armature.scale = armature.scale*rescale
+
     bpy.ops.object.transform_apply(
         location=True,
         scale=True,

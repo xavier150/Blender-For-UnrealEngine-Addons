@@ -121,7 +121,7 @@ def ExportSingleFbxNLAAnim(
         ResetArmaturePose(active)
         RescaleRigConsraints(active, rrf)
     
-    ApplyExportTransform(active)
+    ApplyExportTransform(active) # Apply export transform after rescale
 
     # scene.frame_start += active.StartFramesOffset
     # scene.frame_end += active.EndFramesOffset
