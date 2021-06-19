@@ -239,6 +239,9 @@ class AnimationManagment():
             self.action_extrapolation = obj.animation_data.action_extrapolation
             self.action_blend_type = obj.animation_data.action_blend_type
             self.action_influence = obj.animation_data.action_influence
+            self.use_animation_data = True
+        else:
+            self.use_animation_data = False
 
     def ClearAnimationData(self, obj):
         obj.animation_data_clear()
