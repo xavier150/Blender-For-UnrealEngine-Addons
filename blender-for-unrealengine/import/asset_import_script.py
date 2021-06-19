@@ -98,9 +98,10 @@ def ImportAllAssets():
 
         def GetAdditionalData():
             if "additional_tracks_path" in asset_data:
-                with open(asset_data["additional_tracks_path"], "r") as json_file:
-                    additional_data = json.load(json_file)
-                return additional_data
+                if asset_data["additional_tracks_path"] is not None:
+                    with open(asset_data["additional_tracks_path"], "r") as json_file:
+                        additional_data = json.load(json_file)
+                        return additional_data
             return None
         
         additional_data = GetAdditionalData()
