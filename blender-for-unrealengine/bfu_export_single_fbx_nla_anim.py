@@ -96,7 +96,7 @@ def ExportSingleFbxNLAAnim(
 
     animation_data = AnimationManagment()
     animation_data.SaveAnimationData(obj)
-    animation_data.SetAnimationData(active)
+    animation_data.SetAnimationData(active, True)
 
     if active.ExportAsProxy:
         ApplyProxyData(active)
@@ -112,7 +112,8 @@ def ExportSingleFbxNLAAnim(
         savedUnitLength = bpy.context.scene.unit_settings.scale_length
         bpy.context.scene.unit_settings.scale_length *= 1/rrf
         oldScale = active.scale.z
-        ApplySkeletalExportScale(active, rrf)
+        
+        ApplySkeletalExportScale(active, rrf, animation_data)
         RescaleAllActionCurve(rrf*oldScale)
         for selected in bpy.context.selected_objects:
             if selected.type == "MESH":
