@@ -369,3 +369,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Vertex color updated only in import option when reimport.
 - Fixed: With Unit Scale not at 0.01 SkeletalMesh have a wrong scale.
 - Fixed: Import NLA animation with script don't work
+- Fixed: With Unit Scale not at 0.01 NLA animation will not export
