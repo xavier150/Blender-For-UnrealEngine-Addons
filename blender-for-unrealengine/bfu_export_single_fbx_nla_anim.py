@@ -54,6 +54,7 @@ def ProcessNLAAnimExport(obj):
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.StartAssetExport(obj)
     MyAsset.asset_type = "NlAnim"
+    MyAsset.asset_name = GetNLAExportFileName(obj)
 
     ExportSingleFbxNLAAnim(dirpath, GetNLAExportFileName(obj), obj)
     file = MyAsset.files.add()
@@ -95,7 +96,7 @@ def ExportSingleFbxNLAAnim(
 
     animation_data = AnimationManagment()
     animation_data.SaveAnimationData(obj)
-    animation_data.SetAnimationData(active)
+    animation_data.SetAnimationData(active, True)
 
     if active.ExportAsProxy:
         ApplyProxyData(active)
@@ -111,7 +112,8 @@ def ExportSingleFbxNLAAnim(
         savedUnitLength = bpy.context.scene.unit_settings.scale_length
         bpy.context.scene.unit_settings.scale_length *= 1/rrf
         oldScale = active.scale.z
-        ApplySkeletalExportScale(active, rrf)
+        
+        ApplySkeletalExportScale(active, rrf, animation_data)
         RescaleAllActionCurve(rrf*oldScale)
         for selected in bpy.context.selected_objects:
             if selected.type == "MESH":
@@ -120,7 +122,7 @@ def ExportSingleFbxNLAAnim(
         ResetArmaturePose(active)
         RescaleRigConsraints(active, rrf)
     
-    ApplyExportTransform(active)
+    ApplyExportTransform(active) # Apply export transform after rescale
 
     # scene.frame_start += active.StartFramesOffset
     # scene.frame_end += active.EndFramesOffset

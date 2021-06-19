@@ -26,8 +26,10 @@ from . import bfu_write_text
 from . import bfu_basics
 from .bfu_basics import *
 from . import bfu_utils
-from . import bfu_check_potential_error
 from .bfu_utils import *
+from . import bfu_export_get_info
+from .bfu_export_get_info import *
+from . import bfu_check_potential_error
 from . import bfu_ui_utils
 from . import languages
 from .languages import *
@@ -43,6 +45,8 @@ if "bpy" in locals():
         importlib.reload(bfu_basics)
     if "bfu_utils" in locals():
         importlib.reload(bfu_utils)
+    if "bfu_export_get_info" in locals():
+        importlib.reload(bfu_export_get_info)
     if "bfu_check_potential_error" in locals():
         importlib.reload(bfu_check_potential_error)
     if "bfu_ui_utils" in locals():
@@ -508,6 +512,28 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             # Vania python
             # https://docs.unrealengine.com/en-US/PythonAPI/class/FbxSkeletalMeshImportData.html
         )
+
+    bpy.types.Object.VertexColorToUse = EnumProperty(
+        name="Vertex Color to use",
+        description="Specify which vertex colors should be imported",
+        items=[
+            ("FirstIndex", "First Index",
+                "Use the the first index in Object Data -> Vertex Color.", 0),
+            ("LastIndex", "Last Index",
+                "Use the the last index in Object Data -> Vertex Color.", 1),
+            ("ActiveIndex", "Active Render",
+                "Use the the active index in Object Data -> Vertex Color.", 2),
+            ("CustomIndex", "CustomIndex",
+                "Use a specific Vertex Color in Object Data -> Vertex Color.", 3)
+            ],
+        default="ActiveIndex"
+        )
+
+    bpy.types.Object.VertexColorIndexToUse = IntProperty(
+        name="Vertex color index",
+        description="Vertex Color index to use.",
+        default=0
+    )
 
     bpy.types.Object.exportActionEnum = EnumProperty(
         name="Action to export",
@@ -1001,7 +1027,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.MaterialSearchLocation',
                             'obj.CollisionTraceFlag',
                             'obj.VertexColorImportOption',
-                            'obj.VertexOverrideColor ',
+                            'obj.VertexOverrideColor',
+                            'obj.VertexColorToUse',
+                            'obj.VertexColorIndexToUse',
                             'obj.exportActionEnum',
                             'obj.PrefixNameToExport',
                             'obj.AnimStartEndTimeEnum',
@@ -1301,12 +1329,29 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         # Vertex color
                         StaticMeshVertexColorImportOption = layout.column()
                         StaticMeshVertexColorImportOption.prop(obj, 'VertexColorImportOption')
-                        StaticMeshVertexColorImportOptionColor = StaticMeshVertexColorImportOption.row()
-                        StaticMeshVertexColorImportOptionColor.prop(obj, 'VertexOverrideColor')
                         if obj.VertexColorImportOption == "OVERRIDE":
-                            StaticMeshVertexColorImportOptionColor.enabled = True
-                        else:
-                            StaticMeshVertexColorImportOptionColor.enabled = False
+                            StaticMeshVertexColorImportOptionColor = StaticMeshVertexColorImportOption.row()
+                            StaticMeshVertexColorImportOptionColor.prop(obj, 'VertexOverrideColor')
+                        if obj.VertexColorImportOption == "REPLACE":
+                            StaticMeshVertexColorImportOptionIndex = StaticMeshVertexColorImportOption.row()
+                            StaticMeshVertexColorImportOptionIndex.prop(obj, 'VertexColorToUse')
+                            if obj.VertexColorToUse == "CustomIndex":
+                                StaticMeshVertexColorImportOptionIndexCustom = StaticMeshVertexColorImportOption.row()
+                                StaticMeshVertexColorImportOptionIndexCustom.prop(obj, 'VertexColorIndexToUse')
+                            
+                            StaticMeshVertexColorFeedback = StaticMeshVertexColorImportOption.row()
+                            if obj.type == "MESH":
+                                vced = VertexColorExportData(obj)
+                                if  vced.export_type == "REPLACE":
+                                    StaticMeshVertexColorFeedback.label(text='Vertex color nammed "' + vced.name + '" will be used.', icon='INFO')
+                                else:
+                                    StaticMeshVertexColorFeedback.label(text='No vertex color found at this index.', icon='ERROR')
+                            else:
+                                StaticMeshVertexColorFeedback.label(text='Vertex color property will be apply on the childrens.', icon='INFO')
+
+                        
+                        
+
 
             bfu_ui_utils.LayoutSection(layout, "bfu_object_light_map_properties_expanded", "Light map")
             if scene.bfu_object_light_map_properties_expanded:
@@ -1823,14 +1868,16 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     def StartAssetExport(self, obj=None, action=None, collection=None):
         if obj:
             self.SetObjData(obj)
-
-        if obj:
             self.asset_type = GetAssetType(obj)
+            if obj.type == "ARMATURE":
+                self.skeleton_name = obj.name
+
         if action:
             self.asset_type = GetActionType(action)  # Override
+
         if obj and action:
             self.asset_name = GetActionExportFileName(obj, action, "")
-            self.skeleton_name = obj.name
+
         if collection:
             self.asset_type = GetCollectionType(collection)  # Override
 

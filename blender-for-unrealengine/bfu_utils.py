@@ -239,11 +239,16 @@ class AnimationManagment():
             self.action_extrapolation = obj.animation_data.action_extrapolation
             self.action_blend_type = obj.animation_data.action_blend_type
             self.action_influence = obj.animation_data.action_influence
+            self.nla_tracks_ref = obj.animation_data.nla_tracks
+            self.use_animation_data = True
+        else:
+            self.use_animation_data = False
 
     def ClearAnimationData(self, obj):
         obj.animation_data_clear()
 
-    def SetAnimationData(self, obj):
+    def SetAnimationData(self, obj, copy_nla=False):
+        print(obj.name)
         if self.use_animation_data:
             obj.animation_data_create()
 
@@ -252,6 +257,44 @@ class AnimationManagment():
             obj.animation_data.action_extrapolation = self.action_extrapolation
             obj.animation_data.action_blend_type = self.action_blend_type
             obj.animation_data.action_influence = self.action_influence
+
+            if copy_nla:
+                #Clear nla_tracks
+                nla_tracks_len = len(obj.animation_data.nla_tracks)
+                for x in range(nla_tracks_len):
+                    obj.animation_data.nla_tracks.remove(obj.animation_data.nla_tracks[0])
+
+                #Add Current nla_tracks
+                for nla_track in self.nla_tracks_ref:
+                    new_nla_track = obj.animation_data.nla_tracks.new()
+                    #new_nla_track.active = nla_track.active
+                    new_nla_track.is_solo = nla_track.is_solo
+                    new_nla_track.lock = nla_track.lock
+                    new_nla_track.mute = nla_track.mute
+                    new_nla_track.name = nla_track.name
+                    new_nla_track.select = nla_track.select
+                    for strip in nla_track.strips:
+                        new_strip = new_nla_track.strips.new(strip.name, strip.frame_start, strip.action)
+                        #new_strip.action = strip.action
+                        new_strip.action_frame_end = strip.action_frame_end
+                        new_strip.action_frame_start = strip.action_frame_start
+                        #new_strip.active = strip.active
+                        new_strip.blend_in = strip.blend_in
+                        new_strip.blend_out = strip.blend_out
+                        new_strip.blend_type = strip.blend_type
+                        new_strip.extrapolation = strip.extrapolation
+                        #new_strip.fcurves = strip.fcurves #TO DO
+                        new_strip.frame_end = strip.frame_end
+                        #new_strip.frame_start = strip.frame_start
+                        new_strip.influence = strip.influence
+                        #new_strip.modifiers = strip.modifiers #TO DO
+                        new_strip.mute = strip.mute
+                        #new_strip.name = strip.name
+                        new_strip.repeat = strip.repeat
+                        new_strip.scale = strip.scale
+                        new_strip.select = strip.select
+                        new_strip.strip_time = strip.strip_time
+                        #new_strip.strips = strip.strips #TO DO
 
 
 def SafeModeSet(target_mode='OBJECT', obj=None):
@@ -940,14 +983,19 @@ def ApplyExportTransform(obj):
         obj.scale = saveScale
 
 
-def ApplySkeletalExportScale(armature, rescale):
+def ApplySkeletalExportScale(armature, rescale, target_animation_data = None):
+ 
     # This function will rescale the armature and applys the new scale
 
-    animation_data = AnimationManagment()
-    animation_data.SaveAnimationData(armature)
-    animation_data.ClearAnimationData(armature)
-
+    if target_animation_data is None:
+        animation_data = AnimationManagment()
+        animation_data.SaveAnimationData(armature)
+        animation_data.ClearAnimationData(armature)
+    else:
+        animation_data = target_animation_data
+    
     armature.scale = armature.scale*rescale
+
     bpy.ops.object.transform_apply(
         location=True,
         scale=True,
