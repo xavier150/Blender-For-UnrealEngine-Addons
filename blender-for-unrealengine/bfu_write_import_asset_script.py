@@ -34,6 +34,8 @@ if "bpy" in locals():
         importlib.reload(bfu_write_utils)
     if "languages" in locals():
         importlib.reload(languages)
+    if "bfu_export_get_info" in locals():
+        importlib.reload(bfu_export_get_info)
 
 from . import bfu_basics
 from .bfu_basics import *
@@ -41,6 +43,8 @@ from . import bfu_utils
 from .bfu_utils import *
 from . import bfu_write_utils
 from .bfu_write_utils import *
+from . import bfu_export_get_info
+from .bfu_export_get_info import *
 
 
 def WriteImportAssetScript():
@@ -132,13 +136,7 @@ def WriteImportAssetScript():
             asset_data["custom_light_map_resolution"] = ExportCompuntedLightMapValue(asset.object)
             asset_data["light_map_resolution"] = GetCompuntedLightMap(asset.object)
             asset_data["collision_trace_flag"] = asset.object.CollisionTraceFlag
-            asset_data["vertex_color_import_option"] = asset.object.VertexColorImportOption
-            vertex_override_color = (
-                asset.object.VertexOverrideColor[0],  # R
-                asset.object.VertexOverrideColor[1],  # G
-                asset.object.VertexOverrideColor[2]  # B
-            )  # Color to Json
-            asset_data["vertex_override_color"] = vertex_override_color
+            
         data['assets'].append(asset_data)
 
     return data

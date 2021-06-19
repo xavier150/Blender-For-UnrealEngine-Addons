@@ -29,12 +29,16 @@ if "bpy" in locals():
         importlib.reload(bfu_basics)
     if "bfu_utils" in locals():
         importlib.reload(bfu_utils)
+    if "bfu_export_get_info" in locals():
+        importlib.reload(bfu_export_get_info)
 
 from . import bfu_write_text
 from . import bfu_basics
 from .bfu_basics import *
 from . import bfu_utils
 from .bfu_utils import *
+from . import bfu_export_get_info
+from .bfu_export_get_info import *
 
 
 def ApplyProxyData(obj):
@@ -311,6 +315,28 @@ def CorrectExtremUVAtExport():
             return True
     return False
 
+# Vertex Color
+
+
+def SetVertexColorForUnrealExport(parent):
+    
+    
+    objs = GetExportDesiredChilds(parent)
+    objs.append(parent)
+
+    for obj in objs:
+        if obj.type == "MESH":
+            vced = VertexColorExportData(obj, parent)
+            if vced.export_type == "REPLACE":
+                
+                obj.data.vertex_colors.active_index = vced.index
+                new_vertex_color = obj.data.vertex_colors.new()
+                new_vertex_color.name = "BFU_VertexColorExportName"
+
+                number = len(obj.data.vertex_colors) -1
+                for i in range(number):
+                    obj.data.vertex_colors.remove(obj.data.vertex_colors[0])
+    
 
 def GetShouldRescaleRig(obj):
     # This will return if the rig should be rescale.

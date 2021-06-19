@@ -129,7 +129,7 @@ def ExportSingleFbxAction(
         ResetArmaturePose(active)
         RescaleRigConsraints(active, rrf)
 
-    ApplyExportTransform(active)
+    ApplyExportTransform(active) # Apply export transform after rescale
 
     # animation_data.action is ReadOnly with tweakmode in 2.8
     if (scene.is_nla_tweakmode):
@@ -171,12 +171,13 @@ def ExportSingleFbxAction(
             bake_space_transform=False
             )
 
-    # Rename Action name for export
-    TempName = "ActionAutoRigProTempExportNameForUnreal"
-    OriginalActionName = active.animation_data.action.name
-    active.animation_data.action.name = TempName
+    elif (export_procedure == "auto-rig-pro"):
+        
+        # Rename Action name for export
+        TempName = "ActionAutoRigProTempExportNameForUnreal"
+        OriginalActionName = active.animation_data.action.name
+        active.animation_data.action.name = TempName
 
-    if (export_procedure == "auto-rig-pro"):
         ExportAutoProRig(
             filepath=fullpath,
             # export_rig_name=GetDesiredExportArmatureName(),
@@ -186,8 +187,8 @@ def ExportSingleFbxAction(
             arp_simplify_fac=active.SimplifyAnimForExport
             )
 
-    # Reset Action name
-    active.animation_data.action.name = OriginalActionName
+        # Reset Action name
+        active.animation_data.action.name = OriginalActionName
 
     asset_name.ResetNames()
 
