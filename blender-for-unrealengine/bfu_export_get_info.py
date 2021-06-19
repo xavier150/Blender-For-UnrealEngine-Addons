@@ -51,11 +51,11 @@ class VertexColorExportData:
             if self.GetPropertyOwner().VertexColorImportOption == "IGNORE":
                 self.export_type = "IGNORE"
 
-            if self.GetPropertyOwner().VertexColorImportOption == "OVERRIDE":
+            elif self.GetPropertyOwner().VertexColorImportOption == "OVERRIDE":
                 self.color = self.GetPropertyOwner().VertexOverrideColor
                 self.export_type = "OVERRIDE"
 
-            if self.GetPropertyOwner().VertexColorImportOption == "REPLACE":
+            elif self.GetPropertyOwner().VertexColorImportOption == "REPLACE":
                 index = self.GetChosenVertexIndex()
                 if index != -1:
                     self.index = index
@@ -71,13 +71,16 @@ class VertexColorExportData:
                 
     def GetChosenVertexIndex(self):
         obj = self.obj
-        if obj.type != "Mesh":
+        if obj.type != "MESH":
             return -1
+
         VertexColorToUse = self.GetPropertyOwner().VertexColorToUse
         VertexColorIndexToUse = self.GetPropertyOwner().VertexColorIndexToUse
+
         if obj:
             if obj.data:
                 if len(obj.data.vertex_colors) > 0:
+                    
                     if VertexColorToUse == "FirstIndex":
                         return 0
 
@@ -103,7 +106,7 @@ class VertexColorExportData:
         
         obj = self.obj
         if obj: 
-            if obj.type == "Mesh":
+            if obj.type == "MESH":
                 if obj.data:
                     if obj.VertexColorIndexToUse < len(obj.data.vertex_colors):
                         return obj.data.vertex_colors[index].name

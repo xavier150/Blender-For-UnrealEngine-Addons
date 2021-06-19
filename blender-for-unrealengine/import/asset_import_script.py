@@ -158,14 +158,6 @@ def ImportAllAssets():
             vertex_color_import_option = None
             if additional_data:         
 
-                vertex_color_import_option = unreal.VertexColorImportOption.REPLACE  # Default
-                if "vertex_override_color" in additional_data:
-                    vertex_override_color = unreal.LinearColor(
-                        additional_data["vertex_override_color"][0],
-                        additional_data["vertex_override_color"][1],
-                        additional_data["vertex_override_color"][2]
-                        )
-
                 if "vertex_color_import_option" in additional_data:
                     if additional_data["vertex_color_import_option"] == "IGNORE":
                         vertex_color_import_option = unreal.VertexColorImportOption.IGNORE
@@ -174,17 +166,25 @@ def ImportAllAssets():
                     elif additional_data["vertex_color_import_option"] == "REPLACE":
                         vertex_color_import_option = unreal.VertexColorImportOption.REPLACE
 
+                vertex_color_import_option = unreal.VertexColorImportOption.REPLACE  # Default
+                if "vertex_override_color" in additional_data:
+                    vertex_override_color = unreal.LinearColor(
+                        additional_data["vertex_override_color"][0],
+                        additional_data["vertex_override_color"][1],
+                        additional_data["vertex_override_color"][2]
+                        )
+
             # #################################[Change]
 
             # unreal.FbxImportUI
             # https://docs.unrealengine.com/en-US/PythonAPI/class/FbxImportUI.html?highlight=fbximportui#unreal.FbxImportUI
 
             # Vertex color
-            if vertex_override_color and GetMeshImportData():
-                GetMeshImportData().set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
-
             if vertex_color_import_option and GetMeshImportData():
                 GetMeshImportData().set_editor_property('vertex_color_import_option', vertex_color_import_option)
+
+            if vertex_override_color and GetMeshImportData():
+                GetMeshImportData().set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
 
             if asset_data["type"] == "Alembic":
                 task.get_editor_property('options').set_editor_property('import_type', unreal.AlembicImportType.SKELETAL)
@@ -266,11 +266,11 @@ def ImportAllAssets():
                         # Vertex color
 
                         asset_import_data = find_asset.get_editor_property('asset_import_data')
-                        if vertex_override_color:
-                            asset_import_data.set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
-
                         if vertex_color_import_option:
                             asset_import_data.set_editor_property('vertex_color_import_option', vertex_color_import_option) 
+
+                        if vertex_override_color:
+                            asset_import_data.set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
 
             
             # ###############[ import asset ]################
