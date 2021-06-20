@@ -1007,18 +1007,24 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data = None):
         animation_data.SaveAnimationData(armature)
         animation_data.ClearAnimationData(armature)
     else:
+        armature_animation_data = AnimationManagment()
         animation_data = target_animation_data
+        armature_animation_data.ClearAnimationData(armature)
+        
     
     
     armature.scale = armature.scale*rescale
-    armature.location = armature.location*rescale
-    
+    old_location = armature.location
+    armature.location = (0,0,0)
+
     bpy.ops.object.transform_apply(
         location=True,
         scale=True,
         rotation=True,
         properties=True
         )
+    
+    armature.location = old_location*rescale
 
     animation_data.SetAnimationData(armature)
 
@@ -1078,19 +1084,34 @@ def RescaleActionCurve(action, scale):
                     mod.strength *= scale
 
 
-def RescaleAllActionCurve(scale):
+def RescaleAllActionCurve(bone_scale, scene_scale = 1):
     for action in bpy.data.actions:
+        print(action.name)
         for fcurve in action.fcurves:
-            if fcurve.data_path.split(".")[-1] == "location":
+            if fcurve.data_path == "location":
+                # Curve
                 for key in fcurve.keyframe_points:
-                    key.co[1] *= scale
-                    key.handle_left[1] *= scale
-                    key.handle_right[1] *= scale
+                    key.co[1] *= scene_scale
+                    key.handle_left[1] *= scene_scale
+                    key.handle_right[1] *= scene_scale
 
                 # Modifier
                 for mod in fcurve.modifiers:
                     if mod.type == "NOISE":
-                        mod.strength *= scale
+                        mod.strength *= scene_scale
+
+            elif fcurve.data_path.split(".")[-1] == "location":
+
+                # Curve
+                for key in fcurve.keyframe_points:
+                    key.co[1] *= bone_scale
+                    key.handle_left[1] *= bone_scale
+                    key.handle_right[1] *= bone_scale
+
+                # Modifier
+                for mod in fcurve.modifiers:
+                    if mod.type == "NOISE":
+                        mod.strength *= bone_scale
 
 
 def GetFinalAssetToExport():
