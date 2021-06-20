@@ -701,7 +701,7 @@ def ExportCompuntedLightMapValue(obj):
 def GetExportRealSurfaceArea(obj):
     scene = bpy.context.scene
 
-    MoveToGlobalView()
+    local_view_areas = MoveToGlobalView()
     SafeModeSet('OBJECT')
 
     SavedSelect = GetCurrentSelection()
@@ -737,6 +737,7 @@ def GetExportRealSurfaceArea(obj):
     area = GetSurfaceArea(active)
     CleanDeleteObjects(bpy.context.selected_objects)
     SetCurrentSelection(SavedSelect)
+    MoveToLocalView(local_view_areas)
     return area
 
 

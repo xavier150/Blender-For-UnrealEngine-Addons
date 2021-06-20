@@ -40,15 +40,25 @@ def CheckPluginIsActivated(PluginName):
 
 
 def MoveToGlobalView():
+    local_view_areas = []
     for area in bpy.context.screen.areas:
         if area.type == 'VIEW_3D':
             space = area.spaces[0]
             if space.local_view:  # check if using local view
-                for region in area.regions:
-                    if region.type == 'WINDOW':
-                        # override context and switch to global view
-                        override = {'area': area, 'region': region}
-                        bpy.ops.view3d.localview(override)
+                local_view_areas.append(area)
+
+    for local_view_area in local_view_areas:
+        for region in local_view_area.regions:
+            if region.type == 'WINDOW':
+                # override context and switch to global view
+                override = {'area': local_view_area, 'region': region}
+                bpy.ops.view3d.localview(override)
+
+    return local_view_areas
+
+def MoveToLocalView(local_view_areas):
+    #TO DO
+    pass
 
 
 def GetCurrentSelection():
