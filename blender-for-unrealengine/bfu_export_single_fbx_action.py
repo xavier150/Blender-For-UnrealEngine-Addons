@@ -112,6 +112,8 @@ def ExportSingleFbxAction(
     if addon_prefs.bakeArmatureAction:
         BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)
 
+    ApplyExportTransform(active, "Action") # Apply export transform before rescale
+
     # This will rescale the rig and unit scale to get a root bone egal to 1
     ShouldRescaleRig = GetShouldRescaleRig(active)
     if ShouldRescaleRig:
@@ -128,8 +130,6 @@ def ExportSingleFbxAction(
         RescaleSelectCurveHook(1/rrf)
         ResetArmaturePose(active)
         RescaleRigConsraints(active, rrf)
-
-    ApplyExportTransform(active) # Apply export transform after rescale
 
     # animation_data.action is ReadOnly with tweakmode in 2.8
     if (scene.is_nla_tweakmode):

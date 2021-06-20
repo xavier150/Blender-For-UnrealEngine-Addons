@@ -952,19 +952,37 @@ def CorrectExtremeUV(stepScale=2):
             obj.data.update()
 
 
-def ApplyExportTransform(obj):
+def ApplyExportTransform(obj, use_type = "Object"):
+    
     newMatrix = obj.matrix_world @ mathutils.Matrix.Translation((0, 0, 0))
     saveScale = obj.scale * 1
 
+
     # Ref
     # Moves object to the center of the scene for export
-    if obj.MoveToCenterForExport:
+    if use_type == "Object":
+        MoveToCenter = obj.MoveToCenterForExport
+        RotateToZero = obj.RotateToZeroForExport
+
+    elif use_type == "Action":
+        MoveToCenter = obj.MoveActionToCenterForExport
+        RotateToZero = obj.RotateActionToZeroForExport
+
+    elif use_type == "NLA":
+        MoveToCenter = obj.MoveNLAToCenterForExport
+        RotateToZero = obj.RotateNLAToZeroForExport
+
+    else:
+        return
+    
+    if MoveToCenter:
         mat_trans = mathutils.Matrix.Translation((0, 0, 0))
         mat_rot = newMatrix.to_quaternion().to_matrix()
         newMatrix = mat_trans @ mat_rot.to_4x4()
 
+    obj.matrix_world = newMatrix
     # Turn object to the center of the scene for export
-    if obj.RotateToZeroForExport:
+    if RotateToZero:
         mat_trans = mathutils.Matrix.Translation(newMatrix.to_translation())
         mat_rot = mathutils.Matrix.Rotation(0, 4, 'X')
         newMatrix = mat_trans @ mat_rot
@@ -977,16 +995,13 @@ def ApplyExportTransform(obj):
     AddMat = mat_loc @ mat_rot.to_4x4()
 
     obj.matrix_world = newMatrix @ AddMat
-    if obj.type == "ARMATURE":
-        obj.scale = (1.0, 1.0, 1.0) #That remove some errors
-    else:
-        obj.scale = saveScale
+    obj.scale = saveScale
 
 
 def ApplySkeletalExportScale(armature, rescale, target_animation_data = None):
  
     # This function will rescale the armature and applys the new scale
-
+    
     if target_animation_data is None:
         animation_data = AnimationManagment()
         animation_data.SaveAnimationData(armature)
@@ -994,8 +1009,10 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data = None):
     else:
         animation_data = target_animation_data
     
+    
     armature.scale = armature.scale*rescale
-
+    armature.location = armature.location*rescale
+    
     bpy.ops.object.transform_apply(
         location=True,
         scale=True,

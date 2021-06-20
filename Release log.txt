@@ -357,6 +357,7 @@ It is now possible to force the duration of an animation according to the scene 
 == Rev 0.2.9 ==
 
 - New: you can now choose a specific Vertex Paint to use when you Export.
+- New: You can now choose if you use scene or armature as origin for export in SkeletalMesh animations.
 - New: Manage more characters cultures in path or files names.
 - Change: The skeletal mesh are exported with scale at 1.0.
 - Change: You can use "Show Asset(s)" and "Show Action(s)" buttons for force to update the action cache.

@@ -103,7 +103,9 @@ def ExportSingleFbxNLAAnim(
 
     if addon_prefs.bakeArmatureAction:
         BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)
-    
+
+    ApplyExportTransform(active, "NLA") # Apply export transform before rescale
+
     # This will rescale the rig and unit scale to get a root bone egal to 1
     ShouldRescaleRig = GetShouldRescaleRig(active)
     if ShouldRescaleRig:
@@ -113,16 +115,17 @@ def ExportSingleFbxNLAAnim(
         bpy.context.scene.unit_settings.scale_length *= 1/rrf
         oldScale = active.scale.z
         
-        ApplySkeletalExportScale(active, rrf, animation_data)
+
+        ApplySkeletalExportScale(active, rrf, target_animation_data = animation_data)
         RescaleAllActionCurve(rrf*oldScale)
         for selected in bpy.context.selected_objects:
             if selected.type == "MESH":
                 RescaleShapeKeysCurve(selected, 1/rrf)
+        
         RescaleSelectCurveHook(1/rrf)
+        
         ResetArmaturePose(active)
         RescaleRigConsraints(active, rrf)
-    
-    ApplyExportTransform(active) # Apply export transform after rescale
 
     # scene.frame_start += active.StartFramesOffset
     # scene.frame_end += active.EndFramesOffset
