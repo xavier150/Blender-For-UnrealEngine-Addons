@@ -779,7 +779,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             " | If true the mesh will be moved to the center" +
             " of the scene for export." +
             " (This is used so that the origin of the fbx file" +
-            " is the same as the mesh in blender)"
+            " is the same as the mesh in blender)" +
+            " Note: Unreal Engine ignore the position of the skeleton at the import."
             ),
         default=True
         )
@@ -800,7 +801,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             " | If true the mesh will be moved to the center" +
             " of the scene for export." +
             " (This is used so that the origin of the fbx file" +
-            " is the same as the mesh in blender)"
+            " is the same as the mesh in blender)" +
+            " Note: Unreal Engine ignore the position of the skeleton at the import."
             ),
         default=True
         )

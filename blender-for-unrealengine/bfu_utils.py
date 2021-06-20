@@ -248,7 +248,7 @@ class AnimationManagment():
         obj.animation_data_clear()
 
     def SetAnimationData(self, obj, copy_nla=False):
-        print(obj.name)
+        
         if self.use_animation_data:
             obj.animation_data_create()
 
@@ -1002,19 +1002,17 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data = None):
  
     # This function will rescale the armature and applys the new scale
     
+    armature.scale = armature.scale*rescale
+    old_location = armature.location.copy()
+
     if target_animation_data is None:
-        animation_data = AnimationManagment()
-        animation_data.SaveAnimationData(armature)
-        animation_data.ClearAnimationData(armature)
+        armature_animation_data = AnimationManagment()
+        armature_animation_data.SaveAnimationData(armature)
+        armature_animation_data.ClearAnimationData(armature)
     else:
         armature_animation_data = AnimationManagment()
-        animation_data = target_animation_data
         armature_animation_data.ClearAnimationData(armature)
-        
     
-    
-    armature.scale = armature.scale*rescale
-    old_location = armature.location
     armature.location = (0,0,0)
 
     bpy.ops.object.transform_apply(
@@ -1026,7 +1024,10 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data = None):
     
     armature.location = old_location*rescale
 
-    animation_data.SetAnimationData(armature)
+    if target_animation_data is None:
+        armature_animation_data.SetAnimationData(armature, True)
+    else:
+        target_animation_data.SetAnimationData(armature, True)
 
 
 def RescaleSelectCurveHook(scale):

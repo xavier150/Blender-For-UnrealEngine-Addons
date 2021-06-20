@@ -112,19 +112,20 @@ def ExportSingleFbxNLAAnim(
 
         rrf = GetRescaleRigFactor()  # rigRescaleFactor
         savedUnitLength = bpy.context.scene.unit_settings.scale_length
-        bpy.context.scene.unit_settings.scale_length *= 1/rrf
+        bpy.context.scene.unit_settings.scale_length = 0.01 # *= 1/rrf
+
         oldScale = active.scale.z
         
-
-        ApplySkeletalExportScale(active, rrf, target_animation_data = animation_data)
-        RescaleAllActionCurve(rrf*oldScale)
+        ApplySkeletalExportScale(active, rrf, animation_data)
+        RescaleAllActionCurve(rrf*oldScale, savedUnitLength/0.01)
+        
         for selected in bpy.context.selected_objects:
             if selected.type == "MESH":
                 RescaleShapeKeysCurve(selected, 1/rrf)
         
         RescaleSelectCurveHook(1/rrf)
-        
         ResetArmaturePose(active)
+
         RescaleRigConsraints(active, rrf)
 
     # scene.frame_start += active.StartFramesOffset
@@ -134,7 +135,7 @@ def ExportSingleFbxNLAAnim(
     fullpath = os.path.join(absdirpath, filename)
 
     asset_name.SetExportName()
-
+    
     if (export_procedure == "normal"):
         bpy.ops.export_scene.fbx(
             filepath=fullpath,
@@ -184,7 +185,7 @@ def ExportSingleFbxNLAAnim(
     if ShouldRescaleRig:
         # Reset Curve an unit
         bpy.context.scene.unit_settings.scale_length = savedUnitLength
-        RescaleAllActionCurve(1/(rrf*oldScale))
+        RescaleAllActionCurve(1/(rrf*oldScale), 0.01/savedUnitLength)
 
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in data_to_remove:

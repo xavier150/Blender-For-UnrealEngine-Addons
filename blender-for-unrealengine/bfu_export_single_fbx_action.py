@@ -120,10 +120,11 @@ def ExportSingleFbxAction(
 
         rrf = GetRescaleRigFactor()  # rigRescaleFactor
         savedUnitLength = bpy.context.scene.unit_settings.scale_length
-        bpy.context.scene.unit_settings.scale_length *= 1/rrf
+        bpy.context.scene.unit_settings.scale_length = 0.01 # *= 1/rrf
+
         oldScale = active.scale.z
         ApplySkeletalExportScale(active, rrf)
-        RescaleAllActionCurve(rrf*oldScale)
+        RescaleAllActionCurve(rrf*oldScale, savedUnitLength/0.01)
         for selected in bpy.context.selected_objects:
             if selected.type == "MESH":
                 RescaleShapeKeysCurve(selected, 1/rrf)
@@ -207,7 +208,7 @@ def ExportSingleFbxAction(
     if ShouldRescaleRig:
         # Reset Curve an unit
         bpy.context.scene.unit_settings.scale_length = savedUnitLength
-        RescaleAllActionCurve(1/(rrf*oldScale))
+        RescaleAllActionCurve(1/(rrf*oldScale), 0.01/savedUnitLength)
 
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in data_to_remove:

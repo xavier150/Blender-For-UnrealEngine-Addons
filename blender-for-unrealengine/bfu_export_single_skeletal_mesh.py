@@ -114,7 +114,8 @@ def ExportSingleSkeletalMesh(
 
         rrf = GetRescaleRigFactor()  # rigRescaleFactor
         savedUnitLength = bpy.context.scene.unit_settings.scale_length
-        bpy.context.scene.unit_settings.scale_length *= 1/rrf
+        bpy.context.scene.unit_settings.scale_length = 0.01 # *= 1/rrf
+
         ApplySkeletalExportScale(active, rrf)
 
     absdirpath = bpy.path.abspath(dirpath)
