@@ -772,6 +772,48 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=False
         )
 
+    bpy.types.Object.MoveActionToCenterForExport = BoolProperty(
+        name="Move animation to center",
+        description=(
+            "(Action animation only) If true use object origin else use scene origin." +
+            " | If true the mesh will be moved to the center" +
+            " of the scene for export." +
+            " (This is used so that the origin of the fbx file" +
+            " is the same as the mesh in blender)"
+            ),
+        default=True
+        )
+
+    bpy.types.Object.RotateActionToZeroForExport = BoolProperty(
+        name="Rotate Action to zero",
+        description=(
+            "(Action animation only) If true use object rotation else use scene rotation." +
+            " | If true the mesh will use zero rotation for export."
+            ),
+        default=False
+        )
+
+    bpy.types.Object.MoveNLAToCenterForExport = BoolProperty(
+        name="Move NLA to center",
+        description=(
+            "(Non linear animation only) If true use object origin else use scene origin." +
+            " | If true the mesh will be moved to the center" +
+            " of the scene for export." +
+            " (This is used so that the origin of the fbx file" +
+            " is the same as the mesh in blender)"
+            ),
+        default=True
+        )
+
+    bpy.types.Object.RotateNLAToZeroForExport = BoolProperty(
+        name="Rotate NLA to zero",
+        description=(
+            "(Non linear animation only) If true use object rotation else use scene rotation." +
+            " | If true the mesh will use zero rotation for export."
+            ),
+        default=False
+        )
+
     bpy.types.Object.AdditionalLocationForExport = FloatVectorProperty(
         name="Additional location",
         description=(
@@ -1050,6 +1092,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.exporSecondaryBoneAxis',
                             'obj.MoveToCenterForExport',
                             'obj.RotateToZeroForExport',
+                            'obj.MoveActionToCenterForExport',
+                            'obj.RotateActionToZeroForExport',
+                            'obj.MoveNLAToCenterForExport',
+                            'obj.RotateNLAToZeroForExport',
                             'obj.AdditionalLocationForExport',
                             'obj.AdditionalRotationForExport',
                         ]
@@ -1502,6 +1548,22 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 text='(This assets is not a SkeletalMesh or Camera)')
                     else:
                         layout.label(text='(No properties to show.)')
+                else:
+                    layout.label(text='(No properties to show.)')
+
+            bfu_ui_utils.LayoutSection(layout, "bfu_anim_advanced_properties_expanded", "Animation advanced Properties")
+            if scene.bfu_anim_advanced_properties_expanded:
+                if obj is not None:
+                    if obj.ExportEnum == "export_recursive":
+
+                        if GetAssetType(obj) != "Alembic":
+                            transformProp = layout.column()
+                            transformProp.prop(obj, "MoveActionToCenterForExport")
+                            transformProp.prop(obj, "RotateActionToZeroForExport")
+
+                            transformProp2 = layout.column()
+                            transformProp2.prop(obj, "MoveNLAToCenterForExport")
+                            transformProp2.prop(obj, "RotateNLAToZeroForExport")
                 else:
                     layout.label(text='(No properties to show.)')
 
