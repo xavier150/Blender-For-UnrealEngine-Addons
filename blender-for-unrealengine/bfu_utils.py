@@ -862,7 +862,12 @@ def ApplyNeededModifierToSelect():
                     if obj.data.users > 1:
                         obj.data = obj.data.copy()
                     if bpy.ops.object.modifier_apply.poll():
-                        bpy.ops.object.modifier_apply(modifier=mod.name)
+                        try:
+                            bpy.ops.object.modifier_apply(modifier=mod.name)
+                        except RuntimeError as ex:
+                            # print the error incase its important... but continue
+                            print(ex)
+                        
 
     SetCurrentSelection(SavedSelect)
 
