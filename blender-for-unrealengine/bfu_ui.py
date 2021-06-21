@@ -819,7 +819,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.AdditionalLocationForExport = FloatVectorProperty(
         name="Additional location",
         description=(
-            "This will add a additional absolute rotation to the mesh"
+            "This will add a additional absolute location to the mesh"
             ),
         subtype="TRANSLATION",
         default=(0, 0, 0)
