@@ -1,6 +1,6 @@
 # Blender For Unreal Engine
 This Add-on allows you to export content created with Blender to Unreal Engine. StaticMeshs, SkeletalMeshs, Animations (NLA and Actions), Collisions and Sockets, Alembic animations, Camera and sequencer [...]
-</br>It works with Blender 2.7, 2.8, 2.9 and work for UE4, UE5!
+It works with Blender 2.7, 2.8, 2.9 and work for UE4, UE5!
 
 Videos:
 - [How Import Blender assets to Unreal Engine](https://youtu.be/2ehb2Ih3Nbg)
@@ -8,13 +8,13 @@ Videos:
 - [Teaser](https://youtu.be/YLOZZIlhgaM)
 
 # How it works and Documentation
-Working on object packs for Unreal Engine 4 can be tedious with Blender. That's why I created the Add-on: "Blender for UnrealEngine". It simplifies the method of exporting from Blender to Unreal Engine 4 by allowing you to export all the assets of a scene at the same time. It even automatically distributes them in a proper tree structure in correlation with the Unreal Engine 4 pipeline!
+Working on object packs for Unreal Engine can be tedious with Blender. That's why I created the Add-on: "Blender for UnrealEngine". it simplified the export process from Blender to Unreal Engine by allowing you to export all the assets of a scene at the same time. It even automatically distributes them in a proper tree structure in correlation with the Unreal Engine pipeline!
 
-Sockets and collision shapes are created directly in Blender.
-You can precisely choose which animations need to be exported.
-It includes a error checker to prevent potential problems and generate python scripts that can be used in Unreal Engine 4 to import the Camera Objects and Animations from your Blender project to a Level Sequence in Unreal Engine 4. All Camera Objects and their animations will import as Camera Actors.
+Sockets and collision shapes are created directly in Blender, you can precisely choose which animations need to be exported. Blender For Unreal Engine also includes a error checker to prevent the all potential problems. You have an explanation of the problem and how to solve it. In addition to the possibility in certain cases of correcting the problem automatically.
 
-You can see the tutorials and documentation here: [Wiki page](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki)
+By using Blender For Unreal Engine you can generate python scripts to import the all exported assets directly in Unreal Engine. That work too for the cameras in a Level Sequence with the all cuts and camera ratio.
+
+More info, tutorials and documentation here --> [Wiki page](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki) <--
 
 # Download and installation
 1. Download addon:
