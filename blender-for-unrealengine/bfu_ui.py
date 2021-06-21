@@ -1433,9 +1433,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     if obj.ExportEnum == "export_recursive":
 
                         transformProp = layout.column()
-                        if GetAssetType(obj) != "Alembic":
+                        if GetAssetType(obj) != "Alembic" and GetAssetType(obj) != "Camera":
                             transformProp.prop(obj, "MoveToCenterForExport")
                             transformProp.prop(obj, "RotateToZeroForExport")
+                        if GetAssetType(obj) != "Alembic":
                             transformProp.prop(obj, "AdditionalLocationForExport")
                             transformProp.prop(obj, "AdditionalRotationForExport")
                             transformProp.prop(obj, 'exportGlobalScale')
