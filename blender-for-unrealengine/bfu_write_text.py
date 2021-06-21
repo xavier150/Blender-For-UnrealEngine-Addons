@@ -331,7 +331,9 @@ def WriteCameraAnimationTracks(obj):
                 # Get Transfrom
 
                 matrix = camera.matrix_world @ Matrix.Rotation(radians(90.0), 4, 'Y') @ Matrix.Rotation(radians(-90.0), 4, 'X')
+                matrix_rotation_offset = Matrix.Rotation(camera.AdditionalRotationForExport.z, 4, 'Z')               
                 loc = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
+                loc += camera.AdditionalLocationForExport
                 r = matrix.to_euler()
                 s = matrix.to_scale()
 

@@ -1436,10 +1436,12 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         if GetAssetType(obj) != "Alembic" and GetAssetType(obj) != "Camera":
                             transformProp.prop(obj, "MoveToCenterForExport")
                             transformProp.prop(obj, "RotateToZeroForExport")
-                        if GetAssetType(obj) != "Alembic":
                             transformProp.prop(obj, "AdditionalLocationForExport")
                             transformProp.prop(obj, "AdditionalRotationForExport")
                             transformProp.prop(obj, 'exportGlobalScale')
+                        elif GetAssetType(obj) == "Camera":
+                            transformProp.prop(obj, "AdditionalLocationForExport")
+
 
                         AxisProperty = layout.column()
                         AxisProperty.prop(obj, 'exportAxisForward')
