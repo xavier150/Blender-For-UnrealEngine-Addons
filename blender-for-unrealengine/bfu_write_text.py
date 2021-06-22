@@ -310,6 +310,18 @@ def WriteCameraAnimationTracks(obj):
                 keys.append((frame, v))
             return keys
         return[(scene.frame_start, DataValue)]
+    
+    def GetTimelineMarkerAtFrame(frame):
+        scene = bpy.context.scene
+
+        previous_marker = None
+        for marker in scene.timeline_markers:
+            if marker.frame == frame:
+                return marker
+            if marker.frame > frame:
+                return previous_marker
+            previous_marker = marker
+
 
     class CameraDataAtFrame():
 
@@ -325,60 +337,65 @@ def WriteCameraAnimationTracks(obj):
 
         def EvaluateTracks(self, camera, frame_start, frame_end):
             saveFrame = scene.frame_current
+            if camera is None:
+                return
+            
             for frame in range(frame_start, frame_end+1):
-                scene.frame_set(frame)
+                marker = GetTimelineMarkerAtFrame(frame)
+                if marker:
+                    if marker.camera == camera:
+                        scene.frame_set(frame)
 
-                # Get Transfrom
+                        # Get Transfrom
+                        matrix = camera.matrix_world @ Matrix.Rotation(radians(90.0), 4, 'Y') @ Matrix.Rotation(radians(-90.0), 4, 'X')
+                        matrix_rotation_offset = Matrix.Rotation(camera.AdditionalRotationForExport.z, 4, 'Z')               
+                        loc = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
+                        loc += camera.AdditionalLocationForExport
+                        r = matrix.to_euler()
+                        s = matrix.to_scale()
 
-                matrix = camera.matrix_world @ Matrix.Rotation(radians(90.0), 4, 'Y') @ Matrix.Rotation(radians(-90.0), 4, 'X')
-                matrix_rotation_offset = Matrix.Rotation(camera.AdditionalRotationForExport.z, 4, 'Z')               
-                loc = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
-                loc += camera.AdditionalLocationForExport
-                r = matrix.to_euler()
-                s = matrix.to_scale()
+                        array_location = [loc[0], loc[1]*-1, loc[2]]
+                        array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]
+                        array_scale = [s[0], s[1], s[2]]
 
-                array_location = [loc[0], loc[1]*-1, loc[2]]
-                array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]
-                array_scale = [s[0], s[1], s[2]]
+                        transform = {}
+                        transform["location_x"] = array_location[0]
+                        transform["location_y"] = array_location[1]
+                        transform["location_z"] = array_location[2]
+                        transform["rotation_x"] = array_rotation[0]
+                        transform["rotation_y"] = array_rotation[1]
+                        transform["rotation_z"] = array_rotation[2]
+                        transform["scale_x"] = array_scale[0]
+                        transform["scale_y"] = array_scale[1]
+                        transform["scale_z"] = array_scale[2]
+                        self.transform_track[frame] = transform
 
-                transform = {}
-                transform["location_x"] = array_location[0]
-                transform["location_y"] = array_location[1]
-                transform["location_z"] = array_location[2]
-                transform["rotation_x"] = array_rotation[0]
-                transform["rotation_y"] = array_rotation[1]
-                transform["rotation_z"] = array_rotation[2]
-                transform["scale_x"] = array_scale[0]
-                transform["scale_y"] = array_scale[1]
-                transform["scale_z"] = array_scale[2]
-                self.transform_track[frame] = transform
+                        # Get FocalLength SensorWidth SensorHeight
+                        self.lens[frame] = getOneKeysByFcurves(camera, "lens", camera.data.lens, frame)
+                        self.sensor_width[frame] = getOneKeysByFcurves(camera, "sensor_width", camera.data.sensor_width, frame)
+                        self.sensor_height[frame] = getOneKeysByFcurves(camera, "sensor_height", camera.data.sensor_height, frame)
 
-                # Get FocalLength SensorWidth SensorHeight
-                self.lens[frame] = getOneKeysByFcurves(camera, "lens", camera.data.lens, frame)
-                self.sensor_width[frame] = getOneKeysByFcurves(camera, "sensor_width", camera.data.sensor_width, frame)
-                self.sensor_height[frame] = getOneKeysByFcurves(camera, "sensor_height", camera.data.sensor_height, frame)
+                        # Get FocusDistance
+                        if camera.data.dof.focus_object is not None:
+                            key = getCameraFocusDistance(camera, camera.data.dof.focus_object) * 100 * bpy.context.scene.unit_settings.scale_length
 
-                # Get FocusDistance
-                if camera.data.dof.focus_object is not None:
-                    key = getCameraFocusDistance(camera, camera.data.dof.focus_object) * 100 * bpy.context.scene.unit_settings.scale_length
+                        else:
+                            key = getOneKeysByFcurves(camera, "dof.focus_distance", camera.data.dof.focus_distance, frame) * 100 * bpy.context.scene.unit_settings.scale_length
 
-                else:
-                    key = getOneKeysByFcurves(camera, "dof.focus_distance", camera.data.dof.focus_distance, frame) * 100 * bpy.context.scene.unit_settings.scale_length
+                        if key > 0:
+                            self.focus_distance[frame] = key
+                        else:
+                            self.focus_distance[frame] = 100000  # 100000 is default value in ue4
 
-                if key > 0:
-                    self.focus_distance[frame] = key
-                else:
-                    self.focus_distance[frame] = 100000  # 100000 is default value in ue4
+                        # Write Aperture (Depth of Field) keys
+                        if scene.render.engine == "BLENDER_EEVEE" or scene.render.engine == "CYCLES" or scene.render.engine == "BLENDER_WORKBENCH":
+                            key = getOneKeysByFcurves(camera, "dof.aperture_fstop", camera.data.dof.aperture_fstop, frame)
+                            self.aperture_fstop[frame] = key / bpy.context.scene.unit_settings.scale_length
+                        else:
+                            self.aperture_fstop[frame] = 2.8  # 2.8 is default value in ue4
 
-                # Write Aperture (Depth of Field) keys
-                if scene.render.engine == "BLENDER_EEVEE" or scene.render.engine == "CYCLES" or scene.render.engine == "BLENDER_WORKBENCH":
-                    key = getOneKeysByFcurves(camera, "dof.aperture_fstop", camera.data.dof.aperture_fstop, frame)
-                    self.aperture_fstop[frame] = key / bpy.context.scene.unit_settings.scale_length
-                else:
-                    self.aperture_fstop[frame] = 2.8  # 2.8 is default value in ue4
-
-                boolKey = getOneKeysByFcurves(camera, "hide_viewport", camera.hide_viewport, frame, False)
-                self.hide_viewport[frame] = (boolKey < 1)  # Inversed for convert hide to spawn
+                        boolKey = getOneKeysByFcurves(camera, "hide_viewport", camera.hide_viewport, frame, False)
+                        self.hide_viewport[frame] = (boolKey < 1)  # Inversed for convert hide to spawn
             scene.frame_set(saveFrame)
 
         pass
