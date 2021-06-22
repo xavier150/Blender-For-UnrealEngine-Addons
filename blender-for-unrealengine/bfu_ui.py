@@ -1612,10 +1612,12 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     "object.updatecollectionlist",
                     icon='RECOVER_LAST')
 
-                col_name = scene.CollectionExportList[scene.active_CollectionExportList].name
-                col = bpy.data.collections[col_name]
-                col_prop = layout
-                col_prop.prop(col, 'exportFolderName', icon='FILE_FOLDER')
+                if scene.active_CollectionExportList < len(scene.CollectionExportList):
+                    col_name = scene.CollectionExportList[scene.active_CollectionExportList].name
+                    if col_name in bpy.data.collections:
+                        col = bpy.data.collections[col_name]
+                        col_prop = layout
+                        col_prop.prop(col, 'exportFolderName', icon='FILE_FOLDER')
 
                 collectionPropertyInfo = layout.row().box().split(factor=0.75)
                 collectionNum = len(GetCollectionToExport(scene))
