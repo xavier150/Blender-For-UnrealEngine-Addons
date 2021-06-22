@@ -102,7 +102,7 @@ def ExportSingleStaticMesh(
 
 
 
-    ApplyExportTransform(active)
+    ApplyExportTransform(active, "Object")
     absdirpath = bpy.path.abspath(dirpath)
     VerifiDirs(absdirpath)
     fullpath = os.path.join(absdirpath, filename)

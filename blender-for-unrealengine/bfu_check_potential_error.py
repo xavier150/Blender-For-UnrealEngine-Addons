@@ -560,7 +560,7 @@ def TryToCorrectPotentialError(errorIndex):
     global successCorrect
     successCorrect = False
 
-    MoveToGlobalView()
+    local_view_areas = MoveToGlobalView()
 
     MyCurrentDataSave = UserSceneSave()
     MyCurrentDataSave.SaveCurrentScene()
@@ -634,6 +634,7 @@ def TryToCorrectPotentialError(errorIndex):
     # ----------------------------------------Reset data
     MyCurrentDataSave.ResetSelectByName()
     MyCurrentDataSave.ResetSceneAtSave()
+    MoveToLocalView(local_view_areas)
 
     # ----------------------------------------
 

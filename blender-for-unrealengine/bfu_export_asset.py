@@ -263,7 +263,7 @@ def ExportForUnrealEngine():
     scene = bpy.context.scene
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
 
-    MoveToGlobalView()
+    local_view_areas = MoveToGlobalView()
 
     MyCurrentDataSave = UserSceneSave()
     MyCurrentDataSave.SaveCurrentScene()
@@ -330,3 +330,5 @@ def ExportForUnrealEngine():
     for action in bpy.data.actions:
         if action.name not in MyCurrentDataSave.action_names:
             bpy.data.actions.remove(action)
+
+    MoveToLocalView(local_view_areas)

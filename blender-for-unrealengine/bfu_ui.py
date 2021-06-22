@@ -772,10 +772,54 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=False
         )
 
+    bpy.types.Object.MoveActionToCenterForExport = BoolProperty(
+        name="Move animation to center",
+        description=(
+            "(Action animation only) If true use object origin else use scene origin." +
+            " | If true the mesh will be moved to the center" +
+            " of the scene for export." +
+            " (This is used so that the origin of the fbx file" +
+            " is the same as the mesh in blender)" +
+            " Note: Unreal Engine ignore the position of the skeleton at the import."
+            ),
+        default=True
+        )
+
+    bpy.types.Object.RotateActionToZeroForExport = BoolProperty(
+        name="Rotate Action to zero",
+        description=(
+            "(Action animation only) If true use object rotation else use scene rotation." +
+            " | If true the mesh will use zero rotation for export."
+            ),
+        default=False
+        )
+
+    bpy.types.Object.MoveNLAToCenterForExport = BoolProperty(
+        name="Move NLA to center",
+        description=(
+            "(Non linear animation only) If true use object origin else use scene origin." +
+            " | If true the mesh will be moved to the center" +
+            " of the scene for export." +
+            " (This is used so that the origin of the fbx file" +
+            " is the same as the mesh in blender)" +
+            " Note: Unreal Engine ignore the position of the skeleton at the import."
+            ),
+        default=True
+        )
+
+    bpy.types.Object.RotateNLAToZeroForExport = BoolProperty(
+        name="Rotate NLA to zero",
+        description=(
+            "(Non linear animation only) If true use object rotation else use scene rotation." +
+            " | If true the mesh will use zero rotation for export."
+            ),
+        default=False
+        )
+
     bpy.types.Object.AdditionalLocationForExport = FloatVectorProperty(
         name="Additional location",
         description=(
-            "This will add a additional absolute rotation to the mesh"
+            "This will add a additional absolute location to the mesh"
             ),
         subtype="TRANSLATION",
         default=(0, 0, 0)
@@ -1050,6 +1094,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.exporSecondaryBoneAxis',
                             'obj.MoveToCenterForExport',
                             'obj.RotateToZeroForExport',
+                            'obj.MoveActionToCenterForExport',
+                            'obj.RotateActionToZeroForExport',
+                            'obj.MoveNLAToCenterForExport',
+                            'obj.RotateNLAToZeroForExport',
                             'obj.AdditionalLocationForExport',
                             'obj.AdditionalRotationForExport',
                         ]
@@ -1385,12 +1433,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     if obj.ExportEnum == "export_recursive":
 
                         transformProp = layout.column()
-                        if GetAssetType(obj) != "Alembic":
+                        if GetAssetType(obj) != "Alembic" and GetAssetType(obj) != "Camera":
                             transformProp.prop(obj, "MoveToCenterForExport")
                             transformProp.prop(obj, "RotateToZeroForExport")
                             transformProp.prop(obj, "AdditionalLocationForExport")
                             transformProp.prop(obj, "AdditionalRotationForExport")
                             transformProp.prop(obj, 'exportGlobalScale')
+                        elif GetAssetType(obj) == "Camera":
+                            transformProp.prop(obj, "AdditionalLocationForExport")
+
 
                         AxisProperty = layout.column()
                         AxisProperty.prop(obj, 'exportAxisForward')
@@ -1505,6 +1556,22 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 else:
                     layout.label(text='(No properties to show.)')
 
+            bfu_ui_utils.LayoutSection(layout, "bfu_anim_advanced_properties_expanded", "Animation advanced Properties")
+            if scene.bfu_anim_advanced_properties_expanded:
+                if obj is not None:
+                    if obj.ExportEnum == "export_recursive":
+
+                        if GetAssetType(obj) != "Alembic":
+                            transformProp = layout.column()
+                            transformProp.prop(obj, "MoveActionToCenterForExport")
+                            transformProp.prop(obj, "RotateActionToZeroForExport")
+
+                            transformProp2 = layout.column()
+                            transformProp2.prop(obj, "MoveNLAToCenterForExport")
+                            transformProp2.prop(obj, "RotateNLAToZeroForExport")
+                else:
+                    layout.label(text='(No properties to show.)')
+
             bfu_ui_utils.LayoutSection(layout, "bfu_skeleton_properties_expanded", "Skeleton")
             if scene.bfu_skeleton_properties_expanded:
                 if addon_prefs.useGeneratedScripts and obj is not None:
@@ -1545,10 +1612,12 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     "object.updatecollectionlist",
                     icon='RECOVER_LAST')
 
-                col_name = scene.CollectionExportList[scene.active_CollectionExportList].name
-                col = bpy.data.collections[col_name]
-                col_prop = layout
-                col_prop.prop(col, 'exportFolderName', icon='FILE_FOLDER')
+                if scene.active_CollectionExportList < len(scene.CollectionExportList):
+                    col_name = scene.CollectionExportList[scene.active_CollectionExportList].name
+                    if col_name in bpy.data.collections:
+                        col = bpy.data.collections[col_name]
+                        col_prop = layout
+                        col_prop.prop(col, 'exportFolderName', icon='FILE_FOLDER')
 
                 collectionPropertyInfo = layout.row().box().split(factor=0.75)
                 collectionNum = len(GetCollectionToExport(scene))

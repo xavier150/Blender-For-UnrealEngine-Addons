@@ -248,7 +248,7 @@ class AnimationManagment():
         obj.animation_data_clear()
 
     def SetAnimationData(self, obj, copy_nla=False):
-        print(obj.name)
+        
         if self.use_animation_data:
             obj.animation_data_create()
 
@@ -701,7 +701,7 @@ def ExportCompuntedLightMapValue(obj):
 def GetExportRealSurfaceArea(obj):
     scene = bpy.context.scene
 
-    MoveToGlobalView()
+    local_view_areas = MoveToGlobalView()
     SafeModeSet('OBJECT')
 
     SavedSelect = GetCurrentSelection()
@@ -737,6 +737,7 @@ def GetExportRealSurfaceArea(obj):
     area = GetSurfaceArea(active)
     CleanDeleteObjects(bpy.context.selected_objects)
     SetCurrentSelection(SavedSelect)
+    MoveToLocalView(local_view_areas)
     return area
 
 
@@ -862,7 +863,12 @@ def ApplyNeededModifierToSelect():
                     if obj.data.users > 1:
                         obj.data = obj.data.copy()
                     if bpy.ops.object.modifier_apply.poll():
-                        bpy.ops.object.modifier_apply(modifier=mod.name)
+                        try:
+                            bpy.ops.object.modifier_apply(modifier=mod.name)
+                        except RuntimeError as ex:
+                            # print the error incase its important... but continue
+                            print(ex)
+                        
 
     SetCurrentSelection(SavedSelect)
 
@@ -952,19 +958,37 @@ def CorrectExtremeUV(stepScale=2):
             obj.data.update()
 
 
-def ApplyExportTransform(obj):
+def ApplyExportTransform(obj, use_type = "Object"):
+    
     newMatrix = obj.matrix_world @ mathutils.Matrix.Translation((0, 0, 0))
     saveScale = obj.scale * 1
 
+
     # Ref
     # Moves object to the center of the scene for export
-    if obj.MoveToCenterForExport:
+    if use_type == "Object":
+        MoveToCenter = obj.MoveToCenterForExport
+        RotateToZero = obj.RotateToZeroForExport
+
+    elif use_type == "Action":
+        MoveToCenter = obj.MoveActionToCenterForExport
+        RotateToZero = obj.RotateActionToZeroForExport
+
+    elif use_type == "NLA":
+        MoveToCenter = obj.MoveNLAToCenterForExport
+        RotateToZero = obj.RotateNLAToZeroForExport
+
+    else:
+        return
+    
+    if MoveToCenter:
         mat_trans = mathutils.Matrix.Translation((0, 0, 0))
         mat_rot = newMatrix.to_quaternion().to_matrix()
         newMatrix = mat_trans @ mat_rot.to_4x4()
 
+    obj.matrix_world = newMatrix
     # Turn object to the center of the scene for export
-    if obj.RotateToZeroForExport:
+    if RotateToZero:
         mat_trans = mathutils.Matrix.Translation(newMatrix.to_translation())
         mat_rot = mathutils.Matrix.Rotation(0, 4, 'X')
         newMatrix = mat_trans @ mat_rot
@@ -977,24 +1001,25 @@ def ApplyExportTransform(obj):
     AddMat = mat_loc @ mat_rot.to_4x4()
 
     obj.matrix_world = newMatrix @ AddMat
-    if obj.type == "ARMATURE":
-        obj.scale = (1.0, 1.0, 1.0) #That remove some errors
-    else:
-        obj.scale = saveScale
+    obj.scale = saveScale
 
 
 def ApplySkeletalExportScale(armature, rescale, target_animation_data = None):
  
     # This function will rescale the armature and applys the new scale
-
-    if target_animation_data is None:
-        animation_data = AnimationManagment()
-        animation_data.SaveAnimationData(armature)
-        animation_data.ClearAnimationData(armature)
-    else:
-        animation_data = target_animation_data
     
     armature.scale = armature.scale*rescale
+    old_location = armature.location.copy()
+
+    if target_animation_data is None:
+        armature_animation_data = AnimationManagment()
+        armature_animation_data.SaveAnimationData(armature)
+        armature_animation_data.ClearAnimationData(armature)
+    else:
+        armature_animation_data = AnimationManagment()
+        armature_animation_data.ClearAnimationData(armature)
+    
+    armature.location = (0,0,0)
 
     bpy.ops.object.transform_apply(
         location=True,
@@ -1002,8 +1027,13 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data = None):
         rotation=True,
         properties=True
         )
+    
+    armature.location = old_location*rescale
 
-    animation_data.SetAnimationData(armature)
+    if target_animation_data is None:
+        armature_animation_data.SetAnimationData(armature, True)
+    else:
+        target_animation_data.SetAnimationData(armature, True)
 
 
 def RescaleSelectCurveHook(scale):
@@ -1061,19 +1091,34 @@ def RescaleActionCurve(action, scale):
                     mod.strength *= scale
 
 
-def RescaleAllActionCurve(scale):
+def RescaleAllActionCurve(bone_scale, scene_scale = 1):
     for action in bpy.data.actions:
+        print(action.name)
         for fcurve in action.fcurves:
-            if fcurve.data_path.split(".")[-1] == "location":
+            if fcurve.data_path == "location":
+                # Curve
                 for key in fcurve.keyframe_points:
-                    key.co[1] *= scale
-                    key.handle_left[1] *= scale
-                    key.handle_right[1] *= scale
+                    key.co[1] *= scene_scale
+                    key.handle_left[1] *= scene_scale
+                    key.handle_right[1] *= scene_scale
 
                 # Modifier
                 for mod in fcurve.modifiers:
                     if mod.type == "NOISE":
-                        mod.strength *= scale
+                        mod.strength *= scene_scale
+
+            elif fcurve.data_path.split(".")[-1] == "location":
+
+                # Curve
+                for key in fcurve.keyframe_points:
+                    key.co[1] *= bone_scale
+                    key.handle_left[1] *= bone_scale
+                    key.handle_right[1] *= bone_scale
+
+                # Modifier
+                for mod in fcurve.modifiers:
+                    if mod.type == "NOISE":
+                        mod.strength *= bone_scale
 
 
 def GetFinalAssetToExport():
@@ -1189,7 +1234,7 @@ def ValidFilenameForUnreal(filename):
     return (''.join(c for c in newfilename if c != ".")+extension)
 
 
-def ValidUnrealAssetename(filename):
+def ValidUnrealAssetsName(filename):
     # Normalizes string, removes non-alpha characters
     # Asset name in Unreal use
 

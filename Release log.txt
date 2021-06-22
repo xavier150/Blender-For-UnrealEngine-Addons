@@ -357,6 +357,8 @@ It is now possible to force the duration of an animation according to the scene 
 == Rev 0.2.9 ==
 
 - New: you can now choose a specific Vertex Paint to use when you Export.
+- New: You can now choose if you use scene or armature as origin for export in SkeletalMesh animations.
+- New: Manage more characters cultures in path or files names.
 - Change: The skeletal mesh are exported with scale at 1.0.
 - Change: You can use "Show Asset(s)" and "Show Action(s)" buttons for force to update the action cache.
 - Fixed: Do a new preset do a script error.
@@ -368,4 +370,9 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Animation file with space can do error durring import
 - Fixed: Vertex color updated only in import option when reimport.
 - Fixed: With Unit Scale not at 0.01 SkeletalMesh have a wrong scale.
-- Fixed: Import NLA animation with script don't work
+- Fixed: Import NLA animation with script don't work.
+- Fixed: With Unit Scale not at 0.01 NLA animation will not export.
+- Fixed: Apply Wrong Bool Modifier do script error.
+- Fixed: Mesh with disabled Modifier do script error.
+- Fixed: Additional location in advanced properties don't work for the cameras.
+- Fixed: Export Instanced complex Collections can break the exported mesh.

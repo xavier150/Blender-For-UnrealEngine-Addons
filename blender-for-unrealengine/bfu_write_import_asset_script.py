@@ -102,19 +102,19 @@ def WriteImportAssetScript():
 
         if GetIsAnimation(asset.asset_type):
             if(asset.object.bfu_skeleton_search_mode) == "auto":
-                customName = scene.skeletal_prefix_export_name+ValidUnrealAssetename(asset.skeleton_name)+"_Skeleton"
+                customName = scene.skeletal_prefix_export_name+ValidUnrealAssetsName(asset.skeleton_name)+"_Skeleton"
                 SkeletonName = customName+"."+customName
                 SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
                 asset_data["animation_skeleton_path"] = os.path.join("/Game/", scene.unreal_import_location, SkeletonLoc).replace('\\', '/')
 
             elif(asset.object.bfu_skeleton_search_mode) == "custom_name":
-                customName = ValidUnrealAssetename(asset.object.bfu_target_skeleton_custom_name)
+                customName = ValidUnrealAssetsName(asset.object.bfu_target_skeleton_custom_name)
                 SkeletonName = customName+"."+customName
                 SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
                 asset_data["animation_skeleton_path"] = os.path.join("/Game/", scene.unreal_import_location, SkeletonLoc).replace('\\', '/')
 
             elif(asset.object.bfu_skeleton_search_mode) == "custom_path_name":
-                customName = ValidUnrealAssetename(asset.object.bfu_target_skeleton_custom_name)
+                customName = ValidUnrealAssetsName(asset.object.bfu_target_skeleton_custom_name)
                 SkeletonName = customName+"."+customName
                 SkeletonLoc = os.path.join("/Game/", asset.object.bfu_target_skeleton_custom_path, SkeletonName)
                 asset_data["animation_skeleton_path"] = SkeletonLoc.replace('\\', '/')

@@ -106,16 +106,17 @@ def ExportSingleSkeletalMesh(
     if active.ExportAsProxy:
         ApplyProxyData(active)
 
+    ApplyExportTransform(active, "Object") # Apply export transform before rescale
+
     # This will rescale the rig and unit scale to get a root bone egal to 1
     ShouldRescaleRig = GetShouldRescaleRig(active)
     if ShouldRescaleRig:
 
         rrf = GetRescaleRigFactor()  # rigRescaleFactor
         savedUnitLength = bpy.context.scene.unit_settings.scale_length
-        bpy.context.scene.unit_settings.scale_length *= 1/rrf
-        ApplySkeletalExportScale(active, rrf)
+        bpy.context.scene.unit_settings.scale_length = 0.01 # *= 1/rrf
 
-    ApplyExportTransform(active) # Apply export transform after rescale
+        ApplySkeletalExportScale(active, rrf)
 
     absdirpath = bpy.path.abspath(dirpath)
     VerifiDirs(absdirpath)

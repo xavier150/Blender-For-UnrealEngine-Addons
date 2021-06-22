@@ -150,11 +150,19 @@ def DuplicateSelectForExport():
     for currentSelectName in bpy.context.selected_objects:
         currentSelectNames.append(currentSelectName.name)
 
-    # Make Instances Real
-    bpy.ops.object.duplicates_make_real(
-        use_base_parent=True,
-        use_hierarchy=True
-        )
+    ApplyVisual = False
+    if ApplyVisual:
+        # Visual Transform Apply
+        bpy.ops.object.visual_transform_apply()
+
+
+        # This can break mesh with Instanced complex Collections
+
+        # Make Instances Real
+        bpy.ops.object.duplicates_make_real(
+            use_base_parent=True,
+            use_hierarchy=True
+            )
 
     for objSelect in currentSelectNames:
         if objSelect not in bpy.context.selected_objects:
