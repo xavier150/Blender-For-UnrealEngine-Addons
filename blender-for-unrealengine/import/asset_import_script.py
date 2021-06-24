@@ -119,7 +119,7 @@ def ImportAllAssets():
                 else:
                     OriginSkeleton =  None
                 
-
+            # https://docs.unrealengine.com/4.26/en-US/PythonAPI/class/FbxImportUI.html
             task = unreal.AssetImportTask()
 
             def GetStaticMeshImportData():
@@ -131,6 +131,13 @@ def ImportAllAssets():
                 if asset_data["type"] == "SkeletalMesh": 
                     return task.get_editor_property('options').skeletal_mesh_import_data
                 return None
+
+            def GetAnimationImportData():
+                if asset_data["type"] == "Animation": 
+                    return task.get_editor_property('options').anim_sequence_import_data
+                return None
+
+
 
             def GetMeshImportData():
                 if asset_data["type"] == "StaticMesh": 
@@ -178,7 +185,12 @@ def ImportAllAssets():
             # #################################[Change]
 
             # unreal.FbxImportUI
-            # https://docs.unrealengine.com/en-US/PythonAPI/class/FbxImportUI.html?highlight=fbximportui#unreal.FbxImportUI
+            # https://docs.unrealengine.com/4.26/en-US/PythonAPI/class/FbxImportUI.html
+
+            # Import transform
+            anim_sequence_import_data = GetAnimationImportData()
+            if anim_sequence_import_data:
+                anim_sequence_import_data.import_translation = unreal.Vector(0, 0, 0)
 
             # Vertex color
             if vertex_color_import_option and GetMeshImportData():
