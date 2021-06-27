@@ -284,30 +284,30 @@ class NLA_Save():
                 self.select = nla_track.select
                 self.strips = []
                 for strip in nla_track.strips:
-                    self.strips.append(self.Proxy_NLA_Track_Stripstrip(strip))
+                    self.strips.append(self.Proxy_NLA_Track_Strip(strip))
 
-    class Proxy_NLA_Track_Strip():
-        def __init__(self, strip):
-            self.action = strip.action
-            self.action_frame_end = strip.action_frame_end
-            self.action_frame_start = strip.action_frame_start
-            self.active = strip.active
-            self.blend_in = strip.blend_in
-            self.blend_out = strip.blend_out
-            self.blend_type = strip.blend_type
-            self.extrapolation = strip.extrapolation
-            self.fcurves = strip.fcurves #TO DO
-            self.frame_end = strip.frame_end
-            self.frame_start = strip.frame_start
-            self.influence = strip.influence
-            self.modifiers = strip.modifiers #TO DO
-            self.mute = strip.mute
-            self.name = strip.name
-            self.repeat = strip.repeat
-            self.scale = strip.scale
-            self.select = strip.select
-            self.strip_time = strip.strip_time
-            #self.strips = strip.strips #TO DO
+        class Proxy_NLA_Track_Strip():
+            def __init__(self, strip):
+                self.action = strip.action
+                self.action_frame_end = strip.action_frame_end
+                self.action_frame_start = strip.action_frame_start
+                self.active = strip.active
+                self.blend_in = strip.blend_in
+                self.blend_out = strip.blend_out
+                self.blend_type = strip.blend_type
+                self.extrapolation = strip.extrapolation
+                self.fcurves = strip.fcurves #TO DO
+                self.frame_end = strip.frame_end
+                self.frame_start = strip.frame_start
+                self.influence = strip.influence
+                self.modifiers = strip.modifiers #TO DO
+                self.mute = strip.mute
+                self.name = strip.name
+                self.repeat = strip.repeat
+                self.scale = strip.scale
+                self.select = strip.select
+                self.strip_time = strip.strip_time
+                #self.strips = strip.strips #TO DO
 
 
 class AnimationManagment():
@@ -1442,7 +1442,6 @@ def GetImportSequencerScriptCommand():
 
 def GetAnimSample(obj):
     # return obj sample animation
-    # return 1000 #Debug
     return obj.SampleAnimForExport
 
 

@@ -148,9 +148,6 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
 
     NumberAssetToExport = len(GetFinalAssetToExport())
 
-    print("Check crash 0")
-
-
     def UpdateExportProgress(time=None):
         exported_assets = len(scene.UnrealExportedAssetsList)
         remain_assets = exported_assets/NumberAssetToExport
@@ -167,9 +164,7 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
         
         UpdateProgress("Export assets", remain_assets, time)
     
-    print("Check crash 1")
     UpdateExportProgress()
-    print("Check crash End 1")
 
     # Export collections
     print("Start Export collection(s)")
