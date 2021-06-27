@@ -2518,7 +2518,7 @@ class BFU_PT_Export(bpy.types.Panel):
 
     # exportProperty
     bpy.types.Scene.bfu_export_filter = bpy.props.EnumProperty(
-        name="Export only select",
+        name="Export filter",
         items=[
             ('default', "No Filter", "Export as normal all objects with the recursive export option.", 0),
             ('only_object', "Only select", "Export only the selected object(s)", 1),
@@ -2526,8 +2526,7 @@ class BFU_PT_Export(bpy.types.Panel):
                 "Export only the selected object(s) and active action on this object", 2),
             ],
         description=(
-            "Check mark to export only selected export group." +
-            " (export_recursive objects and auto childs) "),
+            "Choose what need be export from asset list."),
         default="default"
         )
 
