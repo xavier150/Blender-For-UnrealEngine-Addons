@@ -361,31 +361,21 @@ def UpdateUnrealPotentialError():
         # Check that skeleton have multiples roots
         for obj in objToCheck:
             if GetAssetType(obj) == "SkeletalMesh":
-
-                rootBones = []
-                if not obj.exportDeformOnly:
-                    for bone in obj.data.bones:
-                        if bone.parent is None:
-                            rootBones.append(bone)
-
-                if obj.exportDeformOnly:
-                    for bone in obj.data.bones:
-                        if bone.use_deform:
-                            rootBone = getRootBoneParent(bone)
-                            if rootBone not in rootBones:
-                                rootBones.append(rootBone)
+                rootBones = GetArmatureRootBones(obj)
 
                 if len(rootBones) > 1:
                     MyError = PotentialErrors.add()
                     MyError.name = obj.name
-                    MyError.type = 2
+                    MyError.type = 1
                     MyError.text = (
                         'Object "'+obj.name +
                         '" have Multiple roots bones.' +
-                        ' Unreal only support single root bone.')
-                    MyError.text += '\nRoot bones: '
+                        ' Unreal only support single root bone')
+                    MyError.text += '\nA custom root bone will be added at the export.'
+                    MyError.text += ' '+str(len(rootBones))+' root bones found: '
+                    MyError.text += '\n'
                     for rootBone in rootBones:
-                        MyError.text += rootBone.name+' '
+                        MyError.text += rootBone.name+', '
                     MyError.object = obj
 
     def CheckArmatureNoDeformBone():

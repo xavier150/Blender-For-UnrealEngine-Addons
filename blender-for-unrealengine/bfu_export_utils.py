@@ -217,7 +217,7 @@ class PrepareExportName():
 
             scene = bpy.context.scene
             if self.is_armature:
-                self.new_asset_name = GetDesiredExportArmatureName()
+                self.new_asset_name = GetDesiredExportArmatureName(obj)
             else:
                 self.new_asset_name = obj.name  # Keep the same name
 

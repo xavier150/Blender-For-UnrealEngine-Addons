@@ -1444,13 +1444,29 @@ def GetAnimSample(obj):
     # return obj sample animation
     return obj.SampleAnimForExport
 
+def GetArmatureRootBones(obj):
+    rootBones = []
+    if GetAssetType(obj) == "SkeletalMesh":
+        
+        if not obj.exportDeformOnly:
+            for bone in obj.data.bones:
+                if bone.parent is None:
+                    rootBones.append(bone)
 
-def GetDesiredExportArmatureName():
+        if obj.exportDeformOnly:
+            for bone in obj.data.bones:
+                if bone.use_deform:
+                    rootBone = getRootBoneParent(bone)
+                    if rootBone not in rootBones:
+                        rootBones.append(rootBone)
+    return rootBones
+
+def GetDesiredExportArmatureName(obj):
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
-    if addon_prefs.add_skeleton_root_bone:
+    single_root = len(GetArmatureRootBones(obj)) == 1
+    if addon_prefs.add_skeleton_root_bone or single_root != 1:
         return addon_prefs.skeleton_root_bone_name
-    else:
-        return "Armature"
+    return "Armature"
 
 
 def GetObjExportScale(obj):

@@ -181,7 +181,7 @@ def ExportSingleFbxAction(
 
         ExportAutoProRig(
             filepath=fullpath,
-            # export_rig_name=GetDesiredExportArmatureName(),
+            # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=True,
             anim_export_name_string=active.animation_data.action.name,
             mesh_smooth_type="FACE",
