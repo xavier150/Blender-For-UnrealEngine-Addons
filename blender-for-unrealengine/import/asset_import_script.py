@@ -119,8 +119,9 @@ def ImportAllAssets():
                 else:
                     OriginSkeleton =  None
                 
-            # https://docs.unrealengine.com/4.26/en-US/PythonAPI/class/FbxImportUI.html
+            # docs.unrealengine.com/4.26/en-US/PythonAPI/class/AssetImportTask.html
             task = unreal.AssetImportTask()
+
 
             def GetStaticMeshImportData():
                 if asset_data["type"] == "StaticMesh": 
@@ -153,6 +154,7 @@ def ImportAllAssets():
                 task.filename = asset_data["fbx_path"]
             task.destination_path = os.path.normpath(asset_data["full_import_path"]).replace('\\','/')
             task.automated = True
+            #task.automated = False #Debug for show dialog
             task.save = True
             task.replace_existing = True
 
@@ -304,7 +306,8 @@ def ImportAllAssets():
                     if oldAsset.asset_class == "SkeletalMesh":
                         unreal.EditorAssetLibrary.delete_asset(AssetPath)
                 
-            print(unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task]))
+            unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+
             if len(task.imported_object_paths) > 0:
                 asset = unreal.find_asset(task.imported_object_paths[0])
             else:
