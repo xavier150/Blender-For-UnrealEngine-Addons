@@ -110,6 +110,7 @@ def ExportSingleSkeletalMesh(
 
     # This will rescale the rig and unit scale to get a root bone egal to 1
     ShouldRescaleRig = GetShouldRescaleRig(active)
+
     if ShouldRescaleRig:
 
         rrf = GetRescaleRigFactor()  # rigRescaleFactor

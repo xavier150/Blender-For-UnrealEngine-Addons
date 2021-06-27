@@ -373,6 +373,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: With Unit Scale not at 0.01 SkeletalMesh have a wrong scale.
 - Fixed: Import NLA animation with script don't work.
 - Fixed: With Unit Scale not at 0.01 NLA animation will not export.
+- Fixed: With Unit Scale not at 0.01 Blender 2.9.1 can crash with SkeletalMesh.
 - Fixed: Apply Wrong Bool Modifier do script error.
 - Fixed: Mesh with disabled Modifier do script error.
 - Fixed: Additional location in advanced properties don't work for the cameras.

@@ -224,6 +224,91 @@ class UserSceneSave():
                     if layer_col_children.hide_viewport != childCol.hide_viewport:
                         layer_col_children.hide_viewport = childCol.hide_viewport
 
+class NLA_Save():
+    def __init__(self, nla_tracks):
+        self.nla_tracks_save = None
+        if nla_tracks is not None:
+            self.SaveTracks(nla_tracks)
+    
+    def SaveTracks(self, nla_tracks):
+        proxy_nla_tracks = []
+
+        for nla_track in nla_tracks:
+            proxy_nla_tracks.append(self.Proxy_NLA_Track(nla_track))        
+        self.nla_tracks_save = proxy_nla_tracks
+
+    def ApplySaveOnTarget(self, target):
+        if target is None:
+            return
+        if target.animation_data is None:
+            return
+        for nla_track in self.nla_tracks_save:
+            new_nla_track = target.animation_data.nla_tracks.new()
+            #new_nla_track.active = nla_track.active
+            new_nla_track.is_solo = nla_track.is_solo
+            new_nla_track.lock = nla_track.lock
+            new_nla_track.mute = nla_track.mute
+            new_nla_track.name = nla_track.name
+            new_nla_track.select = nla_track.select
+            for strip in nla_track.strips:
+                new_strip = new_nla_track.strips.new(strip.name, strip.frame_start, strip.action)
+                #new_strip.action = strip.action
+                new_strip.action_frame_end = strip.action_frame_end
+                new_strip.action_frame_start = strip.action_frame_start
+                #new_strip.active = strip.active
+                new_strip.blend_in = strip.blend_in
+                new_strip.blend_out = strip.blend_out
+                new_strip.blend_type = strip.blend_type
+                new_strip.extrapolation = strip.extrapolation
+                #new_strip.fcurves = strip.fcurves #TO DO
+                new_strip.frame_end = strip.frame_end
+                #new_strip.frame_start = strip.frame_start
+                new_strip.influence = strip.influence
+                #new_strip.modifiers = strip.modifiers #TO DO
+                new_strip.mute = strip.mute
+                #new_strip.name = strip.name
+                new_strip.repeat = strip.repeat
+                new_strip.scale = strip.scale
+                new_strip.select = strip.select
+                new_strip.strip_time = strip.strip_time
+                #new_strip.strips = strip.strips #TO DO
+    
+    class Proxy_NLA_Track():
+        def __init__(self, nla_track):
+            if nla_track:
+                self.active = nla_track.active
+                self.is_solo = nla_track.is_solo
+                self.lock = nla_track.lock
+                self.mute = nla_track.mute
+                self.name = nla_track.name
+                self.select = nla_track.select
+                self.strips = []
+                for strip in nla_track.strips:
+                    self.strips.append(self.Proxy_NLA_Track_Stripstrip(strip))
+
+    class Proxy_NLA_Track_Strip():
+        def __init__(self, strip):
+            self.action = strip.action
+            self.action_frame_end = strip.action_frame_end
+            self.action_frame_start = strip.action_frame_start
+            self.active = strip.active
+            self.blend_in = strip.blend_in
+            self.blend_out = strip.blend_out
+            self.blend_type = strip.blend_type
+            self.extrapolation = strip.extrapolation
+            self.fcurves = strip.fcurves #TO DO
+            self.frame_end = strip.frame_end
+            self.frame_start = strip.frame_start
+            self.influence = strip.influence
+            self.modifiers = strip.modifiers #TO DO
+            self.mute = strip.mute
+            self.name = strip.name
+            self.repeat = strip.repeat
+            self.scale = strip.scale
+            self.select = strip.select
+            self.strip_time = strip.strip_time
+            #self.strips = strip.strips #TO DO
+
 
 class AnimationManagment():
     def __init__(self):
@@ -239,7 +324,7 @@ class AnimationManagment():
             self.action_extrapolation = obj.animation_data.action_extrapolation
             self.action_blend_type = obj.animation_data.action_blend_type
             self.action_influence = obj.animation_data.action_influence
-            self.nla_tracks_ref = obj.animation_data.nla_tracks
+            self.nla_tracks_save = NLA_Save(obj.animation_data.nla_tracks)
             self.use_animation_data = True
         else:
             self.use_animation_data = False
@@ -257,7 +342,7 @@ class AnimationManagment():
             obj.animation_data.action_extrapolation = self.action_extrapolation
             obj.animation_data.action_blend_type = self.action_blend_type
             obj.animation_data.action_influence = self.action_influence
-
+            
             if copy_nla:
                 #Clear nla_tracks
                 nla_tracks_len = len(obj.animation_data.nla_tracks)
@@ -265,36 +350,9 @@ class AnimationManagment():
                     obj.animation_data.nla_tracks.remove(obj.animation_data.nla_tracks[0])
 
                 #Add Current nla_tracks
-                for nla_track in self.nla_tracks_ref:
-                    new_nla_track = obj.animation_data.nla_tracks.new()
-                    #new_nla_track.active = nla_track.active
-                    new_nla_track.is_solo = nla_track.is_solo
-                    new_nla_track.lock = nla_track.lock
-                    new_nla_track.mute = nla_track.mute
-                    new_nla_track.name = nla_track.name
-                    new_nla_track.select = nla_track.select
-                    for strip in nla_track.strips:
-                        new_strip = new_nla_track.strips.new(strip.name, strip.frame_start, strip.action)
-                        #new_strip.action = strip.action
-                        new_strip.action_frame_end = strip.action_frame_end
-                        new_strip.action_frame_start = strip.action_frame_start
-                        #new_strip.active = strip.active
-                        new_strip.blend_in = strip.blend_in
-                        new_strip.blend_out = strip.blend_out
-                        new_strip.blend_type = strip.blend_type
-                        new_strip.extrapolation = strip.extrapolation
-                        #new_strip.fcurves = strip.fcurves #TO DO
-                        new_strip.frame_end = strip.frame_end
-                        #new_strip.frame_start = strip.frame_start
-                        new_strip.influence = strip.influence
-                        #new_strip.modifiers = strip.modifiers #TO DO
-                        new_strip.mute = strip.mute
-                        #new_strip.name = strip.name
-                        new_strip.repeat = strip.repeat
-                        new_strip.scale = strip.scale
-                        new_strip.select = strip.select
-                        new_strip.strip_time = strip.strip_time
-                        #new_strip.strips = strip.strips #TO DO
+                
+                if self.nla_tracks_save is not None:
+                    self.nla_tracks_save.ApplySaveOnTarget(obj)
 
 
 def SafeModeSet(target_mode='OBJECT', obj=None):
@@ -323,7 +381,8 @@ class CounterTimer():
         return time.perf_counter()-self.start
 
 
-def update_progress(job_title, progress, time=None):
+def UpdateProgress(job_title, progress, time=None):
+
 
     length = 20  # modify this to change the length
     block = int(round(length*progress))
@@ -331,13 +390,13 @@ def update_progress(job_title, progress, time=None):
         job_title,
         "#"*block + "-"*(length-block),
         round(progress*100, 2))
+
     if progress >= 1:
         if time is not None:
             msg += " DONE IN " + str(round(time, 2)) + "s\r\n"
         else:
             msg += " DONE\r\n"
-    sys.stdout.write(msg)
-    sys.stdout.flush()
+
 
 
 def RemoveUselessSpecificData(name, type):
@@ -1019,6 +1078,7 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data = None):
         armature_animation_data = AnimationManagment()
         armature_animation_data.ClearAnimationData(armature)
     
+
     armature.location = (0,0,0)
 
     bpy.ops.object.transform_apply(
@@ -1027,6 +1087,7 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data = None):
         rotation=True,
         properties=True
         )
+
     
     armature.location = old_location*rescale
 
@@ -1633,7 +1694,7 @@ def UpdateAreaLightMapList(list=None):
     for obj in objs:
         obj.computedStaticMeshLightMapRes = GetExportRealSurfaceArea(obj)
         UpdatedRes += 1
-        update_progress(
+        UpdateProgress(
             "Update LightMap",
             (UpdatedRes/len(objs)),
             counter.GetTime())
