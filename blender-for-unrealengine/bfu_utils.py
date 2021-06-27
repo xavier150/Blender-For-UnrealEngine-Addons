@@ -635,7 +635,7 @@ class CachedAction():
             self.total_actions.append(self.ActionFromCache(action))
         self.total_rig_bone_len = len(obj.data.bones)
         self.is_cached = True
-        print("Stored action cache updated.")
+        #print("Stored action cache updated.")
 
     def GetStoredActions(self):
         actions = []
@@ -1447,9 +1447,10 @@ def GetAnimSample(obj):
 
 def GetDesiredExportArmatureName():
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
-    if addon_prefs.removeSkeletonRootBone:
+    if addon_prefs.add_skeleton_root_bone:
+        return addon_prefs.skeleton_root_bone_name
+    else:
         return "Armature"
-    return addon_prefs.skeletonRootBoneName
 
 
 def GetObjExportScale(obj):

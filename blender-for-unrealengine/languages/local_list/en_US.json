@@ -3,7 +3,7 @@
         "intro": "Blender for Unreal Engine by Xavier Loux.",
         "bake_armature_action_name": "Bake Armature animation",
         "correct_extrem_uv_scale_name": "Correct Extrem UV Scale",
-        "remove_skeleton_root_bone_name": "Remove root bone",
+        "add_skeleton_root_bone_name": "Add root bone",
         "skeleton_root_bone_name_name": "Skeleton root bone name",
         "rescale_full_rig_at_export_name": "Rescale exported rig",
         "rescale_full_rig_at_export_auto_name": "Auto",
@@ -33,7 +33,7 @@
     "tooltips": {
         "bake_armature_action_desc": "Bake Armature animation for export (Export will take more time).",
         "correct_extrem_uv_scale_desc": "Correct Extrem UV Scale for better UV quality in UE4 (Export will take more time).",
-        "remove_skeleton_root_bone_desc": "Remove the armature root bone.",
+        "add_skeleton_root_bone_desc": "Remove the armature root bone.",
         "skeleton_root_bone_name_desc": "Name of the armature when exported. This is used to change the root bone name. If egal \"Armature\" Ue4 will remove the Armature root bone.",
         "rescale_full_rig_at_export_desc": "This will rescale the full rig at the export with the all constraints.",
         "rescale_full_rig_at_export_auto_desc": "Rescale only if the the Unit Scale is not = to 0.01",

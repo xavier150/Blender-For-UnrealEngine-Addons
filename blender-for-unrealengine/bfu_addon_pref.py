@@ -83,13 +83,13 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         default=False,
         )
 
-    removeSkeletonRootBone: BoolProperty(
-        name=(ti('remove_skeleton_root_bone_name')),
-        description=(tt('remove_skeleton_root_bone_desc')),
-        default=True,
+    add_skeleton_root_bone: BoolProperty(
+        name=(ti('add_skeleton_root_bone_name')),
+        description=(tt('add_skeleton_root_bone_desc')),
+        default=False,
         )
 
-    skeletonRootBoneName: StringProperty(
+    skeleton_root_bone_name: StringProperty(
         name=(ti('skeleton_root_bone_name_name')),
         description=(tt('skeleton_root_bone_name_desc')),
         default="ArmatureRoot",
@@ -271,10 +271,10 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
             "SKELETON & ROOT BONE",
             "skeleton--root-bone"
             )
-        rootBone.prop(self, "removeSkeletonRootBone")
+        rootBone.prop(self, "add_skeleton_root_bone")
         rootBoneName = rootBone.column()
-        rootBoneName.enabled = not self.removeSkeletonRootBone
-        rootBoneName.prop(self, "skeletonRootBoneName")
+        rootBoneName.enabled = self.add_skeleton_root_bone
+        rootBoneName.prop(self, "skeleton_root_bone_name")
 
         rootBone.prop(self, "rescaleFullRigAtExport")
         newRigScale = rootBone.column()

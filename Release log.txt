@@ -362,6 +362,7 @@ It is now possible to force the duration of an animation according to the scene 
 - New: Camera export take less time + new camera options in addon preferences
 - Change: The skeletal mesh are exported with scale at 1.0.
 - Change: You can use "Show Asset(s)" and "Show Action(s)" buttons for force to update the action cache.
+- Change: Remove root bone moddified to Add root bone.
 - Fixed: Do a new preset do a script error.
 - Fixed: Export filter "Only select and active action" don't work with poses.
 - Fixed: The export action cache is not correctly updated.
