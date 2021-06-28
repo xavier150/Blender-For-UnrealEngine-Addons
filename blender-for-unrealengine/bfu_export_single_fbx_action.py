@@ -91,7 +91,7 @@ def ExportSingleFbxAction(
 
     SelectParentAndDesiredChilds(obj)
     asset_name = PrepareExportName(obj, True)
-    data_to_remove = DuplicateSelectForExport()
+    data_to_remove = DuplicateSelectForExport(True)
 
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
