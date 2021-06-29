@@ -1206,11 +1206,11 @@ def GetFinalAssetToExport():
     objList = []
     collectionList = []
 
-    if scene.bfu_export_filter == "default":
+    if scene.bfu_export_selection_filter == "default":
         objList = GetAllobjectsByExportType("export_recursive")
         collectionList = GetCollectionToExport(scene)
 
-    elif scene.bfu_export_filter == "only_object" or scene.bfu_export_filter == "only_object_action":
+    elif scene.bfu_export_selection_filter == "only_object" or scene.bfu_export_selection_filter == "only_object_action":
         recuList = GetAllobjectsByExportType("export_recursive")
 
         for obj in bpy.context.selected_objects:
@@ -1257,7 +1257,7 @@ def GetFinalAssetToExport():
                         "NlAnim"))
 
             for action in GetActionToExport(obj):
-                if scene.bfu_export_filter == "only_object_action":
+                if scene.bfu_export_selection_filter == "only_object_action":
                     if obj.animation_data:
                         if obj.animation_data.action == action:
                             TargetAssetToExport.append(AssetToExport(obj, action, "Action"))

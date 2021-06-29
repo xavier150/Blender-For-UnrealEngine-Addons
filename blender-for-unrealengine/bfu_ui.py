@@ -2425,7 +2425,7 @@ class BFU_PT_Export(bpy.types.Panel):
             return {'FINISHED'}
 
     class BFU_OT_CopyImportAssetScriptCommand(Operator):
-        bl_label = "ImportAssetScript"
+        bl_label = "Copy import script (Assets)"
         bl_idname = "object.copy_importassetscript_command"
         bl_description = "Copy Import Asset Script command"
 
@@ -2439,7 +2439,7 @@ class BFU_PT_Export(bpy.types.Panel):
             return {'FINISHED'}
 
     class BFU_OT_CopyImportSequencerScriptCommand(Operator):
-        bl_label = "ImportSequencerScript"
+        bl_label = "Copy import script (Sequencer)"
         bl_idname = "object.copy_importsequencerscript_command"
         bl_description = "Copy Import Sequencer Script command"
 
@@ -2517,8 +2517,8 @@ class BFU_PT_Export(bpy.types.Panel):
         )
 
     # exportProperty
-    bpy.types.Scene.bfu_export_filter = bpy.props.EnumProperty(
-        name="Export filter",
+    bpy.types.Scene.bfu_export_selection_filter = bpy.props.EnumProperty(
+        name="Selection filter",
         items=[
             ('default', "No Filter", "Export as normal all objects with the recursive export option.", 0),
             ('only_object', "Only select", "Export only the selected object(s)", 1),
@@ -2598,8 +2598,8 @@ class BFU_PT_Export(bpy.types.Panel):
                     'file_import_sequencer_script_name',
                     icon='FILE')
 
-        bfu_ui_utils.LayoutSection(layout, "bfu_export_properties_expanded", "Export")
-        if scene.bfu_export_properties_expanded:
+        bfu_ui_utils.LayoutSection(layout, "bfu_export_filter_properties_expanded", "Export filters")
+        if scene.bfu_export_filter_properties_expanded:
 
             # Assets
             row = layout.row()
@@ -2623,6 +2623,13 @@ class BFU_PT_Export(bpy.types.Panel):
             if addon_prefs.useGeneratedScripts:
                 FileCol.prop(scene, 'text_AdditionalData')
 
+            # exportProperty
+            export_by_select = layout.row()
+            export_by_select.prop(scene, 'bfu_export_selection_filter')
+
+        bfu_ui_utils.LayoutSection(layout, "bfu_export_process_properties_expanded", "Export process")
+        if scene.bfu_export_process_properties_expanded:
+
             # Feedback info :
             AssetNum = len(GetFinalAssetToExport())
             AssetInfo = layout.row().box().split(factor=0.75)
@@ -2635,10 +2642,6 @@ class BFU_PT_Export(bpy.types.Panel):
             checkButton.operator("object.checkpotentialerror", icon='FILE_TICK')
             checkButton.operator("object.openpotentialerror", icon='LOOP_BACK', text="")
 
-            # exportProperty
-            exportOnlySelect = layout.row()
-            exportOnlySelect.prop(scene, 'bfu_export_filter')
-
             exportButton = layout.row()
             exportButton.scale_y = 2.0
             exportButton.operator("object.exportforunreal", icon='EXPORT')
@@ -2646,15 +2649,13 @@ class BFU_PT_Export(bpy.types.Panel):
         bfu_ui_utils.LayoutSection(layout, "bfu_script_tool_expanded", "Copy Import Script")
         if scene.bfu_script_tool_expanded:
             if addon_prefs.useGeneratedScripts:
-                layout.label(
-                    text="Click on one of the buttons to copy the import command.",
-                    icon='INFO')
                 copyButton = layout.row()
                 copyButton.operator("object.copy_importassetscript_command")
                 copyButton.operator("object.copy_importsequencerscript_command")
-                layout.label(
-                    text="Then you can paste it into the python console of unreal",
-                    icon='INFO')
+                layout.label(text="Click on one of the buttons to copy the import command.", icon='INFO')
+                layout.label(text="Then paste it into the cmd console of unreal.")
+                layout.label(text="You need activate python plugins in Unreal Engine.")
+                    
             else:
                 layout.label(text='(Generated scripts are deactivated.)')
 

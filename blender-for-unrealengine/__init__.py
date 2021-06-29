@@ -123,7 +123,8 @@ def register():
     bpy.types.Scene.bfu_collision_socket_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_lightmap_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_nomenclature_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_export_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_export_filter_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_export_process_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_script_tool_expanded = bpy.props.BoolProperty()
 
     bpy.types.Scene.bfu_active_object_tab = bpy.props.EnumProperty(
@@ -160,7 +161,8 @@ def unregister():
     del bpy.types.Scene.bfu_collision_socket_expanded
     del bpy.types.Scene.bfu_lightmap_expanded
     del bpy.types.Scene.bfu_nomenclature_properties_expanded
-    del bpy.types.Scene.bfu_export_properties_expanded
+    del bpy.types.Scene.bfu_export_filter_properties_expanded
+    del bpy.types.Scene.bfu_export_process_properties_expanded
     del bpy.types.Scene.bfu_script_tool_expanded
 
     del bpy.types.Scene.bfu_active_object_tab
