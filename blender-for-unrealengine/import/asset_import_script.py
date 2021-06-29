@@ -21,14 +21,6 @@ def ImportAllAssets():
     import json
     import string
 
-    '''
-    if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:
-        import configparser as ConfigParser
-    else:
-        import ConfigParser
-    '''
-
-
     # Prepare process import
     json_data_file = 'ImportAssetData.json'
     dir_path = os.path.dirname(os.path.realpath(__file__))
