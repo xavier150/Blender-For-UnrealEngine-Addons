@@ -21,8 +21,7 @@ More info, tutorials and documentation here --> [Wiki page](https://github.com/x
 
 |Version|Blender Version|Download URL|
 |---|---|---|
-|0.2.9 Preview 4 |Blender 2.8 / 2.9|[Download](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/tag/vp0.2.9.4)|
-|0.2.8|Blender 2.8 / 2.9|[Download](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/tag/v0.2.8)|
+|0.2.9|Blender 2.8 / 2.9|[Download](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/tag/v0.2.8)|
 |v0.2.3d|Blender 2.7|[Download](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/tag/v.0.2.3d)|
 
 Or previous versions: [Releases page](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases)
