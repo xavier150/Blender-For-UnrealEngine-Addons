@@ -21,14 +21,6 @@ def ImportAllAssets():
     import json
     import string
 
-    '''
-    if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:
-        import configparser as ConfigParser
-    else:
-        import ConfigParser
-    '''
-
-
     # Prepare process import
     json_data_file = 'ImportAssetData.json'
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -119,8 +111,9 @@ def ImportAllAssets():
                 else:
                     OriginSkeleton =  None
                 
-
+            # docs.unrealengine.com/4.26/en-US/PythonAPI/class/AssetImportTask.html
             task = unreal.AssetImportTask()
+
 
             def GetStaticMeshImportData():
                 if asset_data["type"] == "StaticMesh": 
@@ -131,6 +124,13 @@ def ImportAllAssets():
                 if asset_data["type"] == "SkeletalMesh": 
                     return task.get_editor_property('options').skeletal_mesh_import_data
                 return None
+
+            def GetAnimationImportData():
+                if asset_data["type"] == "Animation": 
+                    return task.get_editor_property('options').anim_sequence_import_data
+                return None
+
+
 
             def GetMeshImportData():
                 if asset_data["type"] == "StaticMesh": 
@@ -146,6 +146,7 @@ def ImportAllAssets():
                 task.filename = asset_data["fbx_path"]
             task.destination_path = os.path.normpath(asset_data["full_import_path"]).replace('\\','/')
             task.automated = True
+            #task.automated = False #Debug for show dialog
             task.save = True
             task.replace_existing = True
 
@@ -178,7 +179,12 @@ def ImportAllAssets():
             # #################################[Change]
 
             # unreal.FbxImportUI
-            # https://docs.unrealengine.com/en-US/PythonAPI/class/FbxImportUI.html?highlight=fbximportui#unreal.FbxImportUI
+            # https://docs.unrealengine.com/4.26/en-US/PythonAPI/class/FbxImportUI.html
+
+            # Import transform
+            anim_sequence_import_data = GetAnimationImportData()
+            if anim_sequence_import_data:
+                anim_sequence_import_data.import_translation = unreal.Vector(0, 0, 0)
 
             # Vertex color
             if vertex_color_import_option and GetMeshImportData():
@@ -292,7 +298,8 @@ def ImportAllAssets():
                     if oldAsset.asset_class == "SkeletalMesh":
                         unreal.EditorAssetLibrary.delete_asset(AssetPath)
                 
-            print(unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task]))
+            unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+
             if len(task.imported_object_paths) > 0:
                 asset = unreal.find_asset(task.imported_object_paths[0])
             else:

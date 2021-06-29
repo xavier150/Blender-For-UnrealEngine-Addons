@@ -121,7 +121,7 @@ def BakeArmatureAnimation(armature, frame_start, frame_end):
     SetCurrentSelection(SavedSelect)
 
 
-def DuplicateSelectForExport():
+def DuplicateSelectForExport(apply_visual = False):
     # Note: Need look for a optimized duplicate, This is too long
 
     scene = bpy.context.scene
@@ -150,8 +150,7 @@ def DuplicateSelectForExport():
     for currentSelectName in bpy.context.selected_objects:
         currentSelectNames.append(currentSelectName.name)
 
-    ApplyVisual = False
-    if ApplyVisual:
+    if apply_visual:
         # Visual Transform Apply
         bpy.ops.object.visual_transform_apply()
 
@@ -217,7 +216,7 @@ class PrepareExportName():
 
             scene = bpy.context.scene
             if self.is_armature:
-                self.new_asset_name = GetDesiredExportArmatureName()
+                self.new_asset_name = GetDesiredExportArmatureName(obj)
             else:
                 self.new_asset_name = obj.name  # Keep the same name
 

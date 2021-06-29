@@ -110,6 +110,7 @@ def ExportSingleSkeletalMesh(
 
     # This will rescale the rig and unit scale to get a root bone egal to 1
     ShouldRescaleRig = GetShouldRescaleRig(active)
+
     if ShouldRescaleRig:
 
         rrf = GetRescaleRigFactor()  # rigRescaleFactor
@@ -169,7 +170,7 @@ def ExportSingleSkeletalMesh(
     if (export_procedure == "auto-rig-pro"):
         ExportAutoProRig(
             filepath=fullpath,
-            # export_rig_name=GetDesiredExportArmatureName(),
+            # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=False,
             mesh_smooth_type="FACE"
             )

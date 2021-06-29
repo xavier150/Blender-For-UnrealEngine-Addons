@@ -117,28 +117,30 @@ def ExportSingleFbxCamera(
     VerifiDirs(absdirpath)
     fullpath = os.path.join(absdirpath, filename)
 
-    bpy.ops.export_scene.fbx(
-        filepath=fullpath,
-        check_existing=False,
-        use_selection=True,
-        global_scale=GetObjExportScale(obj),
-        object_types={'CAMERA'},
-        use_custom_props=addon_prefs.exportWithCustomProps,
-        add_leaf_bones=False,
-        use_armature_deform_only=obj.exportDeformOnly,
-        bake_anim=True,
-        bake_anim_use_nla_strips=False,
-        bake_anim_use_all_actions=False,
-        bake_anim_force_startend_keying=True,
-        bake_anim_step=GetAnimSample(obj),
-        bake_anim_simplify_factor=obj.SimplifyAnimForExport,
-        use_metadata=addon_prefs.exportWithMetaData,
-        primary_bone_axis=obj.exportPrimaryBaneAxis,
-        secondary_bone_axis=obj.exporSecondaryBoneAxis,
-        axis_forward=obj.exportAxisForward,
-        axis_up=obj.exportAxisUp,
-        bake_space_transform=False
-        )
+    ExportCameraAsFBX = addon_prefs.exportCameraAsFBX
+    if ExportCameraAsFBX:
+        bpy.ops.export_scene.fbx(
+            filepath=fullpath,
+            check_existing=False,
+            use_selection=True,
+            global_scale=GetObjExportScale(obj),
+            object_types={'CAMERA'},
+            use_custom_props=addon_prefs.exportWithCustomProps,
+            add_leaf_bones=False,
+            use_armature_deform_only=obj.exportDeformOnly,
+            bake_anim=True,
+            bake_anim_use_nla_strips=False,
+            bake_anim_use_all_actions=False,
+            bake_anim_force_startend_keying=True,
+            bake_anim_step=GetAnimSample(obj),
+            bake_anim_simplify_factor=obj.SimplifyAnimForExport,
+            use_metadata=addon_prefs.exportWithMetaData,
+            primary_bone_axis=obj.exportPrimaryBaneAxis,
+            secondary_bone_axis=obj.exporSecondaryBoneAxis,
+            axis_forward=obj.exportAxisForward,
+            axis_up=obj.exportAxisUp,
+            bake_space_transform=False
+            )
 
     # Reset camera scale
     obj.delta_scale *= 100

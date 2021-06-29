@@ -148,15 +148,26 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
 
     NumberAssetToExport = len(GetFinalAssetToExport())
 
-    def UpdateProgress(time=None):
-        update_progress(
-            "Export assets",
-            len(scene.UnrealExportedAssetsList)/NumberAssetToExport,
-            time
-        )
-    UpdateProgress()
+    def UpdateExportProgress(time=None):
+        exported_assets = len(scene.UnrealExportedAssetsList)
+        remain_assets = exported_assets/NumberAssetToExport
+
+        wm = bpy.context.window_manager
+
+        if remain_assets == NumberAssetToExport:
+            wm.progress_begin(0, remain_assets)
+
+        wm.progress_update(exported_assets)
+
+        if remain_assets == 0: 
+            wm.progress_end()
+        
+        UpdateProgress("Export assets", remain_assets, time)
+    
+    UpdateExportProgress()
 
     # Export collections
+    print("Start Export collection(s)")
     if scene.static_collection_export:
         for col in GetCollectionToExport(scene):
             if col in targetcollection:
@@ -169,13 +180,14 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
                 scene.frame_end = UserEndFrame
-                UpdateProgress()
+                UpdateExportProgress()
 
     # Export assets
     for obj in targetobjects:
         if obj.ExportEnum == "export_recursive":
 
             # Camera
+            print("Start Export camera(s)")
             if GetAssetType(obj) == "Camera" and IsValidObjectForExport(scene, obj):
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
@@ -185,9 +197,10 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
                 scene.frame_end = UserEndFrame
-                UpdateProgress()
+                UpdateExportProgress()
 
             # StaticMesh
+            print("Start Export StaticMesh(s)")
             if GetAssetType(obj) == "StaticMesh" and IsValidObjectForExport(scene, obj):
 
                 # Save current start/end frame
@@ -198,11 +211,11 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
                 scene.frame_end = UserEndFrame
-                UpdateProgress()
+                UpdateExportProgress()
 
             # SkeletalMesh
+            print("Start Export SkeletalMesh(s)")
             if GetAssetType(obj) == "SkeletalMesh" and IsValidObjectForExport(scene, obj):
-
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end
@@ -211,9 +224,10 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
                 scene.frame_end = UserEndFrame
-                UpdateProgress()
+                UpdateExportProgress()
 
             # Alembic
+            print("Start Export Alembic(s)")
             if GetAssetType(obj) == "Alembic" and IsValidObjectForExport(scene, obj):
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
@@ -223,9 +237,10 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
                 scene.frame_end = UserEndFrame
-                UpdateProgress()
+                UpdateExportProgress()
 
             # Action animation
+            print("Start Export Action(s)")
             if GetAssetType(obj) == "SkeletalMesh" and obj.visible_get():
                 for action in GetActionToExport(obj):
                     if action.name in targetActionName:
@@ -242,9 +257,10 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                                 # Resets previous start/end frame
                                 scene.frame_start = UserStartFrame
                                 scene.frame_end = UserEndFrame
-                                UpdateProgress()
+                                UpdateExportProgress()
 
                 # NLA animation
+                print("Start Export NLA(s)")
                 if IsValidActionForExport(scene, obj, "NLA"):
                     if obj.ExportNLA:
                         # Save current start/end frame
@@ -256,7 +272,7 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                         scene.frame_start = UserStartFrame
                         scene.frame_end = UserEndFrame
 
-    UpdateProgress(counter.GetTime())
+    UpdateExportProgress(counter.GetTime())
 
 
 def ExportForUnrealEngine():

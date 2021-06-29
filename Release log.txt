@@ -359,8 +359,11 @@ It is now possible to force the duration of an animation according to the scene 
 - New: you can now choose a specific Vertex Paint to use when you Export.
 - New: You can now choose if you use scene or armature as origin for export in SkeletalMesh animations.
 - New: Manage more characters cultures in path or files names.
+- New: Camera export take less time + new camera options in addon preferences
 - Change: The skeletal mesh are exported with scale at 1.0.
 - Change: You can use "Show Asset(s)" and "Show Action(s)" buttons for force to update the action cache.
+- Change: Remove root bone modified to Add root bone.
+- Change: Auto fix the "multiple root bones" potential error when export.
 - Fixed: Do a new preset do a script error.
 - Fixed: Export filter "Only select and active action" don't work with poses.
 - Fixed: The export action cache is not correctly updated.
@@ -372,7 +375,9 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: With Unit Scale not at 0.01 SkeletalMesh have a wrong scale.
 - Fixed: Import NLA animation with script don't work.
 - Fixed: With Unit Scale not at 0.01 NLA animation will not export.
+- Fixed: With Unit Scale not at 0.01 Blender 2.9.1 can crash with SkeletalMesh.
 - Fixed: Apply Wrong Bool Modifier do script error.
 - Fixed: Mesh with disabled Modifier do script error.
 - Fixed: Additional location in advanced properties don't work for the cameras.
 - Fixed: Export Instanced complex Collections can break the exported mesh.
+- Fixed: Camera Sequencer don't work in Unreal Engine 5.

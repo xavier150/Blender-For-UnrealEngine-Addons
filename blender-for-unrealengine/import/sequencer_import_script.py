@@ -27,13 +27,6 @@ def CreateSequencer():
     import time
     import json
 
-    '''
-    if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:
-        import configparser as ConfigParser
-    else:
-        import ConfigParser
-    '''
-
     # Prepare process import
     json_data_file = 'ImportSequencerData.json'
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -51,6 +44,11 @@ def CreateSequencer():
     secureCrop = sequence_data['secureCrop']  # add end crop for avoid section overlay
     unreal_import_location = sequence_data['unreal_import_location']
     ImportedCamera = []  # (CameraName, CameraGuid)
+
+    def GetUnrealVersion():
+        version = unreal.SystemLibrary.get_engine_version().split(".")
+        float_version = int(version[0]) + float(int(version[1])/100)
+        return float_version
 
     def AddSequencerSectionTransformKeysByIniFile(sequencer_section, track_dict):
         for key in track_dict.keys():
@@ -86,8 +84,7 @@ def CreateSequencer():
     if seq is None:
         return 'ERROR: level sequencer factory_create fail'
 
-    print("Sequencer reference created")
-    print(seq)
+    print("Sequencer reference created", seq)
 
     # Process import
     print("========================= Import started ! =========================")
@@ -103,7 +100,7 @@ def CreateSequencer():
     seq.set_playback_start_seconds(startFrame/float(frameRateNumerator))  # set_playback_end_seconds
     camera_cut_track = seq.add_master_track(unreal.MovieSceneCameraCutTrack)
     camera_cut_track.set_editor_property('display_name', 'Imported Camera Cuts')
-    if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:
+    if GetUnrealVersion() >= 4.26:
         camera_cut_track.set_color_tint(unreal.Color(b=200, g=0, r=0, a=0))
     else:
         pass
@@ -164,13 +161,13 @@ def CreateSequencer():
         TrackFocusDistance = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)
 
         # Wtf this var name change every version or I do someting wrong??? :v
-        if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:
+        if GetUnrealVersion() >= 4.26:
             TrackFocusDistance.set_property_name_and_path('FocusSettings.ManualFocusDistance', 'FocusSettings.ManualFocusDistance')
             TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance (Focus Settings)')
-        elif int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 25:
+        elif GetUnrealVersion() >= 4.25:
             TrackFocusDistance.set_property_name_and_path('FocusSettings.ManualFocusDistance', 'FocusSettings.ManualFocusDistance')
             TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance (Focus Settings)')
-        elif int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 24:
+        elif GetUnrealVersion() >= 4.24:
             TrackFocusDistance.set_property_name_and_path('CurrentFocusDistance', 'CurrentFocusDistance')
             TrackFocusDistance.set_editor_property('display_name', 'Current Focus Distance')
         else:
@@ -213,7 +210,7 @@ def CreateSequencer():
         else:
             current_camera_binding = camera_binding
 
-        if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:
+        if GetUnrealVersion() >= 4.26:
             current_camera_binding.set_display_name(camera_data["name"])
         else:
             pass
@@ -265,7 +262,7 @@ def CreateSequencer():
         print('=========================')
 
     # Select and open seq in content browser
-    if int(unreal.SystemLibrary.get_engine_version()[:4][2:]) >= 26:
+    if GetUnrealVersion() >= 4.26:
         unreal.AssetEditorSubsystem.open_editor_for_assets(unreal.AssetEditorSubsystem(), [unreal.load_asset(seq.get_path_name())])
     else:
         unreal.AssetToolsHelpers.get_asset_tools().open_editor_for_assets([unreal.load_asset(seq.get_path_name())])

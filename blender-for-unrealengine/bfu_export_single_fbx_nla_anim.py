@@ -86,7 +86,7 @@ def ExportSingleFbxNLAAnim(
 
     SelectParentAndDesiredChilds(obj)
     asset_name = PrepareExportName(obj, True)
-    data_to_remove = DuplicateSelectForExport()
+    data_to_remove = DuplicateSelectForExport(True)
 
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
@@ -163,7 +163,7 @@ def ExportSingleFbxNLAAnim(
     if (export_procedure == "auto-rig-pro"):
         ExportAutoProRig(
             filepath=fullpath,
-            # export_rig_name=GetDesiredExportArmatureName(),
+            # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=True,
             anim_export_name_string=active.animation_data.action.name,
             mesh_smooth_type="FACE",
