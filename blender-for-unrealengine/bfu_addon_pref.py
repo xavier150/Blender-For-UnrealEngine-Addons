@@ -163,6 +163,18 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         default=1,
         )
 
+    exportCameraAsFBX: BoolProperty(
+        name=(ti('export_camera_as_fbx_name')),
+        description=(tt('export_camera_as_fbx_desc')),
+        default=False,
+        )
+
+    bakeOnlyKeyVisibleInCut: BoolProperty(
+        name=(ti('bake_only_key_visible_in_cut_name')),
+        description=(tt('bake_only_key_visible_in_cut_desc')),
+        default=True,
+        )
+
     ignoreNLAForAction: BoolProperty(
         name=(ti('ignore_nla_for_action_name')),
         description=(tt('ignore_nla_for_action_desc')),
@@ -194,7 +206,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         )
 
     collisionColor:  FloatVectorProperty(
-        name='Collision color.',
+        name=ti('collision_color_name'),
         description='Color of the collision in Blender',
         subtype='COLOR',
         size=4,
@@ -203,7 +215,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         )
 
     notifyUnitScalePotentialError: BoolProperty(
-        name='Notify UnitScale (PotentialError)',
+        name=ti('notify_unit_scale_potential_error_name'),
         description=(
             'Notify as potential error' +
             ' if the unit scale is not equal to 0.01.'
@@ -263,8 +275,10 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         boxColumn = layout.column().split(
             factor=0.5
             )
+        ColumnLeft = boxColumn.column()
+        ColumnRight = boxColumn.column()
 
-        rootBone = boxColumn.box()
+        rootBone = ColumnLeft.box()
 
         LabelWithDocButton(
             rootBone,
@@ -281,7 +295,8 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         newRigScale.enabled = self.rescaleFullRigAtExport == "custom_rescale"
         newRigScale.prop(self, "newRigScale")
 
-        socket = boxColumn.box()
+        ColumnLeft.label(text='')
+        socket = ColumnLeft.box()
         socket.label(text='SOCKET')
         socket.prop(self, "staticSocketsAdd90X")
         socket.prop(self, "rescaleSocketsAtExport")
@@ -290,9 +305,13 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         socketRescale.prop(self, "staticSocketsImportedSize")
         socketRescale.prop(self, "skeletalSocketsImportedSize")
 
-        boxColumn = layout.column().split(factor=0.5)
+        ColumnLeft.label(text='')
+        camera = ColumnLeft.box()
+        camera.label(text='CAMERA')
+        camera.prop(self, "exportCameraAsFBX")
+        camera.prop(self, "bakeOnlyKeyVisibleInCut")
 
-        data = boxColumn.box()
+        data = ColumnRight.box()
         data.label(text='DATA')
         data.prop(self, "ignoreNLAForAction")
         PropWithDocButton(data, "correctExtremUVScale", "uv")
@@ -301,16 +320,16 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         data.prop(self, "exportWithMetaData")
         data.prop(self, "revertExportPath")
 
-        script = boxColumn.box()
-        script.label(text='IMPORT SCRIPT')
-        script.prop(self, "useGeneratedScripts")
-
-        boxColumn = layout.column().split(factor=0.5)
-
-        other = boxColumn.box()
+        ColumnRight.label(text='')
+        other = ColumnRight.box()
         other.label(text='OTHER')
         other.prop(self, "collisionColor")
         other.prop(self, "notifyUnitScalePotentialError")
+
+        ColumnRight.label(text='')
+        script = ColumnRight.box()
+        script.label(text='IMPORT SCRIPT')
+        script.prop(self, "useGeneratedScripts")
 
         updateButton = layout.row()
         updateButton.scale_y = 2.0
