@@ -251,27 +251,28 @@ class NLA_Save():
             new_nla_track.name = nla_track.name
             new_nla_track.select = nla_track.select
             for strip in nla_track.strips:
-                new_strip = new_nla_track.strips.new(strip.name, strip.frame_start, strip.action)
-                #new_strip.action = strip.action
-                new_strip.action_frame_end = strip.action_frame_end
-                new_strip.action_frame_start = strip.action_frame_start
-                #new_strip.active = strip.active
-                new_strip.blend_in = strip.blend_in
-                new_strip.blend_out = strip.blend_out
-                new_strip.blend_type = strip.blend_type
-                new_strip.extrapolation = strip.extrapolation
-                #new_strip.fcurves = strip.fcurves #TO DO
-                new_strip.frame_end = strip.frame_end
-                #new_strip.frame_start = strip.frame_start
-                new_strip.influence = strip.influence
-                #new_strip.modifiers = strip.modifiers #TO DO
-                new_strip.mute = strip.mute
-                #new_strip.name = strip.name
-                new_strip.repeat = strip.repeat
-                new_strip.scale = strip.scale
-                new_strip.select = strip.select
-                new_strip.strip_time = strip.strip_time
-                #new_strip.strips = strip.strips #TO DO
+                if strip.action:
+                    new_strip = new_nla_track.strips.new(strip.name, strip.frame_start, strip.action)
+                    #new_strip.action = strip.action
+                    new_strip.action_frame_end = strip.action_frame_end
+                    new_strip.action_frame_start = strip.action_frame_start
+                    #new_strip.active = strip.active
+                    new_strip.blend_in = strip.blend_in
+                    new_strip.blend_out = strip.blend_out
+                    new_strip.blend_type = strip.blend_type
+                    new_strip.extrapolation = strip.extrapolation
+                    #new_strip.fcurves = strip.fcurves #TO DO
+                    new_strip.frame_end = strip.frame_end
+                    #new_strip.frame_start = strip.frame_start
+                    new_strip.influence = strip.influence
+                    #new_strip.modifiers = strip.modifiers #TO DO
+                    new_strip.mute = strip.mute
+                    #new_strip.name = strip.name
+                    new_strip.repeat = strip.repeat
+                    new_strip.scale = strip.scale
+                    new_strip.select = strip.select
+                    new_strip.strip_time = strip.strip_time
+                    #new_strip.strips = strip.strips #TO DO
     
     class Proxy_NLA_Track():
         def __init__(self, nla_track):
