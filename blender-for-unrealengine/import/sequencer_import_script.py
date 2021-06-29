@@ -84,8 +84,7 @@ def CreateSequencer():
     if seq is None:
         return 'ERROR: level sequencer factory_create fail'
 
-    print("Sequencer reference created")
-    print(seq)
+    print("Sequencer reference created", seq)
 
     # Process import
     print("========================= Import started ! =========================")

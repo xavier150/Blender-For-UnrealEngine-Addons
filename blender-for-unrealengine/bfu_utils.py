@@ -224,6 +224,7 @@ class UserSceneSave():
                     if layer_col_children.hide_viewport != childCol.hide_viewport:
                         layer_col_children.hide_viewport = childCol.hide_viewport
 
+
 class NLA_Save():
     def __init__(self, nla_tracks):
         self.nla_tracks_save = None
@@ -356,6 +357,84 @@ class AnimationManagment():
                     self.nla_tracks_save.ApplySaveOnTarget(obj)
 
 
+class MarkerSequence():
+    def __init__(self, marker):
+        scene = bpy.context.scene
+        self.marker = marker
+        self.start = 0
+        self.end = scene.frame_end
+        
+        if marker is not None:
+            self.start = marker.frame
+
+
+class TimelineMarkerSequence():
+    
+    def __init__(self):
+        scene = bpy.context.scene
+        timeline = scene.timeline_markers
+        self.marker_sequences = self.GetMarkerSequences(timeline)
+            
+    def GetMarkerSequences(self, timeline_markers):
+        if len(timeline_markers) == 0:
+            print("Scene has no timeline_markers.")
+            return
+        
+        def GetFisrtMarket(marker_list):
+            if len(marker_list) == 0:
+                return None
+            
+            best_marker = ""
+            best_marker_frame = 0
+            init = False
+
+            for marker in marker_list:
+                
+                if init:
+                    if marker.frame < best_marker_frame:
+                        best_marker = marker
+                        best_marker_frame = marker.frame
+                else:
+                    best_marker = marker
+                    best_marker_frame = marker.frame
+                    init = True
+                
+            return best_marker
+        
+        marker_list = []
+        for marker in timeline_markers:
+            marker_list.append(marker)
+            
+        order_marker_list = []
+        while len(marker_list)!= 0:
+            first_marker = GetFisrtMarket(marker_list)
+            order_marker_list.append(first_marker)
+            marker_list.remove(first_marker)
+            
+        marker_sequences = []
+        
+        for marker in order_marker_list:
+                marker_sequence = MarkerSequence(marker)
+            
+                if len(marker_sequences) > 0:
+                    previous_marker_sequence = marker_sequences[-1]
+                    previous_marker_sequence.end = marker.frame -1
+            
+                marker_sequences.append(marker_sequence)
+                
+        
+        return marker_sequences
+                    
+            
+    
+    def GetMarkerSequenceAtFrame(self, frame):
+        for marker_sequence in self.marker_sequences:
+            #print(marker_sequence.start, marker_sequence.end, frame)
+            if frame >= marker_sequence.start and frame <= marker_sequence.end:
+                return marker_sequence
+        return None
+
+
 def SafeModeSet(target_mode='OBJECT', obj=None):
     if bpy.ops.object.mode_set.poll():
         if obj:
@@ -397,7 +476,6 @@ def UpdateProgress(job_title, progress, time=None):
             msg += " DONE IN " + str(round(time, 2)) + "s\r\n"
         else:
             msg += " DONE\r\n"
-
 
 
 def RemoveUselessSpecificData(name, type):
