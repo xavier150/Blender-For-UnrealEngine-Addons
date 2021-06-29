@@ -117,7 +117,7 @@ def ExportSingleFbxCamera(
     VerifiDirs(absdirpath)
     fullpath = os.path.join(absdirpath, filename)
 
-    ExportCameraAsFBX = False
+    ExportCameraAsFBX = addon_prefs.exportCameraAsFBX
     if ExportCameraAsFBX:
         bpy.ops.export_scene.fbx(
             filepath=fullpath,
