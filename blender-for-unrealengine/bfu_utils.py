@@ -428,10 +428,11 @@ class TimelineMarkerSequence():
             
     
     def GetMarkerSequenceAtFrame(self, frame):
-        for marker_sequence in self.marker_sequences:
-            #print(marker_sequence.start, marker_sequence.end, frame)
-            if frame >= marker_sequence.start and frame <= marker_sequence.end:
-                return marker_sequence
+        if self.marker_sequences:
+            for marker_sequence in self.marker_sequences:
+                #print(marker_sequence.start, marker_sequence.end, frame)
+                if frame >= marker_sequence.start and frame <= marker_sequence.end:
+                    return marker_sequence
         return None
 
 
