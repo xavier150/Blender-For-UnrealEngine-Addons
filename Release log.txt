@@ -381,3 +381,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Additional location in advanced properties don't work for the cameras.
 - Fixed: Export Instanced complex Collections can break the exported mesh.
 - Fixed: Camera Sequencer don't work in Unreal Engine 5.
+
+== Rev 0.3.0 ==
+
+- Fixed: Camera export don't work when any marker_sequences was created.
