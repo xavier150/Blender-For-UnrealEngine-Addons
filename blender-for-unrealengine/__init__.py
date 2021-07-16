@@ -38,7 +38,7 @@ import addon_utils
 
 from . import bfu_addon_pref
 from . import bfu_ui
-from . import bfu_export_asset
+from .export import bfu_export_asset
 from . import bfu_write_text
 from . import bfu_basics
 from . import bfu_utils

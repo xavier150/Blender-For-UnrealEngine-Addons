@@ -230,12 +230,12 @@ class NLA_Save():
         self.nla_tracks_save = None
         if nla_tracks is not None:
             self.SaveTracks(nla_tracks)
-    
+
     def SaveTracks(self, nla_tracks):
         proxy_nla_tracks = []
 
         for nla_track in nla_tracks:
-            proxy_nla_tracks.append(self.Proxy_NLA_Track(nla_track))        
+            proxy_nla_tracks.append(self.Proxy_NLA_Track(nla_track))
         self.nla_tracks_save = proxy_nla_tracks
 
     def ApplySaveOnTarget(self, target):
@@ -245,7 +245,7 @@ class NLA_Save():
             return
         for nla_track in self.nla_tracks_save:
             new_nla_track = target.animation_data.nla_tracks.new()
-            #new_nla_track.active = nla_track.active
+            # new_nla_track.active = nla_track.active
             new_nla_track.is_solo = nla_track.is_solo
             new_nla_track.lock = nla_track.lock
             new_nla_track.mute = nla_track.mute
@@ -254,27 +254,27 @@ class NLA_Save():
             for strip in nla_track.strips:
                 if strip.action:
                     new_strip = new_nla_track.strips.new(strip.name, strip.frame_start, strip.action)
-                    #new_strip.action = strip.action
+                    # new_strip.action = strip.action
                     new_strip.action_frame_end = strip.action_frame_end
                     new_strip.action_frame_start = strip.action_frame_start
-                    #new_strip.active = strip.active
+                    # new_strip.active = strip.active
                     new_strip.blend_in = strip.blend_in
                     new_strip.blend_out = strip.blend_out
                     new_strip.blend_type = strip.blend_type
                     new_strip.extrapolation = strip.extrapolation
-                    #new_strip.fcurves = strip.fcurves #TO DO
+                    # new_strip.fcurves = strip.fcurves #TO DO
                     new_strip.frame_end = strip.frame_end
-                    #new_strip.frame_start = strip.frame_start
+                    # new_strip.frame_start = strip.frame_start
                     new_strip.influence = strip.influence
-                    #new_strip.modifiers = strip.modifiers #TO DO
+                    # new_strip.modifiers = strip.modifiers #TO DO
                     new_strip.mute = strip.mute
-                    #new_strip.name = strip.name
+                    # new_strip.name = strip.name
                     new_strip.repeat = strip.repeat
                     new_strip.scale = strip.scale
                     new_strip.select = strip.select
                     new_strip.strip_time = strip.strip_time
-                    #new_strip.strips = strip.strips #TO DO
-    
+                    # new_strip.strips = strip.strips #TO DO
+
     class Proxy_NLA_Track():
         def __init__(self, nla_track):
             if nla_track:
@@ -298,27 +298,27 @@ class NLA_Save():
                 self.blend_out = strip.blend_out
                 self.blend_type = strip.blend_type
                 self.extrapolation = strip.extrapolation
-                self.fcurves = strip.fcurves #TO DO
+                self.fcurves = strip.fcurves  # TO DO
                 self.frame_end = strip.frame_end
                 self.frame_start = strip.frame_start
                 self.influence = strip.influence
-                self.modifiers = strip.modifiers #TO DO
+                self.modifiers = strip.modifiers  # TO DO
                 self.mute = strip.mute
                 self.name = strip.name
                 self.repeat = strip.repeat
                 self.scale = strip.scale
                 self.select = strip.select
                 self.strip_time = strip.strip_time
-                #self.strips = strip.strips #TO DO
+                # self.strips = strip.strips #TO DO
 
 
 class AnimationManagment():
     def __init__(self):
         self.use_animation_data = False
         self.action = None
-        self.action_extrapolation = "HOLD" # Default value
-        self.action_blend_type = "REPLACE" # Default value
-        self.action_influence = 1.0 # Default value
+        self.action_extrapolation = "HOLD"  # Default value
+        self.action_blend_type = "REPLACE"  # Default value
+        self.action_influence = 1.0  # Default value
 
     def SaveAnimationData(self, obj):
         if obj.animation_data is not None:
@@ -335,7 +335,7 @@ class AnimationManagment():
         obj.animation_data_clear()
 
     def SetAnimationData(self, obj, copy_nla=False):
-        
+
         if self.use_animation_data:
             obj.animation_data_create()
 
@@ -344,15 +344,15 @@ class AnimationManagment():
             obj.animation_data.action_extrapolation = self.action_extrapolation
             obj.animation_data.action_blend_type = self.action_blend_type
             obj.animation_data.action_influence = self.action_influence
-            
+
             if copy_nla:
-                #Clear nla_tracks
+                # Clear nla_tracks
                 nla_tracks_len = len(obj.animation_data.nla_tracks)
                 for x in range(nla_tracks_len):
                     obj.animation_data.nla_tracks.remove(obj.animation_data.nla_tracks[0])
 
-                #Add Current nla_tracks
-                
+                # Add Current nla_tracks
+
                 if self.nla_tracks_save is not None:
                     self.nla_tracks_save.ApplySaveOnTarget(obj)
 
@@ -363,33 +363,33 @@ class MarkerSequence():
         self.marker = marker
         self.start = 0
         self.end = scene.frame_end
-        
+
         if marker is not None:
             self.start = marker.frame
 
 
 class TimelineMarkerSequence():
-    
+
     def __init__(self):
         scene = bpy.context.scene
         timeline = scene.timeline_markers
         self.marker_sequences = self.GetMarkerSequences(timeline)
-            
+
     def GetMarkerSequences(self, timeline_markers):
         if len(timeline_markers) == 0:
             print("Scene has no timeline_markers.")
             return
-        
+
         def GetFisrtMarket(marker_list):
             if len(marker_list) == 0:
                 return None
-            
+
             best_marker = ""
             best_marker_frame = 0
             init = False
 
             for marker in marker_list:
-                
+
                 if init:
                     if marker.frame < best_marker_frame:
                         best_marker = marker
@@ -398,39 +398,36 @@ class TimelineMarkerSequence():
                     best_marker = marker
                     best_marker_frame = marker.frame
                     init = True
-                
+
             return best_marker
-        
+
         marker_list = []
         for marker in timeline_markers:
             marker_list.append(marker)
-            
+
         order_marker_list = []
-        while len(marker_list)!= 0:
+        while len(marker_list) != 0:
             first_marker = GetFisrtMarket(marker_list)
             order_marker_list.append(first_marker)
             marker_list.remove(first_marker)
-            
+
         marker_sequences = []
-        
+
         for marker in order_marker_list:
-                marker_sequence = MarkerSequence(marker)
-            
-                if len(marker_sequences) > 0:
-                    previous_marker_sequence = marker_sequences[-1]
-                    previous_marker_sequence.end = marker.frame -1
-            
-                marker_sequences.append(marker_sequence)
-                
-        
+            marker_sequence = MarkerSequence(marker)
+
+            if len(marker_sequences) > 0:
+                previous_marker_sequence = marker_sequences[-1]
+                previous_marker_sequence.end = marker.frame - 1
+
+            marker_sequences.append(marker_sequence)
+
         return marker_sequences
-                    
-            
-    
+
     def GetMarkerSequenceAtFrame(self, frame):
         if self.marker_sequences:
             for marker_sequence in self.marker_sequences:
-                #print(marker_sequence.start, marker_sequence.end, frame)
+                # print(marker_sequence.start, marker_sequence.end, frame)
                 if frame >= marker_sequence.start and frame <= marker_sequence.end:
                     return marker_sequence
         return None
@@ -463,7 +460,6 @@ class CounterTimer():
 
 
 def UpdateProgress(job_title, progress, time=None):
-
 
     length = 20  # modify this to change the length
     block = int(round(length*progress))
@@ -677,16 +673,15 @@ class CachedAction():
     '''
 
     class ActionFromCache():
-        #Info about actions from last cache.
-            def __init__(self, action):
-                self.total_action_fcurves_len = len(action.fcurves)
-
+        # Info about actions from last cache.
+        def __init__(self, action):
+            self.total_action_fcurves_len = len(action.fcurves)
 
     def __init__(self):
         self.name = ""
         self.is_cached = False
         self.stored_actions = []
-        self.total_actions =[]
+        self.total_actions = []
         self.total_rig_bone_len = 0
 
     def CheckCache(self, obj):
@@ -715,7 +710,7 @@ class CachedAction():
             self.total_actions.append(self.ActionFromCache(action))
         self.total_rig_bone_len = len(obj.data.bones)
         self.is_cached = True
-        #print("Stored action cache updated.")
+        # print("Stored action cache updated.")
 
     def GetStoredActions(self):
         actions = []
@@ -729,6 +724,7 @@ class CachedAction():
 
 
 MyCachedActions = CachedAction()
+
 
 def UpdateActionCache(obj):
     # Force update cache export auto action list
@@ -1007,7 +1003,6 @@ def ApplyNeededModifierToSelect():
                         except RuntimeError as ex:
                             # print the error incase its important... but continue
                             print(ex)
-                        
 
     SetCurrentSelection(SavedSelect)
 
@@ -1097,11 +1092,10 @@ def CorrectExtremeUV(stepScale=2):
             obj.data.update()
 
 
-def ApplyExportTransform(obj, use_type = "Object"):
-    
+def ApplyExportTransform(obj, use_type="Object"):
+
     newMatrix = obj.matrix_world @ mathutils.Matrix.Translation((0, 0, 0))
     saveScale = obj.scale * 1
-
 
     # Ref
     # Moves object to the center of the scene for export
@@ -1119,7 +1113,7 @@ def ApplyExportTransform(obj, use_type = "Object"):
 
     else:
         return
-    
+
     if MoveToCenter:
         mat_trans = mathutils.Matrix.Translation((0, 0, 0))
         mat_rot = newMatrix.to_quaternion().to_matrix()
@@ -1143,10 +1137,10 @@ def ApplyExportTransform(obj, use_type = "Object"):
     obj.scale = saveScale
 
 
-def ApplySkeletalExportScale(armature, rescale, target_animation_data = None):
- 
+def ApplySkeletalExportScale(armature, rescale, target_animation_data=None):
+
     # This function will rescale the armature and applys the new scale
-    
+
     armature.scale = armature.scale*rescale
     old_location = armature.location.copy()
 
@@ -1157,9 +1151,8 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data = None):
     else:
         armature_animation_data = AnimationManagment()
         armature_animation_data.ClearAnimationData(armature)
-    
 
-    armature.location = (0,0,0)
+    armature.location = (0, 0, 0)
 
     bpy.ops.object.transform_apply(
         location=True,
@@ -1168,7 +1161,6 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data = None):
         properties=True
         )
 
-    
     armature.location = old_location*rescale
 
     if target_animation_data is None:
@@ -1232,7 +1224,7 @@ def RescaleActionCurve(action, scale):
                     mod.strength *= scale
 
 
-def RescaleAllActionCurve(bone_scale, scene_scale = 1):
+def RescaleAllActionCurve(bone_scale, scene_scale=1):
     for action in bpy.data.actions:
         print(action.name)
         for fcurve in action.fcurves:
@@ -1275,6 +1267,8 @@ def GetFinalAssetToExport():
             return None
 
     scene = bpy.context.scene
+    export_filter = scene.bfu_export_selection_filter
+
     TargetAssetToExport = []  # Obj, Action, type
 
     class AssetToExport:
@@ -1286,11 +1280,11 @@ def GetFinalAssetToExport():
     objList = []
     collectionList = []
 
-    if scene.bfu_export_selection_filter == "default":
+    if export_filter == "default":
         objList = GetAllobjectsByExportType("export_recursive")
         collectionList = GetCollectionToExport(scene)
 
-    elif scene.bfu_export_selection_filter == "only_object" or scene.bfu_export_selection_filter == "only_object_action":
+    elif export_filter == "only_object" or export_filter == "only_object_action":
         recuList = GetAllobjectsByExportType("export_recursive")
 
         for obj in bpy.context.selected_objects:
@@ -1506,7 +1500,7 @@ def GetImportAssetScriptCommand():
     fileName = scene.file_import_asset_script_name
     absdirpath = bpy.path.abspath(scene.export_other_file_path)
     fullpath = os.path.join(absdirpath, fileName)
-    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    addon_prefs = GetAddonPrefs()
     return 'py "'+fullpath+'"'
 
 
@@ -1516,7 +1510,7 @@ def GetImportSequencerScriptCommand():
     absdirpath = bpy.path.abspath(scene.export_other_file_path)
     fullpath = os.path.join(absdirpath, fileName)
 
-    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    addon_prefs = GetAddonPrefs()
     return 'py "'+fullpath+'"'  # Vania
 
 
@@ -1524,10 +1518,11 @@ def GetAnimSample(obj):
     # return obj sample animation
     return obj.SampleAnimForExport
 
+
 def GetArmatureRootBones(obj):
     rootBones = []
     if GetAssetType(obj) == "SkeletalMesh":
-        
+
         if not obj.exportDeformOnly:
             for bone in obj.data.bones:
                 if bone.parent is None:
@@ -1541,8 +1536,9 @@ def GetArmatureRootBones(obj):
                         rootBones.append(rootBone)
     return rootBones
 
+
 def GetDesiredExportArmatureName(obj):
-    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    addon_prefs = GetAddonPrefs()
     single_root = len(GetArmatureRootBones(obj)) == 1
     if addon_prefs.add_skeleton_root_bone or single_root != 1:
         return addon_prefs.skeleton_root_bone_name
@@ -1586,7 +1582,7 @@ def GenerateUe4Name(name):
 
 
 def CreateCollisionMaterial():
-    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    addon_prefs = GetAddonPrefs()
 
     mat = bpy.data.materials.get("UE4Collision")
     if mat is None:

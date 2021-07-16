@@ -98,7 +98,7 @@ def GetVertexWithZeroWeight(Armature, Mesh):
 def UpdateUnrealPotentialError():
     # Find and reset list of all potential error in scene
 
-    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    addon_prefs = GetAddonPrefs()
     PotentialErrors = bpy.context.scene.potentialErrorList
     PotentialErrors.clear()
 

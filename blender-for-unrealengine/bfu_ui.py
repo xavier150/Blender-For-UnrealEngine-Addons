@@ -21,14 +21,14 @@ import bpy
 import addon_utils
 import time
 
-from . import bfu_export_asset
+from .export import bfu_export_asset
 from . import bfu_write_text
 from . import bfu_basics
 from .bfu_basics import *
 from . import bfu_utils
 from .bfu_utils import *
-from . import bfu_export_get_info
-from .bfu_export_get_info import *
+from .export import bfu_export_get_info
+from .export.bfu_export_get_info import *
 from . import bfu_check_potential_error
 from . import bfu_ui_utils
 from . import languages
@@ -1201,7 +1201,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     def draw(self, contex):
         scene = bpy.context.scene
         obj = bpy.context.object
-        addon_prefs = bpy.context.preferences.addons[__package__].preferences
+        addon_prefs = GetAddonPrefs()
         layout = self.layout
 
         version = "-1"
@@ -1386,20 +1386,19 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             if obj.VertexColorToUse == "CustomIndex":
                                 StaticMeshVertexColorImportOptionIndexCustom = StaticMeshVertexColorImportOption.row()
                                 StaticMeshVertexColorImportOptionIndexCustom.prop(obj, 'VertexColorIndexToUse')
-                            
+
                             StaticMeshVertexColorFeedback = StaticMeshVertexColorImportOption.row()
                             if obj.type == "MESH":
                                 vced = VertexColorExportData(obj)
-                                if  vced.export_type == "REPLACE":
-                                    StaticMeshVertexColorFeedback.label(text='Vertex color nammed "' + vced.name + '" will be used.', icon='INFO')
+                                if vced.export_type == "REPLACE":
+                                    my_text = 'Vertex color nammed "' + vced.name + '" will be used.'
+                                    StaticMeshVertexColorFeedback.label(text=my_text, icon='INFO')
                                 else:
-                                    StaticMeshVertexColorFeedback.label(text='No vertex color found at this index.', icon='ERROR')
+                                    my_text = 'No vertex color found at this index.'
+                                    StaticMeshVertexColorFeedback.label(text=my_text, icon='ERROR')
                             else:
-                                StaticMeshVertexColorFeedback.label(text='Vertex color property will be apply on the childrens.', icon='INFO')
-
-                        
-                        
-
+                                my_text = 'Vertex color property will be apply on the childrens.'
+                                StaticMeshVertexColorFeedback.label(text=my_text, icon='INFO')
 
             bfu_ui_utils.LayoutSection(layout, "bfu_object_light_map_properties_expanded", "Light map")
             if scene.bfu_object_light_map_properties_expanded:
@@ -1441,7 +1440,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             transformProp.prop(obj, 'exportGlobalScale')
                         elif GetAssetType(obj) == "Camera":
                             transformProp.prop(obj, "AdditionalLocationForExport")
-
 
                         AxisProperty = layout.column()
                         AxisProperty.prop(obj, 'exportAxisForward')
@@ -1784,7 +1782,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
 
     def draw(self, context):
 
-        addon_prefs = bpy.context.preferences.addons[__package__].preferences
+        addon_prefs = GetAddonPrefs()
         layout = self.layout
         scene = bpy.context.scene
         obj = context.object
@@ -2533,7 +2531,7 @@ class BFU_PT_Export(bpy.types.Panel):
     def draw(self, context):
         scene = context.scene
         scene = context.scene
-        addon_prefs = bpy.context.preferences.addons[__package__].preferences
+        addon_prefs = GetAddonPrefs()
 
         # Categories :
         layout = self.layout
@@ -2655,7 +2653,7 @@ class BFU_PT_Export(bpy.types.Panel):
                 layout.label(text="Click on one of the buttons to copy the import command.", icon='INFO')
                 layout.label(text="Then paste it into the cmd console of unreal.")
                 layout.label(text="You need activate python plugins in Unreal Engine.")
-                    
+
             else:
                 layout.label(text='(Generated scripts are deactivated.)')
 

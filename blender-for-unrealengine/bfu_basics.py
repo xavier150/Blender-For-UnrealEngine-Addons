@@ -27,6 +27,10 @@ from mathutils import Vector
 from mathutils import Quaternion
 
 
+def GetAddonPrefs():
+    return bpy.context.preferences.addons[__package__].preferences
+
+
 def is_deleted(o):
     if o and o is not None:
         return not (o.name in bpy.data.objects)
@@ -56,8 +60,9 @@ def MoveToGlobalView():
 
     return local_view_areas
 
+
 def MoveToLocalView(local_view_areas):
-    #TO DO
+    # TO DO
     pass
 
 
@@ -260,7 +265,7 @@ def ValidFilename(filename):
 
     filename = ''.join(c for c in filename if c not in illegal_chars)
     filename = ''.join(c for c in filename if c in valid_chars)
-    
+
     return filename
 
 

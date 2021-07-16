@@ -24,6 +24,15 @@ from math import degrees
 from . import languages
 from .languages import *
 
+from . import bfu_basics
+from .bfu_basics import *
+from . import bfu_utils
+from .bfu_utils import *
+from . import bfu_write_utils
+from .bfu_write_utils import *
+from .export import bfu_export_get_info
+from .export.bfu_export_get_info import *
+
 if "bpy" in locals():
     import importlib
     if "bfu_basics" in locals():
@@ -36,15 +45,6 @@ if "bpy" in locals():
         importlib.reload(languages)
     if "bfu_export_get_info" in locals():
         importlib.reload(bfu_export_get_info)
-
-from . import bfu_basics
-from .bfu_basics import *
-from . import bfu_utils
-from .bfu_utils import *
-from . import bfu_write_utils
-from .bfu_write_utils import *
-from . import bfu_export_get_info
-from .bfu_export_get_info import *
 
 
 def WriteImportAssetScript():
@@ -82,7 +82,9 @@ def WriteImportAssetScript():
         else:
             relative_import_path = asset.folder_name
 
-        asset_data["full_import_path"] = "/Game/" + os.path.join(scene.unreal_import_location, relative_import_path).replace('\\', '/').rstrip('/')
+        full_import_path = "/Game/" + os.path.join(scene.unreal_import_location, relative_import_path)
+        full_import_path = full_import_path.replace('\\', '/').rstrip('/')
+        asset_data["full_import_path"] = full_import_path
 
         if asset.GetFileByType("FBX"):
             asset_data["fbx_path"] = asset.GetFileByType("FBX").GetAbsolutePath()
@@ -105,13 +107,19 @@ def WriteImportAssetScript():
                 customName = scene.skeletal_prefix_export_name+ValidUnrealAssetsName(asset.skeleton_name)+"_Skeleton"
                 SkeletonName = customName+"."+customName
                 SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
-                asset_data["animation_skeleton_path"] = os.path.join("/Game/", scene.unreal_import_location, SkeletonLoc).replace('\\', '/')
+
+                animation_skeleton_path = os.path.join("/Game/", scene.unreal_import_location, SkeletonLoc)
+                animation_skeleton_path = animation_skeleton_path.replace('\\', '/')
+                asset_data["animation_skeleton_path"] = animation_skeleton_path
 
             elif(asset.object.bfu_skeleton_search_mode) == "custom_name":
                 customName = ValidUnrealAssetsName(asset.object.bfu_target_skeleton_custom_name)
                 SkeletonName = customName+"."+customName
                 SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
-                asset_data["animation_skeleton_path"] = os.path.join("/Game/", scene.unreal_import_location, SkeletonLoc).replace('\\', '/')
+
+                animation_skeleton_path = os.path.join("/Game/", scene.unreal_import_location, SkeletonLoc)
+                animation_skeleton_path = animation_skeleton_path.replace('\\', '/')
+                asset_data["animation_skeleton_path"] = animation_skeleton_path
 
             elif(asset.object.bfu_skeleton_search_mode) == "custom_path_name":
                 customName = ValidUnrealAssetsName(asset.object.bfu_target_skeleton_custom_name)
@@ -136,7 +144,7 @@ def WriteImportAssetScript():
             asset_data["custom_light_map_resolution"] = ExportCompuntedLightMapValue(asset.object)
             asset_data["light_map_resolution"] = GetCompuntedLightMap(asset.object)
             asset_data["collision_trace_flag"] = asset.object.CollisionTraceFlag
-            
+
         data['assets'].append(asset_data)
 
     return data

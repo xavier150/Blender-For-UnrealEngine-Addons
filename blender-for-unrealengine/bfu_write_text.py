@@ -27,6 +27,14 @@ from . import languages
 from .languages import *
 from shutil import copyfile
 
+from . import bfu_basics
+from .bfu_basics import *
+from . import bfu_utils
+from .bfu_utils import *
+from . import bfu_write_import_asset_script
+from . import bfu_write_import_sequencer_script
+from .export import bfu_export_get_info
+from .export.bfu_export_get_info import *
 
 if "bpy" in locals():
     import importlib
@@ -42,15 +50,6 @@ if "bpy" in locals():
         importlib.reload(languages)
     if "bfu_export_get_info" in locals():
         importlib.reload(bfu_export_get_info)
-
-from . import bfu_basics
-from .bfu_basics import *
-from . import bfu_utils
-from .bfu_utils import *
-from . import bfu_write_import_asset_script
-from . import bfu_write_import_sequencer_script
-from . import bfu_export_get_info
-from .bfu_export_get_info import *
 
 
 def ExportSingleText(text, dirpath, filename):
@@ -197,6 +196,9 @@ def WriteExportedAssetsDetail():
             os.path.join(obj.exportFolderName)
             )
 
+        fbx_path = os.path.join(asset.exportPath, asset.assetName)
+        import_path = os.path.join(obj.exportFolderName, scene.anim_subfolder_name)
+
         # Mesh only
         if (asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh"):
             fbx_file_path = asset.GetFileByType("FBX").GetAbsolutePath()
@@ -220,7 +222,7 @@ def WriteExportedAssetsDetail():
 
             fbx_file_path = asset.GetFileByType("FBX").GetAbsolutePath()
             config.set(AssetSectionName, animOption+'_fbx_path', fbx_path)
-            config.set(AssetSectionName, animOption+'_import_path', os.path.join(obj.exportFolderName, scene.anim_subfolder_name))
+            config.set(AssetSectionName, animOption+'_import_path', import_path)
 
     AssetForImport = []
     for asset in scene.UnrealExportedAssetsList:
@@ -229,7 +231,7 @@ def WriteExportedAssetsDetail():
 
     # Comment
     config.add_section('Comment')
-    config.set('Comment', '; '+ti(write_text_additional_track_start))
+    config.set('Comment', '; '+ti("write_text_additional_track_start"))
 
     config.add_section('Defaultsettings')
     config.set('Defaultsettings', 'unreal_import_location', r'/Game/'+scene.unreal_import_location)
@@ -311,7 +313,6 @@ def WriteCameraAnimationTracks(obj):
             return keys
         return[(scene.frame_start, DataValue)]
 
-
     class CameraDataAtFrame():
 
         def __init__(self):
@@ -328,8 +329,10 @@ def WriteCameraAnimationTracks(obj):
             scene.frame_set(frame)
 
             # Get Transfrom
-            matrix = camera.matrix_world @ Matrix.Rotation(radians(90.0), 4, 'Y') @ Matrix.Rotation(radians(-90.0), 4, 'X')
-            matrix_rotation_offset = Matrix.Rotation(camera.AdditionalRotationForExport.z, 4, 'Z')               
+            matrix_y = Matrix.Rotation(radians(90.0), 4, 'Y')
+            matrix_x = Matrix.Rotation(radians(-90.0), 4, 'X')
+            matrix = camera.matrix_world @ matrix_y @ matrix_x
+            matrix_rotation_offset = Matrix.Rotation(camera.AdditionalRotationForExport.z, 4, 'Z')
             loc = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
             loc += camera.AdditionalLocationForExport
             r = matrix.to_euler()
@@ -357,11 +360,15 @@ def WriteCameraAnimationTracks(obj):
             self.sensor_height[frame] = getOneKeysByFcurves(camera, "sensor_height", camera.data.sensor_height, frame)
 
             # Get FocusDistance
+            scale_length = bpy.context.scene.unit_settings.scale_length
+
             if camera.data.dof.focus_object is not None:
-                key = getCameraFocusDistance(camera, camera.data.dof.focus_object) * 100 * bpy.context.scene.unit_settings.scale_length
+                key = getCameraFocusDistance(camera, camera.data.dof.focus_object)
+                key = key * 100 * scale_length
 
             else:
-                key = getOneKeysByFcurves(camera, "dof.focus_distance", camera.data.dof.focus_distance, frame) * 100 * bpy.context.scene.unit_settings.scale_length
+                key = getOneKeysByFcurves(camera, "dof.focus_distance", camera.data.dof.focus_distance, frame)
+                key = key * 100 * scale_length
 
             if key > 0:
                 self.focus_distance[frame] = key
@@ -369,34 +376,34 @@ def WriteCameraAnimationTracks(obj):
                 self.focus_distance[frame] = 100000  # 100000 is default value in ue4
 
             # Write Aperture (Depth of Field) keys
-            if scene.render.engine == "BLENDER_EEVEE" or scene.render.engine == "CYCLES" or scene.render.engine == "BLENDER_WORKBENCH":
+            render_engine = scene.render.engine
+            if render_engine == "BLENDER_EEVEE" or render_engine == "CYCLES" or render_engine == "BLENDER_WORKBENCH":
                 key = getOneKeysByFcurves(camera, "dof.aperture_fstop", camera.data.dof.aperture_fstop, frame)
-                self.aperture_fstop[frame] = key / bpy.context.scene.unit_settings.scale_length
+                self.aperture_fstop[frame] = key / scale_length
             else:
                 self.aperture_fstop[frame] = 2.8  # 2.8 is default value in ue4
 
             boolKey = getOneKeysByFcurves(camera, "hide_viewport", camera.hide_viewport, frame, False)
             self.hide_viewport[frame] = (boolKey < 1)  # Inversed for convert hide to spawn
 
-
         def EvaluateTracks(self, camera, frame_start, frame_end):
             scene = bpy.context.scene
-            addon_prefs = bpy.context.preferences.addons[__package__].preferences
+            addon_prefs = GetAddonPrefs()
 
             saveFrame = scene.frame_current
             if camera is None:
                 return
-            
+
             slms = TimelineMarkerSequence()
             for frame in range(frame_start, frame_end+1):
-                
+
                 if addon_prefs.bakeOnlyKeyVisibleInCut:
                     marker_sequence = slms.GetMarkerSequenceAtFrame(frame)
                     if marker_sequence:
                         marker = marker_sequence.marker
                         if marker.camera == camera:
                             self.EvaluateTracksAtFrame(camera, frame)
-                            
+
                 else:
                     self.EvaluateTracksAtFrame(camera, frame)
 
@@ -435,7 +442,7 @@ def WriteCameraAnimationTracks(obj):
 def WriteSingleMeshAdditionalParameter(obj):
 
     scene = bpy.context.scene
-    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    addon_prefs = GetAddonPrefs()
 
     sockets = []
     for socket in GetSocketDesiredChild(obj):
@@ -453,7 +460,6 @@ def WriteSingleMeshAdditionalParameter(obj):
     # Defaultsettings
     data['DefaultSettings'] = {}
     # config.set('Defaultsettings', 'SocketNumber', str(len(sockets)))
-    
 
     # Level of detail
     data['LevelOfDetail'] = {}
@@ -519,20 +525,15 @@ def WriteSingleMeshAdditionalParameter(obj):
         )  # Color to Json
         data["vertex_override_color"] = vertex_override_color
 
-    # preview_import_path
-    #SkeletonName = customName+"."+customName
-    #SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
-    #asset_data["animation_skeleton_path"] = os.path.join("/Game/", scene.unreal_import_location, SkeletonLoc).replace('\\', '/')
-
     data["preview_import_path"] = GetObjExportFileName(obj, "")
-    
+
     return data
 
 
 def WriteAllTextFiles():
 
     scene = bpy.context.scene
-    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    addon_prefs = GetAddonPrefs()
 
     if scene.text_ExportLog:
         Text = ti("write_text_additional_track_start") + "\n"
@@ -543,11 +544,13 @@ def WriteAllTextFiles():
             ExportSingleText(Text, scene.export_other_file_path, Filename)
 
     # Import script
+    bfu_path = os.path.join("addons", "blender-for-unrealengine", "import")
+    bfu_path_ref = bpy.utils.user_resource('SCRIPTS', bfu_path)
+
     if scene.text_ImportAssetScript:
         json_data = bfu_write_import_asset_script.WriteImportAssetScript()
         ExportSingleJson(json_data, scene.export_other_file_path, "ImportAssetData.json")
-
-        source = os.path.join(bpy.utils.user_resource('SCRIPTS', os.path.join("addons", "blender-for-unrealengine", "import")), "asset_import_script.py")
+        source = os.path.join(bfu_path_ref, "asset_import_script.py")
         filename = ValidFilename(scene.file_import_asset_script_name)
         destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
         copyfile(source, destination)
@@ -555,8 +558,7 @@ def WriteAllTextFiles():
     if scene.text_ImportSequenceScript:
         json_data = bfu_write_import_sequencer_script.WriteImportSequencerTracks()
         ExportSingleJson(json_data, scene.export_other_file_path, "ImportSequencerData.json")
-
-        source = os.path.join(bpy.utils.user_resource('SCRIPTS', os.path.join("addons", "blender-for-unrealengine", "import")), "sequencer_import_script.py")
+        source = os.path.join(bfu_path_ref, "sequencer_import_script.py")
         filename = ValidFilename(scene.file_import_sequencer_script_name)
         destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
         copyfile(source, destination)

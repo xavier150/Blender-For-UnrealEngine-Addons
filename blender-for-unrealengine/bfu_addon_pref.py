@@ -20,7 +20,7 @@ import os
 import bpy
 import addon_utils
 
-from . import bfu_export_asset
+from .export import bfu_export_asset
 from . import bfu_write_text
 from . import bfu_basics
 from .bfu_basics import *
@@ -343,13 +343,6 @@ classes = (
 )
 
 
-def menu_func(self, context):
-    layout = self.layout
-    col = layout.column()
-    col.separator(factor=1.0)
-    col.operator(BFU_PT_CorrectAndImprov.BFU_OT_CorrectExtremUV.bl_idname)
-
-
 def register():
     from bpy.utils import register_class
 
@@ -362,5 +355,3 @@ def unregister():
 
     for cls in reversed(classes):
         unregister_class(cls)
-
-    bpy.types.VIEW3D_MT_uv_map.remove(menu_func)
