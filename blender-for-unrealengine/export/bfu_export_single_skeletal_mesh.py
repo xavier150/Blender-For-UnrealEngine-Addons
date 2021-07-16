@@ -64,7 +64,7 @@ def ProcessSkeletalMeshExport(obj):
 
     if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
 
-        ExportSingleAdditionalParameterMesh(absdirpath, GetObjExportFileName(obj, "_AdditionalTrack.json"), obj)
+        ExportAdditionalParameter(absdirpath, MyAsset)
         file = MyAsset.files.add()
         file.name = GetObjExportFileName(obj, "_AdditionalTrack.json")
         file.path = dirpath
@@ -98,7 +98,7 @@ def ExportSingleSkeletalMesh(
     asset_name = PrepareExportName(obj, True)
     duplicate_data = DuplicateSelectForExport()
     SetDuplicateNameForExport(duplicate_data)
-    
+
     CorrectExtremUVAtExport()
 
     ApplyNeededModifierToSelect()

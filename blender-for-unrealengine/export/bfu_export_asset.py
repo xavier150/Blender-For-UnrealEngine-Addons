@@ -165,7 +165,7 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
     print("Start Export collection(s)")
     if scene.static_collection_export:
         for col in GetCollectionToExport(scene):
-            if col in targetcollection:
+            if col.name in targetcollection:
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end

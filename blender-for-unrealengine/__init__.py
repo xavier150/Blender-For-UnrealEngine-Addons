@@ -63,7 +63,7 @@ bl_info = {
     'description': "This add-ons allows to easily export several "
     "objects at the same time for use in unreal engine 4.",
     'author': 'Loux Xavier (BleuRaven)',
-    'version': (0, 2, 9),  # Rev 0.2.9
+    'version': (0, 2, 3),  # Rev 0.2.3
     'blender': (2, 80, 0),
     'location': 'View3D > UI > Unreal Engine 4',
     'warning': '',

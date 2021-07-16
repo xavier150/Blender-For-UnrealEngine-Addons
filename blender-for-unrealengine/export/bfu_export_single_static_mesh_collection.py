@@ -53,27 +53,27 @@ from .bfu_export_single_static_mesh import *
 def ProcessCollectionExport(col):
 
     addon_prefs = GetAddonPrefs()
-    dirpath = GetCollectionExportDir(bpy.data.collections[col])
+    dirpath = GetCollectionExportDir(bpy.data.collections[col.name])
     absdirpath = bpy.path.abspath(dirpath)
     scene = bpy.context.scene
 
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.StartAssetExport(collection=col)
 
-    ExportSingleStaticMeshCollection(dirpath, GetCollectionExportFileName(col), col)
+    ExportSingleStaticMeshCollection(dirpath, GetCollectionExportFileName(col.name), col.name)
 
     # MyAsset.SetObjData(obj)
 
     file = MyAsset.files.add()
-    file.name = GetCollectionExportFileName(col)
+    file.name = GetCollectionExportFileName(col.name)
     file.path = dirpath
     file.type = "FBX"
 
     if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
 
-        # ExportSingleAdditionalParameterMesh(absdirpath, GetCollectionExportFileName(col, "_AdditionalTrack.json"), obj)
+        ExportAdditionalParameter(absdirpath, MyAsset)
         file = MyAsset.files.add()
-        file.name = GetCollectionExportFileName(col, "_AdditionalTrack.json")
+        file.name = GetCollectionExportFileName(col.name, "_AdditionalTrack.json")
         file.path = dirpath
         file.type = "AdditionalTrack"
 
@@ -118,7 +118,6 @@ def ExportSingleStaticMeshCollection(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
         )
 
-    
     bpy.ops.export_scene.fbx(
         filepath=fullpath,
         check_existing=False,

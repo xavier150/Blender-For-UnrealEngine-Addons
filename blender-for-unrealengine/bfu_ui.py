@@ -1923,6 +1923,7 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     folder_name: StringProperty(default="None")
     files: CollectionProperty(type=BFU_OT_FileExport)
     object: PointerProperty(type=bpy.types.Object)
+    collection: PointerProperty(type=bpy.types.Collection)
     export_start_time: FloatProperty(default=0)
     export_end_time: FloatProperty(default=0)
     export_success: BoolProperty(default=False)
@@ -1946,6 +1947,7 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
             self.asset_name = GetActionExportFileName(obj, action, "")
 
         if collection:
+            self.collection = collection
             self.asset_type = GetCollectionType(collection)  # Override
 
         self.export_start_time = time.perf_counter()
@@ -1962,6 +1964,12 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
             if file.type == type:
                 return file
         print("File type not found in this assets:", type)
+
+    def GetFilename(self, fileType=".fbx"):
+        if self.asset_type == "Collection StaticMesh":
+            return GetCollectionExportFileName(self.collection.name, fileType)
+        else:
+            return GetObjExportFileName(self.object, fileType)
 
 
 class BFU_PT_Export(bpy.types.Panel):

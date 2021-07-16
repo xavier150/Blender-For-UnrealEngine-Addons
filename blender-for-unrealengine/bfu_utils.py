@@ -679,7 +679,8 @@ def GetCollectionToExport(scene):
     colExport = []
     for col in scene.CollectionExportList:
         if col.use:
-            colExport.append(col.name)
+            collection = bpy.data.collections[col.name]
+            colExport.append(collection)
     return colExport
 
 
@@ -1318,7 +1319,8 @@ def GetFinalAssetToExport():
 
     if export_filter == "default":
         objList = GetAllobjectsByExportType("export_recursive")
-        collectionList = GetCollectionToExport(scene)
+        for col in GetCollectionToExport(scene):
+            collectionList.append(col.name)
 
     elif export_filter == "only_object" or export_filter == "only_object_action":
         recuList = GetAllobjectsByExportType("export_recursive")

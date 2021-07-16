@@ -63,7 +63,7 @@ def ProcessStaticMeshExport(obj):
 
     if not obj.ExportAsLod:
         if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
-            ExportSingleAdditionalParameterMesh(absdirpath, GetObjExportFileName(obj, "_AdditionalTrack.json"), obj)
+            ExportAdditionalParameter(absdirpath, MyAsset)
             file = MyAsset.files.add()
             file.name = GetObjExportFileName(obj, "_AdditionalTrack.json")
             file.path = dirpath

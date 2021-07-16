@@ -439,14 +439,11 @@ def WriteCameraAnimationTracks(obj):
     return data
 
 
-def WriteSingleMeshAdditionalParameter(obj):
+def WriteSingleMeshAdditionalParameter(unreal_exported_asset):
 
     scene = bpy.context.scene
     addon_prefs = GetAddonPrefs()
-
-    sockets = []
-    for socket in GetSocketDesiredChild(obj):
-        sockets.append(socket)
+    obj = unreal_exported_asset.object
 
     data = {}
 
@@ -462,71 +459,77 @@ def WriteSingleMeshAdditionalParameter(obj):
     # config.set('Defaultsettings', 'SocketNumber', str(len(sockets)))
 
     # Level of detail
-    data['LevelOfDetail'] = {}
-    if obj.Ue4Lod1 is not None:
-        loc = os.path.join(GetObjExportDir(obj.Ue4Lod1, True), GetObjExportFileName(obj.Ue4Lod1))
-        data['LevelOfDetail']['lod_1'] = loc
-    if obj.Ue4Lod2 is not None:
-        loc = os.path.join(GetObjExportDir(obj.Ue4Lod2, True), GetObjExportFileName(obj.Ue4Lod2))
-        data['LevelOfDetail']['lod_2'] = loc
-    if obj.Ue4Lod3 is not None:
-        loc = os.path.join(GetObjExportDir(obj.Ue4Lod3, True), GetObjExportFileName(obj.Ue4Lod3))
-        data['LevelOfDetail']['lod_3'] = loc
-    if obj.Ue4Lod4 is not None:
-        loc = os.path.join(GetObjExportDir(obj.Ue4Lod4, True), GetObjExportFileName(obj.Ue4Lod4))
-        data['LevelOfDetail']['lod_4'] = loc
-    if obj.Ue4Lod5 is not None:
-        loc = os.path.join(GetObjExportDir(obj.Ue4Lod5, True), GetObjExportFileName(obj.Ue4Lod5))
-        data['LevelOfDetail']['lod_5'] = loc
+    if obj:
+        data['LevelOfDetail'] = {}
+        if obj.Ue4Lod1 is not None:
+            loc = os.path.join(GetObjExportDir(obj.Ue4Lod1, True), GetObjExportFileName(obj.Ue4Lod1))
+            data['LevelOfDetail']['lod_1'] = loc
+        if obj.Ue4Lod2 is not None:
+            loc = os.path.join(GetObjExportDir(obj.Ue4Lod2, True), GetObjExportFileName(obj.Ue4Lod2))
+            data['LevelOfDetail']['lod_2'] = loc
+        if obj.Ue4Lod3 is not None:
+            loc = os.path.join(GetObjExportDir(obj.Ue4Lod3, True), GetObjExportFileName(obj.Ue4Lod3))
+            data['LevelOfDetail']['lod_3'] = loc
+        if obj.Ue4Lod4 is not None:
+            loc = os.path.join(GetObjExportDir(obj.Ue4Lod4, True), GetObjExportFileName(obj.Ue4Lod4))
+            data['LevelOfDetail']['lod_4'] = loc
+        if obj.Ue4Lod5 is not None:
+            loc = os.path.join(GetObjExportDir(obj.Ue4Lod5, True), GetObjExportFileName(obj.Ue4Lod5))
+            data['LevelOfDetail']['lod_5'] = loc
 
     # Sockets
-    if GetAssetType(obj) == "SkeletalMesh":
+    if obj:
+        sockets = []
+        for socket in GetSocketDesiredChild(obj):
+            sockets.append(socket)
 
-        data['Sockets'] = {}
-        # config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
+        if GetAssetType(obj) == "SkeletalMesh":
 
-        for i, socket in enumerate(sockets):
-            if IsASocket(socket):
-                SocketName = socket.name[7:]
-            else:
-                socket.name
+            data['Sockets'] = {}
+            # config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
 
-            if socket.parent.exportDeformOnly:
-                b = getFirstDeformBoneParent(socket.parent.data.bones[socket.parent_bone])
-            else:
-                b = socket.parent.data.bones[socket.parent_bone]
+            for i, socket in enumerate(sockets):
+                if IsASocket(socket):
+                    SocketName = socket.name[7:]
+                else:
+                    socket.name
 
-            ResetArmaturePose(socket.parent)
-            # GetRelativePostion
-            bml = b.matrix_local  # Bone
-            am = socket.parent.matrix_world  # Armature
-            em = socket.matrix_world  # Socket
-            RelativeMatrix = (bml.inverted() @ am.inverted() @ em)
-            t = RelativeMatrix.to_translation()
-            r = RelativeMatrix.to_euler()
-            s = socket.scale*addon_prefs.skeletalSocketsImportedSize
+                if socket.parent.exportDeformOnly:
+                    b = getFirstDeformBoneParent(socket.parent.data.bones[socket.parent_bone])
+                else:
+                    b = socket.parent.data.bones[socket.parent_bone]
 
-            # Convet to array for configparser and convert value for Unreal
-            array_location = [t[0], t[1]*-1, t[2]]
-            array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]
-            array_scale = [s[0], s[1], s[2]]
+                ResetArmaturePose(socket.parent)
+                # GetRelativePostion
+                bml = b.matrix_local  # Bone
+                am = socket.parent.matrix_world  # Armature
+                em = socket.matrix_world  # Socket
+                RelativeMatrix = (bml.inverted() @ am.inverted() @ em)
+                t = RelativeMatrix.to_translation()
+                r = RelativeMatrix.to_euler()
+                s = socket.scale*addon_prefs.skeletalSocketsImportedSize
 
-            MySocket = [SocketName, b.name.replace('.', '_'), array_location, array_rotation, array_scale]
-            data['Sockets']['socket_'+str(i)] = MySocket
+                # Convet to array for configparser and convert value for Unreal
+                array_location = [t[0], t[1]*-1, t[2]]
+                array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]
+                array_scale = [s[0], s[1], s[2]]
+
+                MySocket = [SocketName, b.name.replace('.', '_'), array_location, array_rotation, array_scale]
+                data['Sockets']['socket_'+str(i)] = MySocket
 
     # Vertex Color
-    if GetAssetType(obj) == "SkeletalMesh" or GetAssetType(obj) == "StaticMesh":
-        vced = VertexColorExportData(obj)
-        data["vertex_color_import_option"] = vced.export_type
-        vertex_override_color = (
-            vced.color[0],  # R
-            vced.color[1],  # G
-            vced.color[2]  # B
-        )  # Color to Json
-        data["vertex_override_color"] = vertex_override_color
+    if obj:
+        if GetAssetType(obj) == "SkeletalMesh" or GetAssetType(obj) == "StaticMesh":
+            vced = VertexColorExportData(obj)
+            data["vertex_color_import_option"] = vced.export_type
+            vertex_override_color = (
+                vced.color[0],  # R
+                vced.color[1],  # G
+                vced.color[2]  # B
+            )  # Color to Json
+            data["vertex_override_color"] = vertex_override_color
 
-    data["preview_import_path"] = GetObjExportFileName(obj, "")
-
+    data["preview_import_path"] = unreal_exported_asset.GetFilename()
     return data
 
 
