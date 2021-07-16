@@ -94,7 +94,11 @@ def ExportSingleStaticMesh(
     SelectParentAndDesiredChilds(obj)
     AddSubObjectTempName(obj)
     asset_name = PrepareExportName(obj, False)
-    data_to_remove = DuplicateSelectForExport()
+    duplicate_data = DuplicateSelectForExport()
+    SetDuplicateNameForExport(duplicate_data)
+
+    MakeSelectVisualReal()
+
     CorrectExtremUVAtExport()
 
     ApplyNeededModifierToSelect()
@@ -120,6 +124,7 @@ def ExportSingleStaticMesh(
 
     SetVertexColorForUnrealExport(active)
 
+
     bpy.ops.export_scene.fbx(
         filepath=fullpath,
         check_existing=False,
@@ -142,7 +147,8 @@ def ExportSingleStaticMesh(
     asset_name.ResetNames()
 
     CleanDeleteObjects(bpy.context.selected_objects)
-    for data in data_to_remove:
+    for data in duplicate_data.data_to_remove:
         data.RemoveData()
 
     RemoveSubObjectTempName(obj)
+    ResetDuplicateNameAfterExport(duplicate_data)

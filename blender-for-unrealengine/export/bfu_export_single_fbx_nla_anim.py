@@ -88,7 +88,9 @@ def ExportSingleFbxNLAAnim(
 
     SelectParentAndDesiredChilds(obj)
     asset_name = PrepareExportName(obj, True)
-    data_to_remove = DuplicateSelectForExport(True)
+    duplicate_data = DuplicateSelectForExport()
+    SetDuplicateNameForExport(duplicate_data)
+    MakeSelectVisualReal()
 
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
@@ -190,5 +192,5 @@ def ExportSingleFbxNLAAnim(
         RescaleAllActionCurve(1/(rrf*oldScale), 0.01/savedUnitLength)
 
     CleanDeleteObjects(bpy.context.selected_objects)
-    for data in data_to_remove:
+    for data in duplicate_data.data_to_remove:
         data.RemoveData()

@@ -96,7 +96,9 @@ def ExportSingleSkeletalMesh(
     SelectParentAndDesiredChilds(obj)
     AddSubObjectTempName(obj)
     asset_name = PrepareExportName(obj, True)
-    data_to_remove = DuplicateSelectForExport()
+    duplicate_data = DuplicateSelectForExport()
+    SetDuplicateNameForExport(duplicate_data)
+    
     CorrectExtremUVAtExport()
 
     ApplyNeededModifierToSelect()
@@ -185,7 +187,7 @@ def ExportSingleSkeletalMesh(
     asset_name.ResetNames()
 
     CleanDeleteObjects(bpy.context.selected_objects)
-    for data in data_to_remove:
+    for data in duplicate_data.data_to_remove:
         data.RemoveData()
 
     RemoveSubObjectTempName(obj)

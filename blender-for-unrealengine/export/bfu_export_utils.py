@@ -41,6 +41,9 @@ from ..bfu_utils import *
 from . import bfu_export_get_info
 from .bfu_export_get_info import *
 
+dup_temp_name = "BFU_Temp" #DuplicateTemporarilyNameForUe4Export
+Export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
+
 
 def ApplyProxyData(obj):
 
@@ -122,10 +125,26 @@ def BakeArmatureAnimation(armature, frame_start, frame_end):
     SetCurrentSelection(SavedSelect)
 
 
-def DuplicateSelectForExport(apply_visual=False):
+def DuplicateSelectForExport(new_name="duplicated Obj"):
     # Note: Need look for a optimized duplicate, This is too long
 
     scene = bpy.context.scene
+
+    class DuplicateData():
+        def __init__(self):
+            self.data_to_remove = []
+            self.origin_select = None
+            self.duplicate_select = None
+
+        def SetOriginSelect(self):
+            select = UserSelectSave()
+            select.SaveCurrentSelect()
+            self.origin_select = select
+
+        def SetDuplicateSelect(self):
+            select = UserSelectSave()
+            select.SaveCurrentSelect()
+            self.duplicate_select = select
 
     class DelegateOldData():
         # contain a data to remove and function for remove
@@ -136,6 +155,11 @@ def DuplicateSelectForExport(apply_visual=False):
 
         def RemoveData(self):
             RemoveUselessSpecificData(self.data_name, self.data_type)
+
+    duplicate_data = DuplicateData()
+    duplicate_data.SetOriginSelect()
+    for user_selected in duplicate_data.origin_select.user_selecteds:
+        SaveObjCurrentName(user_selected)
 
     data_to_remove = []
 
@@ -150,18 +174,6 @@ def DuplicateSelectForExport(apply_visual=False):
     currentSelectNames = []
     for currentSelectName in bpy.context.selected_objects:
         currentSelectNames.append(currentSelectName.name)
-
-    if apply_visual:
-        # Visual Transform Apply
-        bpy.ops.object.visual_transform_apply()
-
-        # This can break mesh with Instanced complex Collections
-
-        # Make Instances Real
-        bpy.ops.object.duplicates_make_real(
-            use_base_parent=True,
-            use_hierarchy=True
-            )
 
     for objSelect in currentSelectNames:
         if objSelect not in bpy.context.selected_objects:
@@ -179,7 +191,36 @@ def DuplicateSelectForExport(apply_visual=False):
         if action.name not in actionNames:
             bpy.data.actions.remove(action)
 
-    return data_to_remove
+    duplicate_data.SetDuplicateSelect()
+
+    return duplicate_data
+
+
+def SetDuplicateNameForExport(duplicate_data, origin_prefix="or_"):
+    for user_selected in duplicate_data.origin_select.user_selecteds:
+        user_selected.name = origin_prefix+user_selected.name
+
+    for user_selected in duplicate_data.duplicate_select.user_selecteds:
+        user_selected.name = GetObjOriginName(user_selected)
+
+
+def ResetDuplicateNameAfterExport(duplicate_data):
+    for user_selected in duplicate_data.origin_select.user_selecteds:
+        user_selected.name = GetObjOriginName(user_selected)
+        ClearObjOriginNameVar(user_selected)
+
+
+def MakeSelectVisualReal():
+    # Visual Transform Apply
+    bpy.ops.object.visual_transform_apply()
+
+    # This can break mesh with Instanced complex Collections
+
+    # Make Instances Real
+    bpy.ops.object.duplicates_make_real(
+        use_base_parent=True,
+        use_hierarchy=True
+        )
 
 
 def SetSocketsExportTransform(obj):
@@ -201,8 +242,6 @@ def SetSocketsExportTransform(obj):
 
 # Main asset
 
-dup_temp_name = "DuplicateTemporarilyNameForUe4Export"
-
 
 class PrepareExportName():
     def __init__(self, obj, is_armature):
@@ -221,6 +260,8 @@ class PrepareExportName():
                 self.new_asset_name = obj.name  # Keep the same name
 
     def SetExportName(self):
+        return  # OLD
+
         '''
         Set the name of the asset for export
         '''
@@ -254,35 +295,35 @@ class PrepareExportName():
 # Sockets and Collisons
 
 
-ExportTempPreFix = "_ESO_Temp"  # _ExportSubObject_TempName
-
-
 def AddSubObjectTempName(obj):
+    return  # OLD
     '''
-    This function add _ExportSubObject_TempName (Var ExportTempPreFix) at end of the name of sub objects.
+    This function add _ExportSubObject_TempName (Var Export_temp_preFix) at end of the name of sub objects.
     '''
 
     for sub_object in GetSubObjectDesiredChild(obj):
-        sub_object.name += ExportTempPreFix
+        sub_object.name += Export_temp_preFix
 
 
 def RemoveDuplicatedSubObjectTempName(obj):
+    return  # OLD
     '''
-    This function remove _ExportSubObject_TempName + Index (Var ExportTempPreFix) at end of the name of sub objects.
+    This function remove _ExportSubObject_TempName + Index (Var Export_temp_preFix) at end of the name of sub objects.
     '''
 
     for sub_object in GetSubObjectDesiredChild(obj):
-        ToRemove = ExportTempPreFix+".xxx"
+        ToRemove = Export_temp_preFix+".xxx"
         sub_object.name = sub_object.name[:-len(ToRemove)]
 
 
 def RemoveSubObjectTempName(obj):
+    return  # OLD
     '''
-    This function remove _ExportSubObject_TempName (Var ExportTempPreFix) at end of the name of sub objects.
+    This function remove _ExportSubObject_TempName (Var Export_temp_preFix) at end of the name of sub objects.
     '''
 
     for sub_object in GetSubObjectDesiredChild(obj):
-        ToRemove = ExportTempPreFix
+        ToRemove = Export_temp_preFix
         sub_object.name = sub_object.name[:-len(ToRemove)]
 
 # Sockets

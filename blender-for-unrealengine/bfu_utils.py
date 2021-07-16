@@ -32,6 +32,7 @@ from . import bfu_basics
 from .bfu_basics import *
 
 
+
 class SavedObject():
 
     def __init__(self, obj):
@@ -71,16 +72,34 @@ class SavedViewLayerChildren():
             self.hide_viewport = childCol.hide_viewport
 
 
+class UserSelectSave():
+    def __init__(self):
+
+        # Select
+        self.user_active = None
+        self.user_active_name = ""
+        self.user_selecteds = []
+
+    def SaveCurrentSelect(self):
+        # Save data (This can take time)
+
+        c = bpy.context
+        # Select
+        self.user_active = c.active_object  # Save current active object
+        if self.user_active:
+            self.user_active_name = self.user_active.name
+        self.user_selecteds = c.selected_objects  # Save current selected objects
+
 class UserSceneSave():
 
     def __init__(self):
 
         # Select
         self.user_active = None
-        self.user_active_name = None
+        self.user_active_name = ""
         self.user_bone_active = None
-        self.user_bone_active_name = None
-        self.user_selected = []
+        self.user_bone_active_name = ""
+        self.user_selecteds = []
 
         # Stats
         self.user_mode = None
@@ -102,7 +121,7 @@ class UserSceneSave():
         self.user_active = c.active_object  # Save current active object
         if self.user_active:
             self.user_active_name = self.user_active.name
-        self.user_selected = c.selected_objects  # Save current selected objects
+        self.user_selecteds = c.selected_objects  # Save current selected objects
 
         # Stats
         if self.user_active:
@@ -136,7 +155,7 @@ class UserSceneSave():
         SafeModeSet("OBJECT", bpy.ops.object)
         bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.data.objects:  # Resets previous selected object if still exist
-            if obj in self.user_selected:
+            if obj in self.user_selecteds:
                 obj.select_set(True)
 
         bpy.context.view_layer.objects.active = self.user_active
@@ -1801,3 +1820,31 @@ def AddFrontEachLine(ImportScript, text="\t"):
         NewImportScript += text + line + "\n"
 
     return NewImportScript
+
+
+# Custom property
+
+
+def SetVarOnObject(obj, VarName, Value):
+    obj[VarName] = Value
+
+
+def GetVarOnObject(obj, VarName):
+    return obj[VarName]
+
+
+def ClearVarOnObject(obj, VarName):
+    del obj[VarName]
+
+
+def SaveObjCurrentName(obj):
+    # Save object current name as Custom property
+    SetVarOnObject(obj, "BFU_OriginName", obj.name)
+
+
+def GetObjOriginName(obj):
+    return GetVarOnObject(obj, "BFU_OriginName")
+
+
+def ClearObjOriginNameVar(obj):
+    ClearVarOnObject(obj, "BFU_OriginName")
