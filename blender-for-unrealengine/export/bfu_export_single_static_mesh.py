@@ -124,7 +124,6 @@ def ExportSingleStaticMesh(
 
     SetVertexColorForUnrealExport(active)
 
-
     bpy.ops.export_scene.fbx(
         filepath=fullpath,
         check_existing=False,

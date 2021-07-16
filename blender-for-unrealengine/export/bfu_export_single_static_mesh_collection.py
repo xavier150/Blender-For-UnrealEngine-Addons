@@ -60,9 +60,9 @@ def ProcessCollectionExport(col):
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.StartAssetExport(collection=col)
 
-    obj = ExportSingleStaticMeshCollection(dirpath, GetCollectionExportFileName(col), col)
+    ExportSingleStaticMeshCollection(dirpath, GetCollectionExportFileName(col), col)
 
-    MyAsset.SetObjData(obj)
+    # MyAsset.SetObjData(obj)
 
     file = MyAsset.files.add()
     file.name = GetCollectionExportFileName(col)
@@ -71,13 +71,12 @@ def ProcessCollectionExport(col):
 
     if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
 
-        ExportSingleAdditionalParameterMesh(absdirpath, GetCollectionExportFileName(col, "_AdditionalTrack.json"), obj)
+        # ExportSingleAdditionalParameterMesh(absdirpath, GetCollectionExportFileName(col, "_AdditionalTrack.json"), obj)
         file = MyAsset.files.add()
         file.name = GetCollectionExportFileName(col, "_AdditionalTrack.json")
         file.path = dirpath
         file.type = "AdditionalTrack"
 
-    CleanSingleStaticMeshCollection(obj)
     MyAsset.EndAssetExport(True)
     return MyAsset
 
@@ -93,19 +92,59 @@ def ExportSingleStaticMeshCollection(
             #COLLECTION
     #####################################################
     '''
+    # Export a single collection
+
+    scene = bpy.context.scene
+    addon_prefs = GetAddonPrefs()
     collection = bpy.data.collections[collectionName]
 
-    # create collection and export it
-    obj = bpy.data.objects.new("EmptyCollectionForUnrealExport_Temp", None)
-    bpy.context.scene.collection.objects.link(obj)
-    obj.instance_type = 'COLLECTION'
-    obj.instance_collection = collection
-    ExportSingleStaticMesh(dirpath, filename, obj)
-    obj.exportFolderName = collection.exportFolderName
-    return obj
+    SafeModeSet('OBJECT')
+
+    SelectCollectionObjects(collection)
+    duplicate_data = DuplicateSelectForExport()
+    SetDuplicateNameForExport(duplicate_data)
+
+    MakeSelectVisualReal()
+
+    CorrectExtremUVAtExport()
+
+    ApplyNeededModifierToSelect()
+
+    absdirpath = bpy.path.abspath(dirpath)
+    VerifiDirs(absdirpath)
+    fullpath = os.path.join(absdirpath, filename)
+
+    bfu_check_potential_error.UpdateNameHierarchy(
+        GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
+        )
+
+    
+    bpy.ops.export_scene.fbx(
+        filepath=fullpath,
+        check_existing=False,
+        use_selection=True,
+        global_scale=1,
+        object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
+        use_custom_props=addon_prefs.exportWithCustomProps,
+        mesh_smooth_type="FACE",
+        add_leaf_bones=False,
+        # use_armature_deform_only=active.exportDeformOnly,
+        bake_anim=False,
+        use_metadata=addon_prefs.exportWithMetaData,
+        # primary_bone_axis=active.exportPrimaryBaneAxis,
+        # secondary_bone_axis=active.exporSecondaryBoneAxis,
+        # axis_forward=active.exportAxisForward,
+        # axis_up=active.exportAxisUp,
+        bake_space_transform=False
+        )
+
+    CleanDeleteObjects(bpy.context.selected_objects)
+    for data in duplicate_data.data_to_remove:
+        data.RemoveData()
+
+    ResetDuplicateNameAfterExport(duplicate_data)
 
 
 def CleanSingleStaticMeshCollection(obj):
     # Remove the created collection
     SelectSpecificObject(obj)
-    CleanDeleteObjects(bpy.context.selected_objects)

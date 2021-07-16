@@ -968,6 +968,23 @@ def CheckIsCollision(target):
     return False
 
 
+def SelectCollectionObjects(collection):
+    # Selects only all objects that must be exported in a collection
+    selectedObjs = []
+    bpy.ops.object.select_all(action='DESELECT')
+    for selectObj in collection.objects:
+        if selectObj.ExportEnum != "dont_export":
+            if selectObj.name in bpy.context.view_layer.objects:
+                selectObj.select_set(True)
+                selectedObjs.append(selectObj)
+
+    if len(selectedObjs) > 1:
+        if selectedObjs[0].name in bpy.context.view_layer.objects:
+            bpy.context.view_layer.objects.active = selectedObjs[0]
+
+    return selectedObjs
+
+
 def SelectParentAndDesiredChilds(obj):
     # Selects only all child objects that must be exported with parent object
     selectedObjs = []
