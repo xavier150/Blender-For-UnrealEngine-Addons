@@ -169,21 +169,14 @@ def CreateSequencer():
 
         TrackFocusDistance = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)
 
-        # Wtf this var name change every version or I do someting wrong??? :v
-        if GetUnrealVersion() >= 4.26:
-            TrackFocusDistance.set_property_name_and_path('FocusSettings.ManualFocusDistance', 'FocusSettings.ManualFocusDistance')
-            TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance (Focus Settings)')
-        elif GetUnrealVersion() >= 4.25:
-            TrackFocusDistance.set_property_name_and_path('FocusSettings.ManualFocusDistance', 'FocusSettings.ManualFocusDistance')
-            TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance (Focus Settings)')
-        elif GetUnrealVersion() >= 4.24:
+        if GetUnrealVersion() >= 4.24:
             TrackFocusDistance.set_property_name_and_path('FocusSettings.ManualFocusDistance', 'FocusSettings.ManualFocusDistance')
             TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance (Focus Settings)')
         else:
             print(GetUnrealVersion())
             TrackFocusDistance.set_property_name_and_path('ManualFocusDistance', 'ManualFocusDistance')
             TrackFocusDistance.set_editor_property('display_name', 'Current Focus Distance')
-            k=k
+
         sectionFocusDistance = TrackFocusDistance.add_section()
         sectionFocusDistance.set_end_frame_bounded(False)
         sectionFocusDistance.set_start_frame_bounded(False)
