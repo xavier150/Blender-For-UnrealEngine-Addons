@@ -257,7 +257,10 @@ def CreateSequencer():
             for camera in ImportedCamera:
                 if camera[0] == section["camera_name"]:
                     camera_binding_id = unreal.MovieSceneObjectBindingID()
-                    camera_binding_id = seq.make_binding_id(camera[1], unreal.MovieSceneObjectBindingSpace.LOCAL)
+                    if GetUnrealVersion() >= 4.26:
+                        camera_binding_id = seq.make_binding_id(camera[1], unreal.MovieSceneObjectBindingSpace.LOCAL)
+                    else:
+                        camera_binding_id = seq.make_binding_id(camera[1])
                     camera_cut_section.set_camera_binding_id(camera_binding_id)
 
         camera_cut_section.set_end_frame_seconds((section["end_time"]-secureCrop)/float(frameRateNumerator))
