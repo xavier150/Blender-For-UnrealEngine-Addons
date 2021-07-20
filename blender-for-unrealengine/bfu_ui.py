@@ -2138,9 +2138,12 @@ class BFU_PT_Export(bpy.types.Panel):
         bl_description = "Click to show assets that are to be exported."
 
         def execute(self, context):
+
             obj = context.object
-            if obj.type == "ARMATURE":
-                UpdateActionCache(obj)
+            if obj:
+                if obj.type == "ARMATURE":
+                    UpdateActionCache(obj)
+
             assets = GetFinalAssetToExport()
             popup_title = "Assets list"
             if len(assets) > 0:
