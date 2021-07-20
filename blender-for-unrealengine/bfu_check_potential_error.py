@@ -555,7 +555,7 @@ def TryToCorrectPotentialError(errorIndex):
     MyCurrentDataSave = UserSceneSave()
     MyCurrentDataSave.SaveCurrentScene()
 
-    SafeModeSet('OBJECT', MyCurrentDataSave.user_active)
+    SafeModeSet('OBJECT', MyCurrentDataSave.user_select_class.user_active)
 
     print("Start correct")
 

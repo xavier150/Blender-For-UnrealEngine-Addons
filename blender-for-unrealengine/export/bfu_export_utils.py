@@ -211,16 +211,29 @@ def ResetDuplicateNameAfterExport(duplicate_data):
 
 
 def MakeSelectVisualReal():
+    select = UserSelectSave()
+    select.SaveCurrentSelect()
+
+    # Save object list
+    previous_objects = []
+    for obj in bpy.data.objects:
+        previous_objects.append(obj)
+
     # Visual Transform Apply
     bpy.ops.object.visual_transform_apply()
-
-    # This can break mesh with Instanced complex Collections
 
     # Make Instances Real
     bpy.ops.object.duplicates_make_real(
         use_base_parent=True,
         use_hierarchy=True
         )
+
+    select.ResetSelectByName()
+
+    # Select the new objects
+    for obj in bpy.data.objects:
+        if obj not in previous_objects:
+            obj.select_set(True)
 
 
 def SetSocketsExportTransform(obj):

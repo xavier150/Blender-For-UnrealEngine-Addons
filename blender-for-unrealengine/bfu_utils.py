@@ -78,6 +78,10 @@ class UserSelectSave():
         self.user_active = None
         self.user_active_name = ""
         self.user_selecteds = []
+        self.user_selected_names = []
+
+        # Stats
+        self.user_mode = None
 
     def SaveCurrentSelect(self):
         # Save data (This can take time)
@@ -87,7 +91,48 @@ class UserSelectSave():
         self.user_active = c.active_object  # Save current active object
         if self.user_active:
             self.user_active_name = self.user_active.name
+
         self.user_selecteds = c.selected_objects  # Save current selected objects
+        self.user_selected_names = []
+        for obj in c.selected_objects:
+            self.user_selected_names.append(obj.name)
+
+    def ResetSelectByRef(self):
+        self.SaveMode()
+        SafeModeSet("OBJECT", bpy.ops.object)
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in bpy.data.objects:  # Resets previous selected object if still exist
+            if obj in self.user_selecteds:
+                obj.select_set(True)
+
+        bpy.context.view_layer.objects.active = self.user_active
+
+        self.ResetModeAtSave()
+
+    def ResetSelectByName(self):
+        self.SaveMode()
+        SafeModeSet("OBJECT", bpy.ops.object)
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in bpy.data.objects:
+            if obj.name in self.user_selected_names:
+                obj.select_set(True)
+
+        if self.user_active_name != "":
+            if self.user_active_name in bpy.data.objects:
+                if self.user_active_name in bpy.context.view_layer.objects:
+                    bpy.context.view_layer.objects.active = bpy.data.objects[self.user_active_name]
+
+        self.ResetModeAtSave()
+
+    def SaveMode(self):
+        if self.user_active:
+            if bpy.ops.object.mode_set.poll():
+                self.user_mode = self.user_active.mode  # Save current mode
+
+    def ResetModeAtSave(self):
+        if self.user_mode:
+            if bpy.ops.object:
+                SafeModeSet(self.user_mode, bpy.ops.object) 
 
 
 class UserSceneSave():
@@ -95,11 +140,10 @@ class UserSceneSave():
     def __init__(self):
 
         # Select
-        self.user_active = None
-        self.user_active_name = ""
+        self.user_select_class = UserSelectSave()
+
         self.user_bone_active = None
         self.user_bone_active_name = ""
-        self.user_selecteds = []
 
         # Stats
         self.user_mode = None
@@ -118,15 +162,12 @@ class UserSceneSave():
 
         c = bpy.context
         # Select
-        self.user_active = c.active_object  # Save current active object
-        if self.user_active:
-            self.user_active_name = self.user_active.name
-        self.user_selecteds = c.selected_objects  # Save current selected objects
+        self.user_select_class.SaveCurrentSelect()
 
         # Stats
-        if self.user_active:
+        if self.user_select_class.user_active:
             if bpy.ops.object.mode_set.poll():
-                self.user_mode = self.user_active.mode  # Save current mode
+                self.user_mode = self.user_select_class.user_active.mode  # Save current mode
         self.use_simplify = bpy.context.scene.render.use_simplify
 
         # Data
@@ -143,59 +184,39 @@ class UserSceneSave():
             self.collection_names.append(collection.name)
 
         # Data for armature
-        if self.user_active:
-            if self.user_active.type == "ARMATURE":
-                if self.user_active.data.bones.active:
-                    self.user_bone_active = self.user_active.data.bones.active
-                    self.user_bone_active_name = self.user_active.data.bones.active.name
-                for bone in self.user_active.data.bones:
+        if self.user_select_class.user_active:
+            if self.user_select_class.user_active.type == "ARMATURE":
+                if self.user_select_class.user_active.data.bones.active:
+                    self.user_bone_active = self.user_select_class.user_active.data.bones.active
+                    self.user_bone_active_name = self.user_select_class.user_active.data.bones.active.name
+                for bone in self.user_select_class.user_active.data.bones:
                     self.object_bones.append(SavedBones(bone))
 
+
     def ResetSelectByRef(self):
-        SafeModeSet("OBJECT", bpy.ops.object)
-        bpy.ops.object.select_all(action='DESELECT')
-        for obj in bpy.data.objects:  # Resets previous selected object if still exist
-            if obj in self.user_selecteds:
-                obj.select_set(True)
-
-        bpy.context.view_layer.objects.active = self.user_active
-
-        self.ResetModeAtSave()
+        self.user_select_class.ResetSelectByRef()
         self.ResetBonesSelectByName()
 
     def ResetSelectByName(self):
-        SafeModeSet("OBJECT", bpy.ops.object)
-        bpy.ops.object.select_all(action='DESELECT')
-        for obj in self.objects:  # Resets previous selected object if still exist
-            if obj.select:
-                if obj.name in bpy.data.objects:
-                    if obj.name in bpy.context.view_layer.objects:
-                        bpy.data.objects[obj.name].select_set(True)
-
-        if self.user_active_name:
-            if self.user_active_name in bpy.data.objects:
-                if self.user_active_name in bpy.context.view_layer.objects:
-                    bpy.context.view_layer.objects.active = bpy.data.objects[self.user_active_name]
-
-        self.ResetModeAtSave()
+        self.user_select_class.ResetSelectByName()
         self.ResetBonesSelectByName()
 
     def ResetBonesSelectByName(self):
         # Work only in pose mode!
         if len(self.object_bones) > 0:
-            if self.user_active:
+            if self.user_select_class.user_active:
                 if bpy.ops.object.mode_set.poll():
-                    if self.user_active.mode == "POSE":
+                    if self.user_select_class.user_active.mode == "POSE":
                         bpy.ops.pose.select_all(action='DESELECT')
                         for bone in self.object_bones:
                             if bone.select:
-                                if bone.name in self.user_active.data.bones:
-                                    self.user_active.data.bones[bone.name].select = True
+                                if bone.name in self.user_select_class.user_active.data.bones:
+                                    self.user_select_class.user_active.data.bones[bone.name].select = True
 
                         if self.user_bone_active_name is not None:
-                            if self.user_bone_active_name in self.user_active.data.bones:
-                                new_active = self.user_active.data.bones[self.user_bone_active_name]
-                                self.user_active.data.bones.active = new_active
+                            if self.user_bone_active_name in self.user_select_class.user_active.data.bones:
+                                new_active = self.user_select_class.user_active.data.bones[self.user_bone_active_name]
+                                self.user_select_class.user_active.data.bones.active = new_active
 
     def ResetModeAtSave(self):
         if self.user_mode:
