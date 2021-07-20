@@ -32,7 +32,6 @@ from . import bfu_basics
 from .bfu_basics import *
 
 
-
 class SavedObject():
 
     def __init__(self, obj):
@@ -89,6 +88,7 @@ class UserSelectSave():
         if self.user_active:
             self.user_active_name = self.user_active.name
         self.user_selecteds = c.selected_objects  # Save current selected objects
+
 
 class UserSceneSave():
 
