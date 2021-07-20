@@ -679,8 +679,9 @@ def GetCollectionToExport(scene):
     colExport = []
     for col in scene.CollectionExportList:
         if col.use:
-            collection = bpy.data.collections[col.name]
-            colExport.append(collection)
+            if col.name in bpy.data.collections:
+                collection = bpy.data.collections[col.name]
+                colExport.append(collection)
     return colExport
 
 
