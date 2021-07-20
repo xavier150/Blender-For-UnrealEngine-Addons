@@ -9,7 +9,7 @@ def CheckTasks():
     if not hasattr(unreal, 'EditorAssetLibrary'):
         print('--------------------------------------------------')
         print('WARNING: Editor Scripting Utilities should be activated.')
-        print('Plugin > Scripting > Editor Scripting Utilities.')
+        print('Edit > Plugin > Scripting > Editor Scripting Utilities.')
         return False
     return True
 
