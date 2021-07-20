@@ -120,6 +120,7 @@ def register():
     bpy.types.Scene.bfu_skeleton_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_collection_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_object_advanced_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_export_type_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_collision_socket_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_lightmap_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_nomenclature_properties_expanded = bpy.props.BoolProperty()

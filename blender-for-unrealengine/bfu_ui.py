@@ -1819,6 +1819,18 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         ready_for_convert_collider = False
         ready_for_convert_socket = False
 
+        '''
+        bfu_ui_utils.LayoutSection(layout, "bfu_export_type_expanded", "Export type")
+        if scene.bfu_export_type_expanded:
+            if not ActiveModeIs("OBJECT"):
+                layout.label(text="Switch to Object Mode.", icon='INFO')
+            else:
+                export_type_buttons = layout.row().split(factor=0.80)
+                export_type_cameras = export_type_buttons.column()
+                export_type_cameras.enabled = True
+                export_type_cameras.operator("object.converttoboxcollision", icon='MESH_CUBE')
+        '''
+
         bfu_ui_utils.LayoutSection(layout, "bfu_collision_socket_expanded", "Collision and Socket")
         if scene.bfu_collision_socket_expanded:
             if not ActiveModeIs("OBJECT"):
