@@ -52,7 +52,7 @@ def CreateSequencer():
 
     def GetUnrealVersion():
         version = unreal.SystemLibrary.get_engine_version().split(".")
-        float_version = int(version[0]) + float(int(version[1])/100)
+        float_version = int(version[0]) + float(float(version[1])/100)
         return float_version
 
     def AddSequencerSectionTransformKeysByIniFile(sequencer_section, track_dict):
@@ -177,11 +177,13 @@ def CreateSequencer():
             TrackFocusDistance.set_property_name_and_path('FocusSettings.ManualFocusDistance', 'FocusSettings.ManualFocusDistance')
             TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance (Focus Settings)')
         elif GetUnrealVersion() >= 4.24:
-            TrackFocusDistance.set_property_name_and_path('CurrentFocusDistance', 'CurrentFocusDistance')
-            TrackFocusDistance.set_editor_property('display_name', 'Current Focus Distance')
+            TrackFocusDistance.set_property_name_and_path('FocusSettings.ManualFocusDistance', 'FocusSettings.ManualFocusDistance')
+            TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance (Focus Settings)')
         else:
+            print(GetUnrealVersion())
             TrackFocusDistance.set_property_name_and_path('ManualFocusDistance', 'ManualFocusDistance')
             TrackFocusDistance.set_editor_property('display_name', 'Current Focus Distance')
+            k=k
         sectionFocusDistance = TrackFocusDistance.add_section()
         sectionFocusDistance.set_end_frame_bounded(False)
         sectionFocusDistance.set_start_frame_bounded(False)
