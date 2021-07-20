@@ -388,3 +388,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: show asset(s) Button do script error when not object is selected.
 - Fixed: Removed collision in export collision list do script error.
 - Fixed: Collision on exported Instanced Collections don't work.
+- Fixed: Sequencer Import Script don't work on older version of Unreal Engine (Python version not the same.)
