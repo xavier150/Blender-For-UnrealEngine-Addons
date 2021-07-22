@@ -217,3 +217,5 @@ def ExportSingleFbxAction(
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in duplicate_data.data_to_remove:
         data.RemoveData()
+
+    ResetDuplicateNameAfterExport(duplicate_data)
