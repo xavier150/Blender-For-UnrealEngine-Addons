@@ -308,37 +308,6 @@ class PrepareExportName():
 # Sockets and Collisons
 
 
-def AddSubObjectTempName(obj):
-    return  # OLD
-    '''
-    This function add _ExportSubObject_TempName (Var Export_temp_preFix) at end of the name of sub objects.
-    '''
-
-    for sub_object in GetSubObjectDesiredChild(obj):
-        sub_object.name += Export_temp_preFix
-
-
-def RemoveDuplicatedSubObjectTempName(obj):
-    return  # OLD
-    '''
-    This function remove _ExportSubObject_TempName + Index (Var Export_temp_preFix) at end of the name of sub objects.
-    '''
-
-    for sub_object in GetSubObjectDesiredChild(obj):
-        ToRemove = Export_temp_preFix+".xxx"
-        sub_object.name = sub_object.name[:-len(ToRemove)]
-
-
-def RemoveSubObjectTempName(obj):
-    return  # OLD
-    '''
-    This function remove _ExportSubObject_TempName (Var Export_temp_preFix) at end of the name of sub objects.
-    '''
-
-    for sub_object in GetSubObjectDesiredChild(obj):
-        ToRemove = Export_temp_preFix
-        sub_object.name = sub_object.name[:-len(ToRemove)]
-
 # Sockets
 
 

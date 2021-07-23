@@ -94,7 +94,6 @@ def ExportSingleSkeletalMesh(
     SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
-    AddSubObjectTempName(obj)
     asset_name = PrepareExportName(obj, True)
     duplicate_data = DuplicateSelectForExport()
     SetDuplicateNameForExport(duplicate_data)
@@ -129,7 +128,6 @@ def ExportSingleSkeletalMesh(
     meshType = GetAssetType(active)
 
     SetSocketsExportTransform(active)
-    RemoveDuplicatedSubObjectTempName(active)
     TryToApplyCustomSocketsName(active)
 
     # Set rename temporarily the Armature as "Armature"
@@ -190,4 +188,4 @@ def ExportSingleSkeletalMesh(
     for data in duplicate_data.data_to_remove:
         data.RemoveData()
 
-    RemoveSubObjectTempName(obj)
+    ResetDuplicateNameAfterExport(duplicate_data)

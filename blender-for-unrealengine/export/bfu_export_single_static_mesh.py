@@ -92,7 +92,6 @@ def ExportSingleStaticMesh(
     SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
-    AddSubObjectTempName(obj)
     asset_name = PrepareExportName(obj, False)
     duplicate_data = DuplicateSelectForExport()
     SetDuplicateNameForExport(duplicate_data)
@@ -112,8 +111,6 @@ def ExportSingleStaticMesh(
     fullpath = os.path.join(absdirpath, filename)
     meshType = GetAssetType(active)
     SetSocketsExportTransform(active)
-
-    RemoveDuplicatedSubObjectTempName(active)
 
     TryToApplyCustomSocketsName(active)
     asset_name.SetExportName()
@@ -149,5 +146,4 @@ def ExportSingleStaticMesh(
     for data in duplicate_data.data_to_remove:
         data.RemoveData()
 
-    RemoveSubObjectTempName(obj)
     ResetDuplicateNameAfterExport(duplicate_data)
