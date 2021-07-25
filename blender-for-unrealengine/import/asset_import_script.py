@@ -355,8 +355,14 @@ def ImportAllAssets():
                 for socket in sockets_to_add:
                     pass
                     # Create socket
-                    # new_socket = unreal.SkeletalMeshSocket('', skeleton)
-                    # new_socket.SocketName = socket[0]
+                    new_socket = unreal.SkeletalMeshSocket(skeleton)
+                    new_socket.socket_name = socket["SocketName"]
+                    new_socket.bone_name = socket["BoneName"]
+                    new_socket.relative_location = socket["Location"]
+                    new_socket.relative_rotation = socket["Rotation"]
+                    new_socket.relative_scale = socket["Scale"]
+                    # NEED UNREAL ENGINE IMPLEMENTATION IN PYTHON API.
+                    # skeleton.add_socket(new_socket)
 
             # Lod
             if asset_data["type"] == "StaticMesh" or asset_data["type"] == "SkeletalMesh":

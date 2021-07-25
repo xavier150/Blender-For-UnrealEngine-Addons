@@ -514,7 +514,12 @@ def WriteSingleMeshAdditionalParameter(unreal_exported_asset):
                 array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]
                 array_scale = [s[0], s[1], s[2]]
 
-                MySocket = [SocketName, b.name.replace('.', '_'), array_location, array_rotation, array_scale]
+                MySocket = {}
+                MySocket["SocketName"] = SocketName
+                MySocket["BoneName"] = b.name.replace('.', '_')
+                MySocket["Location"] = array_location
+                MySocket["Rotation"] = array_rotation
+                MySocket["Scale"] = array_scale
                 data['Sockets']['socket_'+str(i)] = MySocket
 
     # Vertex Color
