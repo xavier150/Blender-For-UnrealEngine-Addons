@@ -131,7 +131,6 @@ def ExportSingleSkeletalMesh(
     TryToApplyCustomSocketsName(active)
 
     # Set rename temporarily the Armature as "Armature"
-    asset_name.SetExportName()
 
     bfu_check_potential_error.UpdateNameHierarchy(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
@@ -141,6 +140,8 @@ def ExportSingleSkeletalMesh(
     bpy.context.object.data.pose_position = 'REST'
 
     SetVertexColorForUnrealExport(active)
+
+    asset_name.SetExportName()
 
     if (export_procedure == "normal"):
         pass

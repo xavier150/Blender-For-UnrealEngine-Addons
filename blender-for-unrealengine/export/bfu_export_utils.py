@@ -273,7 +273,6 @@ class PrepareExportName():
                 self.new_asset_name = obj.name  # Keep the same name
 
     def SetExportName(self):
-        return  # OLD
 
         '''
         Set the name of the asset for export

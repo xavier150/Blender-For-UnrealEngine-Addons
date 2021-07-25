@@ -113,13 +113,14 @@ def ExportSingleStaticMesh(
     SetSocketsExportTransform(active)
 
     TryToApplyCustomSocketsName(active)
-    asset_name.SetExportName()
 
     bfu_check_potential_error.UpdateNameHierarchy(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
         )
 
     SetVertexColorForUnrealExport(active)
+
+    asset_name.SetExportName()
 
     bpy.ops.export_scene.fbx(
         filepath=fullpath,
