@@ -1087,6 +1087,21 @@ def SelectParentAndDesiredChilds(obj):
     return selectedObjs
 
 
+def RemoveSocketFromSelectForProxyArmature():
+    select = UserSelectSave()
+    select.SaveCurrentSelect()
+
+    # With skeletal mesh the socket must be not exported,
+    # ue4 read it like a bone
+    sockets = []
+    for obj in bpy.context.selected_objects:
+        if fnmatch.fnmatchcase(obj.name, "SOCKET*"):
+            sockets.append(obj)
+    CleanDeleteObjects(sockets)
+
+    select.ResetSelectByName()
+
+
 def GoToMeshEditMode():
     for obj in bpy.context.selected_objects:
         if obj.type == "MESH":

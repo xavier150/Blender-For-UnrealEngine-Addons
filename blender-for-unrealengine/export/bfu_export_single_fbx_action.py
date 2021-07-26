@@ -109,6 +109,7 @@ def ExportSingleFbxAction(
     if obj.ExportAsProxy:
         if obj.ExportProxyChild is not None:
             obj.animation_data.action = targetAction  # Apply desired action
+        RemoveSocketFromSelectForProxyArmature()
 
     active.animation_data.action = targetAction  # Apply desired action
     export_procedure = active.bfu_export_procedure

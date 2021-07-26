@@ -104,6 +104,7 @@ def ExportSingleFbxNLAAnim(
 
     if active.ExportAsProxy:
         ApplyProxyData(active)
+        RemoveSocketFromSelectForProxyArmature()
 
     if addon_prefs.bakeArmatureAction:
         BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)
