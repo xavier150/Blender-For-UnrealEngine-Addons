@@ -1921,7 +1921,6 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     socketNameText.enabled = obj.usesocketcustomName
                     socketNameText.prop(obj, "socketcustomName")
 
-
             copy_skeletalsocket_buttons = layout.column()
             copy_skeletalsocket_buttons.enabled = False
             copy_skeletalsocket_buttons.operator(

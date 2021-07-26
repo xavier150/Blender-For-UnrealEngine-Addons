@@ -384,6 +384,7 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.3.0 ==
 
+- New: Text generator for export Skeletal Mesh Sockets in Unreal Engine (Copy / Paste).
 - Fixed: Camera export don't work when any marker_sequences was created.
 - Fixed: show asset(s) Button do script error when not object is selected.
 - Fixed: Removed collision in export collision list do script error.

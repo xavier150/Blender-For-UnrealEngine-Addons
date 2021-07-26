@@ -132,7 +132,7 @@ class UserSelectSave():
     def ResetModeAtSave(self):
         if self.user_mode:
             if bpy.ops.object:
-                SafeModeSet(self.user_mode, bpy.ops.object) 
+                SafeModeSet(self.user_mode, bpy.ops.object)
 
 
 class UserSceneSave():
@@ -191,7 +191,6 @@ class UserSceneSave():
                     self.user_bone_active_name = self.user_select_class.user_active.data.bones.active.name
                 for bone in self.user_select_class.user_active.data.bones:
                     self.object_bones.append(SavedBones(bone))
-
 
     def ResetSelectByRef(self):
         self.user_select_class.ResetSelectByRef()

@@ -481,7 +481,6 @@ def WriteSingleMeshAdditionalParameter(unreal_exported_asset):
     if obj:
         data['Sockets'] = GetSkeletalMeshSockets(obj)
 
-
     # Vertex Color
     if obj:
         if GetAssetType(obj) == "SkeletalMesh" or GetAssetType(obj) == "StaticMesh":
