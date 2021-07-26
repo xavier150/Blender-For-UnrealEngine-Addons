@@ -628,6 +628,58 @@ def GetSocketDesiredChild(targetObj):
     return sockets
 
 
+def GetSkeletalMeshSockets(obj):
+    if obj is None:
+        return
+
+    addon_prefs = GetAddonPrefs()
+    data = {}
+    sockets = []
+
+    for socket in GetSocketDesiredChild(obj):
+        sockets.append(socket)
+
+    if GetAssetType(obj) == "SkeletalMesh":
+
+        data['Sockets'] = []
+        # config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
+
+        for i, socket in enumerate(sockets):
+            if IsASocket(socket):
+                SocketName = socket.name[7:]
+            else:
+                socket.name
+
+            if socket.parent.exportDeformOnly:
+                b = getFirstDeformBoneParent(socket.parent.data.bones[socket.parent_bone])
+            else:
+                b = socket.parent.data.bones[socket.parent_bone]
+
+            ResetArmaturePose(socket.parent)
+            # GetRelativePostion
+            bml = b.matrix_local  # Bone
+            am = socket.parent.matrix_world  # Armature
+            em = socket.matrix_world  # Socket
+            RelativeMatrix = (bml.inverted() @ am.inverted() @ em)
+            t = RelativeMatrix.to_translation()
+            r = RelativeMatrix.to_euler()
+            s = socket.scale*addon_prefs.skeletalSocketsImportedSize
+
+            # Convet to array for configparser and convert value for Unreal
+            array_location = [t[0], t[1]*-1, t[2]]
+            array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]
+            array_scale = [s[0], s[1], s[2]]
+
+            MySocket = {}
+            MySocket["SocketName"] = SocketName
+            MySocket["BoneName"] = b.name.replace('.', '_')
+            MySocket["Location"] = array_location
+            MySocket["Rotation"] = array_rotation
+            MySocket["Scale"] = array_scale
+            data['Sockets'].append(MySocket)
+    return data['Sockets']
+
+
 def GetSubObjectDesiredChild(targetObj):
     sub_objects = []
     for obj in GetExportDesiredChilds(targetObj):
@@ -1562,6 +1614,29 @@ def GetImportAssetScriptCommand():
     fullpath = os.path.join(absdirpath, fileName)
     addon_prefs = GetAddonPrefs()
     return 'py "'+fullpath+'"'
+
+
+def GetImportSkeletalMeshSocketScriptCommand(obj):
+
+    if obj:
+        if obj.type == "ARMATURE":
+            sockets = GetSkeletalMeshSockets(obj)
+            t = "SocketCopyPasteBuffer" + "\n"
+            t += "NumSockets=" + str(len(sockets)) + "\n"
+            t += "IsOnSkeleton=1" + "\n"
+            for socket in sockets:
+                t += "Begin Object Class=/Script/Engine.SkeletalMeshSocket" + "\n"
+                t += "\t" + 'SocketName="' + socket["SocketName"] + '"' + "\n"
+                t += "\t" + 'BoneName="' + socket["BoneName"] + '"' + "\n"
+                loc = socket["Location"]
+                r = socket["Rotation"]
+                s = socket["Scale"]
+                t += "\t" + 'RelativeLocation=' + "(X="+str(loc[0])+",Y="+str(loc[1])+",Z="+str(loc[2])+")" + "\n"
+                t += "\t" + 'RelativeRotation=' + "(Pitch="+str(r[1])+",Yaw="+str(r[2])+",Roll="+str(r[0])+")" + "\n"
+                t += "\t" + 'RelativeScale=' + "(X="+str(s[0])+",Y="+str(s[1])+",Z="+str(s[2])+")" + "\n"
+                t += "End Object" + "\n"
+            return t
+    return "Select a Skeletal Mesh"
 
 
 def GetImportSequencerScriptCommand():

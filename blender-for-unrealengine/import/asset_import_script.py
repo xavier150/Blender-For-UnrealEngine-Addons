@@ -350,19 +350,28 @@ def ImportAllAssets():
             # Socket
             if asset_data["type"] == "SkeletalMesh":
                 # Import the SkeletalMesh socket(s)
-                sockets_to_add = GetOptionByIniFile(asset_data["additional_tracks_path"], 'Sockets', True)
+                sockets_to_add = additional_data["Sockets"]
                 skeleton = asset.get_editor_property('skeleton')
                 for socket in sockets_to_add:
-                    pass
-                    # Create socket
-                    new_socket = unreal.SkeletalMeshSocket(skeleton)
-                    new_socket.socket_name = socket["SocketName"]
-                    new_socket.bone_name = socket["BoneName"]
-                    new_socket.relative_location = socket["Location"]
-                    new_socket.relative_rotation = socket["Rotation"]
-                    new_socket.relative_scale = socket["Scale"]
-                    # NEED UNREAL ENGINE IMPLEMENTATION IN PYTHON API.
-                    # skeleton.add_socket(new_socket)
+                    old_socket = asset.find_socket(socket["SocketName"])
+                    if old_socket:
+                        # Edit socket
+                        pass
+                        # old_socket.relative_location = socket["Location"]
+                        # old_socket.relative_rotation = socket["Rotation"]
+                        # old_socket.relative_scale = socket["Scale"]
+
+                    else:
+                        # Create socket
+                        pass
+                        # new_socket = unreal.SkeletalMeshSocket(asset)
+                        # new_socket.socket_name = socket["SocketName"]
+                        # new_socket.bone_name = socket["BoneName"]
+                        # new_socket.relative_location = socket["Location"]
+                        # new_socket.relative_rotation = socket["Rotation"]
+                        # new_socket.relative_scale = socket["Scale"]
+                        # NEED UNREAL ENGINE IMPLEMENTATION IN PYTHON API.
+                        # skeleton.add_socket(new_socket)
 
             # Lod
             if asset_data["type"] == "StaticMesh" or asset_data["type"] == "SkeletalMesh":

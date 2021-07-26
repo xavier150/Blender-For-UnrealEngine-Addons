@@ -1780,6 +1780,22 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     "(Active object is the owner of the socket)")
             return {'FINISHED'}
 
+    class BFU_OT_CopySkeletalSocketButton(Operator):
+        bl_label = "Copy Skeletal Mesh socket for Unreal"
+        bl_idname = "object.copy_skeletalsocket_command"
+        bl_description = "Copy Skeletal Socket Script command"
+
+        def execute(self, context):
+            scene = context.scene
+            obj = context.object
+            if obj:
+                if obj.type == "ARMATURE":
+                    setWindowsClipboard(GetImportSkeletalMeshSocketScriptCommand(obj))
+                    self.report(
+                        {'INFO'},
+                        "Skeletal sockets copied. Paste in Unreal Engine for import sockets.")
+            return {'FINISHED'}
+
     def draw(self, context):
 
         addon_prefs = GetAddonPrefs()
@@ -1904,6 +1920,16 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     socketNameText = socketName.column()
                     socketNameText.enabled = obj.usesocketcustomName
                     socketNameText.prop(obj, "socketcustomName")
+
+
+            copy_skeletalsocket_buttons = layout.column()
+            copy_skeletalsocket_buttons.enabled = False
+            copy_skeletalsocket_buttons.operator(
+                "object.copy_skeletalsocket_command",
+                icon='OUTLINER_DATA_EMPTY')
+            if obj is not None:
+                if obj.type == "ARMATURE":
+                    copy_skeletalsocket_buttons.enabled = True
 
         bfu_ui_utils.LayoutSection(layout, "bfu_lightmap_expanded", "Light Map")
         if scene.bfu_lightmap_expanded:
@@ -2739,6 +2765,7 @@ classes = (
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToCollisionButtonConvex,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToStaticSocketButton,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToSkeletalSocketButton,
+    BFU_PT_BlenderForUnrealTool.BFU_OT_CopySkeletalSocketButton,
     BFU_PT_BlenderForUnrealObject.BFU_OT_ComputAllLightMap,
 
     BFU_PT_Export,
