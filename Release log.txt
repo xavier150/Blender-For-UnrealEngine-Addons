@@ -392,3 +392,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Sequencer Import Script don't work on older version of Unreal Engine because Python version is not the same.
 - Fixed: Var Manual Focus Distance (Focus Settings) don't work in Sequencer Import Script.
 - Fixed: When use Proxy Armature with sockets wrong bones with sockets name are exported.
+- Fixed: Camera export don't work when scene has no timeline_markers.

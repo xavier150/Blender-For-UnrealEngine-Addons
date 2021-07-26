@@ -396,14 +396,12 @@ def WriteCameraAnimationTracks(obj):
 
             slms = TimelineMarkerSequence()
             for frame in range(frame_start, frame_end+1):
-
-                if addon_prefs.bakeOnlyKeyVisibleInCut:
+                if len(slms.marker_sequences) > 0 and addon_prefs.bakeOnlyKeyVisibleInCut:
                     marker_sequence = slms.GetMarkerSequenceAtFrame(frame)
                     if marker_sequence:
                         marker = marker_sequence.marker
                         if marker.camera == camera:
                             self.EvaluateTracksAtFrame(camera, frame)
-
                 else:
                     self.EvaluateTracksAtFrame(camera, frame)
 

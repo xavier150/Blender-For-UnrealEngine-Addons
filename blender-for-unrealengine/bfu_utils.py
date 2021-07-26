@@ -417,7 +417,7 @@ class TimelineMarkerSequence():
     def GetMarkerSequences(self, timeline_markers):
         if len(timeline_markers) == 0:
             print("Scene has no timeline_markers.")
-            return
+            return []
 
         def GetFisrtMarket(marker_list):
             if len(marker_list) == 0:
