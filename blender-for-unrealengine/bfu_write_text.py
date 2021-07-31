@@ -510,7 +510,7 @@ def WriteAllTextFiles():
 
     # Import script
     bfu_path = os.path.join("addons", "blender-for-unrealengine", "import")
-    bfu_path_ref = bpy.utils.user_resource('SCRIPTS', bfu_path)
+    bfu_path_ref = os.path.join(bpy.utils.user_resource('SCRIPTS'), bfu_path)
 
     if scene.text_ImportAssetScript:
         json_data = bfu_write_import_asset_script.WriteImportAssetScript()
