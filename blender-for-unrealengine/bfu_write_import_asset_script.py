@@ -141,7 +141,7 @@ def WriteImportAssetScript():
                 asset_data["static_mesh_lod_group"] = None
             asset_data["generate_lightmap_u_vs"] = asset.object.GenerateLightmapUVs
 
-            asset_data["custom_light_map_resolution"] = ExportCompuntedLightMapValue(asset.object)
+            asset_data["use_custom_light_map_resolution"] = GetUseCustomLightMapResolution(asset.object)
             asset_data["light_map_resolution"] = GetCompuntedLightMap(asset.object)
             asset_data["collision_trace_flag"] = asset.object.CollisionTraceFlag
 

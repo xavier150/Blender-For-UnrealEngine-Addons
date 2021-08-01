@@ -928,7 +928,7 @@ def GetDesiredActionStartEndTime(obj, action):
         return (startTime, endTime)
 
 
-def ExportCompuntedLightMapValue(obj):
+def GetUseCustomLightMapResolution(obj):
     if obj.StaticMeshLightMapEnum == "Default":
         return False
     return True

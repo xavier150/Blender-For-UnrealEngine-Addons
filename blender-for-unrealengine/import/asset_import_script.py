@@ -326,8 +326,10 @@ def ImportAllAssets():
                 if "static_mesh_lod_group" in asset_data:
                     if asset_data["static_mesh_lod_group"]:
                         asset.set_editor_property('lod_group', asset_data["static_mesh_lod_group"])
-                if "light_map_resolution" in asset_data:
-                    asset.set_editor_property('light_map_resolution', asset_data["light_map_resolution"])
+                if "use_custom_light_map_resolution" in asset_data:
+                    if asset_data["use_custom_light_map_resolution"]:
+                        if "light_map_resolution" in asset_data:
+                            asset.set_editor_property('light_map_resolution', asset_data["light_map_resolution"])
 
                 if "collision_trace_flag" in asset_data:
                     if asset_data["collision_trace_flag"] == "CTF_UseDefault":
