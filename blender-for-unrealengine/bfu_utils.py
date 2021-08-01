@@ -644,44 +644,46 @@ def GetSkeletalMeshSockets(obj):
     for socket in GetSocketDesiredChild(obj):
         sockets.append(socket)
 
-    if GetAssetType(obj) == "SkeletalMesh":
+    if GetAssetType(obj) != "SkeletalMesh":
+        return
 
-        data['Sockets'] = []
-        # config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
+    data['Sockets'] = []
+    # config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
 
-        for i, socket in enumerate(sockets):
-            if IsASocket(socket):
-                SocketName = socket.name[7:]
-            else:
-                socket.name
+    for i, socket in enumerate(sockets):
+        if IsASocket(socket):
+            SocketName = socket.name[7:]
+        else:
+            socket.name
 
-            if socket.parent.exportDeformOnly:
-                b = getFirstDeformBoneParent(socket.parent.data.bones[socket.parent_bone])
-            else:
-                b = socket.parent.data.bones[socket.parent_bone]
+        if socket.parent.exportDeformOnly:
+            b = getFirstDeformBoneParent(socket.parent.data.bones[socket.parent_bone])
+        else:
+            b = socket.parent.data.bones[socket.parent_bone]
 
-            ResetArmaturePose(socket.parent)
-            # GetRelativePostion
-            bml = b.matrix_local  # Bone
-            am = socket.parent.matrix_world  # Armature
-            em = socket.matrix_world  # Socket
-            RelativeMatrix = (bml.inverted() @ am.inverted() @ em)
-            t = RelativeMatrix.to_translation()
-            r = RelativeMatrix.to_euler()
-            s = socket.scale*addon_prefs.skeletalSocketsImportedSize
+        ResetArmaturePose(socket.parent)
+        # GetRelativePostion
+        bml = b.matrix_local  # Bone
+        am = socket.parent.matrix_world  # Armature
+        em = socket.matrix_world  # Socket
+        RelativeMatrix = (bml.inverted() @ am.inverted() @ em)
+        t = RelativeMatrix.to_translation()
+        r = RelativeMatrix.to_euler()
+        s = socket.scale*addon_prefs.skeletalSocketsImportedSize
 
-            # Convet to array for configparser and convert value for Unreal
-            array_location = [t[0], t[1]*-1, t[2]]
-            array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]
-            array_scale = [s[0], s[1], s[2]]
+        # Convet to array for configparser and convert value for Unreal
+        array_location = [t[0], t[1]*-1, t[2]]
+        array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]
+        array_scale = [s[0], s[1], s[2]]
 
-            MySocket = {}
-            MySocket["SocketName"] = SocketName
-            MySocket["BoneName"] = b.name.replace('.', '_')
-            MySocket["Location"] = array_location
-            MySocket["Rotation"] = array_rotation
-            MySocket["Scale"] = array_scale
-            data['Sockets'].append(MySocket)
+        MySocket = {}
+        MySocket["SocketName"] = SocketName
+        MySocket["BoneName"] = b.name.replace('.', '_')
+        MySocket["Location"] = array_location
+        MySocket["Rotation"] = array_rotation
+        MySocket["Scale"] = array_scale
+        data['Sockets'].append(MySocket)
+
     return data['Sockets']
 
 
