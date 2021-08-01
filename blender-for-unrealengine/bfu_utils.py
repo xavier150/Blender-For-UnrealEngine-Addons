@@ -375,6 +375,9 @@ class AnimationManagment():
 
     def SetAnimationData(self, obj, copy_nla=False):
 
+        SaveItTweakmode = IsTweakmode()
+        ExitTweakmode()
+        print("Set animation data on: ", obj)
         if self.use_animation_data:
             obj.animation_data_create()
 
@@ -394,6 +397,9 @@ class AnimationManagment():
 
                 if self.nla_tracks_save is not None:
                     self.nla_tracks_save.ApplySaveOnTarget(obj)
+
+        if SaveItTweakmode:
+            EnterTweakmode()
 
 
 class MarkerSequence():

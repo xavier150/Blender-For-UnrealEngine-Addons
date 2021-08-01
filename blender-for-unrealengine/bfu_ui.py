@@ -2433,7 +2433,14 @@ class BFU_PT_Export(bpy.types.Panel):
                     # to avoid windows PermissionError
                     self.report(
                         {'WARNING'},
-                        "Please save this .blend file before export")
+                        "Please save this .blend file before export.")
+                    return False
+
+                if IsTweakmode():
+                    # Need exit Tweakmode because the Animation data is read only.
+                    self.report(
+                        {'WARNING'},
+                        "Exit Tweakmode in NLA Editor. [Tab]")
                     return False
 
                 return True
