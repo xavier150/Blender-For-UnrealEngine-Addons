@@ -99,3 +99,6 @@ def ExportSingleAlembicAnimation(
 
     scene.frame_start -= obj.StartFramesOffset
     scene.frame_end -= obj.EndFramesOffset
+
+    for obj in scene.objects:
+        ClearAllBFUTempVars(obj)

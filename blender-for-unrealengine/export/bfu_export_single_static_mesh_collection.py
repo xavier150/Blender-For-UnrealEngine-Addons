@@ -143,6 +143,9 @@ def ExportSingleStaticMeshCollection(
 
     ResetDuplicateNameAfterExport(duplicate_data)
 
+    for obj in scene.objects:
+        ClearAllBFUTempVars(obj)
+
 
 def CleanSingleStaticMeshCollection(obj):
     # Remove the created collection

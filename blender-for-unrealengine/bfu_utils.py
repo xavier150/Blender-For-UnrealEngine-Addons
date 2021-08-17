@@ -110,12 +110,14 @@ class UserSelectSave():
         self.ResetModeAtSave()
 
     def ResetSelectByName(self):
+
         self.SaveMode()
         SafeModeSet("OBJECT", bpy.ops.object)
         bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.data.objects:
             if obj.name in self.user_selected_names:
-                obj.select_set(True)
+                if obj.name in bpy.context.view_layer.objects:
+                    bpy.data.objects[obj.name].select_set(True)  # Use the name because can be duplicated name
 
         if self.user_active_name != "":
             if self.user_active_name in bpy.data.objects:
@@ -1068,6 +1070,9 @@ def SelectCollectionObjects(collection):
 
 
 def GetExportAsProxy(obj):
+    if GetObjProxyChild(obj):
+        return True
+
     if obj.data:
         if obj.data.library:
             return True
@@ -1076,8 +1081,10 @@ def GetExportAsProxy(obj):
 
 def GetExportProxyChild(obj):
 
-    scene = bpy.context.scene
+    if GetObjProxyChild(obj):
+        return GetObjProxyChild(obj)
 
+    scene = bpy.context.scene
     if obj.data:
         if obj.data.library:
             for child_obj in scene.objects:
@@ -1107,6 +1114,7 @@ def SelectParentAndDesiredChilds(obj):
 
     if obj.name in bpy.context.view_layer.objects:
         obj.select_set(True)
+
     if GetExportAsProxy(obj):
         proxy_child = GetExportProxyChild(obj)
         if proxy_child is not None:
@@ -1121,7 +1129,6 @@ def SelectParentAndDesiredChilds(obj):
 def RemoveSocketFromSelectForProxyArmature():
     select = UserSelectSave()
     select.SaveCurrentSelect()
-
     # With skeletal mesh the socket must be not exported,
     # ue4 read it like a bone
     sockets = []
@@ -1129,7 +1136,6 @@ def RemoveSocketFromSelectForProxyArmature():
         if fnmatch.fnmatchcase(obj.name, "SOCKET*"):
             sockets.append(obj)
     CleanDeleteObjects(sockets)
-
     select.ResetSelectByName()
 
 
@@ -1995,8 +2001,13 @@ def GetVarOnObject(obj, VarName):
     return obj[VarName]
 
 
+def HasVarOnObject(obj, VarName):
+    return VarName in obj
+
+
 def ClearVarOnObject(obj, VarName):
-    del obj[VarName]
+    if VarName in obj:
+        del obj[VarName]
 
 
 def SaveObjCurrentName(obj):
@@ -2010,3 +2021,32 @@ def GetObjOriginName(obj):
 
 def ClearObjOriginNameVar(obj):
     ClearVarOnObject(obj, "BFU_OriginName")
+
+
+def SetObjProxyData(obj):
+    # Save object proxy info as Custom property
+    SetVarOnObject(obj, "BFU_ExportAsProxy", GetExportAsProxy(obj))
+    SetVarOnObject(obj, "BFU_ExportProxyChild", GetExportProxyChild(obj))
+
+
+def GetObjProxyChild(obj):
+    if (not HasVarOnObject(obj, "BFU_ExportAsProxy")):
+        return False
+
+    if (not HasVarOnObject(obj, "BFU_ExportProxyChild")):
+        return False
+
+    if GetVarOnObject(obj, "BFU_ExportAsProxy"):
+        return GetVarOnObject(obj, "BFU_ExportProxyChild")
+    return None
+
+
+def ClearObjProxyDataVars(obj):
+    ClearVarOnObject(obj, "BFU_ExportAsProxy")
+    ClearVarOnObject(obj, "BFU_ExportProxyChild")
+
+
+def ClearAllBFUTempVars(obj):
+    ClearVarOnObject(obj, "BFU_OriginName")
+    ClearVarOnObject(obj, "BFU_ExportAsProxy")
+    ClearVarOnObject(obj, "BFU_ExportProxyChild")

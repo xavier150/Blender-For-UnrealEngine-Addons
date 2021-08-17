@@ -148,3 +148,6 @@ def ExportSingleStaticMesh(
         data.RemoveData()
 
     ResetDuplicateNameAfterExport(duplicate_data)
+
+    for obj in scene.objects:
+        ClearAllBFUTempVars(obj)

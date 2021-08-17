@@ -81,6 +81,8 @@ def ExportSingleFbxAction(
 
     scene = bpy.context.scene
     addon_prefs = GetAddonPrefs()
+    export_as_proxy = GetExportAsProxy(obj)
+    export_proxy_child = GetExportProxyChild(obj)
 
     if obj.animation_data is None:
         obj.animation_data_create()
@@ -100,14 +102,14 @@ def ExportSingleFbxAction(
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
-    if GetExportAsProxy(active):
+    if export_as_proxy:
         ApplyProxyData(active)
 
     scene.frame_start = GetDesiredActionStartEndTime(active, targetAction)[0]
     scene.frame_end = GetDesiredActionStartEndTime(active, targetAction)[1]
 
-    if GetExportAsProxy(obj):
-        if GetExportProxyChild(obj) is not None:
+    if export_as_proxy:
+        if export_proxy_child is not None:
             obj.animation_data.action = targetAction  # Apply desired action
         RemoveSocketFromSelectForProxyArmature()
 
@@ -220,3 +222,6 @@ def ExportSingleFbxAction(
         data.RemoveData()
 
     ResetDuplicateNameAfterExport(duplicate_data)
+
+    for obj in scene.objects:
+        ClearAllBFUTempVars(obj)

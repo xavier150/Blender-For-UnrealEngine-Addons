@@ -159,7 +159,10 @@ def DuplicateSelectForExport(new_name="duplicated Obj"):
     duplicate_data = DuplicateData()
     duplicate_data.SetOriginSelect()
     for user_selected in duplicate_data.origin_select.user_selecteds:
-        SaveObjCurrentName(user_selected)
+        if user_selected:
+            SaveObjCurrentName(user_selected)
+            if user_selected.type == "ARMATURE":
+                SetObjProxyData(user_selected)
 
     data_to_remove = []
 

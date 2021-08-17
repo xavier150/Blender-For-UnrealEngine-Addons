@@ -146,3 +146,6 @@ def ExportSingleFbxCamera(
 
     # Reset camera scale
     obj.delta_scale *= 100
+
+    for obj in scene.objects:
+        ClearAllBFUTempVars(obj)

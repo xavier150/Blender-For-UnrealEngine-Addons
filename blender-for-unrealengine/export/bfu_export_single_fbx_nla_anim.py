@@ -83,6 +83,8 @@ def ExportSingleFbxNLAAnim(
 
     scene = bpy.context.scene
     addon_prefs = GetAddonPrefs()
+    export_as_proxy = GetExportAsProxy(obj)
+    export_proxy_child = GetExportProxyChild(obj)
 
     SafeModeSet('OBJECT')
 
@@ -102,7 +104,7 @@ def ExportSingleFbxNLAAnim(
     animation_data.SaveAnimationData(obj)
     animation_data.SetAnimationData(active, True)
 
-    if GetExportAsProxy(active):
+    if export_as_proxy:
         ApplyProxyData(active)
         RemoveSocketFromSelectForProxyArmature()
 
@@ -197,3 +199,6 @@ def ExportSingleFbxNLAAnim(
         data.RemoveData()
 
     ResetDuplicateNameAfterExport(duplicate_data)
+
+    for obj in scene.objects:
+        ClearAllBFUTempVars(obj)

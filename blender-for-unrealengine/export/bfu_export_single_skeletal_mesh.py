@@ -90,6 +90,8 @@ def ExportSingleSkeletalMesh(
 
     scene = bpy.context.scene
     addon_prefs = GetAddonPrefs()
+    export_as_proxy = GetExportAsProxy(obj)
+    export_proxy_child = GetExportProxyChild(obj)
 
     SafeModeSet('OBJECT')
 
@@ -106,7 +108,7 @@ def ExportSingleSkeletalMesh(
     asset_name.target_object = active
     export_procedure = active.bfu_export_procedure
 
-    if GetExportAsProxy(active):
+    if export_as_proxy:
         ApplyProxyData(active)
 
     ApplyExportTransform(active, "Object")  # Apply export transform before rescale
@@ -190,3 +192,6 @@ def ExportSingleSkeletalMesh(
         data.RemoveData()
 
     ResetDuplicateNameAfterExport(duplicate_data)
+
+    for obj in scene.objects:
+        ClearAllBFUTempVars(obj)

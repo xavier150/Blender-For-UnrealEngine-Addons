@@ -337,14 +337,16 @@ def UpdateUnrealPotentialError():
 
     def CheckArmatureValidChild():
         # Check that skeleton also has a mesh to export
+
         for obj in objToCheck:
+            export_as_proxy = GetExportAsProxy(obj)
             if GetAssetType(obj) == "SkeletalMesh":
                 childs = GetExportDesiredChilds(obj)
                 validChild = 0
                 for child in childs:
                     if child.type == "MESH":
                         validChild += 1
-                if GetExportAsProxy(obj):
+                if export_as_proxy:
                     if GetExportProxyChild(obj) is not None:
                         validChild += 1
                 if validChild < 1:
