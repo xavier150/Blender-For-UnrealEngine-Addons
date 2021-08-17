@@ -167,21 +167,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             ]
         )
 
-    bpy.types.Object.ExportAsProxy = BoolProperty(
-        name="The armature is a Proxy ?",
-        description=(
-            "If true this mesh will be exported" +
-            " with a target child for keed to data"
-            ),
-        default=False
-        )
-
-    bpy.types.Object.ExportProxyChild = PointerProperty(
-        name="The armature proxy children",
-        description="Select child proxy (The mesh animated by this armature)",
-        type=bpy.types.Object
-        )
-
     bpy.types.Object.ExportAsAlembic = BoolProperty(
         name="Export as Alembic animation",
         description=(
@@ -1261,14 +1246,22 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
                         else:
                             ProxyProp = layout.column()
-                            ProxyProp.prop(obj, 'ExportAsProxy')
-                            if obj.ExportAsProxy:
-                                ProxyProp.prop(obj, 'ExportProxyChild')
+                            if GetExportAsProxy(obj):
+                                ProxyProp.label(
+                                        text="The Armature was detected as a proxy."
+                                        )
+                                proxy_child = GetExportProxyChild(obj)
+                                if proxy_child:
+                                    ProxyProp.label(
+                                            text="Proxy child: " + proxy_child.name
+                                            )
+                                else:
+                                    ProxyProp.label(text="Proxy child not found")
 
                             export_procedure_prop = layout.column()
                             export_procedure_prop.prop(obj, 'bfu_export_procedure')
 
-                            if not obj.ExportAsProxy:
+                            if not GetExportAsProxy(obj):
                                 AlembicProp = layout.column()
                                 AlembicProp.prop(obj, 'ExportAsAlembic')
                                 if obj.ExportAsAlembic:

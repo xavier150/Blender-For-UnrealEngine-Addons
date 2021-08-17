@@ -48,7 +48,7 @@ Export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
 def ApplyProxyData(obj):
 
     # Apply proxy data if needed.
-    if obj.ExportProxyChild is not None:
+    if GetExportProxyChild(obj) is not None:
 
         def ReasignProxySkeleton(newArmature, oldArmature):
             for select in bpy.context.selected_objects:

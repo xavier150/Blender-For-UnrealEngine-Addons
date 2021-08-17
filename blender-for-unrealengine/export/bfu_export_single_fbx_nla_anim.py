@@ -102,7 +102,7 @@ def ExportSingleFbxNLAAnim(
     animation_data.SaveAnimationData(obj)
     animation_data.SetAnimationData(active, True)
 
-    if active.ExportAsProxy:
+    if GetExportAsProxy(active):
         ApplyProxyData(active)
         RemoveSocketFromSelectForProxyArmature()
 

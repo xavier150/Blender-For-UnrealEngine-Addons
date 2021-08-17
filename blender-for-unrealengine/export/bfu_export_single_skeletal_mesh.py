@@ -106,7 +106,7 @@ def ExportSingleSkeletalMesh(
     asset_name.target_object = active
     export_procedure = active.bfu_export_procedure
 
-    if active.ExportAsProxy:
+    if GetExportAsProxy(active):
         ApplyProxyData(active)
 
     ApplyExportTransform(active, "Object")  # Apply export transform before rescale

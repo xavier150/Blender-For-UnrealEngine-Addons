@@ -1067,6 +1067,28 @@ def SelectCollectionObjects(collection):
     return selectedObjs
 
 
+def GetExportAsProxy(obj):
+    if obj.data:
+        if obj.data.library:
+            return True
+    return False
+
+
+def GetExportProxyChild(obj):
+
+    scene = bpy.context.scene
+
+    if obj.data:
+        if obj.data.library:
+            for child_obj in scene.objects:
+                if child_obj != obj:
+                    if child_obj.instance_collection:
+                        if child_obj.instance_collection.library:
+                            if child_obj.instance_collection.library == obj.data.library:
+                                return child_obj
+    return None
+
+
 def SelectParentAndDesiredChilds(obj):
     # Selects only all child objects that must be exported with parent object
     selectedObjs = []
@@ -1085,9 +1107,10 @@ def SelectParentAndDesiredChilds(obj):
 
     if obj.name in bpy.context.view_layer.objects:
         obj.select_set(True)
-    if obj.ExportAsProxy:
-        if obj.ExportProxyChild is not None:
-            obj.ExportProxyChild.select_set(True)
+    if GetExportAsProxy(obj):
+        proxy_child = GetExportProxyChild(obj)
+        if proxy_child is not None:
+            proxy_child.select_set(True)
 
     selectedObjs.append(obj)
     if obj.name in bpy.context.view_layer.objects:
@@ -1533,9 +1556,10 @@ def GetCollectionExportDir(col, abspath=False):
 def GetObjExportName(obj):
     # Return Proxy Name for Proxy and Object Name for other
     if GetAssetType(obj) == "SkeletalMesh":
-        if obj.ExportAsProxy:
-            if obj.ExportProxyChild is not None:
-                return obj.ExportProxyChild.name
+        if GetExportAsProxy(obj):
+            proxy_child = GetExportProxyChild(obj)
+            if proxy_child is not None:
+                return proxy_child.name
     return ValidFilename(obj.name)
 
 

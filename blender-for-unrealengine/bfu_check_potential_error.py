@@ -344,8 +344,8 @@ def UpdateUnrealPotentialError():
                 for child in childs:
                     if child.type == "MESH":
                         validChild += 1
-                if obj.ExportAsProxy:
-                    if obj.ExportProxyChild is not None:
+                if GetExportAsProxy(obj):
+                    if GetExportProxyChild(obj) is not None:
                         validChild += 1
                 if validChild < 1:
                     MyError = PotentialErrors.add()
