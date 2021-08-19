@@ -385,7 +385,7 @@ def ImportAllAssets():
                     def ImportSkeletalLod(lod_name, lod_number):
                         if "LevelOfDetail" in additional_data:
                             if lod_name in additional_data["LevelOfDetail"]:
-                                # Unreal python no longer support Skeletal mesh import.
+                                # Unreal python no longer support Skeletal mesh LODS import.
                                 pass
 
                     if asset_data["type"] == "StaticMesh":

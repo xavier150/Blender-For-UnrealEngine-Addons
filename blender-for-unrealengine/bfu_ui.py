@@ -1275,8 +1275,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                         )
                                 else:
                                     if addon_prefs.useGeneratedScripts:
-                                        LodProp = layout.column()
-                                        LodProp.prop(obj, 'ExportAsLod')
+                                        # Unreal python no longer support Skeletal mesh LODS import.
+                                        if GetAssetType(obj) != "SkeletalMesh":
+                                            LodProp = layout.column()
+                                            LodProp.prop(obj, 'ExportAsLod')
 
                                     if obj.type == "ARMATURE":
                                         AssetType2 = layout.column()
@@ -1300,8 +1302,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
                         # Lod selection
                         if not obj.ExportAsLod:
-                            if (GetAssetType(obj) == "StaticMesh" or
-                                    GetAssetType(obj) == "SkeletalMesh"):
+                            # Unreal python no longer support Skeletal mesh LODS import.
+                            if (GetAssetType(obj) == "StaticMesh"):
                                 LodList = layout.column()
                                 LodList.prop(obj, 'Ue4Lod1')
                                 LodList.prop(obj, 'Ue4Lod2')
