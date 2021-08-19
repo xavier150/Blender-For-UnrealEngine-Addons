@@ -45,23 +45,6 @@ def ImportAllAssets():
         filename = ''.join(c for c in filename if c in valid_chars)
         return filename
 
-    def GetOptionByIniFile(FileLoc, OptionName, literal=False):
-        return []
-
-        # To do with Json
-        Config = ConfigParser.ConfigParser()
-        Config.read(FileLoc)
-        Options = []
-        if Config.has_section(OptionName):
-            for option in Config.options(OptionName):
-                if literal:
-                    Options.append(ast.literal_eval(Config.get(OptionName, option)))
-                else:
-                    Options.append(Config.get(OptionName, option))
-        else:
-            print("WARNING: Option: "+OptionName+" not found in file: "+FileLoc)
-        return Options
-
     def GetAssetByType(type):
         target_assets = []
         for asset in import_assets_data["assets"]:
@@ -381,23 +364,43 @@ def ImportAllAssets():
                     unreal.EditorStaticMeshLibrary.remove_lods(asset)  # Import the StaticMesh lod(s)
 
                 if asset_data["type"] == "SkeletalMesh" or asset_data["type"] == "StaticMesh":
-                    lods_to_add = GetOptionByIniFile(asset_data["additional_tracks_path"], 'LevelOfDetail')  # Import the SkeletalMesh lod(s)
+                    lods_to_add = additional_data["LevelOfDetail"]  # Import the SkeletalMesh lod(s)
 
-                    for x, lod in enumerate(lods_to_add):
-                        if asset_data["type"] == "StaticMesh":
-                            lodTask = unreal.AssetImportTask()
-                            lodTask.filename = lod
-                            destination_path = os.path.normpath(asset_data["full_import_path"]).replace('\\', '/')
-                            lodTask.destination_path = destination_path
-                            lodTask.automated = True
-                            lodTask.replace_existing = True
-                            unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([lodTask])
-                            lodAsset = unreal.find_asset(lodTask.imported_object_paths[0])
-                            slot_replaced = unreal.EditorStaticMeshLibrary.set_lod_from_static_mesh(asset, x+1, lodAsset, 0, True)
-                            unreal.EditorAssetLibrary.delete_asset(lodTask.imported_object_paths[0])
-                        elif asset_data["type"] == "SkeletalMesh":
-                            # Vania unreal python dont have unreal.FbxMeshUtils.
-                            unreal.FbxMeshUtils.ImportSkeletalMeshLOD(asset, lod, x+1)
+                    def ImportStaticLod(lod_name, lod_number):
+                        if "LevelOfDetail" in additional_data:
+                            if lod_name in additional_data["LevelOfDetail"]:
+                                lodTask = unreal.AssetImportTask()
+                                lodTask.filename = additional_data["LevelOfDetail"][lod_name]
+                                destination_path = os.path.normpath(asset_data["full_import_path"]).replace('\\', '/')
+                                lodTask.destination_path = destination_path
+                                lodTask.automated = True
+                                lodTask.replace_existing = True
+                                print(destination_path, additional_data["LevelOfDetail"][lod_name])
+                                unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([lodTask])
+                                if len(lodTask.imported_object_paths) > 0:
+                                    lodAsset = unreal.find_asset(lodTask.imported_object_paths[0])
+                                    slot_replaced = unreal.EditorStaticMeshLibrary.set_lod_from_static_mesh(asset, lod_number, lodAsset, 0, True)
+                                    unreal.EditorAssetLibrary.delete_asset(lodTask.imported_object_paths[0])
+
+                    def ImportSkeletalLod(lod_name, lod_number):
+                        if "LevelOfDetail" in additional_data:
+                            if lod_name in additional_data["LevelOfDetail"]:
+                                # Unreal python no longer support Skeletal mesh import.
+                                pass
+
+                    if asset_data["type"] == "StaticMesh":
+                        ImportStaticLod("lod_1", 1)
+                        ImportStaticLod("lod_2", 2)
+                        ImportStaticLod("lod_3", 3)
+                        ImportStaticLod("lod_4", 4)
+                        ImportStaticLod("lod_5", 5)
+
+                    elif asset_data["type"] == "SkeletalMesh":
+                        ImportSkeletalLod("lod_1", 1)
+                        ImportSkeletalLod("lod_2", 2)
+                        ImportSkeletalLod("lod_3", 3)
+                        ImportSkeletalLod("lod_4", 4)
+                        ImportSkeletalLod("lod_5", 5)
 
             # Vertex color
             if vertex_override_color:

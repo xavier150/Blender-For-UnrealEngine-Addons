@@ -62,13 +62,13 @@ def ProcessSkeletalMeshExport(obj):
     file.path = dirpath
     file.type = "FBX"
 
-    if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
-
-        ExportAdditionalParameter(absdirpath, MyAsset)
-        file = MyAsset.files.add()
-        file.name = GetObjExportFileName(obj, "_AdditionalTrack.json")
-        file.path = dirpath
-        file.type = "AdditionalTrack"
+    if not obj.ExportAsLod:
+        if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
+            ExportAdditionalParameter(absdirpath, MyAsset)
+            file = MyAsset.files.add()
+            file.name = GetObjExportFileName(obj, "_AdditionalTrack.json")
+            file.path = dirpath
+            file.type = "AdditionalTrack"
 
     MyAsset.EndAssetExport(True)
     return MyAsset
