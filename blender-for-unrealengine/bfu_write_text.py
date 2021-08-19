@@ -69,25 +69,8 @@ def ExportSingleText(text, dirpath, filename):
     return([filename, "TextFile", absdirpath, exportTime])
 
 
-def ExportSingleConfigParser(config_data, dirpath, filename):
-    # Export single ConfigParser
-
-    counter = CounterTimer()
-
-    absdirpath = bpy.path.abspath(dirpath)
-    VerifiDirs(absdirpath)
-    fullpath = os.path.join(absdirpath, filename)
-
-    with open(fullpath, "w") as config_file:
-        config_data.write(config_file)
-
-    exportTime = counter.GetTime()
-    # This return [AssetName , AssetType , ExportPath, ExportTime]
-    return([filename, "TextFile", absdirpath, exportTime])
-
-
 def ExportSingleJson(json_data, dirpath, filename):
-    # Export single ConfigParser
+    # Export single Json
 
     counter = CounterTimer()
 
@@ -166,81 +149,6 @@ def WriteExportLog():
         ExportLog += "\n"
 
     return ExportLog
-
-
-def WriteExportedAssetsDetail():
-    # Generate a config file for import assets in Ue4
-    scene = bpy.context.scene
-    config = configparser.ConfigParser(allow_no_value=True)
-
-    def getSectionNameByAsset(asset):
-        # GetObjExportFileName(asset.object, "")
-        return "ASSET_" + GetObjExportFileName(asset.object, "")
-
-    def completeAssetSection(config, asset):
-        # Complete the section of an asset
-
-        obj = asset.object
-        AssetSectionName = getSectionNameByAsset(asset)
-        if (not config.has_section(AssetSectionName)):
-            config.add_section(AssetSectionName)
-
-        config.set(
-            AssetSectionName,
-            'name',
-            GetObjExportFileName(asset.object, "")
-            )
-        config.set(
-            AssetSectionName,
-            'mesh_import_path',
-            os.path.join(obj.exportFolderName)
-            )
-
-        fbx_path = os.path.join(asset.exportPath, asset.assetName)
-        import_path = os.path.join(obj.exportFolderName, scene.anim_subfolder_name)
-
-        # Mesh only
-        if (asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh"):
-            fbx_file_path = asset.GetFileByType("FBX").GetAbsolutePath()
-            config.set(AssetSectionName, 'lod0_fbx_path', fbx_path)
-            config.set(AssetSectionName, 'asset_type', asset.asset_type)
-            config.set(AssetSectionName, 'material_search_location', obj.MaterialSearchLocation)
-            config.set(AssetSectionName, 'generate_lightmap_uvs', str(obj.GenerateLightmapUVs))
-            config.set(AssetSectionName, 'create_physics_asset', str(obj.CreatePhysicsAsset))
-            if (obj.UseStaticMeshLODGroup):
-                config.set(AssetSectionName, 'static_mesh_lod_group', obj.StaticMeshLODGroup)
-            if (ExportCompuntedLightMapValue(obj)):
-                config.set(AssetSectionName, 'light_map_resolution', str(GetCompuntedLightMap(obj)))
-
-        # Anim only
-        if GetIsAnimation(asset.asset_type):
-            actionIndex = 0
-            animOption = "anim"+str(actionIndex)
-            while config.has_option(AssetSectionName, animOption+'_fbx_path'):
-                actionIndex += 1
-                animOption = "anim"+str(actionIndex)
-
-            fbx_file_path = asset.GetFileByType("FBX").GetAbsolutePath()
-            config.set(AssetSectionName, animOption+'_fbx_path', fbx_path)
-            config.set(AssetSectionName, animOption+'_import_path', import_path)
-
-    AssetForImport = []
-    for asset in scene.UnrealExportedAssetsList:
-        if (asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh" or GetIsAnimation(asset.asset_type)):
-            AssetForImport.append(asset)
-
-    # Comment
-    config.add_section('Comment')
-    config.set('Comment', '; '+ti("write_text_additional_track_start"))
-
-    config.add_section('Defaultsettings')
-    config.set('Defaultsettings', 'unreal_import_location', r'/Game/'+scene.unreal_import_location)
-
-    for asset in AssetForImport:
-        completeAssetSection(config, asset)
-
-    # Import asset
-    return config
 
 
 def WriteCameraAnimationTracks(obj):
@@ -528,23 +436,3 @@ def WriteAllTextFiles():
         destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
         copyfile(source, destination)
 
-    # ConfigParser
-    '''
-    if scene.text_ImportAssetScript:
-        Text = WriteExportedAssetsDetail()
-        if Text is not None:
-            Filename = "ExportedAssetsDetail.ini"
-            ExportSingleConfigParser(
-                Text,
-                scene.export_other_file_path,
-                Filename)
-
-    if scene.text_ImportSequenceScript:
-        Text = WriteSequencerDetail()
-        if Text is not None:
-            Filename = "SequencerDetail.ini"
-            ExportSingleConfigParser(
-                Text,
-                scene.export_other_file_path,
-                Filename)
-    '''

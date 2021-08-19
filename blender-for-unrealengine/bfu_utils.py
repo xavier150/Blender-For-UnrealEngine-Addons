@@ -673,7 +673,7 @@ def GetSkeletalMeshSockets(obj):
         r = RelativeMatrix.to_euler()
         s = socket.scale*addon_prefs.skeletalSocketsImportedSize
 
-        # Convet to array for configparser and convert value for Unreal
+        # Convet to array for Json and convert value for Unreal
         array_location = [t[0], t[1]*-1, t[2]]
         array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]
         array_scale = [s[0], s[1], s[2]]

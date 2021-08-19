@@ -19,7 +19,6 @@
 
 import bpy
 import time
-import configparser
 from math import degrees
 from . import languages
 from .languages import *
