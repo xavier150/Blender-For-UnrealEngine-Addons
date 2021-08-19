@@ -38,7 +38,7 @@ import addon_utils
 
 from . import bfu_addon_pref
 from . import bfu_ui
-from . import bfu_export_asset
+from .export import bfu_export_asset
 from . import bfu_write_text
 from . import bfu_basics
 from . import bfu_utils
@@ -63,7 +63,7 @@ bl_info = {
     'description': "This add-ons allows to easily export several "
     "objects at the same time for use in unreal engine 4.",
     'author': 'Loux Xavier (BleuRaven)',
-    'version': (0, 2, 9),  # Rev 0.2.9
+    'version': (0, 3, 0),  # Rev 0.2.3
     'blender': (2, 80, 0),
     'location': 'View3D > UI > Unreal Engine 4',
     'warning': '',
@@ -120,6 +120,7 @@ def register():
     bpy.types.Scene.bfu_skeleton_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_collection_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_object_advanced_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_export_type_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_collision_socket_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_lightmap_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_nomenclature_properties_expanded = bpy.props.BoolProperty()

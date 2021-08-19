@@ -9,12 +9,12 @@ def CheckTasks():
     if not hasattr(unreal, 'EditorAssetLibrary'):
         print('--------------------------------------------------')
         print('WARNING: Editor Scripting Utilities should be activated.')
-        print('Plugin > Scripting > Editor Scripting Utilities.')
+        print('Edit > Plugin > Scripting > Editor Scripting Utilities.')
         return False
     if not hasattr(unreal.MovieSceneSequence, 'set_display_rate'):
         print('--------------------------------------------------')
         print('WARNING: Editor Scripting Utilities should be activated.')
-        print('Plugin > Scripting > Sequencer Scripting.')
+        print('Edit > Plugin > Scripting > Sequencer Scripting.')
         return False
     return True
 
@@ -22,6 +22,7 @@ def CheckTasks():
 def CreateSequencer():
 
     import unreal
+    import sys
     import os.path
     import sys
     import time
@@ -31,8 +32,12 @@ def CreateSequencer():
     json_data_file = 'ImportSequencerData.json'
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
-    with open(os.path.join(dir_path, json_data_file), "r", encoding="utf8") as json_file:
-        sequence_data = json.load(json_file, encoding="utf8")
+    if sys.version_info[0] < 3:
+        with open(os.path.join(dir_path, json_data_file), "r") as json_file:
+            sequence_data = json.load(json_file, encoding="utf8")
+    else:
+        with open(os.path.join(dir_path, json_data_file), "r", encoding="utf8") as json_file:
+            sequence_data = json.load(json_file, encoding="utf8")
 
     spawnable_camera = sequence_data['spawnable_camera']
     startFrame = sequence_data['startFrame']
@@ -47,7 +52,7 @@ def CreateSequencer():
 
     def GetUnrealVersion():
         version = unreal.SystemLibrary.get_engine_version().split(".")
-        float_version = int(version[0]) + float(int(version[1])/100)
+        float_version = int(version[0]) + float(float(version[1])/100)
         return float_version
 
     def AddSequencerSectionTransformKeysByIniFile(sequencer_section, track_dict):
@@ -110,8 +115,12 @@ def CreateSequencer():
         print("Start camera import " + str(x+1) + "/" + str(len(sequence_data["cameras"])) + " :" + camera_data["name"])
         # Import camera tracks transform
 
-        with open(camera_data["additional_tracks_path"], "r", encoding="utf8") as json_file:
-            camera_tracks = json.load(json_file, encoding="utf8")
+        if sys.version_info[0] < 3:
+            with open(camera_data["additional_tracks_path"], "r", ) as json_file:
+                camera_tracks = json.load(json_file, encoding="utf8")
+        else:
+            with open(camera_data["additional_tracks_path"], "r", encoding="utf8") as json_file:
+                camera_tracks = json.load(json_file, encoding="utf8")
 
         # Create spawnable camera and add camera in sequencer
         cine_camera_actor = unreal.EditorLevelLibrary().spawn_actor_from_class(unreal.CineCameraActor, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
@@ -160,19 +169,14 @@ def CreateSequencer():
 
         TrackFocusDistance = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)
 
-        # Wtf this var name change every version or I do someting wrong??? :v
-        if GetUnrealVersion() >= 4.26:
+        if GetUnrealVersion() >= 4.24:
             TrackFocusDistance.set_property_name_and_path('FocusSettings.ManualFocusDistance', 'FocusSettings.ManualFocusDistance')
             TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance (Focus Settings)')
-        elif GetUnrealVersion() >= 4.25:
-            TrackFocusDistance.set_property_name_and_path('FocusSettings.ManualFocusDistance', 'FocusSettings.ManualFocusDistance')
-            TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance (Focus Settings)')
-        elif GetUnrealVersion() >= 4.24:
-            TrackFocusDistance.set_property_name_and_path('CurrentFocusDistance', 'CurrentFocusDistance')
-            TrackFocusDistance.set_editor_property('display_name', 'Current Focus Distance')
         else:
+            print(GetUnrealVersion())
             TrackFocusDistance.set_property_name_and_path('ManualFocusDistance', 'ManualFocusDistance')
             TrackFocusDistance.set_editor_property('display_name', 'Current Focus Distance')
+
         sectionFocusDistance = TrackFocusDistance.add_section()
         sectionFocusDistance.set_end_frame_bounded(False)
         sectionFocusDistance.set_start_frame_bounded(False)
@@ -248,7 +252,10 @@ def CreateSequencer():
             for camera in ImportedCamera:
                 if camera[0] == section["camera_name"]:
                     camera_binding_id = unreal.MovieSceneObjectBindingID()
-                    camera_binding_id = seq.make_binding_id(camera[1], unreal.MovieSceneObjectBindingSpace.LOCAL)
+                    if GetUnrealVersion() >= 4.26:
+                        camera_binding_id = seq.make_binding_id(camera[1], unreal.MovieSceneObjectBindingSpace.LOCAL)
+                    else:
+                        camera_binding_id = seq.make_binding_id(camera[1])
                     camera_cut_section.set_camera_binding_id(camera_binding_id)
 
         camera_cut_section.set_end_frame_seconds((section["end_time"]-secureCrop)/float(frameRateNumerator))

@@ -98,7 +98,7 @@ def GetVertexWithZeroWeight(Armature, Mesh):
 def UpdateUnrealPotentialError():
     # Find and reset list of all potential error in scene
 
-    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    addon_prefs = GetAddonPrefs()
     PotentialErrors = bpy.context.scene.potentialErrorList
     PotentialErrors.clear()
 
@@ -337,15 +337,17 @@ def UpdateUnrealPotentialError():
 
     def CheckArmatureValidChild():
         # Check that skeleton also has a mesh to export
+
         for obj in objToCheck:
+            export_as_proxy = GetExportAsProxy(obj)
             if GetAssetType(obj) == "SkeletalMesh":
                 childs = GetExportDesiredChilds(obj)
                 validChild = 0
                 for child in childs:
                     if child.type == "MESH":
                         validChild += 1
-                if obj.ExportAsProxy:
-                    if obj.ExportProxyChild is not None:
+                if export_as_proxy:
+                    if GetExportProxyChild(obj) is not None:
                         validChild += 1
                 if validChild < 1:
                     MyError = PotentialErrors.add()
@@ -555,7 +557,7 @@ def TryToCorrectPotentialError(errorIndex):
     MyCurrentDataSave = UserSceneSave()
     MyCurrentDataSave.SaveCurrentScene()
 
-    SafeModeSet('OBJECT', MyCurrentDataSave.user_active)
+    SafeModeSet('OBJECT', MyCurrentDataSave.user_select_class.user_active)
 
     print("Start correct")
 

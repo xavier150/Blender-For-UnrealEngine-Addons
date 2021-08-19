@@ -381,3 +381,20 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Additional location in advanced properties don't work for the cameras.
 - Fixed: Export Instanced complex Collections can break the exported mesh.
 - Fixed: Camera Sequencer don't work in Unreal Engine 5.
+
+== Rev 0.3.0 ==
+
+- New: Text generator for export Skeletal Mesh Sockets in Unreal Engine (Copy / Paste).
+- New: ExportAsProxy and ExportProxyChild options removed. That now Auto.
+- Change: Additional files use now Json.
+- Fixed: Camera export don't work when any marker_sequences was created.
+- Fixed: show asset(s) Button do script error when not object is selected.
+- Fixed: Removed collision in export collision list do script error.
+- Fixed: Collision on exported Instanced Collections don't work.
+- Fixed: Sequencer Import Script don't work on older version of Unreal Engine because Python version is not the same.
+- Fixed: Var Manual Focus Distance (Focus Settings) don't work in Sequencer Import Script.
+- Fixed: When use Proxy Armature with sockets wrong bones with sockets name are exported.
+- Fixed: Camera export don't work when scene has no timeline_markers.
+- Fixed: Export Fail with animation when tweakmode is activated.
+- Fixed: Lightmap res = 4 when export with not custom light map.
+- Fixed: SkeletalMesh LOD Are imported as normal mesh.

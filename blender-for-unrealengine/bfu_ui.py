@@ -21,14 +21,14 @@ import bpy
 import addon_utils
 import time
 
-from . import bfu_export_asset
+from .export import bfu_export_asset
 from . import bfu_write_text
 from . import bfu_basics
 from .bfu_basics import *
 from . import bfu_utils
 from .bfu_utils import *
-from . import bfu_export_get_info
-from .bfu_export_get_info import *
+from .export import bfu_export_get_info
+from .export.bfu_export_get_info import *
 from . import bfu_check_potential_error
 from . import bfu_ui_utils
 from . import languages
@@ -165,21 +165,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 "ARMATURE_DATA",
                 2),
             ]
-        )
-
-    bpy.types.Object.ExportAsProxy = BoolProperty(
-        name="The armature is a Proxy ?",
-        description=(
-            "If true this mesh will be exported" +
-            " with a target child for keed to data"
-            ),
-        default=False
-        )
-
-    bpy.types.Object.ExportProxyChild = PointerProperty(
-        name="The armature proxy children",
-        description="Select child proxy (The mesh animated by this armature)",
-        type=bpy.types.Object
         )
 
     bpy.types.Object.ExportAsAlembic = BoolProperty(
@@ -1201,7 +1186,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     def draw(self, contex):
         scene = bpy.context.scene
         obj = bpy.context.object
-        addon_prefs = bpy.context.preferences.addons[__package__].preferences
+        addon_prefs = GetAddonPrefs()
         layout = self.layout
 
         version = "-1"
@@ -1261,14 +1246,22 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
                         else:
                             ProxyProp = layout.column()
-                            ProxyProp.prop(obj, 'ExportAsProxy')
-                            if obj.ExportAsProxy:
-                                ProxyProp.prop(obj, 'ExportProxyChild')
+                            if GetExportAsProxy(obj):
+                                ProxyProp.label(
+                                        text="The Armature was detected as a proxy."
+                                        )
+                                proxy_child = GetExportProxyChild(obj)
+                                if proxy_child:
+                                    ProxyProp.label(
+                                            text="Proxy child: " + proxy_child.name
+                                            )
+                                else:
+                                    ProxyProp.label(text="Proxy child not found")
 
                             export_procedure_prop = layout.column()
                             export_procedure_prop.prop(obj, 'bfu_export_procedure')
 
-                            if not obj.ExportAsProxy:
+                            if not GetExportAsProxy(obj):
                                 AlembicProp = layout.column()
                                 AlembicProp.prop(obj, 'ExportAsAlembic')
                                 if obj.ExportAsAlembic:
@@ -1282,8 +1275,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                         )
                                 else:
                                     if addon_prefs.useGeneratedScripts:
-                                        LodProp = layout.column()
-                                        LodProp.prop(obj, 'ExportAsLod')
+                                        # Unreal python no longer support Skeletal mesh LODS import.
+                                        if GetAssetType(obj) != "SkeletalMesh":
+                                            LodProp = layout.column()
+                                            LodProp.prop(obj, 'ExportAsLod')
 
                                     if obj.type == "ARMATURE":
                                         AssetType2 = layout.column()
@@ -1307,8 +1302,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
                         # Lod selection
                         if not obj.ExportAsLod:
-                            if (GetAssetType(obj) == "StaticMesh" or
-                                    GetAssetType(obj) == "SkeletalMesh"):
+                            # Unreal python no longer support Skeletal mesh LODS import.
+                            if (GetAssetType(obj) == "StaticMesh"):
                                 LodList = layout.column()
                                 LodList.prop(obj, 'Ue4Lod1')
                                 LodList.prop(obj, 'Ue4Lod2')
@@ -1386,20 +1381,19 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             if obj.VertexColorToUse == "CustomIndex":
                                 StaticMeshVertexColorImportOptionIndexCustom = StaticMeshVertexColorImportOption.row()
                                 StaticMeshVertexColorImportOptionIndexCustom.prop(obj, 'VertexColorIndexToUse')
-                            
+
                             StaticMeshVertexColorFeedback = StaticMeshVertexColorImportOption.row()
                             if obj.type == "MESH":
                                 vced = VertexColorExportData(obj)
-                                if  vced.export_type == "REPLACE":
-                                    StaticMeshVertexColorFeedback.label(text='Vertex color nammed "' + vced.name + '" will be used.', icon='INFO')
+                                if vced.export_type == "REPLACE":
+                                    my_text = 'Vertex color nammed "' + vced.name + '" will be used.'
+                                    StaticMeshVertexColorFeedback.label(text=my_text, icon='INFO')
                                 else:
-                                    StaticMeshVertexColorFeedback.label(text='No vertex color found at this index.', icon='ERROR')
+                                    my_text = 'No vertex color found at this index.'
+                                    StaticMeshVertexColorFeedback.label(text=my_text, icon='ERROR')
                             else:
-                                StaticMeshVertexColorFeedback.label(text='Vertex color property will be apply on the childrens.', icon='INFO')
-
-                        
-                        
-
+                                my_text = 'Vertex color property will be apply on the childrens.'
+                                StaticMeshVertexColorFeedback.label(text=my_text, icon='INFO')
 
             bfu_ui_utils.LayoutSection(layout, "bfu_object_light_map_properties_expanded", "Light map")
             if scene.bfu_object_light_map_properties_expanded:
@@ -1441,7 +1435,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             transformProp.prop(obj, 'exportGlobalScale')
                         elif GetAssetType(obj) == "Camera":
                             transformProp.prop(obj, "AdditionalLocationForExport")
-
 
                         AxisProperty = layout.column()
                         AxisProperty.prop(obj, 'exportAxisForward')
@@ -1782,9 +1775,25 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     "(Active object is the owner of the socket)")
             return {'FINISHED'}
 
+    class BFU_OT_CopySkeletalSocketButton(Operator):
+        bl_label = "Copy Skeletal Mesh socket for Unreal"
+        bl_idname = "object.copy_skeletalsocket_command"
+        bl_description = "Copy Skeletal Socket Script command"
+
+        def execute(self, context):
+            scene = context.scene
+            obj = context.object
+            if obj:
+                if obj.type == "ARMATURE":
+                    setWindowsClipboard(GetImportSkeletalMeshSocketScriptCommand(obj))
+                    self.report(
+                        {'INFO'},
+                        "Skeletal sockets copied. Paste in Unreal Engine for import sockets.")
+            return {'FINISHED'}
+
     def draw(self, context):
 
-        addon_prefs = bpy.context.preferences.addons[__package__].preferences
+        addon_prefs = GetAddonPrefs()
         layout = self.layout
         scene = bpy.context.scene
         obj = context.object
@@ -1820,6 +1829,18 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
 
         ready_for_convert_collider = False
         ready_for_convert_socket = False
+
+        '''
+        bfu_ui_utils.LayoutSection(layout, "bfu_export_type_expanded", "Export type")
+        if scene.bfu_export_type_expanded:
+            if not ActiveModeIs("OBJECT"):
+                layout.label(text="Switch to Object Mode.", icon='INFO')
+            else:
+                export_type_buttons = layout.row().split(factor=0.80)
+                export_type_cameras = export_type_buttons.column()
+                export_type_cameras.enabled = True
+                export_type_cameras.operator("object.converttoboxcollision", icon='MESH_CUBE')
+        '''
 
         bfu_ui_utils.LayoutSection(layout, "bfu_collision_socket_expanded", "Collision and Socket")
         if scene.bfu_collision_socket_expanded:
@@ -1895,6 +1916,15 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     socketNameText.enabled = obj.usesocketcustomName
                     socketNameText.prop(obj, "socketcustomName")
 
+            copy_skeletalsocket_buttons = layout.column()
+            copy_skeletalsocket_buttons.enabled = False
+            copy_skeletalsocket_buttons.operator(
+                "object.copy_skeletalsocket_command",
+                icon='OUTLINER_DATA_EMPTY')
+            if obj is not None:
+                if obj.type == "ARMATURE":
+                    copy_skeletalsocket_buttons.enabled = True
+
         bfu_ui_utils.LayoutSection(layout, "bfu_lightmap_expanded", "Light Map")
         if scene.bfu_lightmap_expanded:
             checkButton = layout.column()
@@ -1925,6 +1955,7 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     folder_name: StringProperty(default="None")
     files: CollectionProperty(type=BFU_OT_FileExport)
     object: PointerProperty(type=bpy.types.Object)
+    collection: PointerProperty(type=bpy.types.Collection)
     export_start_time: FloatProperty(default=0)
     export_end_time: FloatProperty(default=0)
     export_success: BoolProperty(default=False)
@@ -1948,6 +1979,7 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
             self.asset_name = GetActionExportFileName(obj, action, "")
 
         if collection:
+            self.collection = collection
             self.asset_type = GetCollectionType(collection)  # Override
 
         self.export_start_time = time.perf_counter()
@@ -1964,6 +1996,12 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
             if file.type == type:
                 return file
         print("File type not found in this assets:", type)
+
+    def GetFilename(self, fileType=".fbx"):
+        if self.asset_type == "Collection StaticMesh":
+            return GetCollectionExportFileName(self.collection.name, fileType)
+        else:
+            return GetObjExportFileName(self.object, fileType)
 
 
 class BFU_PT_Export(bpy.types.Panel):
@@ -2132,9 +2170,12 @@ class BFU_PT_Export(bpy.types.Panel):
         bl_description = "Click to show assets that are to be exported."
 
         def execute(self, context):
+
             obj = context.object
-            if obj.type == "ARMATURE":
-                UpdateActionCache(obj)
+            if obj:
+                if obj.type == "ARMATURE":
+                    UpdateActionCache(obj)
+
             assets = GetFinalAssetToExport()
             popup_title = "Assets list"
             if len(assets) > 0:
@@ -2387,7 +2428,14 @@ class BFU_PT_Export(bpy.types.Panel):
                     # to avoid windows PermissionError
                     self.report(
                         {'WARNING'},
-                        "Please save this .blend file before export")
+                        "Please save this .blend file before export.")
+                    return False
+
+                if IsTweakmode():
+                    # Need exit Tweakmode because the Animation data is read only.
+                    self.report(
+                        {'WARNING'},
+                        "Exit Tweakmode in NLA Editor. [Tab]")
                     return False
 
                 return True
@@ -2533,7 +2581,7 @@ class BFU_PT_Export(bpy.types.Panel):
     def draw(self, context):
         scene = context.scene
         scene = context.scene
-        addon_prefs = bpy.context.preferences.addons[__package__].preferences
+        addon_prefs = GetAddonPrefs()
 
         # Categories :
         layout = self.layout
@@ -2655,7 +2703,7 @@ class BFU_PT_Export(bpy.types.Panel):
                 layout.label(text="Click on one of the buttons to copy the import command.", icon='INFO')
                 layout.label(text="Then paste it into the cmd console of unreal.")
                 layout.label(text="You need activate python plugins in Unreal Engine.")
-                    
+
             else:
                 layout.label(text='(Generated scripts are deactivated.)')
 
@@ -2718,6 +2766,7 @@ classes = (
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToCollisionButtonConvex,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToStaticSocketButton,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToSkeletalSocketButton,
+    BFU_PT_BlenderForUnrealTool.BFU_OT_CopySkeletalSocketButton,
     BFU_PT_BlenderForUnrealObject.BFU_OT_ComputAllLightMap,
 
     BFU_PT_Export,
