@@ -19,7 +19,6 @@
 
 import bpy
 import time
-import configparser
 from math import degrees, radians, tan
 from mathutils import Matrix
 import json
