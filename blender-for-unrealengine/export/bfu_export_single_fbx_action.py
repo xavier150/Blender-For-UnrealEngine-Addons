@@ -148,15 +148,11 @@ def ExportSingleFbxAction(
         active.animation_data.action_blend_type = 'REPLACE'
         active.animation_data.action_influence = 1
 
-    absdirpath = bpy.path.abspath(dirpath)
-    VerifiDirs(absdirpath)
-    fullpath = os.path.join(absdirpath, filename)
-
     asset_name.SetExportName()
 
     if (export_procedure == "normal"):
         bpy.ops.export_scene.fbx(
-            filepath=fullpath,
+            filepath=GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
             global_scale=GetObjExportScale(active),

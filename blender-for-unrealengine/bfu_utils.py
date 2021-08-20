@@ -1591,9 +1591,9 @@ def GetObjExportDir(obj, abspath=False):
             scene.export_camera_file_path,
             obj.exportFolderName)
     if abspath:
-        return bpy.path.abspath(dirpath)
+        return ValidDirName(bpy.path.abspath(dirpath))
     else:
-        return dirpath
+        return ValidDirName(dirpath)
 
 
 def GetCollectionExportFileName(collection, fileType=".fbx"):

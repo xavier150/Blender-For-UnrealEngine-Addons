@@ -85,13 +85,10 @@ def ExportSingleAlembicAnimation(
 
     scene.frame_start += obj.StartFramesOffset
     scene.frame_end += obj.EndFramesOffset
-    absdirpath = bpy.path.abspath(dirpath)
-    VerifiDirs(absdirpath)
-    fullpath = os.path.join(absdirpath, filename)
 
     # Export
     bpy.ops.wm.alembic_export(
-        filepath=fullpath,
+        filepath=GetExportFullpath(dirpath, filename),
         check_existing=False,
         selected=True,
         triangulate=True,
