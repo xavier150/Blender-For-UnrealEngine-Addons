@@ -56,7 +56,7 @@ def ProcessSkeletalMeshExport(obj):
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.StartAssetExport(obj)
 
-    ExportSingleSkeletalMesh(scene, absdirpath, GetObjExportFileName(obj), obj)
+    ExportSingleSkeletalMesh(scene, dirpath, GetObjExportFileName(obj), obj)
     file = MyAsset.files.add()
     file.name = GetObjExportFileName(obj)
     file.path = dirpath

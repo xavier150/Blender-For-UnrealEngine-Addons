@@ -273,16 +273,13 @@ def VerifiDirs(directory):
 
 
 def ValidDirName(directory):
-    print(directory)
-    #return directory
     # https://gist.github.com/seanh/93666
     # Normalizes string, removes non-alpha characters
     # File name use
 
-    illegal_chars = r':'
+    illegal_chars = r':*?"<>|'
     directory = ''.join(c for c in directory if c not in illegal_chars)
 
-    print(directory)
     return directory
 
 
