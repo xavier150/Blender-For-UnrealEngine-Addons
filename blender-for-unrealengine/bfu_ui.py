@@ -2569,8 +2569,8 @@ class BFU_PT_Export(bpy.types.Panel):
         name="Selection filter",
         items=[
             ('default', "No Filter", "Export as normal all objects with the recursive export option.", 0),
-            ('only_object', "Only select", "Export only the selected object(s)", 1),
-            ('only_object_action', "Only select and active action",
+            ('only_object', "Only selected", "Export only the selected object(s)", 1),
+            ('only_object_action', "Only selected and active action",
                 "Export only the selected object(s) and active action on this object", 2),
             ],
         description=(
