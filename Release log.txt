@@ -400,3 +400,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Lightmap res = 4 when export with not custom light map.
 - Fixed: SkeletalMesh LOD Are imported as normal mesh.
 - Fixed: Export dirs with invalid characters do script error.
+- Fixed: Show collection Popup do script Error.
