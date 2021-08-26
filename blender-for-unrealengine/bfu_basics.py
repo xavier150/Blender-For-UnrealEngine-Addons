@@ -126,8 +126,14 @@ def SetCurrentSelection(selection):
         if not is_deleted(obj):
             if obj.name in bpy.context.window.view_layer.objects:
                 obj.select_set(True)
-    selection.active.select_set(True)
-    bpy.context.view_layer.objects.active = selection.active
+
+    if selection.active:
+        selection.active.select_set(True)
+        bpy.context.view_layer.objects.active = selection.active
+    else:
+        if len(selection.selected_objects) > 0:
+            selection.selected_objects[0].select_set(True)
+            bpy.context.view_layer.objects.active = selection.selected_objects[0]
 
 
 def SelectSpecificObject(obj):
