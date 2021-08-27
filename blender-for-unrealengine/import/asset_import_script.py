@@ -378,7 +378,6 @@ def ImportAllAssets():
                     unreal.EditorStaticMeshLibrary.remove_lods(asset)  # Import the StaticMesh lod(s)
 
                 if asset_data["type"] == "SkeletalMesh" or asset_data["type"] == "StaticMesh":
-                    lods_to_add = additional_data["LevelOfDetail"]  # Import the SkeletalMesh lod(s)
 
                     def ImportStaticLod(lod_name, lod_number):
                         if "LevelOfDetail" in additional_data:
