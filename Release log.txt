@@ -401,3 +401,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: SkeletalMesh LOD Are imported as normal mesh.
 - Fixed: Export dirs with invalid characters do script error.
 - Fixed: Show collection Popup do script Error.
+- Fixed: Collection export don't use SubCollection.
