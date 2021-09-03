@@ -1158,7 +1158,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             return {'FINISHED'}
 
     class BFU_OT_ShowCollectionToExport(Operator):
-        bl_label = "Show action(s)"
+        bl_label = "Show collection(s)"
         bl_idname = "object.showscenecollection"
         bl_description = "Click to show collections to export"
 
@@ -1176,7 +1176,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 col = self.layout.column()
                 for collection in collections:
                     row = col.row()
-                    row.label(text="- "+collection)
+                    row.label(text="- "+collection.name)
             bpy.context.window_manager.popup_menu(
                 draw,
                 title=popup_title,
@@ -2569,8 +2569,8 @@ class BFU_PT_Export(bpy.types.Panel):
         name="Selection filter",
         items=[
             ('default', "No Filter", "Export as normal all objects with the recursive export option.", 0),
-            ('only_object', "Only select", "Export only the selected object(s)", 1),
-            ('only_object_action', "Only select and active action",
+            ('only_object', "Only selected", "Export only the selected object(s)", 1),
+            ('only_object_action', "Only selected and active action",
                 "Export only the selected object(s) and active action on this object", 2),
             ],
         description=(

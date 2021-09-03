@@ -1056,7 +1056,7 @@ def SelectCollectionObjects(collection):
     # Selects only all objects that must be exported in a collection
     selectedObjs = []
     bpy.ops.object.select_all(action='DESELECT')
-    for selectObj in collection.objects:
+    for selectObj in collection.all_objects:
         if selectObj.ExportEnum != "dont_export":
             if selectObj.name in bpy.context.view_layer.objects:
                 selectObj.select_set(True)
@@ -1591,9 +1591,9 @@ def GetObjExportDir(obj, abspath=False):
             scene.export_camera_file_path,
             obj.exportFolderName)
     if abspath:
-        return bpy.path.abspath(dirpath)
+        return ValidDirName(bpy.path.abspath(dirpath))
     else:
-        return dirpath
+        return ValidDirName(dirpath)
 
 
 def GetCollectionExportFileName(collection, fileType=".fbx"):

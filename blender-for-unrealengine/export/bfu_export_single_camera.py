@@ -115,14 +115,10 @@ def ExportSingleFbxCamera(
         scene.frame_start = GetDesiredActionStartEndTime(obj, action)[0]
         scene.frame_end = GetDesiredActionStartEndTime(obj, action)[1]
 
-    absdirpath = bpy.path.abspath(dirpath)
-    VerifiDirs(absdirpath)
-    fullpath = os.path.join(absdirpath, filename)
-
     ExportCameraAsFBX = addon_prefs.exportCameraAsFBX
     if ExportCameraAsFBX:
         bpy.ops.export_scene.fbx(
-            filepath=fullpath,
+            filepath=GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
             global_scale=GetObjExportScale(obj),

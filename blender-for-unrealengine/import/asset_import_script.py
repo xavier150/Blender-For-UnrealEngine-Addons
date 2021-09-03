@@ -112,6 +112,11 @@ def ImportAllAssets():
                     return task.get_editor_property('options').anim_sequence_import_data
                 return None
 
+            def GetAlembicImportData():
+                if asset_data["type"] == "Alembic":
+                    return task.get_editor_property('options')
+                return None
+
             def GetMeshImportData():
                 if asset_data["type"] == "StaticMesh":
                     return GetStaticMeshImportData()
@@ -134,6 +139,15 @@ def ImportAllAssets():
                 task.set_editor_property('options', unreal.AbcImportSettings())
             else:
                 task.set_editor_property('options', unreal.FbxImportUI())
+
+            # Alembic
+            if GetAlembicImportData():
+                GetAlembicImportData().static_mesh_settings.set_editor_property("merge_meshes", True)
+                GetAlembicImportData().set_editor_property("import_type", unreal.AlembicImportType.SKELETAL)
+                GetAlembicImportData().conversion_settings.set_editor_property("flip_u", False)
+                GetAlembicImportData().conversion_settings.set_editor_property("flip_v", True)
+                GetAlembicImportData().conversion_settings.set_editor_property("scale", unreal.Vector(100, -100, 100))
+                GetAlembicImportData().conversion_settings.set_editor_property("rotation", unreal.Vector(90, 0, 0))
 
             # Vertex color
             vertex_override_color = None
@@ -364,7 +378,6 @@ def ImportAllAssets():
                     unreal.EditorStaticMeshLibrary.remove_lods(asset)  # Import the StaticMesh lod(s)
 
                 if asset_data["type"] == "SkeletalMesh" or asset_data["type"] == "StaticMesh":
-                    lods_to_add = additional_data["LevelOfDetail"]  # Import the SkeletalMesh lod(s)
 
                     def ImportStaticLod(lod_name, lod_number):
                         if "LevelOfDetail" in additional_data:

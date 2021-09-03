@@ -137,15 +137,12 @@ def ExportSingleFbxNLAAnim(
 
     # scene.frame_start += active.StartFramesOffset
     # scene.frame_end += active.EndFramesOffset
-    absdirpath = bpy.path.abspath(dirpath)
-    VerifiDirs(absdirpath)
-    fullpath = os.path.join(absdirpath, filename)
 
     asset_name.SetExportName()
 
     if (export_procedure == "normal"):
         bpy.ops.export_scene.fbx(
-            filepath=fullpath,
+            filepath=GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
             global_scale=GetObjExportScale(active),

@@ -106,9 +106,7 @@ def ExportSingleStaticMesh(
     asset_name.target_object = active
 
     ApplyExportTransform(active, "Object")
-    absdirpath = bpy.path.abspath(dirpath)
-    VerifiDirs(absdirpath)
-    fullpath = os.path.join(absdirpath, filename)
+
     meshType = GetAssetType(active)
     SetSocketsExportTransform(active)
 
@@ -123,7 +121,7 @@ def ExportSingleStaticMesh(
     asset_name.SetExportName()
 
     bpy.ops.export_scene.fbx(
-        filepath=fullpath,
+        filepath=GetExportFullpath(dirpath, filename),
         check_existing=False,
         use_selection=True,
         global_scale=GetObjExportScale(active),
