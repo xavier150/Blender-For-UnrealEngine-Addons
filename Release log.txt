@@ -402,3 +402,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Export dirs with invalid characters do script error.
 - Fixed: Show collection Popup do script Error.
 - Fixed: Collection export don't use SubCollection.
+
+== Rev 0.3.1 ==
+
+- Fixed: GetObjExportDir remove ":" in path.
