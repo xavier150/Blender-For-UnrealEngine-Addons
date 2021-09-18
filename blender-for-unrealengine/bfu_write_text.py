@@ -434,4 +434,3 @@ def WriteAllTextFiles():
         filename = ValidFilename(scene.file_import_sequencer_script_name)
         destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
         copyfile(source, destination)
-

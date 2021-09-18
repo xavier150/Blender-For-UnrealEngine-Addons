@@ -1571,29 +1571,31 @@ def GetObjExportName(obj):
 
 def GetObjExportDir(obj, abspath=False):
     # Generate assset folder path
+    FolderName = ValidDirName(obj.exportFolderName)
+
     scene = bpy.context.scene
     if GetAssetType(obj) == "SkeletalMesh":
         dirpath = os.path.join(
             scene.export_skeletal_file_path,
-            obj.exportFolderName,
+            FolderName,
             GetObjExportName(obj))
     if GetAssetType(obj) == "Alembic":
         dirpath = os.path.join(
             scene.export_alembic_file_path,
-            obj.exportFolderName,
+            FolderName,
             obj.name)
     if GetAssetType(obj) == "StaticMesh":
         dirpath = os.path.join(
             scene.export_static_file_path,
-            obj.exportFolderName)
+            FolderName)
     if GetAssetType(obj) == "Camera":
         dirpath = os.path.join(
             scene.export_camera_file_path,
-            obj.exportFolderName)
+            FolderName)
     if abspath:
-        return ValidDirName(bpy.path.abspath(dirpath))
+        return bpy.path.abspath(dirpath)
     else:
-        return ValidDirName(dirpath)
+        return dirpath
 
 
 def GetCollectionExportFileName(collection, fileType=".fbx"):
