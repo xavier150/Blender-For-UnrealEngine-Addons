@@ -1931,6 +1931,42 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
             checkButton.operator("object.computalllightmap", icon='TEXTURE')
 
 
+class BFU_PT_BlenderForUnrealDebug(bpy.types.Panel):
+    # Debug panel for get dev info and test
+
+    bl_idname = "BFU_PT_BlenderForUnrealDebug"
+    bl_label = "Debug"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "Unreal Engine"
+
+    bpy.types.Object.usesocketcustomName = BoolProperty(
+        name="Socket custom name",
+        description='Use a custom name in Unreal Engine for this socket?',
+        default=False
+        )
+
+    bpy.types.Object.socketcustomName = StringProperty(
+        name="",
+        description='',
+        default="MySocket"
+        )
+
+    def draw(self, context):
+        addon_prefs = GetAddonPrefs()
+        layout = self.layout
+        scene = bpy.context.scene
+        obj = context.object
+        layout.label(text="This panel is only for Debug", icon='INFO')
+        if obj:
+            layout.label(text="Full path name as Static Mesh:")
+            layout.label(text="GetObjExportDir(local):" + GetObjExportDir(obj, False))
+            layout.label(text="GetObjExportDir:" + GetObjExportDir(obj, True))
+            layout.label(text="GetObjExportName:" + GetObjExportName(obj))
+            layout.label(text="GetObjExportFileName:" + GetObjExportFileName(obj))
+            
+
+
 class BFU_OT_FileExport(bpy.types.PropertyGroup):
     name: StringProperty()
     path: StringProperty()
@@ -2768,6 +2804,8 @@ classes = (
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToSkeletalSocketButton,
     BFU_PT_BlenderForUnrealTool.BFU_OT_CopySkeletalSocketButton,
     BFU_PT_BlenderForUnrealObject.BFU_OT_ComputAllLightMap,
+
+    BFU_PT_BlenderForUnrealDebug,
 
     BFU_PT_Export,
     BFU_PT_Export.BFU_MT_NomenclaturePresets,

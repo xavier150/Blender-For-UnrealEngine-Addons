@@ -46,8 +46,9 @@ Export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
 
 
 def GetExportFullpath(dirpath, filename):
-    VerifiDirs(dirpath)
-    return os.path.join(dirpath, filename)
+    absdirpath = bpy.path.abspath(dirpath)
+    VerifiDirs(absdirpath)
+    return os.path.join(absdirpath, filename)
 
 
 def ApplyProxyData(obj):
