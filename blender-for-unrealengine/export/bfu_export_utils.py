@@ -41,14 +41,13 @@ from ..bfu_utils import *
 from . import bfu_export_get_info
 from .bfu_export_get_info import *
 
-dup_temp_name = "BFU_Temp" #DuplicateTemporarilyNameForUe4Export
+dup_temp_name = "BFU_Temp"  # DuplicateTemporarilyNameForUe4Export
 Export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
 
 
 def GetExportFullpath(dirpath, filename):
-    absdirpath = bpy.path.abspath(ValidDirName(dirpath))
-    VerifiDirs(absdirpath)
-    return os.path.join(absdirpath, filename)
+    VerifiDirs(dirpath)
+    return os.path.join(dirpath, filename)
 
 
 def ApplyProxyData(obj):

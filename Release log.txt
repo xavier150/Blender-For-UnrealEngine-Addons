@@ -406,3 +406,4 @@ It is now possible to force the duration of an animation according to the scene 
 == Rev 0.3.1 ==
 
 - Fixed: GetObjExportDir remove ":" in path.
+- Fixed: GetExportFullpath remove ":" in path.
