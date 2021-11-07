@@ -1304,6 +1304,7 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data=None):
     # This function will rescale the armature and applys the new scale
 
     armature.scale = armature.scale*rescale
+    # Save armature location
     old_location = armature.location.copy()
 
     if target_animation_data is None:
@@ -1316,6 +1317,11 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data=None):
 
     armature.location = (0, 0, 0)
 
+    # Save childs location
+    ChildsLocation = []
+    for Child in GetChilds(armature):
+        ChildsLocation.append([Child, Child.location.copy(), Child.matrix_parent_inverse.copy()])
+
     bpy.ops.object.transform_apply(
         location=True,
         scale=True,
@@ -1323,7 +1329,14 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data=None):
         properties=True
         )
 
+    # Apply armature location
     armature.location = old_location*rescale
+
+    # Apply childs location
+    # I need work with matrix ChildLocation[0].matrix_parent_inverse
+    # But I don't understand how make it work.
+    for ChildLocation in ChildsLocation:
+        pass
 
     if target_animation_data is None:
         armature_animation_data.SetAnimationData(armature, True)
