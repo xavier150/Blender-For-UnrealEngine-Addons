@@ -359,6 +359,24 @@ def UpdateUnrealPotentialError():
                         ' any valid children.')
                     MyError.object = obj
 
+    def CheckArmatureChildWithBoneParent():
+        # If you use Parent Bone to parent your mesh to your armature the import will fail.
+        for obj in objToCheck:
+            if GetAssetType(obj) == "SkeletalMesh":
+                childs = GetExportDesiredChilds(obj)
+                for child in childs:
+                    if child.type == "MESH":
+                        if child.parent_type == 'BONE':
+                            MyError = PotentialErrors.add()
+                            MyError.name = child.name
+                            MyError.type = 2
+                            MyError.text = (
+                                'Object "'+child.name +
+                                '" use Parent Bone to parent. ' +
+                                '\n If you use Parent Bone to parent your mesh to your armature the import will fail.')
+                            MyError.object = child
+                            MyError.docsOcticon = 'armature-child-with-bone-parent'
+
     def CheckArmatureMultipleRoots():
         # Check that skeleton have multiples roots
         for obj in objToCheck:
@@ -470,6 +488,7 @@ def UpdateUnrealPotentialError():
     CheckArmatureBoneData()
     CheckArmatureValidChild()
     CheckArmatureMultipleRoots()
+    CheckArmatureChildWithBoneParent()
     CheckArmatureNoDeformBone()
     CheckMarkerOverlay()
     CheckVertexGroupWeight()
