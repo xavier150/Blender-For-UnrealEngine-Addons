@@ -2805,7 +2805,7 @@ classes = (
     BFU_PT_BlenderForUnrealTool.BFU_OT_CopySkeletalSocketButton,
     BFU_PT_BlenderForUnrealObject.BFU_OT_ComputAllLightMap,
 
-    BFU_PT_BlenderForUnrealDebug,
+    # BFU_PT_BlenderForUnrealDebug, #Unhide for dev
 
     BFU_PT_Export,
     BFU_PT_Export.BFU_MT_NomenclaturePresets,
