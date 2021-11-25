@@ -1062,7 +1062,7 @@ def SelectCollectionObjects(collection):
                 selectObj.select_set(True)
                 selectedObjs.append(selectObj)
 
-    if len(selectedObjs) > 1:
+    if len(selectedObjs) > 0:
         if selectedObjs[0].name in bpy.context.view_layer.objects:
             bpy.context.view_layer.objects.active = selectedObjs[0]
 
