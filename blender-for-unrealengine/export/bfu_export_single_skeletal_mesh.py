@@ -122,7 +122,7 @@ def ExportSingleSkeletalMesh(
         savedUnitLength = bpy.context.scene.unit_settings.scale_length
         bpy.context.scene.unit_settings.scale_length = 0.01  # *= 1/rrf
 
-        ApplySkeletalExportScale(active, rrf)
+        ApplySkeletalExportScale(active, rrf, is_a_proxy=export_as_proxy)
 
     meshType = GetAssetType(active)
 

@@ -130,11 +130,12 @@ def ExportSingleFbxAction(
         bpy.context.scene.unit_settings.scale_length = 0.01  # *= 1/rrf
 
         oldScale = active.scale.z
-        ApplySkeletalExportScale(active, rrf)
+        ApplySkeletalExportScale(active, rrf, is_a_proxy=export_as_proxy)
         RescaleAllActionCurve(rrf*oldScale, savedUnitLength/0.01)
         for selected in bpy.context.selected_objects:
             if selected.type == "MESH":
-                RescaleShapeKeysCurve(selected, 1/rrf)
+                if export_as_proxy is False:
+                    RescaleShapeKeysCurve(selected, 1/rrf)
         RescaleSelectCurveHook(1/rrf)
         ResetArmaturePose(active)
         RescaleRigConsraints(active, rrf)

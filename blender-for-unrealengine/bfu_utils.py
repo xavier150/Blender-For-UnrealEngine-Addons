@@ -1299,7 +1299,7 @@ def ApplyExportTransform(obj, use_type="Object"):
     obj.scale = saveScale
 
 
-def ApplySkeletalExportScale(armature, rescale, target_animation_data=None):
+def ApplySkeletalExportScale(armature, rescale, target_animation_data=None, is_a_proxy=False):
 
     # This function will rescale the armature and applys the new scale
 
@@ -1322,12 +1322,20 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data=None):
     for Child in GetChilds(armature):
         ChildsLocation.append([Child, Child.location.copy(), Child.matrix_parent_inverse.copy()])
 
+    if is_a_proxy:
+        selection = GetCurrentSelection()
+        bpy.ops.object.select_all(action='DESELECT')
+        armature.select_set(True)
+
     bpy.ops.object.transform_apply(
         location=True,
         scale=True,
         rotation=True,
         properties=True
         )
+
+    if is_a_proxy:
+        SetCurrentSelection(selection)
 
     # Apply armature location
     armature.location = old_location*rescale
