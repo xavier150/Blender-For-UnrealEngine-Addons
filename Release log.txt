@@ -410,4 +410,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: GetExportFullpath remove ":" in path.
 - Fixed: Remove the active object if an exported collection contain a single object.
 - Fixed: With Unit Scale not at 0.01 and Proxy use animation export will fail.
-- Fixed: With Unit Scale not at 0.01 and Proxy ShapeKeysCurve scale is wrong. 
+- Fixed: With Unit Scale not at 0.01 and Proxy ShapeKeysCurve scale is wrong.
