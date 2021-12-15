@@ -94,6 +94,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.ExportEnum = EnumProperty(
         name="Export type",
         description="Export procedure",
+        override={'LIBRARY_OVERRIDABLE'},
         items=[
             ("auto",
                 "Auto",
@@ -119,7 +120,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             'The name of sub folder.' +
             ' You can now use ../ for up one directory.'
             ),
-
+        override={'LIBRARY_OVERRIDABLE'},
         maxlen=64,
         default="",
         subtype='FILE_NAME'
@@ -131,7 +132,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             'The name of sub folder.' +
             ' You can now use ../ for up one directory.'
             ),
-
+        override={'LIBRARY_OVERRIDABLE'},
         maxlen=64,
         default="",
         subtype='FILE_NAME'
@@ -143,7 +144,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             'True: export .Fbx object and AdditionalTrack.ini ' +
             'Else: export only AdditionalTrack.ini'
             ),
-
+        override={'LIBRARY_OVERRIDABLE'},
         default=False,
         )
 
@@ -153,6 +154,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "This will define how the object should" +
             " be exported in case you are using specific Rig."
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         items=[
             ("normal",
                 "Normal",
@@ -172,6 +174,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         description=(
             "If true this mesh will be exported as a Alembic animation"
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=False
         )
 
@@ -181,12 +184,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "If true this mesh will be exported" +
             " as a level of detail for another mesh"
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=False
         )
 
     bpy.types.Object.ForceStaticMesh = BoolProperty(
         name="Force staticMesh",
         description="Force export asset like a StaticMesh if is ARMATURE type",
+        override={'LIBRARY_OVERRIDABLE'},
         default=False
         )
 
@@ -196,6 +201,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "Only write deforming bones" +
             " (and non-deforming ones when they have deforming children)"
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=True
         )
 
@@ -205,12 +211,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "Only write deforming bones" +
             " (and non-deforming ones when they have deforming children)"
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=False
         )
 
     bpy.types.Object.bfu_custom_export_name = StringProperty(
         name="",
         description="The name of exported file",
+        override={'LIBRARY_OVERRIDABLE'},
         default="MyObjectExportName.fbx"
         )
 
@@ -220,30 +228,35 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.Ue4Lod1 = PointerProperty(
         name="LOD1",
         description="Target objet for level of detail 01",
+        override={'LIBRARY_OVERRIDABLE'},
         type=bpy.types.Object
         )
 
     bpy.types.Object.Ue4Lod2 = PointerProperty(
         name="LOD2",
         description="Target objet for level of detail 02",
+        override={'LIBRARY_OVERRIDABLE'},
         type=bpy.types.Object
         )
 
     bpy.types.Object.Ue4Lod3 = PointerProperty(
         name="LOD3",
         description="Target objet for level of detail 03",
+        override={'LIBRARY_OVERRIDABLE'},
         type=bpy.types.Object
         )
 
     bpy.types.Object.Ue4Lod4 = PointerProperty(
         name="LOD4",
         description="Target objet for level of detail 04",
+        override={'LIBRARY_OVERRIDABLE'},
         type=bpy.types.Object
         )
 
     bpy.types.Object.Ue4Lod5 = PointerProperty(
         name="LOD5",
         description="Target objet for level of detail 05",
+        override={'LIBRARY_OVERRIDABLE'},
         type=bpy.types.Object
         )
 
@@ -253,12 +266,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.CreatePhysicsAsset = BoolProperty(
         name="Create PhysicsAsset",
         description="If checked, create a PhysicsAsset when is imported",
+        override={'LIBRARY_OVERRIDABLE'},
         default=True
         )
 
     bpy.types.Object.bfu_skeleton_search_mode = EnumProperty(
         name="Skeleton search mode",
         description='Specify the skeleton location in Unreal',
+        override={'LIBRARY_OVERRIDABLE'},
         items=[
             ("auto",
                 "Auto",
@@ -282,12 +297,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.bfu_target_skeleton_custom_path = StringProperty(
         name="",
         description="The path of the Skeleton in Unreal. Skeleton not the skeletal mesh.",
+        override={'LIBRARY_OVERRIDABLE'},
         default="ImportedFbx"
         )
 
     bpy.types.Object.bfu_target_skeleton_custom_name = StringProperty(
         name="",
         description="The name of the Skeleton in Unreal. Skeleton not the skeletal mesh.",
+        override={'LIBRARY_OVERRIDABLE'},
         default="SK_MySketonName_Skeleton"
         )
 
@@ -297,6 +314,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "The full reference of the skeleton in Unreal. " +
             "(Use right clic on asset and copy reference.)"
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default="SkeletalMesh'/Game/ImportedFbx/SK_MySketonName_Skeleton.SK_MySketonName_Skeleton'"
         )
 
@@ -306,6 +324,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.UseStaticMeshLODGroup = BoolProperty(
         name="",
         description='',
+        override={'LIBRARY_OVERRIDABLE'},
         default=False
         )
 
@@ -316,6 +335,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             " Default: LevelArchitecture, SmallProp, " +
             "LargeProp, Deco, Vista, Foliage, HighDetail"
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         maxlen=32,
         default="SmallProp"
         )
@@ -323,6 +343,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.StaticMeshLightMapEnum = EnumProperty(
         name="Light map",
         description='Specify how the light map resolution will be generated',
+        override={'LIBRARY_OVERRIDABLE'},
         items=[
             ("Default",
                 "Default",
@@ -342,6 +363,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.customStaticMeshLightMapRes = IntProperty(
         name="Light Map resolution",
         description="This is the resolution of the light map",
+        override={'LIBRARY_OVERRIDABLE'},
         soft_max=2048,
         soft_min=16,
         max=4096,  # Max for unreal
@@ -352,12 +374,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.computedStaticMeshLightMapRes = FloatProperty(
         name="computed Light Map resolution",
         description="This is the computed resolution of the light map",
+        override={'LIBRARY_OVERRIDABLE'},
         default=64.0
         )
 
     bpy.types.Object.staticMeshLightMapSurfaceScale = FloatProperty(
         name="Surface scale",
         description="This is for resacle the surface Area value",
+        override={'LIBRARY_OVERRIDABLE'},
         min=0.00001,  # Min for unreal
         default=64
         )
@@ -375,6 +399,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         description=(
             "If not that will use the object scale."
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=False
         )
 
@@ -383,6 +408,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         description=(
             "If checked, UVs for Lightmap will automatically be generated."
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=True,
         )
 
@@ -392,6 +418,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "If checked, collision will automatically be generated" +
             " (ignored if custom collision is imported or used)."
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=True,
         )
 
@@ -407,6 +434,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "Specify where we should search" +
             " for matching materials when importing"
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         # Vania python:
         # https://docs.unrealengine.com/en-US/PythonAPI/class/MaterialSearchLocation.html?highlight=materialsearchlocation
         # C++ API:
@@ -434,6 +462,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.CollisionTraceFlag = EnumProperty(
         name="Collision Complexity",
         description="Collision Trace Flag",
+        override={'LIBRARY_OVERRIDABLE'},
         # Vania python
         # https://docs.unrealengine.com/en-US/PythonAPI/class/CollisionTraceFlag.html
         # C++ API
@@ -472,6 +501,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.VertexColorImportOption = EnumProperty(
         name="Vertex Color Import Option",
         description="Specify how vertex colors should be imported",
+        override={'LIBRARY_OVERRIDABLE'},
         # Vania python
         # https://docs.unrealengine.com/en-US/PythonAPI/class/VertexColorImportOption.html
         # C++ API
@@ -491,6 +521,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             name="Vertex Override Color",
             subtype='COLOR',
             description="Specify override color in the case that VertexColorImportOption is set to Override",
+            override={'LIBRARY_OVERRIDABLE'},
             default=(1.0, 1.0, 1.0),
             min=0.0,
             max=1.0
@@ -501,6 +532,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.VertexColorToUse = EnumProperty(
         name="Vertex Color to use",
         description="Specify which vertex colors should be imported",
+        override={'LIBRARY_OVERRIDABLE'},
         items=[
             ("FirstIndex", "First Index",
                 "Use the the first index in Object Data -> Vertex Color.", 0),
@@ -517,12 +549,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.VertexColorIndexToUse = IntProperty(
         name="Vertex color index",
         description="Vertex Color index to use.",
+        override={'LIBRARY_OVERRIDABLE'},
         default=0
     )
 
     bpy.types.Object.exportActionEnum = EnumProperty(
         name="Action to export",
         description="Export procedure for actions (Animations and poses)",
+        override={'LIBRARY_OVERRIDABLE'},
         items=[
             ("export_auto",
                 "Export auto",
@@ -556,6 +590,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.active_ObjectAction = IntProperty(
         name="Active Scene Action",
         description="Index of the currently active object action",
+        override={'LIBRARY_OVERRIDABLE'},
         default=0
         )
 
@@ -563,6 +598,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         # properties used with ""export_specific_prefix" on exportActionEnum
         name="Prefix name",
         description="Indicate the prefix of the actions that must be exported",
+        override={'LIBRARY_OVERRIDABLE'},
         maxlen=32,
         default="Example_",
         )
@@ -570,6 +606,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.AnimStartEndTimeEnum = EnumProperty(
         name="Animation start/end time",
         description="Set when animation starts and end",
+        override={'LIBRARY_OVERRIDABLE'},
         items=[
             ("with_keyframes",
                 "Auto",
@@ -595,6 +632,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.StartFramesOffset = IntProperty(
         name="Offset at start frame",
         description="Offset for the start frame.",
+        override={'LIBRARY_OVERRIDABLE'},
         default=0
     )
 
@@ -605,24 +643,28 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             " is recommended for the sequences | 0 is recommended" +
             " for UnrealEngine cycles | -1 is recommended for Sketchfab cycles"
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=0
     )
 
     bpy.types.Object.AnimCustomStartTime = IntProperty(
         name="Custom start time",
         description="Set when animation start",
+        override={'LIBRARY_OVERRIDABLE'},
         default=0
         )
 
     bpy.types.Object.AnimCustomEndTime = IntProperty(
         name="Custom end time",
         description="Set when animation end",
+        override={'LIBRARY_OVERRIDABLE'},
         default=1
         )
 
     bpy.types.Object.SampleAnimForExport = FloatProperty(
         name="Sampling Rate",
         description="How often to evaluate animated values (in frames)",
+        override={'LIBRARY_OVERRIDABLE'},
         min=0.01, max=100.0,
         soft_min=0.01, soft_max=100.0,
         default=1.0,
@@ -634,6 +676,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "How much to simplify baked values" +
             " (0.0 to disable, the higher the more simplified)"
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         # No simplification to up to 10% of current magnitude tolerance.
         min=0.0, max=100.0,
         soft_min=0.0, soft_max=10.0,
@@ -646,12 +689,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "If checked, exports the all animation of the scene with the NLA " +
             "(Don't work with Auto-Rig Pro for the moment.)"
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=False
         )
 
     bpy.types.Object.NLAAnimName = StringProperty(
         name="NLA export name",
         description="Export NLA name (Don't work with Auto-Rig Pro for the moment.)",
+        override={'LIBRARY_OVERRIDABLE'},
         maxlen=64,
         default="NLA_animation",
         subtype='FILE_NAME'
@@ -659,6 +704,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
     bpy.types.Object.bfu_anim_naming_type = EnumProperty(
         name="Naming type",
+        override={'LIBRARY_OVERRIDABLE'},
         items=[
             ('action_name', "Action name", 'Exemple: "Anim_MyAction"'),
             ('include_armature_name',
@@ -675,17 +721,20 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
     bpy.types.Object.bfu_anim_naming_custom = StringProperty(
         name="Export name",
+        override={'LIBRARY_OVERRIDABLE'},
         default='MyCustomName'
         )
 
     bpy.types.Object.exportGlobalScale = FloatProperty(
         name="Global scale",
         description="Scale, change is not recommended with SkeletalMesh.",
+        override={'LIBRARY_OVERRIDABLE'},
         default=1.0
         )
 
     bpy.types.Object.exportAxisForward = EnumProperty(
         name="Axis Forward",
+        override={'LIBRARY_OVERRIDABLE'},
         items=[
             ('X', "X Forward", ""),
             ('Y', "Y Forward", ""),
@@ -699,6 +748,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
     bpy.types.Object.exportAxisUp = EnumProperty(
         name="Axis Up",
+        override={'LIBRARY_OVERRIDABLE'},
         items=[
             ('X', "X Up", ""),
             ('Y', "Y Up", ""),
@@ -712,6 +762,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
     bpy.types.Object.exportPrimaryBaneAxis = EnumProperty(
         name="Primary Axis Bone",
+        override={'LIBRARY_OVERRIDABLE'},
         items=[
             ('X', "X", ""),
             ('Y', "Y", ""),
@@ -725,6 +776,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
     bpy.types.Object.exporSecondaryBoneAxis = EnumProperty(
         name="Secondary Axis Bone",
+        override={'LIBRARY_OVERRIDABLE'},
         items=[
             ('X', "X", ""),
             ('Y', "Y", ""),
@@ -745,6 +797,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             " (This is used so that the origin of the fbx file" +
             " is the same as the mesh in blender)"
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=True
         )
 
@@ -754,6 +807,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "If true use object rotation else use scene rotation." +
             " | If true the mesh will use zero rotation for export."
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=False
         )
 
@@ -767,6 +821,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             " is the same as the mesh in blender)" +
             " Note: Unreal Engine ignore the position of the skeleton at the import."
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=True
         )
 
@@ -776,6 +831,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "(Action animation only) If true use object rotation else use scene rotation." +
             " | If true the mesh will use zero rotation for export."
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=False
         )
 
@@ -789,6 +845,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             " is the same as the mesh in blender)" +
             " Note: Unreal Engine ignore the position of the skeleton at the import."
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=True
         )
 
@@ -798,6 +855,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "(Non linear animation only) If true use object rotation else use scene rotation." +
             " | If true the mesh will use zero rotation for export."
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         default=False
         )
 
@@ -806,6 +864,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         description=(
             "This will add a additional absolute location to the mesh"
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         subtype="TRANSLATION",
         default=(0, 0, 0)
         )
@@ -815,6 +874,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         description=(
             "This will add a additional absolute rotation to the mesh"
             ),
+        override={'LIBRARY_OVERRIDABLE'},
         subtype="EULER",
         default=(0, 0, 0)
         )
@@ -824,6 +884,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Scene.active_CollectionExportList = IntProperty(
         name="Active Collection",
         description="Index of the currently active collection",
+        override={'LIBRARY_OVERRIDABLE'},
         default=0
         )
 
