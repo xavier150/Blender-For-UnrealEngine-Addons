@@ -72,13 +72,13 @@ from bpy.types import (
 
 
 class BFU_OT_ObjExportAction(bpy.types.PropertyGroup):
-    name: StringProperty(name="Action data name", default="Unknown")
-    use: BoolProperty(name="use this action", default=False)
+    name: StringProperty(name="Action data name", default="Unknown", override={'LIBRARY_OVERRIDABLE'})
+    use: BoolProperty(name="use this action", default=False, override={'LIBRARY_OVERRIDABLE'})
 
 
 class BFU_OT_SceneCollectionExport(bpy.types.PropertyGroup):
-    name: StringProperty(name="collection data name", default="Unknown")
-    use: BoolProperty(name="export this collection", default=False)
+    name: StringProperty(name="collection data name", default="Unknown", override={'LIBRARY_OVERRIDABLE'})
+    use: BoolProperty(name="export this collection", default=False, override={'LIBRARY_OVERRIDABLE'})
 
 
 class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
@@ -2902,10 +2902,16 @@ def register():
 
     bpy.utils.register_class(BFU_OT_ObjExportAction)
     bpy.types.Object.exportActionList = CollectionProperty(
-        type=BFU_OT_ObjExportAction)
+        type=BFU_OT_ObjExportAction,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE', 'USE_INSERTION'},
+        )
     bpy.utils.register_class(BFU_OT_SceneCollectionExport)
     bpy.types.Scene.CollectionExportList = CollectionProperty(
-        type=BFU_OT_SceneCollectionExport)
+        type=BFU_OT_SceneCollectionExport,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE', 'USE_INSERTION'},
+        )
 
     bpy.utils.register_class(BFU_OT_FileExport)
     bpy.utils.register_class(BFU_OT_UnrealExportedAsset)
