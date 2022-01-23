@@ -235,30 +235,27 @@ def WriteCameraAnimationTracks(obj):
         def EvaluateTracksAtFrame(self, camera, frame):
             scene.frame_set(frame)
 
-            # Get Transfrom
-            matrix_y = Matrix.Rotation(radians(90.0), 4, 'Y')
-            matrix_x = Matrix.Rotation(radians(-90.0), 4, 'X')
-            matrix = camera.matrix_world @ matrix_y @ matrix_x
-            matrix_rotation_offset = Matrix.Rotation(camera.AdditionalRotationForExport.z, 4, 'Z')
-            loc = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
-            loc += camera.AdditionalLocationForExport
-            r = matrix.to_euler()
-            s = matrix.to_scale()
+            array_transform = EvaluateCameraPositionForUnreal(camera)
+            array_location = array_transform[0]
+            array_rotation = array_transform[1]
+            array_scale = array_transform[2]
 
-            array_location = [loc[0], loc[1]*-1, loc[2]]
-            array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]
-            array_scale = [s[0], s[1], s[2]]
+            # Fix axis flippings
+            if frame-1 in self.transform_track:
+                previous_rotation_z = self.transform_track[frame-1]["rotation_z"]
+                diff = round((array_rotation[2] - previous_rotation_z) / 180.0) * 180.0
+                array_rotation[2] = array_rotation[2] - diff
 
             transform = {}
-            transform["location_x"] = array_location[0]
-            transform["location_y"] = array_location[1]
-            transform["location_z"] = array_location[2]
+            transform["location_x"] = array_location.x
+            transform["location_y"] = array_location.y
+            transform["location_z"] = array_location.z
             transform["rotation_x"] = array_rotation[0]
             transform["rotation_y"] = array_rotation[1]
             transform["rotation_z"] = array_rotation[2]
-            transform["scale_x"] = array_scale[0]
-            transform["scale_y"] = array_scale[1]
-            transform["scale_z"] = array_scale[2]
+            transform["scale_x"] = array_scale.x
+            transform["scale_y"] = array_scale.y
+            transform["scale_z"] = array_scale.z
             self.transform_track[frame] = transform
 
             # Get FocalLength SensorWidth SensorHeight

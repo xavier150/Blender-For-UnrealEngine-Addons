@@ -2025,7 +2025,10 @@ class BFU_PT_BlenderForUnrealDebug(bpy.types.Panel):
             layout.label(text="GetObjExportDir:" + GetObjExportDir(obj, True))
             layout.label(text="GetObjExportName:" + GetObjExportName(obj))
             layout.label(text="GetObjExportFileName:" + GetObjExportFileName(obj))
-            
+            if obj.type == "CAMERA":
+                layout.label(text="CameraPositionForUnreal (Loc):" + str(EvaluateCameraPositionForUnreal(obj)[0]))
+                layout.label(text="CameraPositionForUnreal (Rot):" + str(EvaluateCameraPositionForUnreal(obj)[1]))
+                layout.label(text="CameraPositionForUnreal (Scale):" + str(EvaluateCameraPositionForUnreal(obj)[2]))
 
 
 class BFU_OT_FileExport(bpy.types.PropertyGroup):
@@ -2866,7 +2869,7 @@ classes = (
     BFU_PT_BlenderForUnrealTool.BFU_OT_CopySkeletalSocketButton,
     BFU_PT_BlenderForUnrealObject.BFU_OT_ComputAllLightMap,
 
-    # BFU_PT_BlenderForUnrealDebug, #Unhide for dev
+    # BFU_PT_BlenderForUnrealDebug, # Unhide for dev
 
     BFU_PT_Export,
     BFU_PT_Export.BFU_MT_NomenclaturePresets,
