@@ -4,6 +4,12 @@
 # Use this command in Unreal cmd consol: py "[ScriptLocation]\ImportSequencerScript.py"
 
 
+from unittest import result
+import sys
+import os.path
+import json
+
+
 def CheckTasks():
     import unreal
     if not hasattr(unreal, 'EditorAssetLibrary'):
@@ -12,6 +18,23 @@ def CheckTasks():
         print('Edit > Plugin > Scripting > Editor Scripting Utilities.')
         return False
     return True
+
+
+def JsonLoad(json_file):
+    # Changed in Python 3.9: The keyword argument encoding has been removed.
+    if sys.version_info >= (3, 9):
+        return json.load(json_file)
+    else:
+        return json.load(json_file, encoding="utf8")
+
+
+def JsonLoadFile(json_file_path):
+    if sys.version_info[0] < 3:
+        with open(json_file_path, "r") as json_file:
+            return JsonLoad(json_file)
+    else:
+        with open(json_file_path, "r", encoding="utf8") as json_file:
+            return JsonLoad(json_file)
 
 
 def ImportAllAssets():
@@ -26,8 +49,7 @@ def ImportAllAssets():
     json_data_file = 'ImportAssetData.json'
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
-    with open(os.path.join(dir_path, json_data_file), "r", encoding="utf8") as json_file:
-        import_assets_data = json.load(json_file, encoding="utf8")
+    import_assets_data = JsonLoadFile(os.path.join(dir_path, json_data_file))
 
     unreal_import_location = import_assets_data['unreal_import_location']
     ImportedList = []
@@ -74,9 +96,7 @@ def ImportAllAssets():
         def GetAdditionalData():
             if "additional_tracks_path" in asset_data:
                 if asset_data["additional_tracks_path"] is not None:
-                    with open(asset_data["additional_tracks_path"], "r", encoding="utf8") as json_file:
-                        additional_data = json.load(json_file, encoding="utf8")
-                        return additional_data
+                    return JsonLoadFile(asset_data["additional_tracks_path"])
             return None
 
         additional_data = GetAdditionalData()

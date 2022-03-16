@@ -3,6 +3,10 @@
 # The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python
 # Use this command in Unreal cmd consol: py "[ScriptLocation]\ImportSequencerScript.py"
 
+import sys
+import os.path
+import json
+
 
 def CheckTasks():
     import unreal
@@ -19,6 +23,23 @@ def CheckTasks():
     return True
 
 
+def JsonLoad(json_file):
+    # Changed in Python 3.9: The keyword argument encoding has been removed.
+    if sys.version_info >= (3, 9):
+        return json.load(json_file)
+    else:
+        return json.load(json_file, encoding="utf8")
+
+
+def JsonLoadFile(json_file_path):
+    if sys.version_info[0] < 3:
+        with open(json_file_path, "r") as json_file:
+            return JsonLoad(json_file)
+    else:
+        with open(json_file_path, "r", encoding="utf8") as json_file:
+            return JsonLoad(json_file)
+
+
 def CreateSequencer():
 
     import unreal
@@ -32,12 +53,7 @@ def CreateSequencer():
     json_data_file = 'ImportSequencerData.json'
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
-    if sys.version_info[0] < 3:
-        with open(os.path.join(dir_path, json_data_file), "r") as json_file:
-            sequence_data = json.load(json_file, encoding="utf8")
-    else:
-        with open(os.path.join(dir_path, json_data_file), "r", encoding="utf8") as json_file:
-            sequence_data = json.load(json_file, encoding="utf8")
+    sequence_data = JsonLoadFile(os.path.join(dir_path, json_data_file))
 
     spawnable_camera = sequence_data['spawnable_camera']
     startFrame = sequence_data['startFrame']
@@ -114,13 +130,7 @@ def CreateSequencer():
         # import camera
         print("Start camera import " + str(x+1) + "/" + str(len(sequence_data["cameras"])) + " :" + camera_data["name"])
         # Import camera tracks transform
-
-        if sys.version_info[0] < 3:
-            with open(camera_data["additional_tracks_path"], "r", ) as json_file:
-                camera_tracks = json.load(json_file, encoding="utf8")
-        else:
-            with open(camera_data["additional_tracks_path"], "r", encoding="utf8") as json_file:
-                camera_tracks = json.load(json_file, encoding="utf8")
+        camera_tracks = JsonLoadFile(camera_data["additional_tracks_path"])
 
         # Create spawnable camera and add camera in sequencer
         cine_camera_actor = unreal.EditorLevelLibrary().spawn_actor_from_class(unreal.CineCameraActor, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
