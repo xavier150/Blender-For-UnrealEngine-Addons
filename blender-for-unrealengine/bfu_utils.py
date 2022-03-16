@@ -24,6 +24,9 @@ import math
 import time
 import sys
 
+from math import degrees, radians, tan
+from mathutils import Matrix
+
 if "bpy" in locals():
     import importlib
     if "bfu_basics" in locals():
@@ -893,6 +896,36 @@ def GetActionToExport(obj):
     return TargetActionToExport
 
 
+def EvaluateCameraPositionForUnreal(camera, previous_euler=mathutils.Euler()):
+    # Get Transfrom
+    matrix_y = Matrix.Rotation(radians(90.0), 4, 'Y')
+    matrix_x = Matrix.Rotation(radians(-90.0), 4, 'X')
+    matrix = camera.matrix_world @ matrix_y @ matrix_x
+    matrix_rotation_offset = Matrix.Rotation(camera.AdditionalRotationForExport.z, 4, 'Z')
+    loc = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
+    loc += camera.AdditionalLocationForExport
+    r = matrix.to_euler("XYZ", previous_euler)
+    s = matrix.to_scale()
+
+    loc *= mathutils.Vector([1, -1, 1])
+    array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]  # Roll Pith Yaw XYZ
+    array_transform = [loc, array_rotation, s]
+
+    # array_location = [loc[0], loc[1]*-1, loc[2]]
+    # r = mathutils.Euler([degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1], r.order)  # Roll Pith Yaw XYZ
+    # array_transform = [array_location, r, s]
+
+    return array_transform
+
+
+def EvaluateCameraRotationForBlender(transform):
+    x = transform["rotation_x"]
+    y = transform["rotation_y"]*-1
+    z = transform["rotation_z"]*-1
+    euler = mathutils.Euler([x, y, z], "XYZ")
+    return euler
+
+
 def GetDesiredActionStartEndTime(obj, action):
     # Returns desired action or camera anim start/end time
     # Return start with index 0 and end with index 1
@@ -1062,7 +1095,7 @@ def SelectCollectionObjects(collection):
                 selectObj.select_set(True)
                 selectedObjs.append(selectObj)
 
-    if len(selectedObjs) > 1:
+    if len(selectedObjs) > 0:
         if selectedObjs[0].name in bpy.context.view_layer.objects:
             bpy.context.view_layer.objects.active = selectedObjs[0]
 
@@ -1299,7 +1332,7 @@ def ApplyExportTransform(obj, use_type="Object"):
     obj.scale = saveScale
 
 
-def ApplySkeletalExportScale(armature, rescale, target_animation_data=None):
+def ApplySkeletalExportScale(armature, rescale, target_animation_data=None, is_a_proxy=False):
 
     # This function will rescale the armature and applys the new scale
 
@@ -1322,12 +1355,20 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data=None):
     for Child in GetChilds(armature):
         ChildsLocation.append([Child, Child.location.copy(), Child.matrix_parent_inverse.copy()])
 
+    if is_a_proxy:
+        selection = GetCurrentSelection()
+        bpy.ops.object.select_all(action='DESELECT')
+        armature.select_set(True)
+
     bpy.ops.object.transform_apply(
         location=True,
         scale=True,
         rotation=True,
         properties=True
         )
+
+    if is_a_proxy:
+        SetCurrentSelection(selection)
 
     # Apply armature location
     armature.location = old_location*rescale
@@ -1734,6 +1775,7 @@ def GetArmatureRootBones(obj):
             for bone in obj.data.bones:
                 if bone.use_deform:
                     rootBone = getRootBoneParent(bone)
+                    print(rootBone.name + " --> " + bone.name)
                     if rootBone not in rootBones:
                         rootBones.append(rootBone)
     return rootBones

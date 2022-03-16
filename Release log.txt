@@ -405,6 +405,12 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.3.1 ==
 
+- New potential errors in the check: If you use Parent Bone to parent your mesh to your armature the import will fail.
+- New: Generated import script compatible with Python 3.9 (Unreal Engine Preview 2)
 - Fixed: GetObjExportDir remove ":" in path.
 - Fixed: GetExportFullpath remove ":" in path.
-- New potential errors in the check: If you use Parent Bone to parent your mesh to your armature the import will fail.
+- Fixed: Remove the active object if an exported collection contain a single object.
+- Fixed: With Unit Scale not at 0.01 and Proxy use animation export will fail.
+- Fixed: With Unit Scale not at 0.01 and Proxy ShapeKeysCurve scale is wrong.
+- Fixed: Export camera can do axis flipping.
+- Fixed: Import script doesn't work with Unreal Engine Preview 2.

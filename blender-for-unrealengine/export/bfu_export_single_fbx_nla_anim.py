@@ -123,7 +123,7 @@ def ExportSingleFbxNLAAnim(
 
         oldScale = active.scale.z
 
-        ApplySkeletalExportScale(active, rrf, animation_data)
+        ApplySkeletalExportScale(active, rrf, target_animation_data=animation_data, is_a_proxy=export_as_proxy)
         RescaleAllActionCurve(rrf*oldScale, savedUnitLength/0.01)
 
         for selected in bpy.context.selected_objects:
