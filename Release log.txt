@@ -405,8 +405,9 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.3.1 ==
 
-- New potential errors in the check: If you use Parent Bone to parent your mesh to your armature the import will fail.
 - New: Generated import script compatible with Python 3.9 (Unreal Engine Preview 2)
+- New potential errors in the check: If you use Parent Bone to parent your mesh to your armature the import will fail.
+- You can now use Force Static Mesh and Export Deform Only options with proxy armatures.
 - Fixed: GetObjExportDir remove ":" in path.
 - Fixed: GetExportFullpath remove ":" in path.
 - Fixed: Remove the active object if an exported collection contain a single object.

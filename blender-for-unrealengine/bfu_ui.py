@@ -1340,14 +1340,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                         if GetAssetType(obj) != "SkeletalMesh":
                                             LodProp = layout.column()
                                             LodProp.prop(obj, 'ExportAsLod')
+                            if not obj.ExportAsAlembic:
+                                if obj.type == "ARMATURE":
+                                    AssetType2 = layout.column()
+                                    # Show asset type
+                                    AssetType2.prop(obj, "ForceStaticMesh")
+                                    if GetAssetType(obj) == "SkeletalMesh":
+                                        AssetType2.prop(obj, 'exportDeformOnly')
 
-                                    if obj.type == "ARMATURE":
-                                        AssetType2 = layout.column()
-                                        # Show asset type
-                                        AssetType2.prop(obj, "ForceStaticMesh")
-                                        if GetAssetType(obj) == "SkeletalMesh":
-                                            AssetType2.prop(obj, 'exportDeformOnly')
-
+                            if not GetExportAsProxy(obj):
                                 # exportCustomName
                                 exportCustomName = layout.row()
                                 exportCustomName.prop(obj, "bfu_use_custom_export_name")
