@@ -297,7 +297,7 @@ class NLA_Save():
             new_nla_track.select = nla_track.select
             for strip in nla_track.strips:
                 if strip.action:
-                    new_strip = new_nla_track.strips.new(strip.name, strip.frame_start, strip.action)
+                    new_strip = new_nla_track.strips.new(strip.name, int(strip.frame_start), strip.action)
                     # new_strip.action = strip.action
                     new_strip.action_frame_end = strip.action_frame_end
                     new_strip.action_frame_start = strip.action_frame_start

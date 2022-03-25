@@ -414,4 +414,5 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: With Unit Scale not at 0.01 and Proxy use animation export will fail.
 - Fixed: With Unit Scale not at 0.01 and Proxy ShapeKeysCurve scale is wrong.
 - Fixed: Export camera can do axis flipping.
+- Fixed: NLA export fail when use inter frame.
 - Fixed: Import script doesn't work with Unreal Engine Preview 2.
