@@ -305,7 +305,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         name="",
         description="The name of the Skeleton in Unreal. Skeleton not the skeletal mesh.",
         override={'LIBRARY_OVERRIDABLE'},
-        default="SK_MySketonName_Skeleton"
+        default="SKM_MySketonName_Skeleton"
         )
 
     bpy.types.Object.bfu_target_skeleton_custom_ref = StringProperty(
@@ -315,7 +315,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "(Use right clic on asset and copy reference.)"
             ),
         override={'LIBRARY_OVERRIDABLE'},
-        default="SkeletalMesh'/Game/ImportedFbx/SK_MySketonName_Skeleton.SK_MySketonName_Skeleton'"
+        default="SkeletalMesh'/Game/ImportedFbx/SKM_MySketonName_Skeleton.SKM_MySketonName_Skeleton'"
         )
 
     # StaticMeshImportData
@@ -1823,7 +1823,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
             " to Unreal sockets ready for export (SkeletalMesh)")
 
         def execute(self, context):
-            ConvertedObj = Ue4SubObj_set("SK_Socket")
+            ConvertedObj = Ue4SubObj_set("SKM_Socket")
             if len(ConvertedObj) > 0:
                 self.report(
                     {'INFO'},
@@ -2125,13 +2125,13 @@ class BFU_PT_Export(bpy.types.Panel):
         name="SkeletalMesh Prefix ",
         description="Prefix of SkeletalMesh",
         maxlen=32,
-        default="SK_")
+        default="SKM_")
 
     bpy.types.Scene.alembic_prefix_export_name = bpy.props.StringProperty(
         name="Alembic Prefix ",
         description="Prefix of Alembic (SkeletalMesh in unreal)",
         maxlen=32,
-        default="SK_")
+        default="SKM_")
 
     bpy.types.Scene.anim_prefix_export_name = bpy.props.StringProperty(
         name="AnimationSequence Prefix",
