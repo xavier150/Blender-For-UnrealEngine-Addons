@@ -329,24 +329,25 @@ class NLA_Save():
                     for i, fcurve in enumerate(strip.fcurves):
                         if fcurve:
                             new_fcurve = new_strip.fcurves.find(fcurve.data_path)
-                            new_fcurve.array_index = fcurve.array_index
-                            new_fcurve.color = fcurve.color
-                            new_fcurve.color_mode = fcurve.color_mode
-                            # new_fcurve.data_path = fcurve.data_path
-                            # new_fcurve.driver = fcurve.driver  #TO DO
-                            new_fcurve.extrapolation = fcurve.extrapolation
-                            new_fcurve.group = fcurve.group
-                            new_fcurve.hide = fcurve.hide
-                            # new_fcurve.is_empty = fcurve.is_empty
-                            # new_fcurve.is_valid = fcurve.is_valid
-                            # new_fcurve.keyframe_points = fcurve.keyframe_points
-                            new_fcurve.lock = fcurve.lock
-                            # new_fcurve.modifiers = fcurve.modifiers #TO DO
-                            new_fcurve.mute = fcurve.mute
-                            # new_fcurve.sampled_points = fcurve.sampled_points
-                            new_fcurve.select = fcurve.select
-                            for keyframe_point in fcurve.keyframe_points:
-                                new_fcurve.keyframe_points.insert(keyframe_point.co[0], keyframe_point.co[1])
+                            if new_fcurve:
+                                new_fcurve.array_index = fcurve.array_index
+                                new_fcurve.color = fcurve.color
+                                new_fcurve.color_mode = fcurve.color_mode
+                                # new_fcurve.data_path = fcurve.data_path
+                                # new_fcurve.driver = fcurve.driver  #TO DO
+                                new_fcurve.extrapolation = fcurve.extrapolation
+                                new_fcurve.group = fcurve.group
+                                new_fcurve.hide = fcurve.hide
+                                # new_fcurve.is_empty = fcurve.is_empty
+                                # new_fcurve.is_valid = fcurve.is_valid
+                                # new_fcurve.keyframe_points = fcurve.keyframe_points
+                                new_fcurve.lock = fcurve.lock
+                                # new_fcurve.modifiers = fcurve.modifiers #TO DO
+                                new_fcurve.mute = fcurve.mute
+                                # new_fcurve.sampled_points = fcurve.sampled_points
+                                new_fcurve.select = fcurve.select
+                                for keyframe_point in fcurve.keyframe_points:
+                                    new_fcurve.keyframe_points.insert(keyframe_point.co[0], keyframe_point.co[1])
 
     class Proxy_NLA_Track():
         def __init__(self, nla_track):
