@@ -150,8 +150,14 @@ def WriteExportLog():
     return ExportLog
 
 
-def WriteCameraAnimationTracks(obj):
+def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=None):
     # Write as json file
+
+    scene = bpy.context.scene
+    if target_frame_start is None:
+        target_frame_start = scene.frame_start
+    if target_frame_end is None:
+        target_frame_end = scene.frame_end+1
 
     def getCameraFocusDistance(Camera, Target):
         transA = Camera.matrix_world.copy()
@@ -166,7 +172,7 @@ def WriteCameraAnimationTracks(obj):
         scene = bpy.context.scene
         saveFrame = scene.frame_current  # Save current frame
         keys = []
-        for frame in range(scene.frame_start, scene.frame_end+1):
+        for frame in range(target_frame_start, target_frame_end):
             scene.frame_set(frame)
             v = getCameraFocusDistance(Camera, Target)
             keys.append((frame, v))
@@ -177,7 +183,7 @@ def WriteCameraAnimationTracks(obj):
         scene = bpy.context.scene
         saveFrame = scene.frame_current  # Save current frame
         keys = []
-        for frame in range(scene.frame_start, scene.frame_end+1):
+        for frame in range(target_frame_start, target_frame_end):
             scene.frame_set(frame)
             v = obj.matrix_world*1
             keys.append((frame, v))
@@ -214,11 +220,11 @@ def WriteCameraAnimationTracks(obj):
                     f = obj.animation_data.action.fcurves.find(DataPath)
 
         if f is not None:
-            for frame in range(scene.frame_start, scene.frame_end+1):
+            for frame in range(target_frame_start, target_frame_end):
                 v = f.evaluate(frame)
                 keys.append((frame, v))
             return keys
-        return[(scene.frame_start, DataValue)]
+        return[(target_frame_start, DataValue)]
 
     class CameraDataAtFrame():
 
@@ -329,12 +335,12 @@ def WriteCameraAnimationTracks(obj):
 
     data['Frames'] = []
     data['Frames'].append({
-        'frame_start': scene.frame_start,
-        'frame_end': scene.frame_end,
+        'frame_start': target_frame_start,
+        'frame_end': target_frame_end,
     })
 
     camera_tracks = CameraDataAtFrame()
-    camera_tracks.EvaluateTracks(obj, scene.frame_start, scene.frame_end)
+    camera_tracks.EvaluateTracks(obj, target_frame_start, target_frame_end)
 
     data['Camera transform'] = camera_tracks.transform_track
     data['Camera FocalLength'] = camera_tracks.lens

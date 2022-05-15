@@ -900,6 +900,22 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 )
             return {'FINISHED'}
 
+    class BFU_OT_CopyCameraButton(Operator):
+        bl_label = "Copy Camera for Unreal"
+        bl_idname = "object.copy_camera_command"
+        bl_description = "Copy Camera Script command"
+
+        def execute(self, context):
+            scene = context.scene
+            obj = context.object
+            if obj:
+                if obj.type == "CAMERA":
+                    setWindowsClipboard(GetImportCameraScriptCommand(obj))
+                    self.report(
+                        {'INFO'},
+                        "Camera copied. Paste in Unreal Engine scene for import the camera. (Ctrl+V)")
+            return {'FINISHED'}
+
     class BFU_OT_ComputLightMap(Operator):
         bl_label = "Calculate surface area"
         bl_idname = "object.computlightmap"
@@ -1291,6 +1307,11 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
                     ExportType = layout.column()
                     ExportType.prop(obj, 'ExportEnum')
+                    
+                    if obj.type == "CAMERA":
+                        CameraProp = layout.column()
+                        CameraProp.operator("object.copy_camera_command", icon="COPYDOWN")
+
 
                     if obj.ExportEnum == "export_recursive":
 
@@ -1302,8 +1323,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             )
 
                         if obj.type == "CAMERA":
-                            CameraProp = layout.column()
                             CameraProp.prop(obj, 'bfu_export_fbx_camera')
+                            
 
                         else:
                             ProxyProp = layout.column()
@@ -1850,7 +1871,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     setWindowsClipboard(GetImportSkeletalMeshSocketScriptCommand(obj))
                     self.report(
                         {'INFO'},
-                        "Skeletal sockets copied. Paste in Unreal Engine for import sockets.")
+                        "Skeletal sockets copied. Paste in Unreal Engine Skeletal Mesh assets for import sockets. (Ctrl+V)")
             return {'FINISHED'}
 
     def draw(self, context):
@@ -1982,7 +2003,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
             copy_skeletalsocket_buttons.enabled = False
             copy_skeletalsocket_buttons.operator(
                 "object.copy_skeletalsocket_command",
-                icon='OUTLINER_DATA_EMPTY')
+                icon='COPYDOWN')
             if obj is not None:
                 if obj.type == "ARMATURE":
                     copy_skeletalsocket_buttons.enabled = True
@@ -2852,6 +2873,7 @@ classes = (
     BFU_PT_BlenderForUnrealObject.BFU_MT_ObjectGlobalPropertiesPresets,
     BFU_PT_BlenderForUnrealObject.BFU_OT_AddObjectGlobalPropertiesPreset,
     BFU_PT_BlenderForUnrealObject.BFU_OT_OpenDocumentationPage,
+    BFU_PT_BlenderForUnrealObject.BFU_OT_CopyCameraButton,
     BFU_PT_BlenderForUnrealObject.BFU_OT_ComputLightMap,
     BFU_PT_BlenderForUnrealObject.BFU_UL_ActionExportTarget,
     BFU_PT_BlenderForUnrealObject.BFU_OT_UpdateObjActionListButton,
