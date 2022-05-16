@@ -333,6 +333,13 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
         '3/3': ti('write_text_additional_track_end'),
     }
 
+    data["resolution_x"] = scene.render.resolution_x
+    data["resolution_y"] = scene.render.resolution_y
+    data["desired_screen_ratio"] = scene.render.resolution_x / scene.render.resolution_y
+    data["frame_start"] = target_frame_start
+    data["frame_end"] = target_frame_end
+
+    # Frames is old, need to update and remove.
     data['Frames'] = []
     data['Frames'].append({
         'frame_start': target_frame_start,
