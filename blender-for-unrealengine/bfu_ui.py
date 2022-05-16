@@ -1307,11 +1307,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
                     ExportType = layout.column()
                     ExportType.prop(obj, 'ExportEnum')
-                    
+
                     if obj.type == "CAMERA":
                         CameraProp = layout.column()
                         CameraProp.operator("object.copy_camera_command", icon="COPYDOWN")
-
 
                     if obj.ExportEnum == "export_recursive":
 
@@ -1324,7 +1323,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
                         if obj.type == "CAMERA":
                             CameraProp.prop(obj, 'bfu_export_fbx_camera')
-                            
 
                         else:
                             ProxyProp = layout.column()
