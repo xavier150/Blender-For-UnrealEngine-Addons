@@ -900,17 +900,35 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 )
             return {'FINISHED'}
 
-    class BFU_OT_CopyCameraButton(Operator):
-        bl_label = "Copy Camera for Unreal"
-        bl_idname = "object.copy_camera_command"
-        bl_description = "Copy Camera Script command"
+
+
+    class BFU_OT_CopyRegularCameraButton(Operator):
+        bl_label = "Copy Regular Camera for Unreal"
+        bl_idname = "object.copy_regular_camera_command"
+        bl_description = "Copy Regular Camera Script command"
 
         def execute(self, context):
             scene = context.scene
             obj = context.object
             if obj:
                 if obj.type == "CAMERA":
-                    setWindowsClipboard(GetImportCameraScriptCommand(obj))
+                    setWindowsClipboard(GetImportCameraScriptCommand(obj, False))
+                    self.report(
+                        {'INFO'},
+                        "Camera copied. Paste in Unreal Engine scene for import the camera. (Ctrl+V)")
+            return {'FINISHED'}
+
+    class BFU_OT_CopyCineCameraButton(Operator):
+        bl_label = "Copy Cine Camera for Unreal"
+        bl_idname = "object.copy_cine_camera_command"
+        bl_description = "Copy Cine Camera Script command"
+
+        def execute(self, context):
+            scene = context.scene
+            obj = context.object
+            if obj:
+                if obj.type == "CAMERA":
+                    setWindowsClipboard(GetImportCameraScriptCommand(obj, True))
                     self.report(
                         {'INFO'},
                         "Camera copied. Paste in Unreal Engine scene for import the camera. (Ctrl+V)")
@@ -1310,7 +1328,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
                     if obj.type == "CAMERA":
                         CameraProp = layout.column()
-                        CameraProp.operator("object.copy_camera_command", icon="COPYDOWN")
+                        CameraProp.operator("object.copy_regular_camera_command", icon="COPYDOWN")
+                        CameraProp.operator("object.copy_cine_camera_command", icon="COPYDOWN")
+                        
 
                     if obj.ExportEnum == "export_recursive":
 
@@ -2871,7 +2891,8 @@ classes = (
     BFU_PT_BlenderForUnrealObject.BFU_MT_ObjectGlobalPropertiesPresets,
     BFU_PT_BlenderForUnrealObject.BFU_OT_AddObjectGlobalPropertiesPreset,
     BFU_PT_BlenderForUnrealObject.BFU_OT_OpenDocumentationPage,
-    BFU_PT_BlenderForUnrealObject.BFU_OT_CopyCameraButton,
+    BFU_PT_BlenderForUnrealObject.BFU_OT_CopyRegularCameraButton,
+    BFU_PT_BlenderForUnrealObject.BFU_OT_CopyCineCameraButton,
     BFU_PT_BlenderForUnrealObject.BFU_OT_ComputLightMap,
     BFU_PT_BlenderForUnrealObject.BFU_UL_ActionExportTarget,
     BFU_PT_BlenderForUnrealObject.BFU_OT_UpdateObjActionListButton,

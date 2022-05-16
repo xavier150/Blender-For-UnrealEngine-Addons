@@ -1760,7 +1760,7 @@ def GetImportAssetScriptCommand():
     return 'py "'+fullpath+'"'
 
 
-def GetImportCameraScriptCommand(obj):
+def GetImportCameraScriptCommand(obj, CineCamera=True):
     if obj:
         if obj.type == "CAMERA":
             # Get Camera Data
@@ -1780,26 +1780,39 @@ def GetImportCameraScriptCommand(obj):
             scale_x = transform_track["scale_x"]
             scale_y = transform_track["scale_y"]
             scale_z = transform_track["scale_z"]
+            FieldOfView = data["Camera FieldOfView"][frame_current]
             FocalLength = data["Camera FocalLength"][frame_current]
             SensorWidth = data["Camera SensorWidth"][frame_current]
             SensorHeight = data["Camera SensorHeight"][frame_current]
             FocusDistance = data["Camera FocusDistance"][frame_current]
             Aperture = data["Camera Aperture"][frame_current]
+            CameraName = "BlenderCineCameraActor"
 
             # And I apply the camrta data to the copy paste text.
             t = "Begin Map" + "\n"
             t += "   " + "Begin Level" + "\n"
 
             # Actor
-            t += "      " + "Begin Actor Class=/Script/CinematicCamera.CineCameraActor Name=BlenderCineCameraActor Archetype=/Script/CinematicCamera.CineCameraActor'/Script/CinematicCamera.Default__CineCameraActor'" + "\n"
+            if CineCamera:
+                t += "      " + "Begin Actor Class=/Script/CinematicCamera.CineCameraActor Name="+CameraName+" Archetype=/Script/CinematicCamera.CineCameraActor'/Script/CinematicCamera.Default__CineCameraActor'" + "\n"
+            else:
+                t += "      " + "Begin Actor Class=/Script/Engine.CameraActor Name="+CameraName+" Archetype=/Script/Engine.CameraActor'/Script/Engine.Default__CameraActor'" + "\n"
 
             # Init SceneComponent
-            t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=SceneComponent'/Script/CinematicCamera.Default__CineCameraActor:SceneComponent'" + "\n"
-            t += "         " + "End Object" + "\n"
+            if CineCamera:
+                t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=SceneComponent'/Script/CinematicCamera.Default__CineCameraActor:SceneComponent'" + "\n"
+                t += "         " + "End Object" + "\n"
+            else:
+                t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=SceneComponent'/Script/Engine.Default__CameraActor:SceneComponent'" + "\n"
+                t += "         " + "End Object" + "\n"
 
             # Init CameraComponent
-            t += "         " + "Begin Object Class=/Script/CinematicCamera.CineCameraComponent Name=\"CameraComponent\" Archetype=CineCameraComponent'/Script/CinematicCamera.Default__CineCameraActor:CameraComponent'" + "\n"
-            t += "         " + "End Object" + "\n"
+            if CineCamera:
+                t += "         " + "Begin Object Class=/Script/CinematicCamera.CineCameraComponent Name=\"CameraComponent\" Archetype=CineCameraComponent'/Script/CinematicCamera.Default__CineCameraActor:CameraComponent'" + "\n"
+                t += "         " + "End Object" + "\n"
+            else:
+                t += "         " + "Begin Object Class=/Script/Engine.CameraComponent Name=\"CameraComponent\" Archetype=CameraComponent'/Script/Engine.Default__CameraActor:CameraComponent'" + "\n"
+                t += "         " + "End Object" + "\n"
 
             # SceneComponent
             t += "         " + "Begin Object Name=\"SceneComponent\"" + "\n"
@@ -1815,13 +1828,14 @@ def GetImportCameraScriptCommand(obj):
             t += "            " + "CurrentFocalLength="+str(FocalLength)+")" + "\n"
             t += "            " + "CurrentFocusDistance="+str(FocusDistance)+")" + "\n"
             t += "            " + "CurrentFocusDistance="+str(FocusDistance)+")" + "\n"
+            t += "            " + "FieldOfView="+str(FieldOfView)+")" + "\n"
             t += "         " + "End Object" + "\n"
 
             # Attach
             t += "         " + "CameraComponent=\"CameraComponent\"" + "\n"
             t += "         " + "SceneComponent=\"SceneComponent\"" + "\n"
             t += "         " + "RootComponent=\"SceneComponent\"" + "\n"
-            t += "         " + "ActorLabel=\"BlenderCineCameraActor\"" + "\n"
+            t += "         " + "ActorLabel=\""+CameraName+"\"" + "\n"
 
             # Close
             t += "      " + "End Actor" + "\n"

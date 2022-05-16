@@ -231,6 +231,8 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
         def __init__(self):
             scene = bpy.context.scene
             self.transform_track = {}
+            self.fov = {}
+            self.angle = {}
             self.lens = {}
             self.sensor_width = {}
             self.sensor_height = {}
@@ -270,10 +272,12 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
             transform["scale_z"] = array_scale.z
             self.transform_track[frame] = transform
 
-            # Get FocalLength SensorWidth SensorHeight
+            # Get FOV FocalLength SensorWidth SensorHeight
+            self.angle[frame] = getOneKeysByFcurves(camera, "angle", camera.data.angle, frame)
             self.lens[frame] = getOneKeysByFcurves(camera, "lens", camera.data.lens, frame)
             self.sensor_width[frame] = getOneKeysByFcurves(camera, "sensor_width", camera.data.sensor_width, frame)
             self.sensor_height[frame] = getOneKeysByFcurves(camera, "sensor_height", camera.data.sensor_height, frame)
+            self.fov[frame] = math.degrees(self.angle[frame])
 
             # Get FocusDistance
             scale_length = bpy.context.scene.unit_settings.scale_length
@@ -350,6 +354,8 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
     camera_tracks.EvaluateTracks(obj, target_frame_start, target_frame_end)
 
     data['Camera transform'] = camera_tracks.transform_track
+    data["Camera FieldOfView"] = camera_tracks.fov
+    data["Camera FocalAngle"] = camera_tracks.angle
     data['Camera FocalLength'] = camera_tracks.lens
     data['Camera SensorWidth'] = camera_tracks.sensor_width
     data['Camera SensorHeight'] = camera_tracks.sensor_height
