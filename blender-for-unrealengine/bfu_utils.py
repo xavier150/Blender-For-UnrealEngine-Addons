@@ -1786,6 +1786,7 @@ def GetImportCameraScriptCommand(obj, CineCamera=True):
             SensorHeight = data["Camera SensorHeight"][frame_current]
             FocusDistance = data["Camera FocusDistance"][frame_current]
             Aperture = data["Camera Aperture"][frame_current]
+            AspectRatio = data["desired_screen_ratio"]
             CameraName = "BlenderCineCameraActor"
 
             # And I apply the camrta data to the copy paste text.
@@ -1823,12 +1824,13 @@ def GetImportCameraScriptCommand(obj, CineCamera=True):
 
             # CameraComponent
             t += "         " + "Begin Object Name=\"CameraComponent\"" + "\n"
-            t += "            " + "Filmback=(SensorWidth="+str(SensorWidth)+",SensorHeight="+str(SensorHeight)+")" + "\n"
+            t += "            " + "Filmback=(SensorWidth="+str(SensorWidth)+",SensorHeight="+str(SensorHeight)+", SensorAspectRatio="+str(AspectRatio)+")" + "\n"
             t += "            " + "CurrentAperture="+str(Aperture)+")" + "\n"
             t += "            " + "CurrentFocalLength="+str(FocalLength)+")" + "\n"
             t += "            " + "CurrentFocusDistance="+str(FocusDistance)+")" + "\n"
             t += "            " + "CurrentFocusDistance="+str(FocusDistance)+")" + "\n"
             t += "            " + "FieldOfView="+str(FieldOfView)+")" + "\n"
+            t += "            " + "AspectRatio="+str(AspectRatio)+")" + "\n"
             t += "         " + "End Object" + "\n"
 
             # Attach
