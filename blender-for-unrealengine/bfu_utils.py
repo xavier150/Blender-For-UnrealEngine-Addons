@@ -1787,7 +1787,7 @@ def GetImportCameraScriptCommand(obj, CineCamera=True):
             FocusDistance = data["Camera FocusDistance"][frame_current]
             Aperture = data["Camera Aperture"][frame_current]
             AspectRatio = data["desired_screen_ratio"]
-            CameraName = "BlenderCineCameraActor"
+            CameraName = obj.name
 
             # And I apply the camrta data to the copy paste text.
             t = "Begin Map" + "\n"
