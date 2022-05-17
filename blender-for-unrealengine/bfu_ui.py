@@ -900,22 +900,19 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 )
             return {'FINISHED'}
 
-
-
     class BFU_OT_CopyRegularCameraButton(Operator):
         bl_label = "Copy Regular Camera for Unreal"
         bl_idname = "object.copy_regular_camera_command"
         bl_description = "Copy Regular Camera Script command"
 
         def execute(self, context):
-            scene = context.scene
             obj = context.object
-            if obj:
-                if obj.type == "CAMERA":
-                    setWindowsClipboard(GetImportCameraScriptCommand(obj, False))
-                    self.report(
-                        {'INFO'},
-                        "Camera copied. Paste in Unreal Engine scene for import the camera. (Ctrl+V)")
+            result = GetImportCameraScriptCommand([obj], False)
+            if result[0]:
+                setWindowsClipboard(result[1])
+                self.report({'INFO'}, result[2])
+            else:
+                self.report({'WARNING'}, result[2])
             return {'FINISHED'}
 
     class BFU_OT_CopyCineCameraButton(Operator):
@@ -924,14 +921,13 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         bl_description = "Copy Cine Camera Script command"
 
         def execute(self, context):
-            scene = context.scene
             obj = context.object
-            if obj:
-                if obj.type == "CAMERA":
-                    setWindowsClipboard(GetImportCameraScriptCommand(obj, True))
-                    self.report(
-                        {'INFO'},
-                        "Camera copied. Paste in Unreal Engine scene for import the camera. (Ctrl+V)")
+            result = GetImportCameraScriptCommand([obj], False)
+            if result[0]:
+                setWindowsClipboard(result[1])
+                self.report({'INFO'}, result[2])
+            else:
+                self.report({'WARNING'}, result[2])
             return {'FINISHED'}
 
     class BFU_OT_ComputLightMap(Operator):
@@ -948,21 +944,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 "Compunted Light map: " + str(GetCompuntedLightMap(obj)))
             return {'FINISHED'}
 
-    class BFU_OT_ComputAllLightMap(Operator):
-        bl_label = "Calculate all surface area"
-        bl_idname = "object.computalllightmap"
-        bl_description = (
-            "Click to calculate the surface of the all object in the scene"
-            )
-
-        def execute(self, context):
-            updated = UpdateAreaLightMapList()
-            self.report(
-                {'INFO'},
-                "The light maps of " + str(updated) +
-                " object(s) have been updated."
-                )
-            return {'FINISHED'}
 
     # Animation :
 
@@ -1744,6 +1725,36 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         default="MySocket"
         )
 
+    class BFU_OT_CopyRegularCamerasButton(Operator):
+        bl_label = "Copy Regular Cameras for Unreal"
+        bl_idname = "object.copy_regular_cameras_command"
+        bl_description = "Copy Regular Cameras Script command"
+
+        def execute(self, context):
+            objs = context.selected_objects
+            result = GetImportCameraScriptCommand(objs, False)
+            if result[0]:
+                setWindowsClipboard(result[1])
+                self.report({'INFO'}, result[2])
+            else:
+                self.report({'WARNING'}, result[2])
+            return {'FINISHED'}
+
+    class BFU_OT_CopyCineCamerasButton(Operator):
+        bl_label = "Copy Cine Cameras for Unreal"
+        bl_idname = "object.copy_cine_cameras_command"
+        bl_description = "Copy Cine Cameras Script command"
+
+        def execute(self, context):
+            objs = context.selected_objects
+            result = GetImportCameraScriptCommand(objs, False)
+            if result[0]:
+                setWindowsClipboard(result[1])
+                self.report({'INFO'}, result[2])
+            else:
+                self.report({'WARNING'}, result[2])
+            return {'FINISHED'}
+
     class BFU_OT_ConvertToCollisionButtonBox(Operator):
         bl_label = "Convert to box (UBX)"
         bl_idname = "object.converttoboxcollision"
@@ -1892,6 +1903,22 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                         "Skeletal sockets copied. Paste in Unreal Engine Skeletal Mesh assets for import sockets. (Ctrl+V)")
             return {'FINISHED'}
 
+    class BFU_OT_ComputAllLightMap(Operator):
+        bl_label = "Calculate all surface area"
+        bl_idname = "object.computalllightmap"
+        bl_description = (
+            "Click to calculate the surface of the all object in the scene"
+            )
+
+        def execute(self, context):
+            updated = UpdateAreaLightMapList()
+            self.report(
+                {'INFO'},
+                "The light maps of " + str(updated) +
+                " object(s) have been updated."
+                )
+            return {'FINISHED'}
+
     def draw(self, context):
 
         addon_prefs = GetAddonPrefs()
@@ -1942,6 +1969,12 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                 export_type_cameras.enabled = True
                 export_type_cameras.operator("object.converttoboxcollision", icon='MESH_CUBE')
         '''
+
+        bfu_ui_utils.LayoutSection(layout, "bfu_camera_expanded", "Camera")
+        if scene.bfu_camera_expanded:
+            copy_camera_buttons = layout.column()
+            copy_camera_buttons.operator("object.copy_regular_cameras_command", icon="COPYDOWN")
+            copy_camera_buttons.operator("object.copy_cine_cameras_command", icon="COPYDOWN")
 
         bfu_ui_utils.LayoutSection(layout, "bfu_collision_socket_expanded", "Collision and Socket")
         if scene.bfu_collision_socket_expanded:
@@ -2902,6 +2935,8 @@ classes = (
     BFU_PT_BlenderForUnrealObject.BFU_OT_ShowCollectionToExport,
 
     BFU_PT_BlenderForUnrealTool,
+    BFU_PT_BlenderForUnrealTool.BFU_OT_CopyRegularCamerasButton,
+    BFU_PT_BlenderForUnrealTool.BFU_OT_CopyCineCamerasButton,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToCollisionButtonBox,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToCollisionButtonCapsule,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToCollisionButtonSphere,
@@ -2909,7 +2944,7 @@ classes = (
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToStaticSocketButton,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToSkeletalSocketButton,
     BFU_PT_BlenderForUnrealTool.BFU_OT_CopySkeletalSocketButton,
-    BFU_PT_BlenderForUnrealObject.BFU_OT_ComputAllLightMap,
+    BFU_PT_BlenderForUnrealTool.BFU_OT_ComputAllLightMap,
 
     # BFU_PT_BlenderForUnrealDebug, # Unhide for dev
 

@@ -1760,16 +1760,24 @@ def GetImportAssetScriptCommand():
     return 'py "'+fullpath+'"'
 
 
-def GetImportCameraScriptCommand(obj, CineCamera=True):
-    if obj:
-        if obj.type == "CAMERA":
+def GetImportCameraScriptCommand(objs, CineCamera=True):
+    # Return (success, command)
+
+    success = False
+    command = ""
+    report = ""
+    add_camera_num = 0
+
+    def AddCameraToCommand(camera):
+        if camera.type == "CAMERA":
+            t = ""
             # Get Camera Data
             scene = bpy.context.scene
             frame_current = scene.frame_current
 
             # First I get the camera data.
             # This is a very bad way to do this. I need do a new python file specific to camera with class to get data.
-            data = bfu_write_text.WriteCameraAnimationTracks(obj, frame_current, frame_current)
+            data = bfu_write_text.WriteCameraAnimationTracks(camera, frame_current, frame_current)
             transform_track = data["Camera transform"][frame_current]
             location_x = transform_track["location_x"]
             location_y = transform_track["location_y"]
@@ -1787,11 +1795,7 @@ def GetImportCameraScriptCommand(obj, CineCamera=True):
             FocusDistance = data["Camera FocusDistance"][frame_current]
             Aperture = data["Camera Aperture"][frame_current]
             AspectRatio = data["desired_screen_ratio"]
-            CameraName = obj.name
-
-            # And I apply the camrta data to the copy paste text.
-            t = "Begin Map" + "\n"
-            t += "   " + "Begin Level" + "\n"
+            CameraName = camera.name
 
             # Actor
             if CineCamera:
@@ -1841,13 +1845,37 @@ def GetImportCameraScriptCommand(obj, CineCamera=True):
 
             # Close
             t += "      " + "End Actor" + "\n"
-            t += "   " + "End Level" + "\n"
-            t += "Begin Surface" + "\n"
-            t += "End Surface" + "\n"
-            t += "End Object" + "\n"
             return t
+        return None
 
-    return "Please select a Camera."
+    cameras = []
+    for obj in objs:
+        if obj.type == "CAMERA":
+            cameras.append(obj)
+
+    if len(cameras) == 0:
+        report = "Please select at least one camera."
+        return (success, command, report)
+
+    # And I apply the camrta data to the copy paste text.
+    t = "Begin Map" + "\n"
+    t += "   " + "Begin Level" + "\n"
+    for camera in cameras:
+        add_command = AddCameraToCommand(camera)
+        if add_command:
+            t += add_command
+            add_camera_num += 1
+
+    t += "   " + "End Level" + "\n"
+    t += "Begin Surface" + "\n"
+    t += "End Surface" + "\n"
+    t += "End Object" + "\n"
+
+    success = True
+    command = t
+    report = str(add_camera_num)+" camera(s) copied. Paste in Unreal Engine scene for import the camera. (Ctrl+V)"
+
+    return (success, command, report)
 
 
 def GetImportSkeletalMeshSocketScriptCommand(obj):
