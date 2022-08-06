@@ -2187,17 +2187,23 @@ class BFU_PT_Export(bpy.types.Panel):
     bl_category = "Unreal Engine"
 
     # Prefix
-    bpy.types.Scene.static_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.static_mesh_prefix_export_name = bpy.props.StringProperty(
         name="StaticMesh Prefix",
         description="Prefix of staticMesh",
         maxlen=32,
         default="SM_")
 
-    bpy.types.Scene.skeletal_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.skeletal_mesh_prefix_export_name = bpy.props.StringProperty(
         name="SkeletalMesh Prefix ",
         description="Prefix of SkeletalMesh",
         maxlen=32,
         default="SKM_")
+    
+    bpy.types.Scene.skeleton_prefix_export_name = bpy.props.StringProperty(
+        name="skeleton Prefix ",
+        description="Prefix of skeleton",
+        maxlen=32,
+        default="SK_")
 
     bpy.types.Scene.alembic_prefix_export_name = bpy.props.StringProperty(
         name="Alembic Prefix ",
@@ -2315,8 +2321,9 @@ class BFU_PT_Export(bpy.types.Panel):
 
         # Properties to store in the preset
         preset_values = [
-                            'scene.static_prefix_export_name',
-                            'scene.skeletal_prefix_export_name',
+                            'scene.static_mesh_prefix_export_name',
+                            'scene.skeletal_mesh_prefix_export_name',
+                            'scene.skeleton_prefix_export_name',
                             'scene.alembic_prefix_export_name',
                             'scene.anim_prefix_export_name',
                             'scene.pose_prefix_export_name',
@@ -2774,11 +2781,9 @@ class BFU_PT_Export(bpy.types.Panel):
             # Prefix
             propsPrefix = self.layout.row()
             propsPrefix = propsPrefix.column()
-            propsPrefix.prop(scene, 'static_prefix_export_name', icon='OBJECT_DATA')
-            propsPrefix.prop(
-                scene,
-                'skeletal_prefix_export_name',
-                icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'static_mesh_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'skeletal_mesh_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'skeleton_prefix_export_name', icon='OBJECT_DATA')
             propsPrefix.prop(scene, 'alembic_prefix_export_name', icon='OBJECT_DATA')
             propsPrefix.prop(scene, 'anim_prefix_export_name', icon='OBJECT_DATA')
             propsPrefix.prop(scene, 'pose_prefix_export_name', icon='OBJECT_DATA')

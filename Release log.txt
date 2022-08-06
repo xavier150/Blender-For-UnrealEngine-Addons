@@ -419,3 +419,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: NLA export fail when use inter frame.
 - Fixed: NLA export ignore animated influence on actions.
 - Fixed: Import script doesn't work with Unreal Engine 5.
+- Fixed: Export doesn't work with animation from Proxy Since Blender 3.2.2

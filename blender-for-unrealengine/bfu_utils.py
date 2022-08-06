@@ -1692,7 +1692,7 @@ def GetCollectionExportFileName(collection, fileType=".fbx"):
     # Generate assset file name
 
     scene = bpy.context.scene
-    return scene.static_prefix_export_name+collection+fileType
+    return scene.static_mesh_prefix_export_name+collection+fileType
 
 
 def GetObjExportFileName(obj, fileType=".fbx"):
@@ -1705,9 +1705,9 @@ def GetObjExportFileName(obj, fileType=".fbx"):
     if assetType == "Camera":
         return ValidFilename(scene.camera_prefix_export_name+obj.name+fileType)
     elif assetType == "StaticMesh":
-        return ValidFilename(scene.static_prefix_export_name+obj.name+fileType)
+        return ValidFilename(scene.static_mesh_prefix_export_name+obj.name+fileType)
     elif assetType == "SkeletalMesh":
-        return ValidFilename(scene.skeletal_prefix_export_name+obj.name+fileType)
+        return ValidFilename(scene.skeletal_mesh_prefix_export_name+obj.name+fileType)
     elif assetType == "Alembic":
         return ValidFilename(scene.alembic_prefix_export_name+obj.name+fileType)
     else:
