@@ -7,6 +7,10 @@ Videos:
 - [How Import Blender camera to Unreal Sequencer](https://youtu.be/Xx_9MQu2EkM)
 - [Teaser](https://youtu.be/YLOZZIlhgaM)
 
+Discord:
+If you need help or you want see my sides project you can join the discord!
+-> https://discord.gg/XuYeGCFtxa
+
 # How it works and Documentation
 Working on object packs for Unreal Engine can be tedious with Blender. That's why I created the Add-on: "Blender for UnrealEngine". it simplified the export process from Blender to Unreal Engine by allowing you to export all the assets of a scene at the same time. It even automatically distributes them in a proper tree structure in correlation with the Unreal Engine pipeline!
 
