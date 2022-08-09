@@ -657,9 +657,40 @@ def TryToCorrectPotentialError(errorIndex):
     return "Correct fail"
 
 
+class BFU_OT_UnrealPotentialError(bpy.types.PropertyGroup):
+    type: bpy.props.IntProperty(default=0)  # 0:Info, 1:Warning, 2:Error
+    object: bpy.props.PointerProperty(type=bpy.types.Object)
+    ###
+    selectObjectButton: bpy.props.BoolProperty(default=True)
+    selectVertexButton: bpy.props.BoolProperty(default=False)
+    selectPoseBoneButton: bpy.props.BoolProperty(default=False)
+    ###
+    selectOption: bpy.props.StringProperty(default="None")  # 0:VertexWithZeroWeight
+    itemName: bpy.props.StringProperty(default="None")
+    text: bpy.props.StringProperty(default="Unknown")
+    correctRef: bpy.props.StringProperty(default="None")
+    correctlabel: bpy.props.StringProperty(default="Fix it !")
+    correctDesc: bpy.props.StringProperty(default="Correct target error")
+    docsOcticon: bpy.props.StringProperty(default="None")
+
+
+classes = (
+    BFU_OT_UnrealPotentialError
+)
+
+
 def register():
     from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
+
+    bpy.types.Scene.potentialErrorList = bpy.props.CollectionProperty(type=BFU_OT_UnrealPotentialError)
 
 
 def unregister():
     from bpy.utils import unregister_class
+
+    for cls in reversed(classes):
+        unregister_class(cls)
+
+    del bpy.types.Scene.potentialErrorList

@@ -38,6 +38,7 @@ import addon_utils
 
 from . import bfu_addon_pref
 from . import bfu_ui
+from . import bfu_check_potential_error
 from .export import bfu_export_asset
 from . import bfu_write_text
 from . import bfu_basics
@@ -49,6 +50,8 @@ if "bpy" in locals():
         importlib.reload(bfu_addon_pref)
     if "bfu_ui" in locals():
         importlib.reload(bfu_ui)
+    if "bfu_check_potential_error" in locals():
+        importlib.reload(bfu_check_potential_error)
     if "bfu_export_asset" in locals():
         importlib.reload(bfu_export_asset)
     if "bfu_write_text" in locals():
@@ -63,7 +66,7 @@ bl_info = {
     'description': "This add-ons allows to easily export several "
     "objects at the same time for use in unreal engine 4.",
     'author': 'Loux Xavier (BleuRaven)',
-    'version': (0, 3, 1),
+    'version': (0, 4, 0),
     'blender': (2, 80, 0),
     'location': 'View3D > UI > Unreal Engine 4',
     'warning': '',
@@ -71,23 +74,6 @@ bl_info = {
     'tracker_url': 'https://github.com/xavier150/Blender-For-UnrealEngine-Addons/issues',
     'support': 'COMMUNITY',
     'category': 'Import-Export'}
-
-
-class BFU_OT_UnrealPotentialError(bpy.types.PropertyGroup):
-    type: bpy.props.IntProperty(default=0)  # 0:Info, 1:Warning, 2:Error
-    object: bpy.props.PointerProperty(type=bpy.types.Object)
-    ###
-    selectObjectButton: bpy.props.BoolProperty(default=True)
-    selectVertexButton: bpy.props.BoolProperty(default=False)
-    selectPoseBoneButton: bpy.props.BoolProperty(default=False)
-    ###
-    selectOption: bpy.props.StringProperty(default="None")  # 0:VertexWithZeroWeight
-    itemName: bpy.props.StringProperty(default="None")
-    text: bpy.props.StringProperty(default="Unknown")
-    correctRef: bpy.props.StringProperty(default="None")
-    correctlabel: bpy.props.StringProperty(default="Fix it !")
-    correctDesc: bpy.props.StringProperty(default="Correct target error")
-    docsOcticon: bpy.props.StringProperty(default="None")
 
 
 class BFU_CachedAction(bpy.types.PropertyGroup):
@@ -136,14 +122,12 @@ def register():
             ('SCENE', 'Scene', 'Scene anf global Tab')
             ))
 
-    bpy.utils.register_class(BFU_OT_UnrealPotentialError)
-    bpy.types.Scene.potentialErrorList = bpy.props.CollectionProperty(type=BFU_OT_UnrealPotentialError)
-
     for cls in classes:
         register_class(cls)
 
     bfu_addon_pref.register()
     bfu_ui.register()
+    bfu_check_potential_error.register()
 
 
 def unregister():
@@ -169,11 +153,9 @@ def unregister():
 
     del bpy.types.Scene.bfu_active_object_tab
 
-    bpy.utils.unregister_class(BFU_OT_UnrealPotentialError)
-    del bpy.types.Scene.potentialErrorList
-
-    for cls in classes:
+    for cls in reversed(classes):
         unregister_class(cls)
 
     bfu_addon_pref.unregister()
     bfu_ui.unregister()
+    bfu_check_potential_error.unregister()
