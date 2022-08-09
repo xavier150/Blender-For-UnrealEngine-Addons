@@ -305,7 +305,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         name="",
         description="The name of the Skeleton in Unreal. Skeleton not the skeletal mesh.",
         override={'LIBRARY_OVERRIDABLE'},
-        default="SK_MySketonName_Skeleton"
+        default="SKM_MySketonName_Skeleton"
         )
 
     bpy.types.Object.bfu_target_skeleton_custom_ref = StringProperty(
@@ -315,7 +315,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "(Use right clic on asset and copy reference.)"
             ),
         override={'LIBRARY_OVERRIDABLE'},
-        default="SkeletalMesh'/Game/ImportedFbx/SK_MySketonName_Skeleton.SK_MySketonName_Skeleton'"
+        default="SkeletalMesh'/Game/ImportedFbx/SKM_MySketonName_Skeleton.SKM_MySketonName_Skeleton'"
         )
 
     # StaticMeshImportData
@@ -900,6 +900,36 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 )
             return {'FINISHED'}
 
+    class BFU_OT_CopyRegularCameraButton(Operator):
+        bl_label = "Copy Regular Camera for Unreal"
+        bl_idname = "object.copy_regular_camera_command"
+        bl_description = "Copy Regular Camera Script command"
+
+        def execute(self, context):
+            obj = context.object
+            result = GetImportCameraScriptCommand([obj], False)
+            if result[0]:
+                setWindowsClipboard(result[1])
+                self.report({'INFO'}, result[2])
+            else:
+                self.report({'WARNING'}, result[2])
+            return {'FINISHED'}
+
+    class BFU_OT_CopyCineCameraButton(Operator):
+        bl_label = "Copy Cine Camera for Unreal"
+        bl_idname = "object.copy_cine_camera_command"
+        bl_description = "Copy Cine Camera Script command"
+
+        def execute(self, context):
+            obj = context.object
+            result = GetImportCameraScriptCommand([obj], False)
+            if result[0]:
+                setWindowsClipboard(result[1])
+                self.report({'INFO'}, result[2])
+            else:
+                self.report({'WARNING'}, result[2])
+            return {'FINISHED'}
+
     class BFU_OT_ComputLightMap(Operator):
         bl_label = "Calculate surface area"
         bl_idname = "object.computlightmap"
@@ -914,21 +944,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 "Compunted Light map: " + str(GetCompuntedLightMap(obj)))
             return {'FINISHED'}
 
-    class BFU_OT_ComputAllLightMap(Operator):
-        bl_label = "Calculate all surface area"
-        bl_idname = "object.computalllightmap"
-        bl_description = (
-            "Click to calculate the surface of the all object in the scene"
-            )
-
-        def execute(self, context):
-            updated = UpdateAreaLightMapList()
-            self.report(
-                {'INFO'},
-                "The light maps of " + str(updated) +
-                " object(s) have been updated."
-                )
-            return {'FINISHED'}
 
     # Animation :
 
@@ -1292,6 +1307,12 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     ExportType = layout.column()
                     ExportType.prop(obj, 'ExportEnum')
 
+                    if obj.type == "CAMERA":
+                        CameraProp = layout.column()
+                        CameraProp.operator("object.copy_regular_camera_command", icon="COPYDOWN")
+                        CameraProp.operator("object.copy_cine_camera_command", icon="COPYDOWN")
+                        
+
                     if obj.ExportEnum == "export_recursive":
 
                         folderNameProperty = layout.column()
@@ -1302,7 +1323,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             )
 
                         if obj.type == "CAMERA":
-                            CameraProp = layout.column()
                             CameraProp.prop(obj, 'bfu_export_fbx_camera')
 
                         else:
@@ -1340,14 +1360,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                         if GetAssetType(obj) != "SkeletalMesh":
                                             LodProp = layout.column()
                                             LodProp.prop(obj, 'ExportAsLod')
+                            if not obj.ExportAsAlembic:
+                                if obj.type == "ARMATURE":
+                                    AssetType2 = layout.column()
+                                    # Show asset type
+                                    AssetType2.prop(obj, "ForceStaticMesh")
+                                    if GetAssetType(obj) == "SkeletalMesh":
+                                        AssetType2.prop(obj, 'exportDeformOnly')
 
-                                    if obj.type == "ARMATURE":
-                                        AssetType2 = layout.column()
-                                        # Show asset type
-                                        AssetType2.prop(obj, "ForceStaticMesh")
-                                        if GetAssetType(obj) == "SkeletalMesh":
-                                            AssetType2.prop(obj, 'exportDeformOnly')
-
+                            if not GetExportAsProxy(obj):
                                 # exportCustomName
                                 exportCustomName = layout.row()
                                 exportCustomName.prop(obj, "bfu_use_custom_export_name")
@@ -1704,6 +1725,36 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         default="MySocket"
         )
 
+    class BFU_OT_CopyRegularCamerasButton(Operator):
+        bl_label = "Copy Regular Cameras for Unreal"
+        bl_idname = "object.copy_regular_cameras_command"
+        bl_description = "Copy Regular Cameras Script command"
+
+        def execute(self, context):
+            objs = context.selected_objects
+            result = GetImportCameraScriptCommand(objs, False)
+            if result[0]:
+                setWindowsClipboard(result[1])
+                self.report({'INFO'}, result[2])
+            else:
+                self.report({'WARNING'}, result[2])
+            return {'FINISHED'}
+
+    class BFU_OT_CopyCineCamerasButton(Operator):
+        bl_label = "Copy Cine Cameras for Unreal"
+        bl_idname = "object.copy_cine_cameras_command"
+        bl_description = "Copy Cine Cameras Script command"
+
+        def execute(self, context):
+            objs = context.selected_objects
+            result = GetImportCameraScriptCommand(objs, False)
+            if result[0]:
+                setWindowsClipboard(result[1])
+                self.report({'INFO'}, result[2])
+            else:
+                self.report({'WARNING'}, result[2])
+            return {'FINISHED'}
+
     class BFU_OT_ConvertToCollisionButtonBox(Operator):
         bl_label = "Convert to box (UBX)"
         bl_idname = "object.converttoboxcollision"
@@ -1822,7 +1873,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
             " to Unreal sockets ready for export (SkeletalMesh)")
 
         def execute(self, context):
-            ConvertedObj = Ue4SubObj_set("SK_Socket")
+            ConvertedObj = Ue4SubObj_set("SKM_Socket")
             if len(ConvertedObj) > 0:
                 self.report(
                     {'INFO'},
@@ -1849,7 +1900,23 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     setWindowsClipboard(GetImportSkeletalMeshSocketScriptCommand(obj))
                     self.report(
                         {'INFO'},
-                        "Skeletal sockets copied. Paste in Unreal Engine for import sockets.")
+                        "Skeletal sockets copied. Paste in Unreal Engine Skeletal Mesh assets for import sockets. (Ctrl+V)")
+            return {'FINISHED'}
+
+    class BFU_OT_ComputAllLightMap(Operator):
+        bl_label = "Calculate all surface area"
+        bl_idname = "object.computalllightmap"
+        bl_description = (
+            "Click to calculate the surface of the all object in the scene"
+            )
+
+        def execute(self, context):
+            updated = UpdateAreaLightMapList()
+            self.report(
+                {'INFO'},
+                "The light maps of " + str(updated) +
+                " object(s) have been updated."
+                )
             return {'FINISHED'}
 
     def draw(self, context):
@@ -1902,6 +1969,12 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                 export_type_cameras.enabled = True
                 export_type_cameras.operator("object.converttoboxcollision", icon='MESH_CUBE')
         '''
+
+        bfu_ui_utils.LayoutSection(layout, "bfu_camera_expanded", "Camera")
+        if scene.bfu_camera_expanded:
+            copy_camera_buttons = layout.column()
+            copy_camera_buttons.operator("object.copy_regular_cameras_command", icon="COPYDOWN")
+            copy_camera_buttons.operator("object.copy_cine_cameras_command", icon="COPYDOWN")
 
         bfu_ui_utils.LayoutSection(layout, "bfu_collision_socket_expanded", "Collision and Socket")
         if scene.bfu_collision_socket_expanded:
@@ -1981,7 +2054,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
             copy_skeletalsocket_buttons.enabled = False
             copy_skeletalsocket_buttons.operator(
                 "object.copy_skeletalsocket_command",
-                icon='OUTLINER_DATA_EMPTY')
+                icon='COPYDOWN')
             if obj is not None:
                 if obj.type == "ARMATURE":
                     copy_skeletalsocket_buttons.enabled = True
@@ -2114,15 +2187,21 @@ class BFU_PT_Export(bpy.types.Panel):
     bl_category = "Unreal Engine"
 
     # Prefix
-    bpy.types.Scene.static_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.static_mesh_prefix_export_name = bpy.props.StringProperty(
         name="StaticMesh Prefix",
         description="Prefix of staticMesh",
         maxlen=32,
         default="SM_")
 
-    bpy.types.Scene.skeletal_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.skeletal_mesh_prefix_export_name = bpy.props.StringProperty(
         name="SkeletalMesh Prefix ",
         description="Prefix of SkeletalMesh",
+        maxlen=32,
+        default="SKM_")
+    
+    bpy.types.Scene.skeleton_prefix_export_name = bpy.props.StringProperty(
+        name="skeleton Prefix ",
+        description="Prefix of skeleton",
         maxlen=32,
         default="SK_")
 
@@ -2130,7 +2209,7 @@ class BFU_PT_Export(bpy.types.Panel):
         name="Alembic Prefix ",
         description="Prefix of Alembic (SkeletalMesh in unreal)",
         maxlen=32,
-        default="SK_")
+        default="SKM_")
 
     bpy.types.Scene.anim_prefix_export_name = bpy.props.StringProperty(
         name="AnimationSequence Prefix",
@@ -2242,8 +2321,9 @@ class BFU_PT_Export(bpy.types.Panel):
 
         # Properties to store in the preset
         preset_values = [
-                            'scene.static_prefix_export_name',
-                            'scene.skeletal_prefix_export_name',
+                            'scene.static_mesh_prefix_export_name',
+                            'scene.skeletal_mesh_prefix_export_name',
+                            'scene.skeleton_prefix_export_name',
                             'scene.alembic_prefix_export_name',
                             'scene.anim_prefix_export_name',
                             'scene.pose_prefix_export_name',
@@ -2701,11 +2781,9 @@ class BFU_PT_Export(bpy.types.Panel):
             # Prefix
             propsPrefix = self.layout.row()
             propsPrefix = propsPrefix.column()
-            propsPrefix.prop(scene, 'static_prefix_export_name', icon='OBJECT_DATA')
-            propsPrefix.prop(
-                scene,
-                'skeletal_prefix_export_name',
-                icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'static_mesh_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'skeletal_mesh_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'skeleton_prefix_export_name', icon='OBJECT_DATA')
             propsPrefix.prop(scene, 'alembic_prefix_export_name', icon='OBJECT_DATA')
             propsPrefix.prop(scene, 'anim_prefix_export_name', icon='OBJECT_DATA')
             propsPrefix.prop(scene, 'pose_prefix_export_name', icon='OBJECT_DATA')
@@ -2851,6 +2929,8 @@ classes = (
     BFU_PT_BlenderForUnrealObject.BFU_MT_ObjectGlobalPropertiesPresets,
     BFU_PT_BlenderForUnrealObject.BFU_OT_AddObjectGlobalPropertiesPreset,
     BFU_PT_BlenderForUnrealObject.BFU_OT_OpenDocumentationPage,
+    BFU_PT_BlenderForUnrealObject.BFU_OT_CopyRegularCameraButton,
+    BFU_PT_BlenderForUnrealObject.BFU_OT_CopyCineCameraButton,
     BFU_PT_BlenderForUnrealObject.BFU_OT_ComputLightMap,
     BFU_PT_BlenderForUnrealObject.BFU_UL_ActionExportTarget,
     BFU_PT_BlenderForUnrealObject.BFU_OT_UpdateObjActionListButton,
@@ -2860,6 +2940,8 @@ classes = (
     BFU_PT_BlenderForUnrealObject.BFU_OT_ShowCollectionToExport,
 
     BFU_PT_BlenderForUnrealTool,
+    BFU_PT_BlenderForUnrealTool.BFU_OT_CopyRegularCamerasButton,
+    BFU_PT_BlenderForUnrealTool.BFU_OT_CopyCineCamerasButton,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToCollisionButtonBox,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToCollisionButtonCapsule,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToCollisionButtonSphere,
@@ -2867,7 +2949,7 @@ classes = (
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToStaticSocketButton,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToSkeletalSocketButton,
     BFU_PT_BlenderForUnrealTool.BFU_OT_CopySkeletalSocketButton,
-    BFU_PT_BlenderForUnrealObject.BFU_OT_ComputAllLightMap,
+    BFU_PT_BlenderForUnrealTool.BFU_OT_ComputAllLightMap,
 
     # BFU_PT_BlenderForUnrealDebug, # Unhide for dev
 

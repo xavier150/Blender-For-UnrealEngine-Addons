@@ -368,7 +368,8 @@ def SetVertexColorForUnrealExport(parent):
 
                 obj.data.vertex_colors.active_index = vced.index
                 new_vertex_color = obj.data.vertex_colors.new()
-                new_vertex_color.name = "BFU_VertexColorExportName"
+                if new_vertex_color:
+                    new_vertex_color.name = "BFU_VertexColorExportName"
 
                 number = len(obj.data.vertex_colors) - 1
                 for i in range(number):

@@ -405,12 +405,18 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.3.1 ==
 
+- New: Generated import script compatible with Python 3.9 (Unreal Engine 5)
+- New: Text generator for export camera in Unreal Engine (Copy / Paste).
 - New potential errors in the check: If you use Parent Bone to parent your mesh to your armature the import will fail.
-- New: Generated import script compatible with Python 3.9 (Unreal Engine Preview 2)
+- You can now use Force Static Mesh and Export Deform Only options with proxy armatures.
+- Naming asset updated for Unreal Engine 5.
 - Fixed: GetObjExportDir remove ":" in path.
 - Fixed: GetExportFullpath remove ":" in path.
 - Fixed: Remove the active object if an exported collection contain a single object.
 - Fixed: With Unit Scale not at 0.01 and Proxy use animation export will fail.
 - Fixed: With Unit Scale not at 0.01 and Proxy ShapeKeysCurve scale is wrong.
 - Fixed: Export camera can do axis flipping.
-- Fixed: Import script doesn't work with Unreal Engine Preview 2.
+- Fixed: NLA export fail when use inter frame.
+- Fixed: NLA export ignore animated influence on actions.
+- Fixed: Import script doesn't work with Unreal Engine 5.
+- Fixed: Export doesn't work with animation from Proxy Since Blender 3.2.2

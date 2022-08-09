@@ -29,8 +29,13 @@ from mathutils import Matrix
 
 if "bpy" in locals():
     import importlib
+    if "bfu_write_text" in locals():
+        importlib.reload(bfu_write_text)
     if "bfu_basics" in locals():
         importlib.reload(bfu_basics)
+
+
+from . import bfu_write_text
 from . import bfu_basics
 from .bfu_basics import *
 
@@ -297,7 +302,7 @@ class NLA_Save():
             new_nla_track.select = nla_track.select
             for strip in nla_track.strips:
                 if strip.action:
-                    new_strip = new_nla_track.strips.new(strip.name, strip.frame_start, strip.action)
+                    new_strip = new_nla_track.strips.new(strip.name, int(strip.frame_start), strip.action)
                     # new_strip.action = strip.action
                     new_strip.action_frame_end = strip.action_frame_end
                     new_strip.action_frame_start = strip.action_frame_start
@@ -306,10 +311,18 @@ class NLA_Save():
                     new_strip.blend_out = strip.blend_out
                     new_strip.blend_type = strip.blend_type
                     new_strip.extrapolation = strip.extrapolation
-                    # new_strip.fcurves = strip.fcurves #TO DO
+                    # new_strip.fcurves = strip.fcurves
                     new_strip.frame_end = strip.frame_end
                     # new_strip.frame_start = strip.frame_start
+                    new_strip.use_animated_influence = strip.use_animated_influence
                     new_strip.influence = strip.influence
+                    print(new_strip.influence)
+                    print(new_strip.influence)
+                    print(new_strip.influence)
+                    print(new_strip.influence)
+                    print(new_strip.influence)
+                    print(new_strip.influence)
+                    print(new_strip.influence)
                     # new_strip.modifiers = strip.modifiers #TO DO
                     new_strip.mute = strip.mute
                     # new_strip.name = strip.name
@@ -318,6 +331,28 @@ class NLA_Save():
                     new_strip.select = strip.select
                     new_strip.strip_time = strip.strip_time
                     # new_strip.strips = strip.strips #TO DO
+                    for i, fcurve in enumerate(strip.fcurves):
+                        if fcurve:
+                            new_fcurve = new_strip.fcurves.find(fcurve.data_path)
+                            if new_fcurve:
+                                new_fcurve.array_index = fcurve.array_index
+                                new_fcurve.color = fcurve.color
+                                new_fcurve.color_mode = fcurve.color_mode
+                                # new_fcurve.data_path = fcurve.data_path
+                                # new_fcurve.driver = fcurve.driver  #TO DO
+                                new_fcurve.extrapolation = fcurve.extrapolation
+                                new_fcurve.group = fcurve.group
+                                new_fcurve.hide = fcurve.hide
+                                # new_fcurve.is_empty = fcurve.is_empty
+                                # new_fcurve.is_valid = fcurve.is_valid
+                                # new_fcurve.keyframe_points = fcurve.keyframe_points
+                                new_fcurve.lock = fcurve.lock
+                                # new_fcurve.modifiers = fcurve.modifiers #TO DO
+                                new_fcurve.mute = fcurve.mute
+                                # new_fcurve.sampled_points = fcurve.sampled_points
+                                new_fcurve.select = fcurve.select
+                                for keyframe_point in fcurve.keyframe_points:
+                                    new_fcurve.keyframe_points.insert(keyframe_point.co[0], keyframe_point.co[1])
 
     class Proxy_NLA_Track():
         def __init__(self, nla_track):
@@ -345,6 +380,7 @@ class NLA_Save():
                 self.fcurves = strip.fcurves  # TO DO
                 self.frame_end = strip.frame_end
                 self.frame_start = strip.frame_start
+                self.use_animated_influence = strip.use_animated_influence
                 self.influence = strip.influence
                 self.modifiers = strip.modifiers  # TO DO
                 self.mute = strip.mute
@@ -1656,7 +1692,7 @@ def GetCollectionExportFileName(collection, fileType=".fbx"):
     # Generate assset file name
 
     scene = bpy.context.scene
-    return scene.static_prefix_export_name+collection+fileType
+    return scene.static_mesh_prefix_export_name+collection+fileType
 
 
 def GetObjExportFileName(obj, fileType=".fbx"):
@@ -1669,9 +1705,9 @@ def GetObjExportFileName(obj, fileType=".fbx"):
     if assetType == "Camera":
         return ValidFilename(scene.camera_prefix_export_name+obj.name+fileType)
     elif assetType == "StaticMesh":
-        return ValidFilename(scene.static_prefix_export_name+obj.name+fileType)
+        return ValidFilename(scene.static_mesh_prefix_export_name+obj.name+fileType)
     elif assetType == "SkeletalMesh":
-        return ValidFilename(scene.skeletal_prefix_export_name+obj.name+fileType)
+        return ValidFilename(scene.skeletal_mesh_prefix_export_name+obj.name+fileType)
     elif assetType == "Alembic":
         return ValidFilename(scene.alembic_prefix_export_name+obj.name+fileType)
     else:
@@ -1724,6 +1760,124 @@ def GetImportAssetScriptCommand():
     return 'py "'+fullpath+'"'
 
 
+def GetImportCameraScriptCommand(objs, CineCamera=True):
+    # Return (success, command)
+
+    success = False
+    command = ""
+    report = ""
+    add_camera_num = 0
+
+    def AddCameraToCommand(camera):
+        if camera.type == "CAMERA":
+            t = ""
+            # Get Camera Data
+            scene = bpy.context.scene
+            frame_current = scene.frame_current
+
+            # First I get the camera data.
+            # This is a very bad way to do this. I need do a new python file specific to camera with class to get data.
+            data = bfu_write_text.WriteCameraAnimationTracks(camera, frame_current, frame_current)
+            transform_track = data["Camera transform"][frame_current]
+            location_x = transform_track["location_x"]
+            location_y = transform_track["location_y"]
+            location_z = transform_track["location_z"]
+            rotation_x = transform_track["rotation_x"]
+            rotation_y = transform_track["rotation_y"]
+            rotation_z = transform_track["rotation_z"]
+            scale_x = transform_track["scale_x"]
+            scale_y = transform_track["scale_y"]
+            scale_z = transform_track["scale_z"]
+            FieldOfView = data["Camera FieldOfView"][frame_current]
+            FocalLength = data["Camera FocalLength"][frame_current]
+            SensorWidth = data["Camera SensorWidth"][frame_current]
+            SensorHeight = data["Camera SensorHeight"][frame_current]
+            FocusDistance = data["Camera FocusDistance"][frame_current]
+            Aperture = data["Camera Aperture"][frame_current]
+            AspectRatio = data["desired_screen_ratio"]
+            CameraName = camera.name
+
+            # Actor
+            if CineCamera:
+                t += "      " + "Begin Actor Class=/Script/CinematicCamera.CineCameraActor Name="+CameraName+" Archetype=/Script/CinematicCamera.CineCameraActor'/Script/CinematicCamera.Default__CineCameraActor'" + "\n"
+            else:
+                t += "      " + "Begin Actor Class=/Script/Engine.CameraActor Name="+CameraName+" Archetype=/Script/Engine.CameraActor'/Script/Engine.Default__CameraActor'" + "\n"
+
+            # Init SceneComponent
+            if CineCamera:
+                t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=SceneComponent'/Script/CinematicCamera.Default__CineCameraActor:SceneComponent'" + "\n"
+                t += "         " + "End Object" + "\n"
+            else:
+                t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=SceneComponent'/Script/Engine.Default__CameraActor:SceneComponent'" + "\n"
+                t += "         " + "End Object" + "\n"
+
+            # Init CameraComponent
+            if CineCamera:
+                t += "         " + "Begin Object Class=/Script/CinematicCamera.CineCameraComponent Name=\"CameraComponent\" Archetype=CineCameraComponent'/Script/CinematicCamera.Default__CineCameraActor:CameraComponent'" + "\n"
+                t += "         " + "End Object" + "\n"
+            else:
+                t += "         " + "Begin Object Class=/Script/Engine.CameraComponent Name=\"CameraComponent\" Archetype=CameraComponent'/Script/Engine.Default__CameraActor:CameraComponent'" + "\n"
+                t += "         " + "End Object" + "\n"
+
+            # SceneComponent
+            t += "         " + "Begin Object Name=\"SceneComponent\"" + "\n"
+            t += "            " + "RelativeLocation=(X="+str(location_x)+",Y="+str(location_y)+",Z="+str(location_z)+")" + "\n"
+            t += "            " + "RelativeRotation=(Pitch="+str(rotation_y)+",Yaw="+str(rotation_z)+",Roll="+str(rotation_x)+")" + "\n"
+            t += "            " + "RelativeScale3D=(X="+str(scale_x)+",Y="+str(scale_y)+",Z="+str(scale_z)+")" + "\n"
+            t += "         " + "End Object" + "\n"
+
+            # CameraComponent
+            t += "         " + "Begin Object Name=\"CameraComponent\"" + "\n"
+            t += "            " + "Filmback=(SensorWidth="+str(SensorWidth)+",SensorHeight="+str(SensorHeight)+", SensorAspectRatio="+str(AspectRatio)+")" + "\n"
+            t += "            " + "CurrentAperture="+str(Aperture)+")" + "\n"
+            t += "            " + "CurrentFocalLength="+str(FocalLength)+")" + "\n"
+            t += "            " + "CurrentFocusDistance="+str(FocusDistance)+")" + "\n"
+            t += "            " + "CurrentFocusDistance="+str(FocusDistance)+")" + "\n"
+            t += "            " + "FieldOfView="+str(FieldOfView)+")" + "\n"
+            t += "            " + "AspectRatio="+str(AspectRatio)+")" + "\n"
+            t += "         " + "End Object" + "\n"
+
+            # Attach
+            t += "         " + "CameraComponent=\"CameraComponent\"" + "\n"
+            t += "         " + "SceneComponent=\"SceneComponent\"" + "\n"
+            t += "         " + "RootComponent=\"SceneComponent\"" + "\n"
+            t += "         " + "ActorLabel=\""+CameraName+"\"" + "\n"
+
+            # Close
+            t += "      " + "End Actor" + "\n"
+            return t
+        return None
+
+    cameras = []
+    for obj in objs:
+        if obj.type == "CAMERA":
+            cameras.append(obj)
+
+    if len(cameras) == 0:
+        report = "Please select at least one camera."
+        return (success, command, report)
+
+    # And I apply the camrta data to the copy paste text.
+    t = "Begin Map" + "\n"
+    t += "   " + "Begin Level" + "\n"
+    for camera in cameras:
+        add_command = AddCameraToCommand(camera)
+        if add_command:
+            t += add_command
+            add_camera_num += 1
+
+    t += "   " + "End Level" + "\n"
+    t += "Begin Surface" + "\n"
+    t += "End Surface" + "\n"
+    t += "End Object" + "\n"
+
+    success = True
+    command = t
+    report = str(add_camera_num)+" camera(s) copied. Paste in Unreal Engine scene for import the camera. (Ctrl+V)"
+
+    return (success, command, report)
+
+
 def GetImportSkeletalMeshSocketScriptCommand(obj):
 
     if obj:
@@ -1744,7 +1898,7 @@ def GetImportSkeletalMeshSocketScriptCommand(obj):
                 t += "\t" + 'RelativeScale=' + "(X="+str(s[0])+",Y="+str(s[1])+",Z="+str(s[2])+")" + "\n"
                 t += "End Object" + "\n"
             return t
-    return "Select a Skeletal Mesh"
+    return "Please select an armature."
 
 
 def GetImportSequencerScriptCommand():

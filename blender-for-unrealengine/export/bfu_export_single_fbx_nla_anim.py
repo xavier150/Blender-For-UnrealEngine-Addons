@@ -86,13 +86,17 @@ def ExportSingleFbxNLAAnim(
     export_as_proxy = GetExportAsProxy(obj)
     export_proxy_child = GetExportProxyChild(obj)
 
+
     SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
     asset_name = PrepareExportName(obj, True)
-    duplicate_data = DuplicateSelectForExport()
-    SetDuplicateNameForExport(duplicate_data)
-    MakeSelectVisualReal()
+    if export_as_proxy is False:
+        duplicate_data = DuplicateSelectForExport()
+        SetDuplicateNameForExport(duplicate_data)
+
+    if export_as_proxy is False:
+        MakeSelectVisualReal()
 
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
@@ -103,6 +107,8 @@ def ExportSingleFbxNLAAnim(
     animation_data = AnimationManagment()
     animation_data.SaveAnimationData(obj)
     animation_data.SetAnimationData(active, True)
+    
+
 
     if export_as_proxy:
         ApplyProxyData(active)
@@ -191,11 +197,12 @@ def ExportSingleFbxNLAAnim(
         bpy.context.scene.unit_settings.scale_length = savedUnitLength
         RescaleAllActionCurve(1/(rrf*oldScale), 0.01/savedUnitLength)
 
-    CleanDeleteObjects(bpy.context.selected_objects)
-    for data in duplicate_data.data_to_remove:
-        data.RemoveData()
+    if export_as_proxy is False:
+        CleanDeleteObjects(bpy.context.selected_objects)
+        for data in duplicate_data.data_to_remove:
+            data.RemoveData()
 
-    ResetDuplicateNameAfterExport(duplicate_data)
+        ResetDuplicateNameAfterExport(duplicate_data)
 
     for obj in scene.objects:
         ClearAllBFUTempVars(obj)
