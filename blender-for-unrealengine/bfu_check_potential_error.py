@@ -675,7 +675,7 @@ class BFU_OT_UnrealPotentialError(bpy.types.PropertyGroup):
 
 
 classes = (
-    BFU_OT_UnrealPotentialError
+    BFU_OT_UnrealPotentialError,
 )
 
 
@@ -689,7 +689,6 @@ def register():
 
 def unregister():
     from bpy.utils import unregister_class
-
     for cls in reversed(classes):
         unregister_class(cls)
 
