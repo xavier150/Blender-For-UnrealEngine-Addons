@@ -376,6 +376,15 @@ def SetVertexColorForUnrealExport(parent):
                 vertex_colors.active_index = vced.index
 
 
+def ClearVertexColorForUnrealExport(parent):
+
+    objs = GetExportDesiredChilds(parent)
+    objs.append(parent)
+    for obj in objs:
+        if obj.type == "MESH":
+            if "BFU_PreviousTargetIndex" in obj.data:
+                del obj.data["BFU_PreviousTargetIndex"]
+
 
 def GetShouldRescaleRig(obj):
     # This will return if the rig should be rescale.
