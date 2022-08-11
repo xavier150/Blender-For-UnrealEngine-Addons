@@ -37,6 +37,7 @@ from .. import bfu_basics
 from ..bfu_basics import *
 from .. import bfu_utils
 from ..bfu_utils import *
+from ..bbpl import utils
 
 from . import bfu_export_get_info
 from .bfu_export_get_info import *
@@ -366,14 +367,14 @@ def SetVertexColorForUnrealExport(parent):
             vced = VertexColorExportData(obj, parent)
             if vced.export_type == "REPLACE":
 
-                obj.data.vertex_colors.active_index = vced.index
-                new_vertex_color = obj.data.vertex_colors.new()
-                if new_vertex_color:
-                    new_vertex_color.name = "BFU_VertexColorExportName"
+                vertex_colors = utils.getVertexColors(obj)
 
-                number = len(obj.data.vertex_colors) - 1
-                for i in range(number):
-                    obj.data.vertex_colors.remove(obj.data.vertex_colors[0])
+                # Save the previous target
+                obj.data["BFU_PreviousTargetIndex"] = vertex_colors.active_index
+
+                # Ser the vertex color for export
+                vertex_colors.active_index = vced.index
+
 
 
 def GetShouldRescaleRig(obj):
