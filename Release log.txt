@@ -423,4 +423,5 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.4.0 ==
 
-- Full addon refactoring
+- Full addon refactoring.
+- Fixed: Vertex Colors refactored into generic Color Attributes and not supported by the addon.
