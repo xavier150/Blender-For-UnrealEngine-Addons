@@ -30,11 +30,10 @@ xavierloux.com
 xavierloux.loux@gmail.com
 '''
 
-import os
 import bpy
-import fnmatch
-import time
-import addon_utils
+
+from . import bps
+from . import bbpl
 
 from . import bfu_addon_pref
 from . import bfu_ui
@@ -44,22 +43,25 @@ from . import bfu_write_text
 from . import bfu_basics
 from . import bfu_utils
 
-if "bpy" in locals():
-    import importlib
-    if "bfu_addon_pref" in locals():
-        importlib.reload(bfu_addon_pref)
-    if "bfu_ui" in locals():
-        importlib.reload(bfu_ui)
-    if "bfu_check_potential_error" in locals():
-        importlib.reload(bfu_check_potential_error)
-    if "bfu_export_asset" in locals():
-        importlib.reload(bfu_export_asset)
-    if "bfu_write_text" in locals():
-        importlib.reload(bfu_write_text)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
+import importlib
+if "bps" in locals():
+    importlib.reload(bps)
+if "bbpl" in locals():
+    importlib.reload(bbpl)
+if "bfu_addon_pref" in locals():
+    importlib.reload(bfu_addon_pref)
+if "bfu_ui" in locals():
+    importlib.reload(bfu_ui)
+if "bfu_check_potential_error" in locals():
+    importlib.reload(bfu_check_potential_error)
+if "bfu_export_asset" in locals():
+    importlib.reload(bfu_export_asset)
+if "bfu_write_text" in locals():
+    importlib.reload(bfu_write_text)
+if "bfu_basics" in locals():
+    importlib.reload(bfu_basics)
+if "bfu_utils" in locals():
+    importlib.reload(bfu_utils)
 
 bl_info = {
     'name': 'Blender for UnrealEngine',
