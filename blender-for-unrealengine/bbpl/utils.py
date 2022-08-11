@@ -501,3 +501,26 @@ def getRigCollection(armature, col_type="RIG"):
         return shape_Col
     else:
         print("In getRigCollection() "+col_type+" not found!")
+
+
+def getVertexColors(obj):
+    if bpy.app.version >= (3, 2, 0):
+        return obj.data.color_attributes
+    else:
+        return obj.data.vertex_colors
+
+
+def getVertexColors_RenderColorIndex(obj):
+    if bpy.app.version >= (3, 2, 0):
+        return obj.data.color_attributes.render_color_index
+    else:
+        for index, vertex_color in enumerate(obj.data.vertex_colors):
+            if vertex_color.active_render:
+                return index
+
+
+def getVertexColor_ActiveColorIndex(obj):
+    if bpy.app.version >= (3, 2, 0):
+        return obj.data.color_attributes.active_color_index
+    else:
+        return obj.data.vertex_colors.active_index
