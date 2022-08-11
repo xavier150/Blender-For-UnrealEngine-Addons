@@ -63,12 +63,12 @@ if "bpy" in locals():
 
 bl_info = {
     'name': 'Blender for UnrealEngine',
-    'description': "This add-ons allows to easily export several "
-    "objects at the same time for use in unreal engine 4.",
     'author': 'Loux Xavier (BleuRaven)',
     'version': (0, 4, 0),
     'blender': (2, 80, 0),
-    'location': 'View3D > UI > Unreal Engine 4',
+    'location': 'View3D > UI > Unreal Engine',
+    'description': "This add-ons allows to easily export several "
+    "objects at the same time for use in unreal engine 4.",
     'warning': '',
     "wiki_url": "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki",
     'tracker_url': 'https://github.com/xavier150/Blender-For-UnrealEngine-Addons/issues',
