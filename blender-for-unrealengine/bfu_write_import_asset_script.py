@@ -57,7 +57,7 @@ def WriteImportAssetScript():
         '3/3': ti('write_text_additional_track_end'),
     }
 
-    data['unreal_import_location'] = '/Game/' + scene.unreal_import_location
+    data['unreal_import_location'] = '/' + scene.unreal_import_module + '/' + scene.unreal_import_location
 
     # Import assets
     data['assets'] = []
@@ -81,7 +81,7 @@ def WriteImportAssetScript():
         else:
             relative_import_path = asset.folder_name
 
-        full_import_path = "/Game/" + os.path.join(scene.unreal_import_location, relative_import_path)
+        full_import_path = "/" + scene.unreal_import_module + "/" + os.path.join(scene.unreal_import_location, relative_import_path)
         full_import_path = full_import_path.replace('\\', '/').rstrip('/')
         asset_data["full_import_path"] = full_import_path
 
@@ -107,7 +107,7 @@ def WriteImportAssetScript():
                 SkeletonName = customName+"."+customName
                 SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
 
-                animation_skeleton_path = os.path.join("/Game/", scene.unreal_import_location, SkeletonLoc)
+                animation_skeleton_path = os.path.join("/" + scene.unreal_import_module + "/", scene.unreal_import_location, SkeletonLoc)
                 animation_skeleton_path = animation_skeleton_path.replace('\\', '/')
                 asset_data["animation_skeleton_path"] = animation_skeleton_path
 
@@ -116,14 +116,14 @@ def WriteImportAssetScript():
                 SkeletonName = customName+"."+customName
                 SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
 
-                animation_skeleton_path = os.path.join("/Game/", scene.unreal_import_location, SkeletonLoc)
+                animation_skeleton_path = os.path.join("/" + scene.unreal_import_module + "/", scene.unreal_import_location, SkeletonLoc)
                 animation_skeleton_path = animation_skeleton_path.replace('\\', '/')
                 asset_data["animation_skeleton_path"] = animation_skeleton_path
 
             elif(asset.object.bfu_skeleton_search_mode) == "custom_path_name":
                 customName = ValidUnrealAssetsName(asset.object.bfu_target_skeleton_custom_name)
                 SkeletonName = customName+"."+customName
-                SkeletonLoc = os.path.join("/Game/", asset.object.bfu_target_skeleton_custom_path, SkeletonName)
+                SkeletonLoc = os.path.join("/" + scene.unreal_import_module + "/", asset.object.bfu_target_skeleton_custom_path, SkeletonName)
                 asset_data["animation_skeleton_path"] = SkeletonLoc.replace('\\', '/')
 
             elif(asset.object.bfu_skeleton_search_mode) == "custom_reference":
