@@ -105,7 +105,7 @@ def ImportAllAssets():
             # New import task
             # Property
 
-            if asset_data["type"] == "Animation":
+            if asset_data["type"] == "Animation" or asset_data["type"] == "SkeletalMesh":
                 find_asset = unreal.find_asset(asset_data["animation_skeleton_path"])
                 if isinstance(find_asset, unreal.Skeleton):
                     OriginSkeleton = find_asset
@@ -113,6 +113,10 @@ def ImportAllAssets():
                     OriginSkeleton = find_asset.skeleton
                 else:
                     OriginSkeleton = None
+                if OriginSkeleton:
+                    print("Setting skeleton asset: " + OriginSkeleton.get_full_name())
+                else:
+                    print("Could not find skeleton at the path: " + asset_data["animation_skeleton_path"])
 
             # docs.unrealengine.com/4.26/en-US/PythonAPI/class/AssetImportTask.html
             task = unreal.AssetImportTask()
@@ -211,12 +215,16 @@ def ImportAllAssets():
                 task.get_editor_property('options').set_editor_property('import_type', unreal.AlembicImportType.SKELETAL)
 
             else:
-                if asset_data["type"] == "Animation":
+                if asset_data["type"] == "Animation" or asset_data["type"] == "SkeletalMesh":
                     if OriginSkeleton:
                         task.get_editor_property('options').set_editor_property('Skeleton', OriginSkeleton)
                     else:
-                        ImportFailList.append('Skeleton ' + asset_data["animation_skeleton_path"] + ' Not found for ' + asset_data["name"] + ' asset.')
-                        return
+                        if asset_data["type"] == "Animation":
+                            ImportFailList.append('Skeleton ' + asset_data["animation_skeleton_path"] + ' Not found for ' + asset_data["name"] + ' asset.')
+                            return
+                        else:
+                            print("Skeleton is not set, a new skeleton asset will be created...")
+
 
                 if asset_data["type"] == "StaticMesh":
                     task.get_editor_property('options').set_editor_property('original_import_type', unreal.FBXImportType.FBXIT_STATIC_MESH)
