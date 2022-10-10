@@ -174,6 +174,7 @@ def ImportAllAssets():
             vertex_color_import_option = None
             if additional_data:
 
+                vertex_color_import_option = unreal.VertexColorImportOption.REPLACE  # Default
                 if "vertex_color_import_option" in additional_data:
                     if additional_data["vertex_color_import_option"] == "IGNORE":
                         vertex_color_import_option = unreal.VertexColorImportOption.IGNORE
@@ -182,7 +183,6 @@ def ImportAllAssets():
                     elif additional_data["vertex_color_import_option"] == "REPLACE":
                         vertex_color_import_option = unreal.VertexColorImportOption.REPLACE
 
-                vertex_color_import_option = unreal.VertexColorImportOption.REPLACE  # Default
                 if "vertex_override_color" in additional_data:
                     vertex_override_color = unreal.LinearColor(
                         additional_data["vertex_override_color"][0],
@@ -408,6 +408,16 @@ def ImportAllAssets():
                                 lodTask.destination_path = destination_path
                                 lodTask.automated = True
                                 lodTask.replace_existing = True
+                                
+                                # Set vertex color import settings to replicate base StaticMesh's behaviour
+                                if asset_data["type"] == "Alembic":
+                                    lodTask.set_editor_property('options', unreal.AbcImportSettings())
+                                else:
+                                    lodTask.set_editor_property('options', unreal.FbxImportUI())
+                                
+                                lodTask.get_editor_property('options').static_mesh_import_data.set_editor_property('vertex_color_import_option', vertex_color_import_option)
+                                lodTask.get_editor_property('options').static_mesh_import_data.set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
+                                
                                 print(destination_path, additional_data["LevelOfDetail"][lod_name])
                                 unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([lodTask])
                                 if len(lodTask.imported_object_paths) > 0:
