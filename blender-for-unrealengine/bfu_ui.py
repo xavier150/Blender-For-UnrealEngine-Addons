@@ -208,8 +208,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.bfu_use_custom_export_name = BoolProperty(
         name="Export with custom name.",
         description=(
-            "Only write deforming bones" +
-            " (and non-deforming ones when they have deforming children)"
+            "Specify a custom name for the exported file"
             ),
         override={'LIBRARY_OVERRIDABLE'},
         default=False
@@ -2293,9 +2292,15 @@ class BFU_PT_Export(bpy.types.Panel):
         maxlen=64,
         default="ImportSequencerScript.py")
 
+    bpy.types.Scene.unreal_import_module = bpy.props.StringProperty(
+        name="Unreal import module",
+        description="Which module (plugin name) to import to. Default is 'Game', meaning it will be put into your project's /Content/ folder. If you wish to import to a plugin (for example a plugin called 'myPlugin'), just write its name here",
+        maxlen=512,
+        default='Game')
+
     bpy.types.Scene.unreal_import_location = bpy.props.StringProperty(
         name="Unreal import location",
-        description="Unreal assets import location in /Game/",
+        description="Unreal assets import location inside the module",
         maxlen=512,
         default='ImportedFbx')
 
@@ -2338,6 +2343,7 @@ class BFU_PT_Export(bpy.types.Panel):
                             'scene.file_import_asset_script_name',
                             'scene.file_import_sequencer_script_name',
                             # Import location:
+                            'scene.unreal_import_module',
                             'scene.unreal_import_location',
                         ]
 
@@ -2795,6 +2801,11 @@ class BFU_PT_Export(bpy.types.Panel):
             propsSub.prop(scene, 'anim_subfolder_name', icon='FILE_FOLDER')
 
             if addon_prefs.useGeneratedScripts:
+                unreal_import_module = propsSub.column()
+                unreal_import_module.prop(
+                    scene,
+                    'unreal_import_module',
+                    icon='FILE_FOLDER')
                 unreal_import_location = propsSub.column()
                 unreal_import_location.prop(
                     scene,
