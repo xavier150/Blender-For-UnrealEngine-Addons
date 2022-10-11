@@ -38,3 +38,17 @@ def LayoutSection(layout, PropName, PropLabel):
     tria_icon = "TRIA_DOWN" if expanded else "TRIA_RIGHT"
     layout.row().prop(scene, PropName, icon=tria_icon, icon_only=True, text=PropLabel, emboss=False)
     return expanded
+
+
+def DisplayPropertyFilter(active_tab, active_sub_tab):
+    # Define more easily the options which must be displayed or not
+
+    scene = bpy.context.scene
+    if scene.bfu_active_tab == active_tab == "OBJECT":
+        if scene.bfu_active_object_tab == active_sub_tab or scene.bfu_active_object_tab == "ALL":
+            return True
+
+    if scene.bfu_active_tab == active_tab == "SCENE":
+        if scene.bfu_active_scene_tab == active_sub_tab or scene.bfu_active_scene_tab == "ALL":
+            return True
+    return False
