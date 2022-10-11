@@ -1527,6 +1527,27 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 else:
                     layout.label(text='(No properties to show.)')
 
+            bfu_ui_utils.LayoutSection(layout, "bfu_skeleton_properties_expanded", "Skeleton")
+            if scene.bfu_skeleton_properties_expanded:
+                if addon_prefs.useGeneratedScripts and obj is not None:
+                    if obj.ExportEnum == "export_recursive":
+
+                        # SkeletalMesh prop
+                        if GetAssetType(obj) == "SkeletalMesh":
+                            if not obj.ExportAsLod:
+
+                                Ue4Skeleton = layout.column()
+                                Ue4Skeleton.prop(obj, "bfu_skeleton_search_mode")
+                                if obj.bfu_skeleton_search_mode == "auto":
+                                    pass
+                                if obj.bfu_skeleton_search_mode == "custom_name":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
+                                if obj.bfu_skeleton_search_mode == "custom_path_name":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_path")
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
+                                if obj.bfu_skeleton_search_mode == "custom_reference":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
+
         if scene.bfu_active_object_tab == "ANIM":
             bfu_ui_utils.LayoutSection(layout, "bfu_anim_properties_expanded", "Anim Properties")
             if scene.bfu_anim_properties_expanded:
@@ -1645,27 +1666,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             transformProp2.prop(obj, "RotateNLAToZeroForExport")
                 else:
                     layout.label(text='(No properties to show.)')
-
-            bfu_ui_utils.LayoutSection(layout, "bfu_skeleton_properties_expanded", "Skeleton")
-            if scene.bfu_skeleton_properties_expanded:
-                if addon_prefs.useGeneratedScripts and obj is not None:
-                    if obj.ExportEnum == "export_recursive":
-
-                        # SkeletalMesh prop
-                        if GetAssetType(obj) == "SkeletalMesh":
-                            if not obj.ExportAsLod:
-
-                                Ue4Skeleton = layout.column()
-                                Ue4Skeleton.prop(obj, "bfu_skeleton_search_mode")
-                                if obj.bfu_skeleton_search_mode == "auto":
-                                    pass
-                                if obj.bfu_skeleton_search_mode == "custom_name":
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
-                                if obj.bfu_skeleton_search_mode == "custom_path_name":
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_path")
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
-                                if obj.bfu_skeleton_search_mode == "custom_reference":
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
 
         if scene.bfu_active_object_tab == "SCENE":
 
