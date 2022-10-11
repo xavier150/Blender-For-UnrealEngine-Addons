@@ -1288,9 +1288,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             text='',
             icon='REMOVE'
             ).remove_active = True
-        layout.row().prop(scene, "bfu_active_object_tab", expand=True)
 
-        if scene.bfu_active_object_tab == "PROP":
+        layout.row().prop(scene, "bfu_active_tab", expand=True)
+        if scene.bfu_active_tab == "OBJECT":
+            layout.row().prop(scene, "bfu_active_object_tab", expand=True)
+        if scene.bfu_active_tab == "SCENE":
+            layout.row().prop(scene, "bfu_active_scene_tab", expand=True)
+
+        if bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
             bfu_ui_utils.LayoutSection(layout, "bfu_object_properties_expanded", "Object Properties")
             if scene.bfu_object_properties_expanded:
 
@@ -1310,7 +1315,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         CameraProp = layout.column()
                         CameraProp.operator("object.copy_regular_camera_command", icon="COPYDOWN")
                         CameraProp.operator("object.copy_cine_camera_command", icon="COPYDOWN")
-                        
 
                     if obj.ExportEnum == "export_recursive":
 
@@ -1376,6 +1380,172 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 exportCustomNameText.prop(obj, "bfu_custom_export_name")
                                 exportCustomNameText.enabled = useCustomName
 
+            bfu_ui_utils.LayoutSection(layout, "bfu_object_advanced_properties_expanded", "Object advanced Properties")
+            if scene.bfu_object_advanced_properties_expanded:
+                if obj is not None:
+                    if obj.ExportEnum == "export_recursive":
+
+                        transformProp = layout.column()
+                        if GetAssetType(obj) != "Alembic" and GetAssetType(obj) != "Camera":
+                            transformProp.prop(obj, "MoveToCenterForExport")
+                            transformProp.prop(obj, "RotateToZeroForExport")
+                            transformProp.prop(obj, "AdditionalLocationForExport")
+                            transformProp.prop(obj, "AdditionalRotationForExport")
+                            transformProp.prop(obj, 'exportGlobalScale')
+                        elif GetAssetType(obj) == "Camera":
+                            transformProp.prop(obj, "AdditionalLocationForExport")
+
+                        AxisProperty = layout.column()
+                        AxisProperty.prop(obj, 'exportAxisForward')
+                        AxisProperty.prop(obj, 'exportAxisUp')
+                        if GetAssetType(obj) == "SkeletalMesh":
+                            BoneAxisProperty = layout.column()
+                            BoneAxisProperty.prop(obj, 'exportPrimaryBaneAxis')
+                            BoneAxisProperty.prop(obj, 'exporSecondaryBoneAxis')
+                else:
+                    layout.label(text='(No properties to show.)')
+
+            bfu_ui_utils.LayoutSection(layout, "bfu_skeleton_properties_expanded", "Skeleton")
+            if scene.bfu_skeleton_properties_expanded:
+                if addon_prefs.useGeneratedScripts and obj is not None:
+                    if obj.ExportEnum == "export_recursive":
+
+                        # SkeletalMesh prop
+                        if GetAssetType(obj) == "SkeletalMesh":
+                            if not obj.ExportAsLod:
+
+                                Ue4Skeleton = layout.column()
+                                Ue4Skeleton.prop(obj, "bfu_skeleton_search_mode")
+                                if obj.bfu_skeleton_search_mode == "auto":
+                                    pass
+                                if obj.bfu_skeleton_search_mode == "custom_name":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
+                                if obj.bfu_skeleton_search_mode == "custom_path_name":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_path")
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
+                                if obj.bfu_skeleton_search_mode == "custom_reference":
+                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
+
+        if bfu_ui_utils.DisplayPropertyFilter("OBJECT", "ANIM"):
+            bfu_ui_utils.LayoutSection(layout, "bfu_anim_properties_expanded", "Anim Properties")
+            if scene.bfu_anim_properties_expanded:
+                if obj is not None:
+                    if obj.ExportEnum == "export_recursive" and not obj.ExportAsLod:
+                        if (GetAssetType(obj) == "SkeletalMesh" or
+                                GetAssetType(obj) == "Camera" or
+                                GetAssetType(obj) == "Alembic"):
+
+                            # Action time
+                            if obj.type != "CAMERA" and obj.bfu_export_procedure != "auto-rig-pro":
+                                ActionTimeProperty = layout.column()
+                                ActionTimeProperty.prop(obj, 'AnimStartEndTimeEnum')
+                                if obj.AnimStartEndTimeEnum == "with_customframes":
+                                    OfsetTime = ActionTimeProperty.row()
+                                    OfsetTime.prop(obj, 'AnimCustomStartTime')
+                                    OfsetTime.prop(obj, 'AnimCustomEndTime')
+                                if obj.AnimStartEndTimeEnum != "with_customframes":
+                                    OfsetTime = ActionTimeProperty.row()
+                                    OfsetTime.prop(obj, 'StartFramesOffset')
+                                    OfsetTime.prop(obj, 'EndFramesOffset')
+
+                            else:
+                                layout.label(
+                                    text=(
+                                        "Note: animation start/end use scene frames" +
+                                        " with the camera for the sequencer.")
+                                    )
+
+                            if GetAssetType(obj) == "SkeletalMesh":
+                                # Action list
+                                ActionListProperty = layout.column()
+                                ActionListProperty.prop(obj, 'exportActionEnum')
+                                if obj.exportActionEnum == "export_specific_list":
+                                    ActionListProperty.template_list(
+                                        # type and unique id
+                                        "BFU_UL_ActionExportTarget", "",
+                                        # pointer to the CollectionProperty
+                                        obj, "exportActionList",
+                                        # pointer to the active identifier
+                                        obj, "active_ObjectAction",
+                                        maxrows=5,
+                                        rows=5
+                                    )
+                                    ActionListProperty.operator(
+                                        "object.updateobjactionlist",
+                                        icon='RECOVER_LAST')
+                                if obj.exportActionEnum == "export_specific_prefix":
+                                    ActionListProperty.prop(obj, 'PrefixNameToExport')
+
+                            # NLA
+                            if GetAssetType(obj) == "SkeletalMesh":
+                                NLAAnim = layout.row()
+                                NLAAnim.prop(obj, 'ExportNLA')
+                                NLAAnimChild = NLAAnim.column()
+                                NLAAnimChild.enabled = obj.ExportNLA
+                                NLAAnimChild.prop(obj, 'NLAAnimName')
+                                if obj.bfu_export_procedure == "auto-rig-pro":
+                                    NLAAnim.enabled = False
+                                    NLAAnimChild.enabled = False
+
+                            # Animation fbx properties
+                            if (GetAssetType(obj) != "Alembic"):
+                                propsFbx = layout.row()
+                                if obj.bfu_export_procedure != "auto-rig-pro":
+                                    propsFbx.prop(obj, 'SampleAnimForExport')
+                                propsFbx.prop(obj, 'SimplifyAnimForExport')
+
+                            # Nomenclature
+                            if GetAssetType(obj) == "SkeletalMesh":
+                                export_anim_naming = layout.column()
+                                export_anim_naming.prop(obj, 'bfu_anim_naming_type')
+                                if obj.bfu_anim_naming_type == "include_custom_name":
+                                    export_anim_naming_text = export_anim_naming.column()
+                                    export_anim_naming_text.prop(obj, 'bfu_anim_naming_custom')
+
+                            # Armature export action list feedback
+                            if GetAssetType(obj) == "SkeletalMesh":
+                                layout.label(
+                                    text='Note: The Action with only one' +
+                                    ' frame are exported like Pose.')
+                                ArmaturePropertyInfo = (
+                                    layout.row().box().split(factor=0.75)
+                                    )
+                                ActionNum = len(GetActionToExport(obj))
+                                if obj.ExportNLA:
+                                    ActionNum += 1
+                                actionFeedback = (
+                                    str(ActionNum) +
+                                    " Animation(s) will be exported with this object.")
+                                ArmaturePropertyInfo.label(
+                                    text=actionFeedback,
+                                    icon='INFO')
+                                ArmaturePropertyInfo.operator("object.showobjaction")
+
+                        else:
+                            layout.label(
+                                text='(This assets is not a SkeletalMesh or Camera)')
+                    else:
+                        layout.label(text='(No properties to show.)')
+                else:
+                    layout.label(text='(No properties to show.)')
+
+            bfu_ui_utils.LayoutSection(layout, "bfu_anim_advanced_properties_expanded", "Animation advanced Properties")
+            if scene.bfu_anim_advanced_properties_expanded:
+                if obj is not None:
+                    if obj.ExportEnum == "export_recursive":
+
+                        if GetAssetType(obj) != "Alembic":
+                            transformProp = layout.column()
+                            transformProp.prop(obj, "MoveActionToCenterForExport")
+                            transformProp.prop(obj, "RotateActionToZeroForExport")
+
+                            transformProp2 = layout.column()
+                            transformProp2.prop(obj, "MoveNLAToCenterForExport")
+                            transformProp2.prop(obj, "RotateNLAToZeroForExport")
+                else:
+                    layout.label(text='(No properties to show.)')
+
+        if bfu_ui_utils.DisplayPropertyFilter("OBJECT", "MISC"):
             bfu_ui_utils.LayoutSection(layout, "bfu_object_lod_properties_expanded", "Lod")
             if scene.bfu_object_lod_properties_expanded:
                 if addon_prefs.useGeneratedScripts and obj is not None:
@@ -1502,173 +1672,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             GenerateLightmapUVs = layout.row()
                             GenerateLightmapUVs.prop(obj, 'GenerateLightmapUVs')
 
-            bfu_ui_utils.LayoutSection(layout, "bfu_object_advanced_properties_expanded", "Object advanced Properties")
-            if scene.bfu_object_advanced_properties_expanded:
-                if obj is not None:
-                    if obj.ExportEnum == "export_recursive":
-
-                        transformProp = layout.column()
-                        if GetAssetType(obj) != "Alembic" and GetAssetType(obj) != "Camera":
-                            transformProp.prop(obj, "MoveToCenterForExport")
-                            transformProp.prop(obj, "RotateToZeroForExport")
-                            transformProp.prop(obj, "AdditionalLocationForExport")
-                            transformProp.prop(obj, "AdditionalRotationForExport")
-                            transformProp.prop(obj, 'exportGlobalScale')
-                        elif GetAssetType(obj) == "Camera":
-                            transformProp.prop(obj, "AdditionalLocationForExport")
-
-                        AxisProperty = layout.column()
-                        AxisProperty.prop(obj, 'exportAxisForward')
-                        AxisProperty.prop(obj, 'exportAxisUp')
-                        if GetAssetType(obj) == "SkeletalMesh":
-                            BoneAxisProperty = layout.column()
-                            BoneAxisProperty.prop(obj, 'exportPrimaryBaneAxis')
-                            BoneAxisProperty.prop(obj, 'exporSecondaryBoneAxis')
-                else:
-                    layout.label(text='(No properties to show.)')
-
-            bfu_ui_utils.LayoutSection(layout, "bfu_skeleton_properties_expanded", "Skeleton")
-            if scene.bfu_skeleton_properties_expanded:
-                if addon_prefs.useGeneratedScripts and obj is not None:
-                    if obj.ExportEnum == "export_recursive":
-
-                        # SkeletalMesh prop
-                        if GetAssetType(obj) == "SkeletalMesh":
-                            if not obj.ExportAsLod:
-
-                                Ue4Skeleton = layout.column()
-                                Ue4Skeleton.prop(obj, "bfu_skeleton_search_mode")
-                                if obj.bfu_skeleton_search_mode == "auto":
-                                    pass
-                                if obj.bfu_skeleton_search_mode == "custom_name":
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
-                                if obj.bfu_skeleton_search_mode == "custom_path_name":
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_path")
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
-                                if obj.bfu_skeleton_search_mode == "custom_reference":
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
-
-        if scene.bfu_active_object_tab == "ANIM":
-            bfu_ui_utils.LayoutSection(layout, "bfu_anim_properties_expanded", "Anim Properties")
-            if scene.bfu_anim_properties_expanded:
-                if obj is not None:
-                    if obj.ExportEnum == "export_recursive" and not obj.ExportAsLod:
-                        if (GetAssetType(obj) == "SkeletalMesh" or
-                                GetAssetType(obj) == "Camera" or
-                                GetAssetType(obj) == "Alembic"):
-
-                            # Action time
-                            if obj.type != "CAMERA" and obj.bfu_export_procedure != "auto-rig-pro":
-                                ActionTimeProperty = layout.column()
-                                ActionTimeProperty.prop(obj, 'AnimStartEndTimeEnum')
-                                if obj.AnimStartEndTimeEnum == "with_customframes":
-                                    OfsetTime = ActionTimeProperty.row()
-                                    OfsetTime.prop(obj, 'AnimCustomStartTime')
-                                    OfsetTime.prop(obj, 'AnimCustomEndTime')
-                                if obj.AnimStartEndTimeEnum != "with_customframes":
-                                    OfsetTime = ActionTimeProperty.row()
-                                    OfsetTime.prop(obj, 'StartFramesOffset')
-                                    OfsetTime.prop(obj, 'EndFramesOffset')
-
-                            else:
-                                layout.label(
-                                    text=(
-                                        "Note: animation start/end use scene frames" +
-                                        " with the camera for the sequencer.")
-                                    )
-
-                            if GetAssetType(obj) == "SkeletalMesh":
-                                # Action list
-                                ActionListProperty = layout.column()
-                                ActionListProperty.prop(obj, 'exportActionEnum')
-                                if obj.exportActionEnum == "export_specific_list":
-                                    ActionListProperty.template_list(
-                                        # type and unique id
-                                        "BFU_UL_ActionExportTarget", "",
-                                        # pointer to the CollectionProperty
-                                        obj, "exportActionList",
-                                        # pointer to the active identifier
-                                        obj, "active_ObjectAction",
-                                        maxrows=5,
-                                        rows=5
-                                    )
-                                    ActionListProperty.operator(
-                                        "object.updateobjactionlist",
-                                        icon='RECOVER_LAST')
-                                if obj.exportActionEnum == "export_specific_prefix":
-                                    ActionListProperty.prop(obj, 'PrefixNameToExport')
-
-                            # NLA
-                            if GetAssetType(obj) == "SkeletalMesh":
-                                NLAAnim = layout.row()
-                                NLAAnim.prop(obj, 'ExportNLA')
-                                NLAAnimChild = NLAAnim.column()
-                                NLAAnimChild.enabled = obj.ExportNLA
-                                NLAAnimChild.prop(obj, 'NLAAnimName')
-                                if obj.bfu_export_procedure == "auto-rig-pro":
-                                    NLAAnim.enabled = False
-                                    NLAAnimChild.enabled = False
-
-                            # Animation fbx properties
-                            if (GetAssetType(obj) != "Alembic"):
-                                propsFbx = layout.row()
-                                if obj.bfu_export_procedure != "auto-rig-pro":
-                                    propsFbx.prop(obj, 'SampleAnimForExport')
-                                propsFbx.prop(obj, 'SimplifyAnimForExport')
-
-                            # Nomenclature
-                            if GetAssetType(obj) == "SkeletalMesh":
-                                export_anim_naming = layout.column()
-                                export_anim_naming.prop(obj, 'bfu_anim_naming_type')
-                                if obj.bfu_anim_naming_type == "include_custom_name":
-                                    export_anim_naming_text = export_anim_naming.column()
-                                    export_anim_naming_text.prop(obj, 'bfu_anim_naming_custom')
-
-                            # Armature export action list feedback
-                            if GetAssetType(obj) == "SkeletalMesh":
-                                layout.label(
-                                    text='Note: The Action with only one' +
-                                    ' frame are exported like Pose.')
-                                ArmaturePropertyInfo = (
-                                    layout.row().box().split(factor=0.75)
-                                    )
-                                ActionNum = len(GetActionToExport(obj))
-                                if obj.ExportNLA:
-                                    ActionNum += 1
-                                actionFeedback = (
-                                    str(ActionNum) +
-                                    " Animation(s) will be exported with this object.")
-                                ArmaturePropertyInfo.label(
-                                    text=actionFeedback,
-                                    icon='INFO')
-                                ArmaturePropertyInfo.operator("object.showobjaction")
-
-                        else:
-                            layout.label(
-                                text='(This assets is not a SkeletalMesh or Camera)')
-                    else:
-                        layout.label(text='(No properties to show.)')
-                else:
-                    layout.label(text='(No properties to show.)')
-
-            bfu_ui_utils.LayoutSection(layout, "bfu_anim_advanced_properties_expanded", "Animation advanced Properties")
-            if scene.bfu_anim_advanced_properties_expanded:
-                if obj is not None:
-                    if obj.ExportEnum == "export_recursive":
-
-                        if GetAssetType(obj) != "Alembic":
-                            transformProp = layout.column()
-                            transformProp.prop(obj, "MoveActionToCenterForExport")
-                            transformProp.prop(obj, "RotateActionToZeroForExport")
-
-                            transformProp2 = layout.column()
-                            transformProp2.prop(obj, "MoveNLAToCenterForExport")
-                            transformProp2.prop(obj, "RotateNLAToZeroForExport")
-                else:
-                    layout.label(text='(No properties to show.)')
-
-        if scene.bfu_active_object_tab == "SCENE":
-
+        if bfu_ui_utils.DisplayPropertyFilter("SCENE", "GENERAL"):
             bfu_ui_utils.LayoutSection(layout, "bfu_collection_properties_expanded", "Collection Properties")
             if scene.bfu_collection_properties_expanded:
                 collectionListProperty = layout.column()

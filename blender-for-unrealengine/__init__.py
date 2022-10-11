@@ -117,12 +117,28 @@ def register():
     bpy.types.Scene.bfu_export_process_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_script_tool_expanded = bpy.props.BoolProperty()
 
+    bpy.types.Scene.bfu_active_tab = bpy.props.EnumProperty(
+        items=(
+            ('OBJECT', 'Object', 'Object tab.'),
+            ('SCENE', 'Scene', 'Scene and world tab.')
+            )
+        )
+
     bpy.types.Scene.bfu_active_object_tab = bpy.props.EnumProperty(
         items=(
-            ('PROP', 'Object', 'Object Tab'),
-            ('ANIM', 'Animations', 'Animations Tab'),
-            ('SCENE', 'Scene', 'Scene anf global Tab')
-            ))
+            ('GENERAL', 'General', 'General object tab.'),
+            ('ANIM', 'Animations', 'Animations tab.'),
+            ('MISC', 'Misc', 'Misc tab.'),
+            ('ALL', 'All', 'All tabs.')
+            )
+        )
+
+    bpy.types.Scene.bfu_active_scene_tab = bpy.props.EnumProperty(
+        items=(
+            ('GENERAL', 'Scene', 'General scene tab'),
+            ('ALL', 'All', 'All tabs.')
+            )
+        )
 
     for cls in classes:
         register_class(cls)
