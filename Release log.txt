@@ -423,6 +423,7 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.4.0 ==
 
+- UI updated
 - Full addon refactoring.
 - New: Ability to specify skeleton asset for SkeletalMesh (Thanks Salireths!)
 - New: Ability to specify which module (plugin) to import to (Thanks Salireths!)
