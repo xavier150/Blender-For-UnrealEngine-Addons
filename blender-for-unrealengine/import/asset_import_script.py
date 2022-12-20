@@ -12,11 +12,12 @@ import json
 
 def CheckTasks():
     import unreal
-    if not hasattr(unreal, 'EditorAssetLibrary'):
-        print('--------------------------------------------------')
-        print('WARNING: Editor Scripting Utilities should be activated.')
-        print('Edit > Plugin > Scripting > Editor Scripting Utilities.')
-        return False
+    if GetUnrealVersion() >= 4.20: # TO DO: EditorAssetLibrary was added in witch version exactly?
+        if not hasattr(unreal, 'EditorAssetLibrary'):
+            print('--------------------------------------------------')
+            print('WARNING: Editor Scripting Utilities should be activated.')
+            print('Edit > Plugin > Scripting > Editor Scripting Utilities.')
+            return False
     return True
 
 
@@ -36,6 +37,10 @@ def JsonLoadFile(json_file_path):
         with open(json_file_path, "r", encoding="utf8") as json_file:
             return JsonLoad(json_file)
 
+def GetUnrealVersion():
+    version = unreal.SystemLibrary.get_engine_version().split(".")
+    float_version = int(version[0]) + float(float(version[1])/100)
+    return float_version
 
 def ImportAllAssets():
 
