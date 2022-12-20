@@ -103,7 +103,7 @@ def WriteImportAssetScript():
 
         if GetIsAnimation(asset.asset_type) or asset.asset_type == "SkeletalMesh":
             if(asset.object.bfu_skeleton_search_mode) == "auto":
-                customName = scene.skeletal_mesh_prefix_export_name+ValidUnrealAssetsName(asset.skeleton_name)+"_Skeleton"
+                customName = scene.skeleton_prefix_export_name+ValidUnrealAssetsName(asset.skeleton_name)+"_Skeleton"
                 SkeletonName = customName+"."+customName
                 SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
 
