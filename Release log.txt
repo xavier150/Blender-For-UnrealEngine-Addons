@@ -427,7 +427,11 @@ It is now possible to force the duration of an animation according to the scene 
 - Full addon refactoring.
 - New: Ability to specify skeleton asset for SkeletalMesh (Thanks Salireths!)
 - New: Ability to specify which module (plugin) to import to (Thanks Salireths!)
+- New Support for Export UV From Geometry Node.
+- Correct Extrem UV Scale option moved from addon pref to object settings.
 - Fixed: Vertex Colors refactored into generic Color Attributes and not supported by the addon.
 - Fixed: Vertex color would always be replaced. (Thanks ScrapIO!)
 - Fixed: Mesh LODs would not have their vertex color information imported. (Thanks ScrapIO!)
+- Fixed: Mesh LODs would not have their vertex color information imported. (Thanks ScrapIO!)
+- Fixed: Skeleton detection use the wrong prefix
 

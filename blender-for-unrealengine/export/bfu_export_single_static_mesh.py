@@ -98,12 +98,13 @@ def ExportSingleStaticMesh(
 
     MakeSelectVisualReal()
 
-    CorrectExtremUVAtExport()
-
     ApplyNeededModifierToSelect()
 
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
+
+    ConvertGeometryNodeAttributeToUV(active)
+    CorrectExtremUVAtExport(active)
 
     ApplyExportTransform(active, "Object")
 

@@ -411,6 +411,31 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=True,
         )
 
+    bpy.types.Object.convert_geometry_node_attribute_to_uv = BoolProperty(
+        name="Convert Attribute To Uv",
+        description=(
+            "convert target geometry node attribute to UV when found."
+            ),
+        override={'LIBRARY_OVERRIDABLE'},
+        default=True,
+        )
+
+    bpy.types.Object.convert_geometry_node_attribute_to_uv_name = StringProperty(
+        name="Attribute name",
+        description=(
+            "Name of the Attribute to convert"
+            ),
+        override={'LIBRARY_OVERRIDABLE'},
+        default="UVMap",
+        )
+
+    bpy.types.Object.correct_extrem_uv_scale = BoolProperty(
+        name=(ti('correct_extrem_uv_scale_name')),
+        description=(tt('correct_extrem_uv_scale_desc')),
+        override={'LIBRARY_OVERRIDABLE'},
+        default=False,
+        )
+
     bpy.types.Object.AutoGenerateCollision = BoolProperty(
         name="Auto Generate Collision",
         description=(
@@ -1127,6 +1152,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.staticMeshLightMapRoundPowerOfTwo',
                             'obj.useStaticMeshLightMapWorldScale',
                             'obj.GenerateLightmapUVs',
+                            'obj.convert_geometry_node_attribute_to_uv',
+                            'obj.convert_geometry_node_attribute_to_uv_name',
+                            'obj.correct_extrem_uv_scale',
                             'obj.AutoGenerateCollision',
                             'obj.MaterialSearchLocation',
                             'obj.CollisionTraceFlag',
@@ -1651,7 +1679,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 if addon_prefs.useGeneratedScripts and obj is not None:
                     if obj.ExportEnum == "export_recursive":
 
-                        # UV
+                        # Light map
                         if GetAssetType(obj) == "StaticMesh":
                             StaticMeshLightMapRes = layout.box()
                             StaticMeshLightMapRes.prop(obj, 'StaticMeshLightMapEnum')
@@ -1671,6 +1699,23 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 StaticMeshLightMapRes.label(text='Compunted light map: ' + CompuntedLightMap)
                             GenerateLightmapUVs = layout.row()
                             GenerateLightmapUVs.prop(obj, 'GenerateLightmapUVs')
+
+            bfu_ui_utils.LayoutSection(layout, "bfu_object_uv_map_properties_expanded", "UV map")
+            if scene.bfu_object_uv_map_properties_expanded:
+                if obj.ExportEnum == "export_recursive":
+                    # Geometry Node Uv
+                    convert_geometry_node_attribute_to_uv = layout.column()
+                    convert_geometry_node_attribute_to_uv_use = convert_geometry_node_attribute_to_uv.row()
+                    convert_geometry_node_attribute_to_uv_use.prop(obj, 'convert_geometry_node_attribute_to_uv')
+                    bfu_ui_utils.DocPageButton(convert_geometry_node_attribute_to_uv_use, "wiki/UV-Maps", "Geometry Node UV")
+                    convert_geometry_node_attribute_to_uv_name = convert_geometry_node_attribute_to_uv.row()
+                    convert_geometry_node_attribute_to_uv_name.prop(obj, 'convert_geometry_node_attribute_to_uv_name')
+                    convert_geometry_node_attribute_to_uv_name.enabled = obj.convert_geometry_node_attribute_to_uv
+
+                    # Extreme UV Scale
+                    correct_extrem_uv_scale = layout.row()
+                    correct_extrem_uv_scale.prop(obj, 'correct_extrem_uv_scale')
+                    bfu_ui_utils.DocPageButton(correct_extrem_uv_scale, "wiki/UV-Maps", "Extreme UV Scale")
 
         if bfu_ui_utils.DisplayPropertyFilter("SCENE", "GENERAL"):
             bfu_ui_utils.LayoutSection(layout, "bfu_collection_properties_expanded", "Collection Properties")

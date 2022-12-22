@@ -77,12 +77,6 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         default=False,
         )
 
-    correctExtremUVScale: BoolProperty(
-        name=(ti('correct_extrem_uv_scale_name')),
-        description=(tt('correct_extrem_uv_scale_desc')),
-        default=False,
-        )
-
     add_skeleton_root_bone: BoolProperty(
         name=(ti('add_skeleton_root_bone_name')),
         description=(tt('add_skeleton_root_bone_desc')),
@@ -223,20 +217,6 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         default=True,
         )
 
-    class BFU_OT_OpenDocumentationTargetPage(Operator):
-        bl_label = "Documentation"
-        bl_idname = "object.open_documentation_target_page"
-        bl_description = "Clic for open documentation page on GitHub"
-        octicon: StringProperty(default="")
-
-        def execute(self, context):
-            os.system(
-                "start \"\" " +
-                "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/How-export-assets" +
-                "#"+self.octicon
-                )
-            return {'FINISHED'}
-
     class BFU_OT_NewReleaseInfo(Operator):
         bl_label = "Open last release page"
         bl_idname = "object.new_release_info"
@@ -252,26 +232,6 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
     def draw(self, context):
         layout = self.layout
 
-        def LabelWithDocButton(tagetlayout, name, docOcticon):
-            newRow = tagetlayout.row()
-            newRow.label(text=name)
-            docOperator = newRow.operator(
-                "object.open_documentation_target_page",
-                icon="HELP",
-                text=""
-                )
-            docOperator.octicon = docOcticon
-
-        def PropWithDocButton(tagetlayout, name, docOcticon):
-            newRow = tagetlayout.row()
-            newRow.prop(self, name)
-            docOperator = newRow.operator(
-                "object.open_documentation_target_page",
-                icon="HELP",
-                text=""
-                )
-            docOperator.octicon = docOcticon
-
         boxColumn = layout.column().split(
             factor=0.5
             )
@@ -280,7 +240,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 
         rootBone = ColumnLeft.box()
 
-        LabelWithDocButton(
+        bfu_ui_utils.LabelWithDocButton(
             rootBone,
             "SKELETON & ROOT BONE",
             "skeleton--root-bone"
@@ -295,7 +255,6 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         newRigScale.enabled = self.rescaleFullRigAtExport == "custom_rescale"
         newRigScale.prop(self, "newRigScale")
 
-        ColumnLeft.label(text='')
         socket = ColumnLeft.box()
         socket.label(text='SOCKET')
         socket.prop(self, "staticSocketsAdd90X")
@@ -305,7 +264,6 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         socketRescale.prop(self, "staticSocketsImportedSize")
         socketRescale.prop(self, "skeletalSocketsImportedSize")
 
-        ColumnLeft.label(text='')
         camera = ColumnLeft.box()
         camera.label(text='CAMERA')
         camera.prop(self, "exportCameraAsFBX")
@@ -314,19 +272,16 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         data = ColumnRight.box()
         data.label(text='DATA')
         data.prop(self, "ignoreNLAForAction")
-        PropWithDocButton(data, "correctExtremUVScale", "uv")
         data.prop(self, "bakeArmatureAction")
         data.prop(self, "exportWithCustomProps")
         data.prop(self, "exportWithMetaData")
         data.prop(self, "revertExportPath")
 
-        ColumnRight.label(text='')
         other = ColumnRight.box()
         other.label(text='OTHER')
         other.prop(self, "collisionColor")
         other.prop(self, "notifyUnitScalePotentialError")
 
-        ColumnRight.label(text='')
         script = ColumnRight.box()
         script.label(text='IMPORT SCRIPT')
         script.prop(self, "useGeneratedScripts")
@@ -339,7 +294,6 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 classes = (
     BFU_AP_AddonPreferences,
     BFU_AP_AddonPreferences.BFU_OT_NewReleaseInfo,
-    BFU_AP_AddonPreferences.BFU_OT_OpenDocumentationTargetPage,
 )
 
 

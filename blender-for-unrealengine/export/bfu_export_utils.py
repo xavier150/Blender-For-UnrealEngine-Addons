@@ -342,10 +342,54 @@ def TryToApplyCustomSocketsName(obj):
 
 # UVs
 
+def ConvertGeometryNodeAttributeToUV(obj):
+    #obj = bpy.context.active_object  # Debug
+    if obj.convert_geometry_node_attribute_to_uv:
+        attrib_name = obj.convert_geometry_node_attribute_to_uv_name
 
-def CorrectExtremUVAtExport():
-    addon_prefs = GetAddonPrefs()
-    if addon_prefs.correctExtremUVScale:
+        # I need apply the geometry modifier for get the data.
+        # So this work only when I do export of the duplicate object.
+
+        if attrib_name in obj.data.attributes:
+        #if True == True:
+
+            # TO DO: Bad why to do this. Need found a way to convert without using ops.
+            obj.data.attributes.active = obj.data.attributes[attrib_name]
+            SavedSelect = GetCurrentSelection()
+            SelectSpecificObject(obj)
+            bpy.ops.geometry.attribute_convert(mode='UV_MAP')
+            SetCurrentSelection(SavedSelect)
+            return
+
+            attrib = obj.data.attributes[attrib_name]
+
+            new_uv = obj.data.uv_layers.new(name=attrib_name)
+            uv_coords = []
+
+            attrib.data  # TO DO: I don't understand why attrib.data is egal at zero just after a duplicate.
+            print('XXXXXXXXXXXX')
+            print(type(attrib.data))
+            print('XXXXXXXXXXXX')
+            print(dir(attrib.data))
+            print('XXXXXXXXXXXX')
+            print(attrib.data.values())
+            print('XXXXXXXXXXXX')
+            attrib_data = []
+            attrib.data.foreach_get('vector', attrib_data)
+            print(attrib_data)
+
+            for fv_attrib in attrib.data:  # FloatVectorAttributeValue
+                uv_coords.append(fv_attrib.vector)
+            uv_coords.append(attrib.data[0])
+
+            for loop in obj.data.loops:
+                new_uv.data[loop.index].uv[0] = uv_coords[loop.index][0]
+                new_uv.data[loop.index].uv[1] = uv_coords[loop.index][1]
+
+            obj.data.attributes.remove(attrib_name)
+
+def CorrectExtremUVAtExport(obj):
+    if obj.correct_extrem_uv_scale:
         SavedSelect = GetCurrentSelection()
         if GoToMeshEditMode():
             CorrectExtremeUV(2)

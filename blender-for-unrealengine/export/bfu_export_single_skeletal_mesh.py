@@ -100,12 +100,14 @@ def ExportSingleSkeletalMesh(
     duplicate_data = DuplicateSelectForExport()
     SetDuplicateNameForExport(duplicate_data)
 
-    CorrectExtremUVAtExport()
-
     ApplyNeededModifierToSelect()
 
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
+
+    ConvertGeometryNodeAttributeToUV(active)
+    CorrectExtremUVAtExport(active)
+
     export_procedure = active.bfu_export_procedure
 
     if export_as_proxy:

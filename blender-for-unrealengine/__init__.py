@@ -35,6 +35,7 @@ import bpy
 from . import bps
 from . import bbpl
 
+from . import bfu_ui_utils
 from . import bfu_addon_pref
 from . import bfu_ui
 from . import bfu_check_potential_error
@@ -48,6 +49,8 @@ if "bps" in locals():
     importlib.reload(bps)
 if "bbpl" in locals():
     importlib.reload(bbpl)
+if "bfu_ui_utils" in locals():
+    importlib.reload(bfu_ui_utils)
 if "bfu_addon_pref" in locals():
     importlib.reload(bfu_addon_pref)
 if "bfu_ui" in locals():
@@ -103,6 +106,7 @@ def register():
     bpy.types.Scene.bfu_object_material_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_object_vertex_color_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_object_light_map_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_uv_map_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_anim_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_anim_advanced_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_skeleton_properties_expanded = bpy.props.BoolProperty()
@@ -143,6 +147,7 @@ def register():
     for cls in classes:
         register_class(cls)
 
+    bfu_ui_utils.register()
     bfu_addon_pref.register()
     bfu_ui.register()
     bfu_check_potential_error.register()
@@ -174,6 +179,7 @@ def unregister():
     for cls in reversed(classes):
         unregister_class(cls)
 
+    bfu_ui_utils.unregister()
     bfu_addon_pref.unregister()
     bfu_ui.unregister()
     bfu_check_potential_error.unregister()
