@@ -57,5 +57,4 @@ If you would like to have the Add-on enabled every time you start Blender, click
 [Download and installation](#download-and-installation)
 
 # Other
-About the next versions: [Trello page](https://trello.com/b/32g729kg/blender-for-unreal-engine-addon) </br>
 If you want support: [Support page](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Support) <3
