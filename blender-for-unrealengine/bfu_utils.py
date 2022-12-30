@@ -1788,6 +1788,8 @@ def GetImportCameraScriptCommand(objs, CineCamera=True):
             scale_x = transform_track["scale_x"]
             scale_y = transform_track["scale_y"]
             scale_z = transform_track["scale_z"]
+            NearClippingPlane = data["Camera NearClippingPlane"][frame_current]
+            FarClippingPlane = data["Camera FarClippingPlane"][frame_current]
             FieldOfView = data["Camera FieldOfView"][frame_current]
             FocalLength = data["Camera FocalLength"][frame_current]
             SensorWidth = data["Camera SensorWidth"][frame_current]
@@ -1805,18 +1807,18 @@ def GetImportCameraScriptCommand(objs, CineCamera=True):
 
             # Init SceneComponent
             if CineCamera:
-                t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=SceneComponent'/Script/CinematicCamera.Default__CineCameraActor:SceneComponent'" + "\n"
+                t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=/Script/Engine.SceneComponent'/Script/CinematicCamera.Default__CineCameraActor:SceneComponent'" + "\n"
                 t += "         " + "End Object" + "\n"
             else:
-                t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=SceneComponent'/Script/Engine.Default__CameraActor:SceneComponent'" + "\n"
+                t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=/Script/Engine.SceneComponent'/Script/Engine.Default__CameraActor:SceneComponent'" + "\n"
                 t += "         " + "End Object" + "\n"
 
             # Init CameraComponent
             if CineCamera:
-                t += "         " + "Begin Object Class=/Script/CinematicCamera.CineCameraComponent Name=\"CameraComponent\" Archetype=CineCameraComponent'/Script/CinematicCamera.Default__CineCameraActor:CameraComponent'" + "\n"
+                t += "         " + "Begin Object Class=/Script/CinematicCamera.CineCameraComponent Name=\"CameraComponent\" Archetype=/Script/CinematicCamera.CineCameraComponent'/Script/CinematicCamera.Default__CineCameraActor:CameraComponent'" + "\n"
                 t += "         " + "End Object" + "\n"
             else:
-                t += "         " + "Begin Object Class=/Script/Engine.CameraComponent Name=\"CameraComponent\" Archetype=CameraComponent'/Script/Engine.Default__CameraActor:CameraComponent'" + "\n"
+                t += "         " + "Begin Object Class=/Script/Engine.CameraComponent Name=\"CameraComponent\" Archetype=/Script/Engine.CameraComponent'/Script/Engine.Default__CameraActor:CameraComponent'" + "\n"
                 t += "         " + "End Object" + "\n"
 
             # SceneComponent
@@ -1833,6 +1835,7 @@ def GetImportCameraScriptCommand(objs, CineCamera=True):
             t += "            " + "CurrentFocalLength="+str(FocalLength)+")" + "\n"
             t += "            " + "CurrentFocusDistance="+str(FocusDistance)+")" + "\n"
             t += "            " + "CurrentFocusDistance="+str(FocusDistance)+")" + "\n"
+            t += "            " + "CustomNearClippingPlane="+str(NearClippingPlane)+")" + "\n"
             t += "            " + "FieldOfView="+str(FieldOfView)+")" + "\n"
             t += "            " + "AspectRatio="+str(AspectRatio)+")" + "\n"
             t += "         " + "End Object" + "\n"
@@ -1873,7 +1876,10 @@ def GetImportCameraScriptCommand(objs, CineCamera=True):
 
     success = True
     command = t
-    report = str(add_camera_num)+" camera(s) copied. Paste in Unreal Engine scene for import the camera. (Ctrl+V)"
+    if CineCamera:
+        report = str(add_camera_num)+" Cine camera(s) copied. Paste in Unreal Engine scene for import the camera. (Ctrl+V)"
+    else:
+        report = str(add_camera_num)+" Regular camera(s) copied. Paste in Unreal Engine scene for import the camera. (Ctrl+V)"
 
     return (success, command, report)
 

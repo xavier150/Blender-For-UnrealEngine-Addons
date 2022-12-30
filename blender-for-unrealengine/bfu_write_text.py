@@ -231,6 +231,8 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
         def __init__(self):
             scene = bpy.context.scene
             self.transform_track = {}
+            self.near_clipping_plane = {}
+            self.far_clipping_plane = {}
             self.fov = {}
             self.angle = {}
             self.lens = {}
@@ -278,6 +280,10 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
             self.sensor_width[frame] = getOneKeysByFcurves(camera, "sensor_width", camera.data.sensor_width, frame)
             self.sensor_height[frame] = getOneKeysByFcurves(camera, "sensor_height", camera.data.sensor_height, frame)
             self.fov[frame] = math.degrees(self.angle[frame])
+
+            # Get Clip
+            self.near_clipping_plane[frame] = getOneKeysByFcurves(camera, "clip_start", camera.data.clip_start, frame) * 100 * bpy.context.scene.unit_settings.scale_length
+            self.far_clipping_plane[frame] = getOneKeysByFcurves(camera, "clip_end", camera.data.clip_end, frame) * 100 * bpy.context.scene.unit_settings.scale_length
 
             # Get FocusDistance
             scale_length = bpy.context.scene.unit_settings.scale_length
@@ -354,6 +360,8 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
     camera_tracks.EvaluateTracks(obj, target_frame_start, target_frame_end)
 
     data['Camera transform'] = camera_tracks.transform_track
+    data["Camera NearClippingPlane"] = camera_tracks.near_clipping_plane
+    data["Camera FarClippingPlane"] = camera_tracks.far_clipping_plane
     data["Camera FieldOfView"] = camera_tracks.fov
     data["Camera FocalAngle"] = camera_tracks.angle
     data['Camera FocalLength'] = camera_tracks.lens

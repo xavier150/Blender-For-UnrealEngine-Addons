@@ -429,9 +429,10 @@ It is now possible to force the duration of an animation according to the scene 
 - New: Ability to specify which module (plugin) to import to (Thanks Salireths!)
 - New Support for Export UV From Geometry Node.
 - Correct Extrem UV Scale option moved from addon pref to object settings.
+- Add support NearClippingPlane in camera export.
 - Fixed: Vertex Colors refactored into generic Color Attributes and not supported by the addon.
 - Fixed: Vertex color would always be replaced. (Thanks ScrapIO!)
 - Fixed: Mesh LODs would not have their vertex color information imported. (Thanks ScrapIO!)
-- Fixed: Mesh LODs would not have their vertex color information imported. (Thanks ScrapIO!)
-- Fixed: Skeleton detection use the wrong prefix
-
+- Fixed: Skeleton detection use the wrong prefix.
+- Fixed: Copy Cine Cameras return Regular Cameras.
+- Fixed: Crashes when pasting via the "Copy Regular Cameras"

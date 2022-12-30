@@ -946,7 +946,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
         def execute(self, context):
             obj = context.object
-            result = GetImportCameraScriptCommand([obj], False)
+            result = GetImportCameraScriptCommand([obj], True)
             if result[0]:
                 setWindowsClipboard(result[1])
                 self.report({'INFO'}, result[2])
@@ -1795,7 +1795,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
 
         def execute(self, context):
             objs = context.selected_objects
-            result = GetImportCameraScriptCommand(objs, False)
+            result = GetImportCameraScriptCommand(objs, True)
             if result[0]:
                 setWindowsClipboard(result[1])
                 self.report({'INFO'}, result[2])
