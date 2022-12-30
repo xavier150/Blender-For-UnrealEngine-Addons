@@ -31,14 +31,19 @@ More info, tutorials and documentation here --> [Wiki page](https://github.com/x
 
 Or previous versions: [Releases page](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases)
 
-2. Open User Preferences (Ctrl+Alt+U) and under Add-ons, click Install from File. Then navigate to the .zip file you downloaded and select it.
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/InstallationScreen1.jpg" width="600">
-3. It should now appear in the window and you can tick the checkbox in the upper right to enable it.
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/InstallationScreen2.jpg" width="600">
+2. Open User Preferences (Ctrl+Alt+U) and under Add-ons, click Install from File. Then navigate to the .zip file you downloaded and select it.  
+
+![image](https://user-images.githubusercontent.com/7216958/210084997-755111d8-cd4e-4a3b-991b-e846ac794596.png)
+
+3. It should now appear in the window and you can tick the checkbox in the upper right to enable it.  
+
+![image](https://user-images.githubusercontent.com/7216958/210085334-e37d2c3b-0297-4b45-8995-4e845404d185.png)
+
 If you would like to have the Add-on enabled every time you start Blender, click Save User Settings at the bottom of the user settings window
 
-4. You can found the addons in the right side panel (N)
-<img src="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/blob/master/docs/InstallationScreen3.jpg" width="600">
+4. You can found the addons in the right side panel (N)  
+
+![image](https://user-images.githubusercontent.com/7216958/210085504-e46931f2-d805-4522-b699-366473b4c26d.png)
 
 # Download and installation from dev Branch
 1. Switch Branch to Dev
