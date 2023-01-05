@@ -251,16 +251,17 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
             array_scale = array_transform[2]
 
             # Fix axis flippings
-            if frame-1 in self.transform_track:
-                previous_rotation_x = self.transform_track[frame-1]["rotation_x"]
-                previous_rotation_y = self.transform_track[frame-1]["rotation_y"]
-                previous_rotation_z = self.transform_track[frame-1]["rotation_z"]
-                diff = round((array_rotation[0] - previous_rotation_x) / 180.0) * 180.0
-                array_rotation[0] = array_rotation[0] - diff
-                diff = round((array_rotation[1] - previous_rotation_y) / 180.0) * 180.0
-                array_rotation[1] = array_rotation[1] - diff
-                diff = round((array_rotation[2] - previous_rotation_z) / 180.0) * 180.0
-                array_rotation[2] = array_rotation[2] - diff
+            if camera.bfu_fix_axis_flippings:
+                if frame-1 in self.transform_track:  # Previous frame
+                    previous_rotation_x = self.transform_track[frame-1]["rotation_x"]
+                    previous_rotation_y = self.transform_track[frame-1]["rotation_y"]
+                    previous_rotation_z = self.transform_track[frame-1]["rotation_z"]
+                    diff = round((array_rotation[0] - previous_rotation_x) / 180.0) * 180.0
+                    array_rotation[0] = array_rotation[0] - diff
+                    diff = round((array_rotation[1] - previous_rotation_y) / 180.0) * 180.0
+                    array_rotation[1] = array_rotation[1] - diff
+                    diff = round((array_rotation[2] - previous_rotation_z) / 180.0) * 180.0
+                    array_rotation[2] = array_rotation[2] - diff
 
             transform = {}
             transform["location_x"] = array_location.x

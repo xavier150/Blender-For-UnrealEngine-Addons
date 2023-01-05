@@ -428,6 +428,7 @@ It is now possible to force the duration of an animation according to the scene 
 - New: Ability to specify skeleton asset for SkeletalMesh (Thanks Salireths!)
 - New: Ability to specify which module (plugin) to import to (Thanks Salireths!)
 - New Support for Export UV From Geometry Node.
+- Fix axis flippings on camera animation can be disabled.
 - Correct Extrem UV Scale option moved from addon pref to object settings.
 - Add support NearClippingPlane in camera export.
 - Fixed: Vertex Colors refactored into generic Color Attributes and not supported by the addon.
@@ -436,3 +437,5 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Skeleton detection use the wrong prefix.
 - Fixed: Copy Cine Cameras return Regular Cameras.
 - Fixed: Crashes when pasting via the "Copy Regular Cameras"
+- Fixed: Convert to collision work only if parent is a Mesh.
+

@@ -148,6 +148,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=False,
         )
 
+    bpy.types.Object.bfu_fix_axis_flippings = BoolProperty(
+        name="Fix camera axis flippings",
+        description=(
+            'Disable only if you use extrem camera animation in one frame.'
+            ),
+        override={'LIBRARY_OVERRIDABLE'},
+        default=True,
+        )
+
     bpy.types.Object.bfu_export_procedure = EnumProperty(
         name="Export procedure",
         description=(
@@ -1130,6 +1139,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.exportFolderName',
                             'col.exportFolderName',
                             'obj.bfu_export_fbx_camera',
+                            'obj.bfu_fix_axis_flippings',
                             'obj.ExportAsAlembic',
                             'obj.ExportAsLod',
                             'obj.ForceStaticMesh',
@@ -1355,6 +1365,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
                         if obj.type == "CAMERA":
                             CameraProp.prop(obj, 'bfu_export_fbx_camera')
+                            CameraProp.prop(obj, 'bfu_fix_axis_flippings')
 
                         else:
                             ProxyProp = layout.column()
@@ -1990,6 +2001,14 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     return True
             return False
 
+        def ActiveTypeIsNot(targetType):
+            # Return True is active type ==
+            obj = bpy.context.active_object
+            if obj is not None:
+                if obj.type != targetType:
+                    return True
+            return False
+
         def FoundTypeInSelect(targetType, include_active=True):
             # Return True if a specific type is found
             select = bpy.context.selected_objects
@@ -2030,14 +2049,14 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                 layout.label(text="Switch to Object Mode.", icon='INFO')
             else:
                 if FoundTypeInSelect("MESH", False):
-                    if ActiveTypeIs("MESH") and len(bpy.context.selected_objects) > 1:
+                    if ActiveTypeIsNot("ARMATURE") and len(bpy.context.selected_objects) > 1:
                         layout.label(text="Click on button for convert to collider.", icon='INFO')
                         ready_for_convert_collider = True
                     else:
                         layout.label(text="Select with [SHIFT] the collider owner.", icon='INFO')
 
                 elif FoundTypeInSelect("EMPTY", False):
-                    if ActiveTypeIs("MESH") and len(bpy.context.selected_objects) > 1:
+                    if ActiveTypeIsNot("ARMATURE") and len(bpy.context.selected_objects) > 1:
                         layout.label(text="Click on button for convert to Socket.", icon='INFO')
                         ready_for_convert_socket = True
                     else:
