@@ -245,12 +245,39 @@ def MakeSelectVisualReal():
         if obj not in previous_objects:
             obj.select_set(True)
 
+# Sockets
+
+
+def SetSocketsExportName(obj):
+    '''
+    Try to apply the custom SocketName
+    '''
+
+    scene = bpy.context.scene
+    for socket in GetSocketDesiredChild(obj):
+        if socket.bfu_use_socket_custom_Name:
+            if socket.bfu_socket_custom_Name not in scene.objects:
+
+                # Save the previous name
+                socket["BFU_PreviousSocketName"] = socket.name
+                socket.name = "SOCKET_"+socket.bfu_socket_custom_Name
+            else:
+                print(
+                    'Can\'t rename socket "' +
+                    socket.name +
+                    '" to "'+socket.bfu_socket_custom_Name +
+                    '".'
+                    )
+
 
 def SetSocketsExportTransform(obj):
-    # Set socket scale for Unreal
+    # Set socket Transform for Unreal
 
     addon_prefs = GetAddonPrefs()
     for socket in GetSocketDesiredChild(obj):
+        socket["BFU_PreviousSocketScale"] = socket.scale
+        socket["BFU_PreviousSocketLocation"] = socket.location
+        socket["BFU_PreviousSocketRotationEuler"] = socket.rotation_euler
         if GetShouldRescaleSocket():
             socket.delta_scale *= GetRescaleSocketFactor()
 
@@ -259,8 +286,36 @@ def SetSocketsExportTransform(obj):
             savedLocation = socket.location.copy()
             AddMat = mathutils.Matrix.Rotation(math.radians(90.0), 4, 'X')
             socket.matrix_world = socket.matrix_world @ AddMat
-            socket.scale = savedScale
+            socket.scale.x = savedScale.x
+            socket.scale.z = savedScale.y
+            socket.scale.y = savedScale.z
             socket.location = savedLocation
+
+
+def ResetSocketsExportName(obj):
+    # Reset socket Name
+
+    scene = bpy.context.scene
+    for socket in GetSocketDesiredChild(obj):
+        if "BFU_PreviousSocketName" in socket:
+            socket.name = socket["BFU_PreviousSocketName"]
+            del socket["BFU_PreviousSocketName"]
+
+
+def ResetSocketsTransform(obj):
+    # Reset socket Transform
+
+    scene = bpy.context.scene
+    for socket in GetSocketDesiredChild(obj):
+        if "BFU_PreviousSocketScale" in socket:
+            socket.scale = socket["BFU_PreviousSocketScale"]
+            del socket["BFU_PreviousSocketScale"]
+        if "BFU_PreviousSocketLocation" in socket:
+            socket.location = socket["BFU_PreviousSocketLocation"]
+            del socket["BFU_PreviousSocketLocation"]
+        if "BFU_PreviousSocketRotationEuler" in socket:
+            socket.rotation_euler = socket["BFU_PreviousSocketRotationEuler"]
+            del socket["BFU_PreviousSocketRotationEuler"]
 
 
 # Main asset
@@ -314,36 +369,11 @@ class PrepareExportName():
 
         pass
 
-# Sockets and Collisons
-
-
-# Sockets
-
-
-def TryToApplyCustomSocketsName(obj):
-    '''
-    Try to apply the custom SocketName
-    '''
-
-    scene = bpy.context.scene
-
-    for socket in GetSocketDesiredChild(obj):
-        if socket.usesocketcustomName:
-            if socket.socketcustomName not in scene.objects:
-                socket.name = "SOCKET_"+socket.socketcustomName
-            else:
-                print(
-                    'Can\'t rename socket "' +
-                    socket.name +
-                    '" to "'+socket.socketcustomName +
-                    '".'
-                    )
-
-
 # UVs
 
+
 def ConvertGeometryNodeAttributeToUV(obj):
-    #obj = bpy.context.active_object  # Debug
+    # obj = bpy.context.active_object  # Debug
     if obj.convert_geometry_node_attribute_to_uv:
         attrib_name = obj.convert_geometry_node_attribute_to_uv_name
 
@@ -352,7 +382,7 @@ def ConvertGeometryNodeAttributeToUV(obj):
 
         if hasattr(obj.data, "attributes"):  # Cuves has not attributes.
             if attrib_name in obj.data.attributes:
-            #if True == True:
+            # if True == True:
 
                 # TO DO: Bad why to do this. Need found a way to convert without using ops.
                 obj.data.attributes.active = obj.data.attributes[attrib_name]
@@ -388,6 +418,7 @@ def ConvertGeometryNodeAttributeToUV(obj):
                     new_uv.data[loop.index].uv[1] = uv_coords[loop.index][1]
 
                 obj.data.attributes.remove(attrib_name)
+
 
 def CorrectExtremUVAtExport(obj):
     if obj.correct_extrem_uv_scale:

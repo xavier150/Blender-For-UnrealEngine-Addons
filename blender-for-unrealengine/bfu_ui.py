@@ -1772,13 +1772,13 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
     bl_region_type = "UI"
     bl_category = "Unreal Engine"
 
-    bpy.types.Object.usesocketcustomName = BoolProperty(
+    bpy.types.Object.bfu_use_socket_custom_Name = BoolProperty(
         name="Socket custom name",
         description='Use a custom name in Unreal Engine for this socket?',
         default=False
         )
 
-    bpy.types.Object.socketcustomName = StringProperty(
+    bpy.types.Object.bfu_socket_custom_Name = StringProperty(
         name="",
         description='',
         default="MySocket"
@@ -2112,10 +2112,10 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
             if obj is not None:
                 if obj.type == "EMPTY":
                     socketName = layout.column()
-                    socketName.prop(obj, "usesocketcustomName")
+                    socketName.prop(obj, "bfu_use_socket_custom_Name")
                     socketNameText = socketName.column()
-                    socketNameText.enabled = obj.usesocketcustomName
-                    socketNameText.prop(obj, "socketcustomName")
+                    socketNameText.enabled = obj.bfu_use_socket_custom_Name
+                    socketNameText.prop(obj, "bfu_socket_custom_Name")
 
             copy_skeletalsocket_buttons = layout.column()
             copy_skeletalsocket_buttons.enabled = False
@@ -2141,13 +2141,13 @@ class BFU_PT_BlenderForUnrealDebug(bpy.types.Panel):
     bl_region_type = "UI"
     bl_category = "Unreal Engine"
 
-    bpy.types.Object.usesocketcustomName = BoolProperty(
+    bpy.types.Object.bfu_use_socket_custom_Name = BoolProperty(
         name="Socket custom name",
         description='Use a custom name in Unreal Engine for this socket?',
         default=False
         )
 
-    bpy.types.Object.socketcustomName = StringProperty(
+    bpy.types.Object.bfu_socket_custom_Name = StringProperty(
         name="",
         description='',
         default="MySocket"

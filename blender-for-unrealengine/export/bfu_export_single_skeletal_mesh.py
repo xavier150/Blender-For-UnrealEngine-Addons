@@ -129,7 +129,7 @@ def ExportSingleSkeletalMesh(
     meshType = GetAssetType(active)
 
     SetSocketsExportTransform(active)
-    TryToApplyCustomSocketsName(active)
+    SetSocketsExportName(active)
 
     # Set rename temporarily the Armature as "Armature"
 
@@ -187,7 +187,8 @@ def ExportSingleSkeletalMesh(
     asset_name.ResetNames()
 
     ClearVertexColorForUnrealExport(active)
-
+    ResetSocketsExportName(active)
+    ResetSocketsTransform(active)
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in duplicate_data.data_to_remove:
         data.RemoveData()

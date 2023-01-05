@@ -110,8 +110,7 @@ def ExportSingleStaticMesh(
 
     meshType = GetAssetType(active)
     SetSocketsExportTransform(active)
-
-    TryToApplyCustomSocketsName(active)
+    SetSocketsExportName(active)
 
     bfu_check_potential_error.UpdateNameHierarchy(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
@@ -143,7 +142,8 @@ def ExportSingleStaticMesh(
     asset_name.ResetNames()
 
     ClearVertexColorForUnrealExport(active)
-
+    ResetSocketsExportName(active)
+    ResetSocketsTransform(active)
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in duplicate_data.data_to_remove:
         data.RemoveData()

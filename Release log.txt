@@ -438,4 +438,5 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Copy Cine Cameras return Regular Cameras.
 - Fixed: Crashes when pasting via the "Copy Regular Cameras"
 - Fixed: Convert to collision work only if parent is a Mesh.
+- Fixed: StaticSocketsAdd90X option break non uniform scale sockets
 
