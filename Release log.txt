@@ -440,3 +440,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Convert to collision work only if parent is a Mesh.
 - Fixed: StaticSocketsAdd90X option break non uniform scale sockets.
 - Fixed: Collection staic mesh don't use Sub Folder Name.
+- Fixed: Sockets transform are not apply on Collection staic mesh.

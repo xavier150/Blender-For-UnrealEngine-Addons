@@ -110,8 +110,11 @@ def ExportSingleStaticMeshCollection(
 
     ApplyNeededModifierToSelect()
     for obj in bpy.context.selected_objects:
+        SetVertexColorForUnrealExport(obj)
         ConvertGeometryNodeAttributeToUV(obj)
         CorrectExtremUVAtExport(obj)
+        SetSocketsExportTransform(obj)
+        SetSocketsExportName(obj)
 
     bfu_check_potential_error.UpdateNameHierarchy(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
@@ -135,6 +138,10 @@ def ExportSingleStaticMeshCollection(
         # axis_up=active.exportAxisUp,
         bake_space_transform=False
         )
+    for obj in bpy.context.selected_objects:
+        ClearVertexColorForUnrealExport(obj)
+        ResetSocketsExportName(obj)
+        ResetSocketsTransform(obj)
 
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in duplicate_data.data_to_remove:
