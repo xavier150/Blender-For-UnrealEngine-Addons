@@ -33,27 +33,10 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     export_end_time: bpy.props.FloatProperty(default=0)
     export_success: bpy.props.BoolProperty(default=False)
 
-    def SetObjData(self, obj):
-        self.object = obj
-        self.asset_name = obj.name
-        self.folder_name = obj.exportFolderName
-
     def StartAssetExport(self, obj=None, action=None, collection=None):
-        if obj:
-            self.SetObjData(obj)
-            self.asset_type = bfu_utils.GetAssetType(obj)
-            if obj.type == "ARMATURE":
-                self.skeleton_name = obj.name
-
-        if action:
-            self.asset_type = bfu_utils.GetActionType(action)  # Override
 
         if obj and action:
             self.asset_name = bfu_utils.GetActionExportFileName(obj, action, "")
-
-        if collection:
-            self.collection = collection
-            self.asset_type = bfu_utils.GetCollectionType(collection)  # Override
 
         self.export_start_time = time.perf_counter()
 

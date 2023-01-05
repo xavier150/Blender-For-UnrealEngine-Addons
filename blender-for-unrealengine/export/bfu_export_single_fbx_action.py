@@ -52,7 +52,11 @@ def ProcessActionExport(obj, action):
     dirpath = os.path.join(GetObjExportDir(obj), scene.anim_subfolder_name)
 
     MyAsset = scene.UnrealExportedAssetsList.add()
-    MyAsset.StartAssetExport(obj, action)
+    MyAsset.object = obj
+    MyAsset.asset_name = bfu_utils.GetActionExportFileName(obj, action, "")
+    MyAsset.folder_name = obj.exportFolderName
+    MyAsset.asset_type = bfu_utils.GetActionType(action)
+    MyAsset.StartAssetExport()
 
     ExportSingleFbxAction(scene, dirpath, GetActionExportFileName(obj, action), obj, action)
     file = MyAsset.files.add()
@@ -98,7 +102,7 @@ def ExportSingleFbxAction(
     if export_as_proxy is False:
         duplicate_data = DuplicateSelectForExport()
         SetDuplicateNameForExport(duplicate_data)
-    
+
     if export_as_proxy is False:
         MakeSelectVisualReal()
 

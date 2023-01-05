@@ -54,7 +54,12 @@ def ProcessSkeletalMeshExport(obj):
     scene = bpy.context.scene
 
     MyAsset = scene.UnrealExportedAssetsList.add()
-    MyAsset.StartAssetExport(obj)
+    MyAsset.object = obj
+    MyAsset.skeleton_name = obj.name
+    MyAsset.asset_name = obj.name
+    MyAsset.folder_name = obj.exportFolderName
+    MyAsset.asset_type = bfu_utils.GetAssetType(obj)
+    MyAsset.StartAssetExport()
 
     ExportSingleSkeletalMesh(scene, dirpath, GetObjExportFileName(obj), obj)
     file = MyAsset.files.add()

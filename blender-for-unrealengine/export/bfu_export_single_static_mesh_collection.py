@@ -58,11 +58,13 @@ def ProcessCollectionExport(col):
     scene = bpy.context.scene
 
     MyAsset = scene.UnrealExportedAssetsList.add()
-    MyAsset.StartAssetExport(collection=col)
+    MyAsset.asset_name = col.name
+    MyAsset.collection = col
+    MyAsset.asset_type = bfu_utils.GetCollectionType(col)
+    MyAsset.folder_name = col.exportFolderName
+    MyAsset.StartAssetExport()
 
     ExportSingleStaticMeshCollection(dirpath, GetCollectionExportFileName(col.name), col.name)
-
-    # MyAsset.SetObjData(obj)
 
     file = MyAsset.files.add()
     file.name = GetCollectionExportFileName(col.name)

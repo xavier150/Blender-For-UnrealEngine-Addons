@@ -53,7 +53,11 @@ def ProcessStaticMeshExport(obj):
     scene = bpy.context.scene
 
     MyAsset = scene.UnrealExportedAssetsList.add()
-    MyAsset.StartAssetExport(obj)
+    MyAsset.object = obj
+    MyAsset.asset_name = obj.name
+    MyAsset.folder_name = obj.exportFolderName
+    MyAsset.asset_type = bfu_utils.GetAssetType(obj)
+    MyAsset.StartAssetExport()
 
     ExportSingleStaticMesh(dirpath, GetObjExportFileName(obj), obj)
     file = MyAsset.files.add()
