@@ -2171,79 +2171,6 @@ class BFU_PT_BlenderForUnrealDebug(bpy.types.Panel):
                 layout.label(text="CameraPositionForUnreal (Scale):" + str(EvaluateCameraPositionForUnreal(obj)[2]))
 
 
-class BFU_OT_FileExport(bpy.types.PropertyGroup):
-    name: StringProperty()
-    path: StringProperty()
-    type: StringProperty()  # FBX, AdditionalTrack
-
-    def __init__(self, name):
-        pass
-
-    def GetRelativePath(self):
-        return os.path.join(self.path, self.name)
-
-    def GetAbsolutePath(self):
-        return os.path.join(bpy.path.abspath(self.path), self.name)
-
-
-class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
-    # [AssetName , AssetType , ExportPath, ExportTime]
-
-    asset_name: StringProperty(default="None")
-    skeleton_name: StringProperty(default="None")
-    asset_type: StringProperty(default="None")  # return from GetAssetType()
-    folder_name: StringProperty(default="")
-    files: CollectionProperty(type=BFU_OT_FileExport)
-    object: PointerProperty(type=bpy.types.Object)
-    collection: PointerProperty(type=bpy.types.Collection)
-    export_start_time: FloatProperty(default=0)
-    export_end_time: FloatProperty(default=0)
-    export_success: BoolProperty(default=False)
-
-    def SetObjData(self, obj):
-        self.object = obj
-        self.asset_name = obj.name
-        self.folder_name = obj.exportFolderName
-
-    def StartAssetExport(self, obj=None, action=None, collection=None):
-        if obj:
-            self.SetObjData(obj)
-            self.asset_type = GetAssetType(obj)
-            if obj.type == "ARMATURE":
-                self.skeleton_name = obj.name
-
-        if action:
-            self.asset_type = GetActionType(action)  # Override
-
-        if obj and action:
-            self.asset_name = GetActionExportFileName(obj, action, "")
-
-        if collection:
-            self.collection = collection
-            self.asset_type = GetCollectionType(collection)  # Override
-
-        self.export_start_time = time.perf_counter()
-
-    def EndAssetExport(self, success):
-        self.export_end_time = time.perf_counter()
-        self.export_success = success
-
-    def GetExportTime(self):
-        return self.export_end_time - self.export_start_time
-
-    def GetFileByType(self, type: str):
-        for file in self.files:
-            if file.type == type:
-                return file
-        print("File type not found in this assets:", type)
-
-    def GetFilename(self, fileType=".fbx"):
-        if self.asset_type == "Collection StaticMesh":
-            return GetCollectionExportFileName(self.collection.name, fileType)
-        else:
-            return GetObjExportFileName(self.object, fileType)
-
-
 class BFU_PT_Export(bpy.types.Panel):
     # Is Export panel
 
@@ -3077,11 +3004,6 @@ def register():
         override={'LIBRARY_OVERRIDABLE', 'USE_INSERTION'},
         )
 
-    bpy.utils.register_class(BFU_OT_FileExport)
-    bpy.utils.register_class(BFU_OT_UnrealExportedAsset)
-    bpy.types.Scene.UnrealExportedAssetsList = CollectionProperty(
-        type=BFU_OT_UnrealExportedAsset)
-
     bpy.types.VIEW3D_MT_uv_map.append(menu_func)
 
 
@@ -3093,7 +3015,5 @@ def unregister():
 
     bpy.utils.unregister_class(BFU_OT_ObjExportAction)
     bpy.utils.unregister_class(BFU_OT_SceneCollectionExport)
-    bpy.utils.unregister_class(BFU_OT_FileExport)
-    bpy.utils.unregister_class(BFU_OT_UnrealExportedAsset)
 
     bpy.types.VIEW3D_MT_uv_map.remove(menu_func)

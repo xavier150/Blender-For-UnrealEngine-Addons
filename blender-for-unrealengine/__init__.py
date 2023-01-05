@@ -37,6 +37,7 @@ from . import bbpl
 
 from . import bfu_ui_utils
 from . import bfu_addon_pref
+from . import bfu_export_logs
 from . import bfu_ui
 from . import bfu_check_potential_error
 from .export import bfu_export_asset
@@ -53,6 +54,8 @@ if "bfu_ui_utils" in locals():
     importlib.reload(bfu_ui_utils)
 if "bfu_addon_pref" in locals():
     importlib.reload(bfu_addon_pref)
+if "bfu_export_logs" in locals():
+    importlib.reload(bfu_export_logs)
 if "bfu_ui" in locals():
     importlib.reload(bfu_ui)
 if "bfu_check_potential_error" in locals():
@@ -149,6 +152,7 @@ def register():
 
     bfu_ui_utils.register()
     bfu_addon_pref.register()
+    bfu_export_logs.register()
     bfu_ui.register()
     bfu_check_potential_error.register()
 
@@ -181,5 +185,6 @@ def unregister():
 
     bfu_ui_utils.unregister()
     bfu_addon_pref.unregister()
+    bfu_export_logs.unregister()
     bfu_ui.unregister()
     bfu_check_potential_error.unregister()
