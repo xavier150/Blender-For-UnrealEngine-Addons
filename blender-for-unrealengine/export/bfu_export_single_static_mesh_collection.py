@@ -107,8 +107,9 @@ def ExportSingleStaticMeshCollection(
     MakeSelectVisualReal()
 
     ApplyNeededModifierToSelect()
-    ConvertGeometryNodeAttributeToUV(obj)
-    CorrectExtremUVAtExport(obj)
+    for obj in bpy.context.selected_objects:
+        ConvertGeometryNodeAttributeToUV(obj)
+        CorrectExtremUVAtExport(obj)
 
     bfu_check_potential_error.UpdateNameHierarchy(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
