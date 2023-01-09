@@ -293,12 +293,21 @@ def ExportForUnrealEngine():
         if col.hide_viewport:
             col.hide_viewport = False
 
+    def GetLayerCollectionsRecursive(layer_collection):
+        layer_collections = []
+        layer_collections.append(layer_collection)  # Add curent
+        for child_col in layer_collection.children:
+            layer_collections.extend(GetLayerCollectionsRecursive(child_col))  # Add childs recursive
+
+        return layer_collections
+
     for vlayer in bpy.context.scene.view_layers:
-        for childCol in vlayer.layer_collection.children:
-            if childCol.exclude:
-                childCol.exclude = False
-            if childCol.hide_viewport:
-                childCol.hide_viewport = False
+        layer_collections = GetLayerCollectionsRecursive(vlayer.layer_collection)
+        for layer_collection in layer_collections:
+            if layer_collection.exclude:
+                layer_collection.exclude = False
+            if layer_collection.hide_viewport:
+                layer_collection.hide_viewport = False
 
     SafeModeSet('OBJECT', MyCurrentDataSave.user_select_class.user_active)
 
@@ -313,6 +322,7 @@ def ExportForUnrealEngine():
     action_list = []  # Do a simple list of Action to export
     col_list = []  # Do a simple list of Collection to export
     AssetToExport = GetFinalAssetToExport()
+
     for Asset in AssetToExport:
         if Asset.type == "Action" or Asset.type == "Pose":
             if Asset.obj not in action_list:
