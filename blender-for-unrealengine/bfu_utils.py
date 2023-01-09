@@ -23,6 +23,7 @@ import mathutils
 import math
 import time
 import sys
+from . import bbpl
 
 from math import degrees, radians, tan
 from mathutils import Matrix
@@ -77,6 +78,10 @@ class SavedViewLayerChildren():
             self.name = childCol.name
             self.exclude = childCol.exclude
             self.hide_viewport = childCol.hide_viewport
+            self.children = []
+
+            for children in childCol.children:
+                SavedViewLayerChildren(vlayer, children)
 
 
 class UserSelectSave():
@@ -163,7 +168,7 @@ class UserSceneSave():
         self.objects = []
         self.object_bones = []
         self.collections = []
-        self.view_layers_children = []
+        self.view_layer_collections = []
         self.action_names = []
         self.collection_names = []
 
@@ -186,8 +191,9 @@ class UserSceneSave():
         for col in bpy.data.collections:
             self.collections.append(SavedCollection(col))
         for vlayer in c.scene.view_layers:
-            for childCol in vlayer.layer_collection.children:
-                self.view_layers_children.append(SavedViewLayerChildren(vlayer, childCol))
+            layer_collections = bbpl.utils.getLayerCollectionsRecursive(vlayer.layer_collection)
+            for layer_collection in layer_collections:
+                self.view_layer_collections.append(SavedViewLayerChildren(vlayer, layer_collection))
         for action in bpy.data.actions:
             self.action_names.append(action.name)
         for collection in bpy.data.collections:
@@ -262,16 +268,29 @@ class UserSceneSave():
                 print("/!\\ "+col.name+" not found in bpy.data.collections")
 
         # Reset hide in and viewport (collections from view_layers)
-        for childCol in self.view_layers_children:
-            if childCol.vlayer_name in scene.view_layers:
-                view_layer = scene.view_layers[childCol.vlayer_name]
-                if childCol.name in view_layer.layer_collection.children:
-                    layer_col_children = view_layer.layer_collection.children[childCol.name]
 
-                    if layer_col_children.exclude != childCol.exclude:
-                        layer_col_children.exclude = childCol.exclude
-                    if layer_col_children.hide_viewport != childCol.hide_viewport:
-                        layer_col_children.hide_viewport = childCol.hide_viewport
+        for vlayer in scene.view_layers:
+            layer_collections = bbpl.utils.getLayerCollectionsRecursive(vlayer.layer_collection)
+
+            def getLayerCollectionInList(name):
+                for layer_collection in layer_collections:
+                    if layer_collection.name == name:
+                        return layer_collection
+
+            for layer_collection in layer_collections:
+                print("col -> ", layer_collection)
+            for view_layer_collection in self.view_layer_collections:
+                print("a", view_layer_collection.name)
+                if view_layer_collection.vlayer_name in scene.view_layers:
+                    print("b", view_layer_collection.name)
+
+                    layer_collection = getLayerCollectionInList(view_layer_collection.name)
+
+                    if layer_collection:
+                        if layer_collection.exclude != view_layer_collection.exclude:
+                            layer_collection.exclude = view_layer_collection.exclude
+                        if layer_collection.hide_viewport != view_layer_collection.hide_viewport:
+                            layer_collection.hide_viewport = view_layer_collection.hide_viewport
 
 
 class NLA_Save():
