@@ -441,3 +441,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: StaticSocketsAdd90X option break non uniform scale sockets.
 - Fixed: Collection staic mesh don't use Sub Folder Name.
 - Fixed: Sockets transform are not apply on Collection staic mesh.
+- Fixed: Some collections keep hidden during export and exported file is wrong.
