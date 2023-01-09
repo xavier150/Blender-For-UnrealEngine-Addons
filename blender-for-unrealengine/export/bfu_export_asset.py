@@ -51,6 +51,8 @@ from ..bfu_basics import *
 from .. import bfu_utils
 from ..bfu_utils import *
 
+from .. import bbpl
+
 from . import bfu_export_single_alembic_animation
 from .bfu_export_single_alembic_animation import *
 from . import bfu_export_single_fbx_action
@@ -293,16 +295,8 @@ def ExportForUnrealEngine():
         if col.hide_viewport:
             col.hide_viewport = False
 
-    def GetLayerCollectionsRecursive(layer_collection):
-        layer_collections = []
-        layer_collections.append(layer_collection)  # Add curent
-        for child_col in layer_collection.children:
-            layer_collections.extend(GetLayerCollectionsRecursive(child_col))  # Add childs recursive
-
-        return layer_collections
-
     for vlayer in bpy.context.scene.view_layers:
-        layer_collections = GetLayerCollectionsRecursive(vlayer.layer_collection)
+        layer_collections = bbpl.utils.getLayerCollectionsRecursive(vlayer.layer_collection)
         for layer_collection in layer_collections:
             if layer_collection.exclude:
                 layer_collection.exclude = False

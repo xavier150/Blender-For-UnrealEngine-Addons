@@ -524,3 +524,12 @@ def getVertexColor_ActiveColorIndex(obj):
         return obj.data.color_attributes.active_color_index
     else:
         return obj.data.vertex_colors.active_index
+
+
+def getLayerCollectionsRecursive(layer_collection):
+    layer_collections = []
+    layer_collections.append(layer_collection)  # Add curent
+    for child_col in layer_collection.children:
+        layer_collections.extend(getLayerCollectionsRecursive(child_col))  # Add childs recursive
+
+    return layer_collections
