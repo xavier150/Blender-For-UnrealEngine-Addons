@@ -55,6 +55,7 @@ def ProcessNLAAnimExport(obj):
 
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
+    MyAsset.skeleton_name = obj.name
     MyAsset.asset_name = GetNLAExportFileName(obj)
     MyAsset.folder_name = obj.exportFolderName
     MyAsset.asset_type = "NlAnim"
