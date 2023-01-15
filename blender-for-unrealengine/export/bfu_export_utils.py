@@ -443,6 +443,9 @@ def ConvertArmatureConstraintToModifiers(armature):
                 # Disable constraint
                 const.enabled = False
 
+                # Remove All Vertex Group
+                    # TO DO:
+
                 # Add Vertex Group
                 for target in const.targets:
                     bone_name = target.subtarget
@@ -454,8 +457,6 @@ def ConvertArmatureConstraintToModifiers(armature):
 
         # Save data for reset after export
         obj["BFU_PreviousEnabledArmatureConstraints"] = previous_enabled_armature_constraints
-
-    # TO DO:
 
 
 def ResetArmatureConstraintToModifiers(armature):
@@ -474,10 +475,11 @@ def ResetArmatureConstraintToModifiers(armature):
                     old_vertex_group = obj.vertex_groups[bone_name]
                     obj.vertex_groups.remove(old_vertex_group)
 
+                # Reset all Vertex Groups
+                    # TO DO:
+
                 # Enable back constraint
                 const.enabled = True
-
-    # TO DO:
 
 # Vertex Color
 
