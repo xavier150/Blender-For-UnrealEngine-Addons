@@ -382,7 +382,6 @@ def ConvertGeometryNodeAttributeToUV(obj):
 
         if hasattr(obj.data, "attributes"):  # Cuves has not attributes.
             if attrib_name in obj.data.attributes:
-            # if True == True:
 
                 # TO DO: Bad why to do this. Need found a way to convert without using ops.
                 obj.data.attributes.active = obj.data.attributes[attrib_name]
@@ -429,6 +428,36 @@ def CorrectExtremUVAtExport(obj):
             SetCurrentSelection(SavedSelect)
             return True
     return False
+
+# Armature
+
+
+def ConvertArmatureConstraintToModifiers(armature):
+    for obj in GetExportDesiredChilds(armature):
+        obj["BFU_PreviousEnabledArmatureConstraints"] = []
+        for const in obj.constraints:
+            if const.enabled is True:
+                obj["BFU_PreviousEnabledArmatureConstraints"].append(const.name)
+
+                # Disable constraint
+                const.enabled = False
+
+    # TO DO:
+
+
+def ResetArmatureConstraintToModifiers(armature):
+    for obj in GetExportDesiredChilds(armature):
+        if "BFU_PreviousEnabledArmatureConstraints" in obj:
+            for const_names in obj["BFU_PreviousEnabledArmatureConstraints"]:
+                if const_names in obj.constraints:
+                    const = obj.constraints[const_names]
+
+                    # Enable back constraint
+                    const.enabled = True
+
+            del obj["BFU_PreviousEnabledArmatureConstraints"]
+
+    # TO DO:
 
 # Vertex Color
 

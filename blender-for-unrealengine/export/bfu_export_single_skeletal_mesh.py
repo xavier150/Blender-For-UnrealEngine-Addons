@@ -145,6 +145,7 @@ def ExportSingleSkeletalMesh(
     RemoveAllConsraints(active)
     bpy.context.object.data.pose_position = 'REST'
 
+    ConvertArmatureConstraintToModifiers(active)
     SetVertexColorForUnrealExport(active)
 
     asset_name.SetExportName()
@@ -192,6 +193,7 @@ def ExportSingleSkeletalMesh(
     asset_name.ResetNames()
 
     ClearVertexColorForUnrealExport(active)
+    ResetArmatureConstraintToModifiers(active)
     ResetSocketsExportName(active)
     ResetSocketsTransform(active)
     CleanDeleteObjects(bpy.context.selected_objects)
