@@ -449,7 +449,10 @@ def ConvertArmatureConstraintToModifiers(armature):
                 # Add Vertex Group
                 for target in const.targets:
                     bone_name = target.subtarget
-                    obj.vertex_groups.new(name=bone_name)
+                    group = obj.vertex_groups.new(name=bone_name)
+
+                    vertex_indices = range(0, len(obj.data.vertices))
+                    group.add(vertex_indices, 1.0, 'REPLACE')
 
                 # Add armature modifier
                 mod = obj.modifiers.new("BFU_Const_"+const.name, "ARMATURE")
