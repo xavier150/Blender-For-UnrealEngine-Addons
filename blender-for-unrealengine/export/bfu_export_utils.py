@@ -443,9 +443,14 @@ def ConvertArmatureConstraintToModifiers(armature):
                 # Disable constraint
                 const.enabled = False
 
+                # Add Vertex Group
+                for target in const.targets:
+                    bone_name = target.subtarget
+                    obj.vertex_groups.new(name=bone_name)
+
                 # Add armature modifier
-                obj.modifiers.new("BFU_Const_"+const.name, "ARMATURE")
-                obj.object = armature
+                mod = obj.modifiers.new("BFU_Const_"+const.name, "ARMATURE")
+                mod.object = armature
 
         # Save data for reset after export
         obj["BFU_PreviousEnabledArmatureConstraints"] = previous_enabled_armature_constraints
@@ -457,14 +462,20 @@ def ResetArmatureConstraintToModifiers(armature):
     for obj in GetExportDesiredChilds(armature):
         if "BFU_PreviousEnabledArmatureConstraints" in obj:
             for const_names in obj["BFU_PreviousEnabledArmatureConstraints"]:
-                mod = obj.modifiers["BFU_Const_"+const_names]
                 const = obj.constraints[const_names]
+
+                # Remove created armature for export
+                mod = obj.modifiers["BFU_Const_"+const_names]
+                obj.modifiers.remove(mod)
+
+                # Remove created Vertex Group
+                for target in const.targets:
+                    bone_name = target.subtarget
+                    old_vertex_group = obj.vertex_groups[bone_name]
+                    obj.vertex_groups.remove(old_vertex_group)
 
                 # Enable back constraint
                 const.enabled = True
-
-                # Remove created armature for export
-                obj.modifiers.remove(mod)
 
     # TO DO:
 
