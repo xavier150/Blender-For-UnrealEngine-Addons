@@ -443,6 +443,10 @@ def ConvertArmatureConstraintToModifiers(armature):
                 # Disable constraint
                 const.enabled = False
 
+                # Add armature modifier
+                obj.modifiers.new("BFU_Const_"+const.name, "ARMATURE")
+                obj.object = armature
+
         # Save data for reset after export
         obj["BFU_PreviousEnabledArmatureConstraints"] = previous_enabled_armature_constraints
 
@@ -453,11 +457,14 @@ def ResetArmatureConstraintToModifiers(armature):
     for obj in GetExportDesiredChilds(armature):
         if "BFU_PreviousEnabledArmatureConstraints" in obj:
             for const_names in obj["BFU_PreviousEnabledArmatureConstraints"]:
-                if const_names in obj.constraints:
-                    const = obj.constraints[const_names]
+                mod = obj.modifiers["BFU_Const_"+const_names]
+                const = obj.constraints[const_names]
 
-                    # Enable back constraint
-                    const.enabled = True
+                # Enable back constraint
+                const.enabled = True
+
+                # Remove created armature for export
+                obj.modifiers.remove(mod)
 
     # TO DO:
 
