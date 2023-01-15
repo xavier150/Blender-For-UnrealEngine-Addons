@@ -17,6 +17,7 @@
 # ======================= END GPL LICENSE BLOCK =============================
 
 
+from operator import contains
 import bpy
 import fnmatch
 import mathutils
@@ -93,6 +94,23 @@ def GetVertexWithZeroWeight(Armature, Mesh):
         if cumulateWeight == 0:
             vertices.append(vertex)
     return vertices
+
+
+def ContainsArmatureModifier(obj):
+    for mod in obj.modifiers:
+        if mod.type == "ARMATURE":
+            return True
+    return False
+
+
+def GetSkeletonMeshs(obj):
+    meshs = []
+    if GetAssetType(obj) == "SkeletalMesh":  # Skeleton /  Armature
+        childs = GetExportDesiredChilds(obj)
+        for child in childs:
+            if child.type == "MESH":
+                meshs.append(child)
+    return meshs
 
 
 def UpdateUnrealPotentialError():
@@ -268,23 +286,42 @@ def UpdateUnrealPotentialError():
                     MyError.object = obj
 
     def CheckArmatureModNumber():
-        # check that there is no more than
-        # one Modifier ARMATURE at the same time
-        for obj in MeshTypeToCheck:
-            ArmatureModifiers = 0
-            for modif in obj.modifiers:
-                if modif.type == "ARMATURE":
-                    ArmatureModifiers = ArmatureModifiers + 1
-            if ArmatureModifiers > 1:
-                MyError = PotentialErrors.add()
-                MyError.name = obj.name
-                MyError.type = 2
-                MyError.text = (
-                    'In object "'+obj.name +
-                    '" there are several Armature modifiers' +
-                    ' at the same time.' +
-                    ' Please use only one Armature modifier.')
-                MyError.object = obj
+        # check Modifier or Constraint ARMATURE number = 1
+        for obj in objToCheck:
+            meshs = GetSkeletonMeshs(obj)
+            for mesh in meshs:
+                # Count
+                armature_modifiers = 0
+                armature_constraint = 0
+                for mod in mesh.modifiers:
+                    if mod.type == "ARMATURE":
+                        armature_modifiers += 1
+                for const in mesh.constraints:
+                    if const.type == "ARMATURE":
+                        armature_constraint += 1
+
+                # Check result > 1
+                if armature_modifiers + armature_constraint > 1:
+                    MyError = PotentialErrors.add()
+                    MyError.name = mesh.name
+                    MyError.type = 2
+                    MyError.text = (
+                        'In object "'+mesh.name + '" ' +
+                        str(armature_modifiers) + ' Armature modifier(s) and ' +
+                        str(armature_modifiers) + ' Armature constraint(s) was found. ' +
+                        ' Please use only one Armature modifier or one Armature constraint.')
+                    MyError.object = mesh
+
+                # Check result == 0
+                if armature_modifiers + armature_constraint == 0:
+                    MyError = PotentialErrors.add()
+                    MyError.name = mesh.name
+                    MyError.type = 2
+                    MyError.text = (
+                        'In object "'+mesh.name + '" ' +
+                        ' no Armature modifiers or constraints was found. ' +
+                        ' Please use only one Armature modifier or one Armature constraint.')
+                    MyError.object = mesh
 
     def CheckArmatureModData():
         # check the parameter of Modifier ARMATURE
@@ -433,26 +470,26 @@ def UpdateUnrealPotentialError():
     def CheckVertexGroupWeight():
         # Check that all vertex have a weight
         for obj in objToCheck:
-            if GetAssetType(obj) == "SkeletalMesh":
-                childs = GetExportDesiredChilds(obj)
-                for child in childs:
-                    if child.type == "MESH":
+            meshs = GetSkeletonMeshs(obj)
+            for meshs in meshs:
+                if meshs.type == "MESH":
+                    if ContainsArmatureModifier(meshs):
                         # Result data
                         VertexWithZeroWeight = GetVertexWithZeroWeight(
                             obj,
-                            child)
+                            meshs)
                         if len(VertexWithZeroWeight) > 0:
                             MyError = PotentialErrors.add()
-                            MyError.name = child.name
+                            MyError.name = meshs.name
                             MyError.type = 1
                             MyError.text = (
-                                'Object named "'+child.name +
+                                'Object named "'+meshs.name +
                                 '" contains '+str(len(VertexWithZeroWeight)) +
                                 ' vertex with zero cumulative valid weight.')
                             MyError.text += (
                                 '\nNote: Vertex groups must have' +
                                 ' a bone with the same name to be valid.')
-                            MyError.object = child
+                            MyError.object = meshs
                             MyError.selectVertexButton = True
                             MyError.selectOption = "VertexWithZeroWeight"
 
