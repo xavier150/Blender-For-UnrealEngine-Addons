@@ -434,13 +434,17 @@ def CorrectExtremUVAtExport(obj):
 
 def ConvertArmatureConstraintToModifiers(armature):
     for obj in GetExportDesiredChilds(armature):
-        obj["BFU_PreviousEnabledArmatureConstraints"] = []
+        previous_enabled_armature_constraints = []
+
         for const in obj.constraints:
             if const.enabled is True:
-                obj["BFU_PreviousEnabledArmatureConstraints"].append(const.name)
+                previous_enabled_armature_constraints.append(const.name)
 
                 # Disable constraint
                 const.enabled = False
+
+        # Save data for reset after export
+        obj["BFU_PreviousEnabledArmatureConstraints"] = previous_enabled_armature_constraints
 
     # TO DO:
 
@@ -454,8 +458,6 @@ def ResetArmatureConstraintToModifiers(armature):
 
                     # Enable back constraint
                     const.enabled = True
-
-            del obj["BFU_PreviousEnabledArmatureConstraints"]
 
     # TO DO:
 

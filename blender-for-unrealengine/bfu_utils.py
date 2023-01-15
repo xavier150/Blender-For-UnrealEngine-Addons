@@ -1954,7 +1954,6 @@ def GetArmatureRootBones(obj):
             for bone in obj.data.bones:
                 if bone.use_deform:
                     rootBone = getRootBoneParent(bone)
-                    print(rootBone.name + " --> " + bone.name)
                     if rootBone not in rootBones:
                         rootBones.append(rootBone)
     return rootBones
