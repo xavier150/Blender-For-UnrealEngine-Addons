@@ -285,7 +285,7 @@ def UpdateUnrealPotentialError():
                         ' z:'+str(obj.scale.z))
                     MyError.object = obj
 
-    def CheckArmatureModNumber():
+    def CheckArmatureNumber():
         # check Modifier or Constraint ARMATURE number = 1
         for obj in objToCheck:
             meshs = GetSkeletonMeshs(obj)
@@ -326,22 +326,30 @@ def UpdateUnrealPotentialError():
     def CheckArmatureModData():
         # check the parameter of Modifier ARMATURE
         for obj in MeshTypeToCheck:
-            for modif in obj.modifiers:
-                if modif.type == "ARMATURE":
-                    if modif.use_deform_preserve_volume:
+            for mod in obj.modifiers:
+                if mod.type == "ARMATURE":
+                    if mod.use_deform_preserve_volume:
                         MyError = PotentialErrors.add()
                         MyError.name = obj.name
                         MyError.type = 2
                         MyError.text = (
                             'In object "'+obj.name +
-                            '" the modifier '+modif.type +
-                            ' named "'+modif.name +
+                            '" the modifier '+mod.type +
+                            ' named "'+mod.name +
                             '". The parameter Preserve Volume' +
                             ' must be set to False.')
                         MyError.object = obj
-                        MyError.itemName = modif.name
+                        MyError.itemName = mod.name
                         MyError.correctRef = "PreserveVolume"
                         MyError.correctlabel = 'Set Preserve Volume to False'
+
+    def CheckArmatureConstData():
+        # check the parameter of constraint ARMATURE
+        for obj in MeshTypeToCheck:
+            for const in obj.constraints:
+                if const.type == "ARMATURE":
+                    pass
+                    # TO DO.
 
     def CheckArmatureBoneData():
         # check the parameter of the ARMATURE bones
@@ -520,8 +528,9 @@ def UpdateUnrealPotentialError():
     CheckUVMaps()
     CheckBadStaicMeshExportedLikeSkeletalMesh()
     CheckArmatureScale()
-    CheckArmatureModNumber()
+    CheckArmatureNumber()
     CheckArmatureModData()
+    CheckArmatureConstData()
     CheckArmatureBoneData()
     CheckArmatureValidChild()
     CheckArmatureMultipleRoots()
