@@ -427,6 +427,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Full addon refactoring.
 - New: Ability to specify skeleton asset for SkeletalMesh (Thanks Salireths!)
 - New: Ability to specify which module (plugin) to import to (Thanks Salireths!)
+- New: SkeletalMesh now support Armature from constraint.
 - New Support for Export UV From Geometry Node.
 - Fix axis flippings on camera animation can be disabled.
 - Correct Extrem UV Scale option moved from addon pref to object settings.
