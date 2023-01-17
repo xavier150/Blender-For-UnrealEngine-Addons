@@ -936,14 +936,18 @@ def getLastRootBone(armature):
                     return bone.name
 
 
-def createParentRigPointBone(armature, SourceBone, WillBeTheParent=True):
+def createParentRigPointBone(armature, SourceBone, WillBeTheParent=True, bone_name=None):
 
     consp = armature.mar_construct_prefix
     dp = armature.mar_deform_prefix
     rp = armature.mar_rig_prefix
     rjp = armature.mar_rig_joint_prefix
 
-    RtBone = armature.data.edit_bones.new(rjp+"parent_"+SourceBone)
+    if bone_name:
+        RtBone = armature.data.edit_bones.new(bone_name)
+    else:
+        RtBone = armature.data.edit_bones.new(rjp+"parent_"+SourceBone)
+
     changeCurrentLayer(armature.mar_rig_joint_layer, RtBone)
     RtBone.head = armature.data.edit_bones[SourceBone].head
     RtBone.tail = armature.data.edit_bones[SourceBone].tail
@@ -961,8 +965,8 @@ def subdiviseOneBone(armature, EditBone, SplitNumber=2, KeepParent=True):
     dp = armature.mar_deform_prefix
 
     # Vars
-    OriginalHead = EditBone.head + mathutils.Vector((0,0,0))
-    OriginalTail = EditBone.tail + mathutils.Vector((0,0,0))
+    OriginalHead = EditBone.head + mathutils.Vector((0, 0, 0))
+    OriginalTail = EditBone.tail + mathutils.Vector((0, 0, 0))
 
     # Duplication
     Chain = []
