@@ -2612,7 +2612,7 @@ class BFU_PT_Export(bpy.types.Panel):
                         "Please save this .blend file before export.")
                     return False
 
-                if IsTweakmode():
+                if bbpl.basics.IsTweakmode():
                     # Need exit Tweakmode because the Animation data is read only.
                     self.report(
                         {'WARNING'},

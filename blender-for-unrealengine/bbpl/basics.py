@@ -35,6 +35,23 @@ from mathutils import Vector
 from mathutils import Quaternion
 
 
+def IsTweakmode():
+    # TO DO
+    return bpy.context.scene.is_nla_tweakmode
+
+
+def EnterTweakmode():
+    # TO DO
+    # bpy.ops.nla.tweakmode_enter()
+    pass
+
+
+def ExitTweakmode():
+    # TO DO
+    # bpy.ops.nla.tweakmode_exit()
+    pass
+
+
 def is_deleted(o):
     if o and o is not None:
         return not (o.name in bpy.data.objects)

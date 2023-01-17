@@ -106,7 +106,7 @@ def ExportSingleFbxNLAAnim(
 
     export_procedure = active.bfu_export_procedure
 
-    animation_data = AnimationManagment()
+    animation_data = bbpl.anim_utils.AnimationManagment()
     animation_data.SaveAnimationData(obj)
     animation_data.SetAnimationData(active, True)
 
