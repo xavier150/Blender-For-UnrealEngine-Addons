@@ -50,15 +50,6 @@ class SavedBones():
             self.hide = bone.hide
 
 
-class SavedCollection():
-
-    def __init__(self, col):
-        if col:
-            self.name = col.name
-            self.hide_select = col.hide_select
-            self.hide_viewport = col.hide_viewport
-
-
 class SavedViewLayerChildren():
 
     def __init__(self, vlayer, childCol):
