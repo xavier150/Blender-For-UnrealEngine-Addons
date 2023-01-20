@@ -84,72 +84,6 @@ class SavedViewLayerChildren():
                 SavedViewLayerChildren(vlayer, children)
 
 
-class UserSelectSave():
-    def __init__(self):
-
-        # Select
-        self.user_active = None
-        self.user_active_name = ""
-        self.user_selecteds = []
-        self.user_selected_names = []
-
-        # Stats
-        self.user_mode = None
-
-    def SaveCurrentSelect(self):
-        # Save data (This can take time)
-
-        c = bpy.context
-        # Select
-        self.user_active = c.active_object  # Save current active object
-        if self.user_active:
-            self.user_active_name = self.user_active.name
-
-        self.user_selecteds = c.selected_objects  # Save current selected objects
-        self.user_selected_names = []
-        for obj in c.selected_objects:
-            self.user_selected_names.append(obj.name)
-
-    def ResetSelectByRef(self):
-        self.SaveMode()
-        bbpl.utils.SafeModeSet("OBJECT", bpy.ops.object)
-        bpy.ops.object.select_all(action='DESELECT')
-        for obj in bpy.data.objects:  # Resets previous selected object if still exist
-            if obj in self.user_selecteds:
-                obj.select_set(True)
-
-        bpy.context.view_layer.objects.active = self.user_active
-
-        self.ResetModeAtSave()
-
-    def ResetSelectByName(self):
-
-        self.SaveMode()
-        bbpl.utils.SafeModeSet("OBJECT", bpy.ops.object)
-        bpy.ops.object.select_all(action='DESELECT')
-        for obj in bpy.data.objects:
-            if obj.name in self.user_selected_names:
-                if obj.name in bpy.context.view_layer.objects:
-                    bpy.data.objects[obj.name].select_set(True)  # Use the name because can be duplicated name
-
-        if self.user_active_name != "":
-            if self.user_active_name in bpy.data.objects:
-                if self.user_active_name in bpy.context.view_layer.objects:
-                    bpy.context.view_layer.objects.active = bpy.data.objects[self.user_active_name]
-
-        self.ResetModeAtSave()
-
-    def SaveMode(self):
-        if self.user_active:
-            if bpy.ops.object.mode_set.poll():
-                self.user_mode = self.user_active.mode  # Save current mode
-
-    def ResetModeAtSave(self):
-        if self.user_mode:
-            if bpy.ops.object:
-                bbpl.utils.SafeModeSet(self.user_mode, bpy.ops.object)
-
-
 class MarkerSequence():
     def __init__(self, marker):
         scene = bpy.context.scene
@@ -889,7 +823,7 @@ def SelectParentAndDesiredChilds(obj):
 
 
 def RemoveSocketFromSelectForProxyArmature():
-    select = UserSelectSave()
+    select = bbpl.utils.UserSelectSave()
     select.SaveCurrentSelect()
     # With skeletal mesh the socket must be not exported,
     # ue4 read it like a bone

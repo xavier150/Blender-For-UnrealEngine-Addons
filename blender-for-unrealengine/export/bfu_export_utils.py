@@ -144,12 +144,12 @@ def DuplicateSelectForExport(new_name="duplicated Obj"):
             self.duplicate_select = None
 
         def SetOriginSelect(self):
-            select = UserSelectSave()
+            select = bbpl.utils.UserSelectSave()
             select.SaveCurrentSelect()
             self.origin_select = select
 
         def SetDuplicateSelect(self):
-            select = UserSelectSave()
+            select = bbpl.utils.UserSelectSave()
             select.SaveCurrentSelect()
             self.duplicate_select = select
 
@@ -221,7 +221,7 @@ def ResetDuplicateNameAfterExport(duplicate_data):
 
 
 def MakeSelectVisualReal():
-    select = UserSelectSave()
+    select = bbpl.utils.UserSelectSave()
     select.SaveCurrentSelect()
 
     # Save object list
