@@ -619,7 +619,7 @@ def TryToCorrectPotentialError(errorIndex):
 
     local_view_areas = MoveToGlobalView()
 
-    MyCurrentDataSave = UserSceneSave()
+    MyCurrentDataSave = bbpl.utils.UserSceneSave()
     MyCurrentDataSave.SaveCurrentScene()
 
     SafeModeSet('OBJECT', MyCurrentDataSave.user_select_class.user_active)

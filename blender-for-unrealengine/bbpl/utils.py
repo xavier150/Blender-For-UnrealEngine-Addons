@@ -75,11 +75,10 @@ class UserSceneSave():
     def __init__(self):
 
         # Select
-        self.user_active = None
-        self.user_active_name = None
+        self.user_select_class = UserSelectSave()
+
         self.user_bone_active = None
-        self.user_bone_active_name = None
-        self.user_selected = []
+        self.user_bone_active_name = ""
 
         # Stats
         self.user_mode = None
@@ -89,7 +88,7 @@ class UserSceneSave():
         self.objects = []
         self.object_bones = []
         self.collections = []
-        self.view_layers_children = []
+        self.view_layer_collections = []
         self.action_names = []
         self.collection_names = []
 
@@ -98,15 +97,12 @@ class UserSceneSave():
 
         c = bpy.context
         # Select
-        self.user_active = c.active_object  # Save current active object
-        if self.user_active:
-            self.user_active_name = self.user_active.name
-        self.user_selected = c.selected_objects  # Save current selected objects
+        self.user_select_class.SaveCurrentSelect()
 
         # Stats
-        if self.user_active:
+        if self.user_select_class.user_active:
             if bpy.ops.object.mode_set.poll():
-                self.user_mode = self.user_active.mode  # Save current mode
+                self.user_mode = self.user_select_class.user_active.mode  # Save current mode
         self.use_simplify = bpy.context.scene.render.use_simplify
 
         # Data
@@ -115,70 +111,52 @@ class UserSceneSave():
         for col in bpy.data.collections:
             self.collections.append(SavedCollection(col))
         for vlayer in c.scene.view_layers:
-            for childCol in vlayer.layer_collection.children:
-                self.view_layers_children.append(SavedViewLayerChildren(vlayer, childCol))
+            layer_collections = bbpl.utils.getLayerCollectionsRecursive(vlayer.layer_collection)
+            for layer_collection in layer_collections:
+                self.view_layer_collections.append(SavedViewLayerChildren(vlayer, layer_collection))
         for action in bpy.data.actions:
             self.action_names.append(action.name)
         for collection in bpy.data.collections:
             self.collection_names.append(collection.name)
 
         # Data for armature
-        if self.user_active:
-            if self.user_active.type == "ARMATURE":
-                if self.user_active.data.bones.active:
-                    self.user_bone_active = self.user_active.data.bones.active
-                    self.user_bone_active_name = self.user_active.data.bones.active.name
-                for bone in self.user_active.data.bones:
+        if self.user_select_class.user_active:
+            if self.user_select_class.user_active.type == "ARMATURE":
+                if self.user_select_class.user_active.data.bones.active:
+                    self.user_bone_active = self.user_select_class.user_active.data.bones.active
+                    self.user_bone_active_name = self.user_select_class.user_active.data.bones.active.name
+                for bone in self.user_select_class.user_active.data.bones:
                     self.object_bones.append(SavedBones(bone))
 
     def ResetSelectByRef(self):
-        safeModeSet(bpy.ops.object, "OBJECT")
-        bpy.ops.object.select_all(action='DESELECT')
-        for obj in bpy.data.objects:  # Resets previous selected object if still exist
-            if obj in self.user_selected:
-                obj.select_set(True)
-
-        bpy.context.view_layer.objects.active = self.user_active
-
-        self.ResetModeAtSave()
+        self.user_select_class.ResetSelectByRef()
         self.ResetBonesSelectByName()
 
     def ResetSelectByName(self):
-        safeModeSet(bpy.ops.object, "OBJECT")
-        bpy.ops.object.select_all(action='DESELECT')
-        for obj in self.objects:  # Resets previous selected object if still exist
-            if obj.select:
-                if obj.name in bpy.data.objects:
-                    bpy.data.objects[obj.name].select_set(True)
-
-        if self.user_active_name:
-            if self.user_active_name in bpy.data.objects:
-                bpy.context.view_layer.objects.active = bpy.data.objects[self.user_active_name]
-
-        self.ResetModeAtSave()
+        self.user_select_class.ResetSelectByName()
         self.ResetBonesSelectByName()
 
     def ResetBonesSelectByName(self):
         # Work only in pose mode!
         if len(self.object_bones) > 0:
-            if self.user_active:
+            if self.user_select_class.user_active:
                 if bpy.ops.object.mode_set.poll():
-                    if self.user_active.mode == "POSE":
+                    if self.user_select_class.user_active.mode == "POSE":
                         bpy.ops.pose.select_all(action='DESELECT')
                         for bone in self.object_bones:
                             if bone.select:
-                                if bone.name in self.user_active.data.bones:
-                                    self.user_active.data.bones[bone.name].select = True
+                                if bone.name in self.user_select_class.user_active.data.bones:
+                                    self.user_select_class.user_active.data.bones[bone.name].select = True
 
                         if self.user_bone_active_name is not None:
-                            if self.user_bone_active_name in self.user_active.data.bones:
-                                new_active = self.user_active.data.bones[self.user_bone_active_name]
-                                self.user_active.data.bones.active = new_active
+                            if self.user_bone_active_name in self.user_select_class.user_active.data.bones:
+                                new_active = self.user_select_class.user_active.data.bones[self.user_bone_active_name]
+                                self.user_select_class.user_active.data.bones.active = new_active
 
     def ResetModeAtSave(self):
         if self.user_mode:
             if bpy.ops.object:
-                safeModeSet(bpy.ops.object, self.user_mode)
+                SafeModeSet(self.user_mode, bpy.ops.object)
 
     def ResetSceneAtSave(self):
         scene = bpy.context.scene
@@ -193,6 +171,9 @@ class UserSceneSave():
                     bpy.data.objects[obj.name].hide_select = obj.hide_select
                 if bpy.data.objects[obj.name].hide_viewport != obj.hide_viewport:
                     bpy.data.objects[obj.name].hide_viewport = obj.hide_viewport
+                if bpy.data.objects[obj.name].hide_get() != obj.hide:
+                    bpy.data.objects[obj.name].hide_set(obj.hide)
+
             else:
                 print("/!\\ "+obj.name+" not found in bpy.data.objects")
 
@@ -207,16 +188,25 @@ class UserSceneSave():
                 print("/!\\ "+col.name+" not found in bpy.data.collections")
 
         # Reset hide in and viewport (collections from view_layers)
-        for childCol in self.view_layers_children:
-            if childCol.vlayer_name in scene.view_layers:
-                view_layer = scene.view_layers[childCol.vlayer_name]
-                if childCol.name in view_layer.layer_collection.children:
-                    layer_col_children = view_layer.layer_collection.children[childCol.name]
 
-                    if layer_col_children.exclude != childCol.exclude:
-                        layer_col_children.exclude = childCol.exclude
-                    if layer_col_children.hide_viewport != childCol.hide_viewport:
-                        layer_col_children.hide_viewport = childCol.hide_viewport
+        for vlayer in scene.view_layers:
+            layer_collections = getLayerCollectionsRecursive(vlayer.layer_collection)
+
+            def getLayerCollectionInList(name):
+                for layer_collection in layer_collections:
+                    if layer_collection.name == name:
+                        return layer_collection
+
+            for view_layer_collection in self.view_layer_collections:
+                if view_layer_collection.vlayer_name in scene.view_layers:
+
+                    layer_collection = getLayerCollectionInList(view_layer_collection.name)
+
+                    if layer_collection:
+                        if layer_collection.exclude != view_layer_collection.exclude:
+                            layer_collection.exclude = view_layer_collection.exclude
+                        if layer_collection.hide_viewport != view_layer_collection.hide_viewport:
+                            layer_collection.hide_viewport = view_layer_collection.hide_viewport
 
 
 class UserArmatureDataSave():

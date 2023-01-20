@@ -278,7 +278,7 @@ def ExportForUnrealEngine():
 
     local_view_areas = MoveToGlobalView()
 
-    MyCurrentDataSave = UserSceneSave()
+    MyCurrentDataSave = bbpl.utils.UserSceneSave()
     MyCurrentDataSave.SaveCurrentScene()
 
     for obj in bpy.data.objects:
