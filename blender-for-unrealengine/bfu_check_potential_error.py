@@ -546,7 +546,7 @@ def UpdateUnrealPotentialError():
 def SelectPotentialErrorObject(errorIndex):
     # Select potential error
 
-    SafeModeSet('OBJECT', bpy.context.active_object)
+    bbpl.utils.SafeModeSet('OBJECT', bpy.context.active_object)
     scene = bpy.context.scene
     error = scene.potentialErrorList[errorIndex]
     obj = error.object
@@ -569,7 +569,7 @@ def SelectPotentialErrorObject(errorIndex):
 def SelectPotentialErrorVertex(errorIndex):
     # Select potential error
     SelectPotentialErrorObject(errorIndex)
-    SafeModeSet('EDIT')
+    bbpl.utils.SafeModeSet('EDIT')
 
     scene = bpy.context.scene
     error = scene.potentialErrorList[errorIndex]
@@ -577,11 +577,11 @@ def SelectPotentialErrorVertex(errorIndex):
     bpy.ops.mesh.select_mode(type="VERT")
     bpy.ops.mesh.select_all(action='DESELECT')
 
-    SafeModeSet('OBJECT')
+    bbpl.utils.SafeModeSet('OBJECT')
     if error.selectOption == "VertexWithZeroWeight":
         for vertex in GetVertexWithZeroWeight(obj.parent, obj):
             vertex.select = True
-    SafeModeSet('EDIT')
+    bbpl.utils.SafeModeSet('EDIT')
     bpy.ops.view3d.view_selected()
     return obj
 
@@ -589,7 +589,7 @@ def SelectPotentialErrorVertex(errorIndex):
 def SelectPotentialErrorPoseBone(errorIndex):
     # Select potential error
     SelectPotentialErrorObject(errorIndex)
-    SafeModeSet('POSE')
+    bbpl.utils.SafeModeSet('POSE')
 
     scene = bpy.context.scene
     error = scene.potentialErrorList[errorIndex]
@@ -622,7 +622,7 @@ def TryToCorrectPotentialError(errorIndex):
     MyCurrentDataSave = bbpl.utils.UserSceneSave()
     MyCurrentDataSave.SaveCurrentScene()
 
-    SafeModeSet('OBJECT', MyCurrentDataSave.user_select_class.user_active)
+    bbpl.utils.SafeModeSet('OBJECT', MyCurrentDataSave.user_select_class.user_active)
 
     print("Start correct")
 
@@ -658,7 +658,7 @@ def TryToCorrectPotentialError(errorIndex):
     if error.correctRef == "CreateUV":
         obj = error.object
         SelectObj(obj)
-        if SafeModeSet("EDIT", obj):
+        if bbpl.utils.SafeModeSet("EDIT", obj):
             bpy.ops.uv.smart_project()
             successCorrect = True
         else:

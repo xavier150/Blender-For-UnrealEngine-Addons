@@ -112,7 +112,7 @@ class UserSelectSave():
 
     def ResetSelectByRef(self):
         self.SaveMode()
-        SafeModeSet("OBJECT", bpy.ops.object)
+        bbpl.utils.SafeModeSet("OBJECT", bpy.ops.object)
         bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.data.objects:  # Resets previous selected object if still exist
             if obj in self.user_selecteds:
@@ -125,7 +125,7 @@ class UserSelectSave():
     def ResetSelectByName(self):
 
         self.SaveMode()
-        SafeModeSet("OBJECT", bpy.ops.object)
+        bbpl.utils.SafeModeSet("OBJECT", bpy.ops.object)
         bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.data.objects:
             if obj.name in self.user_selected_names:
@@ -147,7 +147,7 @@ class UserSelectSave():
     def ResetModeAtSave(self):
         if self.user_mode:
             if bpy.ops.object:
-                SafeModeSet(self.user_mode, bpy.ops.object)
+                bbpl.utils.SafeModeSet(self.user_mode, bpy.ops.object)
 
 
 class MarkerSequence():
@@ -224,20 +224,6 @@ class TimelineMarkerSequence():
                 if frame >= marker_sequence.start and frame <= marker_sequence.end:
                     return marker_sequence
         return None
-
-
-def SafeModeSet(target_mode='OBJECT', obj=None):
-    if bpy.ops.object.mode_set.poll():
-        if obj:
-            if obj.mode != target_mode:
-                bpy.ops.object.mode_set(mode=target_mode)
-                return True
-
-        else:
-            bpy.ops.object.mode_set(mode=target_mode)
-            return True
-
-    return False
 
 
 class CounterTimer():
@@ -716,7 +702,7 @@ def GetExportRealSurfaceArea(obj):
     scene = bpy.context.scene
 
     local_view_areas = MoveToGlobalView()
-    SafeModeSet('OBJECT')
+    bbpl.utils.SafeModeSet('OBJECT')
 
     SavedSelect = GetCurrentSelection()
     SelectParentAndDesiredChilds(obj)
@@ -919,7 +905,7 @@ def GoToMeshEditMode():
     for obj in bpy.context.selected_objects:
         if obj.type == "MESH":
             bpy.context.view_layer.objects.active = obj
-            SafeModeSet('EDIT')
+            bbpl.utils.SafeModeSet('EDIT')
 
             return True
     return False

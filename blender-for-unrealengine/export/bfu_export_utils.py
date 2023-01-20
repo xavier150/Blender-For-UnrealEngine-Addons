@@ -424,7 +424,7 @@ def CorrectExtremUVAtExport(obj):
         SavedSelect = GetCurrentSelection()
         if GoToMeshEditMode():
             CorrectExtremeUV(2)
-            SafeModeSet('OBJECT')
+            bbpl.utils.SafeModeSet('OBJECT')
             SetCurrentSelection(SavedSelect)
             return True
     return False

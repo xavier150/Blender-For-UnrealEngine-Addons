@@ -97,7 +97,7 @@ def ExportSingleFbxAction(
     userAction_blend_type = obj.animation_data.action_blend_type
     userAction_influence = obj.animation_data.action_influence
 
-    SafeModeSet('OBJECT')
+    bbpl.utils.SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
     asset_name = PrepareExportName(obj, True)

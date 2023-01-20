@@ -89,7 +89,7 @@ def ExportSingleFbxNLAAnim(
     export_as_proxy = GetExportAsProxy(obj)
     export_proxy_child = GetExportProxyChild(obj)
 
-    SafeModeSet('OBJECT')
+    bbpl.utils.SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
     asset_name = PrepareExportName(obj, True)

@@ -82,7 +82,7 @@ def ExportSingleAlembicAnimation(
     # Export a single alembic animation
 
     scene = bpy.context.scene
-    SafeModeSet('OBJECT')
+    bbpl.utils.SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
 

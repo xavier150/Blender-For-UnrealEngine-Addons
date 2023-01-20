@@ -156,7 +156,7 @@ class UserSceneSave():
     def ResetModeAtSave(self):
         if self.user_mode:
             if bpy.ops.object:
-                SafeModeSet(self.user_mode, bpy.ops.object)
+                bbpl.utils.SafeModeSet(self.user_mode, bpy.ops.object)
 
     def ResetSceneAtSave(self):
         scene = bpy.context.scene
@@ -254,18 +254,18 @@ def modeSetOnTarget(target_object=None, target_mode='OBJECT'):
     return True
 
 
+def SafeModeSet(target_mode='OBJECT', obj=None):
+    if bpy.ops.object.mode_set.poll():
+        if obj:
+            if obj.mode != target_mode:
+                bpy.ops.object.mode_set(mode=target_mode)
+                return True
 
-def safeModeSet(obj=None, target_mode='OBJECT'):
+        else:
+            bpy.ops.object.mode_set(mode=target_mode)
+            return True
 
-    if obj:
-        target = obj
-    else:
-        target = bpy.ops.object
-
-    print("Start switch on mode {target_mode} on {target.name}")
-    bpy.ops.object.mode_set(mode=target_mode)
-
-    return True
+    return False
 
 
     '''

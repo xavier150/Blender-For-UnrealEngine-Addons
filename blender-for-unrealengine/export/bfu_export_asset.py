@@ -303,7 +303,7 @@ def ExportForUnrealEngine():
             if layer_collection.hide_viewport:
                 layer_collection.hide_viewport = False
 
-    SafeModeSet('OBJECT', MyCurrentDataSave.user_select_class.user_active)
+    bbpl.utils.SafeModeSet('OBJECT', MyCurrentDataSave.user_select_class.user_active)
 
     if addon_prefs.revertExportPath:
         RemoveFolderTree(bpy.path.abspath(scene.export_static_file_path))

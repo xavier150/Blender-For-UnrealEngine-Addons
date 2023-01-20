@@ -100,7 +100,7 @@ def ExportSingleStaticMeshCollection(
     addon_prefs = GetAddonPrefs()
     collection = bpy.data.collections[collectionName]
 
-    SafeModeSet('OBJECT')
+    bbpl.utils.SafeModeSet('OBJECT')
 
     SelectCollectionObjects(collection)
     duplicate_data = DuplicateSelectForExport()
