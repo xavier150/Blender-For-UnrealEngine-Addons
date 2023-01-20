@@ -38,6 +38,7 @@ class SavedObject():
         if obj:
             self.name = obj.name
             self.select = obj.select_get()
+            self.hide = obj.hide_get()
             self.hide_select = obj.hide_select
             self.hide_viewport = obj.hide_viewport
 

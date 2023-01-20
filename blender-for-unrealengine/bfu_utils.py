@@ -41,17 +41,6 @@ from . import bfu_basics
 from .bfu_basics import *
 
 
-class SavedObject():
-
-    def __init__(self, obj):
-        if obj:
-            self.name = obj.name
-            self.select = obj.select_get()
-            self.hide = obj.hide_get()
-            self.hide_select = obj.hide_select
-            self.hide_viewport = obj.hide_viewport
-
-
 class SavedBones():
 
     def __init__(self, bone):
