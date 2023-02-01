@@ -1268,29 +1268,31 @@ def GetObjExportName(obj):
 
 def GetObjExportDir(obj, abspath=False):
     # Generate assset folder path
-    FolderName = ValidDirName(obj.exportFolderName)
+    folder_name = ValidDirName(obj.exportFolderName)
+    obj_name = ValidDirName(obj.name)  # Fix obj name
 
     scene = bpy.context.scene
     if GetAssetType(obj) == "SkeletalMesh":
         dirpath = os.path.join(
             scene.export_skeletal_file_path,
-            FolderName,
+            folder_name,
             GetObjExportName(obj))
     if GetAssetType(obj) == "Alembic":
         dirpath = os.path.join(
             scene.export_alembic_file_path,
-            FolderName,
-            obj.name)
+            folder_name,
+            obj_name)
     if GetAssetType(obj) == "StaticMesh":
         dirpath = os.path.join(
             scene.export_static_file_path,
-            FolderName)
+            folder_name)
     if GetAssetType(obj) == "Camera":
         dirpath = os.path.join(
             scene.export_camera_file_path,
-            FolderName)
+            folder_name)
     if abspath:
         return bpy.path.abspath(dirpath)
+        
     else:
         return dirpath
 
