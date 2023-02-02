@@ -424,22 +424,22 @@ It is now possible to force the duration of an animation according to the scene 
 == Rev 0.4.0 ==
 
 - UI updated
-- Full addon refactoring.
-- New: Ability to specify skeleton asset for SkeletalMesh (Thanks Salireths!)
-- New: Ability to specify which module (plugin) to import to (Thanks Salireths!)
-- New: SkeletalMesh now support Armature from constraint.
-- New Support for Export UV From Geometry Node.
-- Fix axis flippings on camera animation can be disabled.
-- Correct Extrem UV Scale option moved from addon pref to object settings.
-- Add support NearClippingPlane in camera export.
-- Fixed: Vertex Colors refactored into generic Color Attributes and not supported by the addon.
-- Fixed: Vertex color would always be replaced. (Thanks ScrapIO!)
-- Fixed: Mesh LODs would not have their vertex color information imported. (Thanks ScrapIO!)
-- Fixed: Skeleton detection use the wrong prefix.
-- Fixed: Copy Cine Cameras return Regular Cameras.
-- Fixed: Crashes when pasting via the "Copy Regular Cameras"
-- Fixed: Convert to collision work only if parent is a Mesh.
-- Fixed: StaticSocketsAdd90X option break non uniform scale sockets.
-- Fixed: Collection staic mesh don't use Sub Folder Name.
-- Fixed: Sockets transform are not apply on Collection staic mesh.
-- Fixed: Some collections keep hidden during export and exported file is wrong.
+- Full addon refactoring
+- New Feature: Ability to specify skeleton asset for SkeletalMesh (Thanks to Salireths!)
+- New Feature: Ability to specify which module (plugin) to import (Thanks to Salireths!)
+- New Feature: SkeletalMesh now supports Armature from constraints
+- New Feature: Support for exporting UV from Geometry Node
+- Fixed: Axis flipping on camera animation can now be disabled
+- Corrected: Extreme UV Scale option moved from addon preferences to object settings
+- Added support for NearClippingPlane in camera export
+- Fixed: Vertex Colors refactored into generic Color Attributes and no longer supported by the addon
+- Fixed: Vertex colors would always be replaced (Thanks to ScrapIO!)
+- Fixed: Mesh LODs did not import vertex color information (Thanks to ScrapIO!)
+- Fixed: Skeleton detection used the wrong prefix
+- Fixed: Copying Cine Cameras returned Regular Cameras
+- Fixed: Crashes when pasting via "Copy Regular Cameras"
+- Fixed: Convert to collision only worked if parent was a Mesh
+- Fixed: StaticSocketsAdd90X option broke non-uniform scale sockets
+- Fixed: Collection static mesh did not use Sub Folder Name
+- Fixed: Socket transformations were not applied to Collection static mesh
+- Fixed: Some collections remained hidden during export and exported files were incorrect
