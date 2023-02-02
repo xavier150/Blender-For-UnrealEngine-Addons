@@ -51,6 +51,8 @@ from ..bfu_basics import *
 from .. import bfu_utils
 from ..bfu_utils import *
 
+from .. import bbpl
+
 from . import bfu_export_single_alembic_animation
 from .bfu_export_single_alembic_animation import *
 from . import bfu_export_single_fbx_action
@@ -276,7 +278,7 @@ def ExportForUnrealEngine():
 
     local_view_areas = MoveToGlobalView()
 
-    MyCurrentDataSave = UserSceneSave()
+    MyCurrentDataSave = bbpl.utils.UserSceneSave()
     MyCurrentDataSave.SaveCurrentScene()
 
     for obj in bpy.data.objects:
@@ -294,13 +296,14 @@ def ExportForUnrealEngine():
             col.hide_viewport = False
 
     for vlayer in bpy.context.scene.view_layers:
-        for childCol in vlayer.layer_collection.children:
-            if childCol.exclude:
-                childCol.exclude = False
-            if childCol.hide_viewport:
-                childCol.hide_viewport = False
+        layer_collections = bbpl.utils.getLayerCollectionsRecursive(vlayer.layer_collection)
+        for layer_collection in layer_collections:
+            if layer_collection.exclude:
+                layer_collection.exclude = False
+            if layer_collection.hide_viewport:
+                layer_collection.hide_viewport = False
 
-    SafeModeSet('OBJECT', MyCurrentDataSave.user_select_class.user_active)
+    bbpl.utils.SafeModeSet('OBJECT', MyCurrentDataSave.user_select_class.user_active)
 
     if addon_prefs.revertExportPath:
         RemoveFolderTree(bpy.path.abspath(scene.export_static_file_path))
@@ -313,6 +316,7 @@ def ExportForUnrealEngine():
     action_list = []  # Do a simple list of Action to export
     col_list = []  # Do a simple list of Collection to export
     AssetToExport = GetFinalAssetToExport()
+
     for Asset in AssetToExport:
         if Asset.type == "Action" or Asset.type == "Pose":
             if Asset.obj not in action_list:

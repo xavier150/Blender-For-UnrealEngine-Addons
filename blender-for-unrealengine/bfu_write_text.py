@@ -231,6 +231,8 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
         def __init__(self):
             scene = bpy.context.scene
             self.transform_track = {}
+            self.near_clipping_plane = {}
+            self.far_clipping_plane = {}
             self.fov = {}
             self.angle = {}
             self.lens = {}
@@ -249,16 +251,17 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
             array_scale = array_transform[2]
 
             # Fix axis flippings
-            if frame-1 in self.transform_track:
-                previous_rotation_x = self.transform_track[frame-1]["rotation_x"]
-                previous_rotation_y = self.transform_track[frame-1]["rotation_y"]
-                previous_rotation_z = self.transform_track[frame-1]["rotation_z"]
-                diff = round((array_rotation[0] - previous_rotation_x) / 180.0) * 180.0
-                array_rotation[0] = array_rotation[0] - diff
-                diff = round((array_rotation[1] - previous_rotation_y) / 180.0) * 180.0
-                array_rotation[1] = array_rotation[1] - diff
-                diff = round((array_rotation[2] - previous_rotation_z) / 180.0) * 180.0
-                array_rotation[2] = array_rotation[2] - diff
+            if camera.bfu_fix_axis_flippings:
+                if frame-1 in self.transform_track:  # Previous frame
+                    previous_rotation_x = self.transform_track[frame-1]["rotation_x"]
+                    previous_rotation_y = self.transform_track[frame-1]["rotation_y"]
+                    previous_rotation_z = self.transform_track[frame-1]["rotation_z"]
+                    diff = round((array_rotation[0] - previous_rotation_x) / 180.0) * 180.0
+                    array_rotation[0] = array_rotation[0] - diff
+                    diff = round((array_rotation[1] - previous_rotation_y) / 180.0) * 180.0
+                    array_rotation[1] = array_rotation[1] - diff
+                    diff = round((array_rotation[2] - previous_rotation_z) / 180.0) * 180.0
+                    array_rotation[2] = array_rotation[2] - diff
 
             transform = {}
             transform["location_x"] = array_location.x
@@ -278,6 +281,10 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
             self.sensor_width[frame] = getOneKeysByFcurves(camera, "sensor_width", camera.data.sensor_width, frame)
             self.sensor_height[frame] = getOneKeysByFcurves(camera, "sensor_height", camera.data.sensor_height, frame)
             self.fov[frame] = math.degrees(self.angle[frame])
+
+            # Get Clip
+            self.near_clipping_plane[frame] = getOneKeysByFcurves(camera, "clip_start", camera.data.clip_start, frame) * 100 * bpy.context.scene.unit_settings.scale_length
+            self.far_clipping_plane[frame] = getOneKeysByFcurves(camera, "clip_end", camera.data.clip_end, frame) * 100 * bpy.context.scene.unit_settings.scale_length
 
             # Get FocusDistance
             scale_length = bpy.context.scene.unit_settings.scale_length
@@ -354,6 +361,8 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
     camera_tracks.EvaluateTracks(obj, target_frame_start, target_frame_end)
 
     data['Camera transform'] = camera_tracks.transform_track
+    data["Camera NearClippingPlane"] = camera_tracks.near_clipping_plane
+    data["Camera FarClippingPlane"] = camera_tracks.far_clipping_plane
     data["Camera FieldOfView"] = camera_tracks.fov
     data["Camera FocalAngle"] = camera_tracks.angle
     data['Camera FocalLength'] = camera_tracks.lens

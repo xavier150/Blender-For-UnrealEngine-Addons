@@ -54,9 +54,12 @@ def ProcessNLAAnimExport(obj):
     scene.frame_end += 1  # Why ?
 
     MyAsset = scene.UnrealExportedAssetsList.add()
-    MyAsset.StartAssetExport(obj)
-    MyAsset.asset_type = "NlAnim"
+    MyAsset.object = obj
+    MyAsset.skeleton_name = obj.name
     MyAsset.asset_name = GetNLAExportFileName(obj)
+    MyAsset.folder_name = obj.exportFolderName
+    MyAsset.asset_type = "NlAnim"
+    MyAsset.StartAssetExport()
 
     ExportSingleFbxNLAAnim(dirpath, GetNLAExportFileName(obj), obj)
     file = MyAsset.files.add()
@@ -86,8 +89,7 @@ def ExportSingleFbxNLAAnim(
     export_as_proxy = GetExportAsProxy(obj)
     export_proxy_child = GetExportProxyChild(obj)
 
-
-    SafeModeSet('OBJECT')
+    bbpl.utils.SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
     asset_name = PrepareExportName(obj, True)
@@ -104,11 +106,9 @@ def ExportSingleFbxNLAAnim(
 
     export_procedure = active.bfu_export_procedure
 
-    animation_data = AnimationManagment()
+    animation_data = bbpl.anim_utils.AnimationManagment()
     animation_data.SaveAnimationData(obj)
     animation_data.SetAnimationData(active, True)
-    
-
 
     if export_as_proxy:
         ApplyProxyData(active)

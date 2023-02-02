@@ -9,14 +9,20 @@ import sys
 import os.path
 import json
 
+try:  # TO DO: Found a better way to check that.
+    import unreal
+except ImportError:
+    import unreal_engine as unreal
+
 
 def CheckTasks():
-    import unreal
-    if not hasattr(unreal, 'EditorAssetLibrary'):
-        print('--------------------------------------------------')
-        print('WARNING: Editor Scripting Utilities should be activated.')
-        print('Edit > Plugin > Scripting > Editor Scripting Utilities.')
-        return False
+
+    if GetUnrealVersion() >= 4.20:  # TO DO: EditorAssetLibrary was added in witch version exactly?
+        if not hasattr(unreal, 'EditorAssetLibrary'):
+            print('--------------------------------------------------')
+            print('WARNING: Editor Scripting Utilities should be activated.')
+            print('Edit > Plugin > Scripting > Editor Scripting Utilities.')
+            return False
     return True
 
 
@@ -37,12 +43,14 @@ def JsonLoadFile(json_file_path):
             return JsonLoad(json_file)
 
 
+def GetUnrealVersion():
+    version = unreal.SystemLibrary.get_engine_version().split(".")
+    float_version = int(version[0]) + float(float(version[1])/100)
+    return float_version
+
+
 def ImportAllAssets():
 
-    import unreal
-    import os.path
-    import ast
-    import json
     import string
 
     # Prepare process import
@@ -105,7 +113,7 @@ def ImportAllAssets():
             # New import task
             # Property
 
-            if asset_data["type"] == "Animation":
+            if asset_data["type"] == "Animation" or asset_data["type"] == "SkeletalMesh":
                 find_asset = unreal.find_asset(asset_data["animation_skeleton_path"])
                 if isinstance(find_asset, unreal.Skeleton):
                     OriginSkeleton = find_asset
@@ -113,6 +121,10 @@ def ImportAllAssets():
                     OriginSkeleton = find_asset.skeleton
                 else:
                     OriginSkeleton = None
+                if OriginSkeleton:
+                    print("Setting skeleton asset: " + OriginSkeleton.get_full_name())
+                else:
+                    print("Could not find skeleton at the path: " + asset_data["animation_skeleton_path"])
 
             # docs.unrealengine.com/4.26/en-US/PythonAPI/class/AssetImportTask.html
             task = unreal.AssetImportTask()
@@ -174,6 +186,7 @@ def ImportAllAssets():
             vertex_color_import_option = None
             if additional_data:
 
+                vertex_color_import_option = unreal.VertexColorImportOption.REPLACE  # Default
                 if "vertex_color_import_option" in additional_data:
                     if additional_data["vertex_color_import_option"] == "IGNORE":
                         vertex_color_import_option = unreal.VertexColorImportOption.IGNORE
@@ -182,7 +195,6 @@ def ImportAllAssets():
                     elif additional_data["vertex_color_import_option"] == "REPLACE":
                         vertex_color_import_option = unreal.VertexColorImportOption.REPLACE
 
-                vertex_color_import_option = unreal.VertexColorImportOption.REPLACE  # Default
                 if "vertex_override_color" in additional_data:
                     vertex_override_color = unreal.LinearColor(
                         additional_data["vertex_override_color"][0],
@@ -211,12 +223,16 @@ def ImportAllAssets():
                 task.get_editor_property('options').set_editor_property('import_type', unreal.AlembicImportType.SKELETAL)
 
             else:
-                if asset_data["type"] == "Animation":
+                if asset_data["type"] == "Animation" or asset_data["type"] == "SkeletalMesh":
                     if OriginSkeleton:
                         task.get_editor_property('options').set_editor_property('Skeleton', OriginSkeleton)
                     else:
-                        ImportFailList.append('Skeleton ' + asset_data["animation_skeleton_path"] + ' Not found for ' + asset_data["name"] + ' asset.')
-                        return
+                        if asset_data["type"] == "Animation":
+                            ImportFailList.append('Skeleton ' + asset_data["animation_skeleton_path"] + ' Not found for ' + asset_data["name"] + ' asset.')
+                            return
+                        else:
+                            print("Skeleton is not set, a new skeleton asset will be created...")
+
 
                 if asset_data["type"] == "StaticMesh":
                     task.get_editor_property('options').set_editor_property('original_import_type', unreal.FBXImportType.FBXIT_STATIC_MESH)
@@ -408,6 +424,16 @@ def ImportAllAssets():
                                 lodTask.destination_path = destination_path
                                 lodTask.automated = True
                                 lodTask.replace_existing = True
+                                
+                                # Set vertex color import settings to replicate base StaticMesh's behaviour
+                                if asset_data["type"] == "Alembic":
+                                    lodTask.set_editor_property('options', unreal.AbcImportSettings())
+                                else:
+                                    lodTask.set_editor_property('options', unreal.FbxImportUI())
+                                
+                                lodTask.get_editor_property('options').static_mesh_import_data.set_editor_property('vertex_color_import_option', vertex_color_import_option)
+                                lodTask.get_editor_property('options').static_mesh_import_data.set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
+                                
                                 print(destination_path, additional_data["LevelOfDetail"][lod_name])
                                 unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([lodTask])
                                 if len(lodTask.imported_object_paths) > 0:

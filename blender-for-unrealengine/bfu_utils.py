@@ -23,6 +23,7 @@ import mathutils
 import math
 import time
 import sys
+from . import bbpl
 
 from math import degrees, radians, tan
 from mathutils import Matrix
@@ -40,17 +41,6 @@ from . import bfu_basics
 from .bfu_basics import *
 
 
-class SavedObject():
-
-    def __init__(self, obj):
-        if obj:
-            self.name = obj.name
-            self.select = obj.select_get()
-            self.hide = obj.hide_get()
-            self.hide_select = obj.hide_select
-            self.hide_viewport = obj.hide_viewport
-
-
 class SavedBones():
 
     def __init__(self, bone):
@@ -58,15 +48,6 @@ class SavedBones():
             self.name = bone.name
             self.select = bone.select
             self.hide = bone.hide
-
-
-class SavedCollection():
-
-    def __init__(self, col):
-        if col:
-            self.name = col.name
-            self.hide_select = col.hide_select
-            self.hide_viewport = col.hide_viewport
 
 
 class SavedViewLayerChildren():
@@ -77,370 +58,10 @@ class SavedViewLayerChildren():
             self.name = childCol.name
             self.exclude = childCol.exclude
             self.hide_viewport = childCol.hide_viewport
+            self.children = []
 
-
-class UserSelectSave():
-    def __init__(self):
-
-        # Select
-        self.user_active = None
-        self.user_active_name = ""
-        self.user_selecteds = []
-        self.user_selected_names = []
-
-        # Stats
-        self.user_mode = None
-
-    def SaveCurrentSelect(self):
-        # Save data (This can take time)
-
-        c = bpy.context
-        # Select
-        self.user_active = c.active_object  # Save current active object
-        if self.user_active:
-            self.user_active_name = self.user_active.name
-
-        self.user_selecteds = c.selected_objects  # Save current selected objects
-        self.user_selected_names = []
-        for obj in c.selected_objects:
-            self.user_selected_names.append(obj.name)
-
-    def ResetSelectByRef(self):
-        self.SaveMode()
-        SafeModeSet("OBJECT", bpy.ops.object)
-        bpy.ops.object.select_all(action='DESELECT')
-        for obj in bpy.data.objects:  # Resets previous selected object if still exist
-            if obj in self.user_selecteds:
-                obj.select_set(True)
-
-        bpy.context.view_layer.objects.active = self.user_active
-
-        self.ResetModeAtSave()
-
-    def ResetSelectByName(self):
-
-        self.SaveMode()
-        SafeModeSet("OBJECT", bpy.ops.object)
-        bpy.ops.object.select_all(action='DESELECT')
-        for obj in bpy.data.objects:
-            if obj.name in self.user_selected_names:
-                if obj.name in bpy.context.view_layer.objects:
-                    bpy.data.objects[obj.name].select_set(True)  # Use the name because can be duplicated name
-
-        if self.user_active_name != "":
-            if self.user_active_name in bpy.data.objects:
-                if self.user_active_name in bpy.context.view_layer.objects:
-                    bpy.context.view_layer.objects.active = bpy.data.objects[self.user_active_name]
-
-        self.ResetModeAtSave()
-
-    def SaveMode(self):
-        if self.user_active:
-            if bpy.ops.object.mode_set.poll():
-                self.user_mode = self.user_active.mode  # Save current mode
-
-    def ResetModeAtSave(self):
-        if self.user_mode:
-            if bpy.ops.object:
-                SafeModeSet(self.user_mode, bpy.ops.object)
-
-
-class UserSceneSave():
-
-    def __init__(self):
-
-        # Select
-        self.user_select_class = UserSelectSave()
-
-        self.user_bone_active = None
-        self.user_bone_active_name = ""
-
-        # Stats
-        self.user_mode = None
-        self.use_simplify = False
-
-        # Data
-        self.objects = []
-        self.object_bones = []
-        self.collections = []
-        self.view_layers_children = []
-        self.action_names = []
-        self.collection_names = []
-
-    def SaveCurrentScene(self):
-        # Save data (This can take time)
-
-        c = bpy.context
-        # Select
-        self.user_select_class.SaveCurrentSelect()
-
-        # Stats
-        if self.user_select_class.user_active:
-            if bpy.ops.object.mode_set.poll():
-                self.user_mode = self.user_select_class.user_active.mode  # Save current mode
-        self.use_simplify = bpy.context.scene.render.use_simplify
-
-        # Data
-        for obj in bpy.data.objects:
-            self.objects.append(SavedObject(obj))
-        for col in bpy.data.collections:
-            self.collections.append(SavedCollection(col))
-        for vlayer in c.scene.view_layers:
-            for childCol in vlayer.layer_collection.children:
-                self.view_layers_children.append(SavedViewLayerChildren(vlayer, childCol))
-        for action in bpy.data.actions:
-            self.action_names.append(action.name)
-        for collection in bpy.data.collections:
-            self.collection_names.append(collection.name)
-
-        # Data for armature
-        if self.user_select_class.user_active:
-            if self.user_select_class.user_active.type == "ARMATURE":
-                if self.user_select_class.user_active.data.bones.active:
-                    self.user_bone_active = self.user_select_class.user_active.data.bones.active
-                    self.user_bone_active_name = self.user_select_class.user_active.data.bones.active.name
-                for bone in self.user_select_class.user_active.data.bones:
-                    self.object_bones.append(SavedBones(bone))
-
-    def ResetSelectByRef(self):
-        self.user_select_class.ResetSelectByRef()
-        self.ResetBonesSelectByName()
-
-    def ResetSelectByName(self):
-        self.user_select_class.ResetSelectByName()
-        self.ResetBonesSelectByName()
-
-    def ResetBonesSelectByName(self):
-        # Work only in pose mode!
-        if len(self.object_bones) > 0:
-            if self.user_select_class.user_active:
-                if bpy.ops.object.mode_set.poll():
-                    if self.user_select_class.user_active.mode == "POSE":
-                        bpy.ops.pose.select_all(action='DESELECT')
-                        for bone in self.object_bones:
-                            if bone.select:
-                                if bone.name in self.user_select_class.user_active.data.bones:
-                                    self.user_select_class.user_active.data.bones[bone.name].select = True
-
-                        if self.user_bone_active_name is not None:
-                            if self.user_bone_active_name in self.user_select_class.user_active.data.bones:
-                                new_active = self.user_select_class.user_active.data.bones[self.user_bone_active_name]
-                                self.user_select_class.user_active.data.bones.active = new_active
-
-    def ResetModeAtSave(self):
-        if self.user_mode:
-            if bpy.ops.object:
-                SafeModeSet(self.user_mode, bpy.ops.object)
-
-    def ResetSceneAtSave(self):
-        scene = bpy.context.scene
-        self.ResetModeAtSave()
-
-        bpy.context.scene.render.use_simplify = self.use_simplify
-
-        # Reset hide and select (bpy.data.objects)
-        for obj in self.objects:
-            if obj.name in bpy.data.objects:
-                if bpy.data.objects[obj.name].hide_select != obj.hide_select:
-                    bpy.data.objects[obj.name].hide_select = obj.hide_select
-                if bpy.data.objects[obj.name].hide_viewport != obj.hide_viewport:
-                    bpy.data.objects[obj.name].hide_viewport = obj.hide_viewport
-                if bpy.data.objects[obj.name].hide_get() != obj.hide:
-                    bpy.data.objects[obj.name].hide_set(obj.hide)
-
-            else:
-                print("/!\\ "+obj.name+" not found in bpy.data.objects")
-
-        # Reset hide and select (bpy.data.collections)
-        for col in self.collections:
-            if col.name in bpy.data.collections:
-                if bpy.data.collections[col.name].hide_select != col.hide_select:
-                    bpy.data.collections[col.name].hide_select = col.hide_select
-                if bpy.data.collections[col.name].hide_viewport != col.hide_viewport:
-                    bpy.data.collections[col.name].hide_viewport = col.hide_viewport
-            else:
-                print("/!\\ "+col.name+" not found in bpy.data.collections")
-
-        # Reset hide in and viewport (collections from view_layers)
-        for childCol in self.view_layers_children:
-            if childCol.vlayer_name in scene.view_layers:
-                view_layer = scene.view_layers[childCol.vlayer_name]
-                if childCol.name in view_layer.layer_collection.children:
-                    layer_col_children = view_layer.layer_collection.children[childCol.name]
-
-                    if layer_col_children.exclude != childCol.exclude:
-                        layer_col_children.exclude = childCol.exclude
-                    if layer_col_children.hide_viewport != childCol.hide_viewport:
-                        layer_col_children.hide_viewport = childCol.hide_viewport
-
-
-class NLA_Save():
-    def __init__(self, nla_tracks):
-        self.nla_tracks_save = None
-        if nla_tracks is not None:
-            self.SaveTracks(nla_tracks)
-
-    def SaveTracks(self, nla_tracks):
-        proxy_nla_tracks = []
-
-        for nla_track in nla_tracks:
-            proxy_nla_tracks.append(self.Proxy_NLA_Track(nla_track))
-        self.nla_tracks_save = proxy_nla_tracks
-
-    def ApplySaveOnTarget(self, target):
-        if target is None:
-            return
-        if target.animation_data is None:
-            return
-        for nla_track in self.nla_tracks_save:
-            new_nla_track = target.animation_data.nla_tracks.new()
-            # new_nla_track.active = nla_track.active
-            new_nla_track.is_solo = nla_track.is_solo
-            new_nla_track.lock = nla_track.lock
-            new_nla_track.mute = nla_track.mute
-            new_nla_track.name = nla_track.name
-            new_nla_track.select = nla_track.select
-            for strip in nla_track.strips:
-                if strip.action:
-                    new_strip = new_nla_track.strips.new(strip.name, int(strip.frame_start), strip.action)
-                    # new_strip.action = strip.action
-                    new_strip.action_frame_end = strip.action_frame_end
-                    new_strip.action_frame_start = strip.action_frame_start
-                    # new_strip.active = strip.active
-                    new_strip.blend_in = strip.blend_in
-                    new_strip.blend_out = strip.blend_out
-                    new_strip.blend_type = strip.blend_type
-                    new_strip.extrapolation = strip.extrapolation
-                    # new_strip.fcurves = strip.fcurves
-                    new_strip.frame_end = strip.frame_end
-                    # new_strip.frame_start = strip.frame_start
-                    new_strip.use_animated_influence = strip.use_animated_influence
-                    new_strip.influence = strip.influence
-                    print(new_strip.influence)
-                    print(new_strip.influence)
-                    print(new_strip.influence)
-                    print(new_strip.influence)
-                    print(new_strip.influence)
-                    print(new_strip.influence)
-                    print(new_strip.influence)
-                    # new_strip.modifiers = strip.modifiers #TO DO
-                    new_strip.mute = strip.mute
-                    # new_strip.name = strip.name
-                    new_strip.repeat = strip.repeat
-                    new_strip.scale = strip.scale
-                    new_strip.select = strip.select
-                    new_strip.strip_time = strip.strip_time
-                    # new_strip.strips = strip.strips #TO DO
-                    for i, fcurve in enumerate(strip.fcurves):
-                        if fcurve:
-                            new_fcurve = new_strip.fcurves.find(fcurve.data_path)
-                            if new_fcurve:
-                                new_fcurve.array_index = fcurve.array_index
-                                new_fcurve.color = fcurve.color
-                                new_fcurve.color_mode = fcurve.color_mode
-                                # new_fcurve.data_path = fcurve.data_path
-                                # new_fcurve.driver = fcurve.driver  #TO DO
-                                new_fcurve.extrapolation = fcurve.extrapolation
-                                new_fcurve.group = fcurve.group
-                                new_fcurve.hide = fcurve.hide
-                                # new_fcurve.is_empty = fcurve.is_empty
-                                # new_fcurve.is_valid = fcurve.is_valid
-                                # new_fcurve.keyframe_points = fcurve.keyframe_points
-                                new_fcurve.lock = fcurve.lock
-                                # new_fcurve.modifiers = fcurve.modifiers #TO DO
-                                new_fcurve.mute = fcurve.mute
-                                # new_fcurve.sampled_points = fcurve.sampled_points
-                                new_fcurve.select = fcurve.select
-                                for keyframe_point in fcurve.keyframe_points:
-                                    new_fcurve.keyframe_points.insert(keyframe_point.co[0], keyframe_point.co[1])
-
-    class Proxy_NLA_Track():
-        def __init__(self, nla_track):
-            if nla_track:
-                self.active = nla_track.active
-                self.is_solo = nla_track.is_solo
-                self.lock = nla_track.lock
-                self.mute = nla_track.mute
-                self.name = nla_track.name
-                self.select = nla_track.select
-                self.strips = []
-                for strip in nla_track.strips:
-                    self.strips.append(self.Proxy_NLA_Track_Strip(strip))
-
-        class Proxy_NLA_Track_Strip():
-            def __init__(self, strip):
-                self.action = strip.action
-                self.action_frame_end = strip.action_frame_end
-                self.action_frame_start = strip.action_frame_start
-                self.active = strip.active
-                self.blend_in = strip.blend_in
-                self.blend_out = strip.blend_out
-                self.blend_type = strip.blend_type
-                self.extrapolation = strip.extrapolation
-                self.fcurves = strip.fcurves  # TO DO
-                self.frame_end = strip.frame_end
-                self.frame_start = strip.frame_start
-                self.use_animated_influence = strip.use_animated_influence
-                self.influence = strip.influence
-                self.modifiers = strip.modifiers  # TO DO
-                self.mute = strip.mute
-                self.name = strip.name
-                self.repeat = strip.repeat
-                self.scale = strip.scale
-                self.select = strip.select
-                self.strip_time = strip.strip_time
-                # self.strips = strip.strips #TO DO
-
-
-class AnimationManagment():
-    def __init__(self):
-        self.use_animation_data = False
-        self.action = None
-        self.action_extrapolation = "HOLD"  # Default value
-        self.action_blend_type = "REPLACE"  # Default value
-        self.action_influence = 1.0  # Default value
-
-    def SaveAnimationData(self, obj):
-        if obj.animation_data is not None:
-            self.action = obj.animation_data.action
-            self.action_extrapolation = obj.animation_data.action_extrapolation
-            self.action_blend_type = obj.animation_data.action_blend_type
-            self.action_influence = obj.animation_data.action_influence
-            self.nla_tracks_save = NLA_Save(obj.animation_data.nla_tracks)
-            self.use_animation_data = True
-        else:
-            self.use_animation_data = False
-
-    def ClearAnimationData(self, obj):
-        obj.animation_data_clear()
-
-    def SetAnimationData(self, obj, copy_nla=False):
-
-        SaveItTweakmode = IsTweakmode()
-        ExitTweakmode()
-        print("Set animation data on: ", obj)
-        if self.use_animation_data:
-            obj.animation_data_create()
-
-        if obj.animation_data is not None:
-            obj.animation_data.action = self.action
-            obj.animation_data.action_extrapolation = self.action_extrapolation
-            obj.animation_data.action_blend_type = self.action_blend_type
-            obj.animation_data.action_influence = self.action_influence
-
-            if copy_nla:
-                # Clear nla_tracks
-                nla_tracks_len = len(obj.animation_data.nla_tracks)
-                for x in range(nla_tracks_len):
-                    obj.animation_data.nla_tracks.remove(obj.animation_data.nla_tracks[0])
-
-                # Add Current nla_tracks
-
-                if self.nla_tracks_save is not None:
-                    self.nla_tracks_save.ApplySaveOnTarget(obj)
-
-        if SaveItTweakmode:
-            EnterTweakmode()
+            for children in childCol.children:
+                SavedViewLayerChildren(vlayer, children)
 
 
 class MarkerSequence():
@@ -517,20 +138,6 @@ class TimelineMarkerSequence():
                 if frame >= marker_sequence.start and frame <= marker_sequence.end:
                     return marker_sequence
         return None
-
-
-def SafeModeSet(target_mode='OBJECT', obj=None):
-    if bpy.ops.object.mode_set.poll():
-        if obj:
-            if obj.mode != target_mode:
-                bpy.ops.object.mode_set(mode=target_mode)
-                return True
-
-        else:
-            bpy.ops.object.mode_set(mode=target_mode)
-            return True
-
-    return False
 
 
 class CounterTimer():
@@ -1009,7 +616,7 @@ def GetExportRealSurfaceArea(obj):
     scene = bpy.context.scene
 
     local_view_areas = MoveToGlobalView()
-    SafeModeSet('OBJECT')
+    bbpl.utils.SafeModeSet('OBJECT')
 
     SavedSelect = GetCurrentSelection()
     SelectParentAndDesiredChilds(obj)
@@ -1196,7 +803,7 @@ def SelectParentAndDesiredChilds(obj):
 
 
 def RemoveSocketFromSelectForProxyArmature():
-    select = UserSelectSave()
+    select = bbpl.utils.UserSelectSave()
     select.SaveCurrentSelect()
     # With skeletal mesh the socket must be not exported,
     # ue4 read it like a bone
@@ -1212,7 +819,7 @@ def GoToMeshEditMode():
     for obj in bpy.context.selected_objects:
         if obj.type == "MESH":
             bpy.context.view_layer.objects.active = obj
-            SafeModeSet('EDIT')
+            bbpl.utils.SafeModeSet('EDIT')
 
             return True
     return False
@@ -1377,11 +984,11 @@ def ApplySkeletalExportScale(armature, rescale, target_animation_data=None, is_a
     old_location = armature.location.copy()
 
     if target_animation_data is None:
-        armature_animation_data = AnimationManagment()
+        armature_animation_data = bbpl.anim_utils.AnimationManagment()
         armature_animation_data.SaveAnimationData(armature)
         armature_animation_data.ClearAnimationData(armature)
     else:
-        armature_animation_data = AnimationManagment()
+        armature_animation_data = bbpl.anim_utils.AnimationManagment()
         armature_animation_data.ClearAnimationData(armature)
 
     armature.location = (0, 0, 0)
@@ -1661,29 +1268,31 @@ def GetObjExportName(obj):
 
 def GetObjExportDir(obj, abspath=False):
     # Generate assset folder path
-    FolderName = ValidDirName(obj.exportFolderName)
+    folder_name = ValidDirName(obj.exportFolderName)
+    obj_name = ValidDirName(obj.name)  # Fix obj name
 
     scene = bpy.context.scene
     if GetAssetType(obj) == "SkeletalMesh":
         dirpath = os.path.join(
             scene.export_skeletal_file_path,
-            FolderName,
+            folder_name,
             GetObjExportName(obj))
     if GetAssetType(obj) == "Alembic":
         dirpath = os.path.join(
             scene.export_alembic_file_path,
-            FolderName,
-            obj.name)
+            folder_name,
+            obj_name)
     if GetAssetType(obj) == "StaticMesh":
         dirpath = os.path.join(
             scene.export_static_file_path,
-            FolderName)
+            folder_name)
     if GetAssetType(obj) == "Camera":
         dirpath = os.path.join(
             scene.export_camera_file_path,
-            FolderName)
+            folder_name)
     if abspath:
         return bpy.path.abspath(dirpath)
+        
     else:
         return dirpath
 
@@ -1788,6 +1397,8 @@ def GetImportCameraScriptCommand(objs, CineCamera=True):
             scale_x = transform_track["scale_x"]
             scale_y = transform_track["scale_y"]
             scale_z = transform_track["scale_z"]
+            NearClippingPlane = data["Camera NearClippingPlane"][frame_current]
+            FarClippingPlane = data["Camera FarClippingPlane"][frame_current]
             FieldOfView = data["Camera FieldOfView"][frame_current]
             FocalLength = data["Camera FocalLength"][frame_current]
             SensorWidth = data["Camera SensorWidth"][frame_current]
@@ -1805,18 +1416,18 @@ def GetImportCameraScriptCommand(objs, CineCamera=True):
 
             # Init SceneComponent
             if CineCamera:
-                t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=SceneComponent'/Script/CinematicCamera.Default__CineCameraActor:SceneComponent'" + "\n"
+                t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=/Script/Engine.SceneComponent'/Script/CinematicCamera.Default__CineCameraActor:SceneComponent'" + "\n"
                 t += "         " + "End Object" + "\n"
             else:
-                t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=SceneComponent'/Script/Engine.Default__CameraActor:SceneComponent'" + "\n"
+                t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=/Script/Engine.SceneComponent'/Script/Engine.Default__CameraActor:SceneComponent'" + "\n"
                 t += "         " + "End Object" + "\n"
 
             # Init CameraComponent
             if CineCamera:
-                t += "         " + "Begin Object Class=/Script/CinematicCamera.CineCameraComponent Name=\"CameraComponent\" Archetype=CineCameraComponent'/Script/CinematicCamera.Default__CineCameraActor:CameraComponent'" + "\n"
+                t += "         " + "Begin Object Class=/Script/CinematicCamera.CineCameraComponent Name=\"CameraComponent\" Archetype=/Script/CinematicCamera.CineCameraComponent'/Script/CinematicCamera.Default__CineCameraActor:CameraComponent'" + "\n"
                 t += "         " + "End Object" + "\n"
             else:
-                t += "         " + "Begin Object Class=/Script/Engine.CameraComponent Name=\"CameraComponent\" Archetype=CameraComponent'/Script/Engine.Default__CameraActor:CameraComponent'" + "\n"
+                t += "         " + "Begin Object Class=/Script/Engine.CameraComponent Name=\"CameraComponent\" Archetype=/Script/Engine.CameraComponent'/Script/Engine.Default__CameraActor:CameraComponent'" + "\n"
                 t += "         " + "End Object" + "\n"
 
             # SceneComponent
@@ -1833,6 +1444,7 @@ def GetImportCameraScriptCommand(objs, CineCamera=True):
             t += "            " + "CurrentFocalLength="+str(FocalLength)+")" + "\n"
             t += "            " + "CurrentFocusDistance="+str(FocusDistance)+")" + "\n"
             t += "            " + "CurrentFocusDistance="+str(FocusDistance)+")" + "\n"
+            t += "            " + "CustomNearClippingPlane="+str(NearClippingPlane)+")" + "\n"
             t += "            " + "FieldOfView="+str(FieldOfView)+")" + "\n"
             t += "            " + "AspectRatio="+str(AspectRatio)+")" + "\n"
             t += "         " + "End Object" + "\n"
@@ -1873,7 +1485,10 @@ def GetImportCameraScriptCommand(objs, CineCamera=True):
 
     success = True
     command = t
-    report = str(add_camera_num)+" camera(s) copied. Paste in Unreal Engine scene for import the camera. (Ctrl+V)"
+    if CineCamera:
+        report = str(add_camera_num)+" Cine camera(s) copied. Paste in Unreal Engine scene for import the camera. (Ctrl+V)"
+    else:
+        report = str(add_camera_num)+" Regular camera(s) copied. Paste in Unreal Engine scene for import the camera. (Ctrl+V)"
 
     return (success, command, report)
 
@@ -1929,7 +1544,6 @@ def GetArmatureRootBones(obj):
             for bone in obj.data.bones:
                 if bone.use_deform:
                     rootBone = getRootBoneParent(bone)
-                    print(rootBone.name + " --> " + bone.name)
                     if rootBone not in rootBones:
                         rootBones.append(rootBone)
     return rootBones

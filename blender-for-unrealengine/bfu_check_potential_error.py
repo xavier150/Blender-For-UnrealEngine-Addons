@@ -17,6 +17,7 @@
 # ======================= END GPL LICENSE BLOCK =============================
 
 
+from operator import contains
 import bpy
 import fnmatch
 import mathutils
@@ -93,6 +94,23 @@ def GetVertexWithZeroWeight(Armature, Mesh):
         if cumulateWeight == 0:
             vertices.append(vertex)
     return vertices
+
+
+def ContainsArmatureModifier(obj):
+    for mod in obj.modifiers:
+        if mod.type == "ARMATURE":
+            return True
+    return False
+
+
+def GetSkeletonMeshs(obj):
+    meshs = []
+    if GetAssetType(obj) == "SkeletalMesh":  # Skeleton /  Armature
+        childs = GetExportDesiredChilds(obj)
+        for child in childs:
+            if child.type == "MESH":
+                meshs.append(child)
+    return meshs
 
 
 def UpdateUnrealPotentialError():
@@ -267,44 +285,71 @@ def UpdateUnrealPotentialError():
                         ' z:'+str(obj.scale.z))
                     MyError.object = obj
 
-    def CheckArmatureModNumber():
-        # check that there is no more than
-        # one Modifier ARMATURE at the same time
-        for obj in MeshTypeToCheck:
-            ArmatureModifiers = 0
-            for modif in obj.modifiers:
-                if modif.type == "ARMATURE":
-                    ArmatureModifiers = ArmatureModifiers + 1
-            if ArmatureModifiers > 1:
-                MyError = PotentialErrors.add()
-                MyError.name = obj.name
-                MyError.type = 2
-                MyError.text = (
-                    'In object "'+obj.name +
-                    '" there are several Armature modifiers' +
-                    ' at the same time.' +
-                    ' Please use only one Armature modifier.')
-                MyError.object = obj
+    def CheckArmatureNumber():
+        # check Modifier or Constraint ARMATURE number = 1
+        for obj in objToCheck:
+            meshs = GetSkeletonMeshs(obj)
+            for mesh in meshs:
+                # Count
+                armature_modifiers = 0
+                armature_constraint = 0
+                for mod in mesh.modifiers:
+                    if mod.type == "ARMATURE":
+                        armature_modifiers += 1
+                for const in mesh.constraints:
+                    if const.type == "ARMATURE":
+                        armature_constraint += 1
+
+                # Check result > 1
+                if armature_modifiers + armature_constraint > 1:
+                    MyError = PotentialErrors.add()
+                    MyError.name = mesh.name
+                    MyError.type = 2
+                    MyError.text = (
+                        'In object "'+mesh.name + '" ' +
+                        str(armature_modifiers) + ' Armature modifier(s) and ' +
+                        str(armature_modifiers) + ' Armature constraint(s) was found. ' +
+                        ' Please use only one Armature modifier or one Armature constraint.')
+                    MyError.object = mesh
+
+                # Check result == 0
+                if armature_modifiers + armature_constraint == 0:
+                    MyError = PotentialErrors.add()
+                    MyError.name = mesh.name
+                    MyError.type = 2
+                    MyError.text = (
+                        'In object "'+mesh.name + '" ' +
+                        ' no Armature modifiers or constraints was found. ' +
+                        ' Please use only one Armature modifier or one Armature constraint.')
+                    MyError.object = mesh
 
     def CheckArmatureModData():
         # check the parameter of Modifier ARMATURE
         for obj in MeshTypeToCheck:
-            for modif in obj.modifiers:
-                if modif.type == "ARMATURE":
-                    if modif.use_deform_preserve_volume:
+            for mod in obj.modifiers:
+                if mod.type == "ARMATURE":
+                    if mod.use_deform_preserve_volume:
                         MyError = PotentialErrors.add()
                         MyError.name = obj.name
                         MyError.type = 2
                         MyError.text = (
                             'In object "'+obj.name +
-                            '" the modifier '+modif.type +
-                            ' named "'+modif.name +
+                            '" the modifier '+mod.type +
+                            ' named "'+mod.name +
                             '". The parameter Preserve Volume' +
                             ' must be set to False.')
                         MyError.object = obj
-                        MyError.itemName = modif.name
+                        MyError.itemName = mod.name
                         MyError.correctRef = "PreserveVolume"
                         MyError.correctlabel = 'Set Preserve Volume to False'
+
+    def CheckArmatureConstData():
+        # check the parameter of constraint ARMATURE
+        for obj in MeshTypeToCheck:
+            for const in obj.constraints:
+                if const.type == "ARMATURE":
+                    pass
+                    # TO DO.
 
     def CheckArmatureBoneData():
         # check the parameter of the ARMATURE bones
@@ -433,26 +478,26 @@ def UpdateUnrealPotentialError():
     def CheckVertexGroupWeight():
         # Check that all vertex have a weight
         for obj in objToCheck:
-            if GetAssetType(obj) == "SkeletalMesh":
-                childs = GetExportDesiredChilds(obj)
-                for child in childs:
-                    if child.type == "MESH":
+            meshs = GetSkeletonMeshs(obj)
+            for meshs in meshs:
+                if meshs.type == "MESH":
+                    if ContainsArmatureModifier(meshs):
                         # Result data
                         VertexWithZeroWeight = GetVertexWithZeroWeight(
                             obj,
-                            child)
+                            meshs)
                         if len(VertexWithZeroWeight) > 0:
                             MyError = PotentialErrors.add()
-                            MyError.name = child.name
+                            MyError.name = meshs.name
                             MyError.type = 1
                             MyError.text = (
-                                'Object named "'+child.name +
+                                'Object named "'+meshs.name +
                                 '" contains '+str(len(VertexWithZeroWeight)) +
                                 ' vertex with zero cumulative valid weight.')
                             MyError.text += (
                                 '\nNote: Vertex groups must have' +
                                 ' a bone with the same name to be valid.')
-                            MyError.object = child
+                            MyError.object = meshs
                             MyError.selectVertexButton = True
                             MyError.selectOption = "VertexWithZeroWeight"
 
@@ -483,8 +528,9 @@ def UpdateUnrealPotentialError():
     CheckUVMaps()
     CheckBadStaicMeshExportedLikeSkeletalMesh()
     CheckArmatureScale()
-    CheckArmatureModNumber()
+    CheckArmatureNumber()
     CheckArmatureModData()
+    CheckArmatureConstData()
     CheckArmatureBoneData()
     CheckArmatureValidChild()
     CheckArmatureMultipleRoots()
@@ -500,7 +546,7 @@ def UpdateUnrealPotentialError():
 def SelectPotentialErrorObject(errorIndex):
     # Select potential error
 
-    SafeModeSet('OBJECT', bpy.context.active_object)
+    bbpl.utils.SafeModeSet('OBJECT', bpy.context.active_object)
     scene = bpy.context.scene
     error = scene.potentialErrorList[errorIndex]
     obj = error.object
@@ -523,7 +569,7 @@ def SelectPotentialErrorObject(errorIndex):
 def SelectPotentialErrorVertex(errorIndex):
     # Select potential error
     SelectPotentialErrorObject(errorIndex)
-    SafeModeSet('EDIT')
+    bbpl.utils.SafeModeSet('EDIT')
 
     scene = bpy.context.scene
     error = scene.potentialErrorList[errorIndex]
@@ -531,11 +577,11 @@ def SelectPotentialErrorVertex(errorIndex):
     bpy.ops.mesh.select_mode(type="VERT")
     bpy.ops.mesh.select_all(action='DESELECT')
 
-    SafeModeSet('OBJECT')
+    bbpl.utils.SafeModeSet('OBJECT')
     if error.selectOption == "VertexWithZeroWeight":
         for vertex in GetVertexWithZeroWeight(obj.parent, obj):
             vertex.select = True
-    SafeModeSet('EDIT')
+    bbpl.utils.SafeModeSet('EDIT')
     bpy.ops.view3d.view_selected()
     return obj
 
@@ -543,7 +589,7 @@ def SelectPotentialErrorVertex(errorIndex):
 def SelectPotentialErrorPoseBone(errorIndex):
     # Select potential error
     SelectPotentialErrorObject(errorIndex)
-    SafeModeSet('POSE')
+    bbpl.utils.SafeModeSet('POSE')
 
     scene = bpy.context.scene
     error = scene.potentialErrorList[errorIndex]
@@ -573,10 +619,10 @@ def TryToCorrectPotentialError(errorIndex):
 
     local_view_areas = MoveToGlobalView()
 
-    MyCurrentDataSave = UserSceneSave()
+    MyCurrentDataSave = bbpl.utils.UserSceneSave()
     MyCurrentDataSave.SaveCurrentScene()
 
-    SafeModeSet('OBJECT', MyCurrentDataSave.user_select_class.user_active)
+    bbpl.utils.SafeModeSet('OBJECT', MyCurrentDataSave.user_select_class.user_active)
 
     print("Start correct")
 
@@ -612,7 +658,7 @@ def TryToCorrectPotentialError(errorIndex):
     if error.correctRef == "CreateUV":
         obj = error.object
         SelectObj(obj)
-        if SafeModeSet("EDIT", obj):
+        if bbpl.utils.SafeModeSet("EDIT", obj):
             bpy.ops.uv.smart_project()
             successCorrect = True
         else:
@@ -657,9 +703,39 @@ def TryToCorrectPotentialError(errorIndex):
     return "Correct fail"
 
 
+class BFU_OT_UnrealPotentialError(bpy.types.PropertyGroup):
+    type: bpy.props.IntProperty(default=0)  # 0:Info, 1:Warning, 2:Error
+    object: bpy.props.PointerProperty(type=bpy.types.Object)
+    ###
+    selectObjectButton: bpy.props.BoolProperty(default=True)
+    selectVertexButton: bpy.props.BoolProperty(default=False)
+    selectPoseBoneButton: bpy.props.BoolProperty(default=False)
+    ###
+    selectOption: bpy.props.StringProperty(default="None")  # 0:VertexWithZeroWeight
+    itemName: bpy.props.StringProperty(default="None")
+    text: bpy.props.StringProperty(default="Unknown")
+    correctRef: bpy.props.StringProperty(default="None")
+    correctlabel: bpy.props.StringProperty(default="Fix it !")
+    correctDesc: bpy.props.StringProperty(default="Correct target error")
+    docsOcticon: bpy.props.StringProperty(default="None")
+
+
+classes = (
+    BFU_OT_UnrealPotentialError,
+)
+
+
 def register():
     from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
+
+    bpy.types.Scene.potentialErrorList = bpy.props.CollectionProperty(type=BFU_OT_UnrealPotentialError)
 
 
 def unregister():
     from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(cls)
+
+    del bpy.types.Scene.potentialErrorList

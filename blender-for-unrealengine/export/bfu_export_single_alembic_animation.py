@@ -52,8 +52,11 @@ def ProcessAlembicExport(obj):
     dirpath = GetObjExportDir(obj)
 
     MyAsset = scene.UnrealExportedAssetsList.add()
-    MyAsset.StartAssetExport(obj)
+    MyAsset.object = obj
+    MyAsset.asset_name = obj.name
+    MyAsset.folder_name = obj.exportFolderName
     MyAsset.asset_type = "Alembic"
+    MyAsset.StartAssetExport()
 
     ExportSingleAlembicAnimation(dirpath, GetObjExportFileName(obj, ".abc"), obj)
     file = MyAsset.files.add()
@@ -79,7 +82,7 @@ def ExportSingleAlembicAnimation(
     # Export a single alembic animation
 
     scene = bpy.context.scene
-    SafeModeSet('OBJECT')
+    bbpl.utils.SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
 

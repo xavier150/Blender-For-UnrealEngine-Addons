@@ -52,7 +52,13 @@ def ProcessActionExport(obj, action):
     dirpath = os.path.join(GetObjExportDir(obj), scene.anim_subfolder_name)
 
     MyAsset = scene.UnrealExportedAssetsList.add()
-    MyAsset.StartAssetExport(obj, action)
+    MyAsset.object = obj
+    MyAsset.skeleton_name = obj.name
+    MyAsset.asset_name = bfu_utils.GetActionExportFileName(obj, action, "")
+    MyAsset.folder_name = obj.exportFolderName
+    MyAsset.asset_type = bfu_utils.GetActionType(action)
+    
+    MyAsset.StartAssetExport()
 
     ExportSingleFbxAction(scene, dirpath, GetActionExportFileName(obj, action), obj, action)
     file = MyAsset.files.add()
@@ -91,14 +97,14 @@ def ExportSingleFbxAction(
     userAction_blend_type = obj.animation_data.action_blend_type
     userAction_influence = obj.animation_data.action_influence
 
-    SafeModeSet('OBJECT')
+    bbpl.utils.SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
     asset_name = PrepareExportName(obj, True)
     if export_as_proxy is False:
         duplicate_data = DuplicateSelectForExport()
         SetDuplicateNameForExport(duplicate_data)
-    
+
     if export_as_proxy is False:
         MakeSelectVisualReal()
 

@@ -54,7 +54,12 @@ def ProcessSkeletalMeshExport(obj):
     scene = bpy.context.scene
 
     MyAsset = scene.UnrealExportedAssetsList.add()
-    MyAsset.StartAssetExport(obj)
+    MyAsset.object = obj
+    MyAsset.skeleton_name = obj.name
+    MyAsset.asset_name = obj.name
+    MyAsset.folder_name = obj.exportFolderName
+    MyAsset.asset_type = bfu_utils.GetAssetType(obj)
+    MyAsset.StartAssetExport()
 
     ExportSingleSkeletalMesh(scene, dirpath, GetObjExportFileName(obj), obj)
     file = MyAsset.files.add()
@@ -93,19 +98,21 @@ def ExportSingleSkeletalMesh(
     export_as_proxy = GetExportAsProxy(obj)
     export_proxy_child = GetExportProxyChild(obj)
 
-    SafeModeSet('OBJECT')
+    bbpl.utils.SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
     asset_name = PrepareExportName(obj, True)
     duplicate_data = DuplicateSelectForExport()
     SetDuplicateNameForExport(duplicate_data)
 
-    CorrectExtremUVAtExport()
-
     ApplyNeededModifierToSelect()
 
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
+
+    ConvertGeometryNodeAttributeToUV(active)
+    CorrectExtremUVAtExport(active)
+
     export_procedure = active.bfu_export_procedure
 
     if export_as_proxy:
@@ -127,7 +134,7 @@ def ExportSingleSkeletalMesh(
     meshType = GetAssetType(active)
 
     SetSocketsExportTransform(active)
-    TryToApplyCustomSocketsName(active)
+    SetSocketsExportName(active)
 
     # Set rename temporarily the Armature as "Armature"
 
@@ -138,6 +145,7 @@ def ExportSingleSkeletalMesh(
     RemoveAllConsraints(active)
     bpy.context.object.data.pose_position = 'REST'
 
+    ConvertArmatureConstraintToModifiers(active)
     SetVertexColorForUnrealExport(active)
 
     asset_name.SetExportName()
@@ -184,6 +192,10 @@ def ExportSingleSkeletalMesh(
 
     asset_name.ResetNames()
 
+    ClearVertexColorForUnrealExport(active)
+    ResetArmatureConstraintToModifiers(active)
+    ResetSocketsExportName(active)
+    ResetSocketsTransform(active)
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in duplicate_data.data_to_remove:
         data.RemoveData()

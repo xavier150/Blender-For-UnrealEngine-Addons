@@ -420,3 +420,26 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: NLA export ignore animated influence on actions.
 - Fixed: Import script doesn't work with Unreal Engine 5.
 - Fixed: Export doesn't work with animation from Proxy Since Blender 3.2.2
+
+== Rev 0.4.0 ==
+
+- UI updated
+- Full addon refactoring.
+- New: Ability to specify skeleton asset for SkeletalMesh (Thanks Salireths!)
+- New: Ability to specify which module (plugin) to import to (Thanks Salireths!)
+- New: SkeletalMesh now support Armature from constraint.
+- New Support for Export UV From Geometry Node.
+- Fix axis flippings on camera animation can be disabled.
+- Correct Extrem UV Scale option moved from addon pref to object settings.
+- Add support NearClippingPlane in camera export.
+- Fixed: Vertex Colors refactored into generic Color Attributes and not supported by the addon.
+- Fixed: Vertex color would always be replaced. (Thanks ScrapIO!)
+- Fixed: Mesh LODs would not have their vertex color information imported. (Thanks ScrapIO!)
+- Fixed: Skeleton detection use the wrong prefix.
+- Fixed: Copy Cine Cameras return Regular Cameras.
+- Fixed: Crashes when pasting via the "Copy Regular Cameras"
+- Fixed: Convert to collision work only if parent is a Mesh.
+- Fixed: StaticSocketsAdd90X option break non uniform scale sockets.
+- Fixed: Collection staic mesh don't use Sub Folder Name.
+- Fixed: Sockets transform are not apply on Collection staic mesh.
+- Fixed: Some collections keep hidden during export and exported file is wrong.

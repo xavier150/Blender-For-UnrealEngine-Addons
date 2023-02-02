@@ -7,14 +7,20 @@ import sys
 import os.path
 import json
 
+try:  # TO DO: Found a better way to check that.
+    import unreal
+except ImportError:
+    import unreal_engine as unreal
+
 
 def CheckTasks():
-    import unreal
-    if not hasattr(unreal, 'EditorAssetLibrary'):
-        print('--------------------------------------------------')
-        print('WARNING: Editor Scripting Utilities should be activated.')
-        print('Edit > Plugin > Scripting > Editor Scripting Utilities.')
-        return False
+
+    if GetUnrealVersion() >= 4.20:  # TO DO: EditorAssetLibrary was added in witch version exactly?
+        if not hasattr(unreal, 'EditorAssetLibrary'):
+            print('--------------------------------------------------')
+            print('WARNING: Editor Scripting Utilities should be activated.')
+            print('Edit > Plugin > Scripting > Editor Scripting Utilities.')
+            return False
     if not hasattr(unreal.MovieSceneSequence, 'set_display_rate'):
         print('--------------------------------------------------')
         print('WARNING: Editor Scripting Utilities should be activated.')
@@ -40,14 +46,13 @@ def JsonLoadFile(json_file_path):
             return JsonLoad(json_file)
 
 
-def CreateSequencer():
+def GetUnrealVersion():
+    version = unreal.SystemLibrary.get_engine_version().split(".")
+    float_version = int(version[0]) + float(float(version[1])/100)
+    return float_version
 
-    import unreal
-    import sys
-    import os.path
-    import sys
-    import time
-    import json
+
+def CreateSequencer():
 
     # Prepare process import
     json_data_file = 'ImportSequencerData.json'
@@ -65,11 +70,6 @@ def CreateSequencer():
     secureCrop = sequence_data['secureCrop']  # add end crop for avoid section overlay
     unreal_import_location = sequence_data['unreal_import_location']
     ImportedCamera = []  # (CameraName, CameraGuid)
-
-    def GetUnrealVersion():
-        version = unreal.SystemLibrary.get_engine_version().split(".")
-        float_version = int(version[0]) + float(float(version[1])/100)
-        return float_version
 
     def AddSequencerSectionTransformKeysByIniFile(sequencer_section, track_dict):
         for key in track_dict.keys():

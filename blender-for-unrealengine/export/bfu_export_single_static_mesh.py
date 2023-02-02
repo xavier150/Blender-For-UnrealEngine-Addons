@@ -53,7 +53,11 @@ def ProcessStaticMeshExport(obj):
     scene = bpy.context.scene
 
     MyAsset = scene.UnrealExportedAssetsList.add()
-    MyAsset.StartAssetExport(obj)
+    MyAsset.object = obj
+    MyAsset.asset_name = obj.name
+    MyAsset.folder_name = obj.exportFolderName
+    MyAsset.asset_type = bfu_utils.GetAssetType(obj)
+    MyAsset.StartAssetExport()
 
     ExportSingleStaticMesh(dirpath, GetObjExportFileName(obj), obj)
     file = MyAsset.files.add()
@@ -89,7 +93,7 @@ def ExportSingleStaticMesh(
     scene = bpy.context.scene
     addon_prefs = GetAddonPrefs()
 
-    SafeModeSet('OBJECT')
+    bbpl.utils.SafeModeSet('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
     asset_name = PrepareExportName(obj, False)
@@ -98,19 +102,19 @@ def ExportSingleStaticMesh(
 
     MakeSelectVisualReal()
 
-    CorrectExtremUVAtExport()
-
     ApplyNeededModifierToSelect()
 
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
 
+    ConvertGeometryNodeAttributeToUV(active)
+    CorrectExtremUVAtExport(active)
+
     ApplyExportTransform(active, "Object")
 
     meshType = GetAssetType(active)
     SetSocketsExportTransform(active)
-
-    TryToApplyCustomSocketsName(active)
+    SetSocketsExportName(active)
 
     bfu_check_potential_error.UpdateNameHierarchy(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
@@ -141,6 +145,9 @@ def ExportSingleStaticMesh(
 
     asset_name.ResetNames()
 
+    ClearVertexColorForUnrealExport(active)
+    ResetSocketsExportName(active)
+    ResetSocketsTransform(active)
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in duplicate_data.data_to_remove:
         data.RemoveData()

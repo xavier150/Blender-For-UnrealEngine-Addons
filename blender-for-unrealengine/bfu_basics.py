@@ -66,23 +66,6 @@ def MoveToLocalView(local_view_areas):
     pass
 
 
-def IsTweakmode():
-    # TO DO
-    return bpy.context.scene.is_nla_tweakmode
-
-
-def EnterTweakmode():
-    # TO DO
-    # bpy.ops.nla.tweakmode_enter()
-    pass
-
-
-def ExitTweakmode():
-    # TO DO
-    # bpy.ops.nla.tweakmode_exit()
-    pass
-
-
 def GetCurrentSelection():
     # Return array for selected and the active
     class MyClass():

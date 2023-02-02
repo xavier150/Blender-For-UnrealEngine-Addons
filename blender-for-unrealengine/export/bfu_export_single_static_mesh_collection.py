@@ -58,11 +58,13 @@ def ProcessCollectionExport(col):
     scene = bpy.context.scene
 
     MyAsset = scene.UnrealExportedAssetsList.add()
-    MyAsset.StartAssetExport(collection=col)
+    MyAsset.asset_name = col.name
+    MyAsset.collection = col
+    MyAsset.asset_type = bfu_utils.GetCollectionType(col)
+    MyAsset.folder_name = col.exportFolderName
+    MyAsset.StartAssetExport()
 
     ExportSingleStaticMeshCollection(dirpath, GetCollectionExportFileName(col.name), col.name)
-
-    # MyAsset.SetObjData(obj)
 
     file = MyAsset.files.add()
     file.name = GetCollectionExportFileName(col.name)
@@ -98,7 +100,7 @@ def ExportSingleStaticMeshCollection(
     addon_prefs = GetAddonPrefs()
     collection = bpy.data.collections[collectionName]
 
-    SafeModeSet('OBJECT')
+    bbpl.utils.SafeModeSet('OBJECT')
 
     SelectCollectionObjects(collection)
     duplicate_data = DuplicateSelectForExport()
@@ -106,9 +108,13 @@ def ExportSingleStaticMeshCollection(
 
     MakeSelectVisualReal()
 
-    CorrectExtremUVAtExport()
-
     ApplyNeededModifierToSelect()
+    for obj in bpy.context.selected_objects:
+        SetVertexColorForUnrealExport(obj)
+        ConvertGeometryNodeAttributeToUV(obj)
+        CorrectExtremUVAtExport(obj)
+        SetSocketsExportTransform(obj)
+        SetSocketsExportName(obj)
 
     bfu_check_potential_error.UpdateNameHierarchy(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
@@ -132,6 +138,10 @@ def ExportSingleStaticMeshCollection(
         # axis_up=active.exportAxisUp,
         bake_space_transform=False
         )
+    for obj in bpy.context.selected_objects:
+        ClearVertexColorForUnrealExport(obj)
+        ResetSocketsExportName(obj)
+        ResetSocketsTransform(obj)
 
     CleanDeleteObjects(bpy.context.selected_objects)
     for data in duplicate_data.data_to_remove:

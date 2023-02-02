@@ -21,21 +21,22 @@ import bpy
 import time
 import math
 
-if "bpy" in locals():
-    import importlib
-    if "bfu_write_text" in locals():
-        importlib.reload(bfu_write_text)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-
 from .. import bfu_write_text
 from .. import bfu_basics
 from ..bfu_basics import *
 from .. import bfu_utils
 from ..bfu_utils import *
 from enum import Enum
+
+from ..bbpl import utils
+
+import importlib
+if "bfu_write_text" in locals():
+    importlib.reload(bfu_write_text)
+if "bfu_basics" in locals():
+    importlib.reload(bfu_basics)
+if "bfu_utils" in locals():
+    importlib.reload(bfu_utils)
 
 
 class VertexColorExportData:
@@ -57,6 +58,7 @@ class VertexColorExportData:
 
             elif self.GetPropertyOwner().VertexColorImportOption == "REPLACE":
                 index = self.GetChosenVertexIndex()
+                print(index)
                 if index != -1:
                     self.index = index
                     self.name = self.GetChosenVertexName()
@@ -69,6 +71,7 @@ class VertexColorExportData:
         return self.obj
 
     def GetChosenVertexIndex(self):
+        
         obj = self.obj
         if obj.type != "MESH":
             return -1
@@ -78,21 +81,20 @@ class VertexColorExportData:
 
         if obj:
             if obj.data:
-                if len(obj.data.vertex_colors) > 0:
+                vertex_colors = utils.getVertexColors(obj)
+                if len(vertex_colors) > 0:
 
                     if VertexColorToUse == "FirstIndex":
                         return 0
 
                     if VertexColorToUse == "LastIndex":
-                        return len(obj.data.vertex_colors)-1
+                        return len(vertex_colors)-1
 
                     if VertexColorToUse == "ActiveIndex":
-                        for index, vertex_color in enumerate(obj.data.vertex_colors):
-                            if vertex_color.active_render:
-                                return index
+                        return utils.getVertexColors_RenderColorIndex(obj)
 
                     if VertexColorToUse == "CustomIndex":
-                        if VertexColorIndexToUse < len(obj.data.vertex_colors):
+                        if VertexColorIndexToUse < len(vertex_colors):
                             return VertexColorIndexToUse
         return -1
 
@@ -106,8 +108,9 @@ class VertexColorExportData:
         if obj:
             if obj.type == "MESH":
                 if obj.data:
-                    if obj.VertexColorIndexToUse < len(obj.data.vertex_colors):
-                        return obj.data.vertex_colors[index].name
+                    vertex_colors = utils.getVertexColors(obj)
+                    if obj.VertexColorIndexToUse < len(vertex_colors):
+                        return vertex_colors[index].name
 
         return "None"
 

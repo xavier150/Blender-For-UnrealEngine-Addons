@@ -30,64 +30,58 @@ xavierloux.com
 xavierloux.loux@gmail.com
 '''
 
-import os
 import bpy
-import fnmatch
-import time
-import addon_utils
 
+from . import bps
+from . import bbpl
+
+from . import bfu_ui_utils
 from . import bfu_addon_pref
+from . import bfu_export_logs
 from . import bfu_ui
+from . import bfu_check_potential_error
 from .export import bfu_export_asset
 from . import bfu_write_text
 from . import bfu_basics
 from . import bfu_utils
 
-if "bpy" in locals():
-    import importlib
-    if "bfu_addon_pref" in locals():
-        importlib.reload(bfu_addon_pref)
-    if "bfu_ui" in locals():
-        importlib.reload(bfu_ui)
-    if "bfu_export_asset" in locals():
-        importlib.reload(bfu_export_asset)
-    if "bfu_write_text" in locals():
-        importlib.reload(bfu_write_text)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
+import importlib
+if "bps" in locals():
+    importlib.reload(bps)
+if "bbpl" in locals():
+    importlib.reload(bbpl)
+if "bfu_ui_utils" in locals():
+    importlib.reload(bfu_ui_utils)
+if "bfu_addon_pref" in locals():
+    importlib.reload(bfu_addon_pref)
+if "bfu_export_logs" in locals():
+    importlib.reload(bfu_export_logs)
+if "bfu_ui" in locals():
+    importlib.reload(bfu_ui)
+if "bfu_check_potential_error" in locals():
+    importlib.reload(bfu_check_potential_error)
+if "bfu_export_asset" in locals():
+    importlib.reload(bfu_export_asset)
+if "bfu_write_text" in locals():
+    importlib.reload(bfu_write_text)
+if "bfu_basics" in locals():
+    importlib.reload(bfu_basics)
+if "bfu_utils" in locals():
+    importlib.reload(bfu_utils)
 
 bl_info = {
     'name': 'Blender for UnrealEngine',
+    'author': 'Loux Xavier (BleuRaven)',
+    'version': (0, 4, 0),
+    'blender': (2, 80, 0),
+    'location': 'View3D > UI > Unreal Engine',
     'description': "This add-ons allows to easily export several "
     "objects at the same time for use in unreal engine 4.",
-    'author': 'Loux Xavier (BleuRaven)',
-    'version': (0, 3, 1),
-    'blender': (2, 80, 0),
-    'location': 'View3D > UI > Unreal Engine 4',
     'warning': '',
     "wiki_url": "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki",
     'tracker_url': 'https://github.com/xavier150/Blender-For-UnrealEngine-Addons/issues',
     'support': 'COMMUNITY',
     'category': 'Import-Export'}
-
-
-class BFU_OT_UnrealPotentialError(bpy.types.PropertyGroup):
-    type: bpy.props.IntProperty(default=0)  # 0:Info, 1:Warning, 2:Error
-    object: bpy.props.PointerProperty(type=bpy.types.Object)
-    ###
-    selectObjectButton: bpy.props.BoolProperty(default=True)
-    selectVertexButton: bpy.props.BoolProperty(default=False)
-    selectPoseBoneButton: bpy.props.BoolProperty(default=False)
-    ###
-    selectOption: bpy.props.StringProperty(default="None")  # 0:VertexWithZeroWeight
-    itemName: bpy.props.StringProperty(default="None")
-    text: bpy.props.StringProperty(default="Unknown")
-    correctRef: bpy.props.StringProperty(default="None")
-    correctlabel: bpy.props.StringProperty(default="Fix it !")
-    correctDesc: bpy.props.StringProperty(default="Correct target error")
-    docsOcticon: bpy.props.StringProperty(default="None")
 
 
 class BFU_CachedAction(bpy.types.PropertyGroup):
@@ -115,6 +109,7 @@ def register():
     bpy.types.Scene.bfu_object_material_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_object_vertex_color_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_object_light_map_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_uv_map_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_anim_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_anim_advanced_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_skeleton_properties_expanded = bpy.props.BoolProperty()
@@ -129,21 +124,37 @@ def register():
     bpy.types.Scene.bfu_export_process_properties_expanded = bpy.props.BoolProperty()
     bpy.types.Scene.bfu_script_tool_expanded = bpy.props.BoolProperty()
 
+    bpy.types.Scene.bfu_active_tab = bpy.props.EnumProperty(
+        items=(
+            ('OBJECT', 'Object', 'Object tab.'),
+            ('SCENE', 'Scene', 'Scene and world tab.')
+            )
+        )
+
     bpy.types.Scene.bfu_active_object_tab = bpy.props.EnumProperty(
         items=(
-            ('PROP', 'Object', 'Object Tab'),
-            ('ANIM', 'Animations', 'Animations Tab'),
-            ('SCENE', 'Scene', 'Scene anf global Tab')
-            ))
+            ('GENERAL', 'General', 'General object tab.'),
+            ('ANIM', 'Animations', 'Animations tab.'),
+            ('MISC', 'Misc', 'Misc tab.'),
+            ('ALL', 'All', 'All tabs.')
+            )
+        )
 
-    bpy.utils.register_class(BFU_OT_UnrealPotentialError)
-    bpy.types.Scene.potentialErrorList = bpy.props.CollectionProperty(type=BFU_OT_UnrealPotentialError)
+    bpy.types.Scene.bfu_active_scene_tab = bpy.props.EnumProperty(
+        items=(
+            ('GENERAL', 'Scene', 'General scene tab'),
+            ('ALL', 'All', 'All tabs.')
+            )
+        )
 
     for cls in classes:
         register_class(cls)
 
+    bfu_ui_utils.register()
     bfu_addon_pref.register()
+    bfu_export_logs.register()
     bfu_ui.register()
+    bfu_check_potential_error.register()
 
 
 def unregister():
@@ -169,11 +180,11 @@ def unregister():
 
     del bpy.types.Scene.bfu_active_object_tab
 
-    bpy.utils.unregister_class(BFU_OT_UnrealPotentialError)
-    del bpy.types.Scene.potentialErrorList
-
-    for cls in classes:
+    for cls in reversed(classes):
         unregister_class(cls)
 
+    bfu_ui_utils.unregister()
     bfu_addon_pref.unregister()
+    bfu_export_logs.unregister()
     bfu_ui.unregister()
+    bfu_check_potential_error.unregister()

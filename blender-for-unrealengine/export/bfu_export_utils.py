@@ -37,6 +37,7 @@ from .. import bfu_basics
 from ..bfu_basics import *
 from .. import bfu_utils
 from ..bfu_utils import *
+from ..bbpl import utils
 
 from . import bfu_export_get_info
 from .bfu_export_get_info import *
@@ -143,12 +144,12 @@ def DuplicateSelectForExport(new_name="duplicated Obj"):
             self.duplicate_select = None
 
         def SetOriginSelect(self):
-            select = UserSelectSave()
+            select = bbpl.utils.UserSelectSave()
             select.SaveCurrentSelect()
             self.origin_select = select
 
         def SetDuplicateSelect(self):
-            select = UserSelectSave()
+            select = bbpl.utils.UserSelectSave()
             select.SaveCurrentSelect()
             self.duplicate_select = select
 
@@ -220,7 +221,7 @@ def ResetDuplicateNameAfterExport(duplicate_data):
 
 
 def MakeSelectVisualReal():
-    select = UserSelectSave()
+    select = bbpl.utils.UserSelectSave()
     select.SaveCurrentSelect()
 
     # Save object list
@@ -244,12 +245,39 @@ def MakeSelectVisualReal():
         if obj not in previous_objects:
             obj.select_set(True)
 
+# Sockets
+
+
+def SetSocketsExportName(obj):
+    '''
+    Try to apply the custom SocketName
+    '''
+
+    scene = bpy.context.scene
+    for socket in GetSocketDesiredChild(obj):
+        if socket.bfu_use_socket_custom_Name:
+            if socket.bfu_socket_custom_Name not in scene.objects:
+
+                # Save the previous name
+                socket["BFU_PreviousSocketName"] = socket.name
+                socket.name = "SOCKET_"+socket.bfu_socket_custom_Name
+            else:
+                print(
+                    'Can\'t rename socket "' +
+                    socket.name +
+                    '" to "'+socket.bfu_socket_custom_Name +
+                    '".'
+                    )
+
 
 def SetSocketsExportTransform(obj):
-    # Set socket scale for Unreal
+    # Set socket Transform for Unreal
 
     addon_prefs = GetAddonPrefs()
     for socket in GetSocketDesiredChild(obj):
+        socket["BFU_PreviousSocketScale"] = socket.scale
+        socket["BFU_PreviousSocketLocation"] = socket.location
+        socket["BFU_PreviousSocketRotationEuler"] = socket.rotation_euler
         if GetShouldRescaleSocket():
             socket.delta_scale *= GetRescaleSocketFactor()
 
@@ -258,8 +286,36 @@ def SetSocketsExportTransform(obj):
             savedLocation = socket.location.copy()
             AddMat = mathutils.Matrix.Rotation(math.radians(90.0), 4, 'X')
             socket.matrix_world = socket.matrix_world @ AddMat
-            socket.scale = savedScale
+            socket.scale.x = savedScale.x
+            socket.scale.z = savedScale.y
+            socket.scale.y = savedScale.z
             socket.location = savedLocation
+
+
+def ResetSocketsExportName(obj):
+    # Reset socket Name
+
+    scene = bpy.context.scene
+    for socket in GetSocketDesiredChild(obj):
+        if "BFU_PreviousSocketName" in socket:
+            socket.name = socket["BFU_PreviousSocketName"]
+            del socket["BFU_PreviousSocketName"]
+
+
+def ResetSocketsTransform(obj):
+    # Reset socket Transform
+
+    scene = bpy.context.scene
+    for socket in GetSocketDesiredChild(obj):
+        if "BFU_PreviousSocketScale" in socket:
+            socket.scale = socket["BFU_PreviousSocketScale"]
+            del socket["BFU_PreviousSocketScale"]
+        if "BFU_PreviousSocketLocation" in socket:
+            socket.location = socket["BFU_PreviousSocketLocation"]
+            del socket["BFU_PreviousSocketLocation"]
+        if "BFU_PreviousSocketRotationEuler" in socket:
+            socket.rotation_euler = socket["BFU_PreviousSocketRotationEuler"]
+            del socket["BFU_PreviousSocketRotationEuler"]
 
 
 # Main asset
@@ -313,45 +369,121 @@ class PrepareExportName():
 
         pass
 
-# Sockets and Collisons
-
-
-# Sockets
-
-
-def TryToApplyCustomSocketsName(obj):
-    '''
-    Try to apply the custom SocketName
-    '''
-
-    scene = bpy.context.scene
-
-    for socket in GetSocketDesiredChild(obj):
-        if socket.usesocketcustomName:
-            if socket.socketcustomName not in scene.objects:
-                socket.name = "SOCKET_"+socket.socketcustomName
-            else:
-                print(
-                    'Can\'t rename socket "' +
-                    socket.name +
-                    '" to "'+socket.socketcustomName +
-                    '".'
-                    )
-
-
 # UVs
 
 
-def CorrectExtremUVAtExport():
-    addon_prefs = GetAddonPrefs()
-    if addon_prefs.correctExtremUVScale:
+def ConvertGeometryNodeAttributeToUV(obj):
+    # obj = bpy.context.active_object  # Debug
+    if obj.convert_geometry_node_attribute_to_uv:
+        attrib_name = obj.convert_geometry_node_attribute_to_uv_name
+
+        # I need apply the geometry modifier for get the data.
+        # So this work only when I do export of the duplicate object.
+
+        if hasattr(obj.data, "attributes"):  # Cuves has not attributes.
+            if attrib_name in obj.data.attributes:
+
+                # TO DO: Bad why to do this. Need found a way to convert without using ops.
+                obj.data.attributes.active = obj.data.attributes[attrib_name]
+                SavedSelect = GetCurrentSelection()
+                SelectSpecificObject(obj)
+                bpy.ops.geometry.attribute_convert(mode='UV_MAP')
+                SetCurrentSelection(SavedSelect)
+                return
+
+                attrib = obj.data.attributes[attrib_name]
+
+                new_uv = obj.data.uv_layers.new(name=attrib_name)
+                uv_coords = []
+
+                attrib.data  # TO DO: I don't understand why attrib.data is egal at zero just after a duplicate.
+                print('XXXXXXXXXXXX')
+                print(type(attrib.data))
+                print('XXXXXXXXXXXX')
+                print(dir(attrib.data))
+                print('XXXXXXXXXXXX')
+                print(attrib.data.values())
+                print('XXXXXXXXXXXX')
+                attrib_data = []
+                attrib.data.foreach_get('vector', attrib_data)
+                print(attrib_data)
+
+                for fv_attrib in attrib.data:  # FloatVectorAttributeValue
+                    uv_coords.append(fv_attrib.vector)
+                uv_coords.append(attrib.data[0])
+
+                for loop in obj.data.loops:
+                    new_uv.data[loop.index].uv[0] = uv_coords[loop.index][0]
+                    new_uv.data[loop.index].uv[1] = uv_coords[loop.index][1]
+
+                obj.data.attributes.remove(attrib_name)
+
+
+def CorrectExtremUVAtExport(obj):
+    if obj.correct_extrem_uv_scale:
         SavedSelect = GetCurrentSelection()
         if GoToMeshEditMode():
             CorrectExtremeUV(2)
-            SafeModeSet('OBJECT')
+            bbpl.utils.SafeModeSet('OBJECT')
             SetCurrentSelection(SavedSelect)
             return True
     return False
+
+# Armature
+
+
+def ConvertArmatureConstraintToModifiers(armature):
+    for obj in GetExportDesiredChilds(armature):
+        previous_enabled_armature_constraints = []
+
+        for const in obj.constraints:
+            if const.type == "ARMATURE":
+                if const.enabled is True:
+                    previous_enabled_armature_constraints.append(const.name)
+
+                    # Disable constraint
+                    const.enabled = False
+
+                    # Remove All Vertex Group
+                        # TO DO:
+
+                    # Add Vertex Group
+                    for target in const.targets:
+                        bone_name = target.subtarget
+                        group = obj.vertex_groups.new(name=bone_name)
+
+                        vertex_indices = range(0, len(obj.data.vertices))
+                        group.add(vertex_indices, 1.0, 'REPLACE')
+
+                    # Add armature modifier
+                    mod = obj.modifiers.new("BFU_Const_"+const.name, "ARMATURE")
+                    mod.object = armature
+
+        # Save data for reset after export
+        obj["BFU_PreviousEnabledArmatureConstraints"] = previous_enabled_armature_constraints
+
+
+def ResetArmatureConstraintToModifiers(armature):
+    for obj in GetExportDesiredChilds(armature):
+        if "BFU_PreviousEnabledArmatureConstraints" in obj:
+            for const_names in obj["BFU_PreviousEnabledArmatureConstraints"]:
+                const = obj.constraints[const_names]
+
+                # Remove created armature for export
+                mod = obj.modifiers["BFU_Const_"+const_names]
+                obj.modifiers.remove(mod)
+
+                # Remove created Vertex Group
+                for target in const.targets:
+                    bone_name = target.subtarget
+                    old_vertex_group = obj.vertex_groups[bone_name]
+                    obj.vertex_groups.remove(old_vertex_group)
+
+                # Reset all Vertex Groups
+                    # TO DO:
+
+                # Enable back constraint
+                const.enabled = True
 
 # Vertex Color
 
@@ -366,14 +498,23 @@ def SetVertexColorForUnrealExport(parent):
             vced = VertexColorExportData(obj, parent)
             if vced.export_type == "REPLACE":
 
-                obj.data.vertex_colors.active_index = vced.index
-                new_vertex_color = obj.data.vertex_colors.new()
-                if new_vertex_color:
-                    new_vertex_color.name = "BFU_VertexColorExportName"
+                vertex_colors = utils.getVertexColors(obj)
 
-                number = len(obj.data.vertex_colors) - 1
-                for i in range(number):
-                    obj.data.vertex_colors.remove(obj.data.vertex_colors[0])
+                # Save the previous target
+                obj.data["BFU_PreviousTargetIndex"] = vertex_colors.active_index
+
+                # Ser the vertex color for export
+                vertex_colors.active_index = vced.index
+
+
+def ClearVertexColorForUnrealExport(parent):
+
+    objs = GetExportDesiredChilds(parent)
+    objs.append(parent)
+    for obj in objs:
+        if obj.type == "MESH":
+            if "BFU_PreviousTargetIndex" in obj.data:
+                del obj.data["BFU_PreviousTargetIndex"]
 
 
 def GetShouldRescaleRig(obj):
