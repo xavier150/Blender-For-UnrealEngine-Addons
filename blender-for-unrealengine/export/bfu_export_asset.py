@@ -259,7 +259,7 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                 # NLA animation
                 print("Start Export NLA(s)")
                 if IsValidActionForExport(scene, obj, "NLA"):
-                    if obj.ExportNLA:
+                    if obj.bfu_anim_nla_use:
                         # Save current start/end frame
                         UserStartFrame = scene.frame_start
                         UserEndFrame = scene.frame_end

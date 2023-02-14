@@ -175,7 +175,7 @@ It is now possible to force the duration of an animation according to the scene 
 - New: You can chose bone axis with skeletalMesh
 - New: Export use now a copy of the mesh for apply modifier, instance groups and collections
 - New: You can chose a presets for object global properties
-- Change: AddOneAdditionalFramesAtTheEnd remplaced by StartFramesOffset and EndFramesOffset
+- Change: AddOneAdditionalFramesAtTheEnd remplaced by bfu_anim_action_start_frame_offset and bfu_anim_action_end_frame_offset
 - Change: Export can use MetaData. You can activate in addon preference.
 - Change: It is now possible not to write the additional parameter, (.ini files)
 - Change: Import script sync the UE4 Content Browser to the imported asset (Vania python only)
@@ -233,7 +233,7 @@ It is now possible to force the duration of an animation according to the scene 
 - New: Show action(s) will now also display the frames range
 - New: Option for include or not the armature name in animation file name
 - Change: Works better with very complex rigs
-- Change: StartFramesOffset set on 1 by default for animations cycles
+- Change: bfu_anim_action_start_frame_offset set on 1 by default for animations cycles
 - Fixed: SocketsAdd90X break the socket export location
 - Fixed: modifier with no MESH type object can make script fail
 - Fixed: CheckArmatureMultipleRoots don't work good
@@ -443,3 +443,8 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Collection static mesh did not use Sub Folder Name
 - Fixed: Socket transformations were not applied to Collection static mesh
 - Fixed: Some collections remained hidden during export and exported files were incorrect
+
+== Rev 0.4.1 ==
+
+- UI updated
+- New options for set start/end animation time with NLA.

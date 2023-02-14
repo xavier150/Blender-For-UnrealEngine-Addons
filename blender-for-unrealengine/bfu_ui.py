@@ -586,7 +586,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=0
     )
 
-    bpy.types.Object.exportActionEnum = EnumProperty(
+    bpy.types.Object.bfu_anim_action_export_enum = EnumProperty(
         name="Action to export",
         description="Export procedure for actions (Animations and poses)",
         override={'LIBRARY_OVERRIDABLE'},
@@ -628,7 +628,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         )
 
     bpy.types.Object.PrefixNameToExport = StringProperty(
-        # properties used with ""export_specific_prefix" on exportActionEnum
+        # properties used with ""export_specific_prefix" on bfu_anim_action_export_enum
         name="Prefix name",
         description="Indicate the prefix of the actions that must be exported",
         override={'LIBRARY_OVERRIDABLE'},
@@ -636,8 +636,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default="Example_",
         )
 
-    bpy.types.Object.AnimStartEndTimeEnum = EnumProperty(
-        name="Animation start/end time",
+    bpy.types.Object.bfu_anim_action_start_end_time_enum = EnumProperty(
+        name="Action Start/End Time",
         description="Set when animation starts and end",
         override={'LIBRARY_OVERRIDABLE'},
         items=[
@@ -656,20 +656,20 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 "Custom time",
                 'The time of all the animations of this object' +
                 ' is defined by you.' +
-                ' Use "AnimCustomStartTime" and "AnimCustomEndTime"',
+                ' Use "bfu_anim_action_custom_start_frame" and "bfu_anim_action_custom_end_frame"',
                 "HAND",
                 3),
             ]
         )
 
-    bpy.types.Object.StartFramesOffset = IntProperty(
+    bpy.types.Object.bfu_anim_action_start_frame_offset = IntProperty(
         name="Offset at start frame",
         description="Offset for the start frame.",
         override={'LIBRARY_OVERRIDABLE'},
         default=0
     )
 
-    bpy.types.Object.EndFramesOffset = IntProperty(
+    bpy.types.Object.bfu_anim_action_end_frame_offset = IntProperty(
         name="Offset at end frame",
         description=(
             "Offset for the end frame. +1" +
@@ -680,19 +680,72 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=0
     )
 
-    bpy.types.Object.AnimCustomStartTime = IntProperty(
+    bpy.types.Object.bfu_anim_action_custom_start_frame = IntProperty(
         name="Custom start time",
         description="Set when animation start",
         override={'LIBRARY_OVERRIDABLE'},
         default=0
         )
 
-    bpy.types.Object.AnimCustomEndTime = IntProperty(
+    bpy.types.Object.bfu_anim_action_custom_end_frame = IntProperty(
         name="Custom end time",
         description="Set when animation end",
         override={'LIBRARY_OVERRIDABLE'},
         default=1
         )
+
+    bpy.types.Object.bfu_anim_nla_start_end_time_enum = EnumProperty(
+        name="NLA Start/End Time",
+        description="Set when animation starts and end",
+        override={'LIBRARY_OVERRIDABLE'},
+        items=[
+            ("with_sceneframes",
+                "Scene time",
+                "Time will be equal to the scene time",
+                "SCENE_DATA",
+                1),
+            ("with_customframes",
+                "Custom time",
+                'The time of all the animations of this object' +
+                ' is defined by you.' +
+                ' Use "bfu_anim_action_custom_start_frame" and "bfu_anim_action_custom_end_frame"',
+                "HAND",
+                2),
+            ]
+        )
+
+    bpy.types.Object.bfu_anim_nla_start_frame_offset = IntProperty(
+        name="Offset at start frame",
+        description="Offset for the start frame.",
+        override={'LIBRARY_OVERRIDABLE'},
+        default=0
+    )
+
+    bpy.types.Object.bfu_anim_nla_end_frame_offset = IntProperty(
+        name="Offset at end frame",
+        description=(
+            "Offset for the end frame. +1" +
+            " is recommended for the sequences | 0 is recommended" +
+            " for UnrealEngine cycles | -1 is recommended for Sketchfab cycles"
+            ),
+        override={'LIBRARY_OVERRIDABLE'},
+        default=0
+    )
+
+    bpy.types.Object.bfu_anim_nla_custom_start_frame = IntProperty(
+        name="Custom start time",
+        description="Set when animation start",
+        override={'LIBRARY_OVERRIDABLE'},
+        default=0
+        )
+
+    bpy.types.Object.bfu_anim_nla_custom_end_frame = IntProperty(
+        name="Custom end time",
+        description="Set when animation end",
+        override={'LIBRARY_OVERRIDABLE'},
+        default=1
+        )
+
 
     bpy.types.Object.SampleAnimForExport = FloatProperty(
         name="Sampling Rate",
@@ -716,7 +769,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=0.0,
         )
 
-    bpy.types.Object.ExportNLA = BoolProperty(
+    bpy.types.Object.bfu_anim_nla_use = BoolProperty(
         name="Export NLA (Nonlinear Animation)",
         description=(
             "If checked, exports the all animation of the scene with the NLA " +
@@ -726,7 +779,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=False
         )
 
-    bpy.types.Object.NLAAnimName = StringProperty(
+    bpy.types.Object.bfu_anim_nla_export_name = StringProperty(
         name="NLA export name",
         description="Export NLA name (Don't work with Auto-Rig Pro for the moment.)",
         override={'LIBRARY_OVERRIDABLE'},
@@ -1062,7 +1115,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             popup_title = "Action list"
             if len(animation_to_export) > 0:
                 animationNumber = len(animation_to_export)
-                if obj.ExportNLA:
+                if obj.bfu_anim_nla_use:
                     animationNumber += 1
                 popup_title = (
                     str(animationNumber) +
@@ -1097,10 +1150,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         GetActionType(action),
                         frame_start,
                         frame_end)
-                if obj.ExportNLA:
+                if obj.bfu_anim_nla_use:
                     scene = context.scene
                     addAnimRow(
-                        obj.NLAAnimName,
+                        obj.bfu_anim_nla_export_name,
                         "NlAnim",
                         str(scene.frame_start),
                         str(scene.frame_end)
@@ -1172,17 +1225,22 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.VertexOverrideColor',
                             'obj.VertexColorToUse',
                             'obj.VertexColorIndexToUse',
-                            'obj.exportActionEnum',
+                            'obj.bfu_anim_action_export_enum',
                             'obj.PrefixNameToExport',
-                            'obj.AnimStartEndTimeEnum',
-                            'obj.StartFramesOffset',
-                            'obj.EndFramesOffset',
-                            'obj.AnimCustomStartTime',
-                            'obj.AnimCustomEndTime',
+                            'obj.bfu_anim_action_start_end_time_enum',
+                            'obj.bfu_anim_nla_start_end_time_enum',
+                            'obj.bfu_anim_action_start_frame_offset',
+                            'obj.bfu_anim_action_end_frame_offset',
+                            'obj.bfu_anim_action_custom_start_frame',
+                            'obj.bfu_anim_action_custom_end_frame',
+                            'obj.bfu_anim_nla_start_frame_offset',
+                            'obj.bfu_anim_nla_end_frame_offset',
+                            'obj.bfu_anim_nla_custom_start_frame',
+                            'obj.bfu_anim_nla_custom_end_frame',
                             'obj.SampleAnimForExport',
                             'obj.SimplifyAnimForExport',
-                            'obj.ExportNLA',
-                            'obj.NLAAnimName',
+                            'obj.bfu_anim_nla_use',
+                            'obj.bfu_anim_nla_export_name',
                             'obj.bfu_anim_naming_type',
                             'obj.bfu_anim_naming_custom',
                             'obj.exportGlobalScale',
@@ -1466,39 +1524,20 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                     Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
 
         if bfu_ui_utils.DisplayPropertyFilter("OBJECT", "ANIM"):
-            bfu_ui_utils.LayoutSection(layout, "bfu_anim_properties_expanded", "Anim Properties")
-            if scene.bfu_anim_properties_expanded:
-                if obj is not None:
-                    if obj.ExportEnum == "export_recursive" and not obj.ExportAsLod:
+            if obj is not None:
+                if obj.ExportEnum == "export_recursive" and not obj.ExportAsLod:
+
+                    bfu_ui_utils.LayoutSection(layout, "bfu_animation_action_properties_expanded", "Actions Properties")
+                    if scene.bfu_animation_action_properties_expanded:
                         if (GetAssetType(obj) == "SkeletalMesh" or
                                 GetAssetType(obj) == "Camera" or
                                 GetAssetType(obj) == "Alembic"):
 
-                            # Action time
-                            if obj.type != "CAMERA" and obj.bfu_export_procedure != "auto-rig-pro":
-                                ActionTimeProperty = layout.column()
-                                ActionTimeProperty.prop(obj, 'AnimStartEndTimeEnum')
-                                if obj.AnimStartEndTimeEnum == "with_customframes":
-                                    OfsetTime = ActionTimeProperty.row()
-                                    OfsetTime.prop(obj, 'AnimCustomStartTime')
-                                    OfsetTime.prop(obj, 'AnimCustomEndTime')
-                                if obj.AnimStartEndTimeEnum != "with_customframes":
-                                    OfsetTime = ActionTimeProperty.row()
-                                    OfsetTime.prop(obj, 'StartFramesOffset')
-                                    OfsetTime.prop(obj, 'EndFramesOffset')
-
-                            else:
-                                layout.label(
-                                    text=(
-                                        "Note: animation start/end use scene frames" +
-                                        " with the camera for the sequencer.")
-                                    )
-
                             if GetAssetType(obj) == "SkeletalMesh":
                                 # Action list
                                 ActionListProperty = layout.column()
-                                ActionListProperty.prop(obj, 'exportActionEnum')
-                                if obj.exportActionEnum == "export_specific_list":
+                                ActionListProperty.prop(obj, 'bfu_anim_action_export_enum')
+                                if obj.bfu_anim_action_export_enum == "export_specific_list":
                                     ActionListProperty.template_list(
                                         # type and unique id
                                         "BFU_UL_ActionExportTarget", "",
@@ -1512,77 +1551,120 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                     ActionListProperty.operator(
                                         "object.updateobjactionlist",
                                         icon='RECOVER_LAST')
-                                if obj.exportActionEnum == "export_specific_prefix":
+                                if obj.bfu_anim_action_export_enum == "export_specific_prefix":
                                     ActionListProperty.prop(obj, 'PrefixNameToExport')
 
-                            # NLA
-                            if GetAssetType(obj) == "SkeletalMesh":
-                                NLAAnim = layout.row()
-                                NLAAnim.prop(obj, 'ExportNLA')
-                                NLAAnimChild = NLAAnim.column()
-                                NLAAnimChild.enabled = obj.ExportNLA
-                                NLAAnimChild.prop(obj, 'NLAAnimName')
-                                if obj.bfu_export_procedure == "auto-rig-pro":
-                                    NLAAnim.enabled = False
-                                    NLAAnimChild.enabled = False
+                            # Action Time
+                            if obj.type != "CAMERA" and obj.bfu_export_procedure != "auto-rig-pro":
+                                ActionTimeProperty = layout.column()
+                                ActionTimeProperty.enabled = obj.bfu_anim_action_export_enum != 'dont_export'
+                                ActionTimeProperty.prop(obj, 'bfu_anim_action_start_end_time_enum')
+                                if obj.bfu_anim_action_start_end_time_enum == "with_customframes":
+                                    OfsetTime = ActionTimeProperty.row()
+                                    OfsetTime.prop(obj, 'bfu_anim_action_custom_start_frame')
+                                    OfsetTime.prop(obj, 'bfu_anim_action_custom_end_frame')
+                                if obj.bfu_anim_action_start_end_time_enum != "with_customframes":
+                                    OfsetTime = ActionTimeProperty.row()
+                                    OfsetTime.prop(obj, 'bfu_anim_action_start_frame_offset')
+                                    OfsetTime.prop(obj, 'bfu_anim_action_end_frame_offset')
 
-                            # Animation fbx properties
-                            if (GetAssetType(obj) != "Alembic"):
-                                propsFbx = layout.row()
-                                if obj.bfu_export_procedure != "auto-rig-pro":
-                                    propsFbx.prop(obj, 'SampleAnimForExport')
-                                propsFbx.prop(obj, 'SimplifyAnimForExport')
+                            else:
+                                layout.label(
+                                    text=(
+                                        "Note: animation start/end use scene frames" +
+                                        " with the camera for the sequencer.")
+                                    )
 
                             # Nomenclature
                             if GetAssetType(obj) == "SkeletalMesh":
                                 export_anim_naming = layout.column()
+                                export_anim_naming.enabled = obj.bfu_anim_action_export_enum != 'dont_export'
                                 export_anim_naming.prop(obj, 'bfu_anim_naming_type')
                                 if obj.bfu_anim_naming_type == "include_custom_name":
                                     export_anim_naming_text = export_anim_naming.column()
                                     export_anim_naming_text.prop(obj, 'bfu_anim_naming_custom')
 
-                            # Armature export action list feedback
-                            if GetAssetType(obj) == "SkeletalMesh":
-                                layout.label(
-                                    text='Note: The Action with only one' +
-                                    ' frame are exported like Pose.')
-                                ArmaturePropertyInfo = (
-                                    layout.row().box().split(factor=0.75)
-                                    )
-                                ActionNum = len(GetActionToExport(obj))
-                                if obj.ExportNLA:
-                                    ActionNum += 1
-                                actionFeedback = (
-                                    str(ActionNum) +
-                                    " Animation(s) will be exported with this object.")
-                                ArmaturePropertyInfo.label(
-                                    text=actionFeedback,
-                                    icon='INFO')
-                                ArmaturePropertyInfo.operator("object.showobjaction")
+
 
                         else:
                             layout.label(
                                 text='(This assets is not a SkeletalMesh or Camera)')
-                    else:
-                        layout.label(text='(No properties to show.)')
-                else:
-                    layout.label(text='(No properties to show.)')
 
-            bfu_ui_utils.LayoutSection(layout, "bfu_anim_advanced_properties_expanded", "Animation advanced Properties")
-            if scene.bfu_anim_advanced_properties_expanded:
-                if obj is not None:
-                    if obj.ExportEnum == "export_recursive":
+                    bfu_ui_utils.LayoutSection(layout, "bfu_animation_action_advanced_properties_expanded", "Actions Advanced Properties")
+                    if scene.bfu_animation_action_advanced_properties_expanded:
 
                         if GetAssetType(obj) != "Alembic":
                             transformProp = layout.column()
+                            transformProp.enabled = obj.bfu_anim_action_export_enum != 'dont_export'
                             transformProp.prop(obj, "MoveActionToCenterForExport")
                             transformProp.prop(obj, "RotateActionToZeroForExport")
 
+                    bfu_ui_utils.LayoutSection(layout, "bfu_animation_nla_properties_expanded", "NLA Properties")
+                    if scene.bfu_animation_nla_properties_expanded:
+                        # NLA
+                        if GetAssetType(obj) == "SkeletalMesh":
+                            NLAAnim = layout.row()
+                            NLAAnim.prop(obj, 'bfu_anim_nla_use')
+                            NLAAnimChild = NLAAnim.column()
+                            NLAAnimChild.enabled = obj.bfu_anim_nla_use
+                            NLAAnimChild.prop(obj, 'bfu_anim_nla_export_name')
+                            if obj.bfu_export_procedure == "auto-rig-pro":
+                                NLAAnim.enabled = False
+                                NLAAnimChild.enabled = False
+
+                        # NLA Time
+                        if obj.type != "CAMERA" and obj.bfu_export_procedure != "auto-rig-pro":
+                            NLATimeProperty = layout.column()
+                            NLATimeProperty.enabled = obj.bfu_anim_nla_use
+                            NLATimeProperty.prop(obj, 'bfu_anim_nla_start_end_time_enum')
+                            if obj.bfu_anim_nla_start_end_time_enum == "with_customframes":
+                                OfsetTime = NLATimeProperty.row()
+                                OfsetTime.prop(obj, 'bfu_anim_nla_custom_start_frame')
+                                OfsetTime.prop(obj, 'bfu_anim_nla_custom_end_frame')
+                            if obj.bfu_anim_nla_start_end_time_enum != "with_customframes":
+                                OfsetTime = NLATimeProperty.row()
+                                OfsetTime.prop(obj, 'bfu_anim_nla_start_frame_offset')
+                                OfsetTime.prop(obj, 'bfu_anim_nla_end_frame_offset')
+
+                    bfu_ui_utils.LayoutSection(layout, "bfu_animation_nla_advanced_properties_expanded", "NLA Advanced Properties")
+                    if scene.bfu_animation_nla_advanced_properties_expanded:
+                        if GetAssetType(obj) != "Alembic":
                             transformProp2 = layout.column()
+                            transformProp2.enabled = obj.bfu_anim_nla_use
                             transformProp2.prop(obj, "MoveNLAToCenterForExport")
                             transformProp2.prop(obj, "RotateNLAToZeroForExport")
+
+                    bfu_ui_utils.LayoutSection(layout, "bfu_animation_advanced_properties_expanded", "Animation Advanced Properties")
+                    if scene.bfu_animation_advanced_properties_expanded:
+                        # Animation fbx properties
+                        if (GetAssetType(obj) != "Alembic"):
+                            propsFbx = layout.row()
+                            if obj.bfu_export_procedure != "auto-rig-pro":
+                                propsFbx.prop(obj, 'SampleAnimForExport')
+                            propsFbx.prop(obj, 'SimplifyAnimForExport')
+
+                    # Armature export action list feedback
+                    if GetAssetType(obj) == "SkeletalMesh":
+                        layout.label(
+                            text='Note: The Action with only one' +
+                            ' frame are exported like Pose.')
+                        ArmaturePropertyInfo = (
+                            layout.row().box().split(factor=0.75)
+                            )
+                        ActionNum = len(GetActionToExport(obj))
+                        if obj.bfu_anim_nla_use:
+                            ActionNum += 1
+                        actionFeedback = (
+                            str(ActionNum) +
+                            " Animation(s) will be exported with this object.")
+                        ArmaturePropertyInfo.label(
+                            text=actionFeedback,
+                            icon='INFO')
+                        ArmaturePropertyInfo.operator("object.showobjaction")
                 else:
                     layout.label(text='(No properties to show.)')
+            else:
+                layout.label(text='(No properties to show.)')
 
         if bfu_ui_utils.DisplayPropertyFilter("OBJECT", "MISC"):
             bfu_ui_utils.LayoutSection(layout, "bfu_object_lod_properties_expanded", "Lod")
@@ -2375,7 +2457,7 @@ class BFU_PT_Export(bpy.types.Panel):
                                 action = asset.action.name
                             elif (type(asset.action) is bpy.types.AnimData):
                                 # Nonlinear name
-                                action = asset.obj.NLAAnimName
+                                action = asset.obj.bfu_anim_nla_export_name
                             else:
                                 action = "..."
                             row.label(

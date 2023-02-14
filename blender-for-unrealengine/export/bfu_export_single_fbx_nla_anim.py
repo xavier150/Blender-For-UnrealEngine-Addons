@@ -141,8 +141,8 @@ def ExportSingleFbxNLAAnim(
 
         RescaleRigConsraints(active, rrf)
 
-    # scene.frame_start += active.StartFramesOffset
-    # scene.frame_end += active.EndFramesOffset
+    scene.frame_start = GetDesiredNLAStartEndTime(active)[0]
+    scene.frame_end = GetDesiredNLAStartEndTime(active)[1]
 
     asset_name.SetExportName()
 
@@ -181,8 +181,8 @@ def ExportSingleFbxNLAAnim(
             )
 
     ResetArmaturePose(active)
-    # scene.frame_start -= active.StartFramesOffset
-    # scene.frame_end -= active.EndFramesOffset
+    # scene.frame_start -= active.bfu_anim_action_start_frame_offset
+    # scene.frame_end -= active.bfu_anim_action_end_frame_offset
 
     asset_name.ResetNames()
 
