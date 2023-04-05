@@ -2645,7 +2645,7 @@ class BFU_PT_Export(bpy.types.Panel):
                         props.errorIndex = x
 
     class BFU_OT_ExportForUnrealEngineButton(Operator):
-        bl_label = "Export for UnrealEngine 4"
+        bl_label = "Export for Unreal Engine"
         bl_idname = "object.exportforunreal"
         bl_description = "Export all assets of this scene."
 
