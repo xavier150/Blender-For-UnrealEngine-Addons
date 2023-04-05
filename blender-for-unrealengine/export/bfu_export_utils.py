@@ -387,7 +387,10 @@ def ConvertGeometryNodeAttributeToUV(obj):
                 obj.data.attributes.active = obj.data.attributes[attrib_name]
                 SavedSelect = GetCurrentSelection()
                 SelectSpecificObject(obj)
-                bpy.ops.geometry.attribute_convert(mode='UV_MAP')
+                if bpy.app.version >= (3, 5, 0):
+                    bpy.ops.geometry.attribute_convert(mode='VERTEX_GROUP')
+                else:
+                    bpy.ops.geometry.attribute_convert(mode='UV_MAP')
                 SetCurrentSelection(SavedSelect)
                 return
 
