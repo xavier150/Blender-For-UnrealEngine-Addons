@@ -383,16 +383,23 @@ def ConvertGeometryNodeAttributeToUV(obj):
         if hasattr(obj.data, "attributes"):  # Cuves has not attributes.
             if attrib_name in obj.data.attributes:
 
-                # TO DO: Bad why to do this. Need found a way to convert without using ops.
-                obj.data.attributes.active = obj.data.attributes[attrib_name]
+                # TO DO: Bad why to do this. Need found a way to convert without using ops.               
+                obj.data.attributes.active = obj.data.attributes[attrib_name]      
+
+                # Because a bug Blender set the wrong attribute as active in 3.5.
+                if obj.data.attributes.active != obj.data.attributes[attrib_name]:
+                    for x, attribute in enumerate(obj.data.attributes):
+                        if attribute.name == attrib_name:
+                            obj.data.attributes.active_index = x
+
                 SavedSelect = GetCurrentSelection()
                 SelectSpecificObject(obj)
                 if bpy.app.version >= (3, 5, 0):
-                    pass
-                    # UV_MAP mode removed ?
-                    # bpy.ops.geometry.attribute_convert(mode='UV_MAP')
+                    if obj.data.attributes.active:
+                        bpy.ops.geometry.attribute_convert(mode='GENERIC', domain='CORNER', data_type='FLOAT2')
                 else:
-                    bpy.ops.geometry.attribute_convert(mode='UV_MAP')
+                    if obj.data.attributes.active:
+                        bpy.ops.geometry.attribute_convert(mode='UV_MAP', domain='CORNER', data_type='FLOAT2')
                 SetCurrentSelection(SavedSelect)
                 return
 
