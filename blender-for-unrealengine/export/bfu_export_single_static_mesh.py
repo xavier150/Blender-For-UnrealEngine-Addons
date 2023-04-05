@@ -103,24 +103,27 @@ def ExportSingleStaticMesh(
     MakeSelectVisualReal()
 
     ApplyNeededModifierToSelect()
+    for obj in bpy.context.selected_objects:
+        SetVertexColorForUnrealExport(obj)
+        ConvertGeometryNodeAttributeToUV(obj)
+        CorrectExtremUVAtExport(obj)
+        SetSocketsExportTransform(obj)
+        SetSocketsExportName(obj)
+
 
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
 
-    ConvertGeometryNodeAttributeToUV(active)
-    CorrectExtremUVAtExport(active)
-
     ApplyExportTransform(active, "Object")
 
     meshType = GetAssetType(active)
-    SetSocketsExportTransform(active)
-    SetSocketsExportName(active)
+
 
     bfu_check_potential_error.UpdateNameHierarchy(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
         )
 
-    SetVertexColorForUnrealExport(active)
+
 
     asset_name.SetExportName()
 

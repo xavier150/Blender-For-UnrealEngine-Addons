@@ -106,12 +106,17 @@ def ExportSingleSkeletalMesh(
     SetDuplicateNameForExport(duplicate_data)
 
     ApplyNeededModifierToSelect()
-
+    for obj in bpy.context.selected_objects:
+        ConvertGeometryNodeAttributeToUV(obj)
+        CorrectExtremUVAtExport(obj)
+        SetVertexColorForUnrealExport(obj)
+        SetSocketsExportTransform(obj)
+        SetSocketsExportName(obj)
+        
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
 
-    ConvertGeometryNodeAttributeToUV(active)
-    CorrectExtremUVAtExport(active)
+
 
     export_procedure = active.bfu_export_procedure
 
@@ -133,9 +138,6 @@ def ExportSingleSkeletalMesh(
 
     meshType = GetAssetType(active)
 
-    SetSocketsExportTransform(active)
-    SetSocketsExportName(active)
-
     # Set rename temporarily the Armature as "Armature"
 
     bfu_check_potential_error.UpdateNameHierarchy(
@@ -146,7 +148,7 @@ def ExportSingleSkeletalMesh(
     bpy.context.object.data.pose_position = 'REST'
 
     ConvertArmatureConstraintToModifiers(active)
-    SetVertexColorForUnrealExport(active)
+
 
     asset_name.SetExportName()
 

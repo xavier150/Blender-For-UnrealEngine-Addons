@@ -450,3 +450,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Update Export Button Name
 - New options for set start/end animation time with NLA.
 - Fixed: ConvertGeometryNodeAttributeToUV fail after Blender 3.5
+- Fixed: Geometry To UV, Correct Extrem UV, Vertex Color, Sockets Transform and Name don't apply on child objects.
