@@ -181,7 +181,7 @@ def ExportSingleSkeletalMesh(
 
     if (export_procedure == "auto-rig-pro"):
         ExportAutoProRig(
-            filepath=fullpath,
+            filepath=GetExportFullpath(dirpath, filename),
             # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=False,
             mesh_smooth_type="FACE"

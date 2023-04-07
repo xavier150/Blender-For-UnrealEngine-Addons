@@ -172,7 +172,7 @@ def ExportSingleFbxNLAAnim(
 
     if (export_procedure == "auto-rig-pro"):
         ExportAutoProRig(
-            filepath=fullpath,
+            filepath=GetExportFullpath(dirpath, filename),
             # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=True,
             anim_export_name_string=active.animation_data.action.name,

@@ -1,4 +1,4 @@
-﻿== Rev 0.1.3 ==
+== Rev 0.1.3 ==
 
 Initial release.
 
@@ -451,3 +451,4 @@ It is now possible to force the duration of an animation according to the scene 
 - New options for set start/end animation time with NLA.
 - Fixed: ConvertGeometryNodeAttributeToUV fail after Blender 3.5
 - Fixed: Geometry To UV, Correct Extrem UV, Vertex Color, Sockets Transform and Name don't apply on child objects.
+- Fixed: Export using AutoProRig fail.
