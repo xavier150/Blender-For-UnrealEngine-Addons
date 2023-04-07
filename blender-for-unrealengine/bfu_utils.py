@@ -238,7 +238,7 @@ def GetAllobjectsByExportType(exportType):
         prop = obj.ExportEnum
         if prop == exportType:
             targetObj.append(obj)
-    return(targetObj)
+    return (targetObj)
 
 
 def GetAllCollisionAndSocketsObj(list=None):
@@ -250,7 +250,7 @@ def GetAllCollisionAndSocketsObj(list=None):
     else:
         objs = bpy.context.scene.objects
 
-    colObjs = [obj for obj in objs if(
+    colObjs = [obj for obj in objs if (
         fnmatch.fnmatchcase(obj.name, "UBX*") or
         fnmatch.fnmatchcase(obj.name, "UCP*") or
         fnmatch.fnmatchcase(obj.name, "USP*") or
@@ -513,27 +513,27 @@ def GetActionToExport(obj):
         return []
 
     TargetActionToExport = []  # Action list
-    if obj.exportActionEnum == "dont_export":
+    if obj.bfu_anim_action_export_enum == "dont_export":
         return []
 
-    if obj.exportActionEnum == "export_current":
+    if obj.bfu_anim_action_export_enum == "export_current":
         if obj.animation_data is not None:
             if obj.animation_data.action is not None:
                 return [obj.animation_data.action]
 
-    elif obj.exportActionEnum == "export_specific_list":
+    elif obj.bfu_anim_action_export_enum == "export_specific_list":
         for action in bpy.data.actions:
             for targetAction in obj.exportActionList:
                 if targetAction.use:
                     if targetAction.name == action.name:
                         TargetActionToExport.append(action)
 
-    elif obj.exportActionEnum == "export_specific_prefix":
+    elif obj.bfu_anim_action_export_enum == "export_specific_prefix":
         for action in bpy.data.actions:
             if fnmatch.fnmatchcase(action.name, obj.PrefixNameToExport+"*"):
                 TargetActionToExport.append(action)
 
-    elif obj.exportActionEnum == "export_auto":
+    elif obj.bfu_anim_action_export_enum == "export_auto":
         TargetActionToExport = GetCachedExportAutoActionList(obj)
 
     return TargetActionToExport
@@ -582,27 +582,51 @@ def GetDesiredActionStartEndTime(obj, action):
             endTime = startTime+1
         return (startTime, endTime)
 
-    elif obj.AnimStartEndTimeEnum == "with_keyframes":
+    elif obj.bfu_anim_action_start_end_time_enum == "with_keyframes":
         # GetFirstActionFrame + Offset
-        startTime = int(action.frame_range.x) + obj.StartFramesOffset
+        startTime = int(action.frame_range.x) + obj.bfu_anim_action_start_frame_offset
         # GetLastActionFrame + Offset
-        endTime = int(action.frame_range.y) + obj.EndFramesOffset
+        endTime = int(action.frame_range.y) + obj.bfu_anim_action_end_frame_offset
         if endTime <= startTime:
             endTime = startTime+1
         return (startTime, endTime)
 
-    elif obj.AnimStartEndTimeEnum == "with_sceneframes":
-        startTime = scene.frame_start + obj.StartFramesOffset
-        endTime = scene.frame_end + obj.EndFramesOffset
+    elif obj.bfu_anim_action_start_end_time_enum == "with_sceneframes":
+        startTime = scene.frame_start + obj.bfu_anim_action_start_frame_offset
+        endTime = scene.frame_end + obj.bfu_anim_action_end_frame_offset
         if endTime <= startTime:
             endTime = startTime+1
         return (startTime, endTime)
 
-    elif obj.AnimStartEndTimeEnum == "with_customframes":
-        startTime = obj.AnimCustomStartTime
-        endTime = obj.AnimCustomEndTime
+    elif obj.bfu_anim_action_start_end_time_enum == "with_customframes":
+        startTime = obj.bfu_anim_action_custom_start_frame
+        endTime = obj.bfu_anim_action_custom_end_frame
         if endTime <= startTime:
             endTime = startTime+1
+        return (startTime, endTime)
+
+
+def GetDesiredNLAStartEndTime(obj):
+    # Returns desired nla anim start/end time
+    # Return start with index 0 and end with index 1
+    # EndTime should be a less one frame bigger than StartTime
+
+    scene = bpy.context.scene
+
+    if obj.bfu_anim_nla_start_end_time_enum == "with_sceneframes":
+        startTime = scene.frame_start + obj.bfu_anim_nla_start_frame_offset
+        endTime = scene.frame_end + obj.bfu_anim_nla_end_frame_offset
+        if endTime <= startTime:
+            endTime = startTime+1
+
+        return (startTime, endTime)
+
+    elif obj.bfu_anim_nla_start_end_time_enum == "with_customframes":
+        startTime = obj.bfu_anim_nla_custom_start_frame
+        endTime = obj.bfu_anim_nla_custom_end_frame
+        if endTime <= startTime:
+            endTime = startTime+1
+
         return (startTime, endTime)
 
 
@@ -1184,7 +1208,7 @@ def GetFinalAssetToExport():
 
             # NLA
             if scene.anin_export:
-                if obj.ExportNLA:
+                if obj.bfu_anim_nla_use:
                     TargetAssetToExport.append(AssetToExport(
                         obj,
                         obj.animation_data,
@@ -1292,7 +1316,7 @@ def GetObjExportDir(obj, abspath=False):
             folder_name)
     if abspath:
         return bpy.path.abspath(dirpath)
-        
+
     else:
         return dirpath
 
@@ -1357,7 +1381,7 @@ def GetNLAExportFileName(obj, fileType=".fbx"):
     if obj.bfu_anim_naming_type == "include_custom_name":
         ArmatureName = obj.bfu_anim_naming_custom+"_"
 
-    return ValidFilename(scene.anim_prefix_export_name+ArmatureName+obj.NLAAnimName+fileType)
+    return ValidFilename(scene.anim_prefix_export_name+ArmatureName+obj.bfu_anim_nla_export_name+fileType)
 
 
 def GetImportAssetScriptCommand():

@@ -57,7 +57,7 @@ def ProcessActionExport(obj, action):
     MyAsset.asset_name = bfu_utils.GetActionExportFileName(obj, action, "")
     MyAsset.folder_name = obj.exportFolderName
     MyAsset.asset_type = bfu_utils.GetActionType(action)
-    
+
     MyAsset.StartAssetExport()
 
     ExportSingleFbxAction(scene, dirpath, GetActionExportFileName(obj, action), obj, action)
@@ -193,7 +193,7 @@ def ExportSingleFbxAction(
         active.animation_data.action.name = TempName
 
         ExportAutoProRig(
-            filepath=fullpath,
+            filepath=GetExportFullpath(dirpath, filename),
             # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=True,
             anim_export_name_string=active.animation_data.action.name,

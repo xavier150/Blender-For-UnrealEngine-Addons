@@ -98,7 +98,7 @@ def GetCurrentSelection():
     Selected.selected_objects = bpy.context.selected_objects.copy()
     for sel in Selected.selected_objects:
         Selected.old_name.append(sel.name)
-    return(Selected)
+    return (Selected)
 
 
 def SetCurrentSelection(selection):

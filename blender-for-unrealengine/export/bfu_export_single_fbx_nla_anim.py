@@ -141,8 +141,8 @@ def ExportSingleFbxNLAAnim(
 
         RescaleRigConsraints(active, rrf)
 
-    # scene.frame_start += active.StartFramesOffset
-    # scene.frame_end += active.EndFramesOffset
+    scene.frame_start = GetDesiredNLAStartEndTime(active)[0]
+    scene.frame_end = GetDesiredNLAStartEndTime(active)[1]
 
     asset_name.SetExportName()
 
@@ -172,7 +172,7 @@ def ExportSingleFbxNLAAnim(
 
     if (export_procedure == "auto-rig-pro"):
         ExportAutoProRig(
-            filepath=fullpath,
+            filepath=GetExportFullpath(dirpath, filename),
             # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=True,
             anim_export_name_string=active.animation_data.action.name,
@@ -181,8 +181,8 @@ def ExportSingleFbxNLAAnim(
             )
 
     ResetArmaturePose(active)
-    # scene.frame_start -= active.StartFramesOffset
-    # scene.frame_end -= active.EndFramesOffset
+    # scene.frame_start -= active.bfu_anim_action_start_frame_offset
+    # scene.frame_end -= active.bfu_anim_action_end_frame_offset
 
     asset_name.ResetNames()
 

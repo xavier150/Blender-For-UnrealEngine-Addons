@@ -86,8 +86,8 @@ def ExportSingleAlembicAnimation(
 
     SelectParentAndDesiredChilds(obj)
 
-    scene.frame_start += obj.StartFramesOffset
-    scene.frame_end += obj.EndFramesOffset
+    scene.frame_start += obj.bfu_anim_action_start_frame_offset
+    scene.frame_end += obj.bfu_anim_action_end_frame_offset
 
     # Export
     bpy.ops.wm.alembic_export(
@@ -97,8 +97,8 @@ def ExportSingleAlembicAnimation(
         triangulate=True,
         )
 
-    scene.frame_start -= obj.StartFramesOffset
-    scene.frame_end -= obj.EndFramesOffset
+    scene.frame_start -= obj.bfu_anim_action_start_frame_offset
+    scene.frame_end -= obj.bfu_anim_action_end_frame_offset
 
     for obj in scene.objects:
         ClearAllBFUTempVars(obj)
