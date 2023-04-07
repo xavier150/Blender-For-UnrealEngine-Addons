@@ -383,8 +383,8 @@ def ConvertGeometryNodeAttributeToUV(obj):
         if hasattr(obj.data, "attributes"):  # Cuves has not attributes.
             if attrib_name in obj.data.attributes:
 
-                # TO DO: Bad why to do this. Need found a way to convert without using ops.               
-                obj.data.attributes.active = obj.data.attributes[attrib_name]      
+                # TO DO: Bad why to do this. Need found a way to convert without using ops.
+                obj.data.attributes.active = obj.data.attributes[attrib_name]
 
                 # Because a bug Blender set the wrong attribute as active in 3.5.
                 if obj.data.attributes.active != obj.data.attributes[attrib_name]:
@@ -457,7 +457,7 @@ def ConvertArmatureConstraintToModifiers(armature):
                     const.enabled = False
 
                     # Remove All Vertex Group
-                        # TO DO:
+                    # TO DO:
 
                     # Add Vertex Group
                     for target in const.targets:

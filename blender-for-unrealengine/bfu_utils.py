@@ -238,7 +238,7 @@ def GetAllobjectsByExportType(exportType):
         prop = obj.ExportEnum
         if prop == exportType:
             targetObj.append(obj)
-    return(targetObj)
+    return (targetObj)
 
 
 def GetAllCollisionAndSocketsObj(list=None):
@@ -250,7 +250,7 @@ def GetAllCollisionAndSocketsObj(list=None):
     else:
         objs = bpy.context.scene.objects
 
-    colObjs = [obj for obj in objs if(
+    colObjs = [obj for obj in objs if (
         fnmatch.fnmatchcase(obj.name, "UBX*") or
         fnmatch.fnmatchcase(obj.name, "UCP*") or
         fnmatch.fnmatchcase(obj.name, "USP*") or
@@ -612,7 +612,6 @@ def GetDesiredNLAStartEndTime(obj):
     # EndTime should be a less one frame bigger than StartTime
 
     scene = bpy.context.scene
-
 
     if obj.bfu_anim_nla_start_end_time_enum == "with_sceneframes":
         startTime = scene.frame_start + obj.bfu_anim_nla_start_frame_offset
@@ -1317,7 +1316,7 @@ def GetObjExportDir(obj, abspath=False):
             folder_name)
     if abspath:
         return bpy.path.abspath(dirpath)
-        
+
     else:
         return dirpath
 

@@ -112,11 +112,9 @@ def ExportSingleSkeletalMesh(
         SetVertexColorForUnrealExport(obj)
         SetSocketsExportTransform(obj)
         SetSocketsExportName(obj)
-        
+
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
-
-
 
     export_procedure = active.bfu_export_procedure
 
@@ -148,7 +146,6 @@ def ExportSingleSkeletalMesh(
     bpy.context.object.data.pose_position = 'REST'
 
     ConvertArmatureConstraintToModifiers(active)
-
 
     asset_name.SetExportName()
 

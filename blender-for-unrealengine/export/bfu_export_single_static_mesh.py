@@ -110,7 +110,6 @@ def ExportSingleStaticMesh(
         SetSocketsExportTransform(obj)
         SetSocketsExportName(obj)
 
-
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
 
@@ -118,12 +117,9 @@ def ExportSingleStaticMesh(
 
     meshType = GetAssetType(active)
 
-
     bfu_check_potential_error.UpdateNameHierarchy(
         GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
         )
-
-
 
     asset_name.SetExportName()
 

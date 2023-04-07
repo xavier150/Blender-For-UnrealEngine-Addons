@@ -71,7 +71,7 @@ class VertexColorExportData:
         return self.obj
 
     def GetChosenVertexIndex(self):
-        
+
         obj = self.obj
         if obj.type != "MESH":
             return -1
