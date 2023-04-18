@@ -51,60 +51,7 @@ class NLA_Save():
         for nla_track in self.nla_tracks_save:
             pass
             new_nla_track = target.animation_data.nla_tracks.new()
-            # new_nla_track.active = nla_track.active
-            new_nla_track.is_solo = nla_track.is_solo
-            new_nla_track.lock = nla_track.lock
-            new_nla_track.mute = nla_track.mute
-            new_nla_track.name = nla_track.name
-            new_nla_track.select = nla_track.select
-
-            for strip in nla_track.strips:
-                if strip.action:
-                    pass
-                    new_strip = new_nla_track.strips.new(strip.name, int(strip.frame_start), strip.action)
-                    # new_strip.action = strip.action
-                    new_strip.action_frame_end = strip.action_frame_end
-                    new_strip.action_frame_start = strip.action_frame_start
-                    # new_strip.active = strip.active
-                    new_strip.blend_in = strip.blend_in
-                    new_strip.blend_out = strip.blend_out
-                    new_strip.blend_type = strip.blend_type
-                    new_strip.extrapolation = strip.extrapolation
-                    # new_strip.fcurves = strip.fcurves
-                    new_strip.frame_end = strip.frame_end
-                    # new_strip.frame_start = strip.frame_start
-                    new_strip.use_animated_influence = strip.use_animated_influence
-                    new_strip.influence = strip.influence
-
-                    # new_strip.modifiers = strip.modifiers #TO DO
-                    new_strip.mute = strip.mute
-                    # new_strip.name = strip.name
-                    new_strip.repeat = strip.repeat
-                    new_strip.scale = strip.scale
-                    new_strip.select = strip.select
-                    new_strip.strip_time = strip.strip_time
-                    # new_strip.strips = strip.strips #TO DO
-                    for i, fcurve in enumerate(strip.fcurves):  # Prodice crash on Bender 3.5
-                        new_fcurve = new_strip.fcurves.find(fcurve.data_path)
-                        if new_fcurve:
-                            new_fcurve.array_index = fcurve.array_index
-                            new_fcurve.color = fcurve.color
-                            new_fcurve.color_mode = fcurve.color_mode
-                            # new_fcurve.data_path = fcurve.data_path
-                            # new_fcurve.driver = fcurve.driver  #TO DO
-                            new_fcurve.extrapolation = fcurve.extrapolation
-                            new_fcurve.group = fcurve.group
-                            new_fcurve.hide = fcurve.hide
-                            # new_fcurve.is_empty = fcurve.is_empty
-                            # new_fcurve.is_valid = fcurve.is_valid
-                            # new_fcurve.keyframe_points = fcurve.keyframe_points
-                            new_fcurve.lock = fcurve.lock
-                            # new_fcurve.modifiers = fcurve.modifiers #TO DO
-                            new_fcurve.mute = fcurve.mute
-                            # new_fcurve.sampled_points = fcurve.sampled_points
-                            new_fcurve.select = fcurve.select
-                            for keyframe_point in fcurve.keyframe_points:
-                                new_fcurve.keyframe_points.insert(keyframe_point.co[0], keyframe_point.co[1])
+            nla_track.PasteDataOn(new_nla_track)
 
 
 class ProxyCopy_NLATrack():
@@ -123,6 +70,19 @@ class ProxyCopy_NLATrack():
             for strip in nla_track.strips:
                 self.strips.append(ProxyCopy_NlaStrip(strip))
 
+    def PasteDataOn(self, nla_track: bpy.types.NlaTrack):
+        if nla_track:
+            # nla_track.active = self.active
+            nla_track.is_solo = self.is_solo
+            nla_track.lock = self.lock
+            nla_track.mute = self.mute
+            nla_track.name = self.name
+            nla_track.select = self.select
+            for strip in self.strips:
+                if strip.action:
+                    new_strip = nla_track.strips.new(strip.name, int(strip.frame_start), strip.action)
+                    strip.PasteDataOn(new_strip)
+
 
 class ProxyCopy_NlaStrip():
     # Copy the NlaStrip(bpy_struct)
@@ -138,7 +98,7 @@ class ProxyCopy_NlaStrip():
         self.blend_type = nla_strip.blend_type
         self.extrapolation = nla_strip.extrapolation
         self.fcurves = []
-        # Interact to a NlaStripFCurves not linked to an object produce Blender Crash.
+        # Since 3.5 interact to a NlaStripFCurves not linked to an object produce Blender Crash.
         for fcurve in nla_strip.fcurves:
             self.fcurves.append(ProxyCopy_FCurve(fcurve))
         self.frame_end = nla_strip.frame_end
@@ -153,6 +113,33 @@ class ProxyCopy_NlaStrip():
         self.select = nla_strip.select
         self.strip_time = nla_strip.strip_time
         # self.strips = strip.strips #TO DO
+
+    def PasteDataOn(self, nla_strip: bpy.types.NlaStrip):
+        # nla_strip.action = strip.action
+        nla_strip.action_frame_end = self.action_frame_end
+        nla_strip.action_frame_start = self.action_frame_start
+        # nla_strip.active = self.active
+        nla_strip.blend_in = self.blend_in
+        nla_strip.blend_out = self.blend_out
+        nla_strip.blend_type = self.blend_type
+        nla_strip.extrapolation = self.extrapolation
+        # nla_strip.fcurves = self.fcurves
+        nla_strip.frame_end = self.frame_end
+        # nla_strip.frame_start = self.frame_start
+        nla_strip.use_animated_influence = self.use_animated_influence
+        nla_strip.influence = self.influence
+
+        # nla_strip.modifiers = self.modifiers #TO DO
+        nla_strip.mute = self.mute
+        # nla_strip.name = self.name
+        nla_strip.repeat = self.repeat
+        nla_strip.scale = self.scale
+        nla_strip.select = self.select
+        nla_strip.strip_time = self.strip_time
+        # nla_strip.strips = self.strips #TO DO
+        for i, fcurve in enumerate(self.fcurves):
+            new_fcurve = nla_strip.fcurves.find(fcurve.data_path)
+            fcurve.PasteDataOn(new_fcurve)
 
 
 class ProxyCopy_FCurve():
@@ -189,6 +176,27 @@ class ProxyCopy_FCurve():
         self.use_auto_blend = fcurve.use_auto_blend
         self.use_reverse = fcurve.use_reverse
         self.use_sync_length = fcurve.use_sync_length
+
+    def PasteDataOn(self, fcurve: bpy.types.FCurve):
+        if fcurve:
+            fcurve.array_index = self.array_index
+            fcurve.color = self.color
+            fcurve.color_mode = self.color_mode
+            # fcurve.data_path = self.data_path
+            # fcurve.driver = self.driver  #TO DO
+            fcurve.extrapolation = self.extrapolation
+            fcurve.group = self.group
+            fcurve.hide = self.hide
+            # fcurve.is_empty = self.is_empty
+            # fcurve.is_valid = self.is_valid
+            # fcurve.keyframe_points = self.keyframe_points
+            fcurve.lock = self.lock
+            # fcurve.modifiers = self.modifiers #TO DO
+            fcurve.mute = self.mute
+            # fcurve.sampled_points = self.sampled_points
+            fcurve.select = self.select
+            for keyframe_point in self.keyframe_points:
+                fcurve.keyframe_points.insert(keyframe_point.co[0], keyframe_point.co[1])
 
 
 class AnimationManagment():
