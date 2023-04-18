@@ -452,3 +452,6 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: ConvertGeometryNodeAttributeToUV fail after Blender 3.5
 - Fixed: Geometry To UV, Correct Extrem UV, Vertex Color, Sockets Transform and Name don't apply on child objects.
 - Fixed: Export using AutoProRig fail.
+
+== Rev 0.4.2 ==
+- Fixed: Blender 3.5 may crash during NLA Export. (Interact to a NlaStripFCurves not linked to an object produce crash in Blender 3.5)
