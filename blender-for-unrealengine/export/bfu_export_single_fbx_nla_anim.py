@@ -125,7 +125,7 @@ def ExportSingleFbxNLAAnim(
 
         rrf = GetRescaleRigFactor()  # rigRescaleFactor
         my_scene_unit_settings = bfu_utils.SceneUnitSettings(bpy.context.scene)
-
+        my_scene_unit_settings.SetUnitForUnrealEngineExport()
         my_skeletal_export_scale = bfu_utils.SkeletalExportScale(active)
         my_skeletal_export_scale.ApplySkeletalExportScale(rrf, target_animation_data=animation_data, is_a_proxy=export_as_proxy)
         my_action_curve_scale = bfu_utils.ActionCurveScale(rrf*active.scale.z)
