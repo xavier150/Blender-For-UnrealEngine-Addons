@@ -129,10 +129,10 @@ def ExportSingleSkeletalMesh(
     if ShouldRescaleRig:
 
         rrf = GetRescaleRigFactor()  # rigRescaleFactor
-        savedUnitLength = bpy.context.scene.unit_settings.scale_length
-        bpy.context.scene.unit_settings.scale_length = 0.01  # *= 1/rrf
+        my_scene_unit_settings = bfu_utils.SceneUnitSettings(bpy.context.scene)
 
-        ApplySkeletalExportScale(active, rrf, is_a_proxy=export_as_proxy)
+        my_skeletal_export_scale = bfu_utils.SkeletalExportScale(active)
+        my_skeletal_export_scale.ApplySkeletalExportScale(rrf, is_a_proxy=export_as_proxy)
 
     meshType = GetAssetType(active)
 
@@ -187,7 +187,7 @@ def ExportSingleSkeletalMesh(
     # This will rescale the rig and unit scale to get a root bone egal to 1
     if ShouldRescaleRig:
         # Reset Curve an unit
-        bpy.context.scene.unit_settings.scale_length = savedUnitLength
+        my_scene_unit_settings.ResetUnit()
 
     asset_name.ResetNames()
 

@@ -135,19 +135,19 @@ def ExportSingleFbxAction(
     if ShouldRescaleRig:
 
         rrf = GetRescaleRigFactor()  # rigRescaleFactor
-        savedUnitLength = bpy.context.scene.unit_settings.scale_length
-        bpy.context.scene.unit_settings.scale_length = 0.01  # *= 1/rrf
+        my_scene_unit_settings = bfu_utils.SceneUnitSettings(bpy.context.scene)
 
-        oldScale = active.scale.z
-        ApplySkeletalExportScale(active, rrf, is_a_proxy=export_as_proxy)
-        RescaleAllActionCurve(rrf*oldScale, savedUnitLength/0.01)
-        for selected in bpy.context.selected_objects:
-            if selected.type == "MESH":
-                if export_as_proxy is False:
-                    RescaleShapeKeysCurve(selected, 1/rrf)
+        my_skeletal_export_scale = bfu_utils.SkeletalExportScale(active)
+        my_skeletal_export_scale.ApplySkeletalExportScale(rrf, is_a_proxy=export_as_proxy)
+        my_action_curve_scale = bfu_utils.ActionCurveScale(rrf*active.scale.z)
+        my_action_curve_scale.ResacleForUnrealEngine()
+        my_shape_keys_curve_scale = bfu_utils.ShapeKeysCurveScale(rrf, is_a_proxy=export_as_proxy)
+        my_shape_keys_curve_scale.ResacleForUnrealEngine()
+
         RescaleSelectCurveHook(1/rrf)
         ResetArmaturePose(active)
-        RescaleRigConsraints(active, rrf)
+        my_rig_consraints_scale = bfu_utils.RigConsraintScale(active, rrf)
+        my_rig_consraints_scale.RescaleRigConsraintForUnrealEngine()
 
     # animation_data.action is ReadOnly with tweakmode in 2.8
     if (scene.is_nla_tweakmode):
@@ -219,9 +219,11 @@ def ExportSingleFbxAction(
 
     # This will rescale the rig and unit scale to get a root bone egal to 1
     if ShouldRescaleRig:
-        # Reset Curve an unit
-        bpy.context.scene.unit_settings.scale_length = savedUnitLength
-        RescaleAllActionCurve(1/(rrf*oldScale), 0.01/savedUnitLength)
+        my_rig_consraints_scale.ResetScaleAfterExport()
+        my_skeletal_export_scale.ResetSkeletalExportScale()
+        my_scene_unit_settings.ResetUnit()
+        my_action_curve_scale.ResetScaleAfterExport()
+        my_shape_keys_curve_scale.ResetScaleAfterExport()
 
     if export_as_proxy is False:
         CleanDeleteObjects(bpy.context.selected_objects)

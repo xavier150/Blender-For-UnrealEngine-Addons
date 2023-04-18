@@ -350,9 +350,41 @@ def RemoveAllConsraints(obj):
             b.constraints.remove(c)
 
 
-def RescaleRigConsraints(obj, scale):
-    for b in obj.pose.bones:
-        for c in b.constraints:
+class RigConsraintScale():
+
+    def __init__(self, armature, rescale_rig_factor):
+        self.armature = armature
+        self.rescale_rig_factor = rescale_rig_factor  # rigRescaleFactor
+        self.consraint_proxys = []
+
+        class ProxyRigConsraint():
+            def __init__(self, constraint):
+                self.constraint = constraint
+                # STRETCH_TO
+                if constraint.type == "STRETCH_TO":
+                    self.rest_length = constraint.rest_length  # Can be bigger than 10?... wtf
+
+                # LIMIT_LOCATION
+                if constraint.type == "LIMIT_LOCATION":
+                    self.min_x = constraint.min_x
+                    self.min_y = constraint.min_y
+                    self.min_z = constraint.min_z
+                    self.max_x = constraint.max_x
+                    self.max_y = constraint.max_y
+                    self.max_z = constraint.max_z
+
+                # LIMIT_DISTANCE
+                if constraint.type == "LIMIT_DISTANCE":
+                    self.distance = constraint.distance
+
+        for bone in armature.pose.bones:
+            for constraint in bone.constraints:
+                self.consraint_proxys.append(ProxyRigConsraint(constraint))
+
+    def RescaleRigConsraintForUnrealEngine(self):
+        scale = self.rescale_rig_factor
+        for consraint_proxy in self.consraint_proxys:
+            c = consraint_proxy.constraint
             # STRETCH_TO
             if c.type == "STRETCH_TO":
                 c.rest_length *= scale  # Can be bigger than 10?... wtf
@@ -370,25 +402,93 @@ def RescaleRigConsraints(obj, scale):
             if c.type == "LIMIT_DISTANCE":
                 c.distance *= scale
 
+    def ResetScaleAfterExport(self):
+        for consraint_proxy in self.consraint_proxys:
+            c = consraint_proxy.constraint
+            # STRETCH_TO
+            if c.type == "STRETCH_TO":
+                c.rest_length = consraint_proxy.rest_length  # Can be bigger than 10?... wtf
 
-def RescaleShapeKeysCurve(obj, scale):
-    if obj.data.shape_keys is None:  # Optimisation
-        return
-    if obj.data.shape_keys.animation_data is None:
-        return
-    if obj.data.shape_keys.animation_data.drivers is None:
-        return
+            # LIMIT_LOCATION
+            if c.type == "LIMIT_LOCATION":
+                c.min_x = consraint_proxy.min_x
+                c.min_y = consraint_proxy.min_y
+                c.min_z = consraint_proxy.min_z
+                c.max_x = consraint_proxy.max_x
+                c.max_y = consraint_proxy.max_y
+                c.max_z = consraint_proxy.max_z
 
-    for driver in obj.data.shape_keys.animation_data.drivers:
-        for key in driver.keyframe_points:
-            key.co[1] *= scale
-            key.handle_left[1] *= scale
-            key.handle_right[1] *= scale
+            # LIMIT_DISTANCE
+            if c.type == "LIMIT_DISTANCE":
+                c.distance = consraint_proxy.distance
 
-        for mod in driver.modifiers:
-            if mod.type == "GENERATOR":
-                mod.coefficients[0] *= scale  # coef: +
-                mod.coefficients[1] *= scale  # coef: x
+
+class ShapeKeysCurveScale():
+
+    def __init__(self, rescale_rig_factor, is_a_proxy=False):
+        self.export_as_proxy = is_a_proxy
+        self.rescale_rig_factor = rescale_rig_factor  # rigRescaleFactor
+        self.default_unit_length = bpy.context.scene.unit_settings.scale_length
+        self.proxy_drivers = self.ShapeKeysDriverRefs()  # Save driver data as proxy
+
+    class DriverProxyData():
+        def __init__(self, driver):
+            self.driver = driver
+            self.keyframe_points = []
+            self.modifiers = []
+            for key in self.driver.keyframe_points:
+                self.DriverKeyProxyData(key)
+
+            for mod in self.driver.modifiers:
+                self.DriverModifierProxyData(mod)
+
+        class DriverKeyProxyData():
+            def __init__(self, key):
+                self.co = key.co[1]
+                self.handle_left = key.handle_left[1]
+                self.handle_right = key.handle_right[1]
+
+        class DriverModifierProxyData():
+            def __init__(self, modifier):
+                self.coefficients = modifier.coefficients
+
+    def ResacleForUnrealEngine(self):
+        scale = 1/self.rescale_rig_factor
+        for proxy_driver in self.proxy_drivers:
+            for key in proxy_driver.driver.keyframe_points:
+                key.co[1] *= scale
+                key.handle_left[1] *= scale
+                key.handle_right[1] *= scale
+
+            for mod in proxy_driver.driver.modifiers:
+                if mod.type == "GENERATOR":
+                    mod.coefficients[0] *= scale  # coef: +
+                    mod.coefficients[1] *= scale  # coef: x
+
+    def ResetScaleAfterExport(self):
+        for proxy_driver in self.proxy_drivers:
+            for x, key in enumerate(proxy_driver.driver.keyframe_points):
+                key.co[1] = proxy_driver.keyframe_points[x].co
+                key.handle_left[1] = proxy_driver.keyframe_points[x].handle_left
+                key.handle_right[1] = proxy_driver.keyframe_points[x].handle_right
+
+            for x, mod in enumerate(proxy_driver.driver.modifiers):
+                if mod.type == "GENERATOR":
+                    mod.coefficients[0] = proxy_driver.modifiers[x].scale  # coef: +
+                    mod.coefficients[1] = proxy_driver.modifiers[x].scale  # coef: x
+
+    def ShapeKeysDriverRefs(self):
+        drivers = []
+        if self.export_as_proxy is False:
+            rrf = self.rescale_rig_factor
+            for obj in bpy.context.selected_objects:
+                if obj.type == "MESH":
+                    if obj.data.shape_keys is None:
+                        if obj.data.shape_keys.animation_data is None:
+                            if obj.data.shape_keys.animation_data.drivers is None:
+                                for driver in obj.data.shape_keys.animation_data.drivers:
+                                    drivers.append(self.DriverProxyData(driver))
+        return drivers
 
 
 def GetAllCollisionObj():
@@ -999,57 +1099,94 @@ def ApplyExportTransform(obj, use_type="Object"):
     obj.scale = saveScale
 
 
-def ApplySkeletalExportScale(armature, rescale, target_animation_data=None, is_a_proxy=False):
+class SceneUnitSettings():
+    def __init__(self, scene):
+        self.scene = scene
+        self.default_scale_length = scene.unit_settings.scale_length
 
-    # This function will rescale the armature and applys the new scale
+    def SetUnitForUnrealEngineExport(self):
+        self.scene.unit_settings.scale_length = 0.01  # *= 1/rrf
 
-    armature.scale = armature.scale*rescale
-    # Save armature location
-    old_location = armature.location.copy()
+    def ResetUnit(self):
+        self.scene.unit_settings.scale_length = self.default_scale_length
 
-    if target_animation_data is None:
-        armature_animation_data = bbpl.anim_utils.AnimationManagment()
-        armature_animation_data.SaveAnimationData(armature)
-        armature_animation_data.ClearAnimationData(armature)
-    else:
-        armature_animation_data = bbpl.anim_utils.AnimationManagment()
-        armature_animation_data.ClearAnimationData(armature)
 
-    armature.location = (0, 0, 0)
+class SkeletalExportScale():
 
-    # Save childs location
-    ChildsLocation = []
-    for Child in GetChilds(armature):
-        ChildsLocation.append([Child, Child.location.copy(), Child.matrix_parent_inverse.copy()])
+    def __init__(self, armature):
+        self.armature = armature
+        self.default_armature_data = armature.data
+        self.default_transform = armature.matrix_world.copy()
 
-    if is_a_proxy:
-        selection = GetCurrentSelection()
-        bpy.ops.object.select_all(action='DESELECT')
-        armature.select_set(True)
+        # Save childs location
+        self.childs = []
+        for child in GetChilds(armature):
+            self.childs.append(self.SkeletalChilds(child))
 
-    bpy.ops.object.transform_apply(
-        location=True,
-        scale=True,
-        rotation=True,
-        properties=True
-        )
+    class SkeletalChilds():
+        def __init__(self, obj):
+            self.obj = obj
+            self.default_matrix_local = obj.matrix_local.copy()
+            self.default_matrix_parent_inverse = obj.matrix_parent_inverse.copy()
 
-    if is_a_proxy:
-        SetCurrentSelection(selection)
+        def ResetObjTransform(self):
+            self.obj.matrix_local = self.default_matrix_local
+            self.obj.matrix_parent_inverse = self.default_matrix_parent_inverse
 
-    # Apply armature location
-    armature.location = old_location*rescale
+    def ResetArmatureChildsTransform(self):
+        for child in self.childs:
+            child.ResetObjTransform()
 
-    # Apply childs location
-    # I need work with matrix ChildLocation[0].matrix_parent_inverse
-    # But I don't understand how make it work.
-    for ChildLocation in ChildsLocation:
-        pass
+    def ApplySkeletalExportScale(self, rescale, target_animation_data=None, is_a_proxy=False):
+        # This function will rescale the armature and applys the new scale
 
-    if target_animation_data is None:
-        armature_animation_data.SetAnimationData(armature, True)
-    else:
-        target_animation_data.SetAnimationData(armature, True)
+        armature = self.armature
+        armature.scale = armature.scale*rescale
+
+        # Save armature location
+        old_location = armature.location.copy()
+
+        if target_animation_data is None:
+            armature_animation_data = bbpl.anim_utils.AnimationManagment()
+            armature_animation_data.SaveAnimationData(armature)
+            armature_animation_data.ClearAnimationData(armature)
+        else:
+            armature_animation_data = bbpl.anim_utils.AnimationManagment()
+            armature_animation_data.ClearAnimationData(armature)
+
+        if is_a_proxy:
+            selection = GetCurrentSelection()
+            bpy.ops.object.select_all(action='DESELECT')
+            armature.select_set(True)
+
+        # Need break multi users for apply scale.
+
+        # armature.make_local()
+        armature_data_copy_name = armature.data.name + "_copy"
+        armature.data.make_local()
+        armature.data.name = armature_data_copy_name
+
+        bpy.ops.object.transform_apply(
+            location=True,
+            scale=True,
+            rotation=True,
+            properties=True
+            )
+        if is_a_proxy:
+            SetCurrentSelection(selection)
+
+        # Apply armature location
+        armature.location = old_location*rescale
+
+        if target_animation_data is None:
+            armature_animation_data.SetAnimationData(armature, True)
+        else:
+            target_animation_data.SetAnimationData(armature, True)
+
+    def ResetSkeletalExportScale(self):
+        self.armature.data = self.default_armature_data
+        self.armature.matrix_world = self.default_transform
+        self.ResetArmatureChildsTransform()
 
 
 def RescaleSelectCurveHook(scale):
@@ -1093,48 +1230,52 @@ def RescaleSelectCurveHook(scale):
                     bezier_point.radius *= scale
 
 
-def RescaleActionCurve(action, scale):
-    for fcurve in action.fcurves:
-        if fcurve.data_path.split(".")[-1] == "location":
-            for key in fcurve.keyframe_points:
-                key.co[1] *= scale
-                key.handle_left[1] *= scale
-                key.handle_right[1] *= scale
+class ActionCurveScale():
 
-            # Modifier
-            for mod in fcurve.modifiers:
-                if mod.type == "NOISE":
-                    mod.strength *= scale
+    def __init__(self, rescale_factor):
+        self.rescale_factor = rescale_factor  # rigRescaleFactor
+        self.default_unit_length = bpy.context.scene.unit_settings.scale_length
 
+    def ResacleForUnrealEngine(self):
+        rf = self.rescale_factor
+        length = self.default_unit_length
 
-def RescaleAllActionCurve(bone_scale, scene_scale=1):
-    for action in bpy.data.actions:
-        print(action.name)
-        for fcurve in action.fcurves:
-            if fcurve.data_path == "location":
-                # Curve
-                for key in fcurve.keyframe_points:
-                    key.co[1] *= scene_scale
-                    key.handle_left[1] *= scene_scale
-                    key.handle_right[1] *= scene_scale
+        self.RescaleAllActionCurve(rf, length/0.01)
 
-                # Modifier
-                for mod in fcurve.modifiers:
-                    if mod.type == "NOISE":
-                        mod.strength *= scene_scale
+    def ResetScaleAfterExport(self):
+        rf = self.rescale_factor
+        length = self.default_unit_length
 
-            elif fcurve.data_path.split(".")[-1] == "location":
+        self.RescaleAllActionCurve(1/(rf), 0.01/length)
 
-                # Curve
-                for key in fcurve.keyframe_points:
-                    key.co[1] *= bone_scale
-                    key.handle_left[1] *= bone_scale
-                    key.handle_right[1] *= bone_scale
+    def RescaleAllActionCurve(self, bone_scale, scene_scale=1):
+        for action in bpy.data.actions:
+            print(action.name)
+            for fcurve in action.fcurves:
+                if fcurve.data_path == "location":
+                    # Curve
+                    for key in fcurve.keyframe_points:
+                        key.co[1] *= scene_scale
+                        key.handle_left[1] *= scene_scale
+                        key.handle_right[1] *= scene_scale
 
-                # Modifier
-                for mod in fcurve.modifiers:
-                    if mod.type == "NOISE":
-                        mod.strength *= bone_scale
+                    # Modifier
+                    for mod in fcurve.modifiers:
+                        if mod.type == "NOISE":
+                            mod.strength *= scene_scale
+
+                elif fcurve.data_path.split(".")[-1] == "location":
+
+                    # Curve
+                    for key in fcurve.keyframe_points:
+                        key.co[1] *= bone_scale
+                        key.handle_left[1] *= bone_scale
+                        key.handle_right[1] *= bone_scale
+
+                    # Modifier
+                    for mod in fcurve.modifiers:
+                        if mod.type == "NOISE":
+                            mod.strength *= bone_scale
 
 
 def GetFinalAssetToExport():

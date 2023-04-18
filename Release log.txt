@@ -455,3 +455,4 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.4.2 ==
 - Fixed: Blender 3.5 may crash during NLA Export. (Interact to a NlaStripFCurves not linked to an object produce crash in Blender 3.5)
+- Fixed: With Proxy and Unit Scale not at 0.01 ApplySkeletalExportScale do error script.
