@@ -401,6 +401,28 @@ def ConvertGeometryNodeAttributeToUV(obj):
                     if obj.data.attributes.active:
                         bpy.ops.geometry.attribute_convert(mode='UV_MAP', domain='CORNER', data_type='FLOAT2')
                 SetCurrentSelection(SavedSelect)
+
+                # Because it not possible to move UV index I need recreate all UV for place new UV Map at start...
+                if len(obj.data.uv_layers) < 8:  # Blender Cannot add more than 8 UV maps.
+
+                    uv_names = []  # Cache uv names
+                    for old_uv in obj.data.uv_layers:
+                        uv_names.append(old_uv.name)
+
+                    for name in uv_names:
+                        old_uv = obj.data.uv_layers[name]
+                        if name != attrib_name:
+                            # Vars
+                            new_uv_name = old_uv.name
+                            old_uv_name = old_uv.name + "_OLDUVEXPORT"
+                            # Rename and recreate new UV
+                            old_uv.name += "_OLDUVEXPORT"
+                            obj.data.uv_layers.active = old_uv
+                            new_uv = obj.data.uv_layers.new(name=new_uv_name, do_init=True)
+                            obj.data.uv_layers.active = new_uv
+                            # Remove old one
+                            obj.data.uv_layers.remove(obj.data.uv_layers[old_uv_name])
+
                 return
 
                 attrib = obj.data.attributes[attrib_name]
