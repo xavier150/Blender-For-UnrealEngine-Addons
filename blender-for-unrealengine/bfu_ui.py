@@ -1439,8 +1439,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 else:
                                     ProxyProp.label(text="Proxy child not found")
 
-                            export_procedure_prop = layout.column()
-                            export_procedure_prop.prop(obj, 'bfu_export_procedure')
+                            if obj.type == "ARMATURE":
+                                export_procedure_prop = layout.column()
+                                export_procedure_prop.prop(obj, 'bfu_export_procedure')
 
                             if not GetExportAsProxy(obj):
                                 AlembicProp = layout.column()
