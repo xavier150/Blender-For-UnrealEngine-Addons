@@ -1723,7 +1723,6 @@ def GetDesiredExportArmatureName(obj):
 
 
 def GetObjExportScale(obj):
-
     return obj.exportGlobalScale
 
 
