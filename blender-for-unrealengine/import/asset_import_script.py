@@ -363,6 +363,9 @@ def ImportAllAssets():
                     if asset_data["use_custom_light_map_resolution"]:
                         if "light_map_resolution" in asset_data:
                             asset.set_editor_property('light_map_resolution', asset_data["light_map_resolution"])
+                            build_settings = unreal.EditorStaticMeshLibrary.get_lod_build_settings(asset, 0)
+                            build_settings.min_lightmap_resolution = asset_data["light_map_resolution"]
+                            unreal.EditorStaticMeshLibrary.set_lod_build_settings(asset, 0, build_settings)
 
                 if "collision_trace_flag" in asset_data:
                     if asset_data["collision_trace_flag"] == "CTF_UseDefault":
