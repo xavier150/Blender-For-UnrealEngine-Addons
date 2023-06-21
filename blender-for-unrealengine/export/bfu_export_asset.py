@@ -291,7 +291,7 @@ def ExportForUnrealEngine():
 
     for col in bpy.data.collections:
         if col.hide_select:
-            col.hide_select = False
+           col.hide_select = False
         if col.hide_viewport:
             col.hide_viewport = False
 

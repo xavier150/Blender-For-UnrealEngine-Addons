@@ -36,6 +36,7 @@ class SavedObject():
 
     def __init__(self, obj):
         if obj:
+            self.ref = obj
             self.name = obj.name
             self.select = obj.select_get()
             self.hide = obj.hide_get()
@@ -56,6 +57,7 @@ class SavedCollection():
 
     def __init__(self, col):
         if col:
+            self.ref = col
             self.name = col.name
             self.hide_select = col.hide_select
             self.hide_viewport = col.hide_viewport
@@ -232,27 +234,27 @@ class UserSceneSave():
         bpy.context.scene.render.use_simplify = self.use_simplify
 
         # Reset hide and select (bpy.data.objects)
+        print("Object", len(self.objects))
         for obj in self.objects:
-            if obj.name in bpy.data.objects:
-                if bpy.data.objects[obj.name].hide_select != obj.hide_select:
-                    bpy.data.objects[obj.name].hide_select = obj.hide_select
-                if bpy.data.objects[obj.name].hide_viewport != obj.hide_viewport:
-                    bpy.data.objects[obj.name].hide_viewport = obj.hide_viewport
-                if bpy.data.objects[obj.name].hide_get() != obj.hide:
-                    bpy.data.objects[obj.name].hide_set(obj.hide)
-
+            if obj.ref:
+                if obj.ref.hide_select != obj.hide_select:
+                    obj.ref.hide_select = obj.hide_select
+                if obj.ref.hide_viewport != obj.hide_viewport:
+                    obj.ref.hide_viewport = obj.hide_viewport
+                if obj.ref.hide_get() != obj.hide:
+                    obj.ref.hide_set(obj.hide)
             else:
-                print("/!\\ "+obj.name+" not found in bpy.data.objects")
+                print("/!\\ "+obj.name+" not found.")
 
         # Reset hide and select (bpy.data.collections)
         for col in self.collections:
-            if col.name in bpy.data.collections:
-                if bpy.data.collections[col.name].hide_select != col.hide_select:
-                    bpy.data.collections[col.name].hide_select = col.hide_select
-                if bpy.data.collections[col.name].hide_viewport != col.hide_viewport:
-                    bpy.data.collections[col.name].hide_viewport = col.hide_viewport
+            if col.ref:
+                if col.ref.hide_select != col.hide_select:
+                    col.ref.hide_select = col.hide_select
+                if col.ref.hide_viewport != col.hide_viewport:
+                    col.ref.hide_viewport = col.hide_viewport
             else:
-                print("/!\\ "+col.name+" not found in bpy.data.collections")
+                print("/!\\ "+col.name+" not found.")
 
         # Reset hide in and viewport (collections from view_layers)
 
