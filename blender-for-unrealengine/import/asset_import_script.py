@@ -384,6 +384,13 @@ def ImportAllAssets():
 
             if asset_data["type"] == "SkeletalMesh":
                 asset_import_data.set_editor_property('normal_import_method', unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS)
+                if OriginSkeleton is None:
+                    #Unreal create a new skeleton when no skeleton was selected, so addon rename it.
+                    p = task.imported_object_paths[0]
+                    old_skeleton_name = p.split('.')[0]+'_Skeleton.'+p.split('.')[1]+'_Skeleton'
+                    new_skeleton_name = asset_data["animation_skeleton_path"]
+                    unreal.EditorAssetLibrary.rename_asset(old_skeleton_name, new_skeleton_name)
+                    
 
             # Socket
             if asset_data["type"] == "SkeletalMesh":

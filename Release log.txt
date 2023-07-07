@@ -459,3 +459,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Use Convert Attribute to UV can swaps UV Index in the exported mesh.
 - Fixed: Export procedure option is visible with Static meshs.
 - Fixed: Hiden obj and collection are unhide after export when use the same name.
+- Fixed: Skeleton imported with skeletal mesh use a wrong name
