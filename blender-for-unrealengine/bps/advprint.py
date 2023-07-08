@@ -104,10 +104,23 @@ class ProgressionBarClass():
         sys.stdout.flush()
 
 
-def PrintSeparation(number=60):
-    print("# {0} #".format("-"*number))
+def print_separation(number=60):
+    """
+    Prints a separation line consisting of '#' characters.
+
+    Args:
+        number (int, optional): The number of '#' characters in the line. Defaults to 60.
+    """
+    print("# {0} #".format("-" * number))
 
 
-def PrintTitle(text, number=60):
+def print_title(text, number=60):
+    """
+    Prints a title surrounded by a line of '#' characters.
+
+    Args:
+        text (str): The text of the title.
+        number (int, optional): The total number of characters in the line. Defaults to 60.
+    """
     remain_number = len(text) - number - 2
-    print("# {0} {1} {2} #".format("-"*remain_number, text, "-"*remain_number))
+    print("# {0} {1} {2} #".format("-" * remain_number, text, "-" * remain_number))
