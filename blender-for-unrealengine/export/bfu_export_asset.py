@@ -279,7 +279,7 @@ def ExportForUnrealEngine():
     local_view_areas = MoveToGlobalView()
 
     MyCurrentDataSave = bbpl.utils.UserSceneSave()
-    MyCurrentDataSave.SaveCurrentScene()
+    MyCurrentDataSave.save_current_scene()
 
     for obj in bpy.data.objects:
         if obj.hide_select:
@@ -296,14 +296,14 @@ def ExportForUnrealEngine():
             col.hide_viewport = False
 
     for vlayer in bpy.context.scene.view_layers:
-        layer_collections = bbpl.utils.getLayerCollectionsRecursive(vlayer.layer_collection)
+        layer_collections = bbpl.utils.get_layer_collections_recursive(vlayer.layer_collection)
         for layer_collection in layer_collections:
             if layer_collection.exclude:
                 layer_collection.exclude = False
             if layer_collection.hide_viewport:
                 layer_collection.hide_viewport = False
 
-    bbpl.utils.SafeModeSet('OBJECT', MyCurrentDataSave.user_select_class.user_active)
+    bbpl.utils.safe_mode_set('OBJECT', MyCurrentDataSave.user_select_class.user_active)
 
     if addon_prefs.revertExportPath:
         RemoveFolderTree(bpy.path.abspath(scene.export_static_file_path))
@@ -338,8 +338,8 @@ def ExportForUnrealEngine():
         targetcollection=col_list,
     )
 
-    MyCurrentDataSave.ResetSelectByName()
-    MyCurrentDataSave.ResetSceneAtSave()
+    MyCurrentDataSave.reset_select_by_name()
+    MyCurrentDataSave.reset_scene_at_save()
 
     # Clean actions
     for action in bpy.data.actions:

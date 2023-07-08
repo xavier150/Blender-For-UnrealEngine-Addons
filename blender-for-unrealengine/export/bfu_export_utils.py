@@ -145,12 +145,12 @@ def DuplicateSelectForExport(new_name="duplicated Obj"):
 
         def SetOriginSelect(self):
             select = bbpl.utils.UserSelectSave()
-            select.SaveCurrentSelect()
+            select.save_current_select()
             self.origin_select = select
 
         def SetDuplicateSelect(self):
             select = bbpl.utils.UserSelectSave()
-            select.SaveCurrentSelect()
+            select.save_current_select()
             self.duplicate_select = select
 
     class DelegateOldData():
@@ -222,7 +222,7 @@ def ResetDuplicateNameAfterExport(duplicate_data):
 
 def MakeSelectVisualReal():
     select = bbpl.utils.UserSelectSave()
-    select.SaveCurrentSelect()
+    select.save_current_select()
 
     # Save object list
     previous_objects = []
@@ -238,7 +238,7 @@ def MakeSelectVisualReal():
         use_hierarchy=True
         )
 
-    select.ResetSelectByName()
+    select.reset_select_by_name()
 
     # Select the new objects
     for obj in bpy.data.objects:
@@ -458,7 +458,7 @@ def CorrectExtremUVAtExport(obj):
         SavedSelect = GetCurrentSelection()
         if GoToMeshEditMode():
             CorrectExtremeUV(2)
-            bbpl.utils.SafeModeSet('OBJECT')
+            bbpl.utils.safe_mode_set('OBJECT')
             SetCurrentSelection(SavedSelect)
             return True
     return False

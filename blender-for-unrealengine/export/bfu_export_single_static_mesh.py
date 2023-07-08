@@ -93,7 +93,7 @@ def ExportSingleStaticMesh(
     scene = bpy.context.scene
     addon_prefs = GetAddonPrefs()
 
-    bbpl.utils.SafeModeSet('OBJECT')
+    bbpl.utils.safe_mode_set('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
     asset_name = PrepareExportName(obj, False)

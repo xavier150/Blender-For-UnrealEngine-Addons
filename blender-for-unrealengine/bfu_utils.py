@@ -740,7 +740,7 @@ def GetExportRealSurfaceArea(obj):
     scene = bpy.context.scene
 
     local_view_areas = MoveToGlobalView()
-    bbpl.utils.SafeModeSet('OBJECT')
+    bbpl.utils.safe_mode_set('OBJECT')
 
     SavedSelect = GetCurrentSelection()
     SelectParentAndDesiredChilds(obj)
@@ -928,7 +928,7 @@ def SelectParentAndDesiredChilds(obj):
 
 def RemoveSocketFromSelectForProxyArmature():
     select = bbpl.utils.UserSelectSave()
-    select.SaveCurrentSelect()
+    select.save_current_select()
     # With skeletal mesh the socket must be not exported,
     # ue4 read it like a bone
     sockets = []
@@ -936,14 +936,14 @@ def RemoveSocketFromSelectForProxyArmature():
         if fnmatch.fnmatchcase(obj.name, "SOCKET*"):
             sockets.append(obj)
     CleanDeleteObjects(sockets)
-    select.ResetSelectByName()
+    select.reset_select_by_name()
 
 
 def GoToMeshEditMode():
     for obj in bpy.context.selected_objects:
         if obj.type == "MESH":
             bpy.context.view_layer.objects.active = obj
-            bbpl.utils.SafeModeSet('EDIT')
+            bbpl.utils.safe_mode_set('EDIT')
 
             return True
     return False

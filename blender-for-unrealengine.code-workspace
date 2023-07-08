@@ -9,6 +9,7 @@
 		"python.linting.pylintEnabled": true,
 		"python.linting.pylintArgs": [
 			"--max-line-length=120",
+			"--disable=E1111"
 		],
 		"python.linting.pycodestyleEnabled": true,
 		"python.linting.pycodestyleArgs": [

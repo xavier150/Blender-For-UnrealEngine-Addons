@@ -107,7 +107,7 @@ def ExportSingleFbxCamera(
     if obj.type != 'CAMERA':
         return
 
-    bbpl.utils.SafeModeSet('OBJECT')
+    bbpl.utils.safe_mode_set('OBJECT')
 
     # Select and rescale camera for export
     bpy.ops.object.select_all(action='DESELECT')

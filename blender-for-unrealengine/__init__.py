@@ -30,6 +30,7 @@ xavierloux.com
 xavierloux.loux@gmail.com
 '''
 
+import importlib
 import bpy
 
 from . import bps
@@ -45,7 +46,7 @@ from . import bfu_write_text
 from . import bfu_basics
 from . import bfu_utils
 
-import importlib
+
 if "bps" in locals():
     importlib.reload(bps)
 if "bbpl" in locals():
@@ -84,7 +85,10 @@ bl_info = {
     'category': 'Import-Export'}
 
 
-class BFU_CachedAction(bpy.types.PropertyGroup):
+class BFUCachedAction(bpy.types.PropertyGroup):
+    """
+    Represents a cached action for Blender File Utils (BFU).
+    """
     name: bpy.props.StringProperty()
 
 
@@ -98,11 +102,12 @@ def register():
     Register.
     """
     from bpy.utils import register_class
+
     bpy.types.Scene.bfu_cache_obj_name = bpy.props.StringProperty()
     bpy.types.Scene.bfu_export_auto_cached = bpy.props.BoolProperty(default=False)
 
-    bpy.utils.register_class(BFU_CachedAction)
-    bpy.types.Scene.bfu_export_auto_cached_actions = bpy.props.CollectionProperty(type=BFU_CachedAction)
+    bpy.utils.register_class(BFUCachedAction)
+    bpy.types.Scene.bfu_export_auto_cached_actions = bpy.props.CollectionProperty(type=BFUCachedAction)
     bpy.types.Scene.bfu_export_auto_cached_actions_len = bpy.props.IntProperty()
 
     bpy.types.Scene.bfu_object_properties_expanded = bpy.props.BoolProperty()
@@ -172,7 +177,7 @@ def unregister():
     del bpy.types.Scene.bfu_export_auto_cached
     del bpy.types.Scene.bfu_export_auto_cached_actions
     del bpy.types.Scene.bfu_export_auto_cached_actions_len
-    bpy.utils.unregister_class(BFU_CachedAction)
+    bpy.utils.unregister_class(BFUCachedAction)
 
     del bpy.types.Scene.bfu_object_properties_expanded
     del bpy.types.Scene.bfu_object_import_properties_expanded

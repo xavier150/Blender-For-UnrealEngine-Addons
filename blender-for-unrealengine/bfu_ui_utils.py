@@ -136,6 +136,9 @@ classes = (
 
 
 def register():
+    """
+    Register.
+    """
     from bpy.utils import register_class
 
     for cls in classes:
@@ -143,6 +146,9 @@ def register():
 
 
 def unregister():
+    """
+    unregister.
+    """
     from bpy.utils import unregister_class
 
     for cls in reversed(classes):

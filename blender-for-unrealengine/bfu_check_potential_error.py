@@ -546,7 +546,7 @@ def UpdateUnrealPotentialError():
 def SelectPotentialErrorObject(errorIndex):
     # Select potential error
 
-    bbpl.utils.SafeModeSet('OBJECT', bpy.context.active_object)
+    bbpl.utils.safe_mode_set('OBJECT', bpy.context.active_object)
     scene = bpy.context.scene
     error = scene.potentialErrorList[errorIndex]
     obj = error.object
@@ -569,7 +569,7 @@ def SelectPotentialErrorObject(errorIndex):
 def SelectPotentialErrorVertex(errorIndex):
     # Select potential error
     SelectPotentialErrorObject(errorIndex)
-    bbpl.utils.SafeModeSet('EDIT')
+    bbpl.utils.safe_mode_set('EDIT')
 
     scene = bpy.context.scene
     error = scene.potentialErrorList[errorIndex]
@@ -577,11 +577,11 @@ def SelectPotentialErrorVertex(errorIndex):
     bpy.ops.mesh.select_mode(type="VERT")
     bpy.ops.mesh.select_all(action='DESELECT')
 
-    bbpl.utils.SafeModeSet('OBJECT')
+    bbpl.utils.safe_mode_set('OBJECT')
     if error.selectOption == "VertexWithZeroWeight":
         for vertex in GetVertexWithZeroWeight(obj.parent, obj):
             vertex.select = True
-    bbpl.utils.SafeModeSet('EDIT')
+    bbpl.utils.safe_mode_set('EDIT')
     bpy.ops.view3d.view_selected()
     return obj
 
@@ -589,7 +589,7 @@ def SelectPotentialErrorVertex(errorIndex):
 def SelectPotentialErrorPoseBone(errorIndex):
     # Select potential error
     SelectPotentialErrorObject(errorIndex)
-    bbpl.utils.SafeModeSet('POSE')
+    bbpl.utils.safe_mode_set('POSE')
 
     scene = bpy.context.scene
     error = scene.potentialErrorList[errorIndex]
@@ -620,9 +620,9 @@ def TryToCorrectPotentialError(errorIndex):
     local_view_areas = MoveToGlobalView()
 
     MyCurrentDataSave = bbpl.utils.UserSceneSave()
-    MyCurrentDataSave.SaveCurrentScene()
+    MyCurrentDataSave.save_current_scene()
 
-    bbpl.utils.SafeModeSet('OBJECT', MyCurrentDataSave.user_select_class.user_active)
+    bbpl.utils.safe_mode_set('OBJECT', MyCurrentDataSave.user_select_class.user_active)
 
     print("Start correct")
 
@@ -658,7 +658,7 @@ def TryToCorrectPotentialError(errorIndex):
     if error.correctRef == "CreateUV":
         obj = error.object
         SelectObj(obj)
-        if bbpl.utils.SafeModeSet("EDIT", obj):
+        if bbpl.utils.safe_mode_set("EDIT", obj):
             bpy.ops.uv.smart_project()
             successCorrect = True
         else:
@@ -689,8 +689,8 @@ def TryToCorrectPotentialError(errorIndex):
         successCorrect = True
 
     # ----------------------------------------Reset data
-    MyCurrentDataSave.ResetSelectByName()
-    MyCurrentDataSave.ResetSceneAtSave()
+    MyCurrentDataSave.reset_select_by_name()
+    MyCurrentDataSave.reset_scene_at_save()
     MoveToLocalView(local_view_areas)
 
     # ----------------------------------------

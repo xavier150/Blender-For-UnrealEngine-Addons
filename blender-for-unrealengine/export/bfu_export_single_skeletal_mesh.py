@@ -98,7 +98,7 @@ def ExportSingleSkeletalMesh(
     export_as_proxy = GetExportAsProxy(obj)
     export_proxy_child = GetExportProxyChild(obj)
 
-    bbpl.utils.SafeModeSet('OBJECT')
+    bbpl.utils.safe_mode_set('OBJECT')
 
     SelectParentAndDesiredChilds(obj)
     asset_name = PrepareExportName(obj, True)
