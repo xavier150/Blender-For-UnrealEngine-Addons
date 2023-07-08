@@ -21,6 +21,8 @@
 #  xavierloux.com
 # ----------------------------------------------
 
+import importlib
+
 from . import basics
 from . import utils
 from . import rig_utils
@@ -29,7 +31,6 @@ from . import skin_utils
 from . import anim_utils
 from . import ui_utils
 
-import importlib
 if "basics" in locals():
     importlib.reload(basics)
 if "utils" in locals():

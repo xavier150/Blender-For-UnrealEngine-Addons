@@ -17,48 +17,79 @@
 # ======================= END GPL LICENSE BLOCK =============================
 
 # ----------------------------------------------
-#  This addons allows to easily export several objects at the same time in .fbx
-#  for use in unreal engine 4 by removing the usual constraints
-#  while respecting UE4 naming conventions and a clean tree structure.
-#  It also contains a small toolkit for collisions and sockets
+#  BBPL -> BleuRaven Blender Python Library
 #  xavierloux.com
 # ----------------------------------------------
 
-from .. import bbpl
 import bpy
+from . import basics
 
 
-class NLA_Save():
+class NLA_Save:
     def __init__(self, nla_tracks):
+        """
+        Initializes the NLA_Save object.
+
+        Args:
+            nla_tracks (list): The NLA tracks to save.
+
+        Returns:
+            None
+        """
         self.nla_tracks_save = None
         if nla_tracks is not None:
-            self.SaveTracks(nla_tracks)
+            self.save_tracks(nla_tracks)
 
-    def SaveTracks(self, nla_tracks):
+    def save_tracks(self, nla_tracks):
+        """
+        Saves the NLA tracks.
+
+        Args:
+            nla_tracks (list): The NLA tracks to save.
+
+        Returns:
+            None
+        """
         proxy_nla_tracks = []
 
         for nla_track in nla_tracks:
             proxy_nla_tracks.append(ProxyCopy_NLATrack(nla_track))
         self.nla_tracks_save = proxy_nla_tracks
 
-    def ApplySaveOnTarget(self, target):
+    def apply_save_on_target(self, target):
+        """
+        Applies the saved NLA tracks to the target object.
 
-        if target is None:
-            return
-        if target.animation_data is None:
+        Args:
+            target (bpy.types.Object): The target object to apply the saved NLA tracks.
+
+        Returns:
+            None
+        """
+        if target is None or target.animation_data is None:
             return
 
         for nla_track in self.nla_tracks_save:
-            pass
             new_nla_track = target.animation_data.nla_tracks.new()
-            nla_track.PasteDataOn(new_nla_track)
+            nla_track.paste_data_on(new_nla_track)
 
+class ProxyCopy_NLATrack:
+    """
+    Proxy class for copying bpy.types.NlaTrack.
 
-class ProxyCopy_NLATrack():
-    # Copy the NlaTrack(bpy_struct)
-    # It used to do a safe for copy the struct.
+    It is used to safely copy the bpy.types.NlaTrack struct.
+    """
 
-    def __init__(self, nla_track: bpy.types.NlaTrack):
+    def __init__(self, nla_track):
+        """
+        Initializes the ProxyCopy_NLATrack object.
+
+        Args:
+            nla_track (bpy.types.NlaTrack): The NlaTrack to copy.
+
+        Returns:
+            None
+        """
         if nla_track:
             self.active = nla_track.active
             self.is_solo = nla_track.is_solo
@@ -70,7 +101,16 @@ class ProxyCopy_NLATrack():
             for strip in nla_track.strips:
                 self.strips.append(ProxyCopy_NlaStrip(strip))
 
-    def PasteDataOn(self, nla_track: bpy.types.NlaTrack):
+    def paste_data_on(self, nla_track):
+        """
+        Pastes the saved data onto the target NlaTrack.
+
+        Args:
+            nla_track (bpy.types.NlaTrack): The target NlaTrack to paste the data on.
+
+        Returns:
+            None
+        """
         if nla_track:
             # nla_track.active = self.active
             nla_track.is_solo = self.is_solo
@@ -81,12 +121,15 @@ class ProxyCopy_NLATrack():
             for strip in self.strips:
                 if strip.action:
                     new_strip = nla_track.strips.new(strip.name, int(strip.frame_start), strip.action)
-                    strip.PasteDataOn(new_strip)
+                    strip.paste_data_on(new_strip)
 
 
-class ProxyCopy_NlaStrip():
-    # Copy the NlaStrip(bpy_struct)
-    # It used to do a safe for copy the struct.
+class ProxyCopy_NlaStrip:
+    """
+    Proxy class for copying bpy.types.NlaStrip.
+
+    It is used to safely copy the bpy.types.NlaStrip struct.
+    """
 
     def __init__(self, nla_strip: bpy.types.NlaStrip):
         self.action = nla_strip.action
@@ -125,7 +168,7 @@ class ProxyCopy_NlaStrip():
             self.use_reverse = nla_strip.use_reverse
             self.use_sync_length = nla_strip.use_sync_length
 
-    def PasteDataOn(self, nla_strip: bpy.types.NlaStrip):
+    def paste_data_on(self, nla_strip: bpy.types.NlaStrip):
         # nla_strip.action = strip.action
         nla_strip.action_frame_end = self.action_frame_end
         nla_strip.action_frame_start = self.action_frame_start
@@ -163,25 +206,38 @@ class ProxyCopy_NlaStrip():
 
 
 class ProxyCopy_FCurve():
-    # Copy the FCurve(bpy_struct)
-    # It used to do a safe for copy the struct.
+    """
+    Proxy class for copying bpy.types.FCurve.
+
+    It is used to safely copy the bpy.types.FCurve struct.
+    """
 
     def __init__(self, fcurve: bpy.types.FCurve):
         self.data_path = fcurve.data_path
 
-    def PasteDataOn(self, fcurve: bpy.types.FCurve):
+    def paste_data_on(self, fcurve: bpy.types.FCurve):
         pass
 
 
 class AnimationManagment():
+    """
+    Helper class for managing animation data in Blender.
+    """
+
     def __init__(self):
         self.use_animation_data = False
         self.action = None
-        self.action_extrapolation = "HOLD"  # Default value
-        self.action_blend_type = "REPLACE"  # Default value
-        self.action_influence = 1.0  # Default value
+        self.action_extrapolation = "HOLD"
+        self.action_blend_type = "REPLACE"
+        self.action_influence = 1.0
 
-    def SaveAnimationData(self, obj):
+    def save_animation_data(self, obj):
+        """
+        Saves the animation data from the object.
+
+        Args:
+            obj (bpy.types.Object): The object to save the animation data from.
+        """
         if obj.animation_data is not None:
             self.action = obj.animation_data.action
             self.action_extrapolation = obj.animation_data.action_extrapolation
@@ -192,19 +248,31 @@ class AnimationManagment():
         else:
             self.use_animation_data = False
 
-    def ClearAnimationData(self, obj):
+    def clear_animation_data(self, obj):
+        """
+        Clears the animation data from the object.
+
+        Args:
+            obj (bpy.types.Object): The object to clear the animation data from.
+        """
         obj.animation_data_clear()
 
-    def SetAnimationData(self, obj, copy_nla=False):
+    def set_animation_data(self, obj, copy_nla=False):
+        """
+        Sets the animation data on the object.
 
-        SaveItTweakmode = bbpl.basics.IsTweakmode()
-        bbpl.basics.ExitTweakmode()
-        print("Set animation data on: ", obj)
+        Args:
+            obj (bpy.types.Object): The object to set the animation data on.
+            copy_nla (bool, optional): Whether to copy the Non-Linear Animation (NLA) tracks. Defaults to False.
+        """
+
+        save_it_tweakmode = basics.is_tweak_mode()
+        basics.exit_tweak_mode()
+        print("Set animation data on:", obj)
         if self.use_animation_data:
             obj.animation_data_create()
 
         if obj.animation_data is not None:
-
             obj.animation_data.action = self.action
             obj.animation_data.action_extrapolation = self.action_extrapolation
             obj.animation_data.action_blend_type = self.action_blend_type
@@ -217,10 +285,10 @@ class AnimationManagment():
                     pass
                     obj.animation_data.nla_tracks.remove(obj.animation_data.nla_tracks[0])
 
-                # Add Current nla_tracks
+                # Add current nla_tracks
                 if self.nla_tracks_save is not None:
                     pass
-                    self.nla_tracks_save.ApplySaveOnTarget(obj)
+                    self.nla_tracks_save.apply_save_on_target(obj)
 
-        if SaveItTweakmode:
-            bbpl.basics.EnterTweakmode()
+        if save_it_tweakmode:
+            basics.enter_tweak_mode()

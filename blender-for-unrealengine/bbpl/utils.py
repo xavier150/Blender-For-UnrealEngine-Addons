@@ -17,22 +17,21 @@
 # ======================= END GPL LICENSE BLOCK =============================
 
 # ----------------------------------------------
-#  This addons allows to easily export several objects at the same time in .fbx
-#  for use in unreal engine 4 by removing the usual constraints
-#  while respecting UE4 naming conventions and a clean tree structure.
-#  It also contains a small toolkit for collisions and sockets
+#  BBPL -> BleuRaven Blender Python Library
 #  xavierloux.com
 # ----------------------------------------------
 
-
-import bpy
 import json
 import time
 import copy
+import bpy
 import mathutils
 
 
 class SavedObject():
+    """
+    Saved data from a blender object.
+    """
 
     def __init__(self, obj):
         if obj:
@@ -45,6 +44,9 @@ class SavedObject():
 
 
 class SavedBones():
+    """
+    Saved data from a blender armature bone.
+    """
 
     def __init__(self, bone):
         if bone:
@@ -54,6 +56,9 @@ class SavedBones():
 
 
 class SavedCollection():
+    """
+    Saved data from a blender collection.
+    """
 
     def __init__(self, col):
         if col:
@@ -64,6 +69,9 @@ class SavedCollection():
 
 
 class SavedViewLayerChildren():
+    """
+    Saved data from a blender ViewLayerChildren.
+    """
 
     def __init__(self, vlayer, childCol):
         if childCol:
@@ -74,8 +82,11 @@ class SavedViewLayerChildren():
 
 
 class UserSelectSave():
-    def __init__(self):
+    """
+    Manager for user selection.
+    """
 
+    def __init__(self):
         # Select
         self.user_active = None
         self.user_active_name = ""
@@ -85,9 +96,12 @@ class UserSelectSave():
         # Stats
         self.user_mode = None
 
-    def SaveCurrentSelect(self):
-        # Save data (This can take time)
+    def save_current_select(self):
+        """
+        Save user selection.
+        """
 
+        # Save data (This can take time)
         c = bpy.context
         # Select
         self.user_active = c.active_object  # Save current active object
@@ -95,13 +109,16 @@ class UserSelectSave():
             self.user_active_name = self.user_active.name
 
         self.user_selecteds = c.selected_objects  # Save current selected objects
-        self.user_selected_names = []
-        for obj in c.selected_objects:
-            self.user_selected_names.append(obj.name)
+        self.user_selected_names = [obj.name for obj in c.selected_objects]
 
-    def ResetSelectByRef(self):
-        self.SaveMode()
-        SafeModeSet("OBJECT", bpy.ops.object)
+
+    def reset_select_by_ref(self):
+        """
+        Reset user selection at the last save. (Use objects refs)
+        """
+
+        self.save_mode()
+        safe_mode_set("OBJECT", bpy.ops.object)
         bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.data.objects:  # Resets previous selected object if still exist
             if obj in self.user_selecteds:
@@ -109,12 +126,15 @@ class UserSelectSave():
 
         bpy.context.view_layer.objects.active = self.user_active
 
-        self.ResetModeAtSave()
+        self.reset_mode_at_save()
 
-    def ResetSelectByName(self):
+    def reset_select_by_name(self):
+        """
+        Reset user selection at the last save. (Use objects names)
+        """
 
-        self.SaveMode()
-        SafeModeSet("OBJECT", bpy.ops.object)
+        self.save_mode()
+        safe_mode_set("OBJECT", bpy.ops.object)
         bpy.ops.object.select_all(action='DESELECT')
         for obj in bpy.data.objects:
             if obj.name in self.user_selected_names:
@@ -126,23 +146,30 @@ class UserSelectSave():
                 if self.user_active_name in bpy.context.view_layer.objects:
                     bpy.context.view_layer.objects.active = bpy.data.objects[self.user_active_name]
 
-        self.ResetModeAtSave()
+        self.reset_mode_at_save()
 
-    def SaveMode(self):
+    def save_mode(self):
+        """
+        Save user mode.
+        """
         if self.user_active:
             if bpy.ops.object.mode_set.poll():
                 self.user_mode = self.user_active.mode  # Save current mode
 
-    def ResetModeAtSave(self):
+    def reset_mode_at_save(self):
+        """
+        Reset user mode at the last save.
+        """
         if self.user_mode:
-            if bpy.ops.object:
-                SafeModeSet(self.user_mode, bpy.ops.object)
+            safe_mode_set(self.user_mode, bpy.ops.object)
 
 
 class UserSceneSave():
+    """
+    Manager for saving and resetting the user scene.
+    """
 
     def __init__(self):
-
         # Select
         self.user_select_class = UserSelectSave()
 
@@ -161,12 +188,14 @@ class UserSceneSave():
         self.action_names = []
         self.collection_names = []
 
-    def SaveCurrentScene(self):
+    def save_current_scene(self):
+        """
+        Save the current scene data.
+        """
         # Save data (This can take time)
-
         c = bpy.context
         # Select
-        self.user_select_class.SaveCurrentSelect()
+        self.user_select_class.save_current_select()
 
         # Stats
         if self.user_select_class.user_active:
@@ -180,7 +209,7 @@ class UserSceneSave():
         for col in bpy.data.collections:
             self.collections.append(SavedCollection(col))
         for vlayer in c.scene.view_layers:
-            layer_collections = getLayerCollectionsRecursive(vlayer.layer_collection)
+            layer_collections = get_layer_collections_recursive(vlayer.layer_collection)
             for layer_collection in layer_collections:
                 self.view_layer_collections.append(SavedViewLayerChildren(vlayer, layer_collection))
         for action in bpy.data.actions:
@@ -197,15 +226,24 @@ class UserSceneSave():
                 for bone in self.user_select_class.user_active.data.bones:
                     self.object_bones.append(SavedBones(bone))
 
-    def ResetSelectByRef(self):
-        self.user_select_class.ResetSelectByRef()
-        self.ResetBonesSelectByName()
+    def reset_select_by_ref(self):
+        """
+        Reset the user selection based on object references.
+        """
+        self.user_select_class.reset_select_by_ref()
+        self.reset_bones_select_by_name()
 
-    def ResetSelectByName(self):
-        self.user_select_class.ResetSelectByName()
-        self.ResetBonesSelectByName()
+    def reset_select_by_name(self):
+        """
+        Reset the user selection based on object names.
+        """
+        self.user_select_class.reset_select_by_name()
+        self.reset_bones_select_by_name()
 
-    def ResetBonesSelectByName(self):
+    def reset_bones_select_by_name(self):
+        """
+        Reset bone selection by name (works only in pose mode).
+        """
         # Work only in pose mode!
         if len(self.object_bones) > 0:
             if self.user_select_class.user_active:
@@ -222,14 +260,19 @@ class UserSceneSave():
                                 new_active = self.user_select_class.user_active.data.bones[self.user_bone_active_name]
                                 self.user_select_class.user_active.data.bones.active = new_active
 
-    def ResetModeAtSave(self):
+    def reset_mode_at_save(self):
+        """
+        Reset the user mode at the last save.
+        """
         if self.user_mode:
-            if bpy.ops.object:
-                SafeModeSet(self.user_mode, bpy.ops.object)
+            safe_mode_set(self.user_mode, bpy.ops.object)
 
-    def ResetSceneAtSave(self):
+    def reset_scene_at_save(self):
+        """
+        Reset the user scene to at the last save.
+        """
         scene = bpy.context.scene
-        self.ResetModeAtSave()
+        self.reset_mode_at_save()
 
         bpy.context.scene.render.use_simplify = self.use_simplify
 
@@ -244,7 +287,7 @@ class UserSceneSave():
                 if obj.ref.hide_get() != obj.hide:
                     obj.ref.hide_set(obj.hide)
             else:
-                print("/!\\ "+obj.name+" not found.")
+                print(f"/!\\ {obj.name} not found.")
 
         # Reset hide and select (bpy.data.collections)
         for col in self.collections:
@@ -254,23 +297,20 @@ class UserSceneSave():
                 if col.ref.hide_viewport != col.hide_viewport:
                     col.ref.hide_viewport = col.hide_viewport
             else:
-                print("/!\\ "+col.name+" not found.")
+                print(f"/!\\ {col.name} not found.")
 
-        # Reset hide in and viewport (collections from view_layers)
-
+        # Reset hide and viewport (collections from view_layers)
         for vlayer in scene.view_layers:
-            layer_collections = getLayerCollectionsRecursive(vlayer.layer_collection)
+            layer_collections = get_layer_collections_recursive(vlayer.layer_collection)
 
-            def getLayerCollectionInList(name):
-                for layer_collection in layer_collections:
+            def get_layer_collection_in_list(name, collections):
+                for layer_collection in collections:
                     if layer_collection.name == name:
                         return layer_collection
 
             for view_layer_collection in self.view_layer_collections:
                 if view_layer_collection.vlayer_name in scene.view_layers:
-
-                    layer_collection = getLayerCollectionInList(view_layer_collection.name)
-
+                    layer_collection = get_layer_collection_in_list(view_layer_collection.name, layer_collections)
                     if layer_collection:
                         if layer_collection.exclude != view_layer_collection.exclude:
                             layer_collection.exclude = view_layer_collection.exclude
@@ -278,19 +318,23 @@ class UserSceneSave():
                             layer_collection.hide_viewport = view_layer_collection.hide_viewport
 
 
-class UserArmatureDataSave():
-
+class UserArmatureDataSave:
+    """
+    Manager for saving and resetting an armature.
+    """
+        
     def __init__(self, armature):
-
         # Select
         self.armature = armature
 
         # Stats
         # Data
-        use_mirror_x = False
+        self.use_mirror_x = False
 
-    def SaveCurrentArmature(self):
-        # Save data (This can take time)
+    def save_current_armature(self):
+        """
+        Save the current armature data.
+        """
         if self.armature is None:
             return
         # Select
@@ -298,18 +342,43 @@ class UserArmatureDataSave():
         # Data
         self.use_mirror_x = self.armature.data.use_mirror_x
 
-    def ResetArmatureAtSave(self):
+    def reset_armature_at_save(self):
+        """
+        Reset the armature to the state at the last save.
+        """
         if self.armature is None:
             return
 
-        scene = bpy.context.scene
         # Select
         # Stats
         # Data
         self.armature.data.use_mirror_x = self.use_mirror_x
 
+class CounterTimer:
+    """
+    A simple timer.
+    """
 
-def modeSetOnTarget(target_object=None, target_mode='OBJECT'):
+    def __init__(self):
+        self.start = time.perf_counter()
+
+    def reset_time(self):
+        """
+        Reset the timer.
+        """
+        self.start = time.perf_counter()
+
+    def get_time(self):
+        """
+        Get the elapsed time since the timer started. (Class create)
+        """
+        return time.perf_counter() - self.start
+
+
+def mode_set_on_target(target_object=None, target_mode='OBJECT'):
+    """
+    Set the target object to the specified mode.
+    """
     # Exit current mode
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT')
@@ -323,13 +392,15 @@ def modeSetOnTarget(target_object=None, target_mode='OBJECT'):
     return True
 
 
-def SafeModeSet(target_mode='OBJECT', obj=None):
+def safe_mode_set(target_mode='OBJECT', obj=None):
+    """
+    Set the mode of the target object to the specified mode if possible.
+    """
     if bpy.ops.object.mode_set.poll():
         if obj:
             if obj.mode != target_mode:
                 bpy.ops.object.mode_set(mode=target_mode)
                 return True
-
         else:
             bpy.ops.object.mode_set(mode=target_mode)
             return True
@@ -337,222 +408,201 @@ def SafeModeSet(target_mode='OBJECT', obj=None):
     return False
 
 
-class counterTimer():
-
-    def __init__(self):
-        self.start = time.perf_counter()
-
-    def ResetTime(self):
-        self.start = time.perf_counter()
-
-    def GetTime(self):
-        return time.perf_counter()-self.start
-
-
-def jsonList(string):
-    if string is None:
-        return []
-    if string == "":
+def json_list(string):
+    """
+    Convert a JSON string to a list of dictionaries.
+    """
+    if string is None or string == "":
         return []
 
     jdata = json.loads(string)
-    List = []
-    for d in jdata:
-        # for value in d.iteritems():
-        List.append(d)
-    return List
+    return list(jdata)
 
 
-def clearDriverVar(d):
+def clear_driver_var(d):
+    """
+    Clear all variables from a driver.
+    """
+    #d.variables.clear()
     for var in d.variables:
         d.variables.remove(var)
 
 
-def updateBoneRotMode(armature, boneName, rotation_mode):
-    armature.pose.bones[boneName].rotation_mode = rotation_mode
+def update_bone_rot_mode(armature, bone_name, rotation_mode):
+    """
+    Update the rotation mode of a specific bone in an armature.
+    """
+    armature.pose.bones[bone_name].rotation_mode = rotation_mode
 
 
-def GetControlerToSwitch(Bones):
-    # Fk and Ik copntroler
-    controlerList = []
-    for bone in Bones:
-        for item in list(bone.items()):
-            if item[0] == "IkBlend":
-                controlerList.append(bone)
-    return controlerList
+def get_visual_bone_pos(obj, bone):
+    """
+    Get the visual position, rotation, and scale of a bone in object space.
+    """
+    matrix_pose = obj.matrix_world @ bone.matrix
+    loc = matrix_pose @ mathutils.Vector((0, 0, 0))
+    rot = matrix_pose.to_euler()
+    scale = bone.scale
+    return loc, rot, scale
 
 
-def GetVisualBonePos(obj, Bone):
-    matrix_Pose = obj.matrix_world @ Bone.matrix
-    loc = matrix_Pose @ mathutils.Vector((0, 0, 0))
-    rot = matrix_Pose.to_euler()
-    scale = Bone.scale
-    return((loc, rot, scale))
+def get_visual_bones_pos_packed(obj, target_bones):
+    """
+    Get the visual positions, rotations, and scales of multiple bones in object space and pack them into a list.
+    """
+    position_list = []
+    for bone in target_bones:
+        loc, rot, scale = get_visual_bone_pos(obj, bone)
+        position_list.append((bone.name, loc, rot, scale))
+    return position_list
 
 
-def GetVisualBonesPosPacked(obj, TargetBones):
-    PositionList = []
-    for bone in TargetBones:
-        loc = GetVisualBonePos(obj, bone)[0]
-        rot = GetVisualBonePos(obj, bone)[1]
-        scale = GetVisualBonePos(obj, bone)[2]
-        PositionList.append((bone.name, loc, rot, scale))
-    return PositionList
-
-
-def ApplyRealMatrixWorldBones(bone, obj, matrix):
+def apply_real_matrix_world_bones(bone, obj, matrix):
+    """
+    Apply the real matrix world to a bone, considering constraints.
+    """
     for cons in bone.constraints:
-        if cons.type == "CHILD_OF":
-            if not cons.mute:
-                if cons.target is not None:
-                    Child = cons.inverse_matrix
-                    if cons.target.type == "ARMATURE":
-                        par = obj.matrix_world @ obj.pose.bones[cons.subtarget].matrix
-                    else:
-                        par = cons.target.matrix_world
-                    bone.matrix = obj.matrix_world.inverted() @ (Child.inverted() @ par.inverted() @ matrix)
-                    return
+        if cons.type == "CHILD_OF" and not cons.mute and cons.target is not None:
+            child = cons.inverse_matrix
+            if cons.target.type == "ARMATURE":
+                parent = obj.matrix_world @ obj.pose.bones[cons.subtarget].matrix
+            else:
+                parent = cons.target.matrix_world
+            bone.matrix = obj.matrix_world.inverted() @ (child.inverted() @ parent.inverted() @ matrix)
+            return
     bone.matrix = obj.matrix_world.inverted() @ matrix
 
 
-def SetVisualBonePos(obj, Bone, loc, rot, scale, UseLoc, UseRot, UseScale):
+def set_visual_bone_pos(obj, bone, loc, rot, scale, use_loc, use_rot, use_scale):
+    """
+    Set the visual position, rotation, and scale of a bone, allowing control over which values to apply.
+    """
     # Save
-    BaseLoc = copy.deepcopy(Bone.location)
-    BaseScale = copy.deepcopy(Bone.scale)
-    RotModeBase = copy.deepcopy(Bone.rotation_mode)
-    # Bone.rotation_mode = 'XYZ'
-    BaseRot = copy.deepcopy(Bone.rotation_euler)
+    base_loc = copy.deepcopy(bone.location)
+    base_scale = copy.deepcopy(bone.scale)
+    rot_mode_base = copy.deepcopy(bone.rotation_mode)
+    base_rot = copy.deepcopy(bone.rotation_euler)
+    base_quaternion = copy.deepcopy(bone.rotation_quaternion)
+
     # ApplyPos
     mat_loc = mathutils.Matrix.Translation(loc)
     mat_rot = rot.to_matrix().to_4x4()
     matrix = mat_loc @ mat_rot
-    ApplyRealMatrixWorldBones(Bone, obj, matrix)
-    Bone.scale = scale
+    apply_real_matrix_world_bones(bone, obj, matrix)
+    bone.scale = scale
+
     # ResetNotDesiredValue
-    if not UseLoc:
-        Bone.location = BaseLoc
-    if not UseRot:
-        Bone.rotation_euler = BaseRot
-    if not UseScale:
-        Bone.scale = BaseScale
-    # Bone.rotation_mode = RotModeBase
+    if not use_loc:
+        bone.location = base_loc
+    if not use_rot:
+        bone.rotation_euler = base_rot
+        bone.rotation_quaternion = base_quaternion
+        bone.rotation_mode = rot_mode_base
+    if not use_scale:
+        bone.scale = base_scale
+
+    
 
 
-def FindItemInListByName(item, list):
-    for TargetItem in list:
-        if TargetItem.name == item:
-            return TargetItem
+def find_item_in_list_by_name(item, lst):
+    """
+    Find an item in a list by its name.
+    """
+    for target_item in lst:
+        if target_item.name == item:
+            return target_item
     return None
 
 
-def SetVisualBonesPosPacked(obj, TargetBones, PositionList, UseLoc, UseRot, UseScale):
-
-    for pl in PositionList:
-        TargetBone = FindItemInListByName(pl[0], TargetBones)
-        if TargetBone is not None:
+def set_visual_bones_pos_packed(obj, target_bones, position_list, use_loc, use_rot, use_scale):
+    """
+    Set the visual positions, rotations, and scales of multiple bones using a packed position list,
+    allowing control over which values to apply.
+    """
+    for pl in position_list:
+        target_bone = find_item_in_list_by_name(pl[0], target_bones)
+        if target_bone is not None:
             loc = mathutils.Vector(pl[1])
             rot = mathutils.Euler(pl[2], 'XYZ')
             scale = mathutils.Vector(pl[3])
-            SetVisualBonePos(obj, TargetBone, loc, rot, scale, UseLoc, UseRot, UseScale)
+            set_visual_bone_pos(obj, target_bone, loc, rot, scale, use_loc, use_rot, use_scale)
 
 
-def GetDirectControledBonesBySwitch(armature, controlerBone):
-    # Recuperre uniquement les os qui sont directement controler
-    bones = []
-
-    def GetIfTarget(targets):
-        for target in targets:
-            if target.data_path.split('"')[3] == "IkBlend":
-                if target.data_path.split('"')[1] == controlerBone.name:
-                    return True
-
-        return False
-    if armature.animation_data is not None:
-        for driver in armature.animation_data.drivers:
-            if '"].constraints["' in driver.data_path and "IkBlend" in driver.driver.expression:
-                for var in driver.driver.variables:
-                    if GetIfTarget(var.targets):
-                        bones.append(armature.pose.bones[driver.data_path.split('"')[1]])
-    return bones
-
-
-def GetControledBonesBySwitch(armature, controlerBone):
-    def GetRecursifParent(MaxIndex, Bones):
-        if MaxIndex > len(Bones):
-            Bones.append(Bones[-1].parent)
-            return GetRecursifParent(MaxIndex, Bones)
-        else:
-            return Bones
-    # Recuperre tout les os qui sont controler directement ou indeirectement
-    bones = GetDirectControledBonesBySwitch(armature, controlerBone)
-    returnBone = bones.copy()
-    for bone in bones:
-        for const in bone.constraints:
-            if const.type == "IK":
-                returnBone += GetRecursifParent(const.chain_count-1, [bone.parent])
-
-    return returnBone
-
-
-def getSafeCollection(collection_name):
-    # Found or create collection.
+def get_safe_collection(collection_name):
+    """
+    Get an existing collection with the given name, or create a new one if it doesn't exist.
+    """
     if collection_name in bpy.data.collections:
-        myCol = bpy.data.collections[collection_name]
+        my_col = bpy.data.collections[collection_name]
     else:
-        myCol = bpy.data.collections.new(collection_name)
-    return myCol
+        my_col = bpy.data.collections.new(collection_name)
+    return my_col
 
 
-def getRecursiveLayerCollection(layer_collection):
-    # Get all recursive childs of a object
-
+def get_recursive_layer_collection(layer_collection):
+    """
+    Get all recursive child collections of a layer collection.
+    """
     all_childs = []
     for child in layer_collection.children:
         all_childs.append(child)
-        all_childs += getRecursiveLayerCollection(child)
+        all_childs += get_recursive_layer_collection(child)
     return all_childs
 
 
-def setCollectionExclude(collection, exclude):
+def set_collection_exclude(collection, exclude):
+    """
+    Set the exclude property for a collection in all view layers.
+    """
     scene = bpy.context.scene
     for vl in scene.view_layers:
-        for layer in getRecursiveLayerCollection(vl.layer_collection):
+        for layer in get_recursive_layer_collection(vl.layer_collection):
             if layer.collection == collection:
                 layer.exclude = exclude
 
 
-def getRigCollection(armature, col_type="RIG"):
-    rig_col = getSafeCollection(armature.users_collection[0].name)
+def get_rig_collection(armature, col_type="RIG"):
+    """
+    Get the rig collection for an armature, optionally creating additional sub-collections based on col_type.
+    """
+    #TO DO: Move this in Modular Auto Rig Addon.
+    rig_col = get_safe_collection(armature.users_collection[0].name)
 
     if col_type == "RIG":
         return rig_col
     elif col_type == "SHAPE":
-        shape_Col = getSafeCollection(armature.name+"_RigShapes")
-        if shape_Col.name not in rig_col.children:
-            rig_col.children.link(shape_Col)
-        return shape_Col
+        shape_col = get_safe_collection(armature.name + "_RigShapes")
+        if shape_col.name not in rig_col.children:
+            rig_col.children.link(shape_col)
+        return shape_col
     elif col_type == "CURVE":
-        shape_Col = getSafeCollection(armature.name+"_RigCurves")
-        if shape_Col.name not in rig_col.children:
-            rig_col.children.link(shape_Col)
-        return shape_Col
+        curve_col = get_safe_collection(armature.name + "_RigCurves")
+        if curve_col.name not in rig_col.children:
+            rig_col.children.link(curve_col)
+        return curve_col
     elif col_type == "CAMERA":
-        shape_Col = getSafeCollection(armature.name+"_RigCameras")
-        if shape_Col.name not in rig_col.children:
-            rig_col.children.link(shape_Col)
-        return shape_Col
+        camera_col = get_safe_collection(armature.name + "_RigCameras")
+        if camera_col.name not in rig_col.children:
+            rig_col.children.link(camera_col)
+        return camera_col
     else:
-        print("In getRigCollection() "+col_type+" not found!")
+        print("In get_rig_collection() " + col_type + " not found!")
 
 
-def getVertexColors(obj):
+def get_vertex_colors(obj):
+    """
+    Get the vertex colors of an object.
+    """
     if bpy.app.version >= (3, 2, 0):
         return obj.data.color_attributes
     else:
         return obj.data.vertex_colors
 
 
-def getVertexColors_RenderColorIndex(obj):
+def get_vertex_colors_render_color_index(obj):
+    """
+    Get the render color index of the vertex colors of an object.
+    """
     if bpy.app.version >= (3, 2, 0):
         return obj.data.color_attributes.render_color_index
     else:
@@ -561,17 +611,23 @@ def getVertexColors_RenderColorIndex(obj):
                 return index
 
 
-def getVertexColor_ActiveColorIndex(obj):
+def get_vertex_color_active_color_index(obj):
+    """
+    Get the active color index of the vertex colors of an object.
+    """
     if bpy.app.version >= (3, 2, 0):
         return obj.data.color_attributes.active_color_index
     else:
         return obj.data.vertex_colors.active_index
 
 
-def getLayerCollectionsRecursive(layer_collection):
+def get_layer_collections_recursive(layer_collection):
+    """
+    Get all recursive child layer collections of a layer collection.
+    """
     layer_collections = []
-    layer_collections.append(layer_collection)  # Add curent
+    layer_collections.append(layer_collection)  # Add current
     for child_col in layer_collection.children:
-        layer_collections.extend(getLayerCollectionsRecursive(child_col))  # Add childs recursive
+        layer_collections.extend(get_layer_collections_recursive(child_col))  # Add child collections recursively
 
     return layer_collections
