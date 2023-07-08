@@ -22,7 +22,6 @@
 # ----------------------------------------------
 
 import json
-import time
 import copy
 import bpy
 import mathutils
@@ -353,26 +352,6 @@ class UserArmatureDataSave:
         # Stats
         # Data
         self.armature.data.use_mirror_x = self.use_mirror_x
-
-class CounterTimer:
-    """
-    A simple timer.
-    """
-
-    def __init__(self):
-        self.start = time.perf_counter()
-
-    def reset_time(self):
-        """
-        Reset the timer.
-        """
-        self.start = time.perf_counter()
-
-    def get_time(self):
-        """
-        Get the elapsed time since the timer started. (Class create)
-        """
-        return time.perf_counter() - self.start
 
 
 def mode_set_on_target(target_object=None, target_mode='OBJECT'):

@@ -24,13 +24,22 @@
 import time
 
 
-class counterTimer():
+class CounterTimer():
+    """
+    A simple timer.
+    """
 
     def __init__(self):
         self.start = time.perf_counter()
 
-    def ResetTime(self):
+    def reset_time(self):
+        """
+        Reset the timer.
+        """
         self.start = time.perf_counter()
 
-    def GetTime(self):
-        return time.perf_counter()-self.start
+    def get_time(self):
+        """
+        Get the elapsed time since the timer started. (Class create)
+        """
+        return time.perf_counter() - self.start

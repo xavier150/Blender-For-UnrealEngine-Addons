@@ -293,6 +293,7 @@ def generate_bone_shape_from_prop(
     utils.mode_set_on_target(new_shape, "EDIT")
 
     me = new_shape.data
+    # pylint: disable=E1128
     bm = bmesh.from_edit_mesh(me)
 
     if construct_add_line:

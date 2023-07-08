@@ -23,48 +23,12 @@
 
 import os
 import string
-from pathlib import Path
-import bpy
 import shutil
+import bpy
 import bmesh
 import addon_utils
-from mathutils import Vector
-from mathutils import Quaternion
-
-
-def is_tweak_mode():
-    """
-    Checks if the Blender scene is in tweak mode.
-
-    Returns:
-        bool: True if the scene is in tweak mode, False otherwise.
-    """
-    return bpy.context.scene.is_nla_tweakmode
-
-
-def enter_tweak_mode():
-    """
-    Enters tweak mode in the Blender NLA editor.
-
-    Returns:
-        None
-    """
-    # TO DO
-    # bpy.ops.nla.tweakmode_enter()
-    pass
-
-
-def exit_tweak_mode():
-    """
-    Exits tweak mode in the Blender NLA editor.
-
-    Returns:
-        None
-    """
-    # TO DO
-    # bpy.ops.nla.tweakmode_exit()
-    pass
-
+import mathutils
+import pathlib
 
 def is_deleted(obj):
     """
@@ -193,7 +157,7 @@ def set_current_selection(selection):
     """
 
     bpy.ops.object.select_all(action='DESELECT')
-    for x, obj in enumerate(selection.selected_objects):
+    for obj in selection.selected_objects:
         if not is_deleted(obj):
             if obj.name in bpy.context.window.view_layer.objects:
                 obj.select_set(True)
@@ -309,7 +273,7 @@ def remove_folder_tree(folder):
     Returns:
         None
     """
-    dirpath = Path(folder)
+    dirpath = pathlib.Path(folder)
     if dirpath.exists() and dirpath.is_dir():
         shutil.rmtree(dirpath, ignore_errors=True)
 
@@ -426,7 +390,8 @@ def convert_to_convex_hull(obj):
     if not mesh.is_editmode:
         bm = bmesh.new()
         bm.from_mesh(mesh)  # Mesh to Bmesh
-        convex_hull = bmesh.ops.convex_hull(bm, input=bm.verts, use_existing_faces=True)
+        bmesh.ops.convex_hull(bm, input=bm.verts, use_existing_faces=True)
+        # convex_hull = bmesh.ops.convex_hull(bm, input=bm.verts, use_existing_faces=True)
         # convex_hull = bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
         bm.to_mesh(mesh)  # BMesh to Mesh
 
@@ -486,10 +451,10 @@ def reset_armature_pose(obj):
         None
     """
     for b in obj.pose.bones:
-        b.rotation_quaternion = Quaternion((0, 0, 0), 0)
-        b.rotation_euler = Vector((0, 0, 0))
-        b.scale = Vector((1, 1, 1))
-        b.location = Vector((0, 0, 0))
+        b.rotation_quaternion = mathutils.Quaternion()
+        b.rotation_euler = mathutils.Vector((0, 0, 0))
+        b.scale = mathutils.Vector((1, 1, 1))
+        b.location = mathutils.Vector((0, 0, 0))
 
 
 def get_if_action_is_associated(action, bone_names):

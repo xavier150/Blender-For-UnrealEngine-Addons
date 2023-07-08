@@ -22,7 +22,7 @@
 # ----------------------------------------------
 
 import bpy
-from . import basics
+from . import scene_utils
 
 
 class NLA_Save:
@@ -177,7 +177,7 @@ class ProxyCopy_NlaStrip:
         nla_strip.blend_out = self.blend_out
         nla_strip.blend_type = self.blend_type
         nla_strip.extrapolation = self.extrapolation
-        for i, fcurve in enumerate(self.fcurves):
+        for fcurve in self.fcurves:
             new_fcurve = nla_strip.fcurves.find(fcurve.data_path)  # Can't create so use find
             fcurve.PasteDataOn(new_fcurve)
         nla_strip.frame_end = self.frame_end
@@ -230,6 +230,7 @@ class AnimationManagment():
         self.action_extrapolation = "HOLD"
         self.action_blend_type = "REPLACE"
         self.action_influence = 1.0
+        self.nla_tracks_save = None
 
     def save_animation_data(self, obj):
         """
@@ -266,8 +267,8 @@ class AnimationManagment():
             copy_nla (bool, optional): Whether to copy the Non-Linear Animation (NLA) tracks. Defaults to False.
         """
 
-        save_it_tweakmode = basics.is_tweak_mode()
-        basics.exit_tweak_mode()
+        save_it_tweakmode = scene_utils.is_tweak_mode()
+        scene_utils.exit_tweak_mode()
         print("Set animation data on:", obj)
         if self.use_animation_data:
             obj.animation_data_create()
@@ -280,15 +281,13 @@ class AnimationManagment():
 
             if copy_nla:
                 # Clear nla_tracks
-                nla_tracks_len = len(obj.animation_data.nla_tracks)
-                for x in range(nla_tracks_len):
-                    pass
-                    obj.animation_data.nla_tracks.remove(obj.animation_data.nla_tracks[0])
+                nla_tracks = obj.animation_data.nla_tracks[:]
+                for nla_track in nla_tracks:
+                    obj.animation_data.nla_tracks.remove(nla_track)
 
                 # Add current nla_tracks
                 if self.nla_tracks_save is not None:
-                    pass
                     self.nla_tracks_save.apply_save_on_target(obj)
 
         if save_it_tweakmode:
-            basics.enter_tweak_mode()
+            scene_utils.enter_tweak_mode()
