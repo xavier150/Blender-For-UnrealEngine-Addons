@@ -94,6 +94,9 @@ classes = (
 
 
 def register():
+    """
+    Register.
+    """
     from bpy.utils import register_class
     bpy.types.Scene.bfu_cache_obj_name = bpy.props.StringProperty()
     bpy.types.Scene.bfu_export_auto_cached = bpy.props.BoolProperty(default=False)
@@ -161,6 +164,9 @@ def register():
 
 
 def unregister():
+    """
+    unregister.
+    """
     from bpy.utils import unregister_class
 
     del bpy.types.Scene.bfu_export_auto_cached

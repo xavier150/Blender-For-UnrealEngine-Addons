@@ -726,6 +726,9 @@ classes = (
 
 
 def register():
+    """
+    Register.
+    """
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
@@ -734,6 +737,9 @@ def register():
 
 
 def unregister():
+    """
+    unregister.
+    """
     from bpy.utils import unregister_class
     for cls in reversed(classes):
         unregister_class(cls)
