@@ -101,14 +101,14 @@ class UserSelectSave():
         """
 
         # Save data (This can take time)
-        c = bpy.context
+
         # Select
-        self.user_active = c.active_object  # Save current active object
+        self.user_active = bpy.context.active_object  # Save current active object
         if self.user_active:
             self.user_active_name = self.user_active.name
 
-        self.user_selecteds = c.selected_objects  # Save current selected objects
-        self.user_selected_names = [obj.name for obj in c.selected_objects]
+        self.user_selecteds = bpy.context.selected_objects  # Save current selected objects
+        self.user_selected_names = [obj.name for obj in bpy.context.selected_objects]
 
 
     def reset_select_by_ref(self):
@@ -161,6 +161,23 @@ class UserSelectSave():
         """
         if self.user_mode:
             safe_mode_set(self.user_mode, bpy.ops.object)
+
+
+def select_specific_object(obj):
+    """
+    Selects a specific object in Blender.
+
+    Args:
+        obj (bpy.types.Object): The object to be selected.
+
+    Returns:
+        None
+    """
+
+    bpy.ops.object.select_all(action='DESELECT')
+    if obj.name in bpy.context.window.view_layer.objects:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
 
 
 class UserSceneSave():

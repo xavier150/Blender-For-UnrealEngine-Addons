@@ -27,7 +27,6 @@ import shutil
 import bpy
 import bmesh
 import addon_utils
-import mathutils
 import pathlib
 
 def is_deleted(obj):
@@ -79,107 +78,7 @@ def move_to_global_view():
                         bpy.ops.view3d.localview(override)
 
 
-def get_current_selection():
-    """
-    Retrieves the current selection in Blender, including the active object.
 
-    Returns:
-        MyClass: An instance of the MyClass object containing the active object and selected objects.
-    """
-    class MyClass:
-        """
-        Helper class to store the active object and selected objects.
-        """
-        def __init__(self):
-            self.active = None
-            self.selected_objects = []
-            self.old_name = []
-
-        def remove_from_list(self, objs):
-            """
-            Removes objects from the selected_objects and old_name lists.
-
-            Args:
-                objs (list): List of objects to remove.
-
-            Returns:
-                None
-            """
-            for x, obj in enumerate(objs):
-                if obj in self.selected_objects:
-                    self.selected_objects.remove(obj)
-                    self.old_name.remove(self.old_name[x])
-
-        def remove_from_list_by_name(self, name_list):
-            """
-            Removes objects from the selected_objects and old_name lists based on object names.
-
-            Args:
-                name_list (list): List of object names to remove.
-
-            Returns:
-                None
-            """
-            for obj_name in name_list:
-                if obj_name in self.old_name:
-                    x = self.old_name.index(obj_name)
-                    del self.selected_objects[x]
-                    del self.old_name[x]
-
-        def debug_object_list(self):
-            """
-            Prints the selected_objects and old_name lists for debugging purposes.
-
-            Returns:
-                None
-            """
-            print("DebugObjectList ##########################################")
-            print(self.selected_objects)
-            print(self.old_name)
-
-    selected = MyClass()
-    selected.active = bpy.context.view_layer.objects.active
-    selected.selected_objects = bpy.context.selected_objects.copy()
-    for sel in selected.selected_objects:
-        selected.old_name.append(sel.name)
-    return selected
-
-
-def set_current_selection(selection):
-    """
-    Sets the current selection in Blender based on the provided selection object.
-
-    Args:
-        selection (MyClass): The selection object containing the active object and selected objects.
-
-    Returns:
-        None
-    """
-
-    bpy.ops.object.select_all(action='DESELECT')
-    for obj in selection.selected_objects:
-        if not is_deleted(obj):
-            if obj.name in bpy.context.window.view_layer.objects:
-                obj.select_set(True)
-    selection.active.select_set(True)
-    bpy.context.view_layer.objects.active = selection.active
-
-
-def select_specific_object(obj):
-    """
-    Selects a specific object in Blender.
-
-    Args:
-        obj (bpy.types.Object): The object to be selected.
-
-    Returns:
-        None
-    """
-
-    bpy.ops.object.select_all(action='DESELECT')
-    if obj.name in bpy.context.window.view_layer.objects:
-        obj.select_set(True)
-    bpy.context.view_layer.objects.active = obj
 
 
 def checks_relationship(arrayA, arrayB):
@@ -199,68 +98,6 @@ def checks_relationship(arrayA, arrayB):
             if a == b:
                 return True
     return False
-
-
-def next_power_of_two(n):
-    """
-    Computes the next power of two that is greater than or equal to n.
-
-    Args:
-        n (int): The input number.
-
-    Returns:
-        int: The next power of two greater than or equal to n.
-    """
-    # decrement n (to handle cases when n itself
-    # is a power of 2)
-    n = n - 1
-
-    # do till only one bit is left
-    while n & n - 1:
-        n = n & n - 1  # unset rightmost bit
-
-    # n is now a power of two (less than n)
-    return n << 1
-
-
-def previous_power_of_two(n):
-    """
-    Computes the previous power of two that is less than or equal to n.
-
-    Args:
-        n (int): The input number.
-
-    Returns:
-        int: The previous power of two less than or equal to n.
-    """
-    # do till only one bit is left
-    while (n & n - 1):
-        n = n & n - 1		# unset rightmost bit
-
-    # n is now a power of two (less than or equal to n)
-    return n
-
-
-def nearest_power_of_two(value):
-    """
-    Computes the nearest power of two to the given value.
-
-    Args:
-        value (int): The input value.
-
-    Returns:
-        int: The nearest power of two.
-    """
-    if value < 2:
-        return 2
-
-    a = previous_power_of_two(value)
-    b = next_power_of_two(value)
-
-    if value - a < b - value:
-        return a
-    else:
-        return b
 
 
 def remove_folder_tree(folder):
@@ -438,23 +275,6 @@ def valid_defname(filename):
     valid_chars = "_%s%s" % (string.ascii_letters, string.digits)
     filename = ''.join(c for c in filename if c in valid_chars)
     return filename
-
-
-def reset_armature_pose(obj):
-    """
-    Resets the pose of an armature object.
-
-    Args:
-        obj (bpy.types.Object): The armature object.
-
-    Returns:
-        None
-    """
-    for b in obj.pose.bones:
-        b.rotation_quaternion = mathutils.Quaternion()
-        b.rotation_euler = mathutils.Vector((0, 0, 0))
-        b.scale = mathutils.Vector((1, 1, 1))
-        b.location = mathutils.Vector((0, 0, 0))
 
 
 def get_if_action_is_associated(action, bone_names):

@@ -29,6 +29,7 @@ from . import rig_utils
 from . import rig_bone_visual
 from . import skin_utils
 from . import anim_utils
+from . import scene_utils
 from . import ui_utils
 
 if "basics" in locals():
@@ -43,5 +44,7 @@ if "skin_utils" in locals():
     importlib.reload(skin_utils)
 if "anim_utils" in locals():
     importlib.reload(anim_utils)
+if "scene_utils" in locals():
+    importlib.reload(scene_utils)
 if "ui_utils" in locals():
     importlib.reload(ui_utils)

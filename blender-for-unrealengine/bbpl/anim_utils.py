@@ -22,6 +22,7 @@
 # ----------------------------------------------
 
 import bpy
+import mathutils
 from . import scene_utils
 
 
@@ -291,3 +292,19 @@ class AnimationManagment():
 
         if save_it_tweakmode:
             scene_utils.enter_tweak_mode()
+
+def reset_armature_pose(obj):
+    """
+    Resets the pose of an armature object.
+
+    Args:
+        obj (bpy.types.Object): The armature object.
+
+    Returns:
+        None
+    """
+    for b in obj.pose.bones:
+        b.rotation_quaternion = mathutils.Quaternion()
+        b.rotation_euler = mathutils.Vector((0, 0, 0))
+        b.scale = mathutils.Vector((1, 1, 1))
+        b.location = mathutils.Vector((0, 0, 0))
