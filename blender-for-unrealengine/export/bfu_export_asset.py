@@ -213,8 +213,8 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                         # Save current start/end frame
                         UserStartFrame = scene.frame_start
                         UserEndFrame = scene.frame_end
-
                         bfu_export_single_fbx_nla_anim.ProcessNLAAnimExport(obj)
+
                         # Resets previous start/end frame
                         scene.frame_start = UserStartFrame
                         scene.frame_end = UserEndFrame
