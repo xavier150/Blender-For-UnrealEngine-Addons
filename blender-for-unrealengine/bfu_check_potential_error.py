@@ -17,26 +17,13 @@
 # ======================= END GPL LICENSE BLOCK =============================
 
 
-from operator import contains
 import bpy
 import fnmatch
-import mathutils
 import math
-import time
-import sys
 
-if "bpy" in locals():
-    import importlib
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_ui_utils" in locals():
-        importlib.reload(bfu_ui_utils)
-
+from . import bbpl
 from . import bfu_basics
-from .bfu_basics import *
-from .bfu_utils import *
-from . import bfu_ui_utils
-
+from . import bfu_utils
 
 def CorrectBadProperty(list=None):
     # Corrects bad properties
@@ -44,7 +31,7 @@ def CorrectBadProperty(list=None):
     if list is not None:
         objs = list
     else:
-        objs = GetAllCollisionAndSocketsObj()
+        objs = bfu_utils.GetAllCollisionAndSocketsObj()
 
     UpdatedProp = 0
     for obj in objs:
@@ -60,24 +47,24 @@ def UpdateNameHierarchy(list=None):
     if list is not None:
         objs = list
     else:
-        objs = GetAllCollisionAndSocketsObj()
+        objs = bfu_utils.GetAllCollisionAndSocketsObj()
 
     UpdatedHierarchy = 0
     for obj in objs:
         if fnmatch.fnmatchcase(obj.name, "UBX*"):
-            UpdateUe4Name("Box", [obj])
+            bfu_utils.UpdateUe4Name("Box", [obj])
             UpdatedHierarchy += 1
         if fnmatch.fnmatchcase(obj.name, "UCP*"):
-            UpdateUe4Name("Capsule", [obj])
+            bfu_utils.UpdateUe4Name("Capsule", [obj])
             UpdatedHierarchy += 1
         if fnmatch.fnmatchcase(obj.name, "USP*"):
-            UpdateUe4Name("Sphere", [obj])
+            bfu_utils.UpdateUe4Name("Sphere", [obj])
             UpdatedHierarchy += 1
         if fnmatch.fnmatchcase(obj.name, "UCX*"):
-            UpdateUe4Name("Convex", [obj])
+            bfu_utils.UpdateUe4Name("Convex", [obj])
             UpdatedHierarchy += 1
         if fnmatch.fnmatchcase(obj.name, "SOCKET*"):
-            UpdateUe4Name("Socket", [obj])
+            bfu_utils.UpdateUe4Name("Socket", [obj])
             UpdatedHierarchy += 1
         return UpdatedHierarchy
 
@@ -105,8 +92,8 @@ def ContainsArmatureModifier(obj):
 
 def GetSkeletonMeshs(obj):
     meshs = []
-    if GetAssetType(obj) == "SkeletalMesh":  # Skeleton /  Armature
-        childs = GetExportDesiredChilds(obj)
+    if bfu_utils.GetAssetType(obj) == "SkeletalMesh":  # Skeleton /  Armature
+        childs = bfu_utils.GetExportDesiredChilds(obj)
         for child in childs:
             if child.type == "MESH":
                 meshs.append(child)
@@ -116,17 +103,17 @@ def GetSkeletonMeshs(obj):
 def UpdateUnrealPotentialError():
     # Find and reset list of all potential error in scene
 
-    addon_prefs = GetAddonPrefs()
+    addon_prefs = bfu_basics.GetAddonPrefs()
     PotentialErrors = bpy.context.scene.potentialErrorList
     PotentialErrors.clear()
 
     # prepares the data to avoid unnecessary loops
     objToCheck = []
-    for Asset in GetFinalAssetToExport():
-        if Asset.obj in GetAllobjectsByExportType("export_recursive"):
+    for Asset in bfu_utils.GetFinalAssetToExport():
+        if Asset.obj in bfu_utils.GetAllobjectsByExportType("export_recursive"):
             if Asset.obj not in objToCheck:
                 objToCheck.append(Asset.obj)
-            for child in GetExportDesiredChilds(Asset.obj):
+            for child in bfu_utils.GetExportDesiredChilds(Asset.obj):
                 if child not in objToCheck:
                     objToCheck.append(child)
 
@@ -137,7 +124,7 @@ def UpdateUnrealPotentialError():
 
     MeshTypeWithoutCol = []  # is Mesh Type To Check Without Collision
     for obj in MeshTypeToCheck:
-        if not CheckIsCollision(obj):
+        if not bfu_utils.CheckIsCollision(obj):
             MeshTypeWithoutCol.append(obj)
 
     def CheckUnitScale():
@@ -271,7 +258,7 @@ def UpdateUnrealPotentialError():
     def CheckArmatureScale():
         # Check if the ARMATURE use the same value on all scale axes
         for obj in objToCheck:
-            if GetAssetType(obj) == "SkeletalMesh":
+            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
                 if obj.scale.z != obj.scale.y or obj.scale.z != obj.scale.x:
                     MyError = PotentialErrors.add()
                     MyError.name = obj.name
@@ -354,7 +341,7 @@ def UpdateUnrealPotentialError():
     def CheckArmatureBoneData():
         # check the parameter of the ARMATURE bones
         for obj in objToCheck:
-            if GetAssetType(obj) == "SkeletalMesh":
+            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
                 for bone in obj.data.bones:
                     if (not obj.exportDeformOnly or
                             (bone.use_deform and obj.exportDeformOnly)):
@@ -384,15 +371,15 @@ def UpdateUnrealPotentialError():
         # Check that skeleton also has a mesh to export
 
         for obj in objToCheck:
-            export_as_proxy = GetExportAsProxy(obj)
-            if GetAssetType(obj) == "SkeletalMesh":
-                childs = GetExportDesiredChilds(obj)
+            export_as_proxy = bfu_utils.GetExportAsProxy(obj)
+            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+                childs = bfu_utils.GetExportDesiredChilds(obj)
                 validChild = 0
                 for child in childs:
                     if child.type == "MESH":
                         validChild += 1
                 if export_as_proxy:
-                    if GetExportProxyChild(obj) is not None:
+                    if bfu_utils.GetExportProxyChild(obj) is not None:
                         validChild += 1
                 if validChild < 1:
                     MyError = PotentialErrors.add()
@@ -407,8 +394,8 @@ def UpdateUnrealPotentialError():
     def CheckArmatureChildWithBoneParent():
         # If you use Parent Bone to parent your mesh to your armature the import will fail.
         for obj in objToCheck:
-            if GetAssetType(obj) == "SkeletalMesh":
-                childs = GetExportDesiredChilds(obj)
+            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+                childs = bfu_utils.GetExportDesiredChilds(obj)
                 for child in childs:
                     if child.type == "MESH":
                         if child.parent_type == 'BONE':
@@ -425,8 +412,8 @@ def UpdateUnrealPotentialError():
     def CheckArmatureMultipleRoots():
         # Check that skeleton have multiples roots
         for obj in objToCheck:
-            if GetAssetType(obj) == "SkeletalMesh":
-                rootBones = GetArmatureRootBones(obj)
+            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+                rootBones = bfu_utils.GetArmatureRootBones(obj)
 
                 if len(rootBones) > 1:
                     MyError = PotentialErrors.add()
@@ -446,7 +433,7 @@ def UpdateUnrealPotentialError():
     def CheckArmatureNoDeformBone():
         # Check that skeleton have at less one deform bone
         for obj in objToCheck:
-            if GetAssetType(obj) == "SkeletalMesh":
+            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
                 if obj.exportDeformOnly:
                     for bone in obj.data.bones:
                         if bone.use_deform:
@@ -479,33 +466,33 @@ def UpdateUnrealPotentialError():
         # Check that all vertex have a weight
         for obj in objToCheck:
             meshs = GetSkeletonMeshs(obj)
-            for meshs in meshs:
-                if meshs.type == "MESH":
-                    if ContainsArmatureModifier(meshs):
+            for mesh in meshs:
+                if mesh.type == "MESH":
+                    if ContainsArmatureModifier(mesh):
                         # Result data
                         VertexWithZeroWeight = GetVertexWithZeroWeight(
                             obj,
-                            meshs)
+                            mesh)
                         if len(VertexWithZeroWeight) > 0:
                             MyError = PotentialErrors.add()
-                            MyError.name = meshs.name
+                            MyError.name = mesh.name
                             MyError.type = 1
                             MyError.text = (
-                                'Object named "'+meshs.name +
+                                'Object named "'+mesh.name +
                                 '" contains '+str(len(VertexWithZeroWeight)) +
                                 ' vertex with zero cumulative valid weight.')
                             MyError.text += (
                                 '\nNote: Vertex groups must have' +
                                 ' a bone with the same name to be valid.')
-                            MyError.object = meshs
+                            MyError.object = mesh
                             MyError.selectVertexButton = True
                             MyError.selectOption = "VertexWithZeroWeight"
 
     def CheckZeroScaleKeyframe():
         # Check that animations do not use a invalid value
         for obj in objToCheck:
-            if GetAssetType(obj) == "SkeletalMesh":
-                for action in GetActionToExport(obj):
+            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+                for action in bfu_utils.GetActionToExport(obj):
                     for fcurve in action.fcurves:
                         if fcurve.data_path.split(".")[-1] == "scale":
                             for key in fcurve.keyframe_points:
@@ -561,7 +548,7 @@ def SelectPotentialErrorObject(errorIndex):
     for collection in bpy.data.collections:
         for ColObj in collection.objects:
             if ColObj == obj:
-                SetCollectionUse(collection)
+                bfu_basics.SetCollectionUse(collection)
     bpy.ops.view3d.view_selected()
     return obj
 
@@ -617,7 +604,7 @@ def TryToCorrectPotentialError(errorIndex):
     global successCorrect
     successCorrect = False
 
-    local_view_areas = MoveToGlobalView()
+    local_view_areas = bbpl.scene_utils.move_to_global_view()
 
     MyCurrentDataSave = bbpl.utils.UserSceneSave()
     MyCurrentDataSave.save_current_scene()
@@ -691,7 +678,7 @@ def TryToCorrectPotentialError(errorIndex):
     # ----------------------------------------Reset data
     MyCurrentDataSave.reset_select_by_name()
     MyCurrentDataSave.reset_scene_at_save()
-    MoveToLocalView(local_view_areas)
+    bbpl.scene_utils.move_to_local_view(local_view_areas)
 
     # ----------------------------------------
 

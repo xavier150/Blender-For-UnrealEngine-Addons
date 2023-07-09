@@ -18,29 +18,15 @@
 
 
 import bpy
-import time
 import math
-
-if "bpy" in locals():
-    import importlib
-    if "bfu_write_text" in locals():
-        importlib.reload(bfu_write_text)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-    if "bfu_export_get_info" in locals():
-        importlib.reload(bfu_export_get_info)
-
+import os
+import mathutils
+from . import bfu_export_get_info
 from .. import bfu_write_text
 from .. import bfu_basics
-from ..bfu_basics import *
 from .. import bfu_utils
-from ..bfu_utils import *
-from ..bbpl import utils
+from .. import bbpl
 
-from . import bfu_export_get_info
-from .bfu_export_get_info import *
 
 dup_temp_name = "BFU_Temp"  # DuplicateTemporarilyNameForUe4Export
 Export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
@@ -48,14 +34,14 @@ Export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
 
 def GetExportFullpath(dirpath, filename):
     absdirpath = bpy.path.abspath(dirpath)
-    VerifiDirs(absdirpath)
+    bfu_basics.VerifiDirs(absdirpath)
     return os.path.join(absdirpath, filename)
 
 
 def ApplyProxyData(obj):
 
     # Apply proxy data if needed.
-    if GetExportProxyChild(obj) is not None:
+    if bfu_utils.GetExportProxyChild(obj) is not None:
 
         def ReasignProxySkeleton(newArmature, oldArmature):
             for select in bpy.context.selected_objects:
@@ -108,17 +94,20 @@ def ApplyProxyData(obj):
                     else:
                         ToRemove.append(selectedObj)
             ReasignProxySkeleton(obj, OldProxyChildArmature)
-            SavedSelect = GetCurrentSelection()
-            RemovedObjects = CleanDeleteObjects(ToRemove)
-            SavedSelect.RemoveFromListByName(RemovedObjects)
-            SetCurrentSelection(SavedSelect)
+            SavedSelect = bbpl.utils.UserSelectSave()
+            SavedSelect.save_current_select()
+
+            RemovedObjects = bfu_utils.CleanDeleteObjects(ToRemove)
+            SavedSelect.remove_from_list_by_name(RemovedObjects)
+            SavedSelect.reset_select_by_ref()
 
 
 def BakeArmatureAnimation(armature, frame_start, frame_end):
     # Change to pose mode
-    SavedSelect = GetCurrentSelection()
+    SavedSelect = bbpl.utils.UserSelectSave()
+    SavedSelect.save_current_select()
     bpy.ops.object.select_all(action='DESELECT')
-    SelectSpecificObject(armature)
+    bbpl.utils.select_specific_object(armature)
     bpy.ops.nla.bake(
         frame_start=frame_start-10,
         frame_end=frame_end+10,
@@ -129,13 +118,11 @@ def BakeArmatureAnimation(armature, frame_start, frame_end):
         bake_types={'POSE'}
         )
     bpy.ops.object.select_all(action='DESELECT')
-    SetCurrentSelection(SavedSelect)
+    SavedSelect.reset_select_by_ref()
 
 
-def DuplicateSelectForExport(new_name="duplicated Obj"):
+def DuplicateSelectForExport():
     # Note: Need look for a optimized duplicate, This is too long
-
-    scene = bpy.context.scene
 
     class DuplicateData():
         def __init__(self):
@@ -161,15 +148,15 @@ def DuplicateSelectForExport(new_name="duplicated Obj"):
             self.data_type = data_type
 
         def RemoveData(self):
-            RemoveUselessSpecificData(self.data_name, self.data_type)
+            bfu_utils.RemoveUselessSpecificData(self.data_name, self.data_type)
 
     duplicate_data = DuplicateData()
     duplicate_data.SetOriginSelect()
     for user_selected in duplicate_data.origin_select.user_selecteds:
         if user_selected:
-            SaveObjCurrentName(user_selected)
+            bfu_utils.SaveObjCurrentName(user_selected)
             if user_selected.type == "ARMATURE":
-                SetObjProxyData(user_selected)
+                bfu_utils.SetObjProxyData(user_selected)
 
     data_to_remove = []
 
@@ -211,13 +198,13 @@ def SetDuplicateNameForExport(duplicate_data, origin_prefix="or_"):
         user_selected.name = origin_prefix+user_selected.name
 
     for user_selected in duplicate_data.duplicate_select.user_selecteds:
-        user_selected.name = GetObjOriginName(user_selected)
+        user_selected.name = bfu_utils.GetObjOriginName(user_selected)
 
 
 def ResetDuplicateNameAfterExport(duplicate_data):
     for user_selected in duplicate_data.origin_select.user_selecteds:
-        user_selected.name = GetObjOriginName(user_selected)
-        ClearObjOriginNameVar(user_selected)
+        user_selected.name = bfu_utils.GetObjOriginName(user_selected)
+        bfu_utils.ClearObjOriginNameVar(user_selected)
 
 
 def MakeSelectVisualReal():
@@ -254,7 +241,7 @@ def SetSocketsExportName(obj):
     '''
 
     scene = bpy.context.scene
-    for socket in GetSocketDesiredChild(obj):
+    for socket in bfu_utils.GetSocketDesiredChild(obj):
         if socket.bfu_use_socket_custom_Name:
             if socket.bfu_socket_custom_Name not in scene.objects:
 
@@ -273,8 +260,8 @@ def SetSocketsExportName(obj):
 def SetSocketsExportTransform(obj):
     # Set socket Transform for Unreal
 
-    addon_prefs = GetAddonPrefs()
-    for socket in GetSocketDesiredChild(obj):
+    addon_prefs = bfu_basics.GetAddonPrefs()
+    for socket in bfu_utils.GetSocketDesiredChild(obj):
         socket["BFU_PreviousSocketScale"] = socket.scale
         socket["BFU_PreviousSocketLocation"] = socket.location
         socket["BFU_PreviousSocketRotationEuler"] = socket.rotation_euler
@@ -295,8 +282,7 @@ def SetSocketsExportTransform(obj):
 def ResetSocketsExportName(obj):
     # Reset socket Name
 
-    scene = bpy.context.scene
-    for socket in GetSocketDesiredChild(obj):
+    for socket in bfu_utils.GetSocketDesiredChild(obj):
         if "BFU_PreviousSocketName" in socket:
             socket.name = socket["BFU_PreviousSocketName"]
             del socket["BFU_PreviousSocketName"]
@@ -305,8 +291,7 @@ def ResetSocketsExportName(obj):
 def ResetSocketsTransform(obj):
     # Reset socket Transform
 
-    scene = bpy.context.scene
-    for socket in GetSocketDesiredChild(obj):
+    for socket in bfu_utils.GetSocketDesiredChild(obj):
         if "BFU_PreviousSocketScale" in socket:
             socket.scale = socket["BFU_PreviousSocketScale"]
             del socket["BFU_PreviousSocketScale"]
@@ -331,14 +316,12 @@ class PrepareExportName():
             self.old_asset_name = ""
             self.new_asset_name = ""
 
-            scene = bpy.context.scene
             if self.is_armature:
-                self.new_asset_name = GetDesiredExportArmatureName(obj)
+                self.new_asset_name = bfu_utils.GetDesiredExportArmatureName(obj)
             else:
                 self.new_asset_name = obj.name  # Keep the same name
 
     def SetExportName(self):
-
         '''
         Set the name of the asset for export
         '''
@@ -367,8 +350,6 @@ class PrepareExportName():
                 armature = scene.objects[dup_temp_name]
                 armature.name = self.new_asset_name
 
-        pass
-
 # UVs
 
 
@@ -392,15 +373,16 @@ def ConvertGeometryNodeAttributeToUV(obj):
                         if attribute.name == attrib_name:
                             obj.data.attributes.active_index = x
 
-                SavedSelect = GetCurrentSelection()
-                SelectSpecificObject(obj)
+                SavedSelect = bbpl.utils.UserSelectSave()
+                SavedSelect.save_current_select()
+                bbpl.utils.select_specific_object(obj)
                 if bpy.app.version >= (3, 5, 0):
                     if obj.data.attributes.active:
                         bpy.ops.geometry.attribute_convert(mode='GENERIC', domain='CORNER', data_type='FLOAT2')
                 else:
                     if obj.data.attributes.active:
                         bpy.ops.geometry.attribute_convert(mode='UV_MAP', domain='CORNER', data_type='FLOAT2')
-                SetCurrentSelection(SavedSelect)
+                SavedSelect.reset_select_by_ref()
 
                 # Because it not possible to move UV index I need recreate all UV for place new UV Map at start...
                 if len(obj.data.uv_layers) < 8:  # Blender Cannot add more than 8 UV maps.
@@ -455,11 +437,12 @@ def ConvertGeometryNodeAttributeToUV(obj):
 
 def CorrectExtremUVAtExport(obj):
     if obj.correct_extrem_uv_scale:
-        SavedSelect = GetCurrentSelection()
-        if GoToMeshEditMode():
-            CorrectExtremeUV(2)
+        SavedSelect = bbpl.utils.UserSelectSave()
+        SavedSelect.save_current_select()
+        if bfu_utils.GoToMeshEditMode():
+            bfu_utils.CorrectExtremeUV(2)
             bbpl.utils.safe_mode_set('OBJECT')
-            SetCurrentSelection(SavedSelect)
+            SavedSelect.reset_select_by_ref()
             return True
     return False
 
@@ -467,7 +450,7 @@ def CorrectExtremUVAtExport(obj):
 
 
 def ConvertArmatureConstraintToModifiers(armature):
-    for obj in GetExportDesiredChilds(armature):
+    for obj in bfu_utils.GetExportDesiredChilds(armature):
         previous_enabled_armature_constraints = []
 
         for const in obj.constraints:
@@ -498,7 +481,7 @@ def ConvertArmatureConstraintToModifiers(armature):
 
 
 def ResetArmatureConstraintToModifiers(armature):
-    for obj in GetExportDesiredChilds(armature):
+    for obj in bfu_utils.GetExportDesiredChilds(armature):
         if "BFU_PreviousEnabledArmatureConstraints" in obj:
             for const_names in obj["BFU_PreviousEnabledArmatureConstraints"]:
                 const = obj.constraints[const_names]
@@ -524,15 +507,15 @@ def ResetArmatureConstraintToModifiers(armature):
 
 def SetVertexColorForUnrealExport(parent):
 
-    objs = GetExportDesiredChilds(parent)
+    objs = bfu_utils.GetExportDesiredChilds(parent)
     objs.append(parent)
 
     for obj in objs:
         if obj.type == "MESH":
-            vced = VertexColorExportData(obj, parent)
+            vced = bfu_export_get_info.VertexColorExportData(obj, parent)
             if vced.export_type == "REPLACE":
 
-                vertex_colors = utils.getVertexColors(obj)
+                vertex_colors = bbpl.utils.get_vertex_colors(obj)
 
                 # Save the previous target
                 obj.data["BFU_PreviousTargetIndex"] = vertex_colors.active_index
@@ -543,7 +526,7 @@ def SetVertexColorForUnrealExport(parent):
 
 def ClearVertexColorForUnrealExport(parent):
 
-    objs = GetExportDesiredChilds(parent)
+    objs = bfu_utils.GetExportDesiredChilds(parent)
     objs.append(parent)
     for obj in objs:
         if obj.type == "MESH":
@@ -557,7 +540,7 @@ def GetShouldRescaleRig(obj):
     if obj.bfu_export_procedure == "auto-rig-pro":
         return False
 
-    addon_prefs = GetAddonPrefs()
+    addon_prefs = bfu_basics.GetAddonPrefs()
     if addon_prefs.rescaleFullRigAtExport == "auto":
         if math.isclose(
             bpy.context.scene.unit_settings.scale_length,
@@ -578,7 +561,7 @@ def GetShouldRescaleRig(obj):
 def GetRescaleRigFactor():
     # This will return the rescale factor.
 
-    addon_prefs = GetAddonPrefs()
+    addon_prefs = bfu_basics.GetAddonPrefs()
     if addon_prefs.rescaleFullRigAtExport == "auto":
         return 100 * bpy.context.scene.unit_settings.scale_length
     else:
@@ -588,7 +571,7 @@ def GetRescaleRigFactor():
 def GetShouldRescaleSocket():
     # This will return if the socket should be rescale.
 
-    addon_prefs = GetAddonPrefs()
+    addon_prefs = bfu_basics.GetAddonPrefs()
     if addon_prefs.rescaleSocketsAtExport == "auto":
         if bpy.context.scene.unit_settings.scale_length == 0.01:
             return False  # False because that useless to rescale at 1 :v
@@ -604,7 +587,7 @@ def GetShouldRescaleSocket():
 def GetRescaleSocketFactor():
     # This will return the rescale factor.
 
-    addon_prefs = GetAddonPrefs()
+    addon_prefs = bfu_basics.GetAddonPrefs()
     if addon_prefs.rescaleSocketsAtExport == "auto":
         return 1/(100*bpy.context.scene.unit_settings.scale_length)
     else:
@@ -649,7 +632,8 @@ def ExportAutoProRig(
 
     # export it
     print("Start AutoProRig Export")
-    bpy.ops.id.arp_export_fbx_panel(filepath=filepath)
+    # TODO Need update
+    #bpy.ops.id.arp_export_fbx_panel(filepath=filepath)
 
 
 def ExportSingleAdditionalTrackCamera(dirpath, filename, obj):
@@ -659,7 +643,7 @@ def ExportSingleAdditionalTrackCamera(dirpath, filename, obj):
     # Aperture
 
     absdirpath = bpy.path.abspath(dirpath)
-    VerifiDirs(absdirpath)
+    bfu_basics.VerifiDirs(absdirpath)
     AdditionalTrack = bfu_write_text.WriteCameraAnimationTracks(obj)
     return bfu_write_text.ExportSingleJson(
         AdditionalTrack,
@@ -675,7 +659,7 @@ def ExportAdditionalParameter(dirpath, unreal_exported_asset):
     filename = unreal_exported_asset.GetFilename("_AdditionalTrack.json")
 
     absdirpath = bpy.path.abspath(dirpath)
-    VerifiDirs(absdirpath)
+    bfu_basics.VerifiDirs(absdirpath)
     AdditionalTrack = bfu_write_text.WriteSingleMeshAdditionalParameter(unreal_exported_asset)
     return bfu_write_text.ExportSingleJson(
         AdditionalTrack,

@@ -18,38 +18,16 @@
 
 
 import bpy
-import time
-import math
-
-if "bpy" in locals():
-    import importlib
-    if "bfu_write_text" in locals():
-        importlib.reload(bfu_write_text)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-    if "bfu_check_potential_error" in locals():
-        importlib.reload(bfu_check_potential_error)
-    if "bfu_export_utils" in locals():
-        importlib.reload(bfu_export_utils)
-
-
-from .. import bfu_write_text
-from .. import bfu_basics
-from ..bfu_basics import *
-from .. import bfu_utils
-from ..bfu_utils import *
-from .. import bfu_check_potential_error
-
 from . import bfu_export_utils
-from .bfu_export_utils import *
+from .. import bbpl
+from .. import bfu_utils
+
+
 
 
 def ProcessAlembicExport(obj):
     scene = bpy.context.scene
-    addon_prefs = GetAddonPrefs()
-    dirpath = GetObjExportDir(obj)
+    dirpath = bfu_utils.GetObjExportDir(obj)
 
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
@@ -58,9 +36,9 @@ def ProcessAlembicExport(obj):
     MyAsset.asset_type = "Alembic"
     MyAsset.StartAssetExport()
 
-    ExportSingleAlembicAnimation(dirpath, GetObjExportFileName(obj, ".abc"), obj)
+    ExportSingleAlembicAnimation(dirpath, bfu_utils.GetObjExportFileName(obj, ".abc"), obj)
     file = MyAsset.files.add()
-    file.name = GetObjExportFileName(obj, ".abc")
+    file.name = bfu_utils.GetObjExportFileName(obj, ".abc")
     file.path = dirpath
     file.type = "ABC"
 
@@ -84,14 +62,14 @@ def ExportSingleAlembicAnimation(
     scene = bpy.context.scene
     bbpl.utils.safe_mode_set('OBJECT')
 
-    SelectParentAndDesiredChilds(obj)
+    bfu_utils.SelectParentAndDesiredChilds(obj)
 
     scene.frame_start += obj.bfu_anim_action_start_frame_offset
     scene.frame_end += obj.bfu_anim_action_end_frame_offset
 
     # Export
     bpy.ops.wm.alembic_export(
-        filepath=GetExportFullpath(dirpath, filename),
+        filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
         check_existing=False,
         selected=True,
         triangulate=True,
@@ -101,4 +79,4 @@ def ExportSingleAlembicAnimation(
     scene.frame_end -= obj.bfu_anim_action_end_frame_offset
 
     for obj in scene.objects:
-        ClearAllBFUTempVars(obj)
+        bfu_utils.ClearAllBFUTempVars(obj)

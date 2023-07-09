@@ -16,54 +16,32 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-
+import os
 import bpy
-import time
-import math
-
-if "bpy" in locals():
-    import importlib
-    if "bfu_write_text" in locals():
-        importlib.reload(bfu_write_text)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-    if "bfu_check_potential_error" in locals():
-        importlib.reload(bfu_check_potential_error)
-    if "bfu_export_utils" in locals():
-        importlib.reload(bfu_export_utils)
-
-
-from .. import bfu_write_text
-from .. import bfu_basics
-from ..bfu_basics import *
-from .. import bfu_utils
-from ..bfu_utils import *
-from .. import bfu_check_potential_error
-
 from . import bfu_export_utils
-from .bfu_export_utils import *
+from .. import bbpl
+from .. import bfu_basics
+from .. import bfu_utils
 
 
 def ProcessNLAAnimExport(obj):
     scene = bpy.context.scene
-    addon_prefs = GetAddonPrefs()
-    dirpath = os.path.join(GetObjExportDir(obj), scene.anim_subfolder_name)
+    addon_prefs = bfu_basics.GetAddonPrefs()
+    dirpath = os.path.join(bfu_utils.GetObjExportDir(obj), scene.anim_subfolder_name)
 
     scene.frame_end += 1  # Why ?
 
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
     MyAsset.skeleton_name = obj.name
-    MyAsset.asset_name = GetNLAExportFileName(obj)
+    MyAsset.asset_name = bfu_utils.GetNLAExportFileName(obj)
     MyAsset.folder_name = obj.exportFolderName
     MyAsset.asset_type = "NlAnim"
     MyAsset.StartAssetExport()
 
-    ExportSingleFbxNLAAnim(dirpath, GetNLAExportFileName(obj), obj)
+    ExportSingleFbxNLAAnim(dirpath, bfu_utils.GetNLAExportFileName(obj), obj)
     file = MyAsset.files.add()
-    file.name = GetNLAExportFileName(obj)
+    file.name = bfu_utils.GetNLAExportFileName(obj)
     file.path = dirpath
     file.type = "FBX"
 
@@ -85,20 +63,20 @@ def ExportSingleFbxNLAAnim(
     # Export a single NLA Animation
 
     scene = bpy.context.scene
-    addon_prefs = GetAddonPrefs()
-    export_as_proxy = GetExportAsProxy(obj)
-    export_proxy_child = GetExportProxyChild(obj)
+    addon_prefs = bfu_basics.GetAddonPrefs()
+    export_as_proxy = bfu_utils.GetExportAsProxy(obj)
+    export_proxy_child = bfu_utils.GetExportProxyChild(obj)
 
     bbpl.utils.safe_mode_set('OBJECT')
 
-    SelectParentAndDesiredChilds(obj)
-    asset_name = PrepareExportName(obj, True)
+    bfu_utils.SelectParentAndDesiredChilds(obj)
+    asset_name = bfu_export_utils.PrepareExportName(obj, True)
     if export_as_proxy is False:
-        duplicate_data = DuplicateSelectForExport()
-        SetDuplicateNameForExport(duplicate_data)
+        duplicate_data = bfu_export_utils.DuplicateSelectForExport()
+        bfu_export_utils.SetDuplicateNameForExport(duplicate_data)
 
     if export_as_proxy is False:
-        MakeSelectVisualReal()
+        bfu_export_utils.MakeSelectVisualReal()
 
     BaseTransform = obj.matrix_world.copy()
     active = bpy.context.view_layer.objects.active
@@ -107,23 +85,23 @@ def ExportSingleFbxNLAAnim(
     export_procedure = active.bfu_export_procedure
 
     animation_data = bbpl.anim_utils.AnimationManagment()
-    animation_data.SaveAnimationData(obj)
-    animation_data.SetAnimationData(active, True)
+    animation_data.save_animation_data(obj)
+    animation_data.set_animation_data(active, True)
 
     if export_as_proxy:
-        ApplyProxyData(active)
-        RemoveSocketFromSelectForProxyArmature()
+        bfu_export_utils.ApplyProxyData(active)
+        bfu_utils.RemoveSocketFromSelectForProxyArmature()
 
     if addon_prefs.bakeArmatureAction:
-        BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)
+        bfu_export_utils.BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)
 
-    ApplyExportTransform(active, "NLA")  # Apply export transform before rescale
+    bfu_utils.ApplyExportTransform(active, "NLA")  # Apply export transform before rescale
 
     # This will rescale the rig and unit scale to get a root bone egal to 1
-    ShouldRescaleRig = GetShouldRescaleRig(active)
+    ShouldRescaleRig = bfu_export_utils.GetShouldRescaleRig(active)
     if ShouldRescaleRig:
 
-        rrf = GetRescaleRigFactor()  # rigRescaleFactor
+        rrf = bfu_export_utils.GetRescaleRigFactor()  # rigRescaleFactor
         my_scene_unit_settings = bfu_utils.SceneUnitSettings(bpy.context.scene)
         my_scene_unit_settings.SetUnitForUnrealEngineExport()
         my_skeletal_export_scale = bfu_utils.SkeletalExportScale(active)
@@ -133,22 +111,22 @@ def ExportSingleFbxNLAAnim(
         my_shape_keys_curve_scale = bfu_utils.ShapeKeysCurveScale(rrf, is_a_proxy=export_as_proxy)
         my_shape_keys_curve_scale.ResacleForUnrealEngine()
 
-        RescaleSelectCurveHook(1/rrf)
-        ResetArmaturePose(active)
+        bfu_utils.RescaleSelectCurveHook(1/rrf)
+        bbpl.anim_utils.reset_armature_pose(active)
         my_rig_consraints_scale = bfu_utils.RigConsraintScale(active, rrf)
         my_rig_consraints_scale.RescaleRigConsraintForUnrealEngine()
 
-    scene.frame_start = GetDesiredNLAStartEndTime(active)[0]
-    scene.frame_end = GetDesiredNLAStartEndTime(active)[1]
+    scene.frame_start = bfu_utils.GetDesiredNLAStartEndTime(active)[0]
+    scene.frame_end = bfu_utils.GetDesiredNLAStartEndTime(active)[1]
 
     asset_name.SetExportName()
 
     if (export_procedure == "normal"):
         bpy.ops.export_scene.fbx(
-            filepath=GetExportFullpath(dirpath, filename),
+            filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
-            global_scale=GetObjExportScale(active),
+            global_scale=bfu_utils.GetObjExportScale(active),
             object_types={'ARMATURE', 'EMPTY', 'MESH'},
             use_custom_props=addon_prefs.exportWithCustomProps,
             add_leaf_bones=False,
@@ -157,7 +135,7 @@ def ExportSingleFbxNLAAnim(
             bake_anim_use_nla_strips=False,
             bake_anim_use_all_actions=False,
             bake_anim_force_startend_keying=True,
-            bake_anim_step=GetAnimSample(active),
+            bake_anim_step=bfu_utils.GetAnimSample(active),
             bake_anim_simplify_factor=active.SimplifyAnimForExport,
             use_metadata=addon_prefs.exportWithMetaData,
             primary_bone_axis=active.exportPrimaryBaneAxis,
@@ -168,8 +146,8 @@ def ExportSingleFbxNLAAnim(
             )
 
     if (export_procedure == "auto-rig-pro"):
-        ExportAutoProRig(
-            filepath=GetExportFullpath(dirpath, filename),
+        bfu_export_utils.ExportAutoProRig(
+            filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=True,
             anim_export_name_string=active.animation_data.action.name,
@@ -177,13 +155,13 @@ def ExportSingleFbxNLAAnim(
             arp_simplify_fac=active.SimplifyAnimForExport
             )
 
-    ResetArmaturePose(active)
+    bbpl.anim_utils.reset_armature_pose(active)
     # scene.frame_start -= active.bfu_anim_action_start_frame_offset
     # scene.frame_end -= active.bfu_anim_action_end_frame_offset
 
     asset_name.ResetNames()
 
-    ResetArmaturePose(obj)
+    bbpl.anim_utils.reset_armature_pose(obj)
 
     # Reset Transform
     obj.matrix_world = BaseTransform
@@ -197,11 +175,11 @@ def ExportSingleFbxNLAAnim(
         my_shape_keys_curve_scale.ResetScaleAfterExport()
 
     if export_as_proxy is False:
-        CleanDeleteObjects(bpy.context.selected_objects)
+        bfu_utils.CleanDeleteObjects(bpy.context.selected_objects)
         for data in duplicate_data.data_to_remove:
             data.RemoveData()
 
-        ResetDuplicateNameAfterExport(duplicate_data)
+        bfu_export_utils.ResetDuplicateNameAfterExport(duplicate_data)
 
     for obj in scene.objects:
-        ClearAllBFUTempVars(obj)
+        bfu_utils.ClearAllBFUTempVars(obj)

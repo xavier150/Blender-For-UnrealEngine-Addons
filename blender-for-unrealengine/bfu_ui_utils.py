@@ -17,23 +17,8 @@
 # ======================= END GPL LICENSE BLOCK =============================
 
 
+import os
 import bpy
-import fnmatch
-import mathutils
-import math
-import time
-import sys
-
-if "bpy" in locals():
-    import importlib
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-from . import bfu_basics
-from .bfu_basics import *
-
-from bpy.props import (
-        StringProperty,
-        )
 
 from bpy.types import (
         Operator,
@@ -99,12 +84,12 @@ class BFU_AP_UI_UTILS(bpy.types.AddonPreferences):
     # when defining this in a submodule of a python package.
     bl_idname = __package__
 
-    class BFU_OT_OpenDocumentationTargetPage(Operator):
+    class BFU_OT_OpenDocumentationTargetPage(bpy.types.Operator):
         bl_label = "Documentation"
         bl_idname = "object.open_documentation_target_page"
         bl_description = "Clic for open documentation page on GitHub"
-        page: StringProperty(default="")
-        octicon: StringProperty(default="")
+        page: bpy.props.StringProperty(default="")
+        octicon: bpy.props.StringProperty(default="")
 
         def execute(self, context):
             os.system(
@@ -113,11 +98,11 @@ class BFU_AP_UI_UTILS(bpy.types.AddonPreferences):
                 )
             return {'FINISHED'}
 
-    class BFU_OT_OpenDocumentationTargetExportPage(Operator):
+    class BFU_OT_OpenDocumentationTargetExportPage(bpy.types.Operator):
         bl_label = "Documentation"
         bl_idname = "object.open_documentation_target_export_page"
         bl_description = "Clic for open documentation page on GitHub"
-        octicon: StringProperty(default="")
+        octicon: bpy.props.StringProperty(default="")
 
         def execute(self, context):
             os.system(

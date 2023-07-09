@@ -198,9 +198,10 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         )
 
     class BFU_OT_NewReleaseInfo(bpy.types.Operator):
+        """Open last release page"""
         bl_label = "Open last release page"
         bl_idname = "object.new_release_info"
-        bl_description = "Clic for open latest release page."
+        bl_description = "Click to open the latest release page."
 
         def execute(self, context):
             os.system(

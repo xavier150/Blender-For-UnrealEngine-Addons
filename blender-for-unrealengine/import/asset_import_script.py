@@ -4,10 +4,12 @@
 # Use this command in Unreal cmd consol: py "[ScriptLocation]\ImportSequencerScript.py"
 
 
-from unittest import result
+
 import sys
 import os.path
 import json
+import string
+from unittest import result
 
 try:  # TO DO: Found a better way to check that.
     import unreal
@@ -50,8 +52,6 @@ def GetUnrealVersion():
 
 
 def ImportAllAssets():
-
-    import string
 
     # Prepare process import
     json_data_file = 'ImportAssetData.json'
@@ -96,10 +96,6 @@ def ImportAllAssets():
             FileType = "ABC"
         else:
             FileType = "FBX"
-
-        asset_data["full_import_path"]  # AssetImportPath
-        asset_data["fbx_path"]  # fbx_file_path
-        asset_data["additional_tracks_path"]  # additional_track_file_path
 
         def GetAdditionalData():
             if "additional_tracks_path" in asset_data:
@@ -312,10 +308,9 @@ def ImportAllAssets():
 
             print("Import task")
             if asset_data["type"] == "Animation":
-                '''
-                For animation the script will import a skeletal mesh and remove after.
-                If the skeletal mesh alredy exist try to remove.
-                '''
+                # For animation the script will import a skeletal mesh and remove after.
+                # If the skeletal mesh alredy exist try to remove.
+
 
                 AssetName = asset_data["name"]
                 AssetName = ValidUnrealAssetsName(AssetName)
@@ -396,7 +391,6 @@ def ImportAllAssets():
             if asset_data["type"] == "SkeletalMesh":
                 # Import the SkeletalMesh socket(s)
                 sockets_to_add = additional_data["Sockets"]
-                skeleton = asset.get_editor_property('skeleton')
                 for socket in sockets_to_add:
                     old_socket = asset.find_socket(socket["SocketName"])
                     if old_socket:

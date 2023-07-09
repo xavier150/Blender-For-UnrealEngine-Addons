@@ -18,28 +18,17 @@
 
 
 import bpy
+import bmesh
+import string
 import fnmatch
 import mathutils
 import math
-import time
-import sys
+import os
+import math
 from . import bbpl
-
-from math import degrees, radians, tan
-from mathutils import Matrix
-
-if "bpy" in locals():
-    import importlib
-    if "bfu_write_text" in locals():
-        importlib.reload(bfu_write_text)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-
-
+from . import bps
 from . import bfu_write_text
 from . import bfu_basics
-from .bfu_basics import *
-
 
 class SavedBones():
 
@@ -139,19 +128,6 @@ class TimelineMarkerSequence():
                     return marker_sequence
         return None
 
-
-class CounterTimer():
-
-    def __init__(self):
-        self.start = time.perf_counter()
-
-    def ResetTime(self):
-        self.start = time.perf_counter()
-
-    def GetTime(self):
-        return time.perf_counter()-self.start
-
-
 def UpdateProgress(job_title, progress, time=None):
 
     length = 20  # modify this to change the length
@@ -168,14 +144,14 @@ def UpdateProgress(job_title, progress, time=None):
             msg += " DONE\r\n"
 
 
-def RemoveUselessSpecificData(name, type):
-    if type == "MESH":
+def RemoveUselessSpecificData(name, data_type):
+    if data_type == "MESH":
         if name in bpy.data.meshes:
             oldData = bpy.data.meshes[name]
             if oldData.users == 0:
                 bpy.data.meshes.remove(oldData)
 
-    if type == "ARMATURE":
+    if data_type == "ARMATURE":
         if name in bpy.data.armatures:
             oldData = bpy.data.armatures[name]
             if oldData.users == 0:
@@ -241,12 +217,12 @@ def GetAllobjectsByExportType(exportType):
     return (targetObj)
 
 
-def GetAllCollisionAndSocketsObj(list=None):
+def GetAllCollisionAndSocketsObj(objs_list=None):
     # Get any object that can be understood
     # as a collision or a socket by unreal
 
-    if list is not None:
-        objs = list
+    if objs_list is not None:
+        objs = objs_list
     else:
         objs = bpy.context.scene.objects
 
@@ -264,7 +240,7 @@ def GetExportDesiredChilds(obj):
     # Get only all child objects that must be exported with parent object
 
     DesiredObj = []
-    for child in GetRecursiveChilds(obj):
+    for child in bfu_basics.GetRecursiveChilds(obj):
         if child.ExportEnum != "dont_export":
             if child.name in bpy.context.window.view_layer.objects:
                 DesiredObj.append(child)
@@ -285,7 +261,7 @@ def GetSkeletalMeshSockets(obj):
     if obj is None:
         return
 
-    addon_prefs = GetAddonPrefs()
+    addon_prefs = bfu_basics.GetAddonPrefs()
     data = {}
     sockets = []
 
@@ -298,18 +274,16 @@ def GetSkeletalMeshSockets(obj):
     data['Sockets'] = []
     # config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
 
-    for i, socket in enumerate(sockets):
+    for socket in sockets:
         if IsASocket(socket):
             SocketName = socket.name[7:]
-        else:
-            socket.name
 
         if socket.parent.exportDeformOnly:
-            b = getFirstDeformBoneParent(socket.parent.data.bones[socket.parent_bone])
+            b = bfu_basics.getFirstDeformBoneParent(socket.parent.data.bones[socket.parent_bone])
         else:
             b = socket.parent.data.bones[socket.parent_bone]
 
-        ResetArmaturePose(socket.parent)
+        bbpl.anim_utils.reset_armature_pose(socket.parent)
         # GetRelativePostion
         bml = b.matrix_local  # Bone
         am = socket.parent.matrix_world  # Armature
@@ -480,12 +454,11 @@ class ShapeKeysCurveScale():
     def ShapeKeysDriverRefs(self):
         drivers = []
         if self.export_as_proxy is False:
-            rrf = self.rescale_rig_factor
             for obj in bpy.context.selected_objects:
                 if obj.type == "MESH":
-                    if obj.data.shape_keys is None:
-                        if obj.data.shape_keys.animation_data is None:
-                            if obj.data.shape_keys.animation_data.drivers is None:
+                    if obj.data.shape_keys is not None:
+                        if obj.data.shape_keys.animation_data is not None:
+                            if obj.data.shape_keys.animation_data.drivers is not None:
                                 for driver in obj.data.shape_keys.animation_data.drivers:
                                     drivers.append(self.DriverProxyData(driver))
         return drivers
@@ -599,7 +572,7 @@ def GetCachedExportAutoActionList(obj, force_update_cache=False):
         objBoneNames = [bone.name for bone in obj.data.bones]
         for action in bpy.data.actions:
             if action.library is None:
-                if GetIfActionIsAssociated(action, objBoneNames):
+                if bfu_basics.GetIfActionIsAssociated(action, objBoneNames):
                     actions.append(action)
         # Update the cache
         MyCachedActions.StoreActions(obj, actions)
@@ -641,21 +614,20 @@ def GetActionToExport(obj):
 
 def EvaluateCameraPositionForUnreal(camera, previous_euler=mathutils.Euler()):
     # Get Transfrom
-    matrix_y = Matrix.Rotation(radians(90.0), 4, 'Y')
-    matrix_x = Matrix.Rotation(radians(-90.0), 4, 'X')
+    matrix_y = mathutils.Matrix.Rotation(math.radians(90.0), 4, 'Y')
+    matrix_x = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'X')
     matrix = camera.matrix_world @ matrix_y @ matrix_x
-    matrix_rotation_offset = Matrix.Rotation(camera.AdditionalRotationForExport.z, 4, 'Z')
     loc = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
     loc += camera.AdditionalLocationForExport
     r = matrix.to_euler("XYZ", previous_euler)
     s = matrix.to_scale()
 
     loc *= mathutils.Vector([1, -1, 1])
-    array_rotation = [degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1]  # Roll Pith Yaw XYZ
+    array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]  # Roll Pith Yaw XYZ
     array_transform = [loc, array_rotation, s]
 
     # array_location = [loc[0], loc[1]*-1, loc[2]]
-    # r = mathutils.Euler([degrees(r[0]), degrees(r[1])*-1, degrees(r[2])*-1], r.order)  # Roll Pith Yaw XYZ
+    # r = mathutils.Euler([math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1], r.order)  # Roll Pith Yaw XYZ
     # array_transform = [array_location, r, s]
 
     return array_transform
@@ -737,12 +709,12 @@ def GetUseCustomLightMapResolution(obj):
 
 
 def GetExportRealSurfaceArea(obj):
-    scene = bpy.context.scene
 
-    local_view_areas = MoveToGlobalView()
+    local_view_areas = bbpl.scene_utils.move_to_global_view()
     bbpl.utils.safe_mode_set('OBJECT')
 
-    SavedSelect = GetCurrentSelection()
+    SavedSelect = bbpl.utils.UserSelectSave()
+    SavedSelect.save_current_select()
     SelectParentAndDesiredChilds(obj)
 
     bpy.ops.object.duplicate()
@@ -772,10 +744,10 @@ def GetExportRealSurfaceArea(obj):
 
     CleanJoinSelect()
     active = bpy.context.view_layer.objects.active
-    area = GetSurfaceArea(active)
+    area = bfu_basics.GetSurfaceArea(active)
     CleanDeleteObjects(bpy.context.selected_objects)
-    SetCurrentSelection(SavedSelect)
-    MoveToLocalView(local_view_areas)
+    SavedSelect.reset_select_by_ref()
+    bbpl.scene_utils.move_to_local_view(local_view_areas)
     return area
 
 
@@ -804,7 +776,7 @@ def GetCompuntedLightMap(obj):
         area *= obj.staticMeshLightMapSurfaceScale/2
         if obj.staticMeshLightMapRoundPowerOfTwo:
 
-            return nearestPowerOfTwo(int(round(area)))
+            return bps.math.nearest_power_of_two(int(round(area)))
         return int(round(area))
 
 
@@ -818,13 +790,13 @@ def GetActionType(action):
 
 def GetCollectionType(collection):
     # return collection type
+    if(collection):
+        return "Collection StaticMesh"
 
-    return "Collection StaticMesh"
 
-
-def GetIsAnimation(type):
+def GetIsAnimation(animation_type):
     # return True if type(string) is a animation
-    if (type == "NlAnim" or type == "Action" or type == "Pose"):
+    if (animation_type == "NlAnim" or animation_type == "Action" or animation_type == "Pose"):
         return True
     return False
 
@@ -951,10 +923,11 @@ def GoToMeshEditMode():
 
 def ApplyNeededModifierToSelect():
 
-    SavedSelect = GetCurrentSelection()
+    SavedSelect = bbpl.utils.UserSelectSave()
+    SavedSelect.save_current_select()
     for obj in bpy.context.selected_objects:
         if obj.type == "MESH":
-            SelectSpecificObject(obj)
+            bbpl.utils.select_specific_object(obj)
             for mod in [m for m in obj.modifiers if m.type != 'ARMATURE']:
                 if obj.data.shape_keys is None:
                     if obj.data.users > 1:
@@ -966,7 +939,7 @@ def ApplyNeededModifierToSelect():
                             # print the error incase its important... but continue
                             print(ex)
 
-    SetCurrentSelection(SavedSelect)
+    SavedSelect.reset_select_by_ref()
 
 
 def CorrectExtremeUV(stepScale=2):
@@ -1041,6 +1014,7 @@ def CorrectExtremeUV(stepScale=2):
 
     for obj in bpy.context.selected_objects:
         if IsValidForUvEdit(obj):
+            # pylint: disable=E1128
             bm = bmesh.from_edit_mesh(obj.data)
 
             uv_lay = bm.loops.layers.uv.active
@@ -1120,7 +1094,7 @@ class SkeletalExportScale():
 
         # Save childs location
         self.childs = []
-        for child in GetChilds(armature):
+        for child in bfu_basics.GetChilds(armature):
             self.childs.append(self.SkeletalChilds(child))
 
     class SkeletalChilds():
@@ -1148,14 +1122,15 @@ class SkeletalExportScale():
 
         if target_animation_data is None:
             armature_animation_data = bbpl.anim_utils.AnimationManagment()
-            armature_animation_data.SaveAnimationData(armature)
-            armature_animation_data.ClearAnimationData(armature)
+            armature_animation_data.save_animation_data(armature)
+            armature_animation_data.clear_animation_data(armature)
         else:
             armature_animation_data = bbpl.anim_utils.AnimationManagment()
-            armature_animation_data.ClearAnimationData(armature)
+            armature_animation_data.clear_animation_data(armature)
 
         if is_a_proxy:
-            selection = GetCurrentSelection()
+            SavedSelect = bbpl.utils.UserSelectSave()
+            SavedSelect.save_current_select()
             bpy.ops.object.select_all(action='DESELECT')
             armature.select_set(True)
 
@@ -1173,15 +1148,15 @@ class SkeletalExportScale():
             properties=True
             )
         if is_a_proxy:
-            SetCurrentSelection(selection)
+            SavedSelect.reset_select_by_ref()
 
         # Apply armature location
         armature.location = old_location*rescale
 
         if target_animation_data is None:
-            armature_animation_data.SetAnimationData(armature, True)
+            armature_animation_data.set_animation_data(armature, True)
         else:
-            target_animation_data.SetAnimationData(armature, True)
+            target_animation_data.set_animation_data(armature, True)
 
     def ResetSkeletalExportScale(self):
         self.armature.data = self.default_armature_data
@@ -1296,10 +1271,10 @@ def GetFinalAssetToExport():
     TargetAssetToExport = []  # Obj, Action, type
 
     class AssetToExport:
-        def __init__(self, obj, action, type):
+        def __init__(self, obj, action, asset_type):
             self.obj = obj
             self.action = action
-            self.type = type
+            self.asset_type = asset_type
 
     objList = []
     collectionList = []
@@ -1390,7 +1365,7 @@ def GetFinalAssetToExport():
 def ValidFilenameForUnreal(filename):
     # valid file name for unreal assets
     extension = os.path.splitext(filename)[1]
-    newfilename = ValidFilename(os.path.splitext(filename)[0])
+    newfilename = bfu_basics.ValidFilename(os.path.splitext(filename)[0])
     return (''.join(c for c in newfilename if c != ".")+extension)
 
 
@@ -1428,13 +1403,13 @@ def GetObjExportName(obj):
             proxy_child = GetExportProxyChild(obj)
             if proxy_child is not None:
                 return proxy_child.name
-    return ValidFilename(obj.name)
+    return bfu_basics.ValidFilename(obj.name)
 
 
 def GetObjExportDir(obj, abspath=False):
     # Generate assset folder path
-    folder_name = ValidDirName(obj.exportFolderName)
-    obj_name = ValidDirName(obj.name)  # Fix obj name
+    folder_name = bfu_basics.ValidDirName(obj.exportFolderName)
+    obj_name = bfu_basics.ValidDirName(obj.name)  # Fix obj name
 
     scene = bpy.context.scene
     if GetAssetType(obj) == "SkeletalMesh":
@@ -1474,16 +1449,16 @@ def GetObjExportFileName(obj, fileType=".fbx"):
 
     scene = bpy.context.scene
     if obj.bfu_use_custom_export_name:
-        return ValidFilename(obj.bfu_custom_export_name+fileType)
+        return bfu_basics.ValidFilename(obj.bfu_custom_export_name+fileType)
     assetType = GetAssetType(obj)
     if assetType == "Camera":
-        return ValidFilename(scene.camera_prefix_export_name+obj.name+fileType)
+        return bfu_basics.ValidFilename(scene.camera_prefix_export_name+obj.name+fileType)
     elif assetType == "StaticMesh":
-        return ValidFilename(scene.static_mesh_prefix_export_name+obj.name+fileType)
+        return bfu_basics.ValidFilename(scene.static_mesh_prefix_export_name+obj.name+fileType)
     elif assetType == "SkeletalMesh":
-        return ValidFilename(scene.skeletal_mesh_prefix_export_name+obj.name+fileType)
+        return bfu_basics.ValidFilename(scene.skeletal_mesh_prefix_export_name+obj.name+fileType)
     elif assetType == "Alembic":
-        return ValidFilename(scene.alembic_prefix_export_name+obj.name+fileType)
+        return bfu_basics.ValidFilename(scene.alembic_prefix_export_name+obj.name+fileType)
     else:
         return None
 
@@ -1502,10 +1477,10 @@ def GetActionExportFileName(obj, action, fileType=".fbx"):
     animType = GetActionType(action)
     if animType == "NlAnim" or animType == "Action":
         # Nla can be exported as action
-        return ValidFilename(scene.anim_prefix_export_name+ArmatureName+action.name+fileType)
+        return bfu_basics.ValidFilename(scene.anim_prefix_export_name+ArmatureName+action.name+fileType)
 
     elif animType == "Pose":
-        return ValidFilename(scene.pose_prefix_export_name+ArmatureName+action.name+fileType)
+        return bfu_basics.ValidFilename(scene.pose_prefix_export_name+ArmatureName+action.name+fileType)
 
     else:
         return None
@@ -1522,7 +1497,7 @@ def GetNLAExportFileName(obj, fileType=".fbx"):
     if obj.bfu_anim_naming_type == "include_custom_name":
         ArmatureName = obj.bfu_anim_naming_custom+"_"
 
-    return ValidFilename(scene.anim_prefix_export_name+ArmatureName+obj.bfu_anim_nla_export_name+fileType)
+    return bfu_basics.ValidFilename(scene.anim_prefix_export_name+ArmatureName+obj.bfu_anim_nla_export_name+fileType)
 
 
 def GetImportAssetScriptCommand():
@@ -1530,7 +1505,6 @@ def GetImportAssetScriptCommand():
     fileName = scene.file_import_asset_script_name
     absdirpath = bpy.path.abspath(scene.export_other_file_path)
     fullpath = os.path.join(absdirpath, fileName)
-    addon_prefs = GetAddonPrefs()
     return 'py "'+fullpath+'"'
 
 
@@ -1610,6 +1584,7 @@ def GetImportCameraScriptCommand(objs, CineCamera=True):
             t += "            " + "CurrentFocusDistance="+str(FocusDistance)+")" + "\n"
             t += "            " + "CurrentFocusDistance="+str(FocusDistance)+")" + "\n"
             t += "            " + "CustomNearClippingPlane="+str(NearClippingPlane)+")" + "\n"
+            t += "            " + "CustomFarClippingPlane="+str(FarClippingPlane)+")" + "\n"
             t += "            " + "FieldOfView="+str(FieldOfView)+")" + "\n"
             t += "            " + "AspectRatio="+str(AspectRatio)+")" + "\n"
             t += "         " + "End Object" + "\n"
@@ -1687,7 +1662,6 @@ def GetImportSequencerScriptCommand():
     absdirpath = bpy.path.abspath(scene.export_other_file_path)
     fullpath = os.path.join(absdirpath, fileName)
 
-    addon_prefs = GetAddonPrefs()
     return 'py "'+fullpath+'"'  # Vania
 
 
@@ -1708,14 +1682,14 @@ def GetArmatureRootBones(obj):
         if obj.exportDeformOnly:
             for bone in obj.data.bones:
                 if bone.use_deform:
-                    rootBone = getRootBoneParent(bone)
+                    rootBone = bfu_basics.getRootBoneParent(bone)
                     if rootBone not in rootBones:
                         rootBones.append(rootBone)
     return rootBones
 
 
 def GetDesiredExportArmatureName(obj):
-    addon_prefs = GetAddonPrefs()
+    addon_prefs = bfu_basics.GetAddonPrefs()
     single_root = len(GetArmatureRootBones(obj)) == 1
     if addon_prefs.add_skeleton_root_bone or single_root != 1:
         return addon_prefs.skeleton_root_bone_name
@@ -1758,7 +1732,7 @@ def GenerateUe4Name(name):
 
 
 def CreateCollisionMaterial():
-    addon_prefs = GetAddonPrefs()
+    addon_prefs = bfu_basics.GetAddonPrefs()
 
     mat = bpy.data.materials.get("UE4Collision")
     if mat is None:
@@ -1800,7 +1774,6 @@ def Ue4SubObj_set(SubType):
                 obj.select_set(False)
 
     ownerObj = bpy.context.active_object
-    ownerBone = bpy.context.active_pose_bone
     objList = bpy.context.selected_objects
     if ownerObj is None:
         return []
@@ -1814,9 +1787,8 @@ def Ue4SubObj_set(SubType):
 
             # SkeletalMesh Colider
             if obj.type == 'MESH':
-                ConvertToConvexHull(obj)
+                bfu_basics.ConvertToConvexHull(obj)
                 obj.modifiers.clear()
-                obj.data
                 obj.data.materials.clear()
                 obj.active_material_index = 0
                 obj.data.materials.append(CreateCollisionMaterial())
@@ -1944,11 +1916,11 @@ def IsASubObject(obj):
     return False
 
 
-def UpdateAreaLightMapList(list=None):
+def UpdateAreaLightMapList(objects_to_update=None):
     # Updates area LightMap
 
-    if list is not None:
-        objs = list
+    if objects_to_update is not None:
+        objs = objects_to_update
     else:
         objs = []
         exportObjs = GetAllobjectsByExportType("export_recursive")
@@ -1958,14 +1930,14 @@ def UpdateAreaLightMapList(list=None):
 
     UpdatedRes = 0
 
-    counter = CounterTimer()
+    counter = bps.utils.CounterTimer()
     for obj in objs:
         obj.computedStaticMeshLightMapRes = GetExportRealSurfaceArea(obj)
         UpdatedRes += 1
         UpdateProgress(
             "Update LightMap",
             (UpdatedRes/len(objs)),
-            counter.GetTime())
+            counter.get_time())
     return UpdatedRes
 
 

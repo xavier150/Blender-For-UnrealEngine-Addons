@@ -16,17 +16,9 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-
-import bpy
-import time
-import math
-
 from .. import bfu_write_text
 from .. import bfu_basics
-from ..bfu_basics import *
 from .. import bfu_utils
-from ..bfu_utils import *
-from enum import Enum
 
 from ..bbpl import utils
 
@@ -81,7 +73,7 @@ class VertexColorExportData:
 
         if obj:
             if obj.data:
-                vertex_colors = utils.getVertexColors(obj)
+                vertex_colors = utils.get_vertex_colors(obj)
                 if len(vertex_colors) > 0:
 
                     if VertexColorToUse == "FirstIndex":
@@ -91,7 +83,7 @@ class VertexColorExportData:
                         return len(vertex_colors)-1
 
                     if VertexColorToUse == "ActiveIndex":
-                        return utils.getVertexColors_RenderColorIndex(obj)
+                        return utils.get_vertex_colors_render_color_index(obj)
 
                     if VertexColorToUse == "CustomIndex":
                         if VertexColorIndexToUse < len(vertex_colors):
@@ -108,7 +100,7 @@ class VertexColorExportData:
         if obj:
             if obj.type == "MESH":
                 if obj.data:
-                    vertex_colors = utils.getVertexColors(obj)
+                    vertex_colors = utils.get_vertex_colors(obj)
                     if obj.VertexColorIndexToUse < len(vertex_colors):
                         return vertex_colors[index].name
 

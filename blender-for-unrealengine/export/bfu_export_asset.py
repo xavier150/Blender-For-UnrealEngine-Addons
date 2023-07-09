@@ -16,87 +16,40 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-if "bpy" in locals():
-    import importlib
-    if "bfu_write_text" in locals():
-        importlib.reload(bfu_write_text)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-    if "bfu_export_single_alembic_animation" in locals():
-        importlib.reload(bfu_export_single_alembic_animation)
-    if "bfu_export_single_fbx_action" in locals():
-        importlib.reload(bfu_export_single_fbx_action)
-    if "bfu_export_single_camera" in locals():
-        importlib.reload(bfu_export_single_camera)
-    if "bfu_export_single_fbx_nla_anim" in locals():
-        importlib.reload(bfu_export_single_fbx_nla_anim)
-    if "bfu_export_single_skeletal_mesh" in locals():
-        importlib.reload(bfu_export_single_skeletal_mesh)
-    if "bfu_export_single_static_mesh" in locals():
-        importlib.reload(bfu_export_single_static_mesh)
-    if "bfu_export_single_static_mesh_collection" in locals():
-        importlib.reload(bfu_export_single_static_mesh_collection)
 
 import bpy
-import time
-import math
-
-import addon_utils
-
-from .. import bfu_write_text
-from .. import bfu_basics
-from ..bfu_basics import *
-from .. import bfu_utils
-from ..bfu_utils import *
-
-from .. import bbpl
-
 from . import bfu_export_single_alembic_animation
-from .bfu_export_single_alembic_animation import *
 from . import bfu_export_single_fbx_action
-from .bfu_export_single_fbx_action import *
 from . import bfu_export_single_camera
-from .bfu_export_single_camera import *
 from . import bfu_export_single_fbx_nla_anim
-from .bfu_export_single_fbx_nla_anim import *
 from . import bfu_export_single_skeletal_mesh
-from .bfu_export_single_skeletal_mesh import *
 from . import bfu_export_single_static_mesh
-from .bfu_export_single_static_mesh import *
 from . import bfu_export_single_static_mesh_collection
-from .bfu_export_single_static_mesh_collection import *
-
-
-class ExportSigleObjects():
-
-    def SaveDataForSigneExport():
-        pass
-
-    def ResetDataAfterSigneExport():
-        pass
+from .. import bps
+from .. import bbpl
+from .. import bfu_basics
+from .. import bfu_utils
 
 
 def IsValidActionForExport(scene, obj, animType):
     if animType == "Action":
         if scene.anin_export:
             if obj.bfu_export_procedure == 'auto-rig-pro':
-                if CheckPluginIsActivated('auto_rig_pro-master'):
+                if bfu_basics.CheckPluginIsActivated('auto_rig_pro-master'):
                     return True
             else:
                 return True
         else:
-            False
+            return False
     elif animType == "Pose":
         if scene.anin_export:
             if obj.bfu_export_procedure == 'auto-rig-pro':
-                if CheckPluginIsActivated('auto_rig_pro-master'):
+                if bfu_basics.CheckPluginIsActivated('auto_rig_pro-master'):
                     return True
             else:
                 return True
         else:
-            False
+            return False
     elif animType == "NLA":
         if scene.anin_export:
             if obj.bfu_export_procedure == 'auto-rig-pro':
@@ -111,7 +64,7 @@ def IsValidActionForExport(scene, obj, animType):
 
 
 def IsValidObjectForExport(scene, obj):
-    objType = GetAssetType(obj)
+    objType = bfu_utils.GetAssetType(obj)
 
     if objType == "Camera":
         return scene.camera_export
@@ -120,7 +73,7 @@ def IsValidObjectForExport(scene, obj):
     if objType == "SkeletalMesh":
         if scene.skeletal_export:
             if obj.bfu_export_procedure == 'auto-rig-pro':
-                if CheckPluginIsActivated('auto_rig_pro-master'):
+                if bfu_basics.CheckPluginIsActivated('auto_rig_pro-master'):
                     return True
             else:
                 return True
@@ -139,11 +92,9 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
         return
 
     scene = bpy.context.scene
-    addon_prefs = GetAddonPrefs()
+    counter = bps.utils.CounterTimer()
 
-    counter = CounterTimer()
-
-    NumberAssetToExport = len(GetFinalAssetToExport())
+    NumberAssetToExport = len(bfu_utils.GetFinalAssetToExport())
 
     def UpdateExportProgress(time=None):
         exported_assets = len(scene.UnrealExportedAssetsList)
@@ -159,20 +110,19 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
         if remain_assets == 0:
             wm.progress_end()
 
-        UpdateProgress("Export assets", remain_assets, time)
+        bfu_utils.UpdateProgress("Export assets", remain_assets, time)
 
     UpdateExportProgress()
 
     # Export collections
     print("Start Export collection(s)")
     if scene.static_collection_export:
-        for col in GetCollectionToExport(scene):
+        for col in bfu_utils.GetCollectionToExport(scene):
             if col.name in targetcollection:
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end
-
-                ProcessCollectionExport(col)
+                bfu_export_single_static_mesh_collection.ProcessCollectionExport(col)
 
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
@@ -185,11 +135,11 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
 
             # Camera
             print("Start Export camera(s)")
-            if GetAssetType(obj) == "Camera" and IsValidObjectForExport(scene, obj):
+            if bfu_utils.GetAssetType(obj) == "Camera" and IsValidObjectForExport(scene, obj):
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end
-                ProcessCameraExport(obj)
+                bfu_export_single_camera.ProcessCameraExport(obj)
 
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
@@ -198,12 +148,12 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
 
             # StaticMesh
             print("Start Export StaticMesh(s)")
-            if GetAssetType(obj) == "StaticMesh" and IsValidObjectForExport(scene, obj):
+            if bfu_utils.GetAssetType(obj) == "StaticMesh" and IsValidObjectForExport(scene, obj):
 
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end
-                ProcessStaticMeshExport(obj)
+                bfu_export_single_static_mesh.ProcessStaticMeshExport(obj)
 
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
@@ -212,11 +162,11 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
 
             # SkeletalMesh
             print("Start Export SkeletalMesh(s)")
-            if GetAssetType(obj) == "SkeletalMesh" and IsValidObjectForExport(scene, obj):
+            if bfu_utils.GetAssetType(obj) == "SkeletalMesh" and IsValidObjectForExport(scene, obj):
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end
-                ProcessSkeletalMeshExport(obj)
+                bfu_export_single_skeletal_mesh.ProcessSkeletalMeshExport(obj)
 
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
@@ -225,11 +175,11 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
 
             # Alembic
             print("Start Export Alembic(s)")
-            if GetAssetType(obj) == "Alembic" and IsValidObjectForExport(scene, obj):
+            if bfu_utils.GetAssetType(obj) == "Alembic" and IsValidObjectForExport(scene, obj):
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end
-                ProcessAlembicExport(obj)
+                bfu_export_single_alembic_animation.ProcessAlembicExport(obj)
 
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
@@ -238,10 +188,10 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
 
             # Action animation
             print("Start Export Action(s)")
-            if GetAssetType(obj) == "SkeletalMesh" and obj.visible_get():
-                for action in GetActionToExport(obj):
+            if bfu_utils.GetAssetType(obj) == "SkeletalMesh" and obj.visible_get():
+                for action in bfu_utils.GetActionToExport(obj):
                     if action.name in targetActionName:
-                        animType = GetActionType(action)
+                        animType = bfu_utils.GetActionType(action)
 
                         # Action and Pose
                         if IsValidActionForExport(scene, obj, animType):
@@ -249,7 +199,7 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                                 # Save current start/end frame
                                 UserStartFrame = scene.frame_start
                                 UserEndFrame = scene.frame_end
-                                ProcessActionExport(obj, action)
+                                bfu_export_single_fbx_action.ProcessActionExport(obj, action)
 
                                 # Resets previous start/end frame
                                 scene.frame_start = UserStartFrame
@@ -264,19 +214,19 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                         UserStartFrame = scene.frame_start
                         UserEndFrame = scene.frame_end
 
-                        ProcessNLAAnimExport(obj)
+                        bfu_export_single_fbx_nla_anim.ProcessNLAAnimExport(obj)
                         # Resets previous start/end frame
                         scene.frame_start = UserStartFrame
                         scene.frame_end = UserEndFrame
 
-    UpdateExportProgress(counter.GetTime())
+    UpdateExportProgress(counter.get_time())
 
 
 def ExportForUnrealEngine():
     scene = bpy.context.scene
-    addon_prefs = GetAddonPrefs()
+    addon_prefs = bfu_basics.GetAddonPrefs()
 
-    local_view_areas = MoveToGlobalView()
+    local_view_areas = bbpl.scene_utils.move_to_global_view()
 
     MyCurrentDataSave = bbpl.utils.UserSceneSave()
     MyCurrentDataSave.save_current_scene()
@@ -291,7 +241,7 @@ def ExportForUnrealEngine():
 
     for col in bpy.data.collections:
         if col.hide_select:
-           col.hide_select = False
+            col.hide_select = False
         if col.hide_viewport:
             col.hide_viewport = False
 
@@ -306,25 +256,25 @@ def ExportForUnrealEngine():
     bbpl.utils.safe_mode_set('OBJECT', MyCurrentDataSave.user_select_class.user_active)
 
     if addon_prefs.revertExportPath:
-        RemoveFolderTree(bpy.path.abspath(scene.export_static_file_path))
-        RemoveFolderTree(bpy.path.abspath(scene.export_skeletal_file_path))
-        RemoveFolderTree(bpy.path.abspath(scene.export_alembic_file_path))
-        RemoveFolderTree(bpy.path.abspath(scene.export_camera_file_path))
-        RemoveFolderTree(bpy.path.abspath(scene.export_other_file_path))
+        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.export_static_file_path))
+        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.export_skeletal_file_path))
+        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.export_alembic_file_path))
+        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.export_camera_file_path))
+        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.export_other_file_path))
 
     obj_list = []  # Do a simple list of Objects to export
     action_list = []  # Do a simple list of Action to export
     col_list = []  # Do a simple list of Collection to export
-    AssetToExport = GetFinalAssetToExport()
+    AssetToExport = bfu_utils.GetFinalAssetToExport()
 
     for Asset in AssetToExport:
-        if Asset.type == "Action" or Asset.type == "Pose":
+        if Asset.asset_type == "Action" or Asset.asset_type == "Pose":
             if Asset.obj not in action_list:
                 action_list.append(Asset.action.name)
             if Asset.obj not in obj_list:
                 obj_list.append(Asset.obj)
 
-        elif Asset.type == "Collection StaticMesh":
+        elif Asset.asset_type == "Collection StaticMesh":
             if Asset.obj not in col_list:
                 col_list.append(Asset.obj)
 
@@ -346,4 +296,4 @@ def ExportForUnrealEngine():
         if action.name not in MyCurrentDataSave.action_names:
             bpy.data.actions.remove(action)
 
-    MoveToLocalView(local_view_areas)
+    bbpl.scene_utils.move_to_local_view(local_view_areas)

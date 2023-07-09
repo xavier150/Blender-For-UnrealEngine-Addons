@@ -16,30 +16,8 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-import os
 import bpy
-import time
-from math import degrees
 from . import languages
-from .languages import *
-
-if "bpy" in locals():
-    import importlib
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-    if "bfu_write_utils" in locals():
-        importlib.reload(bfu_write_utils)
-    if "languages" in locals():
-        importlib.reload(languages)
-
-from . import bfu_basics
-from .bfu_basics import *
-from . import bfu_utils
-from .bfu_utils import *
-from . import bfu_write_utils
-from .bfu_write_utils import *
 
 
 def WriteImportSequencerTracks():
@@ -47,9 +25,9 @@ def WriteImportSequencerTracks():
 
     data = {}
     data['Coment'] = {
-        '1/3': ti('write_text_additional_track_start'),
-        '2/3': ti('write_text_additional_track_camera'),
-        '3/3': ti('write_text_additional_track_end'),
+        '1/3': languages.ti('write_text_additional_track_start'),
+        '2/3': languages.ti('write_text_additional_track_camera'),
+        '3/3': languages.ti('write_text_additional_track_end'),
     }
     data['spawnable_camera'] = True  # Default but open for change
     data['startFrame'] = scene.frame_start

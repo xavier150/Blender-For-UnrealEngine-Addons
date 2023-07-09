@@ -24,7 +24,7 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
 
     asset_name: bpy.props.StringProperty(default="None")
     skeleton_name: bpy.props.StringProperty(default="None")
-    asset_type: bpy.props.StringProperty(default="None")  # return from GetAssetType()
+    asset_type: bpy.props.StringProperty(default="None")  # return from bfu_utils.GetAssetType()
     folder_name: bpy.props.StringProperty(default="")
     files: bpy.props.CollectionProperty(type=BFU_OT_FileExport)
     object: bpy.props.PointerProperty(type=bpy.types.Object)

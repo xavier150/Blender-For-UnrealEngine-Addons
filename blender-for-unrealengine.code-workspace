@@ -36,6 +36,7 @@
 	},
 	"note": {
 		"fake-bpy-module": "https://github.com/nutti/fake-bpy-module",
-		"fake-bpy-module-command": "py -m pip install fake-bpy-module-latest"
+		"fake-bpy-module-command": "py -m pip install fake-bpy-module-latest",
+		"Blender best_practice": "https://docs.blender.org/api/current/info_best_practice.html"
 	}
 }

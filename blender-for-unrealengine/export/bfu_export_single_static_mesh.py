@@ -18,37 +18,16 @@
 
 
 import bpy
-import time
-import math
-
-if "bpy" in locals():
-    import importlib
-    if "bfu_write_text" in locals():
-        importlib.reload(bfu_write_text)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-    if "bfu_check_potential_error" in locals():
-        importlib.reload(bfu_check_potential_error)
-    if "bfu_export_utils" in locals():
-        importlib.reload(bfu_export_utils)
-
-
-from .. import bfu_write_text
-from .. import bfu_basics
-from ..bfu_basics import *
-from .. import bfu_utils
-from ..bfu_utils import *
-from .. import bfu_check_potential_error
-
 from . import bfu_export_utils
-from .bfu_export_utils import *
+from .. import bbpl
+from .. import bfu_basics
+from .. import bfu_utils
+from .. import bfu_check_potential_error
 
 
 def ProcessStaticMeshExport(obj):
-    addon_prefs = GetAddonPrefs()
-    dirpath = GetObjExportDir(obj)
+    addon_prefs = bfu_basics.GetAddonPrefs()
+    dirpath = bfu_utils.GetObjExportDir(obj)
     absdirpath = bpy.path.abspath(dirpath)
     scene = bpy.context.scene
 
@@ -59,17 +38,17 @@ def ProcessStaticMeshExport(obj):
     MyAsset.asset_type = bfu_utils.GetAssetType(obj)
     MyAsset.StartAssetExport()
 
-    ExportSingleStaticMesh(dirpath, GetObjExportFileName(obj), obj)
+    ExportSingleStaticMesh(dirpath, bfu_utils.GetObjExportFileName(obj), obj)
     file = MyAsset.files.add()
-    file.name = GetObjExportFileName(obj)
+    file.name = bfu_utils.GetObjExportFileName(obj)
     file.path = dirpath
     file.type = "FBX"
 
     if not obj.ExportAsLod:
         if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
-            ExportAdditionalParameter(absdirpath, MyAsset)
+            bfu_export_utils.ExportAdditionalParameter(absdirpath, MyAsset)
             file = MyAsset.files.add()
-            file.name = GetObjExportFileName(obj, "_AdditionalTrack.json")
+            file.name = bfu_utils.GetObjExportFileName(obj, "_AdditionalTrack.json")
             file.path = dirpath
             file.type = "AdditionalTrack"
 
@@ -91,43 +70,43 @@ def ExportSingleStaticMesh(
     # Export a single Mesh
 
     scene = bpy.context.scene
-    addon_prefs = GetAddonPrefs()
+    addon_prefs = bfu_basics.GetAddonPrefs()
 
     bbpl.utils.safe_mode_set('OBJECT')
 
-    SelectParentAndDesiredChilds(obj)
-    asset_name = PrepareExportName(obj, False)
-    duplicate_data = DuplicateSelectForExport()
-    SetDuplicateNameForExport(duplicate_data)
+    bfu_utils.SelectParentAndDesiredChilds(obj)
+    asset_name = bfu_export_utils.PrepareExportName(obj, False)
+    duplicate_data = bfu_export_utils.DuplicateSelectForExport()
+    bfu_export_utils.SetDuplicateNameForExport(duplicate_data)
 
-    MakeSelectVisualReal()
+    bfu_export_utils.MakeSelectVisualReal()
 
-    ApplyNeededModifierToSelect()
+    bfu_utils.ApplyNeededModifierToSelect()
     for obj in bpy.context.selected_objects:
-        SetVertexColorForUnrealExport(obj)
-        ConvertGeometryNodeAttributeToUV(obj)
-        CorrectExtremUVAtExport(obj)
-        SetSocketsExportTransform(obj)
-        SetSocketsExportName(obj)
+        bfu_export_utils.SetVertexColorForUnrealExport(obj)
+        bfu_export_utils.ConvertGeometryNodeAttributeToUV(obj)
+        bfu_export_utils.CorrectExtremUVAtExport(obj)
+        bfu_export_utils.SetSocketsExportTransform(obj)
+        bfu_export_utils.SetSocketsExportName(obj)
 
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
 
-    ApplyExportTransform(active, "Object")
+    bfu_utils.ApplyExportTransform(active, "Object")
 
-    meshType = GetAssetType(active)
+    meshType = bfu_utils.GetAssetType(active)
 
     bfu_check_potential_error.UpdateNameHierarchy(
-        GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
+        bfu_utils.GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
         )
 
     asset_name.SetExportName()
 
     bpy.ops.export_scene.fbx(
-        filepath=GetExportFullpath(dirpath, filename),
+        filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
         check_existing=False,
         use_selection=True,
-        global_scale=GetObjExportScale(active),
+        global_scale=bfu_utils.GetObjExportScale(active),
         object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
         use_custom_props=addon_prefs.exportWithCustomProps,
         mesh_smooth_type="FACE",
@@ -144,14 +123,14 @@ def ExportSingleStaticMesh(
 
     asset_name.ResetNames()
 
-    ClearVertexColorForUnrealExport(active)
-    ResetSocketsExportName(active)
-    ResetSocketsTransform(active)
-    CleanDeleteObjects(bpy.context.selected_objects)
+    bfu_export_utils.ClearVertexColorForUnrealExport(active)
+    bfu_export_utils.ResetSocketsExportName(active)
+    bfu_export_utils.ResetSocketsTransform(active)
+    bfu_utils.CleanDeleteObjects(bpy.context.selected_objects)
     for data in duplicate_data.data_to_remove:
         data.RemoveData()
 
-    ResetDuplicateNameAfterExport(duplicate_data)
+    bfu_export_utils.ResetDuplicateNameAfterExport(duplicate_data)
 
     for obj in scene.objects:
-        ClearAllBFUTempVars(obj)
+        bfu_utils.ClearAllBFUTempVars(obj)
