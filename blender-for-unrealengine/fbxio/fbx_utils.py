@@ -10,6 +10,7 @@ import re
 from collections import namedtuple
 from collections.abc import Iterable
 from itertools import zip_longest, chain
+import numpy as np
 
 import bpy
 import bpy_extras
@@ -244,6 +245,11 @@ def array_to_matrix4(arr):
     return Matrix(tuple(zip(*[iter(arr)]*4))).transposed()
 
 
+def parray_as_ndarray(arr):
+    """Convert an array.array into an np.ndarray that shares the same memory"""
+    return np.frombuffer(arr, dtype=arr.typecode)
+
+
 def similar_values(v1, v2, e=1e-6):
     """Return True if v1 and v2 are nearly the same."""
     if v1 == v2:
@@ -260,17 +266,331 @@ def similar_values_iter(v1, v2, e=1e-6):
             return False
     return True
 
-def vcos_transformed_gen(raw_cos, m=None):
-    # Note: we could most likely get much better performances with numpy, but will leave this as TODO for now.
-    gen = zip(*(iter(raw_cos),) * 3)
-    return gen if m is None else (m @ Vector(v) for v in gen)
 
-def nors_transformed_gen(raw_nors, m=None):
+def shape_difference_exclude_similar(sv_cos, ref_cos, e=1e-6):
+    """Return a tuple of:
+        the difference between the vertex cos in sv_cos and ref_cos, excluding any that are nearly the same,
+        and the indices of the vertices that are not nearly the same"""
+    assert(sv_cos.size == ref_cos.size)
+
+    # Create views of 1 co per row of the arrays, only making copies if needed.
+    sv_cos = sv_cos.reshape(-1, 3)
+    ref_cos = ref_cos.reshape(-1, 3)
+
+    # Quick check for equality
+    if np.array_equal(sv_cos, ref_cos):
+        # There's no difference between the two arrays.
+        empty_cos = np.empty((0, 3), dtype=sv_cos.dtype)
+        empty_indices = np.empty(0, dtype=np.int32)
+        return empty_cos, empty_indices
+
+    # Note that unlike math.isclose(a,b), np.isclose(a,b) is not symmetrical and the second argument 'b', is
+    # considered to be the reference value.
+    # Note that atol=0 will mean that if only one co component being compared is zero, they won't be considered close.
+    similar_mask = np.isclose(sv_cos, ref_cos, atol=0, rtol=e)
+
+    # A co is only similar if every component in it is similar.
+    co_similar_mask = np.all(similar_mask, axis=1)
+
+    # Get the indices of cos that are not similar.
+    not_similar_verts_idx = np.flatnonzero(~co_similar_mask)
+
+    # Subtracting first over the entire arrays and then indexing seems faster than indexing both arrays first and then
+    # subtracting, until less than about 3% of the cos are being indexed.
+    difference_cos = (sv_cos - ref_cos)[not_similar_verts_idx]
+    return difference_cos, not_similar_verts_idx
+
+
+def _mat4_vec3_array_multiply(mat4, vec3_array, dtype=None, return_4d=False):
+    """Multiply a 4d matrix by each 3d vector in an array and return as an array of either 3d or 4d vectors.
+
+    A view of the input array is returned if return_4d=False, the dtype matches the input array and either the matrix is
+    None or, ignoring the last row, is a 3x3 identity matrix with no translation:
+    ┌1, 0, 0, 0┐
+    │0, 1, 0, 0│
+    └0, 0, 1, 0┘
+
+    When dtype=None, it defaults to the dtype of the input array."""
+    return_dtype = dtype if dtype is not None else vec3_array.dtype
+    vec3_array = vec3_array.reshape(-1, 3)
+
+    # Multiplying a 4d mathutils.Matrix by a 3d mathutils.Vector implicitly extends the Vector to 4d during the
+    # calculation by appending 1.0 to the Vector and then the 4d result is truncated back to 3d.
+    # Numpy does not do an implicit extension to 4d, so it would have to be done explicitly by extending the entire
+    # vec3_array to 4d.
+    # However, since the w component of the vectors is always 1.0, the last column can be excluded from the
+    # multiplication and then added to every multiplied vector afterwards, which avoids having to make a 4d copy of
+    # vec3_array beforehand.
+    # For a single column vector:
+    # ┌a, b, c, d┐   ┌x┐   ┌ax+by+cz+d┐
+    # │e, f, g, h│ @ │y│ = │ex+fy+gz+h│
+    # │i, j, k, l│   │z│   │ix+jy+kz+l│
+    # └m, n, o, p┘   └1┘   └mx+ny+oz+p┘
+    # ┌a, b, c┐   ┌x┐   ┌d┐   ┌ax+by+cz┐   ┌d┐   ┌ax+by+cz+d┐
+    # │e, f, g│ @ │y│ + │h│ = │ex+fy+gz│ + │h│ = │ex+fy+gz+h│
+    # │i, j, k│   └z┘   │l│   │ix+jy+kz│   │l│   │ix+jy+kz+l│
+    # └m, n, o┘         └p┘   └mx+ny+oz┘   └p┘   └mx+ny+oz+p┘
+
+    # column_vector_multiplication in mathutils_Vector.c uses double precision math for Matrix @ Vector by casting the
+    # matrix's values to double precision and then casts back to single precision when returning the result, so at least
+    # double precision math is always be used to match standard Blender behaviour.
+    math_precision = np.result_type(np.double, vec3_array)
+
+    to_multiply = None
+    to_add = None
+    w_to_set = 1.0
+    if mat4 is not None:
+        mat_np = np.array(mat4, dtype=math_precision)
+        # Identity matrix is compared against to check if any matrix multiplication is required.
+        identity = np.identity(4, dtype=math_precision)
+        if not return_4d:
+            # If returning 3d, the entire last row of the matrix can be ignored because it only affects the w component.
+            mat_np = mat_np[:3]
+            identity = identity[:3]
+
+        # Split mat_np into the columns to multiply and the column to add afterwards.
+        # First 3 columns
+        multiply_columns = mat_np[:, :3]
+        multiply_identity = identity[:, :3]
+        # Last column only
+        add_column = mat_np.T[3]
+
+        # Analyze the split parts of the matrix to figure out if there is anything to multiply and anything to add.
+        if not np.array_equal(multiply_columns, multiply_identity):
+            to_multiply = multiply_columns
+
+        if return_4d and to_multiply is None:
+            # When there's nothing to multiply, the w component of add_column can be set directly into the array because
+            # mx+ny+oz+p becomes 0x+0y+0z+p where p is add_column[3].
+            w_to_set = add_column[3]
+            # Replace add_column with a view of only the translation.
+            add_column = add_column[:3]
+
+        if add_column.any():
+            to_add = add_column
+
+    if to_multiply is None:
+        # If there's anything to add, ensure it's added using the precision being used for math.
+        array_dtype = math_precision if to_add is not None else return_dtype
+        if return_4d:
+            multiplied_vectors = np.empty((len(vec3_array), 4), dtype=array_dtype)
+            multiplied_vectors[:, :3] = vec3_array
+            multiplied_vectors[:, 3] = w_to_set
+        else:
+            # If there's anything to add, ensure a copy is made so that the input vec3_array isn't modified.
+            multiplied_vectors = vec3_array.astype(array_dtype, copy=to_add is not None)
+    else:
+        # Matrix multiplication has the signature (n,k) @ (k,m) -> (n,m).
+        # Where v is the number of vectors in vec3_array and d is the number of vector dimensions to return:
+        # to_multiply has shape (d,3), vec3_array has shape (v,3) and the result should have shape (v,d).
+        # Either vec3_array or to_multiply must be transposed:
+        # Can transpose vec3_array and then transpose the result:
+        # (v,3).T -> (3,v); (d,3) @ (3,v) -> (d,v); (d,v).T -> (v,d)
+        # Or transpose to_multiply and swap the order of multiplication:
+        # (d,3).T -> (3,d); (v,3) @ (3,d) -> (v,d)
+        # There's no, or negligible, performance difference between the two options, however, the result of the latter
+        # will be C contiguous in memory, making it faster to convert to flattened bytes with .tobytes().
+        multiplied_vectors = vec3_array @ to_multiply.T
+
+    if to_add is not None:
+        for axis, to_add_to_axis in zip(multiplied_vectors.T, to_add):
+            if to_add_to_axis != 0:
+                axis += to_add_to_axis
+
+    # Cast to the desired return type before returning.
+    return multiplied_vectors.astype(return_dtype, copy=False)
+
+
+def vcos_transformed(raw_cos, m=None, dtype=None):
+    return _mat4_vec3_array_multiply(m, raw_cos, dtype)
+
+
+def nors_transformed(raw_nors, m=None, dtype=None):
     # Great, now normals are also expected 4D!
     # XXX Back to 3D normals for now!
-    # gen = zip(*(iter(raw_nors),) * 3 + (_infinite_gen(1.0),))
-    gen = zip(*(iter(raw_nors),) * 3)
-    return gen if m is None else (m @ Vector(v) for v in gen)
+    # return _mat4_vec3_array_multiply(m, raw_nors, dtype, return_4d=True)
+    return _mat4_vec3_array_multiply(m, raw_nors, dtype)
+
+
+def astype_view_signedness(arr, new_dtype):
+    """Unsafely views arr as new_dtype if the itemsize and byteorder of arr matches but the signedness does not,
+    otherwise calls np.ndarray.astype with copy=False.
+
+    The benefit of copy=False is that if the array can be safely viewed as the new type, then a view is made, instead of
+    a copy with the new type.
+
+    Unsigned types can't be viewed safely as signed or vice-versa, meaning that a copy would always be made by
+    .astype(..., copy=False).
+
+    This is intended for viewing uintc data (a common Blender C type with variable itemsize, though usually 4 bytes, so
+    uint32) as int32 (a common FBX type), when the itemsizes match."""
+    arr_dtype = arr.dtype
+
+    if not isinstance(new_dtype, np.dtype):
+        # new_dtype could be a type instance or a string, but it needs to be a dtype to compare its itemsize, byteorder
+        # and kind.
+        new_dtype = np.dtype(new_dtype)
+
+    # For simplicity, only dtypes of the same itemsize and byteorder, but opposite signedness, are handled. Everything
+    # else is left to .astype.
+    arr_kind = arr_dtype.kind
+    new_kind = new_dtype.kind
+    if (
+        # Signed and unsigned int are opposite in terms of signedness. Other types don't have signedness.
+        ((arr_kind == 'i' and new_kind == 'u') or (arr_kind == 'u' and new_kind == 'i'))
+        and arr_dtype.itemsize == new_dtype.itemsize
+        and arr_dtype.byteorder == new_dtype.byteorder
+    ):
+        # new_dtype has opposite signedness and matching itemsize and byteorder, so return a view of the new type.
+        return arr.view(new_dtype)
+    else:
+        return arr.astype(new_dtype, copy=False)
+
+
+def fast_first_axis_flat(ar):
+    """Get a flat view (or a copy if a view is not possible) of the input array whereby each element is a single element
+    of a dtype that is fast to sort, sorts according to individual bytes and contains the data for an entire row (and
+    any further dimensions) of the input array.
+
+    Since the dtype of the view could sort in a different order to the dtype of the input array, this isn't typically
+    useful for actual sorting, but it is useful for sorting-based uniqueness, such as np.unique."""
+    # If there are no rows, each element will be viewed as the new dtype.
+    elements_per_row = math.prod(ar.shape[1:])
+    row_itemsize = ar.itemsize * elements_per_row
+
+    # Get a dtype with itemsize that equals row_itemsize.
+    # Integer types sort the fastest, but are only available for specific itemsizes.
+    uint_dtypes_by_itemsize = {1: np.uint8, 2: np.uint16, 4: np.uint32, 8: np.uint64}
+    # Signed/unsigned makes no noticeable speed difference, but using unsigned will result in ordering according to
+    # individual bytes like the other, non-integer types.
+    if row_itemsize in uint_dtypes_by_itemsize:
+        entire_row_dtype = uint_dtypes_by_itemsize[row_itemsize]
+    else:
+        # When using kind='stable' sorting, numpy only uses radix sort with integer types, but it's still
+        # significantly faster to sort by a single item per row instead of multiple row elements or multiple structured
+        # type fields.
+        # Construct a flexible size dtype with matching itemsize.
+        # Should always be 4 because each character in a unicode string is UCS4.
+        str_itemsize = np.dtype((np.str_, 1)).itemsize
+        if row_itemsize % str_itemsize == 0:
+            # Unicode strings seem to be slightly faster to sort than bytes.
+            entire_row_dtype = np.dtype((np.str_, row_itemsize // str_itemsize))
+        else:
+            # Bytes seem to be slightly faster to sort than raw bytes (np.void).
+            entire_row_dtype = np.dtype((np.bytes_, row_itemsize))
+
+    # View each element along the first axis as a single element.
+    # View (or copy if a view is not possible) as flat
+    ar = ar.reshape(-1)
+    # To view as a dtype of different size, the last axis (entire array in NumPy 1.22 and earlier) must be C-contiguous.
+    if row_itemsize != ar.itemsize and not ar.flags.c_contiguous:
+        ar = np.ascontiguousarray(ar)
+    return ar.view(entire_row_dtype)
+
+
+def fast_first_axis_unique(ar, return_unique=True, return_index=False, return_inverse=False, return_counts=False):
+    """np.unique with axis=0 but optimised for when the input array has multiple elements per row, and the returned
+    unique array doesn't need to be sorted.
+
+    Arrays with more than one element per row are more costly to sort in np.unique due to being compared one
+    row-element at a time, like comparing tuples.
+
+    By viewing each entire row as a single non-structured element, much faster sorting can be achieved. Since the values
+    are viewed as a different type to their original, this means that the returned array of unique values may not be
+    sorted according to their original type.
+
+    The array of unique values can be excluded from the returned tuple by specifying return_unique=False.
+
+    Float type caveats:
+    All elements of -0.0 in the input array will be replaced with 0.0 to ensure that both values are collapsed into one.
+    NaN values can have lots of different byte representations (e.g. signalling/quiet and custom payloads). Only the
+    duplicates of each unique byte representation will be collapsed into one."""
+    # At least something should always be returned.
+    assert(return_unique or return_index or return_inverse or return_counts)
+    # Only signed integer, unsigned integer and floating-point kinds of data are allowed. Other kinds of data have not
+    # been tested.
+    assert(ar.dtype.kind in "iuf")
+
+    # Floating-point types have different byte representations for -0.0 and 0.0. Collapse them together by replacing all
+    # -0.0 in the input array with 0.0.
+    if ar.dtype.kind == 'f':
+        ar[ar == -0.0] = 0.0
+
+    # It's a bit annoying that the unique array is always calculated even when it might not be needed, but it is
+    # generally insignificant compared to the cost of sorting.
+    result = np.unique(fast_first_axis_flat(ar), return_index=return_index,
+                       return_inverse=return_inverse, return_counts=return_counts)
+
+    if return_unique:
+        unique = result[0] if isinstance(result, tuple) else result
+        # View in the original dtype.
+        unique = unique.view(ar.dtype)
+        # Return the same number of elements per row and any extra dimensions per row as the input array.
+        unique.shape = (-1, *ar.shape[1:])
+        if isinstance(result, tuple):
+            return (unique,) + result[1:]
+        else:
+            return unique
+    else:
+        # Remove the first element, the unique array.
+        result = result[1:]
+        if len(result) == 1:
+            # Unpack single element tuples.
+            return result[0]
+        else:
+            return result
+
+
+def ensure_object_not_in_edit_mode(context, obj):
+    """Objects in Edit mode usually cannot be exported because much of the API used when exporting is not available for
+    Objects in Edit mode.
+
+    Exiting the currently active Object (and any other Objects opened in multi-editing) from Edit mode is simple and
+    should be done with `bpy.ops.mesh.mode_set(mode='OBJECT')` instead of using this function.
+
+    This function is for the rare case where an Object is in Edit mode, but the current context mode is not Edit mode.
+    This can occur from a state where the current context mode is Edit mode, but then the active Object of the current
+    View Layer is changed to a different Object that is not in Edit mode. This changes the current context mode, but
+    leaves the other Object(s) in Edit mode.
+    """
+    if obj.mode != 'EDIT':
+        return True
+
+    # Get the active View Layer.
+    view_layer = context.view_layer
+
+    # A View Layer belongs to a scene.
+    scene = view_layer.id_data
+
+    # Get the current active Object of this View Layer, so we can restore it once done.
+    orig_active = view_layer.objects.active
+
+    # Check if obj is in the View Layer. If obj is not in the View Layer, it cannot be set as the active Object.
+    # We don't use `obj.name in view_layer.objects` because an Object from a Library could have the same name.
+    is_in_view_layer = any(o == obj for o in view_layer.objects)
+
+    do_unlink_from_scene_collection = False
+    try:
+        if not is_in_view_layer:
+            # There might not be any enabled collections in the View Layer, so link obj into the Scene Collection
+            # instead, which is always available to all View Layers of that Scene.
+            scene.collection.objects.link(obj)
+            do_unlink_from_scene_collection = True
+        view_layer.objects.active = obj
+
+        # Now we're finally ready to attempt to change obj's mode.
+        if bpy.ops.object.mode_set.poll():
+            bpy.ops.object.mode_set(mode='OBJECT')
+        if obj.mode == 'EDIT':
+            # The Object could not be set out of EDIT mode and therefore cannot be exported.
+            return False
+    finally:
+        # Always restore the original active Object and unlink obj from the Scene Collection if it had to be linked.
+        view_layer.objects.active = orig_active
+        if do_unlink_from_scene_collection:
+            scene.collection.objects.unlink(obj)
+
+    return True
 
 
 # ##### UIDs code. #####
@@ -453,6 +773,10 @@ def _elem_data_vec(elem, name, value, func_name):
 
 def elem_data_single_bool(elem, name, value):
     return _elem_data_single(elem, name, value, "add_bool")
+
+
+def elem_data_single_int8(elem, name, value):
+    return _elem_data_single(elem, name, value, "add_int8")
 
 
 def elem_data_single_int16(elem, name, value):
@@ -914,7 +1238,7 @@ class ObjectWrapper(metaclass=MetaObjectWrapper):
     we need to use a key to identify each.
     """
     __slots__ = (
-        'name', 'key', 'bdata', 'parented_to_armature',
+        'name', 'key', 'bdata', 'parented_to_armature', 'override_materials',
         '_tag', '_ref', '_dupli_matrix'
     )
 
@@ -969,6 +1293,7 @@ class ObjectWrapper(metaclass=MetaObjectWrapper):
             self.bdata = bdata
             self._ref = armature
         self.parented_to_armature = False
+        self.override_materials = None
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and self.key == other.key
@@ -1238,11 +1563,14 @@ class ObjectWrapper(metaclass=MetaObjectWrapper):
         return ()
     bones = property(get_bones)
 
-    def get_material_slots(self):
+    def get_materials(self):
+        override_materials = self.override_materials
+        if override_materials is not None:
+            return override_materials
         if self._tag in {'OB', 'DP'}:
-            return self.bdata.material_slots
+            return tuple(slot.material for slot in self.bdata.material_slots)
         return ()
-    material_slots = property(get_material_slots)
+    materials = property(get_materials)
 
     def is_deformed_by_armature(self, arm_obj):
         if not (self.is_object and self.type == 'MESH'):
