@@ -19,11 +19,23 @@
 
 import bpy
 from . import bfu_export_utils
-from . import bfu_export_asset
 from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_check_potential_error
+
+if "bpy" in locals():
+    import importlib
+    if "bfu_export_utils" in locals():
+        importlib.reload(bfu_export_utils)
+    if "bbpl" in locals():
+        importlib.reload(bbpl)
+    if "bfu_basics" in locals():
+        importlib.reload(bfu_basics)
+    if "bfu_utils" in locals():
+        importlib.reload(bfu_utils)
+    if "bfu_check_potential_error" in locals():
+        importlib.reload(bfu_check_potential_error)
 
 def ProcessCollectionExport(col):
 
@@ -102,13 +114,14 @@ def ExportSingleStaticMeshCollection(
         global_scale=1,
         object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
         use_custom_props=addon_prefs.exportWithCustomProps,
+        use_custom_curves=True,
         mesh_smooth_type="FACE",
         add_leaf_bones=False,
         # use_armature_deform_only=active.exportDeformOnly,
         bake_anim=False,
         use_metadata=addon_prefs.exportWithMetaData,
-        # primary_bone_axis=active.exportPrimaryBaneAxis,
-        # secondary_bone_axis=active.exporSecondaryBoneAxis,
+        # primary_bone_axis=active.exportPrimaryBoneAxis,
+        # secondary_bone_axis=active.exportSecondaryBoneAxis,
         # axis_forward=active.exportAxisForward,
         # axis_up=active.exportAxisUp,
         bake_space_transform=False

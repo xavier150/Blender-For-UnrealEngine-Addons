@@ -767,6 +767,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=0.0,
         )
 
+    bpy.types.Object.bfu_disable_free_scale_animation = BoolProperty(
+        name="Disable non-uniform scale animation.",
+        description=(
+            "If checked, scale animation track's elements always have same value."
+        ),
+        override={'LIBRARY_OVERRIDABLE'},
+        default=False
+    )
+
     bpy.types.Object.bfu_anim_nla_use = BoolProperty(
         name="Export NLA (Nonlinear Animation)",
         description=(
@@ -844,22 +853,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default='Y',
         )
 
-    bpy.types.Object.exportPrimaryBaneAxis = EnumProperty(
+    bpy.types.Object.exportPrimaryBoneAxis = EnumProperty(
         name="Primary Axis Bone",
-        override={'LIBRARY_OVERRIDABLE'},
-        items=[
-            ('X', "X", ""),
-            ('Y', "Y", ""),
-            ('Z', "Z", ""),
-            ('-X', "-X", ""),
-            ('-Y', "-Y", ""),
-            ('-Z', "-Z", ""),
-            ],
-        default='Y',
-        )
-
-    bpy.types.Object.exporSecondaryBoneAxis = EnumProperty(
-        name="Secondary Axis Bone",
         override={'LIBRARY_OVERRIDABLE'},
         items=[
             ('X', "X", ""),
@@ -871,6 +866,38 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             ],
         default='X',
         )
+
+    bpy.types.Object.exportSecondaryBoneAxis = EnumProperty(
+        name="Secondary Axis Bone",
+        override={'LIBRARY_OVERRIDABLE'},
+        items=[
+            ('X', "X", ""),
+            ('Y', "Y", ""),
+            ('Z', "Z", ""),
+            ('-X', "-X", ""),
+            ('-Y', "-Y", ""),
+            ('-Z', "-Z", ""),
+            ],
+        default='-Z',
+        )
+
+    bpy.types.Object.bfu_mirror_symmetry_right_side_bones = BoolProperty(
+        name="Revert direction of symmetry right side bones",
+        description=(
+            "If checked, The right-side bones will be mirrored for mirroring physic object in UE PhysicAsset Editor."
+            ),
+        override={'LIBRARY_OVERRIDABLE'},
+        default=True
+        )
+
+    bpy.types.Object.bfu_use_ue_mannequin_bone_alignment = BoolProperty(
+        name="Apply bone alignments similar to UE Mannequin.",
+        description=(
+            "If checked, similar to the UE Mannequin, the leg bones will be oriented upwards, and the pelvis and feet bone will be aligned facing upwards during export."
+        ),
+        override={'LIBRARY_OVERRIDABLE'},
+        default=False
+    )
 
     bpy.types.Object.MoveToCenterForExport = BoolProperty(
         name="Move to center",
@@ -1235,8 +1262,11 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.exportGlobalScale',
                             'obj.exportAxisForward',
                             'obj.exportAxisUp',
-                            'obj.exportPrimaryBaneAxis',
-                            'obj.exporSecondaryBoneAxis',
+                            'obj.exportPrimaryBoneAxis',
+                            'obj.exportSecondaryBoneAxis',
+                            'obj.bfu_mirror_symmetry_right_side_bones',
+                            'obj.bfu_use_ue_mannequin_bone_alignment',
+                            'obj.bfu_disable_free_scale_animation',
                             'obj.MoveToCenterForExport',
                             'obj.RotateToZeroForExport',
                             'obj.MoveActionToCenterForExport',
@@ -1340,14 +1370,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         addon_prefs = bfu_basics.GetAddonPrefs()
         layout = self.layout
 
-        version = "-1"
+        version = (0, 0, 0)
         # pylint: disable=no-value-for-parameter
         for addon in addon_utils.modules():
             if addon.bl_info['name'] == "Blender for UnrealEngine":
-                version = addon.bl_info.get('version', (-1, -1, -1))
+                version = addon.bl_info.get('version', (0, 0, 0))
 
         credit_box = layout.box()
-        credit_box.label(text=languages.ti('intro')+' Version: '+str(version))
+        credit_box.label(text=languages.ti('intro'))
+        credit_box.label(text='Version '+'.'.join([str(x) for x in version]))
         credit_box.operator("object.bfu_open_documentation_page", icon="HELP")
 
         row = layout.row(align=True)
@@ -1479,8 +1510,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         AxisProperty.prop(obj, 'exportAxisUp')
                         if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
                             BoneAxisProperty = layout.column()
-                            BoneAxisProperty.prop(obj, 'exportPrimaryBaneAxis')
-                            BoneAxisProperty.prop(obj, 'exporSecondaryBoneAxis')
+                            BoneAxisProperty.prop(obj, 'exportPrimaryBoneAxis')
+                            BoneAxisProperty.prop(obj, 'exportSecondaryBoneAxis')
                 else:
                     layout.label(text='(No properties to show.)')
 
@@ -1504,6 +1535,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                     Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
                                 if obj.bfu_skeleton_search_mode == "custom_reference":
                                     Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
+                                Ue4Skeleton.prop(obj, "bfu_mirror_symmetry_right_side_bones")
+                                MirrorSymmetryRightSideBonesRow = Ue4Skeleton.row()
+                                MirrorSymmetryRightSideBonesRow.enabled = obj.bfu_mirror_symmetry_right_side_bones
+                                MirrorSymmetryRightSideBonesRow.prop(obj, "bfu_use_ue_mannequin_bone_alignment")
 
         if bfu_ui_utils.DisplayPropertyFilter("OBJECT", "ANIM"):
             if obj is not None:
@@ -1624,6 +1659,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             if obj.bfu_export_procedure != "auto-rig-pro":
                                 propsFbx.prop(obj, 'SampleAnimForExport')
                             propsFbx.prop(obj, 'SimplifyAnimForExport')
+                        propsScaleAnimation = layout.row()
+                        propsScaleAnimation.prop(obj, "bfu_disable_free_scale_animation")
 
                     # Armature export action list feedback
                     if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
@@ -2678,7 +2715,7 @@ class BFU_PT_Export(bpy.types.Panel):
             scene.UnrealExportedAssetsList.clear()
             counter = bps.utils.CounterTimer()
             bfu_check_potential_error.UpdateNameHierarchy()
-            bfu_export_asset.ExportForUnrealEngine()
+            bfu_export_asset.ExportForUnrealEngine(self)
             bfu_write_text.WriteAllTextFiles()
 
             self.report(

@@ -79,44 +79,38 @@ def PropWithDocButton(self, tagetlayout, name, doc_octicon):  # OLD
     docOperator.octicon = doc_octicon
 
 
-class BFU_AP_UI_UTILS(bpy.types.AddonPreferences):
-    # this must match the addon name, use '__package__'
-    # when defining this in a submodule of a python package.
-    bl_idname = __package__
+class BFU_OT_OpenDocumentationTargetPage(bpy.types.Operator):
+    bl_label = "Documentation"
+    bl_idname = "object.open_documentation_target_page"
+    bl_description = "Click for open documentation page on GitHub"
+    page: bpy.props.StringProperty(default="")
+    octicon: bpy.props.StringProperty(default="")
 
-    class BFU_OT_OpenDocumentationTargetPage(bpy.types.Operator):
-        bl_label = "Documentation"
-        bl_idname = "object.open_documentation_target_page"
-        bl_description = "Clic for open documentation page on GitHub"
-        page: bpy.props.StringProperty(default="")
-        octicon: bpy.props.StringProperty(default="")
+    def execute(self, context):
+        os.system(
+            "start \"\" " +
+            "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/" + self.page + "#" + self.octicon
+            )
+        return {'FINISHED'}
 
-        def execute(self, context):
-            os.system(
-                "start \"\" " +
-                "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/" + self.page + "#" + self.octicon
-                )
-            return {'FINISHED'}
+class BFU_OT_OpenDocumentationTargetExportPage(bpy.types.Operator):
+    bl_label = "Documentation"
+    bl_idname = "object.open_documentation_target_export_page"
+    bl_description = "Click for open documentation page on GitHub"
+    octicon: bpy.props.StringProperty(default="")
 
-    class BFU_OT_OpenDocumentationTargetExportPage(bpy.types.Operator):
-        bl_label = "Documentation"
-        bl_idname = "object.open_documentation_target_export_page"
-        bl_description = "Clic for open documentation page on GitHub"
-        octicon: bpy.props.StringProperty(default="")
-
-        def execute(self, context):
-            os.system(
-                "start \"\" " +
-                "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/How-export-assets" +
-                "#"+self.octicon
-                )
-            return {'FINISHED'}
+    def execute(self, context):
+        os.system(
+            "start \"\" " +
+            "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/How-export-assets" +
+            "#"+self.octicon
+            )
+        return {'FINISHED'}
 
 
 classes = (
-    BFU_AP_UI_UTILS,
-    BFU_AP_UI_UTILS.BFU_OT_OpenDocumentationTargetPage,
-    BFU_AP_UI_UTILS.BFU_OT_OpenDocumentationTargetExportPage
+    BFU_OT_OpenDocumentationTargetPage,
+    BFU_OT_OpenDocumentationTargetExportPage
 )
 
 
