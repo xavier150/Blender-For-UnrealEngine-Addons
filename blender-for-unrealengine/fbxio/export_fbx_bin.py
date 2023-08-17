@@ -3547,6 +3547,7 @@ def save(operator, context,
          use_active_collection=False,
          batch_mode='OFF',
          use_batch_own_dir=False,
+         animation_only=False,
          **kwargs
          ):
     """
@@ -3579,6 +3580,8 @@ def save(operator, context,
                 ctx_objects = context.view_layer.objects
         if use_visible:
             ctx_objects = tuple(obj for obj in ctx_objects if obj.visible_get())
+        if animation_only:
+            ctx_objects = tuple(obj for obj in ctx_objects if not obj.type in BLENDER_OBJECT_TYPES_MESHLIKE)
 
         # Ensure no Objects are in Edit mode.
         # Copy to a tuple for safety, to avoid the risk of modifying ctx_objects while iterating.
