@@ -770,7 +770,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bpy.types.Object.bfu_disable_free_scale_animation = BoolProperty(
         name="Disable non-uniform scale animation.",
         description=(
-            "If checked, scale animation track's elements always have same value."
+            "If checked, scale animation track's elements always have same value. " + 
+            "This applies basic bones only."
         ),
         override={'LIBRARY_OVERRIDABLE'},
         default=False

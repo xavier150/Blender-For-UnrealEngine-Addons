@@ -1415,6 +1415,22 @@ class ObjectWrapper(metaclass=MetaObjectWrapper):
             return not self.is_rightside_bone(scene_data.objects)
         return self.is_rightside_bone(scene_data.objects)
 
+    BASIC_NAME_PATTERN1 = re.compile(r'^(root|pelvis|spine[_\.]\d+|neck[_\.]\d+|head)$', re.IGNORECASE)
+    BASIC_NAME_PATTERN2 = re.compile(r'^(clavicle|upperarm|lowerarm|hand|thigh|calf|foot|ball|thumb)[_\.][lr]$', re.IGNORECASE)
+    BASIC_NAME_PATTERN3 = re.compile(r'^(index|middle|ring|pinky)[_\.](\d+|metacarpal)[_\.][lr]$', re.IGNORECASE)
+    BASIC_NAME_PATTERN4 = re.compile(r'^(bigtoe|indextoe|middletoe|ringtoe|littletoe)[_\.](\d+|metacarpal)[_\.][lr]$', re.IGNORECASE)
+
+    def is_basic_bone(self):
+        if self.BASIC_NAME_PATTERN1.match(self.name):
+            return True
+        if self.BASIC_NAME_PATTERN2.match(self.name):
+            return True
+        if self.BASIC_NAME_PATTERN3.match(self.name):
+            return True
+        if self.BASIC_NAME_PATTERN4.match(self.name):
+            return True
+        return False
+
     def get_bone_align_matrix(self, scene_data):
         bone_aligns = scene_data.settings.bone_align_matrix_dict
         if bone_aligns and self.armature.name in bone_aligns:
@@ -1519,7 +1535,7 @@ class ObjectWrapper(metaclass=MetaObjectWrapper):
         """
         matrix = self.fbx_object_matrix(scene_data, rest=rest)
         loc, rot, scale = matrix.decompose()
-        if scene_data.settings.disable_free_scale_animation:
+        if scene_data.settings.disable_free_scale_animation and self.is_basic_bone():
             scale_value = (scale.x + scale.y + scale.z) / 3.0
             if math.isclose(scale_value, 1.0, rel_tol=0.00001):
                 scale_value = 1.0
