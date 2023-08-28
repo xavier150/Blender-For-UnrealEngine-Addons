@@ -30,6 +30,31 @@ from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
 
+if "bpy" in locals():
+    import importlib
+    if "bfu_export_single_alembic_animation" in locals():
+        importlib.reload(bfu_export_single_alembic_animation)
+    if "bfu_export_single_fbx_action" in locals():
+        importlib.reload(bfu_export_single_fbx_action)
+    if "bfu_export_single_camera" in locals():
+        importlib.reload(bfu_export_single_camera)
+    if "bfu_export_single_fbx_nla_anim" in locals():
+        importlib.reload(bfu_export_single_fbx_nla_anim)
+    if "bfu_export_single_skeletal_mesh" in locals():
+        importlib.reload(bfu_export_single_skeletal_mesh)
+    if "bfu_export_single_static_mesh" in locals():
+        importlib.reload(bfu_export_single_static_mesh)
+    if "bfu_export_single_static_mesh_collection" in locals():
+        importlib.reload(bfu_export_single_static_mesh_collection)
+    if "bps" in locals():
+        importlib.reload(bps)
+    if "bbpl" in locals():
+        importlib.reload(bbpl)
+    if "bfu_basics" in locals():
+        importlib.reload(bfu_basics)
+    if "bfu_utils" in locals():
+        importlib.reload(bfu_utils)
+
 
 def IsValidActionForExport(scene, obj, animType):
     if animType == "Action":
@@ -85,7 +110,7 @@ def IsValidObjectForExport(scene, obj):
     return False
 
 
-def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
+def ExportAllAssetByList(op, targetobjects, targetActionName, targetcollection):
     # Export all objects that need to be exported from a list
 
     if len(targetobjects) < 1 and len(targetcollection) < 1:
@@ -122,7 +147,7 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end
-                bfu_export_single_static_mesh_collection.ProcessCollectionExport(col)
+                bfu_export_single_static_mesh_collection.ProcessCollectionExport(op, col)
 
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
@@ -139,7 +164,7 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end
-                bfu_export_single_camera.ProcessCameraExport(obj)
+                bfu_export_single_camera.ProcessCameraExport(op, obj)
 
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
@@ -153,7 +178,7 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end
-                bfu_export_single_static_mesh.ProcessStaticMeshExport(obj)
+                bfu_export_single_static_mesh.ProcessStaticMeshExport(op, obj)
 
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
@@ -166,7 +191,7 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
                 UserEndFrame = scene.frame_end
-                bfu_export_single_skeletal_mesh.ProcessSkeletalMeshExport(obj)
+                bfu_export_single_skeletal_mesh.ProcessSkeletalMeshExport(op, obj)
 
                 # Resets previous start/end frame
                 scene.frame_start = UserStartFrame
@@ -187,8 +212,9 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                 UpdateExportProgress()
 
             # Action animation
-            print("Start Export Action(s)")
             if bfu_utils.GetAssetType(obj) == "SkeletalMesh" and obj.visible_get():
+                print("Start Export Action(s)")
+                action_curve_scale = None
                 for action in bfu_utils.GetActionToExport(obj):
                     if action.name in targetActionName:
                         animType = bfu_utils.GetActionType(action)
@@ -199,12 +225,14 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                                 # Save current start/end frame
                                 UserStartFrame = scene.frame_start
                                 UserEndFrame = scene.frame_end
-                                bfu_export_single_fbx_action.ProcessActionExport(obj, action)
+                                action_curve_scale = bfu_export_single_fbx_action.ProcessActionExport(op, obj, action, action_curve_scale)
 
                                 # Resets previous start/end frame
                                 scene.frame_start = UserStartFrame
                                 scene.frame_end = UserEndFrame
                                 UpdateExportProgress()
+                if action_curve_scale:
+                    action_curve_scale.ResetScaleAfterExport()
 
                 # NLA animation
                 print("Start Export NLA(s)")
@@ -213,7 +241,7 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
                         # Save current start/end frame
                         UserStartFrame = scene.frame_start
                         UserEndFrame = scene.frame_end
-                        bfu_export_single_fbx_nla_anim.ProcessNLAAnimExport(obj)
+                        bfu_export_single_fbx_nla_anim.ProcessNLAAnimExport(op, obj)
 
                         # Resets previous start/end frame
                         scene.frame_start = UserStartFrame
@@ -222,7 +250,7 @@ def ExportAllAssetByList(targetobjects, targetActionName, targetcollection):
     UpdateExportProgress(counter.get_time())
 
 
-def ExportForUnrealEngine():
+def ExportForUnrealEngine(op):
     scene = bpy.context.scene
     addon_prefs = bfu_basics.GetAddonPrefs()
 
@@ -283,6 +311,7 @@ def ExportForUnrealEngine():
                 obj_list.append(Asset.obj)
 
     ExportAllAssetByList(
+        op,
         targetobjects=obj_list,
         targetActionName=action_list,
         targetcollection=col_list,

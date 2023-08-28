@@ -50,7 +50,7 @@ class VertexColorExportData:
 
             elif self.GetPropertyOwner().VertexColorImportOption == "REPLACE":
                 index = self.GetChosenVertexIndex()
-                print(index)
+                # print(index)
                 if index != -1:
                     self.index = index
                     self.name = self.GetChosenVertexName()

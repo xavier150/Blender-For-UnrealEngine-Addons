@@ -18,13 +18,28 @@
 
 import os
 import bpy
+from bpy_extras.io_utils import axis_conversion
 from . import bfu_export_utils
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bbpl
+from ..fbxio import export_fbx_bin
+
+if "bpy" in locals():
+    import importlib
+    if "bfu_export_utils" in locals():
+        importlib.reload(bfu_export_utils)
+    if "bbpl" in locals():
+        importlib.reload(bbpl)
+    if "bfu_basics" in locals():
+        importlib.reload(bfu_basics)
+    if "bfu_utils" in locals():
+        importlib.reload(bfu_utils)
+    if "export_fbx_bin" in locals():
+        importlib.reload(export_fbx_bin)
 
 
-def ProcessActionExport(obj, action):
+def ProcessActionExport(op, obj, action, action_curve_scale):
     scene = bpy.context.scene
     addon_prefs = bfu_basics.GetAddonPrefs()
     dirpath = os.path.join(bfu_utils.GetObjExportDir(obj), scene.anim_subfolder_name)
@@ -38,22 +53,26 @@ def ProcessActionExport(obj, action):
 
     MyAsset.StartAssetExport()
 
-    ExportSingleFbxAction(scene, dirpath, bfu_utils.GetActionExportFileName(obj, action), obj, action)
+    filename = bfu_utils.GetActionExportFileName(obj, action)
+    action_curve_scale = ExportSingleFbxAction(op, scene, dirpath, filename, obj, action, action_curve_scale)
+
     file = MyAsset.files.add()
-    file.name = bfu_utils.GetActionExportFileName(obj, action)
+    file.name = filename
     file.path = dirpath
     file.type = "FBX"
 
     MyAsset.EndAssetExport(True)
-    return MyAsset
+    return action_curve_scale
 
 
 def ExportSingleFbxAction(
+        op,
         originalScene,
         dirpath,
         filename,
         obj,
-        targetAction
+        targetAction,
+        action_curve_scale
         ):
 
     '''
@@ -117,8 +136,9 @@ def ExportSingleFbxAction(
         my_scene_unit_settings.SetUnitForUnrealEngineExport()
         my_skeletal_export_scale = bfu_utils.SkeletalExportScale(active)
         my_skeletal_export_scale.ApplySkeletalExportScale(rrf, is_a_proxy=export_as_proxy)
-        my_action_curve_scale = bfu_utils.ActionCurveScale(rrf*active.scale.z)
-        my_action_curve_scale.ResacleForUnrealEngine()
+        if not action_curve_scale:
+            action_curve_scale = bfu_utils.ActionCurveScale(rrf*active.scale.z)
+            action_curve_scale.ResacleForUnrealEngine()
         my_shape_keys_curve_scale = bfu_utils.ShapeKeysCurveScale(rrf, is_a_proxy=export_as_proxy)
         my_shape_keys_curve_scale.ResacleForUnrealEngine()
 
@@ -139,13 +159,20 @@ def ExportSingleFbxAction(
     asset_name.SetExportName()
 
     if (export_procedure == "normal"):
-        bpy.ops.export_scene.fbx(
+        export_fbx_bin.save(
+            op,
+            bpy.context,
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
+            animation_only=True,
+            global_matrix=axis_conversion(to_forward=active.exportAxisForward, to_up=active.exportAxisUp).to_4x4(),
+            apply_unit_scale=True,
             global_scale=bfu_utils.GetObjExportScale(active),
+            apply_scale_options='FBX_SCALE_NONE',
             object_types={'ARMATURE', 'EMPTY', 'MESH'},
             use_custom_props=addon_prefs.exportWithCustomProps,
+            use_custom_curves=True,
             mesh_smooth_type="FACE",
             add_leaf_bones=False,
             use_armature_deform_only=active.exportDeformOnly,
@@ -155,9 +182,16 @@ def ExportSingleFbxAction(
             bake_anim_force_startend_keying=True,
             bake_anim_step=bfu_utils.GetAnimSample(active),
             bake_anim_simplify_factor=active.SimplifyAnimForExport,
+            path_mode='AUTO',
+            embed_textures=False,
+            batch_mode='OFF',
+            use_batch_own_dir=True,
             use_metadata=addon_prefs.exportWithMetaData,
-            primary_bone_axis=active.exportPrimaryBaneAxis,
-            secondary_bone_axis=active.exporSecondaryBoneAxis,
+            primary_bone_axis=active.exportPrimaryBoneAxis,
+            secondary_bone_axis=active.exportSecondaryBoneAxis,
+            mirror_symmetry_right_side_bones=active.bfu_mirror_symmetry_right_side_bones,
+            use_ue_mannequin_bone_alignment=active.bfu_use_ue_mannequin_bone_alignment,
+            disable_free_scale_animation=active.bfu_disable_free_scale_animation,
             axis_forward=active.exportAxisForward,
             axis_up=active.exportAxisUp,
             bake_space_transform=False
@@ -200,7 +234,6 @@ def ExportSingleFbxAction(
         my_rig_consraints_scale.ResetScaleAfterExport()
         my_skeletal_export_scale.ResetSkeletalExportScale()
         my_scene_unit_settings.ResetUnit()
-        my_action_curve_scale.ResetScaleAfterExport()
         my_shape_keys_curve_scale.ResetScaleAfterExport()
 
     if export_as_proxy is False:
@@ -212,3 +245,5 @@ def ExportSingleFbxAction(
 
     for obj in scene.objects:
         bfu_utils.ClearAllBFUTempVars(obj)
+
+    return action_curve_scale

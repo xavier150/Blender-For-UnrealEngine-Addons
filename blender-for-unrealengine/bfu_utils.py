@@ -1225,7 +1225,7 @@ class ActionCurveScale():
 
     def RescaleAllActionCurve(self, bone_scale, scene_scale=1):
         for action in bpy.data.actions:
-            print(action.name)
+            # print(action.name)
             for fcurve in action.fcurves:
                 if fcurve.data_path == "location":
                     # Curve
