@@ -20,14 +20,9 @@
 import os
 import bpy
 
-from bpy.types import (
-        Operator,
-        )
-
-
 def LayoutSection(layout, PropName, PropLabel):
     scene = bpy.context.scene
-    expanded = eval("scene."+PropName)
+    expanded = getattr(scene, PropName)
     tria_icon = "TRIA_DOWN" if expanded else "TRIA_RIGHT"
     layout.row().prop(scene, PropName, icon=tria_icon, icon_only=True, text=PropLabel, emboss=False)
     return expanded
@@ -122,3 +117,4 @@ def register():
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
+

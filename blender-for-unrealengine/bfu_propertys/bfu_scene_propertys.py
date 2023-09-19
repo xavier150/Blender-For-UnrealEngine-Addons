@@ -28,7 +28,74 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
+    bpy.types.Scene.bfu_object_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_import_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_lod_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_collision_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_material_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_vertex_color_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_light_map_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_uv_map_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_animation_action_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_animation_action_advanced_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_animation_nla_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_animation_nla_advanced_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_animation_advanced_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_skeleton_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_collection_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_advanced_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_export_type_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_camera_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_collision_socket_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_lightmap_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_nomenclature_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_export_filter_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_export_process_properties_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_script_tool_expanded = bpy.props.BoolProperty()
+
+    bpy.types.Scene.bfu_active_tab = bpy.props.EnumProperty(
+        items=(
+            ('OBJECT', 'Object', 'Object tab.'),
+            ('SCENE', 'Scene', 'Scene and world tab.')
+            )
+        )
+
+    bpy.types.Scene.bfu_active_object_tab = bpy.props.EnumProperty(
+        items=(
+            ('GENERAL', 'General', 'General object tab.'),
+            ('ANIM', 'Animations', 'Animations tab.'),
+            ('MISC', 'Misc', 'Misc tab.'),
+            ('ALL', 'All', 'All tabs.')
+            )
+        )
+
+    bpy.types.Scene.bfu_active_scene_tab = bpy.props.EnumProperty(
+        items=(
+            ('GENERAL', 'Scene', 'General scene tab'),
+            ('ALL', 'All', 'All tabs.')
+            )
+        )
+
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
+
+    del bpy.types.Scene.bfu_object_properties_expanded
+    del bpy.types.Scene.bfu_object_import_properties_expanded
+    del bpy.types.Scene.bfu_animation_action_properties_expanded
+    del bpy.types.Scene.bfu_animation_action_advanced_properties_expanded
+    del bpy.types.Scene.bfu_animation_nla_properties_expanded
+    del bpy.types.Scene.bfu_animation_nla_advanced_properties_expanded
+    del bpy.types.Scene.bfu_animation_advanced_properties_expanded
+    del bpy.types.Scene.bfu_collection_properties_expanded
+    del bpy.types.Scene.bfu_object_advanced_properties_expanded
+    del bpy.types.Scene.bfu_collision_socket_expanded
+    del bpy.types.Scene.bfu_lightmap_expanded
+    del bpy.types.Scene.bfu_nomenclature_properties_expanded
+    del bpy.types.Scene.bfu_export_filter_properties_expanded
+    del bpy.types.Scene.bfu_export_process_properties_expanded
+    del bpy.types.Scene.bfu_script_tool_expanded
+
+    del bpy.types.Scene.bfu_active_object_tab
+

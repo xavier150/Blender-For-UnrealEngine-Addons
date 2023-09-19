@@ -5,7 +5,26 @@
 		}
 	],
 	"settings": {
-
+		"python.linting.enabled": true,
+		"python.linting.pylintEnabled": true,
+		"python.linting.pylintArgs": [
+			"--max-line-length=120",
+			"--disable=E1111"
+		],
+		"python.linting.pycodestyleEnabled": true,
+		"python.linting.pycodestyleArgs": [
+			"--max-line-length=120",
+			"--indent-size=4",
+			"--aggressive"
+		],
+		"python.formatting.provider": "autopep8",
+		"python.formatting.autopep8Args": [
+			"--max-line-length=120",
+			"--indent-size=4",
+			"--aggressive"
+		],
+		"python.formatting.autopep8Path": "python -m autopep8",
+		"python.formatting.blackPath": "black"
 	},
 	"extensions": {
 		"recommendations": [
