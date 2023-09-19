@@ -6,7 +6,7 @@ Discord:
 If you need help or you want see my sides project you can join the discord!
 -> https://discord.gg/XuYeGCFtxa
 
-# How it works and 
+# How it works 
 Working on object packs for Unreal Engine can be tedious with Blender. That's why I created the Add-on: "Blender for UnrealEngine". it simplified the export process from Blender to Unreal Engine by allowing you to export all the assets of a scene at the same time. It even automatically distributes them in a proper tree structure in correlation with the Unreal Engine pipeline!
 
 Sockets and collision shapes are created directly in Blender, you can precisely choose which animations need to be exported. Blender For Unreal Engine also includes a error checker to prevent the all potential problems. You have an explanation of the problem and how to solve it. In addition to the possibility in certain cases of correcting the problem automatically.
