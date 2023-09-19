@@ -2,11 +2,6 @@
 This Add-on allows you to export content created with Blender to Unreal Engine. StaticMeshs, SkeletalMeshs, Animations (NLA and Actions), Collisions and Sockets, Alembic animations, Camera and sequencer [...]
 It works with Blender 3.5 and older to 2.8 and work for UE4, UE5!
 
-Videos:
-- [How Import Blender assets to Unreal Engine](https://youtu.be/2ehb2Ih3Nbg)
-- [How Import Blender camera to Unreal Sequencer](https://youtu.be/Xx_9MQu2EkM)
-
-
 Discord:
 If you need help or you want see my sides project you can join the discord!
 -> https://discord.gg/XuYeGCFtxa
