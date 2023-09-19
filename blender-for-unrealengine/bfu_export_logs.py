@@ -65,13 +65,8 @@ classes = (
 
 
 def register():
-    """
-    Register.
-    """
-    from bpy.utils import register_class
-
     for cls in classes:
-        register_class(cls)
+        bpy.utils.register_class(cls)
 
     bpy.utils.register_class(BFU_OT_FileExport)
     bpy.utils.register_class(BFU_OT_UnrealExportedAsset)
@@ -80,13 +75,8 @@ def register():
 
 
 def unregister():
-    """
-    unregister.
-    """
-    from bpy.utils import unregister_class
-
     for cls in reversed(classes):
-        unregister_class(cls)
+        bpy.utils.unregister_class(cls)
 
     bpy.utils.unregister_class(BFU_OT_FileExport)
     bpy.utils.unregister_class(BFU_OT_UnrealExportedAsset)

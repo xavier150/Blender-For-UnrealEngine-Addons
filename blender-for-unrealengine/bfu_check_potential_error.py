@@ -713,22 +713,14 @@ classes = (
 
 
 def register():
-    """
-    Register.
-    """
-    from bpy.utils import register_class
     for cls in classes:
-        register_class(cls)
+        bpy.utils.register_class(cls)
 
     bpy.types.Scene.potentialErrorList = bpy.props.CollectionProperty(type=BFU_OT_UnrealPotentialError)
 
 
 def unregister():
-    """
-    unregister.
-    """
-    from bpy.utils import unregister_class
     for cls in reversed(classes):
-        unregister_class(cls)
+        bpy.utils.unregister_class(cls)
 
     del bpy.types.Scene.potentialErrorList

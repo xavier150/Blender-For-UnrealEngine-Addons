@@ -30,12 +30,12 @@ xavierloux.com
 xavierloux.loux@gmail.com
 '''
 
-import importlib
 import bpy
+import importlib
 
 from . import bps
 from . import bbpl
-
+from . import bfu_propertys
 from . import bfu_ui_utils
 from . import bfu_addon_pref
 from . import bfu_export_logs
@@ -51,6 +51,8 @@ if "bps" in locals():
     importlib.reload(bps)
 if "bbpl" in locals():
     importlib.reload(bbpl)
+if "bfu_propertys" in locals():
+    importlib.reload(bfu_propertys)
 if "bfu_ui_utils" in locals():
     importlib.reload(bfu_ui_utils)
 if "bfu_addon_pref" in locals():
@@ -93,15 +95,10 @@ class BFUCachedAction(bpy.types.PropertyGroup):
 
 
 classes = (
-
 )
 
 
 def register():
-    """
-    Register.
-    """
-    from bpy.utils import register_class
 
     bpy.types.Scene.bfu_cache_obj_name = bpy.props.StringProperty()
     bpy.types.Scene.bfu_export_auto_cached = bpy.props.BoolProperty(default=False)
@@ -159,7 +156,7 @@ def register():
         )
 
     for cls in classes:
-        register_class(cls)
+        bpy.utils.register_class(cls)
 
     bfu_ui_utils.register()
     bfu_addon_pref.register()
@@ -169,10 +166,6 @@ def register():
 
 
 def unregister():
-    """
-    unregister.
-    """
-    from bpy.utils import unregister_class
 
     del bpy.types.Scene.bfu_export_auto_cached
     del bpy.types.Scene.bfu_export_auto_cached_actions
@@ -198,7 +191,7 @@ def unregister():
     del bpy.types.Scene.bfu_active_object_tab
 
     for cls in reversed(classes):
-        unregister_class(cls)
+        bpy.utils.unregister_class(cls)
 
     bfu_ui_utils.unregister()
     bfu_addon_pref.unregister()
