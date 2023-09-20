@@ -43,3 +43,19 @@ class CounterTimer():
         Get the elapsed time since the timer started. (Class create)
         """
         return time.perf_counter() - self.start
+        
+    def get_str_time(self):
+        """
+        Get the elapsed str time since the timer started. (Class create)
+        """
+        elapsed_time = self.get_time()
+        if elapsed_time < 60:
+            return f"{elapsed_time:.2f} secondes"
+        elif elapsed_time < 3600:
+            minutes, seconds = divmod(elapsed_time, 60)
+            return f"{int(minutes)} minutes et {seconds:.2f} secondes"
+        else:
+            hours, remainder = divmod(elapsed_time, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            return f"{int(hours)} heures, {int(minutes)} minutes et {seconds:.2f} secondes"
+
