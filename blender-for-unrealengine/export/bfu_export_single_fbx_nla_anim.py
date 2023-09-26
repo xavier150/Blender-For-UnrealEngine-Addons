@@ -137,10 +137,10 @@ def ExportSingleFbxNLAAnim(
 
     asset_name.SetExportName()
 
-    if (export_procedure == "normal"):
+    if (export_procedure == "ue-standard"):
         export_fbx_bin.save(
-            op,
-            bpy.context,
+            operator=op,
+            context=bpy.context,
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
@@ -173,9 +173,37 @@ def ExportSingleFbxNLAAnim(
             axis_up=active.exportAxisUp,
             bake_space_transform=False
             )
-
-    if (export_procedure == "auto-rig-pro"):
-        bfu_export_utils.ExportAutoProRig(
+    elif (export_procedure == "blender-standard"):
+        bpy.ops.export_scene.fbx(
+            filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
+            check_existing=False,
+            use_selection=True,
+            apply_unit_scale=True,
+            global_scale=bfu_utils.GetObjExportScale(active),
+            apply_scale_options='FBX_SCALE_NONE',
+            object_types={'ARMATURE', 'EMPTY', 'MESH'},
+            use_custom_props=addon_prefs.exportWithCustomProps,
+            add_leaf_bones=False,
+            use_armature_deform_only=active.exportDeformOnly,
+            bake_anim=True,
+            bake_anim_use_nla_strips=False,
+            bake_anim_use_all_actions=False,
+            bake_anim_force_startend_keying=True,
+            bake_anim_step=bfu_utils.GetAnimSample(active),
+            bake_anim_simplify_factor=active.SimplifyAnimForExport,
+            path_mode='AUTO',
+            embed_textures=False,
+            batch_mode='OFF',
+            use_batch_own_dir=True,
+            use_metadata=addon_prefs.exportWithMetaData,
+            primary_bone_axis=active.exportPrimaryBoneAxis,
+            secondary_bone_axis=active.exportSecondaryBoneAxis,
+            axis_forward=active.exportAxisForward,
+            axis_up=active.exportAxisUp,
+            bake_space_transform=False
+            )
+    elif (export_procedure == "auto-rig-pro"):
+        export_fbx_bin.save(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=True,

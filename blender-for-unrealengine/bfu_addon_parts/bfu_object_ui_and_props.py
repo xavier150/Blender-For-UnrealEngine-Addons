@@ -109,17 +109,23 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             ),
         override={'LIBRARY_OVERRIDABLE'},
         items=[
-            ("normal",
-                "Normal",
-                "No specific Rig.",
+            ("ue-standard",
+                "UE Standard",
+                "Standard fbx I/O API.",
                 "ARMATURE_DATA",
                 1),
+            ("blender-standard",
+                "Blender Standard",
+                "modified fbx I/O API.",
+                "ARMATURE_DATA",
+                2),
             ("auto-rig-pro",
                 "AutoRigPro",
                 "Export using AutoRigPro.",
                 "ARMATURE_DATA",
-                2),
-            ]
+                3),
+            ],
+        default="ue-standard"
         )
 
     bpy.types.Object.ExportAsAlembic = BoolProperty(
