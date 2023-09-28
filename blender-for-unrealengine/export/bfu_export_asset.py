@@ -318,7 +318,7 @@ def ExportForUnrealEngine(op):
     )
 
     MyCurrentDataSave.reset_select_by_name()
-    MyCurrentDataSave.reset_scene_at_save()
+    MyCurrentDataSave.reset_scene_at_save(print_removed_items = True)
 
     # Clean actions
     for action in bpy.data.actions:

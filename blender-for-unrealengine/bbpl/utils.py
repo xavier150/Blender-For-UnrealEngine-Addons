@@ -283,7 +283,7 @@ class UserSceneSave():
         if self.user_mode:
             safe_mode_set(self.user_mode, bpy.ops.object)
 
-    def reset_scene_at_save(self):
+    def reset_scene_at_save(self, print_removed_items = False):
         """
         Reset the user scene to at the last save.
         """
@@ -293,27 +293,36 @@ class UserSceneSave():
         bpy.context.scene.render.use_simplify = self.use_simplify
 
         # Reset hide and select (bpy.data.objects)
-        print("Object", len(self.objects))
         for obj in self.objects:
-            if obj.ref:
-                if obj.ref.hide_select != obj.hide_select:
-                    obj.ref.hide_select = obj.hide_select
-                if obj.ref.hide_viewport != obj.hide_viewport:
-                    obj.ref.hide_viewport = obj.hide_viewport
-                if obj.ref.hide_get() != obj.hide:
-                    obj.ref.hide_set(obj.hide)
-            else:
-                print(f"/!\\ {obj.name} not found.")
+            try:
+                if obj.ref:
+                    if obj.ref.hide_select != obj.hide_select:
+                        obj.ref.hide_select = obj.hide_select
+                    if obj.ref.hide_viewport != obj.hide_viewport:
+                        obj.ref.hide_viewport = obj.hide_viewport
+                    if obj.ref.hide_get() != obj.hide:
+                        obj.ref.hide_set(obj.hide)
+                else:
+                    if print_removed_items:
+                        print(f"/!\\ {obj.name} not found.")
+            except ReferenceError:
+                if print_removed_items:
+                    print(f"/!\\ {obj.name} has been removed.")
 
         # Reset hide and select (bpy.data.collections)
         for col in self.collections:
-            if col.ref:
-                if col.ref.hide_select != col.hide_select:
-                    col.ref.hide_select = col.hide_select
-                if col.ref.hide_viewport != col.hide_viewport:
-                    col.ref.hide_viewport = col.hide_viewport
-            else:
-                print(f"/!\\ {col.name} not found.")
+            try:
+                if col.ref.name in bpy.data.collections:
+                    if col.ref.hide_select != col.hide_select:
+                        col.ref.hide_select = col.hide_select
+                    if col.ref.hide_viewport != col.hide_viewport:
+                        col.ref.hide_viewport = col.hide_viewport
+                else:
+                    if print_removed_items:
+                        print(f"/!\\ {col.name} not found.")
+            except ReferenceError:
+                if print_removed_items:
+                    print(f"/!\\ {col.name} has been removed.")
 
         # Reset hide and viewport (collections from view_layers)
         for vlayer in scene.view_layers:
@@ -325,7 +334,7 @@ class UserSceneSave():
                         return layer_collection
 
             for view_layer_collection in self.view_layer_collections:
-                if view_layer_collection.vlayer_name in scene.view_layers:
+                if view_layer_collection.vlayer_name == vlayer.name:
                     layer_collection = get_layer_collection_in_list(view_layer_collection.name, layer_collections)
                     if layer_collection:
                         if layer_collection.exclude != view_layer_collection.exclude:

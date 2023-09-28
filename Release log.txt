@@ -464,3 +464,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: The "Export Procedure" option is visible with static meshes.
 - Fixed: Hidden objects and collections are unhidden after export when using the same name.
 - Fixed: Skeletons imported with skeletal meshes use incorrect names.
+- Fixed: Collection.exclude is not recovery after export when using multi view layers.
