@@ -76,27 +76,45 @@ def CreateSequencer():
             value = track_dict[key]  # (x,y,z x,y,z x,y,z)
             frame = unreal.FrameNumber(int(key))
 
-            sequencer_section.get_channels()[0].add_key(frame, value["location_x"])
-            sequencer_section.get_channels()[1].add_key(frame, value["location_y"])
-            sequencer_section.get_channels()[2].add_key(frame, value["location_z"])
-            sequencer_section.get_channels()[3].add_key(frame, value["rotation_x"])
-            sequencer_section.get_channels()[4].add_key(frame, value["rotation_y"])
-            sequencer_section.get_channels()[5].add_key(frame, value["rotation_z"])
-            sequencer_section.get_channels()[6].add_key(frame, value["scale_x"])
-            sequencer_section.get_channels()[7].add_key(frame, value["scale_y"])
-            sequencer_section.get_channels()[8].add_key(frame, value["scale_z"])
+
+            if GetUnrealVersion() >= 5.0:
+                sequencer_section.get_all_channels()[0].add_key(frame, value["location_x"])
+                sequencer_section.get_all_channels()[1].add_key(frame, value["location_y"])
+                sequencer_section.get_all_channels()[2].add_key(frame, value["location_z"])
+                sequencer_section.get_all_channels()[3].add_key(frame, value["rotation_x"])
+                sequencer_section.get_all_channels()[4].add_key(frame, value["rotation_y"])
+                sequencer_section.get_all_channels()[5].add_key(frame, value["rotation_z"])
+                sequencer_section.get_all_channels()[6].add_key(frame, value["scale_x"])
+                sequencer_section.get_all_channels()[7].add_key(frame, value["scale_y"])
+                sequencer_section.get_all_channels()[8].add_key(frame, value["scale_z"])
+            else:
+                sequencer_section.get_channels()[0].add_key(frame, value["location_x"])
+                sequencer_section.get_channels()[1].add_key(frame, value["location_y"])
+                sequencer_section.get_channels()[2].add_key(frame, value["location_z"])
+                sequencer_section.get_channels()[3].add_key(frame, value["rotation_x"])
+                sequencer_section.get_channels()[4].add_key(frame, value["rotation_y"])
+                sequencer_section.get_channels()[5].add_key(frame, value["rotation_z"])
+                sequencer_section.get_channels()[6].add_key(frame, value["scale_x"])
+                sequencer_section.get_channels()[7].add_key(frame, value["scale_y"])
+                sequencer_section.get_channels()[8].add_key(frame, value["scale_z"])
 
     def AddSequencerSectionFloatKeysByIniFile(sequencer_section, track_dict):
         for key in track_dict.keys():
             frame = unreal.FrameNumber(int(key))
             value = track_dict[key]
-            sequencer_section.get_channels()[0].add_key(frame, value)
+            if GetUnrealVersion() >= 5.0:
+                sequencer_section.get_all_channels()[0].add_key(frame, value)
+            else:
+                sequencer_section.get_channels()[0].add_key(frame, value)
 
     def AddSequencerSectionBoolKeysByIniFile(sequencer_section, track_dict):
         for key in track_dict.keys():
             frame = unreal.FrameNumber(int(key))
             value = track_dict[key]
-            sequencer_section.get_channels()[0].add_key(frame, value)
+            if GetUnrealVersion() >= 5.0:
+                sequencer_section.get_all_channels()[0].add_key(frame, value)
+            else:
+                sequencer_section.get_channels()[0].add_key(frame, value)
 
     print("Warning this file already exists")  # ???
     factory = unreal.LevelSequenceFactoryNew()
@@ -255,6 +273,7 @@ def CreateSequencer():
         else:
             ImportedCamera.append((camera_data["name"], camera_binding))
 
+
     # Import camera cut section
     for section in sequence_data['marker_sections']:
         camera_cut_section = camera_cut_track.add_section()
@@ -262,7 +281,9 @@ def CreateSequencer():
             for camera in ImportedCamera:
                 if camera[0] == section["camera_name"]:
                     camera_binding_id = unreal.MovieSceneObjectBindingID()
-                    if GetUnrealVersion() >= 4.26:
+                    if GetUnrealVersion() >= 4.27:
+                        camera_binding_id = seq.get_binding_id(camera[1])
+                    elif GetUnrealVersion() >= 4.26:
                         camera_binding_id = seq.make_binding_id(camera[1], unreal.MovieSceneObjectBindingSpace.LOCAL)
                     else:
                         camera_binding_id = seq.make_binding_id(camera[1])
@@ -271,6 +292,7 @@ def CreateSequencer():
         camera_cut_section.set_end_frame_seconds((section["end_time"]-secureCrop)/float(frameRateNumerator))
         camera_cut_section.set_start_frame_seconds(section["start_time"]/float(frameRateNumerator))
     # Import result
+
     print('========================= Imports completed ! =========================')
     ImportedCameraStr = []
     for cam in ImportedCamera:
@@ -279,7 +301,10 @@ def CreateSequencer():
         print('=========================')
 
     # Select and open seq in content browser
-    if GetUnrealVersion() >= 4.26:
+    if GetUnrealVersion() >= 5.0:
+        pass #TO DO make crate the engine
+        #unreal.AssetEditorSubsystem.open_editor_for_assets(unreal.AssetEditorSubsystem(), [unreal.load_asset(seq.get_path_name())])
+    elif GetUnrealVersion() >= 4.26:
         unreal.AssetEditorSubsystem.open_editor_for_assets(unreal.AssetEditorSubsystem(), [unreal.load_asset(seq.get_path_name())])
     else:
         unreal.AssetToolsHelpers.get_asset_tools().open_editor_for_assets([unreal.load_asset(seq.get_path_name())])
