@@ -125,7 +125,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 "ARMATURE_DATA",
                 3),
             ],
-        default="ue-standard"
+        default="blender-standard"
         )
 
     bpy.types.Object.ExportAsAlembic = BoolProperty(
