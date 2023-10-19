@@ -46,6 +46,7 @@ def ProcessCollectionExport(col):
 
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.asset_name = col.name
+    MyAsset.asset_global_scale = obj.exportGlobalScale
     MyAsset.collection = col
     MyAsset.asset_type = bfu_utils.GetCollectionType(col)
     MyAsset.folder_name = col.exportFolderName

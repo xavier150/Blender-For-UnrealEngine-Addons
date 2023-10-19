@@ -42,6 +42,7 @@ def WriteImportAssetScript():
         asset_data["scene_unit_scale"] = scene.unit_settings.scale_length
 
         asset_data["asset_name"] = asset.asset_name
+        asset_data["asset_global_scale"] = asset.asset_global_scale
         if bfu_utils.GetIsAnimation(asset.asset_type):
             asset_data["asset_type"] = "Animation"
         elif asset.asset_type == "Collection StaticMesh":

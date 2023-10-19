@@ -23,6 +23,7 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     # [AssetName , AssetType , ExportPath, ExportTime]
 
     asset_name: bpy.props.StringProperty(default="None")
+    asset_global_scale: bpy.props.FloatProperty(default=1.0)
     skeleton_name: bpy.props.StringProperty(default="None")
     asset_type: bpy.props.StringProperty(default="None")  # return from bfu_utils.GetAssetType()
     folder_name: bpy.props.StringProperty(default="")
@@ -33,11 +34,7 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     export_end_time: bpy.props.FloatProperty(default=0)
     export_success: bpy.props.BoolProperty(default=False)
 
-    def StartAssetExport(self, obj=None, action=None, collection=None):
-
-        if obj and action:
-            self.asset_name = bfu_utils.GetActionExportFileName(obj, action, "")
-
+    def StartAssetExport(self):
         self.export_start_time = time.perf_counter()
 
     def EndAssetExport(self, success):

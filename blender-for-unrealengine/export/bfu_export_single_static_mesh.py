@@ -51,6 +51,7 @@ def ProcessStaticMeshExport(op, obj):
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
     MyAsset.asset_name = obj.name
+    MyAsset.asset_global_scale = obj.exportGlobalScale
     MyAsset.folder_name = obj.exportFolderName
     MyAsset.asset_type = bfu_utils.GetAssetType(obj)
     MyAsset.StartAssetExport()

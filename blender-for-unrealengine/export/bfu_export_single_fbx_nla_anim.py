@@ -50,6 +50,7 @@ def ProcessNLAAnimExport(op, obj):
     MyAsset.object = obj
     MyAsset.skeleton_name = obj.name
     MyAsset.asset_name = bfu_utils.GetNLAExportFileName(obj)
+    MyAsset.asset_global_scale = obj.exportGlobalScale
     MyAsset.folder_name = obj.exportFolderName
     MyAsset.asset_type = "NlAnim"
     MyAsset.StartAssetExport()

@@ -174,10 +174,10 @@ def ImportAllAssets():
                 GetAlembicImportData().set_editor_property("import_type", unreal.AlembicImportType.SKELETAL)
                 GetAlembicImportData().conversion_settings.set_editor_property("flip_u", False)
                 GetAlembicImportData().conversion_settings.set_editor_property("flip_v", True)
-                sus = asset_data["scene_unit_scale"]
-                scale = unreal.Vector(sus * 100, sus * -100, sus * 100) #Unit scale *100
+                scale = asset_data["scene_unit_scale"] * asset_data["asset_global_scale"]
+                ue_scale = unreal.Vector(scale * 100, scale * -100, scale * 100) # Unit scale * object scale * 100
                 rotation = unreal.Vector(90, 0, 0)
-                GetAlembicImportData().conversion_settings.set_editor_property("scale", scale) 
+                GetAlembicImportData().conversion_settings.set_editor_property("scale", ue_scale) 
                 GetAlembicImportData().conversion_settings.set_editor_property("rotation", rotation)
 
             # Vertex color
