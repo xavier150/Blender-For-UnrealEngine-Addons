@@ -110,9 +110,9 @@ def remove_folder_tree(folder):
     Returns:
         None
     """
-    dirpath = pathlib.Path(folder)
-    if dirpath.exists() and dirpath.is_dir():
-        shutil.rmtree(dirpath, ignore_errors=True)
+    dirig_prefixath = pathlib.Path(folder)
+    if dirig_prefixath.exists() and dirig_prefixath.is_dir():
+        shutil.rmtree(dirig_prefixath, ignore_errors=True)
 
 
 def get_childs(obj):

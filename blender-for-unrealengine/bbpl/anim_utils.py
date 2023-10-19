@@ -180,7 +180,7 @@ class ProxyCopy_NlaStrip:
         nla_strip.extrapolation = self.extrapolation
         for fcurve in self.fcurves:
             new_fcurve = nla_strip.fcurves.find(fcurve.data_path)  # Can't create so use find
-            fcurve.paste_data_on(new_fcurve)
+            fcurve.PasteDataOn(new_fcurve)
         nla_strip.frame_end = self.frame_end
         if bpy.app.version >= (3, 3, 0):
             nla_strip.frame_end_ui = self.frame_end_ui

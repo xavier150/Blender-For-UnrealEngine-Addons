@@ -636,3 +636,47 @@ def get_layer_collections_recursive(layer_collection):
         layer_collections.extend(get_layer_collections_recursive(child_col))  # Add child collections recursively
 
     return layer_collections
+
+def get_mirror_object_name(original_objects):
+    """
+    Get the mirror object name for the given objects(s).
+    """
+    objects = []
+    new_objects = []
+
+    if not isinstance(original_objects, list):
+        objects = [original_objects]  # Convert to list
+    else:
+        objects = original_objects
+
+    def try_to_invert_bones(bone):
+        def invert(bone, old, new):
+            if bone.endswith(old):
+                new_object_name = bone[:-len(old)]
+                new_object_name = new_object_name + new
+                return new_object_name
+            return None
+
+        change = [
+            ["_l", "_r"],
+            ["_L", "_R"]
+        ]
+        for c in change:
+            a = invert(bone, c[0], c[1])
+            if a:
+                return a
+            b = invert(bone, c[1], c[0])
+            if b:
+                return b
+
+        # Return original If no invert found.
+        return bone
+
+    for bone in objects:
+        new_objects.append(try_to_invert_bones(bone))
+
+    # Can return same bone when don't found mirror
+    if not isinstance(original_objects, list):
+        return new_objects[0]
+    else:
+        return new_objects

@@ -222,10 +222,11 @@ def update_bone_shape(
 def generate_bone_shape_from_prop(
         armature,
         bone_name,
-        object_use,
+        object_to_use,
         shape_mirror_mode=False,
         shape_target_origin="BoneOrigin",
-        construct_add_line=False
+        construct_add_line=False,
+        apply_modifiers=False
 ):
     '''
     Generates a custom bone shape object based on the provided object.
@@ -244,70 +245,88 @@ def generate_bone_shape_from_prop(
     Raises:
         KeyError: If the bone name is not found in the armature.
     '''
-    def link_shape_obj(obj):
-        col = utils.get_rig_collection(armature, "SHAPE")
-        col.objects.link(obj)
-        return col
 
-    bone_length = armature.data.bones.get(bone_name).length
+
+    scene = bpy.context.scene
+    bone = armature.data.bones.get(bone_name)
     new_shape_name = "Shape_CustomGeneratedShape_" + bone_name
+
+    # Vérifier si la forme existe et la supprimer le cas échéant
     if new_shape_name in bpy.data.objects:
-        bpy.data.objects.remove(bpy.data.objects[new_shape_name])  # Clean for recreate
+        bpy.data.objects.remove(bpy.data.objects[new_shape_name], do_unlink=True)
 
-    # Create the new shape
-    new_shape = object_use.copy()
-    new_shape.data = new_shape.data.copy()
-    link_shape_obj(new_shape)
+    def link_shape_object(obj):
+        shape_collection = utils.get_rig_collection(armature, "SHAPE")
+        shape_collection.objects.link(obj)
+
+    def apply_shape_modifiers(object):
+        scene.render.use_simplify = False
+        utils.mode_set_on_target(new_shape, "OBJECT") # Switch to OBJECT mode to apply modifiers
+        for modifier in object.modifiers:
+            bpy.ops.object.modifier_apply(modifier=modifier.name)
+
+    # Créer la nouvelle forme
+    new_shape = object_to_use.copy()
     new_shape.name = new_shape_name
+    new_shape.data = new_shape.data.copy()
+    link_shape_object(new_shape)
+    
 
-    # Transform for apply mirror mode
-    if shape_mirror_mode:
-        for v in new_shape.data.vertices:
-            v.co.x *= -1
+    if apply_modifiers:
+        apply_shape_modifiers(new_shape)  # Appliquer les modificateurs
 
-    # Transform for apply shape mode
-    if shape_target_origin == "BoneOrigin":
-        pass
 
-    elif shape_target_origin == "ArmatureOrigin":
-        bone = armature.data.bones.get(bone_name)
-        if not bone:
-            raise KeyError(f"Bone '{bone_name}' not found in the armature.")
-        bl = bone.matrix_local
-        for v in new_shape.data.vertices:
-            v.co -= bl.to_translation()
-            v.co @= bl
+    if shape_target_origin != "BoneOrigin" or shape_mirror_mode or construct_add_line:
 
-    elif shape_target_origin == "SceneOrigin":
-        bone = armature.data.bones.get(bone_name)
-        if not bone:
-            raise KeyError(f"Bone '{bone_name}' not found in the armature.")
-        bl = bone.matrix_local
-        for v in new_shape.data.vertices:
-            v.co += object_use.location
-            v.co -= bl.to_translation()
-            v.co @= bl
+        
 
-    new_shape.select_set(True)
-    bpy.context.view_layer.objects.active = new_shape
-    utils.mode_set_on_target(new_shape, "EDIT")
+        # ...
+        def mirror_bmesh(verts):
+            for v in verts:
+                v.co.x *= -1
 
-    me = new_shape.data
-    # pylint: disable=E1128
-    bm = bmesh.from_edit_mesh(me)
+        # Transformations en fonction de l'origine cible
+        def transform_bmesh(verts):
+            if shape_target_origin == "ArmatureOrigin":
+                bl = bone.matrix_local
+                for v in verts:
+                    v.co = v.co - bl.to_translation()
+                    v.co = v.co @ (bl)
 
-    if construct_add_line:
-        # Add bone line
-        v1 = bm.verts.new((0.0, 0.0, 0.0))
-        if shape_target_origin == "BoneOrigin":
-            v2 = bm.verts.new((0.0, 1.0, 0.0))
-        else:
-            v2 = bm.verts.new((0.0, bone_length, 0.0))
-        bm.edges.new((v1, v2))
+            elif shape_target_origin == "SceneOrigin":
+                bl = bone.matrix_local
+                for v in verts:
+                    if shape_mirror_mode:
+                        v.co.x *= -1
+                    v.co = v.co + object_to_use.location
+                    v.co = v.co - bl.to_translation()
+                    v.co = v.co @ (bl)
 
-    bm.free()
+        # ...
+        def add_bmesh_line(bm):
+            v1 = bm.verts.new((0.0, 0.0, 0.0))
+            if shape_target_origin == "BoneOrigin":
+                v2 = bm.verts.new((0.0, 1.0, 0.0))
+            else:
+                bone_length = armature.data.bones.get(bone_name).length
+                v2 = bm.verts.new((0.0, bone_length, 0.0))
+            bm.edges.new((v1, v2))
 
-    utils.mode_set_on_target(new_shape, "OBJECT")
+        utils.mode_set_on_target(new_shape, "EDIT") # Switch to EDIT mode to edit mesh data
+
+        me = new_shape.data
+        bm = bmesh.from_edit_mesh(me)
+
+        if shape_mirror_mode:
+            mirror_bmesh(bm.verts)
+
+        if shape_target_origin != "BoneOrigin":
+            transform_bmesh(bm.verts)
+
+        if construct_add_line:
+            add_bmesh_line(bm)
+
+        bm.free()
 
     return new_shape
 

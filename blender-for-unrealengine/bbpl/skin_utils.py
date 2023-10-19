@@ -23,6 +23,7 @@
 
 
 import bpy
+from .. import bbpl
 
 def save_defoms_bones(armature):
     """
@@ -74,10 +75,7 @@ def copy_rig_group(obj, source):
     """
     Copy the rigging weights from the source object to the target object.
     """
-    bpy.ops.object.mode_set(mode='OBJECT')
-    bpy.ops.object.select_all(action='DESELECT')
-    obj.select_set(state=True)
-    bpy.context.view_layer.objects.active = obj
+    bbpl.utils.mode_set_on_target(obj, "OBJECT")
 
     mod_name = "MAR_RigWeightTransfer"
 
