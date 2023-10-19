@@ -213,7 +213,7 @@ class BFU_PT_Export(bpy.types.Panel):
             else:
                 popup_title = 'No exportable assets were found.'
 
-            def draw(self):
+            def draw(self, context):
                 col = self.layout.column()
                 for asset in assets:
                     row = col.row()
