@@ -73,6 +73,7 @@ def ExportSingleAlembicAnimation(
         check_existing=False,
         selected=True,
         triangulate=True,
+        global_scale=1,
         )
 
     scene.frame_start -= obj.bfu_anim_action_start_frame_offset

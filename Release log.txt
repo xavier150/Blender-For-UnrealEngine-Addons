@@ -458,6 +458,7 @@ It is now possible to force the duration of an animation according to the scene 
 - New: Exported models and animations now use Unreal bones coordinate by default. (Thanks SAM-tak!)
 - New: Supports exporting models and animations with the Unreal Mannequin bone structure from Blender. (Thanks SAM-tak!)
 - New: Supports exporting Blender's custom property animation in a format that Unreal Engine can recognize as curve data animation. (Thanks SAM-tak!)
+- New: Alembic animation support multiple unit scales.
 - Fixed: Blender 3.5 may crash during NLA Export. (Interacting with an NlaStripFCurves not linked to an object could lead to a crash in Blender 3.5.)
 - Fixed: Applying skeletal export scale with Proxy and Unit Scale not set to 0.01 could result in a script error.
 - Fixed: Using "Convert Attribute to UV" can swap UV Indices in the exported mesh.

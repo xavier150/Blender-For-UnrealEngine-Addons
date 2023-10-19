@@ -39,13 +39,15 @@ def WriteImportAssetScript():
     data['assets'] = []
     for asset in scene.UnrealExportedAssetsList:
         asset_data = {}
-        asset_data["name"] = asset.asset_name
+        asset_data["scene_unit_scale"] = scene.unit_settings.scale_length
+
+        asset_data["asset_name"] = asset.asset_name
         if bfu_utils.GetIsAnimation(asset.asset_type):
-            asset_data["type"] = "Animation"
+            asset_data["asset_type"] = "Animation"
         elif asset.asset_type == "Collection StaticMesh":
-            asset_data["type"] = "StaticMesh"
+            asset_data["asset_type"] = "StaticMesh"
         else:
-            asset_data["type"] = asset.asset_type
+            asset_data["asset_type"] = asset.asset_type
         if asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh":
             if asset.object.ExportAsLod:
                 asset_data["lod"] = 1
@@ -63,7 +65,6 @@ def WriteImportAssetScript():
 
         if asset.GetFileByType("FBX"):
             asset_data["fbx_path"] = asset.GetFileByType("FBX").GetAbsolutePath()
-            asset_data["asset_filename"] = asset.GetFileByType("FBX").GetAbsolutePath()
         else:
             asset_data["fbx_path"] = None
 
