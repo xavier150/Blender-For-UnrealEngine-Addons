@@ -77,7 +77,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             ]
         )
 
-    bpy.types.Object.exportFolderName = StringProperty(
+    bpy.types.Object.bfu_export_folder_name = StringProperty(
         name="Sub folder name",
         description=(
             'The name of sub folder.' +
@@ -89,7 +89,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         subtype='FILE_NAME'
         )
 
-    bpy.types.Collection.exportFolderName = StringProperty(
+    bpy.types.Collection.bfu_export_folder_name = StringProperty(
         name="Sub folder name",
         description=(
             'The name of sub folder.' +
@@ -1176,8 +1176,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
         # Properties to store in the preset
         preset_values = [
-                            'obj.exportFolderName',
-                            'col.exportFolderName',
+                            'obj.bfu_export_type',
+                            'obj.bfu_export_folder_name',
+                            'col.bfu_export_folder_name',
                             'obj.bfu_export_fbx_camera',
                             'obj.bfu_fix_axis_flippings',
                             'obj.ExportAsAlembic',
@@ -1399,7 +1400,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         folderNameProperty = layout.column()
                         folderNameProperty.prop(
                             obj,
-                            'exportFolderName',
+                            'bfu_export_folder_name',
                             icon='FILE_FOLDER'
                             )
 
@@ -1823,7 +1824,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     if col_name in bpy.data.collections:
                         col = bpy.data.collections[col_name]
                         col_prop = layout
-                        col_prop.prop(col, 'exportFolderName', icon='FILE_FOLDER')
+                        col_prop.prop(col, 'bfu_export_folder_name', icon='FILE_FOLDER')
 
                 collectionPropertyInfo = layout.row().box().split(factor=0.75)
                 collectionNum = len(bfu_utils.GetCollectionToExport(scene))

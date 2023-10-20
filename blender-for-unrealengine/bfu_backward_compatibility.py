@@ -23,6 +23,13 @@ from bpy.app.handlers import persistent
 def update_old_variables():
 
     print("update old bfu variables...")
+
+    # bpy.types.Object.ExportEnum -> bfu_export_type
+    # bpy.types.Object.exportFolderName -> bfu_export_folder_name
+
+    # bpy.types.Collection.exportFolderName -> bfu_export_folder_name
+
+
     for obj in bpy.data.objects:
         if "ExportEnum" in obj:
             if obj["ExportEnum"] == 1:
@@ -34,6 +41,17 @@ def update_old_variables():
 
             del obj["ExportEnum"]
             print('"ExportEnum" update to "bfu_export_type" in ' + obj.name)
+
+        if "exportFolderName" in obj:
+            obj.bfu_export_folder_name = obj["exportFolderName"]
+            del obj["exportFolderName"]
+            print('"exportFolderName" update to "bfu_export_folder_name" in ' + obj.name)
+
+    for col in bpy.data.collections:
+        if "exportFolderName" in col:
+            col.bfu_export_folder_name = col["exportFolderName"]
+            del col["exportFolderName"]
+            print('"exportFolderName" update to "bfu_export_folder_name" in ' + col.name)
 
 @persistent
 def bfu_load_handler(dummy):

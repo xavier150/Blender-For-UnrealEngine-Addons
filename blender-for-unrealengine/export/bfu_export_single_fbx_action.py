@@ -49,7 +49,7 @@ def ProcessActionExport(op, obj, action, action_curve_scale):
     MyAsset.skeleton_name = obj.name
     MyAsset.asset_name = bfu_utils.GetActionExportFileName(obj, action, "")
     MyAsset.asset_global_scale = obj.exportGlobalScale
-    MyAsset.folder_name = obj.exportFolderName
+    MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = bfu_utils.GetActionType(action)
 
     MyAsset.StartAssetExport()

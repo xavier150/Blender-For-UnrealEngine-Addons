@@ -49,7 +49,7 @@ def ProcessCollectionExport(col):
     MyAsset.asset_global_scale = obj.exportGlobalScale
     MyAsset.collection = col
     MyAsset.asset_type = bfu_utils.GetCollectionType(col)
-    MyAsset.folder_name = col.exportFolderName
+    MyAsset.folder_name = col.bfu_export_folder_name
     MyAsset.StartAssetExport()
 
     ExportSingleStaticMeshCollection(dirpath, bfu_utils.GetCollectionExportFileName(col.name), col.name)

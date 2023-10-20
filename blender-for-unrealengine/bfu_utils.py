@@ -1388,7 +1388,7 @@ def GetCollectionExportDir(col, abspath=False):
 
     dirpath = os.path.join(
         scene.export_static_file_path,
-        col.exportFolderName)
+        col.bfu_export_folder_name)
 
     if abspath:
         return bpy.path.abspath(dirpath)
@@ -1408,7 +1408,7 @@ def GetObjExportName(obj):
 
 def GetObjExportDir(obj, abspath=False):
     # Generate assset folder path
-    folder_name = bfu_basics.ValidDirName(obj.exportFolderName)
+    folder_name = bfu_basics.ValidDirName(obj.bfu_export_folder_name)
     obj_name = bfu_basics.ValidDirName(obj.name)  # Fix obj name
 
     scene = bpy.context.scene

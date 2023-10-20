@@ -52,7 +52,7 @@ def ProcessSkeletalMeshExport(op, obj):
     MyAsset.skeleton_name = obj.name
     MyAsset.asset_name = obj.name
     MyAsset.asset_global_scale = obj.exportGlobalScale
-    MyAsset.folder_name = obj.exportFolderName
+    MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = bfu_utils.GetAssetType(obj)
     MyAsset.StartAssetExport()
 
