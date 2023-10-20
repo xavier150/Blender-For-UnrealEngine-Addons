@@ -249,16 +249,7 @@ def ExportAllAssetByList(op, targetobjects, targetActionName, targetcollection):
 
     UpdateExportProgress(counter.get_time())
 
-
-def ExportForUnrealEngine(op):
-    scene = bpy.context.scene
-    addon_prefs = bfu_basics.GetAddonPrefs()
-
-    local_view_areas = bbpl.scene_utils.move_to_global_view()
-
-    MyCurrentDataSave = bbpl.utils.UserSceneSave()
-    MyCurrentDataSave.save_current_scene()
-
+def PrepareSceneForExport():
     for obj in bpy.data.objects:
         if obj.hide_select:
             obj.hide_select = False
@@ -281,6 +272,25 @@ def ExportForUnrealEngine(op):
             if layer_collection.hide_viewport:
                 layer_collection.hide_viewport = False
 
+def ExportForUnrealEngine(op):
+    scene = bpy.context.scene
+    addon_prefs = bfu_basics.GetAddonPrefs()
+    export_filter = scene.bfu_export_selection_filter
+
+    local_view_areas = bbpl.scene_utils.move_to_global_view()
+
+    MyCurrentDataSave = bbpl.utils.UserSceneSave()
+    MyCurrentDataSave.save_current_scene()
+    
+    if export_filter == "default":
+        PrepareSceneForExport()
+        AssetToExport = bfu_utils.GetFinalAssetToExport()
+
+    elif export_filter == "only_object" or export_filter == "only_object_action":
+        AssetToExport = bfu_utils.GetFinalAssetToExport() #Get finial assets visible only
+        PrepareSceneForExport()
+
+
     bbpl.utils.safe_mode_set('OBJECT', MyCurrentDataSave.user_select_class.user_active)
 
     if addon_prefs.revertExportPath:
@@ -293,7 +303,7 @@ def ExportForUnrealEngine(op):
     obj_list = []  # Do a simple list of Objects to export
     action_list = []  # Do a simple list of Action to export
     col_list = []  # Do a simple list of Collection to export
-    AssetToExport = bfu_utils.GetFinalAssetToExport()
+
 
     for Asset in AssetToExport:
         if Asset.asset_type == "Action" or Asset.asset_type == "Pose":
