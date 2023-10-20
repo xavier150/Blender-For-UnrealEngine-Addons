@@ -90,7 +90,7 @@ def WriteImportSequencerTracks():
         marker_sections["start_time"] = section[0]
         marker_sections["end_time"] = section[1]
         if section[2]:
-            if section[2].ExportEnum == "export_recursive" or section[2].ExportEnum == "auto":
+            if section[2].bfu_export_type == "export_recursive" or section[2].bfu_export_type == "auto":
                 marker_sections["has_camera"] = True
                 marker_sections["camera_name"] = section[2].name
             else:

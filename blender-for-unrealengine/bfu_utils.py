@@ -208,10 +208,10 @@ def CleanDeleteObjects(objs):
 
 
 def GetAllobjectsByExportType(exportType):
-    # Find all objects with a specific ExportEnum property
+    # Find all objects with a specific bfu_export_type property
     targetObj = []
     for obj in bpy.context.scene.objects:
-        prop = obj.ExportEnum
+        prop = obj.bfu_export_type
         if prop == exportType:
             targetObj.append(obj)
     return (targetObj)
@@ -241,7 +241,7 @@ def GetExportDesiredChilds(obj):
 
     DesiredObj = []
     for child in bfu_basics.GetRecursiveChilds(obj):
-        if child.ExportEnum != "dont_export":
+        if child.bfu_export_type != "dont_export":
             if child.name in bpy.context.window.view_layer.objects:
                 DesiredObj.append(child)
 
@@ -829,7 +829,7 @@ def SelectCollectionObjects(collection):
     selectedObjs = []
     bpy.ops.object.select_all(action='DESELECT')
     for selectObj in collection.all_objects:
-        if selectObj.ExportEnum != "dont_export":
+        if selectObj.bfu_export_type != "dont_export":
             if selectObj.name in bpy.context.view_layer.objects:
                 selectObj.select_set(True)
                 selectedObjs.append(selectObj)
@@ -1258,7 +1258,7 @@ def GetFinalAssetToExport():
 
     def getHaveParentToExport(obj):
         if obj.parent is not None:
-            if obj.parent.ExportEnum == 'export_recursive':
+            if obj.parent.bfu_export_type == 'export_recursive':
                 return obj.parent
             else:
                 return getHaveParentToExport(obj.parent)

@@ -1,3 +1,22 @@
+# ====================== BEGIN GPL LICENSE BLOCK ============================
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#  All rights reserved.
+#
+# ======================= END GPL LICENSE BLOCK =============================
+
+
 import os
 import bpy
 import addon_utils
@@ -35,7 +54,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     bl_category = "Unreal Engine"
 
     # Object Properties
-    bpy.types.Object.ExportEnum = EnumProperty(
+    bpy.types.Object.bfu_export_type = EnumProperty(
         name="Export type",
         description="Export procedure",
         override={'LIBRARY_OVERRIDABLE'},
@@ -1368,14 +1387,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     AssetType.label(text='('+bfu_utils.GetAssetType(obj)+')')
 
                     ExportType = layout.column()
-                    ExportType.prop(obj, 'ExportEnum')
+                    ExportType.prop(obj, 'bfu_export_type')
 
                     if obj.type == "CAMERA":
                         CameraProp = layout.column()
                         CameraProp.operator("object.copy_regular_camera_command", icon="COPYDOWN")
                         CameraProp.operator("object.copy_cine_camera_command", icon="COPYDOWN")
 
-                    if obj.ExportEnum == "export_recursive":
+                    if obj.bfu_export_type == "export_recursive":
 
                         folderNameProperty = layout.column()
                         folderNameProperty.prop(
@@ -1444,7 +1463,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             bfu_ui_utils.LayoutSection(layout, "bfu_object_advanced_properties_expanded", "Object advanced Properties")
             if scene.bfu_object_advanced_properties_expanded:
                 if obj is not None:
-                    if obj.ExportEnum == "export_recursive":
+                    if obj.bfu_export_type == "export_recursive":
 
                         transformProp = layout.column()
                         if bfu_utils.GetAssetType(obj) != "Alembic" and bfu_utils.GetAssetType(obj) != "Camera":
@@ -1470,7 +1489,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             bfu_ui_utils.LayoutSection(layout, "bfu_skeleton_properties_expanded", "Skeleton")
             if scene.bfu_skeleton_properties_expanded:
                 if addon_prefs.useGeneratedScripts and obj is not None:
-                    if obj.ExportEnum == "export_recursive":
+                    if obj.bfu_export_type == "export_recursive":
 
                         # SkeletalMesh prop
                         if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
@@ -1494,7 +1513,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
         if bfu_ui_utils.DisplayPropertyFilter("OBJECT", "ANIM"):
             if obj is not None:
-                if obj.ExportEnum == "export_recursive" and not obj.ExportAsLod:
+                if obj.bfu_export_type == "export_recursive" and not obj.ExportAsLod:
 
                     bfu_ui_utils.LayoutSection(layout, "bfu_animation_action_properties_expanded", "Actions Properties")
                     if scene.bfu_animation_action_properties_expanded:
@@ -1641,7 +1660,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             bfu_ui_utils.LayoutSection(layout, "bfu_object_lod_properties_expanded", "Lod")
             if scene.bfu_object_lod_properties_expanded:
                 if addon_prefs.useGeneratedScripts and obj is not None:
-                    if obj.ExportEnum == "export_recursive":
+                    if obj.bfu_export_type == "export_recursive":
 
                         # Lod selection
                         if not obj.ExportAsLod:
@@ -1672,7 +1691,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             bfu_ui_utils.LayoutSection(layout, "bfu_object_collision_properties_expanded", "Collision")
             if scene.bfu_object_collision_properties_expanded:
                 if addon_prefs.useGeneratedScripts and obj is not None:
-                    if obj.ExportEnum == "export_recursive":
+                    if obj.bfu_export_type == "export_recursive":
 
                         # StaticMesh prop
                         if bfu_utils.GetAssetType(obj) == "StaticMesh":
@@ -1696,7 +1715,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             bfu_ui_utils.LayoutSection(layout, "bfu_object_material_properties_expanded", "Material")
             if scene.bfu_object_material_properties_expanded:
                 if addon_prefs.useGeneratedScripts and obj is not None:
-                    if obj.ExportEnum == "export_recursive":
+                    if obj.bfu_export_type == "export_recursive":
 
                         # MaterialSearchLocation
                         if not obj.ExportAsLod:
@@ -1710,7 +1729,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             bfu_ui_utils.LayoutSection(layout, "bfu_object_vertex_color_properties_expanded", "Vertex color")
             if scene.bfu_object_vertex_color_properties_expanded:
                 if addon_prefs.useGeneratedScripts and obj is not None:
-                    if obj.ExportEnum == "export_recursive":
+                    if obj.bfu_export_type == "export_recursive":
 
                         # Vertex color
                         StaticMeshVertexColorImportOption = layout.column()
@@ -1741,7 +1760,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             bfu_ui_utils.LayoutSection(layout, "bfu_object_light_map_properties_expanded", "Light map")
             if scene.bfu_object_light_map_properties_expanded:
                 if addon_prefs.useGeneratedScripts and obj is not None:
-                    if obj.ExportEnum == "export_recursive":
+                    if obj.bfu_export_type == "export_recursive":
 
                         # Light map
                         if bfu_utils.GetAssetType(obj) == "StaticMesh":
@@ -1766,7 +1785,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
             bfu_ui_utils.LayoutSection(layout, "bfu_object_uv_map_properties_expanded", "UV map")
             if scene.bfu_object_uv_map_properties_expanded:
-                if obj.ExportEnum == "export_recursive":
+                if obj.bfu_export_type == "export_recursive":
                     # Geometry Node Uv
                     convert_geometry_node_attribute_to_uv = layout.column()
                     convert_geometry_node_attribute_to_uv_use = convert_geometry_node_attribute_to_uv.row()

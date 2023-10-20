@@ -32,7 +32,7 @@ xavierloux.loux@gmail.com
 
 import bpy
 import importlib
-
+print("INIT")
 from . import bps
 from . import bbpl
 from . import bfu_propertys
@@ -47,6 +47,7 @@ from . import bfu_write_import_asset_script
 from . import bfu_write_import_sequencer_script
 from . import bfu_basics
 from . import bfu_utils
+from . import bfu_backward_compatibility
 from .export import bfu_export_asset
 
 if "bps" in locals():
@@ -79,6 +80,8 @@ if "bfu_utils" in locals():
     importlib.reload(bfu_utils)
 if "bfu_export_asset" in locals():
     importlib.reload(bfu_export_asset)
+if "bfu_backward_compatibility" in locals():
+    importlib.reload(bfu_backward_compatibility)
 
 bl_info = {
     'name': 'Blender for UnrealEngine',
@@ -106,7 +109,9 @@ classes = (
 )
 
 
+
 def register():
+    print("INIT register")
     for cls in classes:
         bpy.utils.register_class(cls)
 
@@ -117,7 +122,7 @@ def register():
     bfu_export_logs.register()
     bfu_ui.register()
     bfu_check_potential_error.register()
-
+    bfu_backward_compatibility.register()
 
 def unregister():
     for cls in reversed(classes):
@@ -130,3 +135,4 @@ def unregister():
     bfu_export_logs.unregister()
     bfu_ui.unregister()
     bfu_check_potential_error.unregister()
+    bfu_backward_compatibility.unregister()

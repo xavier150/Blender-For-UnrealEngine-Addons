@@ -35,8 +35,8 @@ def CorrectBadProperty(list=None):
 
     UpdatedProp = 0
     for obj in objs:
-        if obj.ExportEnum == "export_recursive":
-            obj.ExportEnum = "auto"
+        if obj.bfu_export_type == "export_recursive":
+            obj.bfu_export_type = "auto"
             UpdatedProp += 1
     return UpdatedProp
 
@@ -240,7 +240,7 @@ def UpdateUnrealPotentialError():
         for obj in MeshTypeToCheck:
             for modif in obj.modifiers:
                 if modif.type == "ARMATURE":
-                    if obj.ExportEnum == "export_recursive":
+                    if obj.bfu_export_type == "export_recursive":
                         MyError = PotentialErrors.add()
                         MyError.name = obj.name
                         MyError.type = 1

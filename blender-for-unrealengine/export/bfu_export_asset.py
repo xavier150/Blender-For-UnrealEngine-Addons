@@ -156,7 +156,7 @@ def ExportAllAssetByList(op, targetobjects, targetActionName, targetcollection):
 
     # Export assets
     for obj in targetobjects:
-        if obj.ExportEnum == "export_recursive":
+        if obj.bfu_export_type == "export_recursive":
 
             # Camera
             print("Start Export camera(s)")
