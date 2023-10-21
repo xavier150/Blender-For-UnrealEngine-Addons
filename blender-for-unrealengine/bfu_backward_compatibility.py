@@ -20,42 +20,39 @@
 import bpy
 from bpy.app.handlers import persistent
 
+def update_variable(data, old_vars, new_var, callback=None):
+    for old_var in old_vars:
+        if old_var in data:
+            if callback:
+                data[new_var] = callback(data[old_var])
+            else:
+                data[new_var] = data[old_var]
+            del data[old_var]
+            print(f'"{old_var}" updated to "{new_var}" in {data.name}')
+
 def update_old_variables():
-
-    print("update old bfu variables...")
-
-    # bpy.types.Object.ExportEnum -> bfu_export_type
-    # bpy.types.Object.exportFolderName -> bfu_export_folder_name
-
-    # bpy.types.Collection.exportFolderName -> bfu_export_folder_name
-
+    print("Updating old bfu variables...")
 
     for obj in bpy.data.objects:
-        if "ExportEnum" in obj:
-            if obj["ExportEnum"] == 1:
-                obj.bfu_export_type = "auto"
-            elif obj["ExportEnum"] == 2:
-                obj.bfu_export_type = "export_recursive"
-            elif obj["ExportEnum"] == 3:
-                obj.bfu_export_type = "dont_export"
-
-            del obj["ExportEnum"]
-            print('"ExportEnum" update to "bfu_export_type" in ' + obj.name)
-
-        if "exportFolderName" in obj:
-            obj.bfu_export_folder_name = obj["exportFolderName"]
-            del obj["exportFolderName"]
-            print('"exportFolderName" update to "bfu_export_folder_name" in ' + obj.name)
+        update_variable(obj, ["ExportEnum"], "bfu_export_type", export_enum_callback)
+        update_variable(obj, ["exportFolderName"], "bfu_export_folder_name")
 
     for col in bpy.data.collections:
-        if "exportFolderName" in col:
-            col.bfu_export_folder_name = col["exportFolderName"]
-            del col["exportFolderName"]
-            print('"exportFolderName" update to "bfu_export_folder_name" in ' + col.name)
+        update_variable(col, ["exportFolderName"], "bfu_export_folder_name")
+
+
+
+def export_enum_callback(value):
+    mapping = {
+        1: "auto",
+        2: "export_recursive",
+        3: "dont_export"
+    }
+    return mapping.get(value, "")
+
 
 @persistent
 def bfu_load_handler(dummy):
-    print("Load Handler:", bpy.data.filepath)
     update_old_variables()
 
 def deferred_execution():
@@ -71,7 +68,6 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.app.handlers.load_post.append(bfu_load_handler)
-    print("load handler added!")
     
     bpy.app.timers.register(deferred_execution, first_interval=0.1)
 

@@ -89,6 +89,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         subtype='FILE_NAME'
         )
 
+    # Collection Properties
     bpy.types.Collection.bfu_export_folder_name = StringProperty(
         name="Sub folder name",
         description=(
