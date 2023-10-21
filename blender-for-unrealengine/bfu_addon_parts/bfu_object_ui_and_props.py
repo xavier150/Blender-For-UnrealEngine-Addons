@@ -271,6 +271,26 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 4)
             ]
         )
+    
+    bpy.types.Object.bfu_modular_skeletal_mesh_mode = EnumProperty(
+        name="Modular Skeletal Mesh Mode",
+        description='Modular skeletal mesh mode',
+        override={'LIBRARY_OVERRIDABLE'},
+        items=[
+            ("all_in_one",
+                "All in one",
+                "The child meshs as one skeletal mesh.",
+                1),
+            ("every_meshs",
+                "Every meshs",
+                "One skeletal mesh for every child meshs.",
+                2),
+            ("custom parts",
+                "Custom path and name",
+                "Specified mesh parts.",
+                3)
+            ]
+        )
 
     bpy.types.Object.bfu_target_skeleton_custom_path = StringProperty(
         name="",
@@ -1193,6 +1213,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.bfu_lod_target5',
                             'obj.bfu_create_physics_asset',
                             'obj.bfu_skeleton_search_mode',
+                            'obj.bfu_modular_skeletal_mesh_mode',
                             'obj.bfu_target_skeleton_custom_path',
                             'obj.bfu_target_skeleton_custom_name',
                             'obj.bfu_target_skeleton_custom_ref',
@@ -1498,21 +1519,35 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
                             if not obj.bfu_export_as_lod_mesh:
 
-                                Ue4Skeleton = layout.column()
-                                Ue4Skeleton.prop(obj, "bfu_skeleton_search_mode")
+                                unreal_skeleton = layout.column()
+                                unreal_skeleton.prop(obj, "bfu_skeleton_search_mode")
                                 if obj.bfu_skeleton_search_mode == "auto":
                                     pass
                                 if obj.bfu_skeleton_search_mode == "custom_name":
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
+                                    unreal_skeleton.prop(obj, "bfu_target_skeleton_custom_name")
                                 if obj.bfu_skeleton_search_mode == "custom_path_name":
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_path")
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_name")
+                                    unreal_skeleton.prop(obj, "bfu_target_skeleton_custom_path")
+                                    unreal_skeleton.prop(obj, "bfu_target_skeleton_custom_name")
                                 if obj.bfu_skeleton_search_mode == "custom_reference":
-                                    Ue4Skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
-                                Ue4Skeleton.prop(obj, "bfu_mirror_symmetry_right_side_bones")
-                                MirrorSymmetryRightSideBonesRow = Ue4Skeleton.row()
+                                    unreal_skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
+                                unreal_skeleton.prop(obj, "bfu_mirror_symmetry_right_side_bones")
+                                MirrorSymmetryRightSideBonesRow = unreal_skeleton.row()
                                 MirrorSymmetryRightSideBonesRow.enabled = obj.bfu_mirror_symmetry_right_side_bones
                                 MirrorSymmetryRightSideBonesRow.prop(obj, "bfu_use_ue_mannequin_bone_alignment")
+
+            scene.bfu_modular_skeletal_mesh_properties_expanded.draw(layout)
+            if scene.bfu_modular_skeletal_mesh_properties_expanded.is_expend():
+                if obj.bfu_export_type == "export_recursive":
+
+                    # SkeletalMesh prop
+                    if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+                        if not obj.bfu_export_as_lod_mesh:
+                            modular_skeletal_mesh = layout.column()
+                            modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_mode")
+                            if obj.bfu_modular_skeletal_mesh_mode:
+                                pass
+
+
 
         if bfu_ui_utils.DisplayPropertyFilter("OBJECT", "ANIM"):
             if obj is not None:

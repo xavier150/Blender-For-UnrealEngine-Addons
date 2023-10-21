@@ -48,6 +48,8 @@ def register():
     bpy.types.Scene.bfu_animation_advanced_properties_expanded = bpy.props.PointerProperty(type=BBPL_UI_ExpendSection, name="Animation Advanced Properties")
 
     bpy.types.Scene.bfu_skeleton_properties_expanded = bpy.props.PointerProperty(type=BBPL_UI_ExpendSection, name="Skeleton")
+    bpy.types.Scene.bfu_modular_skeletal_mesh_properties_expanded = bpy.props.PointerProperty(type=BBPL_UI_ExpendSection, name="Modular skeletal mesh")
+
     bpy.types.Scene.bfu_collection_properties_expanded = bpy.props.PointerProperty(type=BBPL_UI_ExpendSection, name="Collection Properties")
     bpy.types.Scene.bfu_object_advanced_properties_expanded = bpy.props.PointerProperty(type=BBPL_UI_ExpendSection, name="Object advanced Properties")
     bpy.types.Scene.bfu_camera_expanded = bpy.props.PointerProperty(type=BBPL_UI_ExpendSection, name="Camera")
@@ -101,6 +103,8 @@ def unregister():
     del bpy.types.Scene.bfu_animation_advanced_properties_expanded
 
     del bpy.types.Scene.bfu_skeleton_properties_expanded
+    del bpy.types.Scene.bfu_modular_skeletal_mesh_properties_expanded
+
     del bpy.types.Scene.bfu_collection_properties_expanded
     del bpy.types.Scene.bfu_object_advanced_properties_expanded
     del bpy.types.Scene.bfu_collision_socket_expanded
