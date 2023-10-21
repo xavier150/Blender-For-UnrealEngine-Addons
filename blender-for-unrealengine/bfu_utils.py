@@ -278,7 +278,7 @@ def GetSkeletalMeshSockets(obj):
         if IsASocket(socket):
             SocketName = socket.name[7:]
 
-        if socket.parent.exportDeformOnly:
+        if socket.parent.bfu_export_deform_only:
             b = bfu_basics.getFirstDeformBoneParent(socket.parent.data.bones[socket.parent_bone])
         else:
             b = socket.parent.data.bones[socket.parent_bone]
@@ -582,7 +582,7 @@ def GetCachedExportAutoActionList(obj, force_update_cache=False):
 def GetActionToExport(obj):
     # Returns only the actions that will be exported with the Armature
 
-    if obj.ExportAsLod:
+    if obj.bfu_export_as_lod_mesh:
         return []
 
     TargetActionToExport = []  # Action list
@@ -603,7 +603,7 @@ def GetActionToExport(obj):
 
     elif obj.bfu_anim_action_export_enum == "export_specific_prefix":
         for action in bpy.data.actions:
-            if fnmatch.fnmatchcase(action.name, obj.PrefixNameToExport+"*"):
+            if fnmatch.fnmatchcase(action.name, obj.bfu_prefix_name_to_export+"*"):
                 TargetActionToExport.append(action)
 
     elif obj.bfu_anim_action_export_enum == "export_auto":
@@ -618,7 +618,7 @@ def EvaluateCameraPositionForUnreal(camera, previous_euler=mathutils.Euler()):
     matrix_x = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'X')
     matrix = camera.matrix_world @ matrix_y @ matrix_x
     loc = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
-    loc += camera.AdditionalLocationForExport
+    loc += camera.bfu_additional_location_for_export
     r = matrix.to_euler("XYZ", previous_euler)
     s = matrix.to_scale()
 
@@ -703,7 +703,7 @@ def GetDesiredNLAStartEndTime(obj):
 
 
 def GetUseCustomLightMapResolution(obj):
-    if obj.StaticMeshLightMapEnum == "Default":
+    if obj.bfu_static_mesh_light_map_enum == "Default":
         return False
     return True
 
@@ -752,18 +752,18 @@ def GetExportRealSurfaceArea(obj):
 
 
 def GetCompuntedLightMap(obj):
-    if obj.StaticMeshLightMapEnum == "Default":
+    if obj.bfu_static_mesh_light_map_enum == "Default":
         return -1
 
-    if obj.StaticMeshLightMapEnum == "CustomMap":
-        return obj.customStaticMeshLightMapRes
+    if obj.bfu_static_mesh_light_map_enum == "CustomMap":
+        return obj.bfu_static_mesh_custom_light_map_res
 
-    if obj.StaticMeshLightMapEnum == "SurfaceArea":
+    if obj.bfu_static_mesh_light_map_enum == "SurfaceArea":
         # Get the area
         area = obj.computedStaticMeshLightMapRes
         area **= 0.5  # Adapte for light map
 
-        if obj.useStaticMeshLightMapWorldScale:
+        if obj.bfu_use_static_mesh_light_map_world_scale:
             # Turn area at world scale
             x = max(obj.scale.x, obj.scale.x*-1)
             y = max(obj.scale.y, obj.scale.y*-1)
@@ -773,8 +773,8 @@ def GetCompuntedLightMap(obj):
 
         # Computed light map equal light map scale for a plane vvv
         area *= bpy.context.scene.unit_settings.scale_length
-        area *= obj.staticMeshLightMapSurfaceScale/2
-        if obj.staticMeshLightMapRoundPowerOfTwo:
+        area *= obj.bfu_static_mesh_light_map_surface_scale/2
+        if obj.bfu_static_mesh_light_map_round_power_of_two:
 
             return bps.math.nearest_power_of_two(int(round(area)))
         return int(round(area))
@@ -807,10 +807,10 @@ def GetAssetType(obj):
     if obj.type == "CAMERA":
         return "Camera"
 
-    if obj.ExportAsAlembic:
+    if obj.bfu_export_as_alembic:
         return "Alembic"
 
-    if obj.type == "ARMATURE" and not obj.ForceStaticMesh:
+    if obj.type == "ARMATURE" and not obj.bfu_export_skeletal_mesh_as_static_mesh:
         return "SkeletalMesh"
 
     return "StaticMesh"
@@ -1036,16 +1036,16 @@ def ApplyExportTransform(obj, use_type="Object"):
     # Ref
     # Moves object to the center of the scene for export
     if use_type == "Object":
-        MoveToCenter = obj.MoveToCenterForExport
-        RotateToZero = obj.RotateToZeroForExport
+        MoveToCenter = obj.bfu_move_to_center_for_export
+        RotateToZero = obj.bfu_rotate_to_zero_for_export
 
     elif use_type == "Action":
-        MoveToCenter = obj.MoveActionToCenterForExport
-        RotateToZero = obj.RotateActionToZeroForExport
+        MoveToCenter = obj.bfu_move_action_to_center_for_export
+        RotateToZero = obj.bfu_rotate_action_to_zero_for_export
 
     elif use_type == "NLA":
-        MoveToCenter = obj.MoveNLAToCenterForExport
-        RotateToZero = obj.RotateNLAToZeroForExport
+        MoveToCenter = obj.bfu_move_nla_to_center_for_export
+        RotateToZero = obj.bfu_rotate_nla_to_zero_for_export
 
     else:
         return
@@ -1062,8 +1062,8 @@ def ApplyExportTransform(obj, use_type="Object"):
         mat_rot = mathutils.Matrix.Rotation(0, 4, 'X')
         newMatrix = mat_trans @ mat_rot
 
-    eul = obj.AdditionalRotationForExport
-    loc = obj.AdditionalLocationForExport
+    eul = obj.bfu_additional_rotation_for_export
+    loc = obj.bfu_additional_location_for_export
 
     mat_rot = eul.to_matrix()
     mat_loc = mathutils.Matrix.Translation(loc)
@@ -1387,7 +1387,7 @@ def GetCollectionExportDir(col, abspath=False):
     scene = bpy.context.scene
 
     dirpath = os.path.join(
-        scene.export_static_file_path,
+        scene.bfu_export_static_file_path,
         col.bfu_export_folder_name)
 
     if abspath:
@@ -1414,21 +1414,21 @@ def GetObjExportDir(obj, abspath=False):
     scene = bpy.context.scene
     if GetAssetType(obj) == "SkeletalMesh":
         dirpath = os.path.join(
-            scene.export_skeletal_file_path,
+            scene.bfu_export_skeletal_file_path,
             folder_name,
             GetObjExportName(obj))
     if GetAssetType(obj) == "Alembic":
         dirpath = os.path.join(
-            scene.export_alembic_file_path,
+            scene.bfu_export_alembic_file_path,
             folder_name,
             obj_name)
     if GetAssetType(obj) == "StaticMesh":
         dirpath = os.path.join(
-            scene.export_static_file_path,
+            scene.bfu_export_static_file_path,
             folder_name)
     if GetAssetType(obj) == "Camera":
         dirpath = os.path.join(
-            scene.export_camera_file_path,
+            scene.bfu_export_camera_file_path,
             folder_name)
     if abspath:
         return bpy.path.abspath(dirpath)
@@ -1441,7 +1441,7 @@ def GetCollectionExportFileName(collection, fileType=".fbx"):
     # Generate assset file name
 
     scene = bpy.context.scene
-    return scene.static_mesh_prefix_export_name+collection+fileType
+    return scene.bfu_static_mesh_prefix_export_name+collection+fileType
 
 
 def GetObjExportFileName(obj, fileType=".fbx"):
@@ -1452,13 +1452,13 @@ def GetObjExportFileName(obj, fileType=".fbx"):
         return bfu_basics.ValidFilename(obj.bfu_custom_export_name+fileType)
     assetType = GetAssetType(obj)
     if assetType == "Camera":
-        return bfu_basics.ValidFilename(scene.camera_prefix_export_name+obj.name+fileType)
+        return bfu_basics.ValidFilename(scene.bfu_camera_prefix_export_name+obj.name+fileType)
     elif assetType == "StaticMesh":
-        return bfu_basics.ValidFilename(scene.static_mesh_prefix_export_name+obj.name+fileType)
+        return bfu_basics.ValidFilename(scene.bfu_static_mesh_prefix_export_name+obj.name+fileType)
     elif assetType == "SkeletalMesh":
-        return bfu_basics.ValidFilename(scene.skeletal_mesh_prefix_export_name+obj.name+fileType)
+        return bfu_basics.ValidFilename(scene.bfu_skeletal_mesh_prefix_export_name+obj.name+fileType)
     elif assetType == "Alembic":
-        return bfu_basics.ValidFilename(scene.alembic_prefix_export_name+obj.name+fileType)
+        return bfu_basics.ValidFilename(scene.bfu_alembic_prefix_export_name+obj.name+fileType)
     else:
         return None
 
@@ -1477,10 +1477,10 @@ def GetActionExportFileName(obj, action, fileType=".fbx"):
     animType = GetActionType(action)
     if animType == "NlAnim" or animType == "Action":
         # Nla can be exported as action
-        return bfu_basics.ValidFilename(scene.anim_prefix_export_name+ArmatureName+action.name+fileType)
+        return bfu_basics.ValidFilename(scene.bfu_anim_prefix_export_name+ArmatureName+action.name+fileType)
 
     elif animType == "Pose":
-        return bfu_basics.ValidFilename(scene.pose_prefix_export_name+ArmatureName+action.name+fileType)
+        return bfu_basics.ValidFilename(scene.bfu_pose_prefix_export_name+ArmatureName+action.name+fileType)
 
     else:
         return None
@@ -1497,13 +1497,13 @@ def GetNLAExportFileName(obj, fileType=".fbx"):
     if obj.bfu_anim_naming_type == "include_custom_name":
         ArmatureName = obj.bfu_anim_naming_custom+"_"
 
-    return bfu_basics.ValidFilename(scene.anim_prefix_export_name+ArmatureName+obj.bfu_anim_nla_export_name+fileType)
+    return bfu_basics.ValidFilename(scene.bfu_anim_prefix_export_name+ArmatureName+obj.bfu_anim_nla_export_name+fileType)
 
 
 def GetImportAssetScriptCommand():
     scene = bpy.context.scene
-    fileName = scene.file_import_asset_script_name
-    absdirpath = bpy.path.abspath(scene.export_other_file_path)
+    fileName = scene.bfu_file_import_asset_script_name
+    absdirpath = bpy.path.abspath(scene.bfu_export_other_file_path)
     fullpath = os.path.join(absdirpath, fileName)
     return 'py "'+fullpath+'"'
 
@@ -1658,8 +1658,8 @@ def GetImportSkeletalMeshSocketScriptCommand(obj):
 
 def GetImportSequencerScriptCommand():
     scene = bpy.context.scene
-    fileName = scene.file_import_sequencer_script_name
-    absdirpath = bpy.path.abspath(scene.export_other_file_path)
+    fileName = scene.bfu_file_import_sequencer_script_name
+    absdirpath = bpy.path.abspath(scene.bfu_export_other_file_path)
     fullpath = os.path.join(absdirpath, fileName)
 
     return 'py "'+fullpath+'"'  # Vania
@@ -1667,19 +1667,19 @@ def GetImportSequencerScriptCommand():
 
 def GetAnimSample(obj):
     # return obj sample animation
-    return obj.SampleAnimForExport
+    return obj.bfu_sample_anim_for_export
 
 
 def GetArmatureRootBones(obj):
     rootBones = []
     if GetAssetType(obj) == "SkeletalMesh":
 
-        if not obj.exportDeformOnly:
+        if not obj.bfu_export_deform_only:
             for bone in obj.data.bones:
                 if bone.parent is None:
                     rootBones.append(bone)
 
-        if obj.exportDeformOnly:
+        if obj.bfu_export_deform_only:
             for bone in obj.data.bones:
                 if bone.use_deform:
                     rootBone = bfu_basics.getRootBoneParent(bone)
@@ -1697,7 +1697,7 @@ def GetDesiredExportArmatureName(obj):
 
 
 def GetObjExportScale(obj):
-    return obj.exportGlobalScale
+    return obj.bfu_export_global_scale
 
 
 def GenerateUe4Name(name):

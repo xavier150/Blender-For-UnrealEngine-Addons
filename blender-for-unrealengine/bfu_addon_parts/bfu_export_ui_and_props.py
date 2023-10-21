@@ -30,50 +30,50 @@ class BFU_PT_Export(bpy.types.Panel):
     bl_category = "Unreal Engine"
 
     # Prefix
-    bpy.types.Scene.static_mesh_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_static_mesh_prefix_export_name = bpy.props.StringProperty(
         name="StaticMesh Prefix",
         description="Prefix of staticMesh",
         maxlen=32,
         default="SM_")
 
-    bpy.types.Scene.skeletal_mesh_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_skeletal_mesh_prefix_export_name = bpy.props.StringProperty(
         name="SkeletalMesh Prefix ",
         description="Prefix of SkeletalMesh",
         maxlen=32,
         default="SKM_")
 
-    bpy.types.Scene.skeleton_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_skeleton_prefix_export_name = bpy.props.StringProperty(
         name="skeleton Prefix ",
         description="Prefix of skeleton",
         maxlen=32,
         default="SK_")
 
-    bpy.types.Scene.alembic_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_alembic_prefix_export_name = bpy.props.StringProperty(
         name="Alembic Prefix ",
         description="Prefix of Alembic (SkeletalMesh in unreal)",
         maxlen=32,
         default="SKM_")
 
-    bpy.types.Scene.anim_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_anim_prefix_export_name = bpy.props.StringProperty(
         name="AnimationSequence Prefix",
         description="Prefix of AnimationSequence",
         maxlen=32,
         default="Anim_")
 
-    bpy.types.Scene.pose_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_pose_prefix_export_name = bpy.props.StringProperty(
         name="AnimationSequence(Pose) Prefix",
         description="Prefix of AnimationSequence with only one frame",
         maxlen=32,
         default="Pose_")
 
-    bpy.types.Scene.camera_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_camera_prefix_export_name = bpy.props.StringProperty(
         name="Camera anim Prefix",
         description="Prefix of camera animations",
         maxlen=32,
         default="Cam_")
 
     # Sub folder
-    bpy.types.Scene.anim_subfolder_name = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_anim_subfolder_name = bpy.props.StringProperty(
         name="Animations sub folder name",
         description=(
             "The name of sub folder for animations New." +
@@ -82,35 +82,35 @@ class BFU_PT_Export(bpy.types.Panel):
         default="Anim")
 
     # File path
-    bpy.types.Scene.export_static_file_path = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_export_static_file_path = bpy.props.StringProperty(
         name="StaticMesh export file path",
         description="Choose a directory to export StaticMesh(s)",
         maxlen=512,
         default=os.path.join("//", "ExportedFbx", "StaticMesh"),
         subtype='DIR_PATH')
 
-    bpy.types.Scene.export_skeletal_file_path = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_export_skeletal_file_path = bpy.props.StringProperty(
         name="SkeletalMesh export file path",
         description="Choose a directory to export SkeletalMesh(s)",
         maxlen=512,
         default=os.path.join("//", "ExportedFbx", "SkeletalMesh"),
         subtype='DIR_PATH')
 
-    bpy.types.Scene.export_alembic_file_path = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_export_alembic_file_path = bpy.props.StringProperty(
         name="Alembic export file path",
         description="Choose a directory to export Alembic(s)",
         maxlen=512,
         default=os.path.join("//", "ExportedFbx", "Alembic"),
         subtype='DIR_PATH')
 
-    bpy.types.Scene.export_camera_file_path = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_export_camera_file_path = bpy.props.StringProperty(
         name="Camera export file path",
         description="Choose a directory to export Camera(s)",
         maxlen=512,
         default=os.path.join("//", "ExportedFbx", "Sequencer"),
         subtype='DIR_PATH')
 
-    bpy.types.Scene.export_other_file_path = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_export_other_file_path = bpy.props.StringProperty(
         name="Other export file path",
         description="Choose a directory to export text file and other",
         maxlen=512,
@@ -118,31 +118,31 @@ class BFU_PT_Export(bpy.types.Panel):
         subtype='DIR_PATH')
 
     # File name
-    bpy.types.Scene.file_export_log_name = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_file_export_log_name = bpy.props.StringProperty(
         name="Export log name",
         description="Export log name",
         maxlen=64,
         default="ExportLog.txt")
 
-    bpy.types.Scene.file_import_asset_script_name = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_file_import_asset_script_name = bpy.props.StringProperty(
         name="Import asset script Name",
         description="Import asset script name",
         maxlen=64,
         default="ImportAssetScript.py")
 
-    bpy.types.Scene.file_import_sequencer_script_name = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_file_import_sequencer_script_name = bpy.props.StringProperty(
         name="Import sequencer script Name",
         description="Import sequencer script name",
         maxlen=64,
         default="ImportSequencerScript.py")
 
-    bpy.types.Scene.unreal_import_module = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_unreal_import_module = bpy.props.StringProperty(
         name="Unreal import module",
         description="Which module (plugin name) to import to. Default is 'Game', meaning it will be put into your project's /Content/ folder. If you wish to import to a plugin (for example a plugin called 'myPlugin'), just write its name here",
         maxlen=512,
         default='Game')
 
-    bpy.types.Scene.unreal_import_location = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_unreal_import_location = bpy.props.StringProperty(
         name="Unreal import location",
         description="Unreal assets import location inside the module",
         maxlen=512,
@@ -170,25 +170,25 @@ class BFU_PT_Export(bpy.types.Panel):
 
         # Properties to store in the preset
         preset_values = [
-                            'scene.static_mesh_prefix_export_name',
-                            'scene.skeletal_mesh_prefix_export_name',
-                            'scene.skeleton_prefix_export_name',
-                            'scene.alembic_prefix_export_name',
-                            'scene.anim_prefix_export_name',
-                            'scene.pose_prefix_export_name',
-                            'scene.camera_prefix_export_name',
-                            'scene.anim_subfolder_name',
-                            'scene.export_static_file_path',
-                            'scene.export_skeletal_file_path',
-                            'scene.export_alembic_file_path',
-                            'scene.export_camera_file_path',
-                            'scene.export_other_file_path',
-                            'scene.file_export_log_name',
-                            'scene.file_import_asset_script_name',
-                            'scene.file_import_sequencer_script_name',
+                            'scene.bfu_static_mesh_prefix_export_name',
+                            'scene.bfu_skeletal_mesh_prefix_export_name',
+                            'scene.bfu_skeleton_prefix_export_name',
+                            'scene.bfu_alembic_prefix_export_name',
+                            'scene.bfu_anim_prefix_export_name',
+                            'scene.bfu_pose_prefix_export_name',
+                            'scene.bfu_camera_prefix_export_name',
+                            'scene.bfu_anim_subfolder_name',
+                            'scene.bfu_export_static_file_path',
+                            'scene.bfu_export_skeletal_file_path',
+                            'scene.bfu_export_alembic_file_path',
+                            'scene.bfu_export_camera_file_path',
+                            'scene.bfu_export_other_file_path',
+                            'scene.bfu_file_export_log_name',
+                            'scene.bfu_file_import_asset_script_name',
+                            'scene.bfu_file_import_sequencer_script_name',
                             # Import location:
-                            'scene.unreal_import_module',
-                            'scene.unreal_import_location',
+                            'scene.bfu_unreal_import_module',
+                            'scene.bfu_unreal_import_location',
                         ]
 
         # Directory to store the presets
@@ -512,7 +512,7 @@ class BFU_PT_Export(bpy.types.Panel):
             bfu_basics.setWindowsClipboard(bfu_utils.GetImportAssetScriptCommand())
             self.report(
                 {'INFO'},
-                "command for "+scene.file_import_asset_script_name +
+                "command for "+scene.bfu_file_import_asset_script_name +
                 " copied")
             return {'FINISHED'}
 
@@ -526,7 +526,7 @@ class BFU_PT_Export(bpy.types.Panel):
             bfu_basics.setWindowsClipboard(bfu_utils.GetImportSequencerScriptCommand())
             self.report(
                 {'INFO'},
-                "command for "+scene.file_import_sequencer_script_name +
+                "command for "+scene.bfu_file_import_sequencer_script_name +
                 " copied")
             return {'FINISHED'}
 
@@ -631,52 +631,52 @@ class BFU_PT_Export(bpy.types.Panel):
             # Prefix
             propsPrefix = self.layout.row()
             propsPrefix = propsPrefix.column()
-            propsPrefix.prop(scene, 'static_mesh_prefix_export_name', icon='OBJECT_DATA')
-            propsPrefix.prop(scene, 'skeletal_mesh_prefix_export_name', icon='OBJECT_DATA')
-            propsPrefix.prop(scene, 'skeleton_prefix_export_name', icon='OBJECT_DATA')
-            propsPrefix.prop(scene, 'alembic_prefix_export_name', icon='OBJECT_DATA')
-            propsPrefix.prop(scene, 'anim_prefix_export_name', icon='OBJECT_DATA')
-            propsPrefix.prop(scene, 'pose_prefix_export_name', icon='OBJECT_DATA')
-            propsPrefix.prop(scene, 'camera_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'bfu_static_mesh_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'bfu_skeletal_mesh_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'bfu_skeleton_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'bfu_alembic_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'bfu_anim_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'bfu_pose_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'bfu_camera_prefix_export_name', icon='OBJECT_DATA')
 
             # Sub folder
             propsSub = self.layout.row()
             propsSub = propsSub.column()
-            propsSub.prop(scene, 'anim_subfolder_name', icon='FILE_FOLDER')
+            propsSub.prop(scene, 'bfu_anim_subfolder_name', icon='FILE_FOLDER')
 
             if addon_prefs.useGeneratedScripts:
-                unreal_import_module = propsSub.column()
-                unreal_import_module.prop(
+                bfu_unreal_import_module = propsSub.column()
+                bfu_unreal_import_module.prop(
                     scene,
-                    'unreal_import_module',
+                    'bfu_unreal_import_module',
                     icon='FILE_FOLDER')
-                unreal_import_location = propsSub.column()
-                unreal_import_location.prop(
+                bfu_unreal_import_location = propsSub.column()
+                bfu_unreal_import_location.prop(
                     scene,
-                    'unreal_import_location',
+                    'bfu_unreal_import_location',
                     icon='FILE_FOLDER')
 
             # File path
             filePath = self.layout.row()
             filePath = filePath.column()
-            filePath.prop(scene, 'export_static_file_path')
-            filePath.prop(scene, 'export_skeletal_file_path')
-            filePath.prop(scene, 'export_alembic_file_path')
-            filePath.prop(scene, 'export_camera_file_path')
-            filePath.prop(scene, 'export_other_file_path')
+            filePath.prop(scene, 'bfu_export_static_file_path')
+            filePath.prop(scene, 'bfu_export_skeletal_file_path')
+            filePath.prop(scene, 'bfu_export_alembic_file_path')
+            filePath.prop(scene, 'bfu_export_camera_file_path')
+            filePath.prop(scene, 'bfu_export_other_file_path')
 
             # File name
             fileName = self.layout.row()
             fileName = fileName.column()
-            fileName.prop(scene, 'file_export_log_name', icon='FILE')
+            fileName.prop(scene, 'bfu_file_export_log_name', icon='FILE')
             if addon_prefs.useGeneratedScripts:
                 fileName.prop(
                     scene,
-                    'file_import_asset_script_name',
+                    'bfu_file_import_asset_script_name',
                     icon='FILE')
                 fileName.prop(
                     scene,
-                    'file_import_sequencer_script_name',
+                    'bfu_file_import_sequencer_script_name',
                     icon='FILE')
 
         bfu_ui_utils.LayoutSection(layout, "bfu_export_filter_properties_expanded", "Export filters")

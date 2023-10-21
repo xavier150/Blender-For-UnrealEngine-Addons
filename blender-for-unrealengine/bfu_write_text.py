@@ -114,7 +114,7 @@ def WriteExportLog():
             primaryInfo = "Animation (Pose)"
         else:
             if asset.object:
-                if asset.object.ExportAsLod:
+                if asset.object.bfu_export_as_lod_mesh:
                     primaryInfo = asset.asset_type+" (LOD)"
                 else:
                     primaryInfo = asset.asset_type
@@ -377,20 +377,20 @@ def WriteSingleMeshAdditionalParameter(unreal_exported_asset):
     # Level of detail
     if obj:
         data['LevelOfDetail'] = {}
-        if obj.Ue4Lod1 is not None:
-            loc = os.path.join(bfu_utils.GetObjExportDir(obj.Ue4Lod1, True), bfu_utils.GetObjExportFileName(obj.Ue4Lod1))
+        if obj.bfu_lod_target1 is not None:
+            loc = os.path.join(bfu_utils.GetObjExportDir(obj.bfu_lod_target1, True), bfu_utils.GetObjExportFileName(obj.bfu_lod_target1))
             data['LevelOfDetail']['lod_1'] = loc
-        if obj.Ue4Lod2 is not None:
-            loc = os.path.join(bfu_utils.GetObjExportDir(obj.Ue4Lod2, True), bfu_utils.GetObjExportFileName(obj.Ue4Lod2))
+        if obj.bfu_lod_target2 is not None:
+            loc = os.path.join(bfu_utils.GetObjExportDir(obj.bfu_lod_target2, True), bfu_utils.GetObjExportFileName(obj.bfu_lod_target2))
             data['LevelOfDetail']['lod_2'] = loc
-        if obj.Ue4Lod3 is not None:
-            loc = os.path.join(bfu_utils.GetObjExportDir(obj.Ue4Lod3, True), bfu_utils.GetObjExportFileName(obj.Ue4Lod3))
+        if obj.bfu_lod_target3 is not None:
+            loc = os.path.join(bfu_utils.GetObjExportDir(obj.bfu_lod_target3, True), bfu_utils.GetObjExportFileName(obj.bfu_lod_target3))
             data['LevelOfDetail']['lod_3'] = loc
-        if obj.Ue4Lod4 is not None:
-            loc = os.path.join(bfu_utils.GetObjExportDir(obj.Ue4Lod4, True), bfu_utils.GetObjExportFileName(obj.Ue4Lod4))
+        if obj.bfu_lod_target4 is not None:
+            loc = os.path.join(bfu_utils.GetObjExportDir(obj.bfu_lod_target4, True), bfu_utils.GetObjExportFileName(obj.bfu_lod_target4))
             data['LevelOfDetail']['lod_4'] = loc
-        if obj.Ue4Lod5 is not None:
-            loc = os.path.join(bfu_utils.GetObjExportDir(obj.Ue4Lod5, True), bfu_utils.GetObjExportFileName(obj.Ue4Lod5))
+        if obj.bfu_lod_target5 is not None:
+            loc = os.path.join(bfu_utils.GetObjExportDir(obj.bfu_lod_target5, True), bfu_utils.GetObjExportFileName(obj.bfu_lod_target5))
             data['LevelOfDetail']['lod_5'] = loc
 
     # Sockets
@@ -423,8 +423,8 @@ def WriteAllTextFiles():
         Text += "" + "\n"
         Text += WriteExportLog()
         if Text is not None:
-            Filename = bfu_basics.ValidFilename(scene.file_export_log_name)
-            ExportSingleText(Text, scene.export_other_file_path, Filename)
+            Filename = bfu_basics.ValidFilename(scene.bfu_file_export_log_name)
+            ExportSingleText(Text, scene.bfu_export_other_file_path, Filename)
 
     # Import script
     bfu_path = os.path.join("addons", "blender-for-unrealengine", "import_scripts")
@@ -432,16 +432,16 @@ def WriteAllTextFiles():
 
     if scene.text_ImportAssetScript:
         json_data = bfu_write_import_asset_script.WriteImportAssetScript()
-        ExportSingleJson(json_data, scene.export_other_file_path, "ImportAssetData.json")
+        ExportSingleJson(json_data, scene.bfu_export_other_file_path, "ImportAssetData.json")
         source = os.path.join(bfu_path_ref, "asset_import_script.py")
-        filename = bfu_basics.ValidFilename(scene.file_import_asset_script_name)
-        destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
+        filename = bfu_basics.ValidFilename(scene.bfu_file_import_asset_script_name)
+        destination = bpy.path.abspath(os.path.join(scene.bfu_export_other_file_path, filename))
         copyfile(source, destination)
 
     if scene.text_ImportSequenceScript:
         json_data = bfu_write_import_sequencer_script.WriteImportSequencerTracks()
-        ExportSingleJson(json_data, scene.export_other_file_path, "ImportSequencerData.json")
+        ExportSingleJson(json_data, scene.bfu_export_other_file_path, "ImportSequencerData.json")
         source = os.path.join(bfu_path_ref, "sequencer_import_script.py")
-        filename = bfu_basics.ValidFilename(scene.file_import_sequencer_script_name)
-        destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
+        filename = bfu_basics.ValidFilename(scene.bfu_file_import_sequencer_script_name)
+        destination = bpy.path.abspath(os.path.join(scene.bfu_export_other_file_path, filename))
         copyfile(source, destination)

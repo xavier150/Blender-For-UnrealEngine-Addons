@@ -46,7 +46,7 @@ def ProcessCollectionExport(col):
 
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.asset_name = col.name
-    MyAsset.asset_global_scale = obj.exportGlobalScale
+    MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.collection = col
     MyAsset.asset_type = bfu_utils.GetCollectionType(col)
     MyAsset.folder_name = col.bfu_export_folder_name
@@ -118,13 +118,13 @@ def ExportSingleStaticMeshCollection(
         use_custom_curves=True,
         mesh_smooth_type="FACE",
         add_leaf_bones=False,
-        # use_armature_deform_only=active.exportDeformOnly,
+        # use_armature_deform_only=active.bfu_export_deform_only,
         bake_anim=False,
         use_metadata=addon_prefs.exportWithMetaData,
-        # primary_bone_axis=active.exportPrimaryBoneAxis,
-        # secondary_bone_axis=active.exportSecondaryBoneAxis,
-        # axis_forward=active.exportAxisForward,
-        # axis_up=active.exportAxisUp,
+        # primary_bone_axis=active.bfu_export_primary_bone_axis,
+        # secondary_bone_axis=active.bfu_export_secondary_bone_axis,
+        # axis_forward=active.bfu_export_axis_forward,
+        # axis_up=active.bfu_export_axis_up,
         bake_space_transform=False
         )
     for obj in bpy.context.selected_objects:

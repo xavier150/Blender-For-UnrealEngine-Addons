@@ -355,8 +355,8 @@ class PrepareExportName():
 
 def ConvertGeometryNodeAttributeToUV(obj):
     # obj = bpy.context.active_object  # Debug
-    if obj.convert_geometry_node_attribute_to_uv:
-        attrib_name = obj.convert_geometry_node_attribute_to_uv_name
+    if obj.bfu_convert_geometry_node_attribute_to_uv:
+        attrib_name = obj.bfu_convert_geometry_node_attribute_to_uv_name
 
         # I need apply the geometry modifier for get the data.
         # So this work only when I do export of the duplicate object.
@@ -436,7 +436,7 @@ def ConvertGeometryNodeAttributeToUV(obj):
 
 
 def CorrectExtremUVAtExport(obj):
-    if obj.correct_extrem_uv_scale:
+    if obj.bfu_correct_extrem_uv_scale:
         SavedSelect = bbpl.utils.UserSelectSave()
         SavedSelect.save_current_select()
         if bfu_utils.GoToMeshEditMode():

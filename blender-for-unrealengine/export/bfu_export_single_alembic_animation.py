@@ -32,7 +32,7 @@ def ProcessAlembicExport(obj):
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
     MyAsset.asset_name = obj.name
-    MyAsset.asset_global_scale = obj.exportGlobalScale
+    MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = "Alembic"
     MyAsset.StartAssetExport()

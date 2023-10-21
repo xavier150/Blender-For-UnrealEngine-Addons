@@ -33,7 +33,7 @@ def WriteImportAssetScript():
         '3/3': languages.ti('write_text_additional_track_end'),
     }
 
-    data['unreal_import_location'] = '/' + scene.unreal_import_module + '/' + scene.unreal_import_location
+    data['bfu_unreal_import_location'] = '/' + scene.bfu_unreal_import_module + '/' + scene.bfu_unreal_import_location
 
     # Import assets
     data['assets'] = []
@@ -50,17 +50,17 @@ def WriteImportAssetScript():
         else:
             asset_data["asset_type"] = asset.asset_type
         if asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh":
-            if asset.object.ExportAsLod:
+            if asset.object.bfu_export_as_lod_mesh:
                 asset_data["lod"] = 1
             else:
                 asset_data["lod"] = 0
 
         if bfu_utils.GetIsAnimation(asset.asset_type):
-            relative_import_path = os.path.join(asset.folder_name, scene.anim_subfolder_name)
+            relative_import_path = os.path.join(asset.folder_name, scene.bfu_anim_subfolder_name)
         else:
             relative_import_path = asset.folder_name
 
-        full_import_path = "/" + scene.unreal_import_module + "/" + os.path.join(scene.unreal_import_location, relative_import_path)
+        full_import_path = "/" + scene.bfu_unreal_import_module + "/" + os.path.join(scene.bfu_unreal_import_location, relative_import_path)
         full_import_path = full_import_path.replace('\\', '/').rstrip('/')
         asset_data["full_import_path"] = full_import_path
 
@@ -81,11 +81,11 @@ def WriteImportAssetScript():
 
         if bfu_utils.GetIsAnimation(asset.asset_type) or asset.asset_type == "SkeletalMesh":
             if(asset.object.bfu_skeleton_search_mode) == "auto":
-                customName = scene.skeleton_prefix_export_name+bfu_utils.ValidUnrealAssetsName(asset.skeleton_name)+"_Skeleton"
+                customName = scene.bfu_skeleton_prefix_export_name+bfu_utils.ValidUnrealAssetsName(asset.skeleton_name)+"_Skeleton"
                 SkeletonName = customName+"."+customName
                 SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
 
-                animation_skeleton_path = os.path.join("/" + scene.unreal_import_module + "/", scene.unreal_import_location, SkeletonLoc)
+                animation_skeleton_path = os.path.join("/" + scene.bfu_unreal_import_module + "/", scene.bfu_unreal_import_location, SkeletonLoc)
                 animation_skeleton_path = animation_skeleton_path.replace('\\', '/')
                 asset_data["animation_skeleton_path"] = animation_skeleton_path
 
@@ -94,33 +94,33 @@ def WriteImportAssetScript():
                 SkeletonName = customName+"."+customName
                 SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
 
-                animation_skeleton_path = os.path.join("/" + scene.unreal_import_module + "/", scene.unreal_import_location, SkeletonLoc)
+                animation_skeleton_path = os.path.join("/" + scene.bfu_unreal_import_module + "/", scene.bfu_unreal_import_location, SkeletonLoc)
                 animation_skeleton_path = animation_skeleton_path.replace('\\', '/')
                 asset_data["animation_skeleton_path"] = animation_skeleton_path
 
             elif(asset.object.bfu_skeleton_search_mode) == "custom_path_name":
                 customName = bfu_utils.ValidUnrealAssetsName(asset.object.bfu_target_skeleton_custom_name)
                 SkeletonName = customName+"."+customName
-                SkeletonLoc = os.path.join("/" + scene.unreal_import_module + "/", asset.object.bfu_target_skeleton_custom_path, SkeletonName)
+                SkeletonLoc = os.path.join("/" + scene.bfu_unreal_import_module + "/", asset.object.bfu_target_skeleton_custom_path, SkeletonName)
                 asset_data["animation_skeleton_path"] = SkeletonLoc.replace('\\', '/')
 
             elif(asset.object.bfu_skeleton_search_mode) == "custom_reference":
                 asset_data["animation_skeleton_path"] = asset.object.bfu_target_skeleton_custom_ref.replace('\\', '/')
 
         if asset.object:
-            asset_data["create_physics_asset"] = asset.object.CreatePhysicsAsset
-            asset_data["material_search_location"] = asset.object.MaterialSearchLocation
+            asset_data["create_physics_asset"] = asset.object.bfu_create_physics_asset
+            asset_data["material_search_location"] = asset.object.bfu_material_search_location
 
-            asset_data["auto_generate_collision"] = asset.object.AutoGenerateCollision
-            if (asset.object.UseStaticMeshLODGroup):
-                asset_data["static_mesh_lod_group"] = asset.object.StaticMeshLODGroup
+            asset_data["auto_generate_collision"] = asset.object.bfu_auto_generate_collision
+            if (asset.object.bfu_use_static_mesh_lod_group):
+                asset_data["static_mesh_lod_group"] = asset.object.bfu_static_mesh_lod_group
             else:
                 asset_data["static_mesh_lod_group"] = None
-            asset_data["generate_lightmap_u_vs"] = asset.object.GenerateLightmapUVs
+            asset_data["generate_lightmap_u_vs"] = asset.object.bfu_generate_light_map_uvs
 
             asset_data["use_custom_light_map_resolution"] = bfu_utils.GetUseCustomLightMapResolution(asset.object)
             asset_data["light_map_resolution"] = bfu_utils.GetCompuntedLightMap(asset.object)
-            asset_data["collision_trace_flag"] = asset.object.CollisionTraceFlag
+            asset_data["collision_trace_flag"] = asset.object.bfu_collision_trace_flag
 
         data['assets'].append(asset_data)
 

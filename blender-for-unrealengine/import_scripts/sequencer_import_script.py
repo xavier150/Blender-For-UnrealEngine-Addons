@@ -68,7 +68,7 @@ def CreateSequencer():
     frameRateDenominator = sequence_data['frameRateDenominator']
     frameRateNumerator = sequence_data['frameRateNumerator']
     secureCrop = sequence_data['secureCrop']  # add end crop for avoid section overlay
-    unreal_import_location = sequence_data['unreal_import_location']
+    bfu_unreal_import_location = sequence_data['bfu_unreal_import_location']
     ImportedCamera = []  # (CameraName, CameraGuid)
 
     def AddSequencerSectionTransformKeysByIniFile(sequencer_section, track_dict):

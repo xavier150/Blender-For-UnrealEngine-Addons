@@ -51,7 +51,7 @@ def ProcessStaticMeshExport(op, obj):
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
     MyAsset.asset_name = obj.name
-    MyAsset.asset_global_scale = obj.exportGlobalScale
+    MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = bfu_utils.GetAssetType(obj)
     MyAsset.StartAssetExport()
@@ -62,7 +62,7 @@ def ProcessStaticMeshExport(op, obj):
     file.path = dirpath
     file.type = "FBX"
 
-    if not obj.ExportAsLod:
+    if not obj.bfu_export_as_lod_mesh:
         if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
             bfu_export_utils.ExportAdditionalParameter(absdirpath, MyAsset)
             file = MyAsset.files.add()
@@ -127,7 +127,7 @@ def ExportSingleStaticMesh(
         filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
         check_existing=False,
         use_selection=True,
-        global_matrix=axis_conversion(to_forward=active.exportAxisForward, to_up=active.exportAxisUp).to_4x4(),
+        global_matrix=axis_conversion(to_forward=active.bfu_export_axis_forward, to_up=active.bfu_export_axis_up).to_4x4(),
         apply_unit_scale=True,
         global_scale=bfu_utils.GetObjExportScale(active),
         apply_scale_options='FBX_SCALE_NONE',
@@ -136,20 +136,20 @@ def ExportSingleStaticMesh(
         use_custom_curves=True,
         mesh_smooth_type="FACE",
         add_leaf_bones=False,
-        use_armature_deform_only=active.exportDeformOnly,
+        use_armature_deform_only=active.bfu_export_deform_only,
         bake_anim=False,
         path_mode='AUTO',
         embed_textures=False,
         batch_mode='OFF',
         use_batch_own_dir=True,
         use_metadata=addon_prefs.exportWithMetaData,
-        primary_bone_axis=active.exportPrimaryBoneAxis,
-        secondary_bone_axis=active.exportSecondaryBoneAxis,
+        primary_bone_axis=active.bfu_export_primary_bone_axis,
+        secondary_bone_axis=active.bfu_export_secondary_bone_axis,
         mirror_symmetry_right_side_bones=active.bfu_mirror_symmetry_right_side_bones,
         use_ue_mannequin_bone_alignment=active.bfu_use_ue_mannequin_bone_alignment,
         disable_free_scale_animation=active.bfu_disable_free_scale_animation,
-        axis_forward=active.exportAxisForward,
-        axis_up=active.exportAxisUp,
+        axis_forward=active.bfu_export_axis_forward,
+        axis_up=active.bfu_export_axis_up,
         bake_space_transform=False
         )
 

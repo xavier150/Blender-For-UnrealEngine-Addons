@@ -42,7 +42,7 @@ if "bpy" in locals():
 def ProcessNLAAnimExport(op, obj):
     scene = bpy.context.scene
     addon_prefs = bfu_basics.GetAddonPrefs()
-    dirpath = os.path.join(bfu_utils.GetObjExportDir(obj), scene.anim_subfolder_name)
+    dirpath = os.path.join(bfu_utils.GetObjExportDir(obj), scene.bfu_anim_subfolder_name)
 
     scene.frame_end += 1  # Why ?
 
@@ -50,7 +50,7 @@ def ProcessNLAAnimExport(op, obj):
     MyAsset.object = obj
     MyAsset.skeleton_name = obj.name
     MyAsset.asset_name = bfu_utils.GetNLAExportFileName(obj)
-    MyAsset.asset_global_scale = obj.exportGlobalScale
+    MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = "NlAnim"
     MyAsset.StartAssetExport()
@@ -145,7 +145,7 @@ def ExportSingleFbxNLAAnim(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
-            global_matrix=axis_conversion(to_forward=active.exportAxisForward, to_up=active.exportAxisUp).to_4x4(),
+            global_matrix=axis_conversion(to_forward=active.bfu_export_axis_forward, to_up=active.bfu_export_axis_up).to_4x4(),
             apply_unit_scale=True,
             global_scale=bfu_utils.GetObjExportScale(active),
             apply_scale_options='FBX_SCALE_NONE',
@@ -153,25 +153,25 @@ def ExportSingleFbxNLAAnim(
             use_custom_props=addon_prefs.exportWithCustomProps,
             use_custom_curves=True,
             add_leaf_bones=False,
-            use_armature_deform_only=active.exportDeformOnly,
+            use_armature_deform_only=active.bfu_export_deform_only,
             bake_anim=True,
             bake_anim_use_nla_strips=False,
             bake_anim_use_all_actions=False,
             bake_anim_force_startend_keying=True,
             bake_anim_step=bfu_utils.GetAnimSample(active),
-            bake_anim_simplify_factor=active.SimplifyAnimForExport,
+            bake_anim_simplify_factor=active.bfu_simplify_anim_for_export,
             path_mode='AUTO',
             embed_textures=False,
             batch_mode='OFF',
             use_batch_own_dir=True,
             use_metadata=addon_prefs.exportWithMetaData,
-            primary_bone_axis=active.exportPrimaryBoneAxis,
-            secondary_bone_axis=active.exportSecondaryBoneAxis,
+            primary_bone_axis=active.bfu_export_primary_bone_axis,
+            secondary_bone_axis=active.bfu_export_secondary_bone_axis,
             mirror_symmetry_right_side_bones=active.bfu_mirror_symmetry_right_side_bones,
             use_ue_mannequin_bone_alignment=active.bfu_use_ue_mannequin_bone_alignment,
             disable_free_scale_animation=active.bfu_disable_free_scale_animation,
-            axis_forward=active.exportAxisForward,
-            axis_up=active.exportAxisUp,
+            axis_forward=active.bfu_export_axis_forward,
+            axis_up=active.bfu_export_axis_up,
             bake_space_transform=False
             )
     elif (export_procedure == "blender-standard"):
@@ -185,22 +185,22 @@ def ExportSingleFbxNLAAnim(
             object_types={'ARMATURE', 'EMPTY', 'MESH'},
             use_custom_props=addon_prefs.exportWithCustomProps,
             add_leaf_bones=False,
-            use_armature_deform_only=active.exportDeformOnly,
+            use_armature_deform_only=active.bfu_export_deform_only,
             bake_anim=True,
             bake_anim_use_nla_strips=False,
             bake_anim_use_all_actions=False,
             bake_anim_force_startend_keying=True,
             bake_anim_step=bfu_utils.GetAnimSample(active),
-            bake_anim_simplify_factor=active.SimplifyAnimForExport,
+            bake_anim_simplify_factor=active.bfu_simplify_anim_for_export,
             path_mode='AUTO',
             embed_textures=False,
             batch_mode='OFF',
             use_batch_own_dir=True,
             use_metadata=addon_prefs.exportWithMetaData,
-            primary_bone_axis=active.exportPrimaryBoneAxis,
-            secondary_bone_axis=active.exportSecondaryBoneAxis,
-            axis_forward=active.exportAxisForward,
-            axis_up=active.exportAxisUp,
+            primary_bone_axis=active.bfu_export_primary_bone_axis,
+            secondary_bone_axis=active.bfu_export_secondary_bone_axis,
+            axis_forward=active.bfu_export_axis_forward,
+            axis_up=active.bfu_export_axis_up,
             bake_space_transform=False
             )
     elif (export_procedure == "auto-rig-pro"):
@@ -210,7 +210,7 @@ def ExportSingleFbxNLAAnim(
             bake_anim=True,
             anim_export_name_string=active.animation_data.action.name,
             mesh_smooth_type="FACE",
-            arp_simplify_fac=active.SimplifyAnimForExport
+            arp_simplify_fac=active.bfu_simplify_anim_for_export
             )
 
     bbpl.anim_utils.reset_armature_pose(active)

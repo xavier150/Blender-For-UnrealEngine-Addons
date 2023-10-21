@@ -343,8 +343,8 @@ def UpdateUnrealPotentialError():
         for obj in objToCheck:
             if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
                 for bone in obj.data.bones:
-                    if (not obj.exportDeformOnly or
-                            (bone.use_deform and obj.exportDeformOnly)):
+                    if (not obj.bfu_export_deform_only or
+                            (bone.use_deform and obj.bfu_export_deform_only)):
 
                         if bone.bbone_segments > 1:
                             MyError = PotentialErrors.add()
@@ -434,7 +434,7 @@ def UpdateUnrealPotentialError():
         # Check that skeleton have at less one deform bone
         for obj in objToCheck:
             if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
-                if obj.exportDeformOnly:
+                if obj.bfu_export_deform_only:
                     for bone in obj.data.bones:
                         if bone.use_deform:
                             return

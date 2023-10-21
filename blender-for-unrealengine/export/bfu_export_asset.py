@@ -294,11 +294,11 @@ def ExportForUnrealEngine(op):
     bbpl.utils.safe_mode_set('OBJECT', MyCurrentDataSave.user_select_class.user_active)
 
     if addon_prefs.revertExportPath:
-        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.export_static_file_path))
-        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.export_skeletal_file_path))
-        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.export_alembic_file_path))
-        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.export_camera_file_path))
-        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.export_other_file_path))
+        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_static_file_path))
+        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_skeletal_file_path))
+        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_alembic_file_path))
+        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_camera_file_path))
+        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_other_file_path))
 
     obj_list = []  # Do a simple list of Objects to export
     action_list = []  # Do a simple list of Action to export

@@ -59,7 +59,7 @@ def ImportAllAssets():
 
     import_assets_data = JsonLoadFile(os.path.join(dir_path, json_data_file))
 
-    unreal_import_location = import_assets_data['unreal_import_location']
+    bfu_unreal_import_location = import_assets_data['bfu_unreal_import_location']
     ImportedList = []
     ImportFailList = []
 

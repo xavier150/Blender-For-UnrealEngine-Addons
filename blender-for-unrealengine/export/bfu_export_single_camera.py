@@ -50,7 +50,7 @@ def ProcessCameraExport(op, obj):
     MyAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
     MyAsset.asset_name = obj.name
-    MyAsset.asset_global_scale = obj.exportGlobalScale
+    MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = bfu_utils.GetAssetType(obj)
     MyAsset.StartAssetExport()
@@ -67,7 +67,7 @@ def ProcessCameraExport(op, obj):
         file.path = dirpath
         file.type = "FBX"
 
-    if obj.ExportAsLod is False:
+    if obj.bfu_export_as_lod_mesh is False:
         if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
             bfu_export_utils.ExportSingleAdditionalTrackCamera(
                 dirpath,
@@ -124,7 +124,7 @@ def ExportSingleFbxCamera(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
-            global_matrix=axis_conversion(to_forward=addon_prefs.exportAxisForward, to_up=addon_prefs.exportAxisUp).to_4x4(),
+            global_matrix=axis_conversion(to_forward=addon_prefs.bfu_export_axis_forward, to_up=addon_prefs.bfu_export_axis_up).to_4x4(),
             apply_unit_scale=True,
             global_scale=bfu_utils.GetObjExportScale(obj),
             apply_scale_options='FBX_SCALE_NONE',
@@ -132,25 +132,25 @@ def ExportSingleFbxCamera(
             use_custom_props=addon_prefs.exportWithCustomProps,
             use_custom_curves=True,
             add_leaf_bones=False,
-            use_armature_deform_only=obj.exportDeformOnly,
+            use_armature_deform_only=obj.bfu_export_deform_only,
             bake_anim=True,
             bake_anim_use_nla_strips=False,
             bake_anim_use_all_actions=False,
             bake_anim_force_startend_keying=True,
             bake_anim_step=bfu_utils.GetAnimSample(obj),
-            bake_anim_simplify_factor=obj.SimplifyAnimForExport,
+            bake_anim_simplify_factor=obj.bfu_simplify_anim_for_export,
             path_mode='AUTO',
             embed_textures=False,
             batch_mode='OFF',
             use_batch_own_dir=True,
             use_metadata=addon_prefs.exportWithMetaData,
-            primary_bone_axis=obj.exportPrimaryBoneAxis,
-            secondary_bone_axis=obj.exportSecondaryBoneAxis,
+            primary_bone_axis=obj.bfu_export_primary_bone_axis,
+            secondary_bone_axis=obj.bfu_export_secondary_bone_axis,
             mirror_symmetry_right_side_bones=obj.bfu_mirror_symmetry_right_side_bones,
             use_ue_mannequin_bone_alignment=obj.bfu_use_ue_mannequin_bone_alignment,
             disable_free_scale_animation=obj.bfu_disable_free_scale_animation,
-            axis_forward=obj.exportAxisForward,
-            axis_up=obj.exportAxisUp,
+            axis_forward=obj.bfu_export_axis_forward,
+            axis_up=obj.bfu_export_axis_up,
             bake_space_transform=False
             )
 
