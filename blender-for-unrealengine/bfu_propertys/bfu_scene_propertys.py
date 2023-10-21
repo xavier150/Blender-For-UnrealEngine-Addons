@@ -18,40 +18,42 @@
 
 
 import bpy
+from .. import bbpl
 
 
 classes = (
 )
 
 
+
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bpy.types.Scene.bfu_object_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_object_import_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_object_lod_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_object_collision_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_object_material_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_object_vertex_color_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_object_light_map_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_object_uv_map_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_animation_action_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_animation_action_advanced_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_animation_nla_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_animation_nla_advanced_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_animation_advanced_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_skeleton_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_collection_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_object_advanced_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_export_type_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_camera_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_collision_socket_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_lightmap_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_nomenclature_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_export_filter_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_export_process_properties_expanded = bpy.props.BoolProperty()
-    bpy.types.Scene.bfu_script_tool_expanded = bpy.props.BoolProperty()
+    bpy.types.Scene.bfu_object_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Object Properties")
+    bpy.types.Scene.bfu_object_lod_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Lod")
+    bpy.types.Scene.bfu_object_collision_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Collision")
+    bpy.types.Scene.bfu_object_material_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Material")
+    bpy.types.Scene.bfu_object_vertex_color_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Vertex color")
+    bpy.types.Scene.bfu_object_light_map_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Light map")
+    bpy.types.Scene.bfu_object_uv_map_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="UV map")
+
+    bpy.types.Scene.bfu_animation_action_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Actions Properties")
+    bpy.types.Scene.bfu_animation_action_advanced_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Actions Advanced Properties")
+    bpy.types.Scene.bfu_animation_nla_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="NLA Properties")
+    bpy.types.Scene.bfu_animation_nla_advanced_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="NLA Advanced Properties")
+    bpy.types.Scene.bfu_animation_advanced_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Animation Advanced Properties")
+
+    bpy.types.Scene.bfu_skeleton_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Skeleton")
+    bpy.types.Scene.bfu_collection_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Collection Properties")
+    bpy.types.Scene.bfu_object_advanced_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Object advanced Properties")
+    bpy.types.Scene.bfu_camera_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Camera")
+    bpy.types.Scene.bfu_collision_socket_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Collision and Socket")
+    bpy.types.Scene.bfu_lightmap_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Light Map")
+    bpy.types.Scene.bfu_nomenclature_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Nomenclature")
+    bpy.types.Scene.bfu_export_filter_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Export filters")
+    bpy.types.Scene.bfu_export_process_properties_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Export process")
+    bpy.types.Scene.bfu_script_tool_expanded = bpy.props.PointerProperty(type=bbpl.addon_ui.expend_section_ui.BBPL_UI_ExpendSection, name="Copy Import Script")
 
     bpy.types.Scene.bfu_active_tab = bpy.props.EnumProperty(
         items=(
@@ -82,12 +84,20 @@ def unregister():
         bpy.utils.unregister_class(cls)
 
     del bpy.types.Scene.bfu_object_properties_expanded
-    del bpy.types.Scene.bfu_object_import_properties_expanded
+    del bpy.types.Scene.bfu_object_lod_properties_expanded
+    del bpy.types.Scene.bfu_object_collision_properties_expanded
+    del bpy.types.Scene.bfu_object_material_properties_expanded
+    del bpy.types.Scene.bfu_object_vertex_color_properties_expanded
+    del bpy.types.Scene.bfu_object_light_map_properties_expanded
+    del bpy.types.Scene.bfu_object_uv_map_properties_expanded
+
     del bpy.types.Scene.bfu_animation_action_properties_expanded
     del bpy.types.Scene.bfu_animation_action_advanced_properties_expanded
     del bpy.types.Scene.bfu_animation_nla_properties_expanded
     del bpy.types.Scene.bfu_animation_nla_advanced_properties_expanded
     del bpy.types.Scene.bfu_animation_advanced_properties_expanded
+
+    del bpy.types.Scene.bfu_skeleton_properties_expanded
     del bpy.types.Scene.bfu_collection_properties_expanded
     del bpy.types.Scene.bfu_object_advanced_properties_expanded
     del bpy.types.Scene.bfu_collision_socket_expanded

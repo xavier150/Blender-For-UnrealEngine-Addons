@@ -276,14 +276,16 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         ready_for_convert_collider = False
         ready_for_convert_socket = False
 
-        bfu_ui_utils.LayoutSection(layout, "bfu_camera_expanded", "Camera")
-        if scene.bfu_camera_expanded:
+
+        scene.bfu_camera_expanded.draw(layout)
+        if scene.bfu_camera_expanded.is_expend():
             copy_camera_buttons = layout.column()
             copy_camera_buttons.operator("object.copy_regular_cameras_command", icon="COPYDOWN")
             copy_camera_buttons.operator("object.copy_cine_cameras_command", icon="COPYDOWN")
 
-        bfu_ui_utils.LayoutSection(layout, "bfu_collision_socket_expanded", "Collision and Socket")
-        if scene.bfu_collision_socket_expanded:
+
+        scene.bfu_collision_socket_expanded.draw(layout)
+        if scene.bfu_collision_socket_expanded.is_expend():
             if not ActiveModeIs("OBJECT"):
                 layout.label(text="Switch to Object Mode.", icon='INFO')
             else:
@@ -365,8 +367,8 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                 if obj.type == "ARMATURE":
                     copy_skeletalsocket_buttons.enabled = True
 
-        bfu_ui_utils.LayoutSection(layout, "bfu_lightmap_expanded", "Light Map")
-        if scene.bfu_lightmap_expanded:
+        scene.bfu_lightmap_expanded.draw(layout)
+        if scene.bfu_lightmap_expanded.is_expend():
             checkButton = layout.column()
             checkButton.operator("object.computalllightmap", icon='TEXTURE')
 

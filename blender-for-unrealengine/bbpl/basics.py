@@ -18,6 +18,7 @@
 
 # ----------------------------------------------
 #  BBPL -> BleuRaven Blender Python Library
+#  BleuRaven.fr
 #  xavierloux.com
 # ----------------------------------------------
 

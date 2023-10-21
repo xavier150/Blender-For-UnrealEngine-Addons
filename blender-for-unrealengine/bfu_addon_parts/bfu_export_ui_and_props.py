@@ -625,8 +625,8 @@ class BFU_PT_Export(bpy.types.Panel):
             text='',
             icon='REMOVE').remove_active = True
 
-        bfu_ui_utils.LayoutSection(layout, "bfu_nomenclature_properties_expanded", "Nomenclature")
-        if scene.bfu_nomenclature_properties_expanded:
+        scene.bfu_nomenclature_properties_expanded.draw(layout)
+        if scene.bfu_nomenclature_properties_expanded.is_expend():
 
             # Prefix
             propsPrefix = self.layout.row()
@@ -679,8 +679,8 @@ class BFU_PT_Export(bpy.types.Panel):
                     'bfu_file_import_sequencer_script_name',
                     icon='FILE')
 
-        bfu_ui_utils.LayoutSection(layout, "bfu_export_filter_properties_expanded", "Export filters")
-        if scene.bfu_export_filter_properties_expanded:
+        scene.bfu_export_filter_properties_expanded.draw(layout)
+        if scene.bfu_export_filter_properties_expanded.is_expend():
 
             # Assets
             row = layout.row()
@@ -707,8 +707,8 @@ class BFU_PT_Export(bpy.types.Panel):
             export_by_select = layout.row()
             export_by_select.prop(scene, 'bfu_export_selection_filter')
 
-        bfu_ui_utils.LayoutSection(layout, "bfu_export_process_properties_expanded", "Export process")
-        if scene.bfu_export_process_properties_expanded:
+        scene.bfu_export_process_properties_expanded.draw(layout)
+        if scene.bfu_export_process_properties_expanded.is_expend():
 
             # Feedback info :
             AssetNum = len(bfu_utils.GetFinalAssetToExport())
@@ -726,8 +726,8 @@ class BFU_PT_Export(bpy.types.Panel):
             exportButton.scale_y = 2.0
             exportButton.operator("object.exportforunreal", icon='EXPORT')
 
-        bfu_ui_utils.LayoutSection(layout, "bfu_script_tool_expanded", "Copy Import Script")
-        if scene.bfu_script_tool_expanded:
+        scene.bfu_script_tool_expanded.draw(layout)
+        if scene.bfu_script_tool_expanded.is_expend():
             if addon_prefs.useGeneratedScripts:
                 copyButton = layout.row()
                 copyButton.operator("object.copy_importassetscript_command")

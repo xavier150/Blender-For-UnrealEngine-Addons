@@ -32,7 +32,6 @@ xavierloux.loux@gmail.com
 
 import bpy
 import importlib
-print("INIT")
 from . import bps
 from . import bbpl
 from . import bfu_propertys
@@ -111,10 +110,10 @@ classes = (
 
 
 def register():
-    print("INIT register")
     for cls in classes:
         bpy.utils.register_class(cls)
 
+    bbpl.register()
     bfu_propertys.register()
     bfu_addon_parts.register()
     bfu_ui_utils.register()
@@ -128,6 +127,7 @@ def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
+    bbpl.unregister()
     bfu_propertys.unregister()
     bfu_addon_parts.unregister()
     bfu_ui_utils.unregister()

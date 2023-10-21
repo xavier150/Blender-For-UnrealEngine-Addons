@@ -20,14 +20,6 @@
 import os
 import bpy
 
-def LayoutSection(layout, PropName, PropLabel):
-    scene = bpy.context.scene
-    expanded = getattr(scene, PropName)
-    tria_icon = "TRIA_DOWN" if expanded else "TRIA_RIGHT"
-    layout.row().prop(scene, PropName, icon=tria_icon, icon_only=True, text=PropLabel, emboss=False)
-    return expanded
-
-
 def DisplayPropertyFilter(active_tab, active_sub_tab):
     # Define more easily the options which must be displayed or not
 

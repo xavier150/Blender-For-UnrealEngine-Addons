@@ -18,11 +18,15 @@
 
 # ----------------------------------------------
 #  BBPL -> BleuRaven Blender Python Library
+#  BleuRaven.fr
 #  xavierloux.com
 # ----------------------------------------------
 
+import bpy
 import importlib
 
+
+from . import addon_ui
 from . import basics
 from . import utils
 from . import rig_utils
@@ -32,6 +36,8 @@ from . import anim_utils
 from . import scene_utils
 from . import ui_utils
 
+if "addon_ui" in locals():
+    importlib.reload(addon_ui)
 if "basics" in locals():
     importlib.reload(basics)
 if "utils" in locals():
@@ -48,3 +54,22 @@ if "scene_utils" in locals():
     importlib.reload(scene_utils)
 if "ui_utils" in locals():
     importlib.reload(ui_utils)
+
+
+classes = (
+)
+
+
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
+    addon_ui.register()
+
+
+def unregister():
+    for cls in reversed(classes):
+        bpy.utils.unregister_class(cls)
+
+    addon_ui.unregister()

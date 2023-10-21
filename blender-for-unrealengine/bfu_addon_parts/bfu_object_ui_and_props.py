@@ -1376,8 +1376,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             layout.row().prop(scene, "bfu_active_scene_tab", expand=True)
 
         if bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
-            bfu_ui_utils.LayoutSection(layout, "bfu_object_properties_expanded", "Object Properties")
-            if scene.bfu_object_properties_expanded:
+            
+            scene.bfu_object_properties_expanded.draw(layout)
+            if scene.bfu_object_properties_expanded.is_expend():
 
                 if obj is None:
                     layout.row().label(text='No selected object.')
@@ -1462,8 +1463,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 exportCustomNameText.prop(obj, "bfu_custom_export_name")
                                 exportCustomNameText.enabled = useCustomName
 
-            bfu_ui_utils.LayoutSection(layout, "bfu_object_advanced_properties_expanded", "Object advanced Properties")
-            if scene.bfu_object_advanced_properties_expanded:
+            scene.bfu_object_advanced_properties_expanded.draw(layout)
+            if scene.bfu_object_advanced_properties_expanded.is_expend():
                 if obj is not None:
                     if obj.bfu_export_type == "export_recursive":
 
@@ -1488,8 +1489,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 else:
                     layout.label(text='(No properties to show.)')
 
-            bfu_ui_utils.LayoutSection(layout, "bfu_skeleton_properties_expanded", "Skeleton")
-            if scene.bfu_skeleton_properties_expanded:
+            scene.bfu_skeleton_properties_expanded.draw(layout)
+            if scene.bfu_skeleton_properties_expanded.is_expend():
                 if addon_prefs.useGeneratedScripts and obj is not None:
                     if obj.bfu_export_type == "export_recursive":
 
@@ -1517,8 +1518,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             if obj is not None:
                 if obj.bfu_export_type == "export_recursive" and not obj.bfu_export_as_lod_mesh:
 
-                    bfu_ui_utils.LayoutSection(layout, "bfu_animation_action_properties_expanded", "Actions Properties")
-                    if scene.bfu_animation_action_properties_expanded:
+                    scene.bfu_animation_action_properties_expanded.draw(layout)
+                    if scene.bfu_animation_action_properties_expanded.is_expend():
                         if (bfu_utils.GetAssetType(obj) == "SkeletalMesh" or
                                 bfu_utils.GetAssetType(obj) == "Camera" or
                                 bfu_utils.GetAssetType(obj) == "Alembic"):
@@ -1580,8 +1581,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             layout.label(
                                 text='(This assets is not a SkeletalMesh or Camera)')
 
-                    bfu_ui_utils.LayoutSection(layout, "bfu_animation_action_advanced_properties_expanded", "Actions Advanced Properties")
-                    if scene.bfu_animation_action_advanced_properties_expanded:
+                    scene.bfu_animation_action_advanced_properties_expanded.draw(layout)
+                    if scene.bfu_animation_action_advanced_properties_expanded.is_expend():
 
                         if bfu_utils.GetAssetType(obj) != "Alembic":
                             transformProp = layout.column()
@@ -1589,8 +1590,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             transformProp.prop(obj, "bfu_move_action_to_center_for_export")
                             transformProp.prop(obj, "bfu_rotate_action_to_zero_for_export")
 
-                    bfu_ui_utils.LayoutSection(layout, "bfu_animation_nla_properties_expanded", "NLA Properties")
-                    if scene.bfu_animation_nla_properties_expanded:
+                    scene.bfu_animation_nla_properties_expanded.draw(layout)
+                    if scene.bfu_animation_nla_properties_expanded.is_expend():
                         # NLA
                         if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
                             NLAAnim = layout.row()
@@ -1616,16 +1617,18 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 OfsetTime.prop(obj, 'bfu_anim_nla_start_frame_offset')
                                 OfsetTime.prop(obj, 'bfu_anim_nla_end_frame_offset')
 
-                    bfu_ui_utils.LayoutSection(layout, "bfu_animation_nla_advanced_properties_expanded", "NLA Advanced Properties")
-                    if scene.bfu_animation_nla_advanced_properties_expanded:
+
+                    scene.bfu_animation_nla_advanced_properties_expanded.draw(layout)
+                    if scene.bfu_animation_nla_advanced_properties_expanded.is_expend():
                         if bfu_utils.GetAssetType(obj) != "Alembic":
                             transformProp2 = layout.column()
                             transformProp2.enabled = obj.bfu_anim_nla_use
                             transformProp2.prop(obj, "bfu_move_nla_to_center_for_export")
                             transformProp2.prop(obj, "bfu_rotate_nla_to_zero_for_export")
 
-                    bfu_ui_utils.LayoutSection(layout, "bfu_animation_advanced_properties_expanded", "Animation Advanced Properties")
-                    if scene.bfu_animation_advanced_properties_expanded:
+
+                    scene.bfu_animation_advanced_properties_expanded.draw(layout)
+                    if scene.bfu_animation_advanced_properties_expanded.is_expend():
                         # Animation fbx properties
                         if (bfu_utils.GetAssetType(obj) != "Alembic"):
                             propsFbx = layout.row()
@@ -1659,8 +1662,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 layout.label(text='(No properties to show.)')
 
         if bfu_ui_utils.DisplayPropertyFilter("OBJECT", "MISC"):
-            bfu_ui_utils.LayoutSection(layout, "bfu_object_lod_properties_expanded", "Lod")
-            if scene.bfu_object_lod_properties_expanded:
+
+            scene.bfu_object_lod_properties_expanded.draw(layout)
+            if scene.bfu_object_lod_properties_expanded.is_expend():
                 if addon_prefs.useGeneratedScripts and obj is not None:
                     if obj.bfu_export_type == "export_recursive":
 
@@ -1689,9 +1693,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                     obj,
                                     'bfu_static_mesh_lod_group'
                                     )
-
-            bfu_ui_utils.LayoutSection(layout, "bfu_object_collision_properties_expanded", "Collision")
-            if scene.bfu_object_collision_properties_expanded:
+            scene.bfu_object_collision_properties_expanded.draw(layout)
+            if scene.bfu_object_collision_properties_expanded.is_expend():
                 if addon_prefs.useGeneratedScripts and obj is not None:
                     if obj.bfu_export_type == "export_recursive":
 
@@ -1714,8 +1717,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 bfu_create_physics_asset = layout.row()
                                 bfu_create_physics_asset.prop(obj, "bfu_create_physics_asset")
 
-            bfu_ui_utils.LayoutSection(layout, "bfu_object_material_properties_expanded", "Material")
-            if scene.bfu_object_material_properties_expanded:
+
+            scene.bfu_object_material_properties_expanded.draw(layout)
+            if scene.bfu_object_material_properties_expanded.is_expend():
                 if addon_prefs.useGeneratedScripts and obj is not None:
                     if obj.bfu_export_type == "export_recursive":
 
@@ -1728,8 +1732,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 bfu_material_search_location.prop(
                                     obj, 'bfu_material_search_location')
 
-            bfu_ui_utils.LayoutSection(layout, "bfu_object_vertex_color_properties_expanded", "Vertex color")
-            if scene.bfu_object_vertex_color_properties_expanded:
+
+            scene.bfu_object_vertex_color_properties_expanded.draw(layout)
+            if scene.bfu_object_vertex_color_properties_expanded.is_expend():
                 if addon_prefs.useGeneratedScripts and obj is not None:
                     if obj.bfu_export_type == "export_recursive":
 
@@ -1759,8 +1764,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 my_text = 'Vertex color property will be apply on the childrens.'
                                 StaticMeshVertexColorFeedback.label(text=my_text, icon='INFO')
 
-            bfu_ui_utils.LayoutSection(layout, "bfu_object_light_map_properties_expanded", "Light map")
-            if scene.bfu_object_light_map_properties_expanded:
+
+            scene.bfu_object_light_map_properties_expanded.draw(layout)
+            if scene.bfu_object_light_map_properties_expanded.is_expend():
                 if addon_prefs.useGeneratedScripts and obj is not None:
                     if obj.bfu_export_type == "export_recursive":
 
@@ -1785,8 +1791,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             bfu_generate_light_map_uvs = layout.row()
                             bfu_generate_light_map_uvs.prop(obj, 'bfu_generate_light_map_uvs')
 
-            bfu_ui_utils.LayoutSection(layout, "bfu_object_uv_map_properties_expanded", "UV map")
-            if scene.bfu_object_uv_map_properties_expanded:
+
+            scene.bfu_object_uv_map_properties_expanded.draw(layout)
+            if scene.bfu_object_uv_map_properties_expanded.is_expend():
                 if obj.bfu_export_type == "export_recursive":
                     # Geometry Node Uv
                     bfu_convert_geometry_node_attribute_to_uv = layout.column()
@@ -1803,8 +1810,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     bfu_ui_utils.DocPageButton(bfu_correct_extrem_uv_scale, "wiki/UV-Maps", "Extreme UV Scale")
 
         if bfu_ui_utils.DisplayPropertyFilter("SCENE", "GENERAL"):
-            bfu_ui_utils.LayoutSection(layout, "bfu_collection_properties_expanded", "Collection Properties")
-            if scene.bfu_collection_properties_expanded:
+
+            scene.bfu_collection_properties_expanded.draw(layout)
+            if scene.bfu_collection_properties_expanded.is_expend():
                 collectionListProperty = layout.column()
                 collectionListProperty.template_list(
                     # type and unique id
