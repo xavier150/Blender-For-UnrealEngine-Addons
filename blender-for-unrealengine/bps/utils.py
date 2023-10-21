@@ -17,8 +17,9 @@
 # ======================= END GPL LICENSE BLOCK =============================
 
 # ----------------------------------------------
-#  BleuRaven Python Script
-#  xavierloux.com
+#  BPS -> BleuRaven Python Script
+#  BleuRaven.fr
+#  XavierLoux.com
 # ----------------------------------------------
 
 import time

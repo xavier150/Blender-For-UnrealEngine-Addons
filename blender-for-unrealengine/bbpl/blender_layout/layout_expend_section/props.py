@@ -19,33 +19,31 @@
 # ----------------------------------------------
 #  BBPL -> BleuRaven Blender Python Library
 #  BleuRaven.fr
-#  xavierloux.com
+#  XavierLoux.com
 # ----------------------------------------------
 
 import bpy
-import importlib
 
-from . import expend_section_ui
+class BBPL_UI_ExpendSection(bpy.types.PropertyGroup):
 
-if "expend_section_ui" in locals():
-    importlib.reload(expend_section_ui)
+    expend: bpy.props.BoolProperty(
+        name="Use",
+        description="Click to expand / collapse",
+        default=False
+    )
+    
+    def getName(self):
+        prop_rna = self.id_data.bl_rna.properties[self.id_properties_ensure().name]
+        return prop_rna.name
 
-import bpy
+    def draw(self, layout: bpy.types.UILayout):
+        tria_icon = "TRIA_DOWN" if self.expend else "TRIA_RIGHT"
+        description = "Click to collapse" if self.expend else "Click to expand"
+        layout.row().prop(self, "expend", icon=tria_icon, icon_only=True, text=self.getName(), emboss=False, toggle=True, expand=True)
+        if self.expend:
+            pass
+
+    def is_expend(self):
+        return self.expend
 
 
-classes = (
-)
-
-
-
-def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
-
-    expend_section_ui.register()
-
-def unregister():
-    for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
-
-    expend_section_ui.unregister()

@@ -18,7 +18,8 @@
 
 # ----------------------------------------------
 #  BPS -> BleuRaven Python Script
-#  xavierloux.com
+#  BleuRaven.fr
+#  XavierLoux.com
 # ----------------------------------------------
 
 import importlib

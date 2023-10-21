@@ -1,4 +1,3 @@
-
 # ====================== BEGIN GPL LICENSE BLOCK ============================
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -20,39 +19,15 @@
 # ----------------------------------------------
 #  BBPL -> BleuRaven Blender Python Library
 #  BleuRaven.fr
-#  xavierloux.com
+#  XavierLoux.com
 # ----------------------------------------------
 
-
-
-class BBPL_UI_ExpendSection(bpy.types.PropertyGroup):
-
-    expend: bpy.props.BoolProperty(
-        name="Use",
-        description="Click to expand / collapse",
-        default=False
-    )
-    
-    def getName(self):
-        prop_rna = self.id_data.bl_rna.properties[self.id_properties_ensure().name]
-        return prop_rna.name
-
-    def draw(self, layout: bpy.types.UILayout):
-        tria_icon = "TRIA_DOWN" if self.expend else "TRIA_RIGHT"
-        description = "Click to collapse" if self.expend else "Click to expand"
-        layout.row().prop(self, "expend", icon=tria_icon, icon_only=True, text=self.getName(), emboss=False, toggle=True, expand=True)
-        if self.expend:
-            pass
-
-    def is_expend(self):
-        return self.expend
-
-
-
 import bpy
+from . import props
+
 
 classes = (
-    BBPL_UI_ExpendSection,
+    props.BBPL_UI_ExpendSection,
 )
 
 def register():
