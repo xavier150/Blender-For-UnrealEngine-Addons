@@ -25,6 +25,7 @@ from . import bfu_export_single_fbx_nla_anim
 from . import bfu_export_single_skeletal_mesh
 from . import bfu_export_single_static_mesh
 from . import bfu_export_single_static_mesh_collection
+from .. import bfu_cached_asset_list
 from .. import bps
 from .. import bbpl
 from .. import bfu_basics
@@ -46,6 +47,8 @@ if "bpy" in locals():
         importlib.reload(bfu_export_single_static_mesh)
     if "bfu_export_single_static_mesh_collection" in locals():
         importlib.reload(bfu_export_single_static_mesh_collection)
+    if "bfu_cached_asset_list" in locals():
+        importlib.reload(bfu_cached_asset_list)
     if "bps" in locals():
         importlib.reload(bps)
     if "bbpl" in locals():
@@ -119,7 +122,9 @@ def ExportAllAssetByList(op, targetobjects, targetActionName, targetcollection):
     scene = bpy.context.scene
     counter = bps.utils.CounterTimer()
 
-    NumberAssetToExport = len(bfu_utils.GetFinalAssetToExport())
+    final_asset_cache = bfu_cached_asset_list.GetfinalAssetCache()
+    final_asset_list_to_export = final_asset_cache.GetFinalAssetList()
+    NumberAssetToExport = len(final_asset_list_to_export)
 
     def UpdateExportProgress(time=None):
         exported_assets = len(scene.UnrealExportedAssetsList)
@@ -142,7 +147,9 @@ def ExportAllAssetByList(op, targetobjects, targetActionName, targetcollection):
     # Export collections
     print("Start Export collection(s)")
     if scene.static_collection_export:
-        for col in bfu_utils.GetCollectionToExport(scene):
+        collection_asset_cache = bfu_cached_asset_list.GetCollectionAssetCache()
+        collection_export_asset_list = collection_asset_cache.GetCollectionAssetList()
+        for col in collection_export_asset_list:
             if col.name in targetcollection:
                 # Save current start/end frame
                 UserStartFrame = scene.frame_start
@@ -215,7 +222,9 @@ def ExportAllAssetByList(op, targetobjects, targetActionName, targetcollection):
             if bfu_utils.GetAssetType(obj) == "SkeletalMesh" and obj.visible_get():
                 print("Start Export Action(s)")
                 action_curve_scale = None
-                for action in bfu_utils.GetActionToExport(obj):
+                animation_asset_cache = bfu_cached_asset_list.GetAnimationAssetCache(obj)
+                animation_to_export = animation_asset_cache.GetAnimationAssetList()
+                for action in animation_to_export:
                     if action.name in targetActionName:
                         animType = bfu_utils.GetActionType(action)
 
@@ -284,10 +293,12 @@ def ExportForUnrealEngine(op):
     
     if export_filter == "default":
         PrepareSceneForExport()
-        AssetToExport = bfu_utils.GetFinalAssetToExport()
+        final_asset_cache = bfu_cached_asset_list.GetfinalAssetCache()
+        final_asset_list_to_export = final_asset_cache.GetFinalAssetList()
 
     elif export_filter == "only_object" or export_filter == "only_object_action":
-        AssetToExport = bfu_utils.GetFinalAssetToExport() #Get finial assets visible only
+        final_asset_cache = bfu_cached_asset_list.GetfinalAssetCache()
+        final_asset_list_to_export = final_asset_cache.GetFinalAssetList() #Get finial assets visible only
         PrepareSceneForExport()
 
 
@@ -305,7 +316,7 @@ def ExportForUnrealEngine(op):
     col_list = []  # Do a simple list of Collection to export
 
 
-    for Asset in AssetToExport:
+    for Asset in final_asset_list_to_export:
         if Asset.asset_type == "Action" or Asset.asset_type == "Pose":
             if Asset.obj not in action_list:
                 action_list.append(Asset.action.name)

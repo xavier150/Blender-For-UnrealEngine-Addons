@@ -24,6 +24,8 @@ import math
 from . import bbpl
 from . import bfu_basics
 from . import bfu_utils
+from . import bfu_cached_asset_list
+
 
 def CorrectBadProperty(list=None):
     # Corrects bad properties
@@ -71,15 +73,29 @@ def UpdateNameHierarchy(list=None):
 
 def GetVertexWithZeroWeight(Armature, Mesh):
     vertices = []
-    for vertex in Mesh.data.vertices:
+    
+    # Créez un ensemble des noms des os de l'armature pour une recherche plus rapide
+    armature_bone_names = set(bone.name for bone in Armature.data.bones)
+    
+    
+    for vertex in Mesh.data.vertices: #MeshVertex(bpy_struct)
         cumulateWeight = 0
-        if len(vertex.groups) > 0:
-            for GroupElem in vertex.groups:
-                if (Mesh.vertex_groups[GroupElem.group].name in
-                        Armature.data.bones):
-                    cumulateWeight += GroupElem.weight
+        
+        if vertex.groups:
+            for group_elem in vertex.groups: #VertexGroupElement(bpy_struct)
+                if group_elem.weight > 0:
+                    group_index = group_elem.group
+                    group_len = len(Mesh.vertex_groups)
+                    if group_index <= group_len:
+                        group = Mesh.vertex_groups[group_elem.group]
+                        
+                        # Utilisez l'ensemble des noms d'os pour vérifier l'appartenance à l'armature
+                        if group.name in armature_bone_names:
+                            cumulateWeight += group_elem.weight
+        
         if cumulateWeight == 0:
             vertices.append(vertex)
+    
     return vertices
 
 
@@ -109,7 +125,9 @@ def UpdateUnrealPotentialError():
 
     # prepares the data to avoid unnecessary loops
     objToCheck = []
-    for Asset in bfu_utils.GetFinalAssetToExport():
+    final_asset_cache = bfu_cached_asset_list.GetfinalAssetCache()
+    final_asset_list_to_export = final_asset_cache.GetFinalAssetList()
+    for Asset in final_asset_list_to_export:
         if Asset.obj in bfu_utils.GetAllobjectsByExportType("export_recursive"):
             if Asset.obj not in objToCheck:
                 objToCheck.append(Asset.obj)
@@ -492,7 +510,9 @@ def UpdateUnrealPotentialError():
         # Check that animations do not use a invalid value
         for obj in objToCheck:
             if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
-                for action in bfu_utils.GetActionToExport(obj):
+                animation_asset_cache = bfu_cached_asset_list.GetAnimationAssetCache(obj)
+                animation_to_export = animation_asset_cache.GetAnimationAssetList()
+                for action in animation_to_export:
                     for fcurve in action.fcurves:
                         if fcurve.data_path.split(".")[-1] == "scale":
                             for key in fcurve.keyframe_points:

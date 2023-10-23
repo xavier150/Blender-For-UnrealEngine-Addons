@@ -14,10 +14,11 @@ from .. import bfu_write_text
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_check_potential_error
+from .. import bfu_cached_asset_list
 from .. import bfu_ui_utils
-
 from .. import bbpl
 from .. import bps
+
 
 
 class BFU_PT_Export(bpy.types.Panel):
@@ -204,18 +205,21 @@ class BFU_PT_Export(bpy.types.Panel):
             obj = context.object
             if obj:
                 if obj.type == "ARMATURE":
-                    bfu_utils.UpdateActionCache(obj)
+                    animation_asset_cache = bfu_cached_asset_list.GetAnimationAssetCache(obj)
+                    animation_asset_cache.UpdateActionCache()
+                    
 
-            assets = bfu_utils.GetFinalAssetToExport()
+            final_asset_cache = bfu_cached_asset_list.GetfinalAssetCache()
+            final_asset_list_to_export = final_asset_cache.GetFinalAssetList()
             popup_title = "Assets list"
-            if len(assets) > 0:
-                popup_title = str(len(assets))+' asset(s) will be exported.'
+            if len(final_asset_list_to_export) > 0:
+                popup_title = str(len(final_asset_list_to_export))+' asset(s) will be exported.'
             else:
                 popup_title = 'No exportable assets were found.'
 
             def draw(self, context):
                 col = self.layout.column()
-                for asset in assets:
+                for asset in final_asset_list_to_export:
                     row = col.row()
                     if asset.obj is not None:
                         if asset.action is not None:
@@ -228,12 +232,12 @@ class BFU_PT_Export(bpy.types.Panel):
                             else:
                                 action = "..."
                             row.label(
-                                text="- ["+asset.obj.name+"] --> " +
+                                text="- ["+asset.name+"] --> " +
                                 action+" ("+asset.asset_type+")")
                         else:
                             if asset.asset_type != "Collection StaticMesh":
                                 row.label(
-                                    text="- "+asset.obj.name +
+                                    text="- "+asset.name +
                                     " ("+asset.asset_type+")")
                             else:
                                 row.label(
@@ -445,7 +449,9 @@ class BFU_PT_Export(bpy.types.Panel):
                         "No asset type is checked.")
                     return False
 
-                if not len(bfu_utils.GetFinalAssetToExport()) > 0:
+                final_asset_cache = bfu_cached_asset_list.GetfinalAssetCache()
+                final_asset_list_to_export = final_asset_cache.GetFinalAssetList()
+                if not len(final_asset_list_to_export) > 0:
                     self.report(
                         {'WARNING'},
                         "Not found assets with" +
@@ -711,7 +717,9 @@ class BFU_PT_Export(bpy.types.Panel):
         if scene.bfu_export_process_properties_expanded.is_expend():
 
             # Feedback info :
-            AssetNum = len(bfu_utils.GetFinalAssetToExport())
+            final_asset_cache = bfu_cached_asset_list.GetfinalAssetCache()
+            final_asset_list_to_export = final_asset_cache.GetFinalAssetList()
+            AssetNum = len(final_asset_list_to_export)
             AssetInfo = layout.row().box().split(factor=0.75)
             AssetFeedback = str(AssetNum) + " Asset(s) will be exported."
             AssetInfo.label(text=AssetFeedback, icon='INFO')

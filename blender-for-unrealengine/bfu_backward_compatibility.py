@@ -20,31 +20,36 @@
 import bpy
 from bpy.app.handlers import persistent
 
-def update_variable(data, old_vars, new_var, callback=None):
-    for old_var in old_vars:
-        if old_var in data:
-            if callback:
-                data[new_var] = callback(data[old_var])
-            else:
-                data[new_var] = data[old_var]
-            del data[old_var]
-            print(f'"{old_var}" updated to "{new_var}" in {data.name}')
+def update_variable(data, old_var_names, new_var_name, callback=None):
+    for old_var_name in old_var_names:
+        if old_var_name in data:
+            try:
+                if callback:
+                    new_value = callback(data, old_var_name, new_var_name)
+                    setattr(data, new_var_name, new_value)
+                else:
+                    setattr(data, new_var_name, data[old_var_name])
+
+                del data[old_var_name]
+                print(f'"{old_var_name}" updated to "{new_var_name}" in {data.name}')
+            except Exception as e:
+                print(f'Error updating "{old_var_name}" to "{new_var_name}" in {data.name}: {str(e)}')
 
 def update_old_variables():
     print("Updating old bfu variables...")
 
     for obj in bpy.data.objects:
-        update_variable(obj, ["ExportEnum"], "bfu_export_type", export_enum_callback)
+        update_variable(obj, ["ExportEnum"], "bfu_export_type", enum_callback)
         update_variable(obj, ["exportFolderName"], "bfu_export_folder_name")
         update_variable(obj, ["ExportAsAlembic"], "bfu_export_as_alembic")
         update_variable(obj, ["ExportAsLod"], "bfu_export_as_lod_mesh")
         update_variable(obj, ["ForceStaticMesh"], "bfu_export_skeletal_mesh_as_static_mesh")
         update_variable(obj, ["exportDeformOnly"], "bfu_export_deform_only")
-        update_variable(obj, ["Ue4Lod1"], "bfu_lod_target1")
-        update_variable(obj, ["Ue4Lod2"], "bfu_lod_target2")
-        update_variable(obj, ["Ue4Lod3"], "bfu_lod_target3")
-        update_variable(obj, ["Ue4Lod4"], "bfu_lod_target4")
-        update_variable(obj, ["Ue4Lod5"], "bfu_lod_target5")
+        update_variable(obj, ["Ue4Lod1"], "bfu_lod_target1", object_pointer_callback)
+        update_variable(obj, ["Ue4Lod2"], "bfu_lod_target2", object_pointer_callback)
+        update_variable(obj, ["Ue4Lod3"], "bfu_lod_target3", object_pointer_callback)
+        update_variable(obj, ["Ue4Lod4"], "bfu_lod_target4", object_pointer_callback)
+        update_variable(obj, ["Ue4Lod5"], "bfu_lod_target5", object_pointer_callback)
         update_variable(obj, ["CreatePhysicsAsset"], "bfu_create_physics_asset")
 
         update_variable(obj, ["UseStaticMeshLODGroup"], "bfu_use_static_mesh_lod_group")
@@ -61,9 +66,9 @@ def update_old_variables():
         update_variable(obj, ["AutoGenerateCollision"], "bfu_auto_generate_collision")
         update_variable(obj, ["MaterialSearchLocation"], "bfu_material_search_location")
         update_variable(obj, ["CollisionTraceFlag"], "bfu_collision_trace_flag")
-        update_variable(obj, ["VertexColorImportOption"], "bfu_vertex_color_import_option")
+        update_variable(obj, ["VertexColorImportOption"], "bfu_vertex_color_import_option", enum_callback)
         update_variable(obj, ["VertexOverrideColor"], "bfu_vertex_color_override_color")
-        update_variable(obj, ["VertexColorToUse"], "bfu_vertex_color_to_use")
+        update_variable(obj, ["VertexColorToUse"], "bfu_vertex_color_to_use", enum_callback)
         update_variable(obj, ["VertexColorIndexToUse"], "bfu_vertex_color_index_to_use")
         update_variable(obj, ["PrefixNameToExport"], "bfu_prefix_name_to_export")
 
@@ -84,6 +89,9 @@ def update_old_variables():
         update_variable(obj, ["RotateNLAToZeroForExport"], "bfu_rotate_nla_to_zero_for_export")
         update_variable(obj, ["AdditionalLocationForExport"], "bfu_additional_location_for_export")
         update_variable(obj, ["AdditionalRotationForExport"], "bfu_additional_rotation_for_export")
+
+        update_variable(obj, ["exportActionList"], "bfu_animation_asset_list")
+        update_variable(obj, ["active_ObjectAction"], "bfu_active_animation_asset_list")
 
 
     for col in bpy.data.collections:
@@ -109,14 +117,31 @@ def update_old_variables():
         update_variable(col, ["unreal_import_module"], "bfu_unreal_import_module")
         update_variable(col, ["unreal_import_location"], "bfu_unreal_import_location")
 
+        update_variable(col, ["CollectionExportList"], "bfu_collection_asset_list")
+        update_variable(col, ["active_CollectionExportList"], "bfu_active_collection_asset_list")
 
-def export_enum_callback(value):
-    mapping = {
-        1: "auto",
-        2: "export_recursive",
-        3: "dont_export"
-    }
-    return mapping.get(value, "")
+
+def enum_callback(data, old_var_name, new_var_name):
+    value = data[old_var_name] # Get value ast int
+
+    enum_definition = data.bl_rna.properties.get(new_var_name)
+
+    if enum_definition and enum_definition.type == "ENUM":
+        # Obtenez la liste des valeurs de l'enum
+        enum_values = enum_definition.enum_items.keys()
+
+        return enum_values[value]
+    else:
+        print("La propriété spécifiée n'est pas une énumération.")
+
+    return value
+
+def object_pointer_callback(data, old_var_name, new_var_name):
+    value = data[old_var_name]
+    if isinstance(value, bpy.types.Object):
+        return value
+    return None
+
 
 
 @persistent

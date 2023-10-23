@@ -38,6 +38,7 @@ from bpy.types import (
 
 from .. import bfu_basics
 from .. import bfu_utils
+from .. import bfu_cached_asset_list
 from ..export import bfu_export_get_info
 from .. import bfu_ui_utils
 from .. import languages
@@ -278,15 +279,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         override={'LIBRARY_OVERRIDABLE'},
         items=[
             ("all_in_one",
-                "All in one",
+                "All In One",
                 "The child meshs as one skeletal mesh.",
                 1),
             ("every_meshs",
-                "Every meshs",
+                "Every Meshs",
                 "One skeletal mesh for every child meshs.",
                 2),
-            ("custom parts",
-                "Custom path and name",
+            ("specified_parts",
+                "Specified Parts",
                 "Specified mesh parts.",
                 3)
             ]
@@ -608,13 +609,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 "FILE_SCRIPT",
                 6),
             ]
-        )
-
-    bpy.types.Object.active_ObjectAction = IntProperty(
-        name="Active Scene Action",
-        description="Index of the currently active object action",
-        override={'LIBRARY_OVERRIDABLE'},
-        default=0
         )
 
     bpy.types.Object.bfu_prefix_name_to_export = StringProperty(
@@ -985,12 +979,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
     # Scene and global
 
-    bpy.types.Scene.active_CollectionExportList = IntProperty(
-        name="Active Collection",
-        description="Index of the currently active collection",
-        override={'LIBRARY_OVERRIDABLE'},
-        default=0
-        )
+
 
     class BFU_OT_OpenDocumentationPage(Operator):
         bl_label = "Documentation"
@@ -1095,15 +1084,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     return False
 
                 animSave = [["", False]]
-                for Anim in obj.exportActionList:  # CollectionProperty
+                for Anim in obj.bfu_animation_asset_list:  # CollectionProperty
                     name = Anim.name
                     use = Anim.use
                     animSave.append([name, use])
-                obj.exportActionList.clear()
+                obj.bfu_animation_asset_list.clear()
                 for action in bpy.data.actions:
-                    obj.exportActionList.add().name = action.name
+                    obj.bfu_animation_asset_list.add().name = action.name
                     useFromLast = SetUseFromLast(animSave, action.name)
-                    obj.exportActionList[action.name].use = useFromLast
+                    obj.bfu_animation_asset_list[action.name].use = useFromLast
             UpdateExportActionList(bpy.context.object)
             return {'FINISHED'}
 
@@ -1117,8 +1106,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
         def execute(self, context):
             obj = context.object
-            bfu_utils.UpdateActionCache(obj)
-            animation_to_export = bfu_utils.GetActionToExport(obj)
+            animation_asset_cache = bfu_cached_asset_list.GetAnimationAssetCache(obj)
+            animation_asset_cache.UpdateActionCache()
+            animation_to_export = animation_asset_cache.GetAnimationAssetList()
 
             popup_title = "Action list"
             if len(animation_to_export) > 0:
@@ -1319,15 +1309,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     return False
 
                 colSave = [["", False]]
-                for col in scene.CollectionExportList:  # CollectionProperty
+                for col in scene.bfu_collection_asset_list:  # CollectionProperty
                     name = col.name
                     use = col.use
                     colSave.append([name, use])
-                scene.CollectionExportList.clear()
+                scene.bfu_collection_asset_list.clear()
                 for col in bpy.data.collections:
-                    scene.CollectionExportList.add().name = col.name
+                    scene.bfu_collection_asset_list.add().name = col.name
                     useFromLast = SetUseFromLast(colSave, col.name)
-                    scene.CollectionExportList[col.name].use = useFromLast
+                    scene.bfu_collection_asset_list[col.name].use = useFromLast
             UpdateExportCollectionList(context.scene)
             return {'FINISHED'}
 
@@ -1338,17 +1328,18 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
         def execute(self, context):
             scene = context.scene
-            collections = bfu_utils.GetCollectionToExport(scene)
+            collection_asset_cache = bfu_cached_asset_list.GetCollectionAssetCache()
+            collection_export_asset_list = collection_asset_cache.GetCollectionAssetList()
             popup_title = "Collection list"
-            if len(collections) > 0:
+            if len(collection_export_asset_list) > 0:
                 popup_title = (
-                    str(len(collections))+' collection(s) to export found.')
+                    str(len(collection_export_asset_list))+' collection(s) to export found.')
             else:
                 popup_title = 'No collection to export found.'
 
-            def draw(self):
+            def draw(self, context):
                 col = self.layout.column()
-                for collection in collections:
+                for collection in collection_export_asset_list:
                     row = col.row()
                     row.label(text="- "+collection.name)
             bpy.context.window_manager.popup_menu(
@@ -1568,9 +1559,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                         # type and unique id
                                         "BFU_UL_ActionExportTarget", "",
                                         # pointer to the CollectionProperty
-                                        obj, "exportActionList",
+                                        obj, "bfu_animation_asset_list",
                                         # pointer to the active identifier
-                                        obj, "active_ObjectAction",
+                                        obj, "bfu_active_animation_asset_list",
                                         maxrows=5,
                                         rows=5
                                     )
@@ -1681,7 +1672,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         ArmaturePropertyInfo = (
                             layout.row().box().split(factor=0.75)
                             )
-                        ActionNum = len(bfu_utils.GetActionToExport(obj))
+                        animation_asset_cache = bfu_cached_asset_list.GetAnimationAssetCache(obj)
+                        animation_to_export = animation_asset_cache.GetAnimationAssetList()
+                        ActionNum = len(animation_to_export)
                         if obj.bfu_anim_nla_use:
                             ActionNum += 1
                         actionFeedback = (
@@ -1853,9 +1846,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     # type and unique id
                     "BFU_UL_CollectionExportTarget", "",
                     # pointer to the CollectionProperty
-                    scene, "CollectionExportList",
+                    scene, "bfu_collection_asset_list",
                     # pointer to the active identifier
-                    scene, "active_CollectionExportList",
+                    scene, "bfu_active_collection_asset_list",
                     maxrows=5,
                     rows=5
                 )
@@ -1863,15 +1856,17 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     "object.updatecollectionlist",
                     icon='RECOVER_LAST')
 
-                if scene.active_CollectionExportList < len(scene.CollectionExportList):
-                    col_name = scene.CollectionExportList[scene.active_CollectionExportList].name
+                if scene.bfu_active_collection_asset_list < len(scene.bfu_collection_asset_list):
+                    col_name = scene.bfu_collection_asset_list[scene.bfu_active_collection_asset_list].name
                     if col_name in bpy.data.collections:
                         col = bpy.data.collections[col_name]
                         col_prop = layout
                         col_prop.prop(col, 'bfu_export_folder_name', icon='FILE_FOLDER')
 
                 collectionPropertyInfo = layout.row().box().split(factor=0.75)
-                collectionNum = len(bfu_utils.GetCollectionToExport(scene))
+                collection_asset_cache = bfu_cached_asset_list.GetCollectionAssetCache()
+                collection_export_asset_list = collection_asset_cache.GetCollectionAssetList()
+                collectionNum = len(collection_export_asset_list)
                 collectionFeedback = (
                     str(collectionNum) +
                     " Collection(s) will be exported.")
@@ -1879,14 +1874,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 collectionPropertyInfo.operator("object.showscenecollection")
                 layout.label(text='Note: The collection are exported like StaticMesh.')
 
-class BFU_OT_ObjExportAction(bpy.types.PropertyGroup):
-    name: StringProperty(name="Action data name", default="Unknown", override={'LIBRARY_OVERRIDABLE'})
-    use: BoolProperty(name="use this action", default=False, override={'LIBRARY_OVERRIDABLE'})
 
 
 class BFU_OT_SceneCollectionExport(bpy.types.PropertyGroup):
     name: StringProperty(name="collection data name", default="Unknown", override={'LIBRARY_OVERRIDABLE'})
     use: BoolProperty(name="export this collection", default=False, override={'LIBRARY_OVERRIDABLE'})
+
+class BFU_OT_ObjExportAction(bpy.types.PropertyGroup):
+    name: StringProperty(name="Action data name", default="Unknown", override={'LIBRARY_OVERRIDABLE'})
+    use: BoolProperty(name="use this action", default=False, override={'LIBRARY_OVERRIDABLE'})
 
 
 
@@ -1909,6 +1905,8 @@ classes = (
     BFU_PT_BlenderForUnrealObject.BFU_UL_CollectionExportTarget,
     BFU_PT_BlenderForUnrealObject.BFU_OT_UpdateCollectionButton,
     BFU_PT_BlenderForUnrealObject.BFU_OT_ShowCollectionToExport,
+    BFU_OT_SceneCollectionExport,
+    BFU_OT_ObjExportAction,
 )
 
 
@@ -1916,23 +1914,34 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bpy.utils.register_class(BFU_OT_ObjExportAction)
-    bpy.types.Object.exportActionList = CollectionProperty(
-        type=BFU_OT_ObjExportAction,
-        options={'LIBRARY_EDITABLE'},
-        override={'LIBRARY_OVERRIDABLE', 'USE_INSERTION'},
-        )
-    bpy.utils.register_class(BFU_OT_SceneCollectionExport)
-    bpy.types.Scene.CollectionExportList = CollectionProperty(
+    bpy.types.Scene.bfu_collection_asset_list = CollectionProperty(
         type=BFU_OT_SceneCollectionExport,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE', 'USE_INSERTION'},
         )
 
+    bpy.types.Scene.bfu_active_collection_asset_list = IntProperty(
+        name="Active Collection",
+        description="Index of the currently active collection",
+        override={'LIBRARY_OVERRIDABLE'},
+        default=0
+        )
+
+    bpy.types.Object.bfu_animation_asset_list = CollectionProperty(
+        type=BFU_OT_ObjExportAction,
+        options={'LIBRARY_EDITABLE'},
+        override={'LIBRARY_OVERRIDABLE', 'USE_INSERTION'},
+        )
+
+    bpy.types.Object.bfu_active_animation_asset_list = IntProperty(
+        name="Active Scene Action",
+        description="Index of the currently active object action",
+        override={'LIBRARY_OVERRIDABLE'},
+        default=0
+        )
+
+
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
-
-    bpy.utils.unregister_class(BFU_OT_ObjExportAction)
-    bpy.utils.unregister_class(BFU_OT_SceneCollectionExport)

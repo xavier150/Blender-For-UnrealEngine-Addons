@@ -47,6 +47,7 @@ from . import bfu_write_import_sequencer_script
 from . import bfu_basics
 from . import bfu_utils
 from . import bfu_backward_compatibility
+from . import bfu_cached_asset_list
 from .export import bfu_export_asset
 
 if "bps" in locals():
@@ -81,6 +82,8 @@ if "bfu_export_asset" in locals():
     importlib.reload(bfu_export_asset)
 if "bfu_backward_compatibility" in locals():
     importlib.reload(bfu_backward_compatibility)
+if "bfu_cached_asset_list" in locals():
+    importlib.reload(bfu_cached_asset_list)
 
 bl_info = {
     'name': 'Blender for UnrealEngine',
@@ -122,17 +125,19 @@ def register():
     bfu_ui.register()
     bfu_check_potential_error.register()
     bfu_backward_compatibility.register()
+    bfu_cached_asset_list.register()
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
-    bbpl.unregister()
-    bfu_propertys.unregister()
-    bfu_addon_parts.unregister()
-    bfu_ui_utils.unregister()
-    bfu_addon_pref.unregister()
-    bfu_export_logs.unregister()
-    bfu_ui.unregister()
-    bfu_check_potential_error.unregister()
+    bfu_cached_asset_list.unregister()
     bfu_backward_compatibility.unregister()
+    bfu_check_potential_error.unregister()
+    bfu_ui.unregister()
+    bfu_export_logs.unregister()
+    bfu_addon_pref.unregister()
+    bfu_ui_utils.unregister()
+    bfu_addon_parts.unregister()
+    bfu_propertys.unregister()
+    bbpl.unregister()
