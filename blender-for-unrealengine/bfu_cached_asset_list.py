@@ -246,7 +246,7 @@ class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
                     elif obj.bfu_modular_skeletal_mesh_mode == "every_meshs":
                         for mesh in bfu_basics.GetChilds(obj):
                             asset = AssetToExport(obj, None, "SkeletalMesh")
-                            asset.name = obj.name + obj.bfu_modular_skeletal_mesh_every_meshs + mesh.name
+                            asset.name = obj.name + obj.bfu_modular_skeletal_mesh_every_meshs_separate + mesh.name
                             asset.obj_list = [mesh]
                             TargetAssetToExport.append(asset)
                     elif obj.bfu_modular_skeletal_mesh_mode == "specified_parts":

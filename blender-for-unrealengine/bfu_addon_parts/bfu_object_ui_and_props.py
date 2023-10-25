@@ -293,7 +293,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             ]
         )
     
-    bpy.types.Object.bfu_modular_skeletal_mesh_every_meshs = StringProperty(
+    bpy.types.Object.bfu_modular_skeletal_mesh_every_meshs_separate = StringProperty(
         name="Separate string",
         description="String between armature name and mesh name",
         override={'LIBRARY_OVERRIDABLE'},
@@ -1211,7 +1211,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.bfu_create_physics_asset',
                             'obj.bfu_skeleton_search_mode',
                             'obj.bfu_modular_skeletal_mesh_mode',
-                            'obj.bfu_modular_skeletal_mesh_every_meshs',
+                            'obj.bfu_modular_skeletal_mesh_every_meshs_separate',
+                            'obj.bfu_modular_skeletal_specified_parts_meshs_template',
                             'obj.bfu_target_skeleton_custom_path',
                             'obj.bfu_target_skeleton_custom_name',
                             'obj.bfu_target_skeleton_custom_ref',
@@ -1544,8 +1545,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             modular_skeletal_mesh = layout.column()
                             modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_mode")
                             if obj.bfu_modular_skeletal_mesh_mode == "every_meshs":
-                                modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_every_meshs")
-                                
+                                modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_every_meshs_separate")
+                            if obj.bfu_modular_skeletal_mesh_mode == "specified_parts":
+                                obj.bfu_modular_skeletal_specified_parts_meshs_template.draw(modular_skeletal_mesh)
+                                obj.bfu_modular_skeletal_specified_parts_meshs_template2.draw(modular_skeletal_mesh)
 
 
 

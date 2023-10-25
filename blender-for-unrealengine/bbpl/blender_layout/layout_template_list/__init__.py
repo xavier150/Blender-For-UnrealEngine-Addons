@@ -23,27 +23,24 @@
 # ----------------------------------------------
 
 import bpy
+import importlib
+from . import types
 
-class BBPL_UI_ExpendSection(bpy.types.PropertyGroup):
+if "types" in locals():
+    importlib.reload(types)
 
-    expend: bpy.props.BoolProperty(
-        name="Use",
-        description="Click to expand / collapse",
-        default=False
-    )
-    
-    def getName(self):
-        prop_rna = self.id_data.bl_rna.properties[self.id_properties_ensure().name]
-        return prop_rna.name
+classes = (
+)
 
-    def draw(self, layout: bpy.types.UILayout):
-        tria_icon = "TRIA_DOWN" if self.expend else "TRIA_RIGHT"
-        description = "Click to collapse" if self.expend else "Click to expand"
-        layout.row().prop(self, "expend", icon=tria_icon, icon_only=True, text=self.getName(), emboss=False, toggle=True, expand=True)
-        if self.expend:
-            pass
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
 
-    def is_expend(self):
-        return self.expend
+    types.register()
 
 
+def unregister():
+    for cls in reversed(classes):
+        bpy.utils.unregister_class(cls)
+
+    types.unregister()

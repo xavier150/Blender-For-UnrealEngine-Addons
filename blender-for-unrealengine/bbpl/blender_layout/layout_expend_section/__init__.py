@@ -23,11 +23,13 @@
 # ----------------------------------------------
 
 import bpy
-from . import props
+import importlib
+from . import types
 
+if "types" in locals():
+    importlib.reload(types)
 
 classes = (
-    props.BBPL_UI_ExpendSection,
 )
 
 def register():
