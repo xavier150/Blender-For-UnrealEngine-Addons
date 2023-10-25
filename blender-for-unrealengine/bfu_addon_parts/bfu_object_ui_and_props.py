@@ -280,15 +280,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         items=[
             ("all_in_one",
                 "All In One",
-                "The child meshs as one skeletal mesh.",
+                "Export all child meshs  of the armature as one skeletal mesh.",
                 1),
             ("every_meshs",
                 "Every Meshs",
-                "One skeletal mesh for every child meshs.",
+                "Export one skeletal mesh for every child meshs of the armature.",
                 2),
             ("specified_parts",
                 "Specified Parts",
-                "Specified mesh parts.",
+                "Export specified mesh parts.",
                 3)
             ]
         )
