@@ -23,7 +23,9 @@ from . import bfu_export_utils
 from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
+from .. import bfu_naming
 from .. import bfu_check_potential_error
+from .. import bfu_export_logs
 from ..fbxio import export_fbx_bin
 
 if "bpy" in locals():
@@ -41,34 +43,42 @@ if "bpy" in locals():
     if "export_fbx_bin" in locals():
         importlib.reload(export_fbx_bin)
 
-def ProcessSkeletalMeshExport(op, obj):
+def ProcessSkeletalMeshExport(op, armature, mesh_parts, desired_name=""):
     addon_prefs = bfu_basics.GetAddonPrefs()
-    dirpath = bfu_utils.GetObjExportDir(obj)
+    dirpath = bfu_utils.GetObjExportDir(armature)
     absdirpath = bpy.path.abspath(dirpath)
     scene = bpy.context.scene
+    if desired_name:
+        final_name = desired_name
+    else:
+        final_name = armature.name
 
-    MyAsset = scene.UnrealExportedAssetsList.add()
-    MyAsset.object = obj
-    MyAsset.skeleton_name = obj.name
-    MyAsset.asset_name = obj.name
-    MyAsset.asset_global_scale = obj.bfu_export_global_scale
-    MyAsset.folder_name = obj.bfu_export_folder_name
-    MyAsset.asset_type = bfu_utils.GetAssetType(obj)
+    MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset.object = armature
+    MyAsset.skeleton_name = armature.name
+    MyAsset.asset_name = armature.name
+    MyAsset.asset_global_scale = armature.bfu_export_global_scale
+    MyAsset.folder_name = armature.bfu_export_folder_name
+    MyAsset.asset_type = bfu_utils.GetAssetType(armature)
+
+    file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+    file.file_name = bfu_naming.get_skeletal_mesh_file_name(armature, final_name, "")
+    file.file_extension = "fbx"
+    file.file_path = dirpath
+    file.file_type = "FBX"
+
     MyAsset.StartAssetExport()
+    ExportSingleSkeletalMesh(op, scene, dirpath, file.GetFileWithExtension(), armature, mesh_parts)
 
-    ExportSingleSkeletalMesh(op, scene, dirpath, bfu_utils.GetObjExportFileName(obj), obj)
-    file = MyAsset.files.add()
-    file.name = bfu_utils.GetObjExportFileName(obj)
-    file.path = dirpath
-    file.type = "FBX"
-
-    if not obj.bfu_export_as_lod_mesh:
+    if not armature.bfu_export_as_lod_mesh:
         if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
-            bfu_export_utils.ExportAdditionalParameter(absdirpath, MyAsset)
-            file = MyAsset.files.add()
-            file.name = bfu_utils.GetObjExportFileName(obj, "_AdditionalTrack.json")
-            file.path = dirpath
-            file.type = "AdditionalTrack"
+        
+            file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+            file.file_name = bfu_naming.get_skeletal_mesh_file_name(armature, final_name+"_AdditionalTrack", "")
+            file.file_extension = "json"
+            file.file_path = dirpath
+            file.file_type = "AdditionalTrack"
+            bfu_export_utils.ExportAdditionalParameter(absdirpath, file.GetFileWithExtension(), MyAsset)
 
     MyAsset.EndAssetExport(True)
     return MyAsset
@@ -79,7 +89,8 @@ def ExportSingleSkeletalMesh(
         originalScene,
         dirpath,
         filename,
-        obj
+        armature,
+        mesh_parts
         ):
 
     '''
@@ -91,23 +102,23 @@ def ExportSingleSkeletalMesh(
 
     scene = bpy.context.scene
     addon_prefs = bfu_basics.GetAddonPrefs()
-    export_as_proxy = bfu_utils.GetExportAsProxy(obj)
-    export_proxy_child = bfu_utils.GetExportProxyChild(obj)
+    export_as_proxy = bfu_utils.GetExportAsProxy(armature)
+    export_proxy_child = bfu_utils.GetExportProxyChild(armature)
 
     bbpl.utils.safe_mode_set('OBJECT')
 
-    bfu_utils.SelectParentAndDesiredChilds(obj)
-    asset_name = bfu_export_utils.PrepareExportName(obj, True)
+    bfu_utils.SelectParentAndSpecificChilds(armature, mesh_parts)
+    asset_name = bfu_export_utils.PrepareExportName(armature, True)
     duplicate_data = bfu_export_utils.DuplicateSelectForExport()
     bfu_export_utils.SetDuplicateNameForExport(duplicate_data)
 
     bfu_utils.ApplyNeededModifierToSelect()
-    for obj in bpy.context.selected_objects:
-        bfu_export_utils.ConvertGeometryNodeAttributeToUV(obj)
-        bfu_export_utils.CorrectExtremUVAtExport(obj)
-        bfu_export_utils.SetVertexColorForUnrealExport(obj)
-        bfu_export_utils.SetSocketsExportTransform(obj)
-        bfu_export_utils.SetSocketsExportName(obj)
+    for armature in bpy.context.selected_objects:
+        bfu_export_utils.ConvertGeometryNodeAttributeToUV(armature)
+        bfu_export_utils.CorrectExtremUVAtExport(armature)
+        bfu_export_utils.SetVertexColorForUnrealExport(armature)
+        bfu_export_utils.SetSocketsExportTransform(armature)
+        bfu_export_utils.SetSocketsExportName(armature)
 
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
@@ -244,5 +255,5 @@ def ExportSingleSkeletalMesh(
 
     bfu_export_utils.ResetDuplicateNameAfterExport(duplicate_data)
 
-    for obj in scene.objects:
-        bfu_utils.ClearAllBFUTempVars(obj)
+    for armature in scene.objects:
+        bfu_utils.ClearAllBFUTempVars(armature)

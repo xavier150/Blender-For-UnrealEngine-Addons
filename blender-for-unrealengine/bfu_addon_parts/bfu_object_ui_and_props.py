@@ -292,6 +292,13 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 3)
             ]
         )
+    
+    bpy.types.Object.bfu_modular_skeletal_mesh_every_meshs = StringProperty(
+        name="Separate string",
+        description="String between armature name and mesh name",
+        override={'LIBRARY_OVERRIDABLE'},
+        default="_"
+        )
 
     bpy.types.Object.bfu_target_skeleton_custom_path = StringProperty(
         name="",
@@ -1204,6 +1211,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.bfu_create_physics_asset',
                             'obj.bfu_skeleton_search_mode',
                             'obj.bfu_modular_skeletal_mesh_mode',
+                            'obj.bfu_modular_skeletal_mesh_every_meshs',
                             'obj.bfu_target_skeleton_custom_path',
                             'obj.bfu_target_skeleton_custom_name',
                             'obj.bfu_target_skeleton_custom_ref',
@@ -1535,8 +1543,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         if not obj.bfu_export_as_lod_mesh:
                             modular_skeletal_mesh = layout.column()
                             modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_mode")
-                            if obj.bfu_modular_skeletal_mesh_mode:
-                                pass
+                            if obj.bfu_modular_skeletal_mesh_mode == "every_meshs":
+                                modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_every_meshs")
+                                
 
 
 

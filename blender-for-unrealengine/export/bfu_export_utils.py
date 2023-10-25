@@ -652,11 +652,9 @@ def ExportSingleAdditionalTrackCamera(dirpath, filename, obj):
         )
 
 
-def ExportAdditionalParameter(dirpath, unreal_exported_asset):
+def ExportAdditionalParameter(dirpath, filename, unreal_exported_asset):
     # Export additional parameter from static and skeletal mesh track for ue4
     # SocketsList
-
-    filename = unreal_exported_asset.GetFilename("_AdditionalTrack.json")
 
     absdirpath = bpy.path.abspath(dirpath)
     bfu_basics.VerifiDirs(absdirpath)

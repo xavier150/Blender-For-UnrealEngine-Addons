@@ -26,6 +26,8 @@ from . import bps
 from . import languages
 from . import bfu_basics
 from . import bfu_utils
+from . import bfu_naming
+from . import bfu_export_logs
 from . import bfu_write_import_asset_script
 from . import bfu_write_import_sequencer_script
 from .export import bfu_export_get_info
@@ -105,6 +107,7 @@ def WriteExportLog():
     ExportLog += AssetNumberByType
     ExportLog += "\n"
     for asset in scene.UnrealExportedAssetsList:
+        file: bfu_export_logs.BFU_OT_UnrealExportedAsset
 
         if (asset.asset_type == "NlAnim"):
             primaryInfo = "Animation (NLA)"
@@ -124,7 +127,8 @@ def WriteExportLog():
         ExportLog += (
             asset.asset_name+" ["+primaryInfo+"] EXPORTED IN " + str(round(asset.GetExportTime(), 2))+"s\r\n")
         for file in asset.files:
-            ExportLog += (file.path + "\\" + file.name + "\n")
+            file: bfu_export_logs.BFU_OT_FileExport
+            ExportLog += (file.file_path + "\\" + file.file_name + "\n")
         ExportLog += "\n"
 
     return ExportLog
@@ -355,6 +359,7 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
     return data
 
 
+
 def WriteSingleMeshAdditionalParameter(unreal_exported_asset):
 
     scene = bpy.context.scene
@@ -376,22 +381,27 @@ def WriteSingleMeshAdditionalParameter(unreal_exported_asset):
 
     # Level of detail
     if obj:
+        assetType = bfu_utils.GetAssetType(obj)
         data['LevelOfDetail'] = {}
+
+        def GetLodPath(lod_obj, naming_function):
+            return os.path.join(bfu_utils.GetObjExportDir(lod_obj, True), naming_function(lod_obj))
+
+        if assetType == "StaticMesh":
+            naming_function = bfu_naming.get_static_mesh_file_name
+        if assetType == "SkeletalMesh":
+            naming_function = bfu_naming.get_skeletal_mesh_file_name
+
         if obj.bfu_lod_target1 is not None:
-            loc = os.path.join(bfu_utils.GetObjExportDir(obj.bfu_lod_target1, True), bfu_utils.GetObjExportFileName(obj.bfu_lod_target1))
-            data['LevelOfDetail']['lod_1'] = loc
+            data['LevelOfDetail']['lod_1'] = GetLodPath(obj.bfu_lod_target1, naming_function)
         if obj.bfu_lod_target2 is not None:
-            loc = os.path.join(bfu_utils.GetObjExportDir(obj.bfu_lod_target2, True), bfu_utils.GetObjExportFileName(obj.bfu_lod_target2))
-            data['LevelOfDetail']['lod_2'] = loc
+            data['LevelOfDetail']['lod_2'] = GetLodPath(obj.bfu_lod_target2, naming_function)
         if obj.bfu_lod_target3 is not None:
-            loc = os.path.join(bfu_utils.GetObjExportDir(obj.bfu_lod_target3, True), bfu_utils.GetObjExportFileName(obj.bfu_lod_target3))
-            data['LevelOfDetail']['lod_3'] = loc
+            data['LevelOfDetail']['lod_3'] = GetLodPath(obj.bfu_lod_target3, naming_function)
         if obj.bfu_lod_target4 is not None:
-            loc = os.path.join(bfu_utils.GetObjExportDir(obj.bfu_lod_target4, True), bfu_utils.GetObjExportFileName(obj.bfu_lod_target4))
-            data['LevelOfDetail']['lod_4'] = loc
+            data['LevelOfDetail']['lod_4'] = GetLodPath(obj.bfu_lod_target4, naming_function)
         if obj.bfu_lod_target5 is not None:
-            loc = os.path.join(bfu_utils.GetObjExportDir(obj.bfu_lod_target5, True), bfu_utils.GetObjExportFileName(obj.bfu_lod_target5))
-            data['LevelOfDetail']['lod_5'] = loc
+            data['LevelOfDetail']['lod_5'] = GetLodPath(obj.bfu_lod_target5, naming_function)
 
     # Sockets
     if obj:
@@ -409,7 +419,7 @@ def WriteSingleMeshAdditionalParameter(unreal_exported_asset):
             )  # Color to Json
             data["vertex_override_color"] = vertex_override_color
 
-    data["preview_import_path"] = unreal_exported_asset.GetFilename()
+    data["preview_import_path"] = unreal_exported_asset.GetFilenameWithExtension()
     return data
 
 

@@ -23,7 +23,9 @@ from . import bfu_export_utils
 from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
+from .. import bfu_naming
 from .. import bfu_check_potential_error
+from .. import bfu_export_logs
 from ..fbxio import export_fbx_bin
 
 if "bpy" in locals():
@@ -42,33 +44,41 @@ if "bpy" in locals():
         importlib.reload(export_fbx_bin)
 
 
-def ProcessStaticMeshExport(op, obj):
+def ProcessStaticMeshExport(op, obj, desired_name=""):
     addon_prefs = bfu_basics.GetAddonPrefs()
     dirpath = bfu_utils.GetObjExportDir(obj)
     absdirpath = bpy.path.abspath(dirpath)
     scene = bpy.context.scene
+    if desired_name:
+        final_name = desired_name
+    else:
+        final_name = obj.name
 
-    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
     MyAsset.asset_name = obj.name
     MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = bfu_utils.GetAssetType(obj)
-    MyAsset.StartAssetExport()
 
-    ExportSingleStaticMesh(op, dirpath, bfu_utils.GetObjExportFileName(obj), obj)
-    file = MyAsset.files.add()
-    file.name = bfu_utils.GetObjExportFileName(obj)
-    file.path = dirpath
-    file.type = "FBX"
+    file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+    file.file_name = bfu_naming.get_static_mesh_file_name(obj, obj.name, "")
+    file.file_extension = "fbx"
+    file.file_path = dirpath
+    file.file_type = "FBX"
+
+    MyAsset.StartAssetExport()
+    ExportSingleStaticMesh(op, dirpath, file.GetFileWithExtension(), obj)
 
     if not obj.bfu_export_as_lod_mesh:
         if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
-            bfu_export_utils.ExportAdditionalParameter(absdirpath, MyAsset)
-            file = MyAsset.files.add()
-            file.name = bfu_utils.GetObjExportFileName(obj, "_AdditionalTrack.json")
-            file.path = dirpath
-            file.type = "AdditionalTrack"
+            
+            file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+            file.file_name = bfu_naming.get_static_mesh_file_name(obj, final_name+"_AdditionalTrack", "")
+            file.file_extension = "json"
+            file.file_path = dirpath
+            file.file_type = "AdditionalTrack"
+            bfu_export_utils.ExportAdditionalParameter(absdirpath, file.GetFileWithExtension(), MyAsset)
 
     MyAsset.EndAssetExport(True)
     return MyAsset

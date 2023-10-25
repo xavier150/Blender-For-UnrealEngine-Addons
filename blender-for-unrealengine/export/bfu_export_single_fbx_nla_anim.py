@@ -23,6 +23,8 @@ from . import bfu_export_utils
 from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
+from .. import bfu_naming
+from .. import bfu_export_logs
 from ..fbxio import export_fbx_bin
 
 if "bpy" in locals():
@@ -46,20 +48,22 @@ def ProcessNLAAnimExport(op, obj):
 
     scene.frame_end += 1  # Why ?
 
-    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
     MyAsset.skeleton_name = obj.name
-    MyAsset.asset_name = bfu_utils.GetNLAExportFileName(obj)
+    MyAsset.asset_name = bfu_naming.get_nonlinear_animation_file_name(obj)
     MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = "NlAnim"
-    MyAsset.StartAssetExport()
 
-    ExportSingleFbxNLAAnim(op, dirpath, bfu_utils.GetNLAExportFileName(obj), obj)
-    file = MyAsset.files.add()
-    file.name = bfu_utils.GetNLAExportFileName(obj)
-    file.path = dirpath
-    file.type = "FBX"
+    file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+    file.file_name = bfu_naming.get_nonlinear_animation_file_name(obj, "")
+    file.file_extension = "fbx"
+    file.file_path = dirpath
+    file.file_type = "FBX"
+
+    MyAsset.StartAssetExport()
+    ExportSingleFbxNLAAnim(op, dirpath, file.GetFileWithExtension(), obj)
 
     MyAsset.EndAssetExport(True)
     return MyAsset

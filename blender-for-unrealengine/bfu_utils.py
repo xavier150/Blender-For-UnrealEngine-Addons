@@ -733,7 +733,7 @@ def GetExportProxyChild(obj):
 
 
 def SelectParentAndDesiredChilds(obj):
-    # Selects only all child objects that must be exported with parent object
+    # Selects only auto desired child objects that must be exported with parent object
     selectedObjs = []
     bpy.ops.object.select_all(action='DESELECT')
     for selectObj in GetExportDesiredChilds(obj):
@@ -759,6 +759,36 @@ def SelectParentAndDesiredChilds(obj):
     selectedObjs.append(obj)
     if obj.name in bpy.context.view_layer.objects:
         bpy.context.view_layer.objects.active = obj
+    return selectedObjs
+
+
+def SelectParentAndSpecificChilds(active, objects):
+    # Selects specific child objects that must be exported with parent object
+    selectedObjs = []
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj in objects:
+        if obj.name in bpy.context.view_layer.objects:
+            if GetAssetType(active) == "SkeletalMesh":
+                # With skeletal mesh the socket must be not exported,
+                # ue4 read it like a bone
+                if not fnmatch.fnmatchcase(obj.name, "SOCKET*"):
+                    obj.select_set(True)
+                    selectedObjs.append(obj)
+            else:
+                obj.select_set(True)
+                selectedObjs.append(obj)
+
+    if active.name in bpy.context.view_layer.objects:
+        active.select_set(True)
+
+    if GetExportAsProxy(active):
+        proxy_child = GetExportProxyChild(active)
+        if proxy_child is not None:
+            proxy_child.select_set(True)
+
+    selectedObjs.append(active)
+    if active.name in bpy.context.view_layer.objects:
+        bpy.context.view_layer.objects.active = active
     return selectedObjs
 
 
@@ -1191,69 +1221,6 @@ def GetObjExportDir(obj, abspath=False):
 
     else:
         return dirpath
-
-
-def GetCollectionExportFileName(collection, fileType=".fbx"):
-    # Generate assset file name
-
-    scene = bpy.context.scene
-    return scene.bfu_static_mesh_prefix_export_name+collection+fileType
-
-
-def GetObjExportFileName(obj, fileType=".fbx"):
-    # Generate assset file name
-
-    scene = bpy.context.scene
-    if obj.bfu_use_custom_export_name:
-        return bfu_basics.ValidFilename(obj.bfu_custom_export_name+fileType)
-    assetType = GetAssetType(obj)
-    if assetType == "Camera":
-        return bfu_basics.ValidFilename(scene.bfu_camera_prefix_export_name+obj.name+fileType)
-    elif assetType == "StaticMesh":
-        return bfu_basics.ValidFilename(scene.bfu_static_mesh_prefix_export_name+obj.name+fileType)
-    elif assetType == "SkeletalMesh":
-        return bfu_basics.ValidFilename(scene.bfu_skeletal_mesh_prefix_export_name+obj.name+fileType)
-    elif assetType == "Alembic":
-        return bfu_basics.ValidFilename(scene.bfu_alembic_prefix_export_name+obj.name+fileType)
-    else:
-        return None
-
-
-def GetActionExportFileName(obj, action, fileType=".fbx"):
-    # Generate action file name
-
-    scene = bpy.context.scene
-    if obj.bfu_anim_naming_type == "include_armature_name":
-        ArmatureName = obj.name+"_"
-    if obj.bfu_anim_naming_type == "action_name":
-        ArmatureName = ""
-    if obj.bfu_anim_naming_type == "include_custom_name":
-        ArmatureName = obj.bfu_anim_naming_custom+"_"
-
-    animType = GetActionType(action)
-    if animType == "NlAnim" or animType == "Action":
-        # Nla can be exported as action
-        return bfu_basics.ValidFilename(scene.bfu_anim_prefix_export_name+ArmatureName+action.name+fileType)
-
-    elif animType == "Pose":
-        return bfu_basics.ValidFilename(scene.bfu_pose_prefix_export_name+ArmatureName+action.name+fileType)
-
-    else:
-        return None
-
-
-def GetNLAExportFileName(obj, fileType=".fbx"):
-    # Generate action file name
-
-    scene = bpy.context.scene
-    if obj.bfu_anim_naming_type == "include_armature_name":
-        ArmatureName = obj.name+"_"
-    if obj.bfu_anim_naming_type == "action_name":
-        ArmatureName = ""
-    if obj.bfu_anim_naming_type == "include_custom_name":
-        ArmatureName = obj.bfu_anim_naming_custom+"_"
-
-    return bfu_basics.ValidFilename(scene.bfu_anim_prefix_export_name+ArmatureName+obj.bfu_anim_nla_export_name+fileType)
 
 
 def GetImportAssetScriptCommand():

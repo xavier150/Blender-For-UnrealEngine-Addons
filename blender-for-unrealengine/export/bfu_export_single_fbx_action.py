@@ -22,6 +22,8 @@ from bpy_extras.io_utils import axis_conversion
 from . import bfu_export_utils
 from .. import bfu_basics
 from .. import bfu_utils
+from .. import bfu_naming
+from .. import bfu_export_logs
 from .. import bbpl
 from ..fbxio import export_fbx_bin
 
@@ -44,23 +46,22 @@ def ProcessActionExport(op, obj, action, action_curve_scale):
     addon_prefs = bfu_basics.GetAddonPrefs()
     dirpath = os.path.join(bfu_utils.GetObjExportDir(obj), scene.bfu_anim_subfolder_name)
 
-    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
     MyAsset.skeleton_name = obj.name
-    MyAsset.asset_name = bfu_utils.GetActionExportFileName(obj, action, "")
+    MyAsset.asset_name = bfu_naming.get_animation_file_name(obj, action, "")
     MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = bfu_utils.GetActionType(action)
 
+    file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+    file.file_name = bfu_naming.get_animation_file_name(obj, action, "")
+    file.file_extension = "fbx"
+    file.file_path = dirpath
+    file.file_type = "FBX"
+
     MyAsset.StartAssetExport()
-
-    filename = bfu_utils.GetActionExportFileName(obj, action)
-    action_curve_scale = ExportSingleFbxAction(op, scene, dirpath, filename, obj, action, action_curve_scale)
-
-    file = MyAsset.files.add()
-    file.name = filename
-    file.path = dirpath
-    file.type = "FBX"
+    action_curve_scale = ExportSingleFbxAction(op, scene, dirpath, file.GetFileWithExtension(), obj, action, action_curve_scale)
 
     MyAsset.EndAssetExport(True)
     return action_curve_scale

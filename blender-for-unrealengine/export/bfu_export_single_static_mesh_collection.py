@@ -22,7 +22,9 @@ from . import bfu_export_utils
 from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
+from .. import bfu_naming
 from .. import bfu_check_potential_error
+from .. import bfu_export_logs
 
 if "bpy" in locals():
     import importlib
@@ -44,28 +46,30 @@ def ProcessCollectionExport(col):
     absdirpath = bpy.path.abspath(dirpath)
     scene = bpy.context.scene
 
-    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.asset_name = col.name
-    MyAsset.asset_global_scale = obj.bfu_export_global_scale
+    MyAsset.asset_global_scale = 1.0 #col.bfu_export_global_scale
     MyAsset.collection = col
     MyAsset.asset_type = bfu_utils.GetCollectionType(col)
     MyAsset.folder_name = col.bfu_export_folder_name
+
+    file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+    file.file_name = bfu_naming.get_collection_file_name(col, col.name, "")
+    file.file_extension = "fbx"
+    file.file_path = dirpath
+    file.file_type = "FBX"
+
     MyAsset.StartAssetExport()
-
-    ExportSingleStaticMeshCollection(dirpath, bfu_utils.GetCollectionExportFileName(col.name), col.name)
-
-    file = MyAsset.files.add()
-    file.name = bfu_utils.GetCollectionExportFileName(col.name)
-    file.path = dirpath
-    file.type = "FBX"
+    ExportSingleStaticMeshCollection(dirpath, file.GetFileWithExtension(), col.name)
 
     if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
-
-        bfu_export_utils.ExportAdditionalParameter(absdirpath, MyAsset)
-        file = MyAsset.files.add()
-        file.name = bfu_utils.GetCollectionExportFileName(col.name, "_AdditionalTrack.json")
-        file.path = dirpath
-        file.type = "AdditionalTrack"
+        
+        file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+        file.file_name = bfu_naming.get_collection_file_name(col, col.name+"_AdditionalTrack", "")
+        file.file_extension = "json"
+        file.file_path = dirpath
+        file.file_type = "AdditionalTrack"
+        bfu_export_utils.ExportAdditionalParameter(absdirpath, file.GetFileWithExtension(), MyAsset)
 
     MyAsset.EndAssetExport(True)
     return MyAsset

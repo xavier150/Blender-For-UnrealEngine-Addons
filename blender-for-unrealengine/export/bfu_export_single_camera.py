@@ -24,6 +24,8 @@ from .. import bps
 from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
+from .. import bfu_naming
+from .. import bfu_export_logs
 from ..fbxio import export_fbx_bin
 
 if "bpy" in locals():
@@ -47,7 +49,7 @@ def ProcessCameraExport(op, obj):
     absdirpath = bpy.path.abspath(dirpath)
     scene = bpy.context.scene
 
-    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
     MyAsset.asset_name = obj.name
     MyAsset.asset_global_scale = obj.bfu_export_global_scale
@@ -56,28 +58,24 @@ def ProcessCameraExport(op, obj):
     MyAsset.StartAssetExport()
 
     if obj.bfu_export_fbx_camera:
-        ExportSingleFbxCamera(
-            op,
-            dirpath,
-            bfu_utils.GetObjExportFileName(obj),
-            obj
-            )
-        file = MyAsset.files.add()
-        file.name = bfu_utils.GetObjExportFileName(obj)
-        file.path = dirpath
-        file.type = "FBX"
+        file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+        file.file_name = bfu_naming.get_camera_file_name(obj, obj.name, "")
+        file.file_extension = "fbx"
+        file.file_path = dirpath
+        file.file_type = "FBX"
+
+        ExportSingleFbxCamera(op, dirpath, file.GetFileWithExtension(), obj)
+
 
     if obj.bfu_export_as_lod_mesh is False:
         if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
-            bfu_export_utils.ExportSingleAdditionalTrackCamera(
-                dirpath,
-                bfu_utils.GetObjExportFileName(obj, "_AdditionalTrack.json"),
-                obj
-                )
-            file = MyAsset.files.add()
-            file.name = bfu_utils.GetObjExportFileName(obj, "_AdditionalTrack.json")
-            file.path = dirpath
-            file.type = "AdditionalTrack"
+
+            file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+            file.file_name = bfu_naming.get_camera_file_name(obj, obj.name+"_AdditionalTrack", "")
+            file.file_extension = "json"
+            file.file_path = dirpath
+            file.file_type = "AdditionalTrack"
+            bfu_export_utils.ExportSingleAdditionalTrackCamera(dirpath, file.GetFileWithExtension(), obj)
 
     MyAsset.EndAssetExport(True)
     return MyAsset

@@ -21,6 +21,8 @@ import bpy
 from . import bfu_export_utils
 from .. import bbpl
 from .. import bfu_utils
+from .. import bfu_naming
+from .. import bfu_export_logs
 
 
 
@@ -29,19 +31,21 @@ def ProcessAlembicExport(obj):
     scene = bpy.context.scene
     dirpath = bfu_utils.GetObjExportDir(obj)
 
-    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
     MyAsset.asset_name = obj.name
     MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = "Alembic"
-    MyAsset.StartAssetExport()
 
-    ExportSingleAlembicAnimation(dirpath, bfu_utils.GetObjExportFileName(obj, ".abc"), obj)
-    file = MyAsset.files.add()
-    file.name = bfu_utils.GetObjExportFileName(obj, ".abc")
-    file.path = dirpath
-    file.type = "ABC"
+    file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+    file.file_name = bfu_naming.get_alembic_file_name(obj, obj.name, "")
+    file.file_extension = "abc"
+    file.file_path = dirpath
+    file.file_type = "ABC"
+
+    MyAsset.StartAssetExport()
+    ExportSingleAlembicAnimation(dirpath, file.GetFileWithExtension(), obj)
 
     MyAsset.EndAssetExport(True)
     return MyAsset

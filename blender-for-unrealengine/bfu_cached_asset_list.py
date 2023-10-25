@@ -178,7 +178,7 @@ class AssetToExport:
 
 class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
 
-    def GetFinalAssetList(self):
+    def GetFinalAssetList(self) -> AssetToExport:
         # Returns all assets that will be exported
 
         def getHaveParentToExport(obj):
@@ -239,11 +239,15 @@ class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
                 # Skeletal Mesh
                 if scene.skeletal_export:
                     if obj.bfu_modular_skeletal_mesh_mode == "all_in_one":
-                        TargetAssetToExport.append(AssetToExport(obj, None, "SkeletalMesh"))
+                        asset = AssetToExport(obj, None, "SkeletalMesh")
+                        asset.name = obj.name
+                        asset.obj_list = bfu_utils.GetExportDesiredChilds(obj)
+                        TargetAssetToExport.append(asset)
                     elif obj.bfu_modular_skeletal_mesh_mode == "every_meshs":
                         for mesh in bfu_basics.GetChilds(obj):
                             asset = AssetToExport(obj, None, "SkeletalMesh")
-                            asset.name = obj.name + "." + mesh.name
+                            asset.name = obj.name + obj.bfu_modular_skeletal_mesh_every_meshs + mesh.name
+                            asset.obj_list = [mesh]
                             TargetAssetToExport.append(asset)
                     elif obj.bfu_modular_skeletal_mesh_mode == "specified_parts":
                         TargetAssetToExport.append(AssetToExport(obj, None, "SkeletalMesh"))
