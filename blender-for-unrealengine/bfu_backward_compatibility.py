@@ -98,27 +98,27 @@ def update_old_variables():
         update_variable(col, ["exportFolderName"], "bfu_export_folder_name")
 
     for scene in bpy.data.scenes:
-        update_variable(col, ["static_mesh_prefix_export_name"], "bfu_static_mesh_prefix_export_name")
-        update_variable(col, ["skeletal_mesh_prefix_export_name"], "bfu_skeletal_mesh_prefix_export_name")
-        update_variable(col, ["skeleton_prefix_export_name"], "bfu_skeleton_prefix_export_name")
-        update_variable(col, ["alembic_prefix_export_name"], "bfu_alembic_prefix_export_name")
-        update_variable(col, ["anim_prefix_export_name"], "bfu_anim_prefix_export_name")
-        update_variable(col, ["pose_prefix_export_name"], "bfu_pose_prefix_export_name")
-        update_variable(col, ["camera_prefix_export_name"], "bfu_camera_prefix_export_name")
-        update_variable(col, ["anim_subfolder_name"], "bfu_anim_subfolder_name")
-        update_variable(col, ["export_static_file_path"], "bfu_export_static_file_path")
-        update_variable(col, ["export_skeletal_file_path"], "bfu_export_skeletal_file_path")
-        update_variable(col, ["export_alembic_file_path"], "bfu_export_alembic_file_path")
-        update_variable(col, ["export_camera_file_path"], "bfu_export_camera_file_path")
-        update_variable(col, ["export_other_file_path"], "bfu_export_other_file_path")
-        update_variable(col, ["file_export_log_name"], "bfu_file_export_log_name")
-        update_variable(col, ["file_import_asset_script_name"], "bfu_file_import_asset_script_name")
-        update_variable(col, ["file_import_sequencer_script_name"], "bfu_file_import_sequencer_script_name")
-        update_variable(col, ["unreal_import_module"], "bfu_unreal_import_module")
-        update_variable(col, ["unreal_import_location"], "bfu_unreal_import_location")
+        update_variable(scene, ["static_mesh_prefix_export_name"], "bfu_static_mesh_prefix_export_name")
+        update_variable(scene, ["skeletal_mesh_prefix_export_name"], "bfu_skeletal_mesh_prefix_export_name")
+        update_variable(scene, ["skeleton_prefix_export_name"], "bfu_skeleton_prefix_export_name")
+        update_variable(scene, ["alembic_prefix_export_name"], "bfu_alembic_prefix_export_name")
+        update_variable(scene, ["anim_prefix_export_name"], "bfu_anim_prefix_export_name")
+        update_variable(scene, ["pose_prefix_export_name"], "bfu_pose_prefix_export_name")
+        update_variable(scene, ["camera_prefix_export_name"], "bfu_camera_prefix_export_name")
+        update_variable(scene, ["anim_subfolder_name"], "bfu_anim_subfolder_name")
+        update_variable(scene, ["export_static_file_path"], "bfu_export_static_file_path")
+        update_variable(scene, ["export_skeletal_file_path"], "bfu_export_skeletal_file_path")
+        update_variable(scene, ["export_alembic_file_path"], "bfu_export_alembic_file_path")
+        update_variable(scene, ["export_camera_file_path"], "bfu_export_camera_file_path")
+        update_variable(scene, ["export_other_file_path"], "bfu_export_other_file_path")
+        update_variable(scene, ["file_export_log_name"], "bfu_file_export_log_name")
+        update_variable(scene, ["file_import_asset_script_name"], "bfu_file_import_asset_script_name")
+        update_variable(scene, ["file_import_sequencer_script_name"], "bfu_file_import_sequencer_script_name")
+        update_variable(scene, ["unreal_import_module"], "bfu_unreal_import_module")
+        update_variable(scene, ["unreal_import_location"], "bfu_unreal_import_location")
 
-        update_variable(col, ["CollectionExportList"], "bfu_collection_asset_list")
-        update_variable(col, ["active_CollectionExportList"], "bfu_active_collection_asset_list")
+        update_variable(scene, ["CollectionExportList"], "bfu_collection_asset_list")
+        update_variable(scene, ["active_CollectionExportList"], "bfu_active_collection_asset_list")
 
 
 def enum_callback(data, old_var_name, new_var_name):
@@ -128,9 +128,9 @@ def enum_callback(data, old_var_name, new_var_name):
 
     if enum_definition and enum_definition.type == "ENUM":
         # Obtenez la liste des valeurs de l'enum
-        enum_values = enum_definition.enum_items.keys()
-
-        return enum_values[value]
+        for enum_item in enum_definition.enum_items:
+            if value == enum_item.value:
+                return enum_item.identifier
     else:
         print("La propriété spécifiée n'est pas une énumération.")
 
