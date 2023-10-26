@@ -125,10 +125,10 @@ def ExportSingleStaticMeshCollection(
         # use_armature_deform_only=active.bfu_export_deform_only,
         bake_anim=False,
         use_metadata=addon_prefs.exportWithMetaData,
-        # primary_bone_axis=active.bfu_export_primary_bone_axis,
-        # secondary_bone_axis=active.bfu_export_secondary_bone_axis,
-        # axis_forward=active.bfu_export_axis_forward,
-        # axis_up=active.bfu_export_axis_up,
+        # primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
+        # secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
+        # axis_forward=bfu_export_utils.get_export_axis_forward(obj),
+        # axis_up=bfu_export_utils.get_export_axis_up(obj),
         bake_space_transform=False
         )
     for obj in bpy.context.selected_objects:

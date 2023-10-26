@@ -36,6 +36,7 @@ from bpy.types import (
         Operator,
         )
 
+from . import bfu_export_procedure
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_cached_asset_list
@@ -120,33 +121,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             ),
         override={'LIBRARY_OVERRIDABLE'},
         default=True,
-        )
-
-    bpy.types.Object.bfu_export_procedure = EnumProperty(
-        name="Export procedure",
-        description=(
-            "This will define how the object should" +
-            " be exported in case you are using specific Rig."
-            ),
-        override={'LIBRARY_OVERRIDABLE'},
-        items=[
-            ("ue-standard",
-                "UE Standard",
-                "Modified fbx I/O for Unreal Engine",
-                "ARMATURE_DATA",
-                1),
-            ("blender-standard",
-                "Blender Standard",
-                "Standard fbx I/O.",
-                "ARMATURE_DATA",
-                2),
-            ("auto-rig-pro",
-                "AutoRigPro",
-                "Export using AutoRigPro.",
-                "ARMATURE_DATA",
-                3),
-            ],
-        default="blender-standard"
         )
 
     bpy.types.Object.bfu_export_as_alembic = BoolProperty(
@@ -819,6 +793,13 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=1.0
         )
 
+    bpy.types.Object.bfu_override_procedure_preset = BoolProperty(
+        name="Override Export Preset",
+        description="If true override the export precedure preset.",
+        override={'LIBRARY_OVERRIDABLE'},
+        default=False,
+        )
+
     bpy.types.Object.bfu_export_axis_forward = EnumProperty(
         name="Axis Forward",
         override={'LIBRARY_OVERRIDABLE'},
@@ -858,7 +839,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             ('-Y', "-Y", ""),
             ('-Z', "-Z", ""),
             ],
-        default='X',
+        default='Y',
         )
 
     bpy.types.Object.bfu_export_secondary_bone_axis = EnumProperty(
@@ -872,7 +853,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             ('-Y', "-Y", ""),
             ('-Z', "-Z", ""),
             ],
-        default='-Z',
+        default='X',
         )
 
     bpy.types.Object.bfu_mirror_symmetry_right_side_bones = BoolProperty(
@@ -1253,6 +1234,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.bfu_anim_naming_type',
                             'obj.bfu_anim_naming_custom',
                             'obj.bfu_export_global_scale',
+                            'obj.bfu_override_procedure_preset',
                             'obj.bfu_export_axis_forward',
                             'obj.bfu_export_axis_up',
                             'obj.bfu_export_primary_bone_axis',
@@ -1501,12 +1483,24 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             transformProp.prop(obj, "bfu_additional_location_for_export")
 
                         AxisProperty = layout.column()
-                        AxisProperty.prop(obj, 'bfu_export_axis_forward')
-                        AxisProperty.prop(obj, 'bfu_export_axis_up')
-                        if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
-                            BoneAxisProperty = layout.column()
-                            BoneAxisProperty.prop(obj, 'bfu_export_primary_bone_axis')
-                            BoneAxisProperty.prop(obj, 'bfu_export_secondary_bone_axis')
+                        AxisProperty.prop(obj, 'bfu_override_procedure_preset')
+                        if obj.bfu_override_procedure_preset:
+                            AxisProperty.prop(obj, 'bfu_export_axis_forward')
+                            AxisProperty.prop(obj, 'bfu_export_axis_up')
+                            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+                                BoneAxisProperty = layout.column()
+                                BoneAxisProperty.prop(obj, 'bfu_export_primary_bone_axis')
+                                BoneAxisProperty.prop(obj, 'bfu_export_secondary_bone_axis')
+                        else:
+                            box = layout.box()
+                            preset = bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)  # Obtenez le dictionnaire de preset
+                            var_lines = box.column()
+                            # Utilisez une boucle pour itérer sur les éléments du dictionnaire
+                            for key, value in preset.items():
+                                # Concaténez la clé et la valeur dans la chaîne de caractères
+                                var_lines.label(text=f"{key} -> {value}\n")
+
+                            
                 else:
                     layout.label(text='(No properties to show.)')
 

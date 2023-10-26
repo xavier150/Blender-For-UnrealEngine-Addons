@@ -26,7 +26,7 @@ from .. import bfu_write_text
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bbpl
-
+from ..bfu_addon_parts import bfu_export_procedure
 
 dup_temp_name = "BFU_Temp"  # DuplicateTemporarilyNameForUe4Export
 Export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
@@ -664,3 +664,27 @@ def ExportAdditionalParameter(dirpath, filename, unreal_exported_asset):
         absdirpath,
         filename
         )
+
+def get_final_export_primary_bone_axis(obj):
+    if obj.bfu_override_procedure_preset:
+        return obj.bfu_export_primary_bone_axis
+    else:
+        return bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["primary_bone_axis"]
+
+def get_final_export_secondary_bone_axis(obj):
+    if obj.bfu_override_procedure_preset:
+        return obj.bfu_export_secondary_bone_axis
+    else:
+        return bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["secondary_bone_axis"]
+
+def get_export_axis_forward(obj):
+    if obj.bfu_override_procedure_preset:
+        return obj.bfu_export_axis_forward
+    else:
+        return bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["axis_forward"]
+
+def get_export_axis_up(obj):
+    if obj.bfu_override_procedure_preset:
+        return obj.bfu_export_axis_up
+    else:
+        return bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["axis_up"]

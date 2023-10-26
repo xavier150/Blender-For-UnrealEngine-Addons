@@ -188,13 +188,13 @@ def ExportSingleSkeletalMesh(
             batch_mode='OFF',
             use_batch_own_dir=True,
             use_metadata=addon_prefs.exportWithMetaData,
-            primary_bone_axis=active.bfu_export_primary_bone_axis,
-            secondary_bone_axis=active.bfu_export_secondary_bone_axis,
+            primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(active),
+            secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(active),
             mirror_symmetry_right_side_bones=active.bfu_mirror_symmetry_right_side_bones,
             use_ue_mannequin_bone_alignment=active.bfu_use_ue_mannequin_bone_alignment,
             disable_free_scale_animation=active.bfu_disable_free_scale_animation,
-            axis_forward=active.bfu_export_axis_forward,
-            axis_up=active.bfu_export_axis_up,
+            axis_forward=bfu_export_utils.get_export_axis_forward(active),
+            axis_up=bfu_export_utils.get_export_axis_up(active),
             bake_space_transform=False
             )
     elif (export_procedure == "blender-standard"):
@@ -224,10 +224,10 @@ def ExportSingleSkeletalMesh(
             batch_mode='OFF',
             use_batch_own_dir=True,
             use_metadata=addon_prefs.exportWithMetaData,
-            primary_bone_axis=active.bfu_export_primary_bone_axis,
-            secondary_bone_axis=active.bfu_export_secondary_bone_axis,
-            axis_forward=active.bfu_export_axis_forward,
-            axis_up=active.bfu_export_axis_up,
+            primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(active),
+            secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(active),
+            axis_forward=bfu_export_utils.get_export_axis_forward(active),
+            axis_up=bfu_export_utils.get_export_axis_up(active),
             bake_space_transform=False
             )
     elif (export_procedure == "auto-rig-pro"):
