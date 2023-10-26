@@ -25,15 +25,36 @@ from ..bbpl.blender_layout.layout_template_list.types import (
         )
 
 
-class BFU_UL_ModularSkeletalSpecifiedPartsTargetMeshItem(BBPL_UI_TemplateItem):
-    mesh: bpy.props.PointerProperty(
-        name="LOD4",
-        description="Target objet for level of detail 04",
-        override={'LIBRARY_OVERRIDABLE'},
-        type=bpy.types.Object
+class BFU_UL_ModularSkeletalSpecifiedPartsTargetItem(BBPL_UI_TemplateItem):
+    enabled: bpy.props.BoolProperty(
+        name="Use",
+        default=True
+        )
+
+    target_type: bpy.props.EnumProperty(
+        name="Target Type",
+        description="Choose the type of target (Object or Collection)",
+        items=[
+            ('OBJECT', 'Object', 'Use an Object as the target'),
+            ('COLLECTION', 'Collection', 'Use a Collection as the target'),
+        ],
+        default='OBJECT',
     )
 
-class BFU_UL_ModularSkeletalSpecifiedPartsTargetMeshItemDraw(BBPL_UI_TemplateItemDraw):
+    obj: bpy.props.PointerProperty(
+        name="Obj target",
+        description="Target object for modular skeletal mesh.",
+        type=bpy.types.Object,
+    )
+
+    collection: bpy.props.PointerProperty(
+        name="Collection target",
+        description="Target collection for modular skeletal mesh.",
+        type=bpy.types.Collection,
+    )
+
+
+class BFU_UL_ModularSkeletalSpecifiedPartsTargetItemDraw(BBPL_UI_TemplateItemDraw):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 
         prop_line = layout
@@ -45,26 +66,32 @@ class BFU_UL_ModularSkeletalSpecifiedPartsTargetMeshItemDraw(BBPL_UI_TemplateIte
 
         prop_use = prop_line.row()
         prop_use.alignment = 'LEFT'
-        prop_use.prop(item, "use", text="")
+        prop_use.prop(item, "enabled", text="")
 
         #icon = bbpl.ui_utils.getIconByGroupTheme(item.theme)
         icon = "NONE"
 
         prop_data = prop_line.row()
         prop_data.alignment = 'EXPAND'
-        prop_data.prop(item, "mesh", text="")
-        prop_data.enabled = item.use
+        prop_data.prop(item, "target_type", text="")
+        if item.target_type == "OBJECT":
+            prop_data.prop(item, "obj", text="")
+        elif item.target_type == "COLLECTION":
+            prop_data.prop(item, "collection", text="")
+        prop_data.enabled = item.enabled
 
     
-class BFU_ModularSkeletalSpecifiedPartsTargetMeshs(BBPL_UI_TemplateList):
-    template_collection: bpy.props.CollectionProperty(type=BFU_UL_ModularSkeletalSpecifiedPartsTargetMeshItem)
-    template_collection_uilist_class: bpy.props.StringProperty(default = "BFU_UL_ModularSkeletalSpecifiedPartsTargetMeshItemDraw")
+class BFU_ModularSkeletalSpecifiedPartsTargetList(BBPL_UI_TemplateList):
+    template_collection: bpy.props.CollectionProperty(type=BFU_UL_ModularSkeletalSpecifiedPartsTargetItem)
+    template_collection_uilist_class: bpy.props.StringProperty(default = "BFU_UL_ModularSkeletalSpecifiedPartsTargetItemDraw")
+    rows: bpy.props.IntProperty(default = 3)
+    maxrows: bpy.props.IntProperty(default = 3)
 
 
 
 
 class BFU_UL_ModularSkeletalSpecifiedPartsMeshItem(BBPL_UI_TemplateItem):
-    use: bpy.props.BoolProperty(
+    enabled: bpy.props.BoolProperty(
         name="Use",
         default=True
         )
@@ -75,8 +102,8 @@ class BFU_UL_ModularSkeletalSpecifiedPartsMeshItem(BBPL_UI_TemplateItem):
         default="MyGroup",
         )
     
-    target_meshs: bpy.props.PointerProperty(
-       type=BFU_ModularSkeletalSpecifiedPartsTargetMeshs
+    skeletal_parts: bpy.props.PointerProperty(
+       type=BFU_ModularSkeletalSpecifiedPartsTargetList
        )
 
 class BFU_UL_ModularSkeletalSpecifiedPartsMeshItemDraw(BBPL_UI_TemplateItemDraw):
@@ -91,15 +118,25 @@ class BFU_UL_ModularSkeletalSpecifiedPartsMeshItemDraw(BBPL_UI_TemplateItemDraw)
 
         prop_use = prop_line.row()
         prop_use.alignment = 'LEFT'
-        prop_use.prop(item, "use", text="")
-
-        #icon = bbpl.ui_utils.getIconByGroupTheme(item.theme)
-        icon = "NONE"
+        prop_use.prop(item, "enabled", text="")
 
         prop_data = prop_line.row()
         prop_data.alignment = 'EXPAND'
         prop_data.prop(item, "name", text="")
-        prop_data.enabled = item.use
+        if item.enabled:
+            obj_len = 0
+            col_len = 0
+            for part_item in item.skeletal_parts.get_template_collection():
+                if part_item.target_type == "OBJECT":
+                    obj_len += 1
+                elif part_item.target_type == "COLLECTION":
+                    col_len += 1
+            preview_text = str(obj_len) + " obj(s) and " + str(col_len) + " collections(s)."
+            prop_data.label(text=preview_text)
+
+            if obj_len+col_len == 0:
+                prop_data.label(text="", icon="ERROR")
+        prop_data.enabled = item.enabled
 
     
 class BFU_ModularSkeletalSpecifiedPartsMeshs(BBPL_UI_TemplateList):
@@ -107,17 +144,29 @@ class BFU_ModularSkeletalSpecifiedPartsMeshs(BBPL_UI_TemplateList):
     template_collection_uilist_class: bpy.props.StringProperty(default = "BFU_UL_ModularSkeletalSpecifiedPartsMeshItemDraw")
     def draw(self, layout: bpy.types.UILayout):
         super().draw(layout)
-        active = self.get_active_item()
-        if active:
-            layout.label(text="Active -> "+active.name)
-            active.target_meshs.draw(layout)
+
+        box = layout.box()  # Créez un box dans le layout courant
+        item = self.get_active_item()
+        box
+        if item:
+            prop_line = box.row()
+            prop_use = prop_line.row()
+            prop_use.alignment = 'LEFT'
+            prop_use.prop(item, "enabled", text="enabled")
+
+            prop_data = prop_line.row()
+            prop_data.alignment = 'EXPAND'
+            prop_data.prop(item, "name", text="")
+            prop_data.enabled = item.enabled
+
+            item.skeletal_parts.draw(box).enabled = item.enabled
         
 
 
 classes = (
-    BFU_UL_ModularSkeletalSpecifiedPartsTargetMeshItem,
-    BFU_UL_ModularSkeletalSpecifiedPartsTargetMeshItemDraw,
-    BFU_ModularSkeletalSpecifiedPartsTargetMeshs,
+    BFU_UL_ModularSkeletalSpecifiedPartsTargetItem,
+    BFU_UL_ModularSkeletalSpecifiedPartsTargetItemDraw,
+    BFU_ModularSkeletalSpecifiedPartsTargetList,
     BFU_UL_ModularSkeletalSpecifiedPartsMeshItem,
     BFU_UL_ModularSkeletalSpecifiedPartsMeshItemDraw,
     BFU_ModularSkeletalSpecifiedPartsMeshs,

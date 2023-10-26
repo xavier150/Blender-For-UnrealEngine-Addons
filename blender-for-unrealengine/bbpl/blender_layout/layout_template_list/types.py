@@ -99,6 +99,8 @@ class BBPL_UI_TemplateList(bpy.types.PropertyGroup):
     template_collection: bpy.props.CollectionProperty(type = BBPL_UI_TemplateItem)
     template_collection_uilist_class: bpy.props.StringProperty(default = "BBPL_UI_TemplateItemDraw")
     active_template_property: bpy.props.IntProperty(default = 0)
+    rows: bpy.props.IntProperty(default = 6)
+    maxrows: bpy.props.IntProperty(default = 6)
 
     def get_template_collection(self):
         return self.template_collection
@@ -126,8 +128,8 @@ class BBPL_UI_TemplateList(bpy.types.PropertyGroup):
             self.template_collection_uilist_class, "",  # type and unique id
             self, "template_collection",  # pointer to the CollectionProperty
             self, "active_template_property",  # pointer to the active identifier
-            rows=6,
-            maxrows=6
+            rows=self.rows,
+            maxrows=self.maxrows,
             )
 
 
@@ -142,6 +144,7 @@ class BBPL_UI_TemplateList(bpy.types.PropertyGroup):
         send_template_data_on_button(button_movedown, self)
         button_duplicate = template_column.operator("data.template_button_duplicate", icon='ADD', text="")
         send_template_data_on_button(button_duplicate, self)
+        return template_row
 
 
 class BBPL_OT_TemplateButtonBase (bpy.types.Operator):
