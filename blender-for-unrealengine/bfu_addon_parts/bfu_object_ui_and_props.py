@@ -132,12 +132,12 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         items=[
             ("ue-standard",
                 "UE Standard",
-                "Standard fbx I/O API.",
+                "Modified fbx I/O for Unreal Engine",
                 "ARMATURE_DATA",
                 1),
             ("blender-standard",
                 "Blender Standard",
-                "modified fbx I/O API.",
+                "Standard fbx I/O.",
                 "ARMATURE_DATA",
                 2),
             ("auto-rig-pro",
@@ -1548,7 +1548,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_every_meshs_separate")
                             if obj.bfu_modular_skeletal_mesh_mode == "specified_parts":
                                 obj.bfu_modular_skeletal_specified_parts_meshs_template.draw(modular_skeletal_mesh)
-                                obj.bfu_modular_skeletal_specified_parts_meshs_template2.draw(modular_skeletal_mesh)
 
 
 

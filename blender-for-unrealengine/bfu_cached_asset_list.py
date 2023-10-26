@@ -250,7 +250,12 @@ class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
                             asset.obj_list = [mesh]
                             TargetAssetToExport.append(asset)
                     elif obj.bfu_modular_skeletal_mesh_mode == "specified_parts":
-                        TargetAssetToExport.append(AssetToExport(obj, None, "SkeletalMesh"))
+                        for part in obj.bfu_modular_skeletal_specified_parts_meshs_template.get_template_collection():
+                            asset = AssetToExport(obj, None, "SkeletalMesh")
+                            asset.name = part.name
+                            for mesh in part.target_meshs.get_template_collection():
+                                asset.obj_list.append(mesh.mesh)
+                            TargetAssetToExport.append(asset)
 
                 # NLA
                 if scene.anin_export:

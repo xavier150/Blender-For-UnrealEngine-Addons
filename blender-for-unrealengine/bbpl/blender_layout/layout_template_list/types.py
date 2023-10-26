@@ -35,20 +35,25 @@ def send_template_data_on_button(button, template):
     else:
         return
 
+    button.target_id_data_path = template.path_from_id()
     button.target_id_data_name = template.id_data.name
     button.target_id_data_type = data_type
     button.target_variable_name = template.get_name()
 
 def get_template_from_button(button):
 
+    
+
     if button.target_id_data_type == "Scene":
         scene = bpy.data.scenes[button.target_id_data_name]
-        return getattr(scene, button.target_variable_name)
+        #return getattr(scene, button.target_variable_name)
+        return scene.path_resolve(button.target_id_data_path)
         
 
     if button.target_id_data_type == "Object":
         obj = bpy.data.objects[button.target_id_data_name]
-        return getattr(obj, button.target_variable_name)
+        #return getattr(obj, button.target_variable_name)
+        return obj.path_resolve(button.target_id_data_path)
 
 
 
@@ -95,15 +100,26 @@ class BBPL_UI_TemplateList(bpy.types.PropertyGroup):
     template_collection_uilist_class: bpy.props.StringProperty(default = "BBPL_UI_TemplateItemDraw")
     active_template_property: bpy.props.IntProperty(default = 0)
 
+    def get_template_collection(self):
+        return self.template_collection
+    
+    def get_active_index(self):
+        return self.active_template_property
+    
+    def get_active_item(self):
+        if len(self.template_collection) > 0:
+            return self.template_collection[self.active_template_property]
+
     def get_name(self):
-        prop_rna = self.id_data.bl_rna.properties[self.id_properties_ensure().name]
-        return prop_rna.name
+        #ath_from_id()
+
+        prop_name = self.id_properties_ensure().name
+        #print(self.id_properties_ensure())
+        #self.id_data.bl_rna.properties[prop_name].path_from_id("template_collection")
+        #print(self.path_from_id())
+        return prop_name
 
     def draw(self, layout: bpy.types.UILayout):
-
-        
-        data = self.id_data
-        #print(data)
 
         template_row = layout.row()
         template_row.template_list(
@@ -132,6 +148,7 @@ class BBPL_OT_TemplateButtonBase (bpy.types.Operator):
     bl_label = "Template Actions"
     bl_options = {'REGISTER'}
 
+    target_id_data_path: bpy.props.StringProperty()
     target_id_data_name: bpy.props.StringProperty()
     target_id_data_type: bpy.props.StringProperty()
     target_variable_name: bpy.props.StringProperty()
@@ -147,8 +164,8 @@ class BBPL_OT_TemplateButtonDuplicate (BBPL_OT_TemplateButtonBase):
         itemToCopy = template.template_collection[template.active_template_property]
         for k, v in list(itemToCopy.items()):
             new_item[k] = v
-
-        template.active_template_property = len(template.template_collection)-1
+        last_index = len(template.template_collection)-1
+        template.active_template_property = last_index
         return {"FINISHED"}
 
 
@@ -164,9 +181,7 @@ class BBPL_OT_TemplateButtonAdd(BBPL_OT_TemplateButtonBase):
             last_index,
             template.active_template_property + 10
             )
-        template.active_template_property += 1
-        if template.active_template_property > last_index:
-            template.active_template_property = last_index
+        template.active_template_property = last_index
         return {"FINISHED"}
 
 
