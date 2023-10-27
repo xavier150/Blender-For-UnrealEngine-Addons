@@ -258,11 +258,13 @@ class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
                                     if skeletal_part.enabled:
                                         if skeletal_part.target_type == 'OBJECT':  # Utilisez l'attribut target_type
                                             if skeletal_part.obj:
-                                                asset.obj_list.append(skeletal_part.obj)
+                                                if skeletal_part.obj.bfu_export_type != "dont_export":
+                                                    asset.obj_list.append(skeletal_part.obj)
                                         elif skeletal_part.target_type == 'COLLECTION':
                                             if skeletal_part.collection:
                                                 for collection_obj in skeletal_part.collection.objects:
-                                                    asset.obj_list.append(collection_obj)
+                                                    if collection_obj.bfu_export_type != "dont_export":
+                                                        asset.obj_list.append(collection_obj)
                                 TargetAssetToExport.append(asset)
 
                 # NLA
