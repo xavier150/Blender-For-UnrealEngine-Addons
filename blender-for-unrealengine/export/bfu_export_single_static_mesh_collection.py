@@ -18,66 +18,58 @@
 
 
 import bpy
-import time
-import math
+from . import bfu_export_utils
+from .. import bbpl
+from .. import bfu_basics
+from .. import bfu_utils
+from .. import bfu_naming
+from .. import bfu_check_potential_error
+from .. import bfu_export_logs
 
 if "bpy" in locals():
     import importlib
-    if "bfu_write_text" in locals():
-        importlib.reload(bfu_write_text)
+    if "bfu_export_utils" in locals():
+        importlib.reload(bfu_export_utils)
+    if "bbpl" in locals():
+        importlib.reload(bbpl)
     if "bfu_basics" in locals():
         importlib.reload(bfu_basics)
     if "bfu_utils" in locals():
         importlib.reload(bfu_utils)
     if "bfu_check_potential_error" in locals():
         importlib.reload(bfu_check_potential_error)
-    if "bfu_export_utils" in locals():
-        importlib.reload(bfu_export_utils)
-    if "bfu_export_single_static_mesh" in locals():
-        importlib.reload(bfu_export_single_static_mesh)
-
-
-from .. import bfu_write_text
-from .. import bfu_basics
-from ..bfu_basics import *
-from .. import bfu_utils
-from ..bfu_utils import *
-from .. import bfu_check_potential_error
-
-from . import bfu_export_utils
-from .bfu_export_utils import *
-from . import bfu_export_single_static_mesh
-from .bfu_export_single_static_mesh import *
-
 
 def ProcessCollectionExport(col):
 
-    addon_prefs = GetAddonPrefs()
-    dirpath = GetCollectionExportDir(bpy.data.collections[col.name])
+    addon_prefs = bfu_basics.GetAddonPrefs()
+    dirpath = bfu_utils.GetCollectionExportDir(bpy.data.collections[col.name])
     absdirpath = bpy.path.abspath(dirpath)
     scene = bpy.context.scene
 
-    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.asset_name = col.name
+    MyAsset.asset_global_scale = 1.0 #col.bfu_export_global_scale
     MyAsset.collection = col
     MyAsset.asset_type = bfu_utils.GetCollectionType(col)
-    MyAsset.folder_name = col.exportFolderName
+    MyAsset.folder_name = col.bfu_export_folder_name
+
+    file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+    file.file_name = bfu_naming.get_collection_file_name(col, col.name, "")
+    file.file_extension = "fbx"
+    file.file_path = dirpath
+    file.file_type = "FBX"
+
     MyAsset.StartAssetExport()
-
-    ExportSingleStaticMeshCollection(dirpath, GetCollectionExportFileName(col.name), col.name)
-
-    file = MyAsset.files.add()
-    file.name = GetCollectionExportFileName(col.name)
-    file.path = dirpath
-    file.type = "FBX"
+    ExportSingleStaticMeshCollection(dirpath, file.GetFileWithExtension(), col.name)
 
     if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
-
-        ExportAdditionalParameter(absdirpath, MyAsset)
-        file = MyAsset.files.add()
-        file.name = GetCollectionExportFileName(col.name, "_AdditionalTrack.json")
-        file.path = dirpath
-        file.type = "AdditionalTrack"
+        
+        file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+        file.file_name = bfu_naming.get_collection_file_name(col, col.name+"_AdditionalTrack", "")
+        file.file_extension = "json"
+        file.file_path = dirpath
+        file.file_type = "AdditionalTrack"
+        bfu_export_utils.ExportAdditionalParameter(absdirpath, file.GetFileWithExtension(), MyAsset)
 
     MyAsset.EndAssetExport(True)
     return MyAsset
@@ -97,62 +89,63 @@ def ExportSingleStaticMeshCollection(
     # Export a single collection
 
     scene = bpy.context.scene
-    addon_prefs = GetAddonPrefs()
+    addon_prefs = bfu_basics.GetAddonPrefs()
     collection = bpy.data.collections[collectionName]
 
-    bbpl.utils.SafeModeSet('OBJECT')
+    bbpl.utils.safe_mode_set('OBJECT')
 
-    SelectCollectionObjects(collection)
-    duplicate_data = DuplicateSelectForExport()
-    SetDuplicateNameForExport(duplicate_data)
+    bfu_utils.SelectCollectionObjects(collection)
+    duplicate_data = bfu_export_utils.DuplicateSelectForExport()
+    bfu_export_utils.SetDuplicateNameForExport(duplicate_data)
 
-    MakeSelectVisualReal()
+    bfu_export_utils.MakeSelectVisualReal()
 
-    ApplyNeededModifierToSelect()
+    bfu_utils.ApplyNeededModifierToSelect()
     for obj in bpy.context.selected_objects:
-        SetVertexColorForUnrealExport(obj)
-        ConvertGeometryNodeAttributeToUV(obj)
-        CorrectExtremUVAtExport(obj)
-        SetSocketsExportTransform(obj)
-        SetSocketsExportName(obj)
+        bfu_export_utils.SetVertexColorForUnrealExport(obj)
+        bfu_export_utils.ConvertGeometryNodeAttributeToUV(obj)
+        bfu_export_utils.CorrectExtremUVAtExport(obj)
+        bfu_export_utils.SetSocketsExportTransform(obj)
+        bfu_export_utils.SetSocketsExportName(obj)
 
     bfu_check_potential_error.UpdateNameHierarchy(
-        GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
+        bfu_utils.GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
         )
 
     bpy.ops.export_scene.fbx(
-        filepath=GetExportFullpath(dirpath, filename),
+        filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
         check_existing=False,
         use_selection=True,
         global_scale=1,
         object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
         use_custom_props=addon_prefs.exportWithCustomProps,
+        use_custom_curves=True,
         mesh_smooth_type="FACE",
         add_leaf_bones=False,
-        # use_armature_deform_only=active.exportDeformOnly,
+        # use_armature_deform_only=active.bfu_export_deform_only,
         bake_anim=False,
         use_metadata=addon_prefs.exportWithMetaData,
-        # primary_bone_axis=active.exportPrimaryBaneAxis,
-        # secondary_bone_axis=active.exporSecondaryBoneAxis,
-        # axis_forward=active.exportAxisForward,
-        # axis_up=active.exportAxisUp,
+        # primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
+        # secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
+        # axis_forward=bfu_export_utils.get_export_axis_forward(obj),
+        # axis_up=bfu_export_utils.get_export_axis_up(obj),
         bake_space_transform=False
         )
     for obj in bpy.context.selected_objects:
-        ClearVertexColorForUnrealExport(obj)
-        ResetSocketsExportName(obj)
-        ResetSocketsTransform(obj)
+        bfu_export_utils.ClearVertexColorForUnrealExport(obj)
+        bfu_export_utils.ResetSocketsExportName(obj)
+        bfu_export_utils.ResetSocketsTransform(obj)
 
-    CleanDeleteObjects(bpy.context.selected_objects)
+    bfu_utils.CleanDeleteObjects(bpy.context.selected_objects)
     for data in duplicate_data.data_to_remove:
         data.RemoveData()
 
-    ResetDuplicateNameAfterExport(duplicate_data)
+    bfu_export_utils.ResetDuplicateNameAfterExport(duplicate_data)
 
     for obj in scene.objects:
-        ClearAllBFUTempVars(obj)
+        bfu_utils.ClearAllBFUTempVars(obj)
 
 
 def CleanSingleStaticMeshCollection(obj):
     # Remove the created collection
-    SelectSpecificObject(obj)
+    bbpl.utils.select_specific_object(obj)

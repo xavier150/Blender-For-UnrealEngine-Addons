@@ -23,9 +23,6 @@ import bpy
 import shutil
 import bmesh
 import addon_utils
-from mathutils import Vector
-from mathutils import Quaternion
-
 
 def GetAddonPrefs():
     return bpy.context.preferences.addons[__package__].preferences
@@ -41,90 +38,6 @@ def is_deleted(o):
 def CheckPluginIsActivated(PluginName):
     is_enabled, is_loaded = addon_utils.check(PluginName)
     return is_enabled and is_loaded
-
-
-def MoveToGlobalView():
-    local_view_areas = []
-    for area in bpy.context.screen.areas:
-        if area.type == 'VIEW_3D':
-            space = area.spaces[0]
-            if space.local_view:  # check if using local view
-                local_view_areas.append(area)
-
-    for local_view_area in local_view_areas:
-        for region in local_view_area.regions:
-            if region.type == 'WINDOW':
-                # override context and switch to global view
-                override = {'area': local_view_area, 'region': region}
-                bpy.ops.view3d.localview(override)
-
-    return local_view_areas
-
-
-def MoveToLocalView(local_view_areas):
-    # TO DO
-    pass
-
-
-def GetCurrentSelection():
-    # Return array for selected and the active
-    class MyClass():
-        def __init__(self):
-            self.active = None
-            self.selected_objects = []
-            self.old_name = []
-
-        def RemoveFromList(self, objs):
-            for x, obj in enumerate(objs):
-                if obj in self.selected_objects:
-                    self.selected_objects.remove(obj)
-                    self.old_name.remove(self.old_name[x])
-
-        def RemoveFromListByName(self, name_list):
-
-            for obj_name in name_list:
-                if obj_name in self.old_name:
-                    x = self.old_name.index(obj_name)
-                    del self.selected_objects[x]
-                    del self.old_name[x]
-
-        def DebugObjectList(self):
-            print("##########################################")
-            print(self.selected_objects)
-            print(self.old_name)
-
-    Selected = MyClass()
-    Selected.active = bpy.context.view_layer.objects.active
-    Selected.selected_objects = bpy.context.selected_objects.copy()
-    for sel in Selected.selected_objects:
-        Selected.old_name.append(sel.name)
-    return (Selected)
-
-
-def SetCurrentSelection(selection):
-    # Get array select object and the active
-
-    bpy.ops.object.select_all(action='DESELECT')
-    for x, obj in enumerate(selection.selected_objects):
-        if not is_deleted(obj):
-            if obj.name in bpy.context.window.view_layer.objects:
-                obj.select_set(True)
-
-    if selection.active:
-        selection.active.select_set(True)
-        bpy.context.view_layer.objects.active = selection.active
-    else:
-        if len(selection.selected_objects) > 0:
-            selection.selected_objects[0].select_set(True)
-            bpy.context.view_layer.objects.active = selection.selected_objects[0]
-
-
-def SelectSpecificObject(obj):
-
-    bpy.ops.object.select_all(action='DESELECT')
-    if obj.name in bpy.context.window.view_layer.objects:
-        obj.select_set(True)
-    bpy.context.view_layer.objects.active = obj
 
 
 def ChecksRelationship(arrayA, arrayB):
@@ -161,19 +74,6 @@ def previousPowerOfTwo(n):
 
     # n is now a power of two (less than or equal to n)
     return n
-
-
-def nearestPowerOfTwo(value):
-    if value < 2:
-        return 2
-
-    a = previousPowerOfTwo(value)
-    b = nextPowerOfTwo(value)
-
-    if value - a < b - value:
-        return a
-    else:
-        return b
 
 
 def RemoveFolderTree(folder):
@@ -294,16 +194,6 @@ def ValidDefname(filename):
     valid_chars = "_%s%s" % (string.ascii_letters, string.digits)
     filename = ''.join(c for c in filename if c in valid_chars)
     return filename
-
-
-def ResetArmaturePose(obj):
-    # Reset armature pose
-
-    for b in obj.pose.bones:
-        b.rotation_quaternion = Quaternion((0, 0, 0), 0)
-        b.rotation_euler = Vector((0, 0, 0))
-        b.scale = Vector((1, 1, 1))
-        b.location = Vector((0, 0, 0))
 
 
 def GetIfActionIsAssociated(action, bone_names):

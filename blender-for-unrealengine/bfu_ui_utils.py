@@ -17,36 +17,8 @@
 # ======================= END GPL LICENSE BLOCK =============================
 
 
+import os
 import bpy
-import fnmatch
-import mathutils
-import math
-import time
-import sys
-
-if "bpy" in locals():
-    import importlib
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-from . import bfu_basics
-from .bfu_basics import *
-
-from bpy.props import (
-        StringProperty,
-        )
-
-from bpy.types import (
-        Operator,
-        )
-
-
-def LayoutSection(layout, PropName, PropLabel):
-    scene = bpy.context.scene
-    expanded = eval("scene."+PropName)
-    tria_icon = "TRIA_DOWN" if expanded else "TRIA_RIGHT"
-    layout.row().prop(scene, PropName, icon=tria_icon, icon_only=True, text=PropLabel, emboss=False)
-    return expanded
-
 
 def DisplayPropertyFilter(active_tab, active_sub_tab):
     # Define more easily the options which must be displayed or not
@@ -94,56 +66,47 @@ def PropWithDocButton(self, tagetlayout, name, doc_octicon):  # OLD
     docOperator.octicon = doc_octicon
 
 
-class BFU_AP_UI_UTILS(bpy.types.AddonPreferences):
-    # this must match the addon name, use '__package__'
-    # when defining this in a submodule of a python package.
-    bl_idname = __package__
+class BFU_OT_OpenDocumentationTargetPage(bpy.types.Operator):
+    bl_label = "Documentation"
+    bl_idname = "object.open_documentation_target_page"
+    bl_description = "Click for open documentation page on GitHub"
+    page: bpy.props.StringProperty(default="")
+    octicon: bpy.props.StringProperty(default="")
 
-    class BFU_OT_OpenDocumentationTargetPage(Operator):
-        bl_label = "Documentation"
-        bl_idname = "object.open_documentation_target_page"
-        bl_description = "Clic for open documentation page on GitHub"
-        page: StringProperty(default="")
-        octicon: StringProperty(default="")
+    def execute(self, context):
+        os.system(
+            "start \"\" " +
+            "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/" + self.page + "#" + self.octicon
+            )
+        return {'FINISHED'}
 
-        def execute(self, context):
-            os.system(
-                "start \"\" " +
-                "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/" + self.page + "#" + self.octicon
-                )
-            return {'FINISHED'}
+class BFU_OT_OpenDocumentationTargetExportPage(bpy.types.Operator):
+    bl_label = "Documentation"
+    bl_idname = "object.open_documentation_target_export_page"
+    bl_description = "Click for open documentation page on GitHub"
+    octicon: bpy.props.StringProperty(default="")
 
-    class BFU_OT_OpenDocumentationTargetExportPage(Operator):
-        bl_label = "Documentation"
-        bl_idname = "object.open_documentation_target_export_page"
-        bl_description = "Clic for open documentation page on GitHub"
-        octicon: StringProperty(default="")
-
-        def execute(self, context):
-            os.system(
-                "start \"\" " +
-                "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/How-export-assets" +
-                "#"+self.octicon
-                )
-            return {'FINISHED'}
+    def execute(self, context):
+        os.system(
+            "start \"\" " +
+            "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/How-export-assets" +
+            "#"+self.octicon
+            )
+        return {'FINISHED'}
 
 
 classes = (
-    BFU_AP_UI_UTILS,
-    BFU_AP_UI_UTILS.BFU_OT_OpenDocumentationTargetPage,
-    BFU_AP_UI_UTILS.BFU_OT_OpenDocumentationTargetExportPage
+    BFU_OT_OpenDocumentationTargetPage,
+    BFU_OT_OpenDocumentationTargetExportPage
 )
 
 
 def register():
-    from bpy.utils import register_class
-
     for cls in classes:
-        register_class(cls)
+        bpy.utils.register_class(cls)
 
 
 def unregister():
-    from bpy.utils import unregister_class
-
     for cls in reversed(classes):
-        unregister_class(cls)
+        bpy.utils.unregister_class(cls)
+

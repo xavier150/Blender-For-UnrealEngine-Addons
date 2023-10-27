@@ -16,17 +16,9 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-
-import bpy
-import time
-import math
-
 from .. import bfu_write_text
 from .. import bfu_basics
-from ..bfu_basics import *
 from .. import bfu_utils
-from ..bfu_utils import *
-from enum import Enum
 
 from ..bbpl import utils
 
@@ -49,16 +41,16 @@ class VertexColorExportData:
         self.index = -1
 
         if self.GetPropertyOwner():
-            if self.GetPropertyOwner().VertexColorImportOption == "IGNORE":
+            if self.GetPropertyOwner().bfu_vertex_color_import_option == "IGNORE":
                 self.export_type = "IGNORE"
 
-            elif self.GetPropertyOwner().VertexColorImportOption == "OVERRIDE":
-                self.color = self.GetPropertyOwner().VertexOverrideColor
+            elif self.GetPropertyOwner().bfu_vertex_color_import_option == "OVERRIDE":
+                self.color = self.GetPropertyOwner().bfu_vertex_color_override_color
                 self.export_type = "OVERRIDE"
 
-            elif self.GetPropertyOwner().VertexColorImportOption == "REPLACE":
+            elif self.GetPropertyOwner().bfu_vertex_color_import_option == "REPLACE":
                 index = self.GetChosenVertexIndex()
-                print(index)
+                # print(index)
                 if index != -1:
                     self.index = index
                     self.name = self.GetChosenVertexName()
@@ -76,26 +68,26 @@ class VertexColorExportData:
         if obj.type != "MESH":
             return -1
 
-        VertexColorToUse = self.GetPropertyOwner().VertexColorToUse
-        VertexColorIndexToUse = self.GetPropertyOwner().VertexColorIndexToUse
+        bfu_vertex_color_to_use = self.GetPropertyOwner().bfu_vertex_color_to_use
+        bfu_vertex_color_index_to_use = self.GetPropertyOwner().bfu_vertex_color_index_to_use
 
         if obj:
             if obj.data:
-                vertex_colors = utils.getVertexColors(obj)
+                vertex_colors = utils.get_vertex_colors(obj)
                 if len(vertex_colors) > 0:
 
-                    if VertexColorToUse == "FirstIndex":
+                    if bfu_vertex_color_to_use == "FirstIndex":
                         return 0
 
-                    if VertexColorToUse == "LastIndex":
+                    if bfu_vertex_color_to_use == "LastIndex":
                         return len(vertex_colors)-1
 
-                    if VertexColorToUse == "ActiveIndex":
-                        return utils.getVertexColors_RenderColorIndex(obj)
+                    if bfu_vertex_color_to_use == "ActiveIndex":
+                        return utils.get_vertex_colors_render_color_index(obj)
 
-                    if VertexColorToUse == "CustomIndex":
-                        if VertexColorIndexToUse < len(vertex_colors):
-                            return VertexColorIndexToUse
+                    if bfu_vertex_color_to_use == "CustomIndex":
+                        if bfu_vertex_color_index_to_use < len(vertex_colors):
+                            return bfu_vertex_color_index_to_use
         return -1
 
     def GetChosenVertexName(self):
@@ -108,8 +100,8 @@ class VertexColorExportData:
         if obj:
             if obj.type == "MESH":
                 if obj.data:
-                    vertex_colors = utils.getVertexColors(obj)
-                    if obj.VertexColorIndexToUse < len(vertex_colors):
+                    vertex_colors = utils.get_vertex_colors(obj)
+                    if obj.bfu_vertex_color_index_to_use < len(vertex_colors):
                         return vertex_colors[index].name
 
         return "None"

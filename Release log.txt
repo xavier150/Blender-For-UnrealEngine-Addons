@@ -452,3 +452,20 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: ConvertGeometryNodeAttributeToUV fail after Blender 3.5
 - Fixed: Geometry To UV, Correct Extrem UV, Vertex Color, Sockets Transform and Name don't apply on child objects.
 - Fixed: Export using AutoProRig fail.
+
+== Rev 0.4.2 ==
+- New: The addon now include a modified version of the Blender standard fbx I/O api, instead of using the original one. (Thanks SAM-tak!)
+- New: Exported models and animations now use Unreal bones coordinate by default. (Thanks SAM-tak!)
+- New: Supports exporting models and animations with the Unreal Mannequin bone structure from Blender. (Thanks SAM-tak!)
+- New: Supports exporting Blender's custom property animation in a format that Unreal Engine can recognize as curve data animation. (Thanks SAM-tak!)
+- New: Alembic animation support multiple unit scales and global scale.
+- New: Selection filter "Only selected" and "Only selected and active action" now filter only visible objects.
+- New: Modular export (Export several skeletal meshs with the same skeleton)
+- Fixed: Blender 3.5 may crash during NLA Export. (Interacting with an NlaStripFCurves not linked to an object could lead to a crash in Blender 3.5.)
+- Fixed: Applying skeletal export scale with Proxy and Unit Scale not set to 0.01 could result in a script error.
+- Fixed: Using "Convert Attribute to UV" can swap UV Indices in the exported mesh.
+- Fixed: The "Export Procedure" option is visible with static meshes.
+- Fixed: Hidden objects and collections are unhidden after export when using the same name.
+- Fixed: Skeletons imported with skeletal meshes use incorrect names.
+- Fixed: Collection.exclude is not recovery after export when using multi view layers.
+- Fixed: Camera import script don't work in Unreal Engine 5.3

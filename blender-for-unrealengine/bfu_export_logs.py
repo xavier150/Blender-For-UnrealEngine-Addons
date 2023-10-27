@@ -2,29 +2,36 @@ import bpy
 import os
 import time
 from . import bfu_utils
+from . import bfu_naming
+from . import bfu_export_logs
 
 
 class BFU_OT_FileExport(bpy.types.PropertyGroup):
-    name: bpy.props.StringProperty()
-    path: bpy.props.StringProperty()
-    type: bpy.props.StringProperty()  # FBX, AdditionalTrack
+    file_name: bpy.props.StringProperty()
+    file_extension: bpy.props.StringProperty()
+    file_path: bpy.props.StringProperty()
+    file_type: bpy.props.StringProperty()  # FBX, AdditionalTrack
 
     def __init__(self, name):
         pass
 
+    def GetFileWithExtension(self):
+        return self.file_name + "." + self.file_extension
+
     def GetRelativePath(self):
-        return os.path.join(self.path, self.name)
+        return os.path.join(self.file_path, self.GetFileWithExtension())
 
     def GetAbsolutePath(self):
-        return os.path.join(bpy.path.abspath(self.path), self.name)
+        return os.path.join(bpy.path.abspath(self.file_path), self.GetFileWithExtension())
 
 
 class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     # [AssetName , AssetType , ExportPath, ExportTime]
 
     asset_name: bpy.props.StringProperty(default="None")
+    asset_global_scale: bpy.props.FloatProperty(default=1.0)
     skeleton_name: bpy.props.StringProperty(default="None")
-    asset_type: bpy.props.StringProperty(default="None")  # return from GetAssetType()
+    asset_type: bpy.props.StringProperty(default="None")  # return from bfu_utils.GetAssetType()
     folder_name: bpy.props.StringProperty(default="")
     files: bpy.props.CollectionProperty(type=BFU_OT_FileExport)
     object: bpy.props.PointerProperty(type=bpy.types.Object)
@@ -33,11 +40,7 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     export_end_time: bpy.props.FloatProperty(default=0)
     export_success: bpy.props.BoolProperty(default=False)
 
-    def StartAssetExport(self, obj=None, action=None, collection=None):
-
-        if obj and action:
-            self.asset_name = bfu_utils.GetActionExportFileName(obj, action, "")
-
+    def StartAssetExport(self):
         self.export_start_time = time.perf_counter()
 
     def EndAssetExport(self, success):
@@ -47,40 +50,37 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     def GetExportTime(self):
         return self.export_end_time - self.export_start_time
 
-    def GetFileByType(self, type: str):
+    def GetFileByType(self, file_type: str):
         for file in self.files:
-            if file.type == type:
+            file: bfu_export_logs.BFU_OT_FileExport
+            if file.file_type == file_type:
                 return file
-        print("File type not found in this assets:", type)
+        print("File type not found in this assets:", file_type)
 
-    def GetFilename(self, fileType=".fbx"):
-        if self.asset_type == "Collection StaticMesh":
-            return bfu_utils.GetCollectionExportFileName(self.collection.name, fileType)
-        else:
-            return bfu_utils.GetObjExportFileName(self.object, fileType)
+    def GetFilename(self):
+        main_file = self.files[0]
+        return main_file.file_name
+
+    def GetFilenameWithExtension(self):
+        main_file = self.files[0]
+        return main_file.GetFileWithExtension()
 
 
 classes = (
+    BFU_OT_FileExport,
+    BFU_OT_UnrealExportedAsset,
 )
 
 
 def register():
-    from bpy.utils import register_class
-
     for cls in classes:
-        register_class(cls)
+        bpy.utils.register_class(cls)
 
-    bpy.utils.register_class(BFU_OT_FileExport)
-    bpy.utils.register_class(BFU_OT_UnrealExportedAsset)
     bpy.types.Scene.UnrealExportedAssetsList = bpy.props.CollectionProperty(
         type=BFU_OT_UnrealExportedAsset)
 
 
 def unregister():
-    from bpy.utils import unregister_class
-
     for cls in reversed(classes):
-        unregister_class(cls)
+        bpy.utils.unregister_class(cls)
 
-    bpy.utils.unregister_class(BFU_OT_FileExport)
-    bpy.utils.unregister_class(BFU_OT_UnrealExportedAsset)

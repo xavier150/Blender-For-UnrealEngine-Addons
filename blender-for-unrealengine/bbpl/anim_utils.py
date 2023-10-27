@@ -17,143 +17,230 @@
 # ======================= END GPL LICENSE BLOCK =============================
 
 # ----------------------------------------------
-#  This addons allows to easily export several objects at the same time in .fbx
-#  for use in unreal engine 4 by removing the usual constraints
-#  while respecting UE4 naming conventions and a clean tree structure.
-#  It also contains a small toolkit for collisions and sockets
-#  xavierloux.com
+#  BBPL -> BleuRaven Blender Python Library
+#  BleuRaven.fr
+#  XavierLoux.com
 # ----------------------------------------------
 
-from .. import bbpl
+import bpy
+import mathutils
+from . import scene_utils
 
 
-class NLA_Save():
+class NLA_Save:
     def __init__(self, nla_tracks):
+        """
+        Initializes the NLA_Save object.
+
+        Args:
+            nla_tracks (list): The NLA tracks to save.
+
+        Returns:
+            None
+        """
         self.nla_tracks_save = None
         if nla_tracks is not None:
-            self.SaveTracks(nla_tracks)
+            self.save_tracks(nla_tracks)
 
-    def SaveTracks(self, nla_tracks):
+    def save_tracks(self, nla_tracks):
+        """
+        Saves the NLA tracks.
+
+        Args:
+            nla_tracks (list): The NLA tracks to save.
+
+        Returns:
+            None
+        """
         proxy_nla_tracks = []
 
         for nla_track in nla_tracks:
-            proxy_nla_tracks.append(self.Proxy_NLA_Track(nla_track))
+            proxy_nla_tracks.append(ProxyCopy_NLATrack(nla_track))
         self.nla_tracks_save = proxy_nla_tracks
 
-    def ApplySaveOnTarget(self, target):
-        if target is None:
+    def apply_save_on_target(self, target):
+        """
+        Applies the saved NLA tracks to the target object.
+
+        Args:
+            target (bpy.types.Object): The target object to apply the saved NLA tracks.
+
+        Returns:
+            None
+        """
+        if target is None or target.animation_data is None:
             return
-        if target.animation_data is None:
-            return
+
         for nla_track in self.nla_tracks_save:
             new_nla_track = target.animation_data.nla_tracks.new()
-            # new_nla_track.active = nla_track.active
-            new_nla_track.is_solo = nla_track.is_solo
-            new_nla_track.lock = nla_track.lock
-            new_nla_track.mute = nla_track.mute
-            new_nla_track.name = nla_track.name
-            new_nla_track.select = nla_track.select
+            nla_track.paste_data_on(new_nla_track)
+
+class ProxyCopy_NLATrack:
+    """
+    Proxy class for copying bpy.types.NlaTrack.
+
+    It is used to safely copy the bpy.types.NlaTrack struct.
+    """
+
+    def __init__(self, nla_track):
+        """
+        Initializes the ProxyCopy_NLATrack object.
+
+        Args:
+            nla_track (bpy.types.NlaTrack): The NlaTrack to copy.
+
+        Returns:
+            None
+        """
+        if nla_track:
+            self.active = nla_track.active
+            self.is_solo = nla_track.is_solo
+            self.lock = nla_track.lock
+            self.mute = nla_track.mute
+            self.name = nla_track.name
+            self.select = nla_track.select
+            self.strips = []
             for strip in nla_track.strips:
+                self.strips.append(ProxyCopy_NlaStrip(strip))
+
+    def paste_data_on(self, nla_track):
+        """
+        Pastes the saved data onto the target NlaTrack.
+
+        Args:
+            nla_track (bpy.types.NlaTrack): The target NlaTrack to paste the data on.
+
+        Returns:
+            None
+        """
+        if nla_track:
+            # nla_track.active = self.active
+            nla_track.is_solo = self.is_solo
+            nla_track.lock = self.lock
+            nla_track.mute = self.mute
+            nla_track.name = self.name
+            nla_track.select = self.select
+            for strip in self.strips:
                 if strip.action:
-                    new_strip = new_nla_track.strips.new(strip.name, int(strip.frame_start), strip.action)
-                    # new_strip.action = strip.action
-                    new_strip.action_frame_end = strip.action_frame_end
-                    new_strip.action_frame_start = strip.action_frame_start
-                    # new_strip.active = strip.active
-                    new_strip.blend_in = strip.blend_in
-                    new_strip.blend_out = strip.blend_out
-                    new_strip.blend_type = strip.blend_type
-                    new_strip.extrapolation = strip.extrapolation
-                    # new_strip.fcurves = strip.fcurves
-                    new_strip.frame_end = strip.frame_end
-                    # new_strip.frame_start = strip.frame_start
-                    new_strip.use_animated_influence = strip.use_animated_influence
-                    new_strip.influence = strip.influence
-                    print(new_strip.influence)
-                    print(new_strip.influence)
-                    print(new_strip.influence)
-                    print(new_strip.influence)
-                    print(new_strip.influence)
-                    print(new_strip.influence)
-                    print(new_strip.influence)
-                    # new_strip.modifiers = strip.modifiers #TO DO
-                    new_strip.mute = strip.mute
-                    # new_strip.name = strip.name
-                    new_strip.repeat = strip.repeat
-                    new_strip.scale = strip.scale
-                    new_strip.select = strip.select
-                    new_strip.strip_time = strip.strip_time
-                    # new_strip.strips = strip.strips #TO DO
-                    for i, fcurve in enumerate(strip.fcurves):
-                        if fcurve:
-                            new_fcurve = new_strip.fcurves.find(fcurve.data_path)
-                            if new_fcurve:
-                                new_fcurve.array_index = fcurve.array_index
-                                new_fcurve.color = fcurve.color
-                                new_fcurve.color_mode = fcurve.color_mode
-                                # new_fcurve.data_path = fcurve.data_path
-                                # new_fcurve.driver = fcurve.driver  #TO DO
-                                new_fcurve.extrapolation = fcurve.extrapolation
-                                new_fcurve.group = fcurve.group
-                                new_fcurve.hide = fcurve.hide
-                                # new_fcurve.is_empty = fcurve.is_empty
-                                # new_fcurve.is_valid = fcurve.is_valid
-                                # new_fcurve.keyframe_points = fcurve.keyframe_points
-                                new_fcurve.lock = fcurve.lock
-                                # new_fcurve.modifiers = fcurve.modifiers #TO DO
-                                new_fcurve.mute = fcurve.mute
-                                # new_fcurve.sampled_points = fcurve.sampled_points
-                                new_fcurve.select = fcurve.select
-                                for keyframe_point in fcurve.keyframe_points:
-                                    new_fcurve.keyframe_points.insert(keyframe_point.co[0], keyframe_point.co[1])
+                    new_strip = nla_track.strips.new(strip.name, int(strip.frame_start), strip.action)
+                    strip.paste_data_on(new_strip)
 
-    class Proxy_NLA_Track():
-        def __init__(self, nla_track):
-            if nla_track:
-                self.active = nla_track.active
-                self.is_solo = nla_track.is_solo
-                self.lock = nla_track.lock
-                self.mute = nla_track.mute
-                self.name = nla_track.name
-                self.select = nla_track.select
-                self.strips = []
-                for strip in nla_track.strips:
-                    self.strips.append(self.Proxy_NLA_Track_Strip(strip))
 
-        class Proxy_NLA_Track_Strip():
-            def __init__(self, strip):
-                self.action = strip.action
-                self.action_frame_end = strip.action_frame_end
-                self.action_frame_start = strip.action_frame_start
-                self.active = strip.active
-                self.blend_in = strip.blend_in
-                self.blend_out = strip.blend_out
-                self.blend_type = strip.blend_type
-                self.extrapolation = strip.extrapolation
-                self.fcurves = strip.fcurves  # TO DO
-                self.frame_end = strip.frame_end
-                self.frame_start = strip.frame_start
-                self.use_animated_influence = strip.use_animated_influence
-                self.influence = strip.influence
-                self.modifiers = strip.modifiers  # TO DO
-                self.mute = strip.mute
-                self.name = strip.name
-                self.repeat = strip.repeat
-                self.scale = strip.scale
-                self.select = strip.select
-                self.strip_time = strip.strip_time
-                # self.strips = strip.strips #TO DO
+class ProxyCopy_NlaStrip:
+    """
+    Proxy class for copying bpy.types.NlaStrip.
+
+    It is used to safely copy the bpy.types.NlaStrip struct.
+    """
+
+    def __init__(self, nla_strip: bpy.types.NlaStrip):
+        self.action = nla_strip.action
+        self.action_frame_end = nla_strip.action_frame_end
+        self.action_frame_start = nla_strip.action_frame_start
+        self.active = nla_strip.active
+        self.blend_in = nla_strip.blend_in
+        self.blend_out = nla_strip.blend_out
+        self.blend_type = nla_strip.blend_type
+        self.extrapolation = nla_strip.extrapolation
+        self.fcurves = []
+        # Since 3.5 interact to a NlaStripFCurves not linked to an object produce Blender Crash.
+        for fcurve in nla_strip.fcurves:
+            self.fcurves.append(ProxyCopy_FCurve(fcurve))
+        self.frame_end = nla_strip.frame_end
+        if bpy.app.version >= (3, 3, 0):
+            self.frame_end_ui = nla_strip.frame_end_ui
+        self.frame_start = nla_strip.frame_start
+        if bpy.app.version >= (3, 3, 0):
+            self.frame_start_ui = nla_strip.frame_start_ui
+        self.influence = nla_strip.influence
+        self.modifiers = nla_strip.modifiers  # TO DO
+        self.mute = nla_strip.mute
+        self.name = nla_strip.name
+        self.repeat = nla_strip.repeat
+        self.scale = nla_strip.scale
+        self.select = nla_strip.select
+        self.strip_time = nla_strip.strip_time
+        # self.strips = strip.strips #TO DO
+        self.type = nla_strip.type
+        self.use_animated_influence = nla_strip.use_animated_influence
+        if bpy.app.version >= (3, 0, 0):
+            self.use_animated_time = nla_strip.use_animated_time
+            self.use_animated_time_cyclic = nla_strip.use_animated_time_cyclic
+            self.use_auto_blend = nla_strip.use_auto_blend
+            self.use_reverse = nla_strip.use_reverse
+            self.use_sync_length = nla_strip.use_sync_length
+
+    def paste_data_on(self, nla_strip: bpy.types.NlaStrip):
+        # nla_strip.action = strip.action
+        nla_strip.action_frame_end = self.action_frame_end
+        nla_strip.action_frame_start = self.action_frame_start
+        # nla_strip.active = self.active
+        nla_strip.blend_in = self.blend_in
+        nla_strip.blend_out = self.blend_out
+        nla_strip.blend_type = self.blend_type
+        nla_strip.extrapolation = self.extrapolation
+        for fcurve in self.fcurves:
+            new_fcurve = nla_strip.fcurves.find(fcurve.data_path)  # Can't create so use find
+            fcurve.PasteDataOn(new_fcurve)
+        nla_strip.frame_end = self.frame_end
+        if bpy.app.version >= (3, 3, 0):
+            nla_strip.frame_end_ui = self.frame_end_ui
+        nla_strip.frame_start = self.frame_start
+        if bpy.app.version >= (3, 3, 0):
+            nla_strip.frame_start_ui = self.frame_start_ui
+        nla_strip.influence = self.influence
+        # nla_strip.modifiers = self.modifiers #TO DO
+        nla_strip.mute = self.mute
+        # nla_strip.name = self.name
+        nla_strip.repeat = self.repeat
+        nla_strip.scale = self.scale
+        nla_strip.select = self.select
+        nla_strip.strip_time = self.strip_time
+        # nla_strip.strips = self.strips #TO DO
+        # nla_strip.type = self.type  # Read only
+        nla_strip.use_animated_influence = self.use_animated_influence
+        if bpy.app.version >= (3, 0, 0):
+            nla_strip.use_animated_time = self.use_animated_time
+            nla_strip.use_animated_time_cyclic = self.use_animated_time_cyclic
+            nla_strip.use_auto_blend = self.use_auto_blend
+            nla_strip.use_reverse = self.use_reverse
+            nla_strip.use_sync_length = self.use_sync_length
+
+
+class ProxyCopy_FCurve():
+    """
+    Proxy class for copying bpy.types.FCurve.
+
+    It is used to safely copy the bpy.types.FCurve struct.
+    """
+
+    def __init__(self, fcurve: bpy.types.FCurve):
+        self.data_path = fcurve.data_path
+
+    def paste_data_on(self, fcurve: bpy.types.FCurve):
+        pass
 
 
 class AnimationManagment():
+    """
+    Helper class for managing animation data in Blender.
+    """
+
     def __init__(self):
         self.use_animation_data = False
         self.action = None
-        self.action_extrapolation = "HOLD"  # Default value
-        self.action_blend_type = "REPLACE"  # Default value
-        self.action_influence = 1.0  # Default value
+        self.action_extrapolation = "HOLD"
+        self.action_blend_type = "REPLACE"
+        self.action_influence = 1.0
+        self.nla_tracks_save = None
 
-    def SaveAnimationData(self, obj):
+    def save_animation_data(self, obj):
+        """
+        Saves the animation data from the object.
+
+        Args:
+            obj (bpy.types.Object): The object to save the animation data from.
+        """
         if obj.animation_data is not None:
             self.action = obj.animation_data.action
             self.action_extrapolation = obj.animation_data.action_extrapolation
@@ -164,14 +251,27 @@ class AnimationManagment():
         else:
             self.use_animation_data = False
 
-    def ClearAnimationData(self, obj):
+    def clear_animation_data(self, obj):
+        """
+        Clears the animation data from the object.
+
+        Args:
+            obj (bpy.types.Object): The object to clear the animation data from.
+        """
         obj.animation_data_clear()
 
-    def SetAnimationData(self, obj, copy_nla=False):
+    def set_animation_data(self, obj, copy_nla=False):
+        """
+        Sets the animation data on the object.
 
-        SaveItTweakmode = bbpl.basics.IsTweakmode()
-        bbpl.basics.ExitTweakmode()
-        print("Set animation data on: ", obj)
+        Args:
+            obj (bpy.types.Object): The object to set the animation data on.
+            copy_nla (bool, optional): Whether to copy the Non-Linear Animation (NLA) tracks. Defaults to False.
+        """
+
+        save_it_tweakmode = scene_utils.is_tweak_mode()
+        scene_utils.exit_tweak_mode()
+        print("Set animation data on:", obj)
         if self.use_animation_data:
             obj.animation_data_create()
 
@@ -183,14 +283,29 @@ class AnimationManagment():
 
             if copy_nla:
                 # Clear nla_tracks
-                nla_tracks_len = len(obj.animation_data.nla_tracks)
-                for x in range(nla_tracks_len):
-                    obj.animation_data.nla_tracks.remove(obj.animation_data.nla_tracks[0])
+                nla_tracks = obj.animation_data.nla_tracks[:]
+                for nla_track in nla_tracks:
+                    obj.animation_data.nla_tracks.remove(nla_track)
 
-                # Add Current nla_tracks
-
+                # Add current nla_tracks
                 if self.nla_tracks_save is not None:
-                    self.nla_tracks_save.ApplySaveOnTarget(obj)
+                    self.nla_tracks_save.apply_save_on_target(obj)
 
-        if SaveItTweakmode:
-            bbpl.basics.EnterTweakmode()
+        if save_it_tweakmode:
+            scene_utils.enter_tweak_mode()
+
+def reset_armature_pose(obj):
+    """
+    Resets the pose of an armature object.
+
+    Args:
+        obj (bpy.types.Object): The armature object.
+
+    Returns:
+        None
+    """
+    for b in obj.pose.bones:
+        b.rotation_quaternion = mathutils.Quaternion()
+        b.rotation_euler = mathutils.Vector((0, 0, 0))
+        b.scale = mathutils.Vector((1, 1, 1))
+        b.location = mathutils.Vector((0, 0, 0))

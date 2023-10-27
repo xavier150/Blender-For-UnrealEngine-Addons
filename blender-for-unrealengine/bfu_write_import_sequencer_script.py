@@ -16,30 +16,8 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-import os
 import bpy
-import time
-from math import degrees
 from . import languages
-from .languages import *
-
-if "bpy" in locals():
-    import importlib
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-    if "bfu_write_utils" in locals():
-        importlib.reload(bfu_write_utils)
-    if "languages" in locals():
-        importlib.reload(languages)
-
-from . import bfu_basics
-from .bfu_basics import *
-from . import bfu_utils
-from .bfu_utils import *
-from . import bfu_write_utils
-from .bfu_write_utils import *
 
 
 def WriteImportSequencerTracks():
@@ -47,9 +25,9 @@ def WriteImportSequencerTracks():
 
     data = {}
     data['Coment'] = {
-        '1/3': ti('write_text_additional_track_start'),
-        '2/3': ti('write_text_additional_track_camera'),
-        '3/3': ti('write_text_additional_track_end'),
+        '1/3': languages.ti('write_text_additional_track_start'),
+        '2/3': languages.ti('write_text_additional_track_camera'),
+        '3/3': languages.ti('write_text_additional_track_end'),
     }
     data['spawnable_camera'] = True  # Default but open for change
     data['startFrame'] = scene.frame_start
@@ -61,7 +39,7 @@ def WriteImportSequencerTracks():
     data['render_resolution_x'] = bpy.context.scene.render.resolution_x
     data['render_resolution_y'] = bpy.context.scene.render.resolution_y
     data['secureCrop'] = 0.0001  # add end crop for avoid section overlay
-    data['unreal_import_location'] = "/" + scene.unreal_import_module + "/" + scene.unreal_import_location
+    data['bfu_unreal_import_location'] = "/" + scene.bfu_unreal_import_module + "/" + scene.bfu_unreal_import_location
 
     # Import camera
     data['cameras'] = []
@@ -112,7 +90,7 @@ def WriteImportSequencerTracks():
         marker_sections["start_time"] = section[0]
         marker_sections["end_time"] = section[1]
         if section[2]:
-            if section[2].ExportEnum == "export_recursive" or section[2].ExportEnum == "auto":
+            if section[2].bfu_export_type == "export_recursive" or section[2].bfu_export_type == "auto":
                 marker_sections["has_camera"] = True
                 marker_sections["camera_name"] = section[2].name
             else:

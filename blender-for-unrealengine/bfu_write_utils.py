@@ -18,17 +18,8 @@
 
 import bpy
 
-if "bpy" in locals():
-    import importlib
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-
 from . import bfu_basics
-from .bfu_basics import *
 from . import bfu_utils
-from .bfu_utils import *
 
 
 def WriteImportPythonHeadComment(useSequencer=False):
@@ -61,9 +52,9 @@ def WriteImportPythonHeadComment(useSequencer=False):
         )
 
     if useSequencer:
-        ImportScript += "#Use this command : " + GetImportSequencerScriptCommand() + "\n"
+        ImportScript += "#Use this command : " + bfu_utils.GetImportSequencerScriptCommand() + "\n"
     else:
-        ImportScript += "#Use this command : " + GetImportAssetScriptCommand() + "\n"
+        ImportScript += "#Use this command : " + bfu_utils.GetImportAssetScriptCommand() + "\n"
     ImportScript += "\n"
     ImportScript += "\n"
     return ImportScript

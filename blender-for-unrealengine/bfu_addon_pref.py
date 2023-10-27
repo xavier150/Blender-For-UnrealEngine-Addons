@@ -18,18 +18,14 @@
 
 import os
 import bpy
-import addon_utils
 
 from .export import bfu_export_asset
 from . import bfu_write_text
 from . import bfu_basics
-from .bfu_basics import *
 from . import bfu_utils
 from . import bfu_check_potential_error
-from .bfu_utils import *
 from . import bfu_ui_utils
 from . import languages
-from .languages import *
 
 
 if "bpy" in locals():
@@ -50,157 +46,147 @@ if "bpy" in locals():
         importlib.reload(languages)
 
 
-from bpy.props import (
-        StringProperty,
-        BoolProperty,
-        EnumProperty,
-        IntProperty,
-        FloatProperty,
-        FloatVectorProperty,
-        PointerProperty,
-        CollectionProperty,
-        )
-
-from bpy.types import (
-        Operator,
-        )
-
-
 class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
     # this must match the addon name, use '__package__'
     # when defining this in a submodule of a python package.
     bl_idname = __package__
 
-    bakeArmatureAction: BoolProperty(
-        name=(ti('bake_armature_action_name')),
-        description=(tt('bake_armature_action_desc')),
+    bakeArmatureAction: bpy.props.BoolProperty(
+        name=(languages.ti('bake_armature_action_name')),
+        description=(languages.tt('bake_armature_action_desc')),
         default=False,
         )
 
-    add_skeleton_root_bone: BoolProperty(
-        name=(ti('add_skeleton_root_bone_name')),
-        description=(tt('add_skeleton_root_bone_desc')),
+    add_skeleton_root_bone: bpy.props.BoolProperty(
+        name=(languages.ti('add_skeleton_root_bone_name')),
+        description=(languages.tt('add_skeleton_root_bone_desc')),
         default=False,
         )
 
-    skeleton_root_bone_name: StringProperty(
-        name=(ti('skeleton_root_bone_name_name')),
-        description=(tt('skeleton_root_bone_name_desc')),
+    skeleton_root_bone_name: bpy.props.StringProperty(
+        name=(languages.ti('skeleton_root_bone_name_name')),
+        description=(languages.tt('skeleton_root_bone_name_desc')),
         default="ArmatureRoot",
         )
 
-    rescaleFullRigAtExport: EnumProperty(
-        name=(ti('rescale_full_rig_at_export_name')),
-        description=(tt('rescale_full_rig_at_export_desc')),
+    rescaleFullRigAtExport: bpy.props.EnumProperty(
+        name=(languages.ti('rescale_full_rig_at_export_name')),
+        description=(languages.tt('rescale_full_rig_at_export_desc')),
         items=[
             ("auto",
-                ti('rescale_full_rig_at_export_auto_name'),
-                tt('rescale_full_rig_at_export_auto_desc'),
+                languages.ti('rescale_full_rig_at_export_auto_name'),
+                languages.tt('rescale_full_rig_at_export_auto_desc'),
                 "SHADERFX",
                 1),
             ("custom_rescale",
-                ti('rescale_full_rig_at_export_custom_rescale_name'),
-                tt('rescale_full_rig_at_export_custom_rescale_desc'),
+                languages.ti('rescale_full_rig_at_export_custom_rescale_name'),
+                languages.tt('rescale_full_rig_at_export_custom_rescale_desc'),
                 "MODIFIER",
                 2),
             ("dont_rescale",
-                ti('rescale_full_rig_at_export_dont_rescale_name'),
-                tt('rescale_full_rig_at_export_dont_rescale_desc'),
+                languages.ti('rescale_full_rig_at_export_dont_rescale_name'),
+                languages.tt('rescale_full_rig_at_export_dont_rescale_desc'),
                 "CANCEL",
                 3)
             ]
         )
 
-    newRigScale: FloatProperty(
-        name=(ti('new_rig_scale_name')),
-        description=(tt('new_rig_scale_desc')),
+    newRigScale: bpy.props.FloatProperty(
+        name=(languages.ti('new_rig_scale_name')),
+        description=(languages.tt('new_rig_scale_desc')),
         default=100,
         )
 
-    staticSocketsAdd90X: BoolProperty(
-        name=(ti('static_sockets_add_90_x_name')),
-        description=(tt('static_sockets_add_90_x_desc')),
+    staticSocketsAdd90X: bpy.props.BoolProperty(
+        name=(languages.ti('static_sockets_add_90_x_name')),
+        description=(languages.tt('static_sockets_add_90_x_desc')),
         default=True,
         )
 
-    rescaleSocketsAtExport: EnumProperty(
-        name=(ti('rescale_sockets_at_export_name')),
-        description=(tt('rescale_sockets_at_export_desc')),
+    rescaleSocketsAtExport: bpy.props.EnumProperty(
+        name=(languages.ti('rescale_sockets_at_export_name')),
+        description=(languages.tt('rescale_sockets_at_export_desc')),
         items=[
             ("auto",
-                ti('rescale_sockets_at_export_auto_name'),
-                tt('rescale_sockets_at_export_auto_desc'),
+                languages.ti('rescale_sockets_at_export_auto_name'),
+                languages.tt('rescale_sockets_at_export_auto_desc'),
                 "SHADERFX",
                 1),
             ("custom_rescale",
-                ti('rescale_sockets_at_export_custom_rescale_name'),
-                tt('rescale_sockets_at_export_custom_rescale_desc'),
+                languages.ti('rescale_sockets_at_export_custom_rescale_name'),
+                languages.tt('rescale_sockets_at_export_custom_rescale_desc'),
                 "MODIFIER",
                 2),
             ("dont_rescale",
-                ti('rescale_sockets_at_export_dont_rescale_name'),
-                tt('rescale_sockets_at_export_dont_rescale_desc'),
+                languages.ti('rescale_sockets_at_export_dont_rescale_name'),
+                languages.tt('rescale_sockets_at_export_dont_rescale_desc'),
                 "CANCEL",
                 3)
             ]
         )
 
-    staticSocketsImportedSize: FloatProperty(
-        name=(ti('static_sockets_imported_size_name')),
-        description=(tt('static_sockets_imported_size_desc')),
+    staticSocketsImportedSize: bpy.props.FloatProperty(
+        name=(languages.ti('static_sockets_imported_size_name')),
+        description=(languages.tt('static_sockets_imported_size_desc')),
         default=1,
         )
 
-    skeletalSocketsImportedSize: FloatProperty(
-        name=(ti('skeletal_sockets_imported_size_name')),
-        description=(tt('skeletal_sockets_imported_size_desc')),
+    skeletalSocketsImportedSize: bpy.props.FloatProperty(
+        name=(languages.ti('skeletal_sockets_imported_size_name')),
+        description=(languages.tt('skeletal_sockets_imported_size_desc')),
         default=1,
         )
 
-    exportCameraAsFBX: BoolProperty(
-        name=(ti('export_camera_as_fbx_name')),
-        description=(tt('export_camera_as_fbx_desc')),
+    exportCameraAsFBX: bpy.props.BoolProperty(
+        name=(languages.ti('export_camera_as_fbx_name')),
+        description=(languages.tt('export_camera_as_fbx_desc')),
         default=False,
         )
 
-    bakeOnlyKeyVisibleInCut: BoolProperty(
-        name=(ti('bake_only_key_visible_in_cut_name')),
-        description=(tt('bake_only_key_visible_in_cut_desc')),
+    bakeOnlyKeyVisibleInCut: bpy.props.BoolProperty(
+        name=(languages.ti('bake_only_key_visible_in_cut_name')),
+        description=(languages.tt('bake_only_key_visible_in_cut_desc')),
         default=True,
         )
 
-    ignoreNLAForAction: BoolProperty(
-        name=(ti('ignore_nla_for_action_name')),
-        description=(tt('ignore_nla_for_action_desc')),
+    ignoreNLAForAction: bpy.props.BoolProperty(
+        name=(languages.ti('ignore_nla_for_action_name')),
+        description=(languages.tt('ignore_nla_for_action_desc')),
         default=False,
         )
 
-    exportWithCustomProps: BoolProperty(
-        name=(ti('export_with_custom_props_name')),
-        description=(tt('export_with_custom_props_desc')),
+    exportWithCustomProps: bpy.props.BoolProperty(
+        name=(languages.ti('export_with_custom_props_name')),
+        description=(languages.tt('export_with_custom_props_desc')),
         default=False,
         )
 
-    exportWithMetaData: BoolProperty(
-        name=(ti('export_with_meta_data_name')),
-        description=(tt('export_with_meta_data_desc')),
+    exportWithCustomCurves: bpy.props.BoolProperty(
+        name=(languages.ti('export_with_custom_curves_name')),
+        description=(languages.tt('export_with_custom_curves_desc')),
         default=False,
         )
 
-    revertExportPath: BoolProperty(
-        name=(ti('revert_export_path_name')),
-        description=(tt('revert_export_path_desc')),
+    exportWithMetaData: bpy.props.BoolProperty(
+        name=(languages.ti('export_with_meta_data_name')),
+        description=(languages.tt('export_with_meta_data_desc')),
         default=False,
         )
 
-    useGeneratedScripts: BoolProperty(
-        name=(ti('use_generated_scripts_name')),
-        description=(tt('use_generated_scripts_desc')),
+    revertExportPath: bpy.props.BoolProperty(
+        name=(languages.ti('revert_export_path_name')),
+        description=(languages.tt('revert_export_path_desc')),
+        default=False,
+        )
+
+    useGeneratedScripts: bpy.props.BoolProperty(
+        name=(languages.ti('use_generated_scripts_name')),
+        description=(languages.tt('use_generated_scripts_desc')),
         default=True,
         )
 
-    collisionColor:  FloatVectorProperty(
-        name=ti('collision_color_name'),
+    collisionColor:  bpy.props.FloatVectorProperty(
+        name=languages.ti('collision_color_name'),
         description='Color of the collision in Blender',
         subtype='COLOR',
         size=4,
@@ -208,8 +194,8 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         min=0.0, max=1.0,
         )
 
-    notifyUnitScalePotentialError: BoolProperty(
-        name=ti('notify_unit_scale_potential_error_name'),
+    notifyUnitScalePotentialError: bpy.props.BoolProperty(
+        name=languages.ti('notify_unit_scale_potential_error_name'),
         description=(
             'Notify as potential error' +
             ' if the unit scale is not equal to 0.01.'
@@ -217,10 +203,11 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         default=True,
         )
 
-    class BFU_OT_NewReleaseInfo(Operator):
+    class BFU_OT_NewReleaseInfo(bpy.types.Operator):
+        """Open last release page"""
         bl_label = "Open last release page"
         bl_idname = "object.new_release_info"
-        bl_description = "Clic for open latest release page."
+        bl_description = "Click to open the latest release page."
 
         def execute(self, context):
             os.system(
@@ -298,14 +285,10 @@ classes = (
 
 
 def register():
-    from bpy.utils import register_class
-
     for cls in classes:
-        register_class(cls)
+        bpy.utils.register_class(cls)
 
 
 def unregister():
-    from bpy.utils import unregister_class
-
     for cls in reversed(classes):
-        unregister_class(cls)
+        bpy.utils.unregister_class(cls)

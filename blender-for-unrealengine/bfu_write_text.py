@@ -16,54 +16,36 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-
-import bpy
-import time
-from math import degrees, radians, tan
-from mathutils import Matrix
+import os
 import json
-from . import languages
-from .languages import *
 from shutil import copyfile
+import bpy
+import math
 
+from . import bps
+from . import languages
 from . import bfu_basics
-from .bfu_basics import *
 from . import bfu_utils
-from .bfu_utils import *
+from . import bfu_naming
+from . import bfu_export_logs
 from . import bfu_write_import_asset_script
 from . import bfu_write_import_sequencer_script
 from .export import bfu_export_get_info
-from .export.bfu_export_get_info import *
-
-if "bpy" in locals():
-    import importlib
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-    if "bfu_write_import_asset_script" in locals():
-        importlib.reload(bfu_write_import_asset_script)
-    if "bfu_write_import_sequencer_script" in locals():
-        importlib.reload(bfu_write_import_sequencer_script)
-    if "languages" in locals():
-        importlib.reload(languages)
-    if "bfu_export_get_info" in locals():
-        importlib.reload(bfu_export_get_info)
 
 
 def ExportSingleText(text, dirpath, filename):
     # Export single text
 
-    counter = CounterTimer()
+    counter = bps.utils.CounterTimer()
 
     absdirpath = bpy.path.abspath(dirpath)
-    VerifiDirs(absdirpath)
+    bfu_basics.VerifiDirs(absdirpath)
     fullpath = os.path.join(absdirpath, filename)
 
     with open(fullpath, "w") as file:
         file.write(text)
 
-    exportTime = counter.GetTime()
+    exportTime = counter.get_time()
     # This return [AssetName , AssetType , ExportPath, ExportTime]
     return([filename, "TextFile", absdirpath, exportTime])
 
@@ -71,16 +53,16 @@ def ExportSingleText(text, dirpath, filename):
 def ExportSingleJson(json_data, dirpath, filename):
     # Export single Json
 
-    counter = CounterTimer()
+    counter = bps.utils.CounterTimer()
 
     absdirpath = bpy.path.abspath(dirpath)
-    VerifiDirs(absdirpath)
+    bfu_basics.VerifiDirs(absdirpath)
     fullpath = os.path.join(absdirpath, filename)
 
     with open(fullpath, 'w') as json_file:
         json.dump(json_data, json_file, ensure_ascii=False, sort_keys=False, indent=4)
 
-    exportTime = counter.GetTime()
+    exportTime = counter.get_time()
     # This return [AssetName , AssetType , ExportPath, ExportTime]
     return([filename, "TextFile", absdirpath, exportTime])
 
@@ -103,7 +85,7 @@ def WriteExportLog():
             SkeletalNum += 1
         if assets.asset_type == "Alembic":
             AlembicNum += 1
-        if GetIsAnimation(assets.asset_type):
+        if bfu_utils.GetIsAnimation(assets.asset_type):
             AnimNum += 1
         if assets.asset_type == "Camera":
             CameraNum += 1
@@ -125,6 +107,7 @@ def WriteExportLog():
     ExportLog += AssetNumberByType
     ExportLog += "\n"
     for asset in scene.UnrealExportedAssetsList:
+        file: bfu_export_logs.BFU_OT_UnrealExportedAsset
 
         if (asset.asset_type == "NlAnim"):
             primaryInfo = "Animation (NLA)"
@@ -134,7 +117,7 @@ def WriteExportLog():
             primaryInfo = "Animation (Pose)"
         else:
             if asset.object:
-                if asset.object.ExportAsLod:
+                if asset.object.bfu_export_as_lod_mesh:
                     primaryInfo = asset.asset_type+" (LOD)"
                 else:
                     primaryInfo = asset.asset_type
@@ -144,7 +127,8 @@ def WriteExportLog():
         ExportLog += (
             asset.asset_name+" ["+primaryInfo+"] EXPORTED IN " + str(round(asset.GetExportTime(), 2))+"s\r\n")
         for file in asset.files:
-            ExportLog += (file.path + "\\" + file.name + "\n")
+            file: bfu_export_logs.BFU_OT_FileExport
+            ExportLog += (file.file_path + "\\" + file.file_name + "\n")
         ExportLog += "\n"
 
     return ExportLog
@@ -245,7 +229,7 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
         def EvaluateTracksAtFrame(self, camera, frame):
             scene.frame_set(frame)
 
-            array_transform = EvaluateCameraPositionForUnreal(camera)
+            array_transform = bfu_utils.EvaluateCameraPositionForUnreal(camera)
             array_location = array_transform[0]
             array_rotation = array_transform[1]
             array_scale = array_transform[2]
@@ -315,13 +299,13 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
 
         def EvaluateTracks(self, camera, frame_start, frame_end):
             scene = bpy.context.scene
-            addon_prefs = GetAddonPrefs()
+            addon_prefs = bfu_basics.GetAddonPrefs()
 
             saveFrame = scene.frame_current
             if camera is None:
                 return
 
-            slms = TimelineMarkerSequence()
+            slms = bfu_utils.TimelineMarkerSequence()
             for frame in range(frame_start, frame_end+1):
                 if len(slms.marker_sequences) > 0 and addon_prefs.bakeOnlyKeyVisibleInCut:
                     marker_sequence = slms.GetMarkerSequenceAtFrame(frame)
@@ -339,9 +323,9 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
     scene = bpy.context.scene
     data = {}
     data['Coment'] = {
-        '1/3': ti('write_text_additional_track_start'),
-        '2/3': ti('write_text_additional_track_camera'),
-        '3/3': ti('write_text_additional_track_end'),
+        '1/3': languages.ti('write_text_additional_track_start'),
+        '2/3': languages.ti('write_text_additional_track_camera'),
+        '3/3': languages.ti('write_text_additional_track_end'),
     }
 
     data["resolution_x"] = scene.render.resolution_x
@@ -375,19 +359,20 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
     return data
 
 
+
 def WriteSingleMeshAdditionalParameter(unreal_exported_asset):
 
     scene = bpy.context.scene
-    addon_prefs = GetAddonPrefs()
+    addon_prefs = bfu_basics.GetAddonPrefs()
     obj = unreal_exported_asset.object
 
     data = {}
 
     # Comment
     data['Coment'] = {
-        '1/3': ti('write_text_additional_track_start'),
-        '2/3': ti('write_text_additional_track_all'),
-        '3/3': ti('write_text_additional_track_end'),
+        '1/3': languages.ti('write_text_additional_track_start'),
+        '2/3': languages.ti('write_text_additional_track_all'),
+        '3/3': languages.ti('write_text_additional_track_end'),
     }
 
     # Defaultsettings
@@ -396,31 +381,36 @@ def WriteSingleMeshAdditionalParameter(unreal_exported_asset):
 
     # Level of detail
     if obj:
+        assetType = bfu_utils.GetAssetType(obj)
         data['LevelOfDetail'] = {}
-        if obj.Ue4Lod1 is not None:
-            loc = os.path.join(GetObjExportDir(obj.Ue4Lod1, True), GetObjExportFileName(obj.Ue4Lod1))
-            data['LevelOfDetail']['lod_1'] = loc
-        if obj.Ue4Lod2 is not None:
-            loc = os.path.join(GetObjExportDir(obj.Ue4Lod2, True), GetObjExportFileName(obj.Ue4Lod2))
-            data['LevelOfDetail']['lod_2'] = loc
-        if obj.Ue4Lod3 is not None:
-            loc = os.path.join(GetObjExportDir(obj.Ue4Lod3, True), GetObjExportFileName(obj.Ue4Lod3))
-            data['LevelOfDetail']['lod_3'] = loc
-        if obj.Ue4Lod4 is not None:
-            loc = os.path.join(GetObjExportDir(obj.Ue4Lod4, True), GetObjExportFileName(obj.Ue4Lod4))
-            data['LevelOfDetail']['lod_4'] = loc
-        if obj.Ue4Lod5 is not None:
-            loc = os.path.join(GetObjExportDir(obj.Ue4Lod5, True), GetObjExportFileName(obj.Ue4Lod5))
-            data['LevelOfDetail']['lod_5'] = loc
+
+        def GetLodPath(lod_obj, naming_function):
+            return os.path.join(bfu_utils.GetObjExportDir(lod_obj, True), naming_function(lod_obj))
+
+        if assetType == "StaticMesh":
+            naming_function = bfu_naming.get_static_mesh_file_name
+        if assetType == "SkeletalMesh":
+            naming_function = bfu_naming.get_skeletal_mesh_file_name
+
+        if obj.bfu_lod_target1 is not None:
+            data['LevelOfDetail']['lod_1'] = GetLodPath(obj.bfu_lod_target1, naming_function)
+        if obj.bfu_lod_target2 is not None:
+            data['LevelOfDetail']['lod_2'] = GetLodPath(obj.bfu_lod_target2, naming_function)
+        if obj.bfu_lod_target3 is not None:
+            data['LevelOfDetail']['lod_3'] = GetLodPath(obj.bfu_lod_target3, naming_function)
+        if obj.bfu_lod_target4 is not None:
+            data['LevelOfDetail']['lod_4'] = GetLodPath(obj.bfu_lod_target4, naming_function)
+        if obj.bfu_lod_target5 is not None:
+            data['LevelOfDetail']['lod_5'] = GetLodPath(obj.bfu_lod_target5, naming_function)
 
     # Sockets
     if obj:
-        data['Sockets'] = GetSkeletalMeshSockets(obj)
+        data['Sockets'] = bfu_utils.GetSkeletalMeshSockets(obj)
 
     # Vertex Color
     if obj:
-        if GetAssetType(obj) == "SkeletalMesh" or GetAssetType(obj) == "StaticMesh":
-            vced = VertexColorExportData(obj)
+        if bfu_utils.GetAssetType(obj) == "SkeletalMesh" or bfu_utils.GetAssetType(obj) == "StaticMesh":
+            vced = bfu_export_get_info.VertexColorExportData(obj)
             data["vertex_color_import_option"] = vced.export_type
             vertex_override_color = (
                 vced.color[0],  # R
@@ -429,39 +419,39 @@ def WriteSingleMeshAdditionalParameter(unreal_exported_asset):
             )  # Color to Json
             data["vertex_override_color"] = vertex_override_color
 
-    data["preview_import_path"] = unreal_exported_asset.GetFilename()
+    data["preview_import_path"] = unreal_exported_asset.GetFilenameWithExtension()
     return data
 
 
 def WriteAllTextFiles():
 
     scene = bpy.context.scene
-    addon_prefs = GetAddonPrefs()
+    addon_prefs = bfu_basics.GetAddonPrefs()
 
     if scene.text_ExportLog:
-        Text = ti("write_text_additional_track_start") + "\n"
+        Text = languages.ti("write_text_additional_track_start") + "\n"
         Text += "" + "\n"
         Text += WriteExportLog()
         if Text is not None:
-            Filename = ValidFilename(scene.file_export_log_name)
-            ExportSingleText(Text, scene.export_other_file_path, Filename)
+            Filename = bfu_basics.ValidFilename(scene.bfu_file_export_log_name)
+            ExportSingleText(Text, scene.bfu_export_other_file_path, Filename)
 
     # Import script
-    bfu_path = os.path.join("addons", "blender-for-unrealengine", "import")
+    bfu_path = os.path.join("addons", "blender-for-unrealengine", "import_scripts")
     bfu_path_ref = os.path.join(bpy.utils.user_resource('SCRIPTS'), bfu_path)
 
     if scene.text_ImportAssetScript:
         json_data = bfu_write_import_asset_script.WriteImportAssetScript()
-        ExportSingleJson(json_data, scene.export_other_file_path, "ImportAssetData.json")
+        ExportSingleJson(json_data, scene.bfu_export_other_file_path, "ImportAssetData.json")
         source = os.path.join(bfu_path_ref, "asset_import_script.py")
-        filename = ValidFilename(scene.file_import_asset_script_name)
-        destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
+        filename = bfu_basics.ValidFilename(scene.bfu_file_import_asset_script_name)
+        destination = bpy.path.abspath(os.path.join(scene.bfu_export_other_file_path, filename))
         copyfile(source, destination)
 
     if scene.text_ImportSequenceScript:
         json_data = bfu_write_import_sequencer_script.WriteImportSequencerTracks()
-        ExportSingleJson(json_data, scene.export_other_file_path, "ImportSequencerData.json")
+        ExportSingleJson(json_data, scene.bfu_export_other_file_path, "ImportSequencerData.json")
         source = os.path.join(bfu_path_ref, "sequencer_import_script.py")
-        filename = ValidFilename(scene.file_import_sequencer_script_name)
-        destination = bpy.path.abspath(os.path.join(scene.export_other_file_path, filename))
+        filename = bfu_basics.ValidFilename(scene.bfu_file_import_sequencer_script_name)
+        destination = bpy.path.abspath(os.path.join(scene.bfu_export_other_file_path, filename))
         copyfile(source, destination)

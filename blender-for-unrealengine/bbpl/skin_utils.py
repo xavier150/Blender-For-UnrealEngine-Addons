@@ -17,74 +17,76 @@
 # ======================= END GPL LICENSE BLOCK =============================
 
 # ----------------------------------------------
-#  This addons allows to easily export several objects at the same time in .fbx
-#  for use in unreal engine 4 by removing the usual constraints
-#  while respecting UE4 naming conventions and a clean tree structure.
-#  It also contains a small toolkit for collisions and sockets
-#  xavierloux.com
+#  BBPL -> BleuRaven Blender Python Library
+#  BleuRaven.fr
+#  XavierLoux.com
 # ----------------------------------------------
 
 
 import bpy
-
 from .. import bbpl
-from .. import bps
 
-import mathutils
-
-
-def saveDefomsBones(armature):
-    SavedBones = []
+def save_defoms_bones(armature):
+    """
+    Save the deform flag for each bone in the armature.
+    Returns a list of bone names and their deform flags.
+    """
+    saved_bones = []
     for bone in armature.data.bones:
-        SavedBones.append([bone.name, bone.use_deform])
-    return SavedBones
+        saved_bones.append([bone.name, bone.use_deform])
+    return saved_bones
 
 
-def resetDeformBones(armature, SavedBones):
-    for bones in SavedBones:
+def reset_deform_bones(armature, saved_bones):
+    """
+    Reset the deform flags for each bone in the armature using the saved data.
+    """
+    for bones in saved_bones:
         armature.data.bones[bones[0]].use_deform = bones[1]
 
 
-def setAllBonesDeforms(armature, use_deform):
+def set_all_bones_deforms(armature, use_deform):
+    """
+    Set the deform flag for all bones in the armature.
+    """
     for bone in armature.data.bones:
         bone.use_deform = use_deform
 
 
-def setBonesDeforms(armature, bone_name_list, use_deform):
+def set_bones_deforms(armature, bone_name_list, use_deform):
+    """
+    Set the deform flag for the specified bones in the armature.
+    """
     bone_list = []
-
     for bone_name in bone_name_list:
         bone_list.append(armature.data.bones[bone_name])
-
     for bone in bone_list:
         bone.use_deform = use_deform
 
 
-def removeVertexGroups(obj):
-    for VertexGroup in obj.vertex_groups:
-        obj.vertex_groups.remove(VertexGroup)
-    return
+def remove_vertex_groups(obj):
+    """
+    Remove all vertex groups from the object.
+    """
+    for vertex_group in obj.vertex_groups:
+        obj.vertex_groups.remove(vertex_group)
 
 
-def copyRigGroup(obj, source):
+def copy_rig_group(obj, source):
+    """
+    Copy the rigging weights from the source object to the target object.
+    """
+    bbpl.utils.mode_set_on_target(obj, "OBJECT")
 
-    # Select
-    bpy.ops.object.mode_set(mode='OBJECT')
-    bpy.ops.object.select_all(action='DESELECT')
-    obj.select_set(state=True)
-    bpy.context.view_layer.objects.active = obj
-
-    # Vars
     mod_name = "MAR_RigWeightTransfer"
 
-    # Clean
     for old_mod in obj.modifiers:
         if old_mod.name == mod_name:
             obj.modifiers.remove(old_mod)
-    removeVertexGroups(obj)
+
+    remove_vertex_groups(obj)
 
     mod = obj.modifiers.new(name=mod_name, type='DATA_TRANSFER')
-
     while obj.modifiers[0].name != mod_name:
         bpy.ops.object.modifier_move_up(modifier=mod_name)
 
@@ -92,12 +94,19 @@ def copyRigGroup(obj, source):
     mod.use_vert_data = True
     mod.data_types_verts = {'VGROUP_WEIGHTS'}
     bpy.ops.object.datalayout_transfer(modifier=mod_name, data_type="VGROUP_WEIGHTS")
-    return bpy.ops.object.modifier_apply(modifier=mod_name)
+    bpy.ops.object.modifier_apply(modifier=mod_name)
 
 
-def applyAutoRigParent(armature, target, parent_type='ARMATURE_AUTO', use_only_bone_white_list=False, white_list_bones=[], black_list_bones=[]):
+def apply_auto_rig_parent(armature, target, parent_type='ARMATURE_AUTO', use_only_bone_white_list=False, white_list_bones=None, black_list_bones=None):
+    """
+    Apply an automatic rig parent to the target object using the armature.
+    Optionally, specify a white list or black list of bones to control the deform flag.
+    """
+    if white_list_bones is None:
+        white_list_bones = []
+    if black_list_bones is None:
+        black_list_bones = []
 
-    # Select
     bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.select_all(action='DESELECT')
     armature.select_set(state=True)
@@ -105,24 +114,20 @@ def applyAutoRigParent(armature, target, parent_type='ARMATURE_AUTO', use_only_b
     bpy.context.view_layer.objects.active = armature
 
     if len(white_list_bones) > 0 or len(black_list_bones) > 0:
-        save_defom = saveDefomsBones(armature)
+        save_defom = save_defoms_bones(armature)
 
         if use_only_bone_white_list:
-            setAllBonesDeforms(armature, False)
+            set_all_bones_deforms(armature, False)
 
-        # Apply white list
-        setBonesDeforms(armature, white_list_bones, True)
+        set_bones_deforms(armature, white_list_bones, True)
+        set_bones_deforms(armature, black_list_bones, False)
 
-        # Apply white list
-        setBonesDeforms(armature, black_list_bones, False)
-
-    # Clean
     for modifier in target.modifiers:
         if modifier.type == "ARMATURE":
             target.modifiers.remove(modifier)
 
-    removeVertexGroups(target)
+    remove_vertex_groups(target)
     bpy.ops.object.parent_set(type=parent_type)
 
     if len(white_list_bones) > 0 or len(black_list_bones) > 0:
-        resetDeformBones(armature, save_defom)
+        reset_deform_bones(armature, save_defom)

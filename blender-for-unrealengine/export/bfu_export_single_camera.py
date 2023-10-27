@@ -18,76 +18,71 @@
 
 
 import bpy
-import time
-import math
+from bpy_extras.io_utils import axis_conversion
+from . import bfu_export_utils
+from .. import bps
+from .. import bbpl
+from .. import bfu_basics
+from .. import bfu_utils
+from .. import bfu_naming
+from .. import bfu_export_logs
+from ..fbxio import export_fbx_bin
 
 if "bpy" in locals():
     import importlib
-    if "bfu_write_text" in locals():
-        importlib.reload(bfu_write_text)
+    if "bfu_export_utils" in locals():
+        importlib.reload(bfu_export_utils)
+    if "bbpl" in locals():
+        importlib.reload(bbpl)
     if "bfu_basics" in locals():
         importlib.reload(bfu_basics)
     if "bfu_utils" in locals():
         importlib.reload(bfu_utils)
-    if "bfu_check_potential_error" in locals():
-        importlib.reload(bfu_check_potential_error)
-    if "bfu_export_utils" in locals():
-        importlib.reload(bfu_export_utils)
+    if "export_fbx_bin" in locals():
+        importlib.reload(export_fbx_bin)
 
 
-from .. import bfu_write_text
-from .. import bfu_basics
-from ..bfu_basics import *
-from .. import bfu_utils
-from ..bfu_utils import *
-from .. import bfu_check_potential_error
-
-from . import bfu_export_utils
-from .bfu_export_utils import *
-
-
-def ProcessCameraExport(obj):
-    addon_prefs = GetAddonPrefs()
-    counter = CounterTimer()
-    dirpath = GetObjExportDir(obj)
+def ProcessCameraExport(op, obj):
+    addon_prefs = bfu_basics.GetAddonPrefs()
+    counter = bps.utils.CounterTimer()
+    dirpath = bfu_utils.GetObjExportDir(obj)
     absdirpath = bpy.path.abspath(dirpath)
     scene = bpy.context.scene
 
-    MyAsset = scene.UnrealExportedAssetsList.add()
+    MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
     MyAsset.asset_name = obj.name
-    MyAsset.folder_name = obj.exportFolderName
+    MyAsset.asset_global_scale = obj.bfu_export_global_scale
+    MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = bfu_utils.GetAssetType(obj)
     MyAsset.StartAssetExport()
 
     if obj.bfu_export_fbx_camera:
-        ExportSingleFbxCamera(
-            dirpath,
-            GetObjExportFileName(obj),
-            obj
-            )
-        file = MyAsset.files.add()
-        file.name = GetObjExportFileName(obj)
-        file.path = dirpath
-        file.type = "FBX"
+        file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+        file.file_name = bfu_naming.get_camera_file_name(obj, obj.name, "")
+        file.file_extension = "fbx"
+        file.file_path = dirpath
+        file.file_type = "FBX"
 
-    if obj.ExportAsLod is False:
+        ExportSingleFbxCamera(op, dirpath, file.GetFileWithExtension(), obj)
+
+
+    if obj.bfu_export_as_lod_mesh is False:
         if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
-            ExportSingleAdditionalTrackCamera(
-                dirpath,
-                GetObjExportFileName(obj, "_AdditionalTrack.json"),
-                obj
-                )
-            file = MyAsset.files.add()
-            file.name = GetObjExportFileName(obj, "_AdditionalTrack.json")
-            file.path = dirpath
-            file.type = "AdditionalTrack"
+
+            file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+            file.file_name = bfu_naming.get_camera_file_name(obj, obj.name+"_AdditionalTrack", "")
+            file.file_extension = "json"
+            file.file_path = dirpath
+            file.file_type = "AdditionalTrack"
+            bfu_export_utils.ExportSingleAdditionalTrackCamera(dirpath, file.GetFileWithExtension(), obj)
 
     MyAsset.EndAssetExport(True)
     return MyAsset
 
 
 def ExportSingleFbxCamera(
+        op,
         dirpath,
         filename,
         obj
@@ -101,46 +96,59 @@ def ExportSingleFbxCamera(
     # Export single camera
 
     scene = bpy.context.scene
-    addon_prefs = GetAddonPrefs()
+    addon_prefs = bfu_basics.GetAddonPrefs()
 
-    filename = ValidFilename(filename)
+    filename = bfu_basics.ValidFilename(filename)
     if obj.type != 'CAMERA':
         return
 
-    bbpl.utils.SafeModeSet('OBJECT')
+    bbpl.utils.safe_mode_set('OBJECT')
 
     # Select and rescale camera for export
     bpy.ops.object.select_all(action='DESELECT')
-    SelectSpecificObject(obj)
+    bbpl.utils.select_specific_object(obj)
 
     obj.delta_scale *= 0.01
     if obj.animation_data is not None:
         action = obj.animation_data.action
-        scene.frame_start = GetDesiredActionStartEndTime(obj, action)[0]
-        scene.frame_end = GetDesiredActionStartEndTime(obj, action)[1]
+        scene.frame_start = bfu_utils.GetDesiredActionStartEndTime(obj, action)[0]
+        scene.frame_end = bfu_utils.GetDesiredActionStartEndTime(obj, action)[1]
 
     ExportCameraAsFBX = addon_prefs.exportCameraAsFBX
     if ExportCameraAsFBX:
-        bpy.ops.export_scene.fbx(
-            filepath=GetExportFullpath(dirpath, filename),
+        export_fbx_bin.save(
+            op,
+            bpy.context,
+            filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
-            global_scale=GetObjExportScale(obj),
+            global_matrix=axis_conversion(to_forward=addon_prefs.bfu_export_axis_forward, to_up=addon_prefs.bfu_export_axis_up).to_4x4(),
+            apply_unit_scale=True,
+            global_scale=bfu_utils.GetObjExportScale(obj),
+            apply_scale_options='FBX_SCALE_NONE',
             object_types={'CAMERA'},
             use_custom_props=addon_prefs.exportWithCustomProps,
+            use_custom_curves=True,
             add_leaf_bones=False,
-            use_armature_deform_only=obj.exportDeformOnly,
+            use_armature_deform_only=obj.bfu_export_deform_only,
             bake_anim=True,
             bake_anim_use_nla_strips=False,
             bake_anim_use_all_actions=False,
             bake_anim_force_startend_keying=True,
-            bake_anim_step=GetAnimSample(obj),
-            bake_anim_simplify_factor=obj.SimplifyAnimForExport,
+            bake_anim_step=bfu_utils.GetAnimSample(obj),
+            bake_anim_simplify_factor=obj.bfu_simplify_anim_for_export,
+            path_mode='AUTO',
+            embed_textures=False,
+            batch_mode='OFF',
+            use_batch_own_dir=True,
             use_metadata=addon_prefs.exportWithMetaData,
-            primary_bone_axis=obj.exportPrimaryBaneAxis,
-            secondary_bone_axis=obj.exporSecondaryBoneAxis,
-            axis_forward=obj.exportAxisForward,
-            axis_up=obj.exportAxisUp,
+            primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
+            secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
+            mirror_symmetry_right_side_bones=obj.bfu_mirror_symmetry_right_side_bones,
+            use_ue_mannequin_bone_alignment=obj.bfu_use_ue_mannequin_bone_alignment,
+            disable_free_scale_animation=obj.bfu_disable_free_scale_animation,
+            axis_forward=bfu_export_utils.get_export_axis_forward(obj),
+            axis_up=bfu_export_utils.get_export_axis_up(obj),
             bake_space_transform=False
             )
 
@@ -148,4 +156,4 @@ def ExportSingleFbxCamera(
     obj.delta_scale *= 100
 
     for obj in scene.objects:
-        ClearAllBFUTempVars(obj)
+        bfu_utils.ClearAllBFUTempVars(obj)

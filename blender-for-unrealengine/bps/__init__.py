@@ -18,14 +18,19 @@
 
 # ----------------------------------------------
 #  BPS -> BleuRaven Python Script
-#  xavierloux.com
+#  BleuRaven.fr
+#  XavierLoux.com
 # ----------------------------------------------
+
+import importlib
 
 from . import advprint
 from . import utils
+from . import math
 
-import importlib
 if "advprint" in locals():
     importlib.reload(advprint)
 if "utils" in locals():
     importlib.reload(utils)
+if "math" in locals():
+    importlib.reload(math)
