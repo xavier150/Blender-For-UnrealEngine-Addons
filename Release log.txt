@@ -468,4 +468,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Hidden objects and collections are unhidden after export when using the same name.
 - Fixed: Skeletons imported with skeletal meshes use incorrect names.
 - Fixed: Collection.exclude is not recovery after export when using multi view layers.
-- Fixed: Camera import script don't work in Unreal Engine 5.3
+- Fixed: Camera import script doesn’t work in Unreal Engine 5.3

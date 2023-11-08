@@ -411,10 +411,10 @@ class ShapeKeysCurveScale():
             self.keyframe_points = []
             self.modifiers = []
             for key in self.driver.keyframe_points:
-                self.DriverKeyProxyData(key)
+                self.keyframe_points.append(self.DriverKeyProxyData(key))
 
             for mod in self.driver.modifiers:
-                self.DriverModifierProxyData(mod)
+                self.modifiers.append(self.DriverModifierProxyData(mod))
 
         class DriverKeyProxyData():
             def __init__(self, key):
