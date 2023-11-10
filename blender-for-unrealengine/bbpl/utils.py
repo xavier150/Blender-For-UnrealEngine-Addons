@@ -681,3 +681,14 @@ def get_mirror_object_name(original_objects):
         return new_objects[0]
     else:
         return new_objects
+
+class SaveTransformObject:
+    def __init__(self, obj):
+        self.transform_matrix = obj.matrix_world.copy()
+
+    def LoadObjectTransform(self, obj):
+        obj.matrix_world = self.transform_matrix
+
+def make_override_library_object(obj):
+    select_specific_object(obj)
+    bpy.ops.object.make_override_library()

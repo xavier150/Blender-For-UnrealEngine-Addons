@@ -330,3 +330,5 @@ def set_windows_clipboard(text):
     """
     bpy.context.window_manager.clipboard = text
     # bpy.context.window_manager.clipboard.encode('utf8')
+
+
