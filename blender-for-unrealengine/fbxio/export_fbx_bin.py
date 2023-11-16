@@ -12,6 +12,8 @@ import time
 from itertools import zip_longest
 from functools import cache
 
+from .. import __package__ as parent_package
+
 if "bpy" in locals():
     import importlib
     if "encode_bin" in locals():
@@ -25,7 +27,7 @@ import bpy
 import bpy_extras
 from bpy_extras import node_shader_utils
 from bpy.app.translations import pgettext_tip as tip_
-from mathutils import Vector, Matrix
+from mathutils import Vector, Matrix, Quaternion
 
 from . import encode_bin, data_types, fbx_utils
 from .fbx_utils import (
