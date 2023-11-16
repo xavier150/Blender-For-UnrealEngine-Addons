@@ -55,6 +55,8 @@ def ProcessCameraExport(op, obj):
     MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = bfu_utils.GetAssetType(obj)
+    MyAsset.animation_start_frame = bfu_utils.GetDesiredActionStartEndTime(obj, obj.animation_data.action)[0]
+    MyAsset.animation_end_frame = bfu_utils.GetDesiredActionStartEndTime(obj, obj.animation_data.action)[1]
     MyAsset.StartAssetExport()
 
     if obj.bfu_export_fbx_camera:

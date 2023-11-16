@@ -55,6 +55,8 @@ def ProcessNLAAnimExport(op, obj):
     MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = "NlAnim"
+    MyAsset.animation_start_frame = bfu_utils.GetDesiredNLAStartEndTime(obj)[0]
+    MyAsset.animation_end_frame = bfu_utils.GetDesiredNLAStartEndTime(obj)[1]
 
     file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
     file.file_name = bfu_naming.get_nonlinear_animation_file_name(obj, "")

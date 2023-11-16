@@ -39,7 +39,7 @@ def WriteImportAssetScript():
     data['assets'] = []
     for asset in scene.UnrealExportedAssetsList:
         asset_data = {}
-        asset_data["scene_unit_scale"] = scene.unit_settings.scale_length
+        asset_data["scene_unit_scale"] = round(scene.unit_settings.scale_length, 8) #Have to round for avoid microscopic offset
 
         asset_data["asset_name"] = asset.asset_name
         asset_data["asset_global_scale"] = asset.asset_global_scale
@@ -106,6 +106,10 @@ def WriteImportAssetScript():
 
             elif(asset.object.bfu_skeleton_search_mode) == "custom_reference":
                 asset_data["animation_skeleton_path"] = asset.object.bfu_target_skeleton_custom_ref.replace('\\', '/')
+
+        if bfu_utils.GetIsAnimation(asset.asset_type):
+            asset_data["animation_start_frame"] = asset.animation_start_frame
+            asset_data["animation_end_frame"] = asset.animation_end_frame    
 
         if asset.object:
             asset_data["create_physics_asset"] = asset.object.bfu_create_physics_asset
