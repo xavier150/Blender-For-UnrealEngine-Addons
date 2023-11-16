@@ -27,23 +27,33 @@ import mathutils
 from . import utils
 
 
-def create_safe_bone(armature, bone_name, layer=None):
+def create_safe_bone(arm, bone_name, context_id=None):
     """
     Create a bone in the armature.
+    Blender 4.0 -> context_id is the bone collection name.
+    Blender 3.6 and older -> context_id is the bone layer index.
     """
     #if bone_name == "rp_c_Eye_L":
     #    k=k
 
-    if bone_name in armature.data.edit_bones:
+    if bone_name in arm.data.edit_bones:
         print("Bone already exists! : " + bone_name)
         raise TypeError("Bone already exists! : " + bone_name)
 
-    bone = armature.data.edit_bones.new(bone_name)
+    name_length = len(bone_name)
+    if name_length > 63:
+        print("Name length is bigger than Blender character limit! ("+str(name_length)+"/63) : " + bone_name)
+        raise TypeError("Name length is bigger than Blender character limit! ("+str(name_length)+"/63) : " + bone_name)
+
+    bone = arm.data.edit_bones.new(bone_name)
     bone.tail = bone.head + mathutils.Vector((0, 0, 1))
 
-    if layer:
-        change_current_layer(0, bpy.context.object.data)
-        change_current_layer(layer, bone)
+    if context_id:
+        if bpy.app.version >= (4, 0, 0):
+            add_bone_to_collection(arm, bone_name, context_id)
+        else:
+            change_current_layer(0, bpy.context.object.data)
+            change_current_layer(context_id, bone)
 
     return bone
 
@@ -127,6 +137,16 @@ def no_num(name):
         return name[:-4]
     return name
 
+def add_bone_to_collection(arm, bone_name, collection_name):
+    #Add bone to collection and create if not exist
+    if collection_name in arm.data.collections:
+        col = arm.data.collections[collection_name]
+    else:
+        col = arm.data.collections.new(name=collection_name)
+
+    bone = arm.data.edit_bones[bone_name]
+    col.assign(bone)
+    return col
 
 def change_current_layer(layer, source):
     """
@@ -260,263 +280,6 @@ def set_bone_scale(armature, bone_name, new_scale, apply_tail=True):
         bone.tail = new_tail
     return new_tail
 
-'''
-def create_head_control_point(armature, bone_name, add_controller=False, prefix="TailControlPoint_"):
-    """
-    Crée un point de contrôle de la tête d'un os dans l'armature.
-    """
-    #TO DO: Move this to Modular Auto Rig Addon
-    rig_prefix = armature.mar_rig_prefix
-    rig_joint_prefix = armature.mar_rig_joint_prefix
-
-    bone = armature.data.edit_bones[bone_name]
-    rig_prefix_bone = armature.data.edit_bones[rig_prefix + bone_name]
-
-    # Créer l'os RP pour le parent et l'enfant
-    rig_prefix_point_bone_name = rig_joint_prefix + "HeadControlPoint_" + bone_name
-    rig_prefix_point_bone = create_safe_bone(armature, rig_prefix_point_bone_name, layer=armature.mar_rig_joint_layer)
-    rig_prefix_point_bone.parent = rig_prefix_bone
-
-    # Définir leur position
-    bone_length = 0.02 * armature.mar_rig_bone_scale
-    target_head = bone.head
-    target_tail = set_bone_length(armature, bone_name, bone_length, apply_tail=False)
-    target_roll = bone.roll
-
-    rig_prefix_point_bone.head = target_head
-    rig_prefix_point_bone.tail = target_tail
-    rig_prefix_point_bone.roll = target_roll
-
-    if add_controller:
-        controller_bone_name = rig_prefix + prefix + bone_name
-        controller_bone = create_safe_bone(armature, controller_bone_name, layer=get_layer_by_name(armature, "Default"))
-        controller_bone.head = target_head
-        controller_bone.tail = target_tail
-        controller_bone.roll = target_roll
-        controller_bone.parent = rig_prefix_point_bone
-        return controller_bone_name
-
-
-def create_tail_control_point(armature, bone_name, add_controller=False, prefix="TailControlPoint_"):
-    """
-    Crée un point de contrôle de la queue d'un os dans l'armature.
-    """
-    #TO DO: Move this to Modular Auto Rig Addon
-    rig_prefix = armature.mar_rig_prefix
-    rig_joint_prefix = armature.mar_rig_joint_prefix
-
-    bone = armature.data.edit_bones[bone_name]
-    rig_prefix_bone = armature.data.edit_bones[rig_prefix + bone_name]
-
-    # Créer l'os RP pour le parent et l'enfant
-    rig_prefix_point_bone_name = rig_joint_prefix + "TailControlPoint_" + bone_name
-    rig_prefix_point_bone = create_safe_bone(armature, rig_prefix_point_bone_name, layer=armature.mar_rig_joint_layer)
-    rig_prefix_point_bone.parent = rig_prefix_bone
-
-    # Définir leur position
-    bone_length = 0.02 * armature.mar_rig_bone_scale
-    target_head = bone.tail
-    target_tail = set_bone_length(armature, bone_name, bone_length, apply_tail=False) - bone.head + bone.tail
-    target_roll = bone.roll
-
-    rig_prefix_point_bone.head = target_head
-    rig_prefix_point_bone.tail = target_tail
-    rig_prefix_point_bone.roll = target_roll
-
-    if add_controller:
-        controller_bone_name = rig_prefix + prefix + bone_name
-        controller_bone = create_safe_bone(armature, controller_bone_name, layer=get_layer_by_name(armature, "Default"))
-        controller_bone.head = target_head
-        controller_bone.tail = target_tail
-        controller_bone.roll = target_roll
-        controller_bone.parent = rig_prefix_point_bone
-        return controller_bone_name
-
-
-def create_bone_interpolation(
-        armature, 
-        parent_bone_name, 
-        child_bone_name, 
-        position_mode="PARENT",
-        desired_head=None, 
-        desired_tail=None, 
-        desired_roll=None,
-        add_controller=False, 
-        mode="ROTATION",
-        stretch_by_difference=False, 
-        stretch_axis=0, 
-        prefix="interp_"
-        ):
-    
-
-    """
-    Crée une interpolation entre deux os dans l'armature.
-    """
-    #TO DO: Move this to Modular Auto Rig Addon
-    #TO DO: Move this to Modular Auto Rig Addon
-    #TO DO: Move this to Modular Auto Rig Addon
-    rig_prefix = armature.mar_rig_prefix
-    rig_joint_prefix = armature.mar_rig_joint_prefix
-
-    parent_bone = armature.data.edit_bones[rig_prefix + parent_bone_name]
-    child_bone = armature.data.edit_bones[rig_prefix + child_bone_name]
-
-    # Créer deux os RP pour le parent et l'enfant
-    rig_prefix_parent_bone_name = rig_joint_prefix + "interp_prefixParent_" + parent_bone_name
-    rig_prefix_parent_bone = create_safe_bone(armature, rig_prefix_parent_bone_name, layer=armature.mar_rig_joint_layer)
-    rig_prefix_parent_bone.parent = parent_bone
-
-    rig_prefix_child_bone_name = rig_joint_prefix + "interp_prefixChild_" + parent_bone_name
-    rig_prefix_child_bone = create_safe_bone(armature, rig_prefix_child_bone_name, layer=armature.mar_rig_joint_layer)
-    rig_prefix_child_bone.parent = child_bone
-
-    # Définir leur position
-    bone_length = 0.02 * armature.mar_rig_bone_scale
-
-    if position_mode == "PARENT":
-        target_head = child_bone.head
-        target_tail = set_bone_length(armature, rig_prefix + parent_bone_name, bone_length, apply_tail=False) - parent_bone.head + child_bone.head
-        target_roll = parent_bone.roll
-
-    elif position_mode == "CHILD":
-        target_head = child_bone.head
-        target_tail = set_bone_length(armature, rig_prefix + child_bone_name, bone_length, apply_tail=False)
-        target_roll = child_bone.roll
-
-    elif position_mode == "MIX":
-        target_head = child_bone.head
-        vector_parent = (parent_bone.tail - parent_bone.head)
-        vector_child = (child_bone.tail - child_bone.head)
-        vector_parent.normalize()
-        vector_child.normalize()
-        vector_target = ((vector_parent + vector_child) / 2) * bone_length
-        target_tail = child_bone.head + vector_target
-        target_roll = (child_bone.roll + child_bone.roll) / 2
-
-    elif position_mode == "UP":
-        target_head = child_bone.head
-        target_tail = target_head + mathutils.Vector((0, 0, bone_length))
-        target_roll = 0
-
-    else:
-        raise TypeError('Position mode not found! ' + position_mode)
-
-    if desired_head:
-        target_head = desired_head
-
-    if desired_tail:
-        target_tail = desired_tail
-
-    if desired_roll:
-        target_roll = desired_roll
-
-    rig_prefix_parent_bone.head = target_head
-    rig_prefix_parent_bone.tail = target_tail
-    rig_prefix_parent_bone.roll = target_roll
-
-    rig_prefix_child_bone.head = target_head
-    rig_prefix_child_bone.tail = target_tail
-    rig_prefix_child_bone.roll = target_roll
-
-    if stretch_by_difference:
-        rig_prefix_parent_stretch_bone = armature.data.edit_bones[duplicate_bone(armature, rig_prefix_parent_bone_name)]
-        rig_prefix_parent_stretch_bone_name = rig_prefix_parent_stretch_bone.name
-        rig_prefix_child_stretch_bone = armature.data.edit_bones[duplicate_bone(armature, rig_prefix_child_bone_name)]
-        rig_prefix_child_stretch_bone_name = rig_prefix_child_stretch_bone.name
-
-    # Créer un troisième os qui effectue l'interpolation entre les deux premiers
-    rig_prefix_interp_bone_name = rig_joint_prefix + "interp_" + parent_bone_name
-    rig_prefix_interp_bone = create_safe_bone(armature, rig_prefix_interp_bone_name, layer=armature.mar_rig_joint_layer)
-
-    rig_prefix_interp_bone.head = target_head
-    rig_prefix_interp_bone.tail = target_tail
-    rig_prefix_interp_bone.roll = target_roll
-    if stretch_by_difference:
-        rig_prefix_interp_bone.parent = rig_prefix_parent_stretch_bone
-    else:
-        rig_prefix_interp_bone.parent = rig_prefix_parent_bone
-
-    if add_controller:
-        controller_bone_name = rig_prefix + prefix + parent_bone_name
-        controller_bone = create_safe_bone(armature, controller_bone_name, layer=get_layer_by_name(armature, "Default"))
-        controller_bone.head = target_head
-        controller_bone.tail = target_tail
-        controller_bone.roll = target_roll
-        controller_bone.parent = rig_prefix_interp_bone
-
-    bpy.ops.object.mode_set(mode='POSE')
-    if mode == "ROTATION":
-        cons_name = "COPY_ROTATION"
-    elif mode == "LOCATION":
-        cons_name = "COPY_LOCATION"
-    elif mode == "TRANSFORM":
-        cons_name = "COPY_TRANSFORMS"
-    else:
-        raise TypeError("Error in create_bone_interpolation() cons_name " + cons_name + " not valid.")
-
-
-    constraint = armature.pose.bones[rig_prefix_interp_bone_name].constraints.new(cons_name)
-    constraint.target = armature
-    if stretch_by_difference:
-        constraint.subtarget = rig_prefix_child_stretch_bone_name
-    else:
-        constraint.subtarget = rig_prefix_child_bone_name
-    constraint.name = "interpolation follow rotation"
-    constraint.influence = 0.5
-
-    if stretch_by_difference:
-        # Créer un driver pour modifier l'échelle en fonction de l'interp_prefix
-        def create_stretch_driver(bone_name, value="min_x", axis_index=0):
-            driver_stretch_name = 'pose.bones["' + bone_name + '"].scale'
-
-            driver_stretch = armature.driver_add(driver_stretch_name, axis_index).driver
-            utils.clear_driver_var(driver_stretch)
-            value = driver_stretch.variables.new()
-            value.name = "interp_stretch_by_difference"
-            value.type = 'ROTATION_DIFF'
-            value.targets[0].id = armature
-            value.targets[1].id = armature
-            value.targets[0].bone_target = rig_prefix_parent_bone_name
-            value.targets[1].bone_target = rig_prefix_child_bone_name
-            driver_stretch.expression = "1+"+value.name
-            return driver_stretch
-
-        stretch_drivers = []
-        stretch_drivers.append(create_stretch_driver(rig_prefix_parent_stretch_bone_name, "min_z", stretch_axis))
-        stretch_drivers.append(create_stretch_driver(rig_prefix_child_stretch_bone_name, "max_z", stretch_axis))
-
-    if add_controller:
-        # Gestion des drivers
-        my_property = DriverPropertyHelper(armature, rig_prefix_interp_bone_name, constraint.name, name="Follow_Child")
-        my_property.default = 0.5
-        my_property.description = "Follow child factor."
-        my_property.apply_driver(controller_bone_name)
-
-    bpy.ops.object.mode_set(mode='EDIT')
-
-    class interp_prefixBone():
-        def __init__(self):
-            self.parent = rig_prefix_parent_bone_name
-            self.child = rig_prefix_child_bone_name
-            self.interp_prefix = rig_prefix_interp_bone_name
-
-            if stretch_by_difference:
-                self.parent_stretch = rig_prefix_parent_stretch_bone_name
-                self.child_stretch = rig_prefix_child_stretch_bone_name
-                self.stretch_drivers = stretch_drivers
-            else:
-                self.parent_stretch = None
-                self.child_stretch = None
-                self.stretch_drivers = None
-            if add_controller:
-                self.controller = controller_bone_name
-
-    interp_prefix = interp_prefixBone()
-    return interp_prefix
-
-
-
-'''
 
 class BoneDataSave:
     """
@@ -526,10 +289,6 @@ class BoneDataSave:
         self.name = saved_bone.name
         self.parent = saved_bone.parent.name
         self.childs = [bone for bone in armature if bone.parent == saved_bone]
-
-'''
-
-'''
 
 
 def get_first_parent(bone):
@@ -649,7 +408,7 @@ def subdivise_one_bone(armature, bone_name, subdivise_prefix_name="Subdivise_", 
     Returns:
         list: A list of the created bones.
     """
-
+    print("bone_name ->", bone_name)
     # Vars
     edit_bone = armature.data.edit_bones[bone_name]
     original_tail = edit_bone.tail + mathutils.Vector((0, 0, 0))
@@ -690,7 +449,7 @@ def subdivise_one_bone(armature, bone_name, subdivise_prefix_name="Subdivise_", 
     return chain
 
 
-def duplicate_bone(armature, bone_name, new_name=None):
+def duplicate_bone(arm, bone_name, new_name=None):
     """
     Creates a duplicate bone in the armature.
 
@@ -702,17 +461,22 @@ def duplicate_bone(armature, bone_name, new_name=None):
     Returns:
         str: The name of the created bone.
     """
-    edit_bone = armature.data.edit_bones[bone_name]
+    edit_bone = arm.data.edit_bones[bone_name]
     if new_name is None:
         new_name = edit_bone.name + "_dup"
-    new_bone = armature.data.edit_bones.new(new_name)
+    new_bone = arm.data.edit_bones.new(new_name)
     new_bone.head = edit_bone.head
     new_bone.tail = edit_bone.tail
     new_bone.roll = edit_bone.roll
     new_bone.inherit_scale = edit_bone.inherit_scale
 
     new_bone.parent = edit_bone.parent
-    new_bone.layers = edit_bone.layers
+    if bpy.app.version >= (4, 0, 0):
+        for bone_col in edit_bone.collections:
+            col = arm.data.collections[bone_col.name]
+            col.assign(new_bone)
+    else:
+        new_bone.layers = edit_bone.layers # Deprecated in Blender 4.0
 
     return new_bone.name
 

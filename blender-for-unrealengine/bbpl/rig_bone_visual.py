@@ -27,103 +27,6 @@ import bmesh
 from . import utils
 
 
-class BoneVisualHelper:
-    '''
-    A class of functions to assist with bone visualization.
-    '''
-
-    def _get_shape_use_bone_size(self):
-        return self.__shape_use_bone_size
-
-    def _set_shape_use_bone_size(self, value):
-        if not isinstance(value, bool):
-            raise TypeError("shape_use_bone_size must be set to an Boolean")
-        self.__shape_use_bone_size = value
-
-    shape_use_bone_size = property(_get_shape_use_bone_size, _set_shape_use_bone_size)
-
-    def __init__(self, armature, source_context):
-        self.armature = armature
-        self.shape_name: str = ""
-        self.__shape_use_bone_size: bool = False
-        self.shape_scale = (1.0, 1.0, 1.0)
-        self.shape_translation = (0.0, 0.0, 0.0)
-        self.shape_rotation = (0.0, 0.0, 0.0)
-        self.shape_transform = ""
-        self.group_name = "NoGroup"
-        self.group_theme = "DEFAULT"
-        self.bone_layer = 0
-        self.source_context = source_context
-
-    def delegate_layer(self, bones: str):
-        '''
-        Delegate the specified bones to the bone layer.
-        '''
-        if not isinstance(bones, list):
-            bones = [bones]  # Convert to list
-
-        for bone_name in bones:
-            scene = bpy.context.scene
-            delegate = scene.mar_layer_delegates.add()
-            delegate.armature = self.armature
-            delegate.bone_name = bone_name
-            delegate.layer_index = self.bone_layer
-            delegate.source_context = self.source_context
-
-    def delegate_shape(self, bones: str):
-        '''
-        Delegate the specified bones to the custom shape.
-        '''
-
-        scene = bpy.context.scene
-
-        if not isinstance(bones, list):
-            bones = [bones]  # Convert to list
-
-        for bone_name in bones:
-            delegate = scene.mar_customshape_delegates.add()
-            delegate.armature = self.armature
-            delegate.bone_name = bone_name
-            delegate.shape_name = self.shape_name
-            delegate.shape_use_bone_size = self.shape_use_bone_size
-            delegate.set_scale(self.shape_scale)
-            delegate.shape_translation = self.shape_translation
-            delegate.shape_rotation = self.shape_rotation
-            delegate.shape_transform = self.shape_transform
-            delegate.source_context = self.source_context
-
-    def delegate_bone_group(self, bones: str):
-        '''
-        Add the specified bones to a bone group.
-        '''
-
-        if not isinstance(bones, list):
-            bones = [bones]  # Convert to list
-
-        for bone_name in bones:
-            scene = bpy.context.scene
-            delegate = scene.mar_bonegroup_delegates.add()
-            delegate.armature = self.armature
-            delegate.bone_name = bone_name
-            delegate.group_name = self.group_name
-            delegate.group_theme = self.group_theme
-            delegate.source_context = self.source_context
-
-    def apply_group(self, bone_name):
-        '''
-        Apply the bone group to the specified bone.
-        '''
-
-        if self.armature is not None:
-            direct_add_to_bone_group(
-                self.armature,
-                bone_name,
-                self.group_name
-            )
-        else:
-            raise TypeError('Armature is None. Source: {0}'.format(self.source_context))
-
-
 def get_theme_colors(theme="DEFAULT"):
     '''
     Retrieves the color values for the specified theme.
@@ -378,6 +281,7 @@ def update_bone_shape_by_name(
 
 def create_bone_group(armature, name, theme="DEFAULT"):
     """
+    Deprecated in Blender 4.0
     Creates a bone group in the armature with the specified name and color theme.
 
     Args:
@@ -407,6 +311,7 @@ def create_bone_group(armature, name, theme="DEFAULT"):
 
 def direct_add_to_bone_group(armature, bones, group_name):
     """
+    Deprecated in Blender 4.0
     Adds the specified bones to a bone group in the armature.
 
     Args:
