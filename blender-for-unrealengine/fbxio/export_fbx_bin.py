@@ -1,7 +1,7 @@
+# SPDX-FileCopyrightText: 2013 Campbell Barton
+# SPDX-FileCopyrightText: 2014 Bastien Montagne
+#
 # SPDX-License-Identifier: GPL-2.0-or-later
-
-# Script copyright (C) Campbell Barton, Bastien Montagne
-
 
 import datetime
 import math
@@ -11,8 +11,6 @@ import time
 
 from itertools import zip_longest
 from functools import cache
-
-from .. import __package__ as parent_package
 
 if "bpy" in locals():
     import importlib
@@ -27,7 +25,7 @@ import bpy
 import bpy_extras
 from bpy_extras import node_shader_utils
 from bpy.app.translations import pgettext_tip as tip_
-from mathutils import Vector, Matrix, Quaternion
+from mathutils import Vector, Matrix
 
 from . import encode_bin, data_types, fbx_utils
 from .fbx_utils import (
@@ -51,6 +49,9 @@ from .fbx_utils import (
     units_blender_to_fbx_factor, units_convertor, units_convertor_iter,
     matrix4_to_array, similar_values, shape_difference_exclude_similar, astype_view_signedness, fast_first_axis_unique,
     fast_first_axis_flat,
+    # Attribute helpers.
+    MESH_ATTRIBUTE_CORNER_EDGE, MESH_ATTRIBUTE_SHARP_EDGE, MESH_ATTRIBUTE_EDGE_VERTS, MESH_ATTRIBUTE_CORNER_VERT,
+    MESH_ATTRIBUTE_SHARP_FACE, MESH_ATTRIBUTE_POSITION, MESH_ATTRIBUTE_MATERIAL_INDEX,
     # Mesh transform helpers.
     vcos_transformed, nors_transformed,
     # UUID from key.
@@ -65,7 +66,7 @@ from .fbx_utils import (
     get_blender_nodetexture_key,
     # FBX element data.
     elem_empty,
-    elem_data_single_bool, elem_data_single_int16, elem_data_single_int32, elem_data_single_int64,
+    elem_data_single_char, elem_data_single_int16, elem_data_single_int32, elem_data_single_int64,
     elem_data_single_float32, elem_data_single_float64,
     elem_data_single_bytes, elem_data_single_string, elem_data_single_string_unicode,
     elem_data_single_bool_array, elem_data_single_int32_array, elem_data_single_int64_array,
@@ -551,14 +552,20 @@ def fbx_data_element_custom_properties(props, bid):
 
 def fbx_data_empty_elements(root, empty, scene_data):
     """
-    Write the Empty data block (you can control its FBX datatype with the 'fbx_type' string custom property).
+    Write the Empty data block (you can control its FBX datatype with the 'fbx_type' string custom property) or Armature
+    NodeAttribute.
     """
     empty_key = scene_data.data_empties[empty]
 
     null = elem_data_single_int64(root, b"NodeAttribute", get_fbx_uuid_from_key(empty_key))
     null.add_string(fbx_name_class(empty.name.encode(), b"NodeAttribute"))
-    val = empty.bdata.get('fbx_type', None)
-    null.add_string(val.encode() if val and isinstance(val, str) else b"Null")
+    bdata = empty.bdata
+    if bdata.type == 'EMPTY':
+        val = bdata.get('fbx_type', None)
+        fbx_type = val.encode() if val and isinstance(val, str) else b"Null"
+    else:
+        fbx_type = b"Null"
+    null.add_string(fbx_type)
 
     elem_data_single_string(null, b"TypeFlags", b"Null")
 
@@ -566,7 +573,10 @@ def fbx_data_empty_elements(root, empty, scene_data):
     props = elem_properties(null)
     elem_props_template_finalize(tmpl, props)
 
-    # No custom properties, already saved with object (Model).
+    # Empty/Armature Object custom properties have already been saved with the Model.
+    # Only Armature data custom properties need to be saved here with the NodeAttribute.
+    if bdata.type == 'ARMATURE':
+        fbx_data_element_custom_properties(props, bdata.data)
 
 
 def fbx_data_light_elements(root, lamp, scene_data):
@@ -577,12 +587,9 @@ def fbx_data_light_elements(root, lamp, scene_data):
 
     light_key = scene_data.data_lights[lamp]
     do_light = True
-    decay_type = FBX_LIGHT_DECAY_TYPES['CONSTANT']
     do_shadow = False
     shadow_color = Vector((0.0, 0.0, 0.0))
     if lamp.type not in {'HEMI'}:
-        if lamp.type not in {'SUN', 'AREA'}:
-            decay_type = FBX_LIGHT_DECAY_TYPES[lamp.falloff_type]
         do_light = True
         do_shadow = lamp.use_shadow
         shadow_color = lamp.shadow_color
@@ -599,8 +606,8 @@ def fbx_data_light_elements(root, lamp, scene_data):
     elem_props_template_set(tmpl, props, "p_bool", b"CastLight", do_light)
     elem_props_template_set(tmpl, props, "p_color", b"Color", lamp.color)
     elem_props_template_set(tmpl, props, "p_number", b"Intensity", lamp.energy * 100.0)
-    elem_props_template_set(tmpl, props, "p_enum", b"DecayType", decay_type)
-    elem_props_template_set(tmpl, props, "p_double", b"DecayStart", lamp.distance * gscale)
+    elem_props_template_set(tmpl, props, "p_enum", b"DecayType", FBX_LIGHT_DECAY_TYPES['INVERSE_SQUARE'])
+    elem_props_template_set(tmpl, props, "p_double", b"DecayStart", 25.0 * gscale) # 25 is old Blender default
     elem_props_template_set(tmpl, props, "p_bool", b"CastShadows", do_shadow)
     elem_props_template_set(tmpl, props, "p_color", b"ShadowColor", shadow_color)
     if lamp.type in {'SPOT'}:
@@ -890,13 +897,13 @@ def fbx_data_mesh_elements(root, me_obj, scene_data, done_meshes):
 
     elem_data_single_int32(geom, b"GeometryVersion", FBX_GEOMETRY_VERSION)
 
+    attributes = me.attributes
+
     # Vertex cos.
-    co_bl_dtype = np.single
-    co_fbx_dtype = np.float64
-    t_co = np.empty(len(me.vertices) * 3, dtype=co_bl_dtype)
-    me.vertices.foreach_get("co", t_co)
-    elem_data_single_float64_array(geom, b"Vertices", vcos_transformed(t_co, geom_mat_co, co_fbx_dtype))
-    del t_co
+    pos_fbx_dtype = np.float64
+    t_pos = MESH_ATTRIBUTE_POSITION.to_ndarray(attributes)
+    elem_data_single_float64_array(geom, b"Vertices", vcos_transformed(t_pos, geom_mat_co, pos_fbx_dtype))
+    del t_pos
 
     # Polygon indices.
     #
@@ -909,29 +916,26 @@ def fbx_data_mesh_elements(root, me_obj, scene_data, done_meshes):
 
     # dtypes matching the C data. Matching the C datatype avoids iteration and casting of every element in foreach_get's
     # C code.
-    bl_vertex_index_dtype = bl_edge_index_dtype = bl_loop_index_dtype = np.uintc
+    bl_loop_index_dtype = np.uintc
 
-    # Start vertex indices of loops. May contain elements for loops added for the export of loose edges.
-    t_lvi = np.empty(len(me.loops), dtype=bl_vertex_index_dtype)
+    # Start vertex indices of loops (corners). May contain elements for loops added for the export of loose edges.
+    t_lvi = MESH_ATTRIBUTE_CORNER_VERT.to_ndarray(attributes)
 
     # Loop start indices of polygons. May contain elements for the polygons added for the export of loose edges.
     t_ls = np.empty(len(me.polygons), dtype=bl_loop_index_dtype)
 
     # Vertex indices of edges (unsorted, unlike Mesh.edge_keys), flattened into an array twice the length of the number
     # of edges.
-    t_ev = np.empty(len(me.edges) * 2, dtype=bl_vertex_index_dtype)
+    t_ev = MESH_ATTRIBUTE_EDGE_VERTS.to_ndarray(attributes)
     # Each edge has two vertex indices, so it's useful to view the array as 2d where each element on the first axis is a
     # pair of vertex indices
     t_ev_pair_view = t_ev.view()
     t_ev_pair_view.shape = (-1, 2)
 
-    # Edge indices of loops. May contain elements for loops added for the export of loose edges.
-    t_lei = np.empty(len(me.loops), dtype=bl_edge_index_dtype)
+    # Edge indices of loops (corners). May contain elements for loops added for the export of loose edges.
+    t_lei = MESH_ATTRIBUTE_CORNER_EDGE.to_ndarray(attributes)
 
-    me.loops.foreach_get("vertex_index", t_lvi)
     me.polygons.foreach_get("loop_start", t_ls)
-    me.edges.foreach_get("vertices", t_ev)
-    me.loops.foreach_get("edge_index", t_lei)
 
     # Add "fake" faces for loose edges. Each "fake" face consists of two loops creating a new 2-sided polygon.
     if scene_data.settings.use_mesh_edges:
@@ -1027,12 +1031,18 @@ def fbx_data_mesh_elements(root, me_obj, scene_data, done_meshes):
     # Smoothing.
     if smooth_type in {'FACE', 'EDGE'}:
         ps_fbx_dtype = np.int32
-        poly_use_smooth_dtype = bool
-        edge_use_sharp_dtype = bool
         _map = b""
         if smooth_type == 'FACE':
-            t_ps = np.empty(len(me.polygons), dtype=poly_use_smooth_dtype)
-            me.polygons.foreach_get("use_smooth", t_ps)
+            # The FBX integer values are usually interpreted as boolean where 0 is False (sharp) and 1 is True
+            # (smooth).
+            # The values may also be used to represent smoothing group bitflags, but this does not seem well-supported.
+            t_ps = MESH_ATTRIBUTE_SHARP_FACE.get_ndarray(attributes)
+            if t_ps is not None:
+                # FBX sharp is False, but Blender sharp is True, so invert.
+                t_ps = np.logical_not(t_ps)
+            else:
+                # The mesh has no "sharp_face" attribute, so every face is smooth.
+                t_ps = np.ones(len(me.polygons), dtype=ps_fbx_dtype)
             _map = b"ByPolygon"
         else:  # EDGE
             _map = b"ByEdge"
@@ -1047,37 +1057,40 @@ def fbx_data_mesh_elements(root, me_obj, scene_data, done_meshes):
                 mesh_t_ls_view = t_ls[:mesh_poly_nbr]
                 mesh_t_lei_view = t_lei[:mesh_loop_nbr]
 
-                # - Get sharp edges from flat shaded faces
-                # Get the 'use_smooth' attribute of all polygons.
-                p_use_smooth_mask = np.empty(mesh_poly_nbr, dtype=poly_use_smooth_dtype)
-                me.polygons.foreach_get('use_smooth', p_use_smooth_mask)
-                # Invert to get all flat shaded polygons.
-                p_flat_mask = np.invert(p_use_smooth_mask, out=p_use_smooth_mask)
-                # Convert flat shaded polygons to flat shaded loops by repeating each element by the number of sides of
-                # that polygon.
-                # Polygon sides can be calculated from the element-wise difference of loop starts appended by the number
-                # of loops. Alternatively, polygon sides can be retrieved directly from the 'loop_total' attribute of
-                # polygons, but since we already have t_ls, it tends to be quicker to calculate from t_ls when above
-                # around 10_000 polygons.
-                polygon_sides = np.diff(mesh_t_ls_view, append=mesh_loop_nbr)
-                p_flat_loop_mask = np.repeat(p_flat_mask, polygon_sides)
-                # Convert flat shaded loops to flat shaded (sharp) edge indices.
-                # Note that if an edge is in multiple loops that are part of flat shaded faces, its edge index will end
-                # up in sharp_edge_indices_from_polygons multiple times.
-                sharp_edge_indices_from_polygons = mesh_t_lei_view[p_flat_loop_mask]
-
-                # - Get sharp edges from edges marked as sharp
-                e_use_sharp_mask = np.empty(mesh_edge_nbr, dtype=edge_use_sharp_dtype)
-                me.edges.foreach_get('use_edge_sharp', e_use_sharp_mask)
-
                 # - Get sharp edges from edges used by more than two loops (and therefore more than two faces)
                 e_more_than_two_faces_mask = np.bincount(mesh_t_lei_view, minlength=mesh_edge_nbr) > 2
 
-                # - Combine with edges that are sharp because they're in more than two faces
-                e_use_sharp_mask = np.logical_or(e_use_sharp_mask, e_more_than_two_faces_mask, out=e_use_sharp_mask)
+                # - Get sharp edges from the "sharp_edge" attribute. The attribute may not exist, in which case, there
+                #   are no edges marked as sharp.
+                e_use_sharp_mask = MESH_ATTRIBUTE_SHARP_EDGE.get_ndarray(attributes)
+                if e_use_sharp_mask is not None:
+                    # - Combine with edges that are sharp because they're in more than two faces
+                    e_use_sharp_mask = np.logical_or(e_use_sharp_mask, e_more_than_two_faces_mask, out=e_use_sharp_mask)
+                else:
+                    e_use_sharp_mask = e_more_than_two_faces_mask
 
-                # - Combine with edges that are sharp because a polygon they're in has flat shading
-                e_use_sharp_mask[sharp_edge_indices_from_polygons] = True
+                # - Get sharp edges from flat shaded faces
+                p_flat_mask = MESH_ATTRIBUTE_SHARP_FACE.get_ndarray(attributes)
+                if p_flat_mask is not None:
+                    # Convert flat shaded polygons to flat shaded loops by repeating each element by the number of sides
+                    # of that polygon.
+                    # Polygon sides can be calculated from the element-wise difference of loop starts appended by the
+                    # number of loops. Alternatively, polygon sides can be retrieved directly from the 'loop_total'
+                    # attribute of polygons, but since we already have t_ls, it tends to be quicker to calculate from
+                    # t_ls.
+                    polygon_sides = np.diff(mesh_t_ls_view, append=mesh_loop_nbr)
+                    p_flat_loop_mask = np.repeat(p_flat_mask, polygon_sides)
+                    # Convert flat shaded loops to flat shaded (sharp) edge indices.
+                    # Note that if an edge is in multiple loops that are part of flat shaded faces, its edge index will
+                    # end up in sharp_edge_indices_from_polygons multiple times.
+                    sharp_edge_indices_from_polygons = mesh_t_lei_view[p_flat_loop_mask]
+
+                    # - Combine with edges that are sharp because a polygon they're in has flat shading
+                    e_use_sharp_mask[sharp_edge_indices_from_polygons] = True
+                    del sharp_edge_indices_from_polygons
+                    del p_flat_loop_mask
+                    del polygon_sides
+                del p_flat_mask
 
                 # - Convert sharp edges to sharp edge keys (t_pvi)
                 ek_use_sharp_mask = e_use_sharp_mask[t_pvi_edge_indices]
@@ -1086,11 +1099,6 @@ def fbx_data_mesh_elements(root, me_obj, scene_data, done_meshes):
                 t_ps = np.invert(ek_use_sharp_mask, out=ek_use_sharp_mask)
                 del ek_use_sharp_mask
                 del e_use_sharp_mask
-                del sharp_edge_indices_from_polygons
-                del p_flat_loop_mask
-                del polygon_sides
-                del p_flat_mask
-                del p_use_smooth_mask
                 del mesh_t_lei_view
                 del mesh_t_ls_view
             else:
@@ -1111,19 +1119,25 @@ def fbx_data_mesh_elements(root, me_obj, scene_data, done_meshes):
         ec_fbx_dtype = np.float64
         if t_pvi_edge_indices.size:
             ec_bl_dtype = np.single
-            t_ec_raw = np.empty(len(me.edges), dtype=ec_bl_dtype)
-            me.edges.foreach_get('crease', t_ec_raw)
+            edge_creases = me.edge_creases
+            if edge_creases:
+                t_ec_raw = np.empty(len(me.edges), dtype=ec_bl_dtype)
+                edge_creases.data.foreach_get("value", t_ec_raw)
 
-            # Convert to t_pvi edge-keys.
-            t_ec_ek_raw = t_ec_raw[t_pvi_edge_indices]
+                # Convert to t_pvi edge-keys.
+                t_ec_ek_raw = t_ec_raw[t_pvi_edge_indices]
 
-            # Blender squares those values before sending them to OpenSubdiv, when other software don't,
-            # so we need to compensate that to get similar results through FBX...
-            # Use the precision of the fbx dtype for the calculation since it's usually higher precision.
-            t_ec_ek_raw = t_ec_ek_raw.astype(ec_fbx_dtype, copy=False)
-            t_ec = np.square(t_ec_ek_raw, out=t_ec_ek_raw)
-            del t_ec_ek_raw
-            del t_ec_raw
+                # Blender squares those values before sending them to OpenSubdiv, when other software don't,
+                # so we need to compensate that to get similar results through FBX...
+                # Use the precision of the fbx dtype for the calculation since it's usually higher precision.
+                t_ec_ek_raw = t_ec_ek_raw.astype(ec_fbx_dtype, copy=False)
+                t_ec = np.square(t_ec_ek_raw, out=t_ec_ek_raw)
+                del t_ec_ek_raw
+                del t_ec_raw
+            else:
+                # todo: Blender edge creases are optional now, we may be able to avoid writing the array to FBX when
+                #  there are no edge creases.
+                t_ec = np.zeros(t_pvi_edge_indices.shape, dtype=ec_fbx_dtype)
         else:
             t_ec = np.empty(0, dtype=ec_fbx_dtype)
 
@@ -1338,7 +1352,7 @@ def fbx_data_mesh_elements(root, me_obj, scene_data, done_meshes):
             elem_data_single_string(lay_uv, b"MappingInformationType", b"ByPolygonVertex")
             elem_data_single_string(lay_uv, b"ReferenceInformationType", b"IndexToDirect")
 
-            uvlayer.data.foreach_get("uv", t_luv)
+            uvlayer.uv.foreach_get("vector", t_luv)
 
             # t_luv_fast_pair_view is a view in a dtype that compares elements by individual bytes, but float types have
             # separate byte representations of positive and negative zero. For uniqueness, these should be considered
@@ -1414,11 +1428,13 @@ def fbx_data_mesh_elements(root, me_obj, scene_data, done_meshes):
             elem_data_single_int32(lay_ma, b"Version", FBX_GEOMETRY_MATERIAL_VERSION)
             elem_data_single_string(lay_ma, b"Name", b"")
             nbr_mats = len(me_fbxmaterials_idx)
-            if nbr_mats > 1:
-                bl_pm_dtype = np.uintc
+            multiple_fbx_mats = nbr_mats > 1
+            # If a mesh does not have more than one material its material_index attribute can be ignored.
+            # If a mesh has multiple materials but all its polygons are assigned to the first material, its
+            # material_index attribute may not exist.
+            t_pm = None if not multiple_fbx_mats else MESH_ATTRIBUTE_MATERIAL_INDEX.get_ndarray(attributes)
+            if t_pm is not None:
                 fbx_pm_dtype = np.int32
-                t_pm = np.empty(len(me.polygons), dtype=bl_pm_dtype)
-                me.polygons.foreach_get("material_index", t_pm)
 
                 # We have to validate mat indices, and map them to FBX indices.
                 # Note a mat might not be in me_fbxmaterials_idx (e.g. node mats are ignored).
@@ -1430,7 +1446,10 @@ def fbx_data_mesh_elements(root, me_obj, scene_data, done_meshes):
 
                 # Set material indices that are out of bounds to the default material index
                 mat_idx_limit = len(me_blmaterials)
-                t_pm[t_pm >= mat_idx_limit] = def_me_blmaterial_idx
+                # Material indices shouldn't be negative, but they technically could be. Viewing as unsigned before
+                # checking for indices that are too large means that a single >= check will pick up both negative
+                # indices and indices that are too large.
+                t_pm[t_pm.view("u%i" % t_pm.itemsize) >= mat_idx_limit] = def_me_blmaterial_idx
 
                 # Map to FBX indices. Materials not in me_fbxmaterials_idx will be set to the default material index.
                 blmat_fbx_idx = np.fromiter((me_fbxmaterials_idx.get(m, def_ma) for m in me_blmaterials),
@@ -1444,11 +1463,18 @@ def fbx_data_mesh_elements(root, me_obj, scene_data, done_meshes):
                 #     indices??? *sigh*).
                 elem_data_single_string(lay_ma, b"ReferenceInformationType", b"IndexToDirect")
                 elem_data_single_int32_array(lay_ma, b"Materials", t_pm)
-                del t_pm
             else:
                 elem_data_single_string(lay_ma, b"MappingInformationType", b"AllSame")
                 elem_data_single_string(lay_ma, b"ReferenceInformationType", b"IndexToDirect")
-                elem_data_single_int32_array(lay_ma, b"Materials", [0])
+                if multiple_fbx_mats:
+                    # There's no material_index attribute, so every material index is effectively zero.
+                    # In the order of the mesh's materials, get the FBX index of the first material that is exported.
+                    all_same_idx = next(me_fbxmaterials_idx[m] for m in me_blmaterials if m in me_fbxmaterials_idx)
+                else:
+                    # There's only one fbx material, so the index will always be zero.
+                    all_same_idx = 0
+                elem_data_single_int32_array(lay_ma, b"Materials", [all_same_idx])
+            del t_pm
 
     # And the "layer TOC"...
 
@@ -1784,18 +1810,16 @@ def fbx_data_armature_elements(root, arm_obj, scene_data):
             elem_data_single_int32(fbx_skin, b"Version", FBX_DEFORMER_SKIN_VERSION)
             elem_data_single_float64(fbx_skin, b"Link_DeformAcuracy", 50.0)  # Only vague idea what it is...
 
-            # Pre-process vertex weights (also to check vertices assigned to more than four bones).
+            # Pre-process vertex weights so that the vertices only need to be iterated once.
             ob = ob_obj.bdata
             bo_vg_idx = {bo_obj.bdata.name: ob.vertex_groups[bo_obj.bdata.name].index
                          for bo_obj in clusters.keys() if bo_obj.bdata.name in ob.vertex_groups}
             valid_idxs = set(bo_vg_idx.values())
             vgroups = {vg.index: {} for vg in ob.vertex_groups}
-            verts_vgroups = (sorted(((vg.group, vg.weight) for vg in v.groups if vg.weight and vg.group in valid_idxs),
-                                    key=lambda e: e[1], reverse=True)
-                             for v in me.vertices)
-            for idx, vgs in enumerate(verts_vgroups):
-                for vg_idx, w in vgs:
-                    vgroups[vg_idx][idx] = w
+            for idx, v in enumerate(me.vertices):
+                for vg in v.groups:
+                    if (w := vg.weight) and (vg_idx := vg.group) in valid_idxs:
+                        vgroups[vg_idx][idx] = w
 
             for bo_obj, clstr_key in clusters.items():
                 bo = bo_obj.bdata
@@ -1874,7 +1898,8 @@ def fbx_data_leaf_bone_elements(root, scene_data):
         # object type, etc.
         elem_data_single_int32(model, b"MultiLayer", 0)
         elem_data_single_int32(model, b"MultiTake", 0)
-        elem_data_single_bool(model, b"Shading", True)
+        # Probably the FbxNode.EShadingMode enum. Full description in fbx_data_object_elements.
+        elem_data_single_char(model, b"Shading", b"\x01")
         elem_data_single_string(model, b"Culling", b"CullingOff")
 
         elem_props_template_finalize(tmpl, props)
@@ -1938,7 +1963,12 @@ def fbx_data_object_elements(root, ob_obj, scene_data):
     # object type, etc.
     elem_data_single_int32(model, b"MultiLayer", 0)
     elem_data_single_int32(model, b"MultiTake", 0)
-    elem_data_single_bool(model, b"Shading", True)
+    # This is probably the FbxNode.EShadingMode enum. Not directly used by the FBX SDK, but the SDK guarantees that the
+    # value will be passed through from an imported file to an exported one. Common values are 'Y' and 'T'. 'U' and 'W'
+    # have also been seen in older FBX files. It's not clear which enum member each of these values corresponds to or if
+    # these values are actually application specific. Blender had been exporting this as a `True` bool for a long time
+    # seemingly without issue. The '\x01' char is the same value as `True` in raw bytes.
+    elem_data_single_char(model, b"Shading", b"\x01")
     elem_data_single_string(model, b"Culling", b"CullingOff")
 
     if obj_type == b"Camera":
@@ -1964,12 +1994,6 @@ def fbx_data_animation_elements(root, scene_data):
     animations = scene_data.animations
     if not animations:
         return
-    scene = scene_data.scene
-
-    fps = scene.render.fps / scene.render.fps_base
-
-    def keys_to_ktimes(keys):
-        return (int(v) for v in convert_sec_to_ktime_iter((f / fps for f, _v in keys)))
 
     # Animation stacks.
     for astack_key, alayers, alayer_key, name, f_start, f_end in animations:
@@ -2009,18 +2033,18 @@ def fbx_data_animation_elements(root, scene_data):
                 acn_tmpl = elem_props_template_init(scene_data.templates, b"AnimationCurveNode")
                 acn_props = elem_properties(acurvenode)
 
-                for fbx_item, (acurve_key, def_value, keys, _acurve_valid) in acurves.items():
+                for fbx_item, (acurve_key, def_value, (keys, values), _acurve_valid) in acurves.items():
                     elem_props_template_set(acn_tmpl, acn_props, "p_number", fbx_item.encode(),
                                             def_value, animatable=True)
 
                     # Only create Animation curve if needed!
-                    if keys:
+                    nbr_keys = len(keys)
+                    if nbr_keys:
                         acurve = elem_data_single_int64(root, b"AnimationCurve", get_fbx_uuid_from_key(acurve_key))
                         acurve.add_string(fbx_name_class(b"", b"AnimCurve"))
                         acurve.add_string(b"")
 
                         # key attributes...
-                        nbr_keys = len(keys)
                         # flags...
                         keyattr_flags = (
                             1 << 2 |   # interpolation mode, 1 = constant, 2 = linear, 3 = cubic.
@@ -2035,8 +2059,8 @@ def fbx_data_animation_elements(root, scene_data):
                         # And now, the *real* data!
                         elem_data_single_float64(acurve, b"Default", def_value)
                         elem_data_single_int32(acurve, b"KeyVer", FBX_ANIM_KEY_VERSION)
-                        elem_data_single_int64_array(acurve, b"KeyTime", keys_to_ktimes(keys))
-                        elem_data_single_float32_array(acurve, b"KeyValueFloat", (v for _f, v in keys))
+                        elem_data_single_int64_array(acurve, b"KeyTime", astype_view_signedness(keys, np.int64))
+                        elem_data_single_float32_array(acurve, b"KeyValueFloat", values.astype(np.float32, copy=False))
                         elem_data_single_int32_array(acurve, b"KeyAttrFlags", keyattr_flags)
                         elem_data_single_float32_array(acurve, b"KeyAttrDataFloat", keyattr_datafloat)
                         elem_data_single_int32_array(acurve, b"KeyAttrRefCount", (nbr_keys,))
@@ -2258,81 +2282,131 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
                                                           force_sek, (cam.dof.focus_distance,))
         animdata_cameras[cam_key] = (acnode_lens, acnode_focus_distance, cam)
 
-    currframe = f_start
-    while currframe <= f_end:
-        real_currframe = currframe - f_start if start_zero else currframe
-        scene.frame_set(int(currframe), subframe=currframe - int(currframe))
+    # Get all parent bdata of animated dupli instances, so that we can quickly identify which instances in
+    # `depsgraph.object_instances` are animated and need their ObjectWrappers' matrices updated each frame.
+    dupli_parent_bdata = {dup.get_parent().bdata for dup in animdata_ob if dup.is_dupli}
+    has_animated_duplis = bool(dupli_parent_bdata)
 
-        for dp_obj in ob_obj.dupli_list_gen(depsgraph):
-            pass  # Merely updating dupli matrix of ObjectWrapper...
-        for ob_obj, (anim_loc, anim_rot, anim_scale) in animdata_ob.items():
-            # We compute baked loc/rot/scale for all objects (rot being euler-compat with previous value!).
-            p_rot = p_rots.get(ob_obj, None)
-            loc, rot, scale, _m, _mr = ob_obj.fbx_object_tx(scene_data, rot_euler_compat=p_rot)
-            p_rots[ob_obj] = rot
-            anim_loc.add_keyframe(real_currframe, loc)
-            anim_rot.add_keyframe(real_currframe, tuple(convert_rad_to_deg_iter(rot)))
-            anim_scale.add_keyframe(real_currframe, scale)
-        for anim_shape, me, shape in animdata_shapes.values():
-            anim_shape.add_keyframe(real_currframe, (shape.value * 100.0,))
-        for anim_camera_lens, anim_camera_focus_distance, camera in animdata_cameras.values():
-            anim_camera_lens.add_keyframe(real_currframe, (camera.lens,))
-            anim_camera_focus_distance.add_keyframe(real_currframe, (camera.dof.focus_distance * 1000 * gscale,))
-        for custom_curve_name, (custom_curve, custom_curve_holder) in custom_curves.items():
-            # add custom animation curve for UnrealEngine
-            custom_curve.add_keyframe(real_currframe, (custom_curve_holder[custom_curve_name],))
-        currframe += bake_step
+    # Initialize keyframe times array. Each AnimationCurveNodeWrapper will share the same instance.
+    # `np.arange` excludes the `stop` argument like when using `range`, so we use np.nextafter to get the next
+    # representable value after f_end and use that as the `stop` argument instead.
+    currframes = np.arange(f_start, np.nextafter(f_end, np.inf), step=bake_step)
 
+    # Convert from Blender time to FBX time.
+    fps = scene.render.fps / scene.render.fps_base
+    real_currframes = currframes - f_start if start_zero else currframes
+    real_currframes = (real_currframes / fps * FBX_KTIME).astype(np.int64)
+
+    # Generator that yields the animated values of each frame in order.
+    def frame_values_gen():
+        # Precalculate integer frames and subframes.
+        int_currframes = currframes.astype(int)
+        subframes = currframes - int_currframes
+
+        # Create simpler iterables that return only the values we care about.
+        animdata_shapes_only = [shape for _anim_shape, _me, shape in animdata_shapes.values()]
+        animdata_cameras_only = [camera for _anim_camera_lens, _anim_camera_focus_distance, camera
+                                 in animdata_cameras.values()]
+        # Previous frame's rotation for each object in animdata_ob, this will be updated each frame.
+        animdata_ob_p_rots = p_rots.values()
+
+        # Iterate through each frame and yield the values for that frame.
+        # Iterating .data, the memoryview of an array, is faster than iterating the array directly.
+        for int_currframe, subframe in zip(int_currframes.data, subframes.data):
+            scene.frame_set(int_currframe, subframe=subframe)
+
+            if has_animated_duplis:
+                # Changing the scene's frame invalidates existing dupli instances. To get the updated matrices of duplis
+                # for this frame, we must get the duplis from the depsgraph again.
+                for dup in depsgraph.object_instances:
+                    if (parent := dup.parent) and parent.original in dupli_parent_bdata:
+                        # ObjectWrapper caches its instances. Attempting to create a new instance updates the existing
+                        # ObjectWrapper instance with the current frame's matrix and then returns the existing instance.
+                        ObjectWrapper(dup)
+            next_p_rots = []
+            for ob_obj, p_rot in zip(animdata_ob, animdata_ob_p_rots):
+                # We compute baked loc/rot/scale for all objects (rot being euler-compat with previous value!).
+                loc, rot, scale, _m, _mr = ob_obj.fbx_object_tx(scene_data, rot_euler_compat=p_rot)
+                next_p_rots.append(rot)
+                yield from loc
+                yield from rot
+                yield from scale
+            animdata_ob_p_rots = next_p_rots
+            for shape in animdata_shapes_only:
+                yield shape.value
+            for camera in animdata_cameras_only:
+                yield camera.lens
+                yield camera.dof.focus_distance
+
+    # Providing `count` to np.fromiter pre-allocates the array, avoiding extra memory allocations while iterating.
+    num_ob_values = len(animdata_ob) * 9  # Location, rotation and scale, each of which have x, y, and z components
+    num_shape_values = len(animdata_shapes)  # Only 1 value per shape key
+    num_camera_values = len(animdata_cameras) * 2  # Focal length (`.lens`) and focus distance
+    num_values_per_frame = num_ob_values + num_shape_values + num_camera_values
+    num_frames = len(real_currframes)
+    all_values_flat = np.fromiter(frame_values_gen(), dtype=float, count=num_frames * num_values_per_frame)
+
+    # Restore the scene's current frame.
     scene.frame_set(back_currframe, subframe=0.0)
+
+    # View such that each column is all values for a single frame and each row is all values for a single curve.
+    all_values = all_values_flat.reshape(num_frames, num_values_per_frame).T
+    # Split into views of the arrays for each curve type.
+    split_at = [num_ob_values, num_shape_values, num_camera_values]
+    # For unequal sized splits, np.split takes indices to split at, which can be acquired through a cumulative sum
+    # across the list.
+    # The last value isn't needed, because the last split is assumed to go to the end of the array.
+    split_at = np.cumsum(split_at[:-1])
+    all_ob_values, all_shape_key_values, all_camera_values = np.split(all_values, split_at)
+
+    all_anims = []
+
+    # Set location/rotation/scale curves.
+    # Split into equal sized views of the arrays for each object.
+    split_into = len(animdata_ob)
+    per_ob_values = np.split(all_ob_values, split_into) if split_into > 0 else ()
+    for anims, ob_values in zip(animdata_ob.values(), per_ob_values):
+        # Split again into equal sized views of the location, rotation and scaling arrays.
+        loc_xyz, rot_xyz, sca_xyz = np.split(ob_values, 3)
+        # In-place convert from Blender rotation to FBX rotation.
+        np.rad2deg(rot_xyz, out=rot_xyz)
+
+        anim_loc, anim_rot, anim_scale = anims
+        anim_loc.set_keyframes(real_currframes, loc_xyz)
+        anim_rot.set_keyframes(real_currframes, rot_xyz)
+        anim_scale.set_keyframes(real_currframes, sca_xyz)
+        all_anims.extend(anims)
+
+    # Set shape key curves.
+    # There's only one array per shape key, so there's no need to split `all_shape_key_values`.
+    for (anim_shape, _me, _shape), shape_key_values in zip(animdata_shapes.values(), all_shape_key_values):
+        # In-place convert from Blender Shape Key Value to FBX Deform Percent.
+        shape_key_values *= 100.0
+        anim_shape.set_keyframes(real_currframes, shape_key_values)
+        all_anims.append(anim_shape)
+
+    # Set camera curves.
+    # Split into equal sized views of the arrays for each camera.
+    split_into = len(animdata_cameras)
+    per_camera_values = np.split(all_camera_values, split_into) if split_into > 0 else ()
+    zipped = zip(animdata_cameras.values(), per_camera_values)
+    for (anim_camera_lens, anim_camera_focus_distance, _camera), (lens_values, focus_distance_values) in zipped:
+        # In-place convert from Blender focus distance to FBX.
+        focus_distance_values *= (1000 * gscale)
+        anim_camera_lens.set_keyframes(real_currframes, lens_values)
+        anim_camera_focus_distance.set_keyframes(real_currframes, focus_distance_values)
+        all_anims.append(anim_camera_lens)
+        all_anims.append(anim_camera_focus_distance)
 
     animations = {}
 
     # And now, produce final data (usable by FBX export code)
-    # Objects-like loc/rot/scale...
-    for ob_obj, anims in animdata_ob.items():
-        for anim in anims:
-            anim.simplify(simplify_fac, bake_step, force_keep)
-            if not anim:
-                continue
-            for obj_key, group_key, group, fbx_group, fbx_gname in anim.get_final_data(scene, ref_id, force_keep):
-                anim_data = animations.setdefault(obj_key, ("dummy_unused_key", {}))
-                anim_data[1][fbx_group] = (group_key, group, fbx_gname)
-
-    # And meshes' shape keys.
-    for channel_key, (anim_shape, me, shape) in animdata_shapes.items():
-        final_keys = {}
-        anim_shape.simplify(simplify_fac, bake_step, force_keep)
-        if not anim_shape:
+    for anim in all_anims:
+        anim.simplify(simplify_fac, bake_step, force_keep)
+        if not anim:
             continue
-        for elem_key, group_key, group, fbx_group, fbx_gname in anim_shape.get_final_data(scene, ref_id, force_keep):
-            anim_data = animations.setdefault(elem_key, ("dummy_unused_key", {}))
-            anim_data[1][fbx_group] = (group_key, group, fbx_gname)
-
-    # And cameras' lens and focus distance keys.
-    for cam_key, (anim_camera_lens, anim_camera_focus_distance, camera) in animdata_cameras.items():
-        final_keys = {}
-        anim_camera_lens.simplify(simplify_fac, bake_step, force_keep)
-        anim_camera_focus_distance.simplify(simplify_fac, bake_step, force_keep)
-        if anim_camera_lens:
-            for elem_key, group_key, group, fbx_group, fbx_gname in \
-                    anim_camera_lens.get_final_data(scene, ref_id, force_keep):
-                anim_data = animations.setdefault(elem_key, ("dummy_unused_key", {}))
-                anim_data[1][fbx_group] = (group_key, group, fbx_gname)
-        if anim_camera_focus_distance:
-            for elem_key, group_key, group, fbx_group, fbx_gname in \
-                    anim_camera_focus_distance.get_final_data(scene, ref_id, force_keep):
-                anim_data = animations.setdefault(elem_key, ("dummy_unused_key", {}))
-                anim_data[1][fbx_group] = (group_key, group, fbx_gname)
-
-    # And UE4 Custom Values
-    for custom_curve_name, (custom_curve, custom_curve_key) in custom_curves.items():
-        final_keys = {}
-        custom_curve.simplify(simplify_fac, bake_step, force_keep)
-        if not custom_curve:
-            continue
-        finaldata = custom_curve.get_final_data(scene, ref_id, force_keep)
-        for elem_key, group_key, group, fbx_group, fbx_gname in finaldata:
-            anim_data = animations.setdefault(elem_key, ("dummy_unused_key", {}))
+        for obj_key, group_key, group, fbx_group, fbx_gname in anim.get_final_data(scene, ref_id, force_keep):
+            anim_data = animations.setdefault(obj_key, ("dummy_unused_key", {}))
             anim_data[1][fbx_group] = (group_key, group, fbx_gname)
 
     astack_key = get_blender_anim_stack_key(scene, ref_id)
@@ -2548,7 +2622,6 @@ def fbx_data_from_scene(scene, depsgraph, settings):
         if ob_obj.type not in BLENDER_OBJECT_TYPES_MESHLIKE:
             continue
         ob = ob_obj.bdata
-        use_org_data = True
         org_ob_obj = None
 
         # Do not want to systematically recreate a new mesh for dupliobject instances, kind of break purpose of those.
@@ -2558,90 +2631,114 @@ def fbx_data_from_scene(scene, depsgraph, settings):
                 data_meshes[ob_obj] = data_meshes[org_ob_obj]
                 continue
 
-        is_ob_material = any(ms.link == 'OBJECT' for ms in ob.material_slots)
+        # There are 4 different cases for what we need to do with the original data of each Object:
+        # 1) The original data can be used without changes.
+        # 2) A copy of the original data needs to be made.
+        #  - If an export option modifies the data, e.g. Triangulate Faces is enabled.
+        #  - If the Object has Object-linked materials. This is because our current mapping of materials to FBX requires
+        #    that multiple Objects sharing a single mesh must have the same materials.
+        # 3) The Object needs to be converted to a mesh.
+        #  - All mesh-like Objects that are not meshes need to be converted to a mesh in order to be exported.
+        # 4) The Object needs to be evaluated and then converted to a mesh.
+        #  - Whenever use_mesh_modifiers is enabled and either there are modifiers to apply or the Object needs to be
+        #    converted to a mesh.
+        # If multiple cases apply to an Object, then only the last applicable case is relevant.
+        do_copy = any(ms.link == 'OBJECT' for ms in ob.material_slots) or settings.use_triangles
+        do_convert = ob.type in BLENDER_OTHER_OBJECT_TYPES
+        do_evaluate = do_convert and settings.use_mesh_modifiers
 
-        if settings.use_mesh_modifiers or settings.use_triangles or ob.type in BLENDER_OTHER_OBJECT_TYPES or is_ob_material:
-            # We cannot use default mesh in that case, or material would not be the right ones...
-            use_org_data = not (is_ob_material or ob.type in BLENDER_OTHER_OBJECT_TYPES)
-            backup_pose_positions = []
-            tmp_mods = []
-            if use_org_data and ob.type == 'MESH':
-                if settings.use_triangles:
-                    use_org_data = False
-                # No need to create a new mesh in this case, if no modifier is active!
-                last_subsurf = None
-                for mod in ob.modifiers:
-                    # For meshes, when armature export is enabled, disable Armature modifiers here!
-                    # XXX Temp hacks here since currently we only have access to a viewport depsgraph...
-                    #
-                    # NOTE: We put armature to the rest pose instead of disabling it so we still
-                    # have vertex groups in the evaluated mesh.
-                    if mod.type == 'ARMATURE' and 'ARMATURE' in settings.object_types:
-                        object = mod.object
-                        if object and object.type == 'ARMATURE':
-                            armature = object.data
-                            # If armature is already in REST position, there's nothing to back-up
-                            # This cuts down on export time dramatically, if all armatures are already in REST position
-                            # by not triggering dependency graph update
-                            if armature.pose_position != 'REST':
-                                backup_pose_positions.append((armature, armature.pose_position))
-                                armature.pose_position = 'REST'
-                    elif mod.show_render or mod.show_viewport:
-                        # If exporting with subsurf collect the last Catmull-Clark subsurf modifier
-                        # and disable it. We can use the original data as long as this is the first
-                        # found applicable subsurf modifier.
-                        if settings.use_subsurf and mod.type == 'SUBSURF' and mod.subdivision_type == 'CATMULL_CLARK':
-                            if last_subsurf:
-                                use_org_data = False
-                            last_subsurf = mod
-                        else:
-                            use_org_data = False
-                if settings.use_subsurf and last_subsurf:
-                    # XXX: When exporting with subsurf information temporarily disable
-                    # the last subsurf modifier.
-                    tmp_mods.append((last_subsurf, last_subsurf.show_render, last_subsurf.show_viewport))
-                    last_subsurf.show_render = False
-                    last_subsurf.show_viewport = False
-            if not use_org_data:
-                # If modifiers has been altered need to update dependency graph.
-                if backup_pose_positions or tmp_mods:
-                    depsgraph.update()
-                ob_to_convert = ob.evaluated_get(depsgraph) if settings.use_mesh_modifiers else ob
-                # NOTE: The dependency graph might be re-evaluating multiple times, which could
-                # potentially free the mesh created early on. So we put those meshes to bmain and
-                # free them afterwards. Not ideal but ensures correct ownerwhip.
-                tmp_me = bpy.data.meshes.new_from_object(
-                            ob_to_convert, preserve_all_data_layers=True, depsgraph=depsgraph)
-                # Triangulate the mesh if requested
-                if settings.use_triangles:
-                    import bmesh
-                    bm = bmesh.new()
-                    bm.from_mesh(tmp_me)
-                    bmesh.ops.triangulate(bm, faces=bm.faces)
-                    bm.to_mesh(tmp_me)
-                    bm.free()
-                # Usually the materials of the evaluated object will be the same, but modifiers, such as Geometry Nodes,
-                # can change the materials.
-                orig_mats = tuple(slot.material for slot in ob.material_slots)
-                eval_mats = tuple(slot.material.original if slot.material else None
-                                  for slot in ob_to_convert.material_slots)
-                if orig_mats != eval_mats:
-                    # Override the default behaviour of getting materials from ob_obj.bdata.material_slots.
-                    ob_obj.override_materials = eval_mats
-                data_meshes[ob_obj] = (get_blenderID_key(tmp_me), tmp_me, True)
-            # Change armatures back.
-            for armature, pose_position in backup_pose_positions:
-                # print((armature, pose_position))
-                armature.pose_position = pose_position
-                # Update now, so we don't leave modified state after last object was exported.
-            # Re-enable temporary disabled modifiers.
-            for mod, show_render, show_viewport in tmp_mods:
-                mod.show_render = show_render
-                mod.show_viewport = show_viewport
+        # If the Object is a mesh, and we're applying modifiers, check if there are actually any modifiers to apply.
+        # If there are then the mesh will need to be evaluated, and we may need to make some temporary changes to the
+        # modifiers or scene before the mesh is evaluated.
+        backup_pose_positions = []
+        tmp_mods = []
+        if ob.type == 'MESH' and settings.use_mesh_modifiers:
+            # No need to create a new mesh in this case, if no modifier is active!
+            last_subsurf = None
+            for mod in ob.modifiers:
+                # For meshes, when armature export is enabled, disable Armature modifiers here!
+                # XXX Temp hacks here since currently we only have access to a viewport depsgraph...
+                #
+                # NOTE: We put armature to the rest pose instead of disabling it so we still
+                # have vertex groups in the evaluated mesh.
+                if mod.type == 'ARMATURE' and 'ARMATURE' in settings.object_types:
+                    object = mod.object
+                    if object and object.type == 'ARMATURE':
+                        armature = object.data
+                        # If armature is already in REST position, there's nothing to back-up
+                        # This cuts down on export time dramatically, if all armatures are already in REST position
+                        # by not triggering dependency graph update
+                        if armature.pose_position != 'REST':
+                            backup_pose_positions.append((armature, armature.pose_position))
+                            armature.pose_position = 'REST'
+                elif mod.show_render or mod.show_viewport:
+                    # If exporting with subsurf collect the last Catmull-Clark subsurf modifier
+                    # and disable it. We can use the original data as long as this is the first
+                    # found applicable subsurf modifier.
+                    if settings.use_subsurf and mod.type == 'SUBSURF' and mod.subdivision_type == 'CATMULL_CLARK':
+                        if last_subsurf:
+                            do_evaluate = True
+                        last_subsurf = mod
+                    else:
+                        do_evaluate = True
+            if settings.use_subsurf and last_subsurf:
+                # XXX: When exporting with subsurf information temporarily disable
+                # the last subsurf modifier.
+                tmp_mods.append((last_subsurf, last_subsurf.show_render, last_subsurf.show_viewport))
+
+        if do_evaluate:
+            # If modifiers has been altered need to update dependency graph.
             if backup_pose_positions or tmp_mods:
                 depsgraph.update()
-        if use_org_data:
+            ob_to_convert = ob.evaluated_get(depsgraph)
+            # NOTE: The dependency graph might be re-evaluating multiple times, which could
+            # potentially free the mesh created early on. So we put those meshes to bmain and
+            # free them afterwards. Not ideal but ensures correct ownership.
+            tmp_me = bpy.data.meshes.new_from_object(
+                ob_to_convert, preserve_all_data_layers=True, depsgraph=depsgraph)
+
+            # Usually the materials of the evaluated object will be the same, but modifiers, such as Geometry Nodes,
+            # can change the materials.
+            orig_mats = tuple(slot.material for slot in ob.material_slots)
+            eval_mats = tuple(slot.material.original if slot.material else None
+                              for slot in ob_to_convert.material_slots)
+            if orig_mats != eval_mats:
+                # Override the default behaviour of getting materials from ob_obj.bdata.material_slots.
+                ob_obj.override_materials = eval_mats
+        elif do_convert:
+            tmp_me = bpy.data.meshes.new_from_object(ob, preserve_all_data_layers=True, depsgraph=depsgraph)
+        elif do_copy:
+            # bpy.data.meshes.new_from_object removes shape keys (see #104714), so create a copy of the mesh instead.
+            tmp_me = ob.data.copy()
+        else:
+            tmp_me = None
+
+        if tmp_me is None:
+            # Use the original data of this Object.
             data_meshes[ob_obj] = (get_blenderID_key(ob.data), ob.data, False)
+        else:
+            # Triangulate the mesh if requested
+            if settings.use_triangles:
+                import bmesh
+                bm = bmesh.new()
+                bm.from_mesh(tmp_me)
+                bmesh.ops.triangulate(bm, faces=bm.faces)
+                bm.to_mesh(tmp_me)
+                bm.free()
+            # A temporary mesh was created for this Object, which should be deleted once the export is complete.
+            data_meshes[ob_obj] = (get_blenderID_key(tmp_me), tmp_me, True)
+
+        # Change armatures back.
+        for armature, pose_position in backup_pose_positions:
+            print((armature, pose_position))
+            armature.pose_position = pose_position
+            # Update now, so we don't leave modified state after last object was exported.
+        # Re-enable temporary disabled modifiers.
+        for mod, show_render, show_viewport in tmp_mods:
+            mod.show_render = show_render
+            mod.show_viewport = show_viewport
+        if backup_pose_positions or tmp_mods:
+            depsgraph.update()
 
         # In case "real" source object of that dupli did not yet still existed in data_meshes, create it now!
         if org_ob_obj is not None:
@@ -2677,10 +2774,10 @@ def fbx_data_from_scene(scene, depsgraph, settings):
         # Get and cache only the cos that we need
         @cache
         def sk_cos(shape_key):
-            _cos = np.empty(len(me.vertices) * 3, dtype=co_bl_dtype)
             if shape_key == sk_base:
-                me.vertices.foreach_get("co", _cos)
+                _cos = MESH_ATTRIBUTE_POSITION.to_ndarray(me.attributes)
             else:
+                _cos = np.empty(len(me.vertices) * 3, dtype=co_bl_dtype)
                 shape_key.data.foreach_get("co", _cos)
             return vcos_transformed(_cos, geom_mat_co, co_fbx_dtype)
 
@@ -2860,8 +2957,8 @@ def fbx_data_from_scene(scene, depsgraph, settings):
             for _alayer_key, alayer in astack.values():
                 for _acnode_key, acnode, _acnode_name in alayer.values():
                     nbr_acnodes += 1
-                    for _acurve_key, _dval, acurve, acurve_valid in acnode.values():
-                        if acurve:
+                    for _acurve_key, _dval, (keys, _values), acurve_valid in acnode.values():
+                        if len(keys):
                             nbr_acurves += 1
 
         templates[b"AnimationStack"] = fbx_template_def_animstack(scene, settings, nbr_users=nbr_astacks)
@@ -2995,8 +3092,8 @@ def fbx_data_from_scene(scene, depsgraph, settings):
                 connections.append((b"OO", acurvenode_id, alayer_id, None))
                 # Animcurvenode -> object property.
                 connections.append((b"OP", acurvenode_id, elem_id, fbx_prop.encode()))
-                for fbx_item, (acurve_key, default_value, acurve, acurve_valid) in acurves.items():
-                    if acurve:
+                for fbx_item, (acurve_key, default_value, (keys, values), acurve_valid) in acurves.items():
+                    if len(keys):
                         # Animcurve -> Animcurvenode.
                         connections.append((b"OP", get_fbx_uuid_from_key(acurve_key), acurvenode_id, fbx_item.encode()))
 

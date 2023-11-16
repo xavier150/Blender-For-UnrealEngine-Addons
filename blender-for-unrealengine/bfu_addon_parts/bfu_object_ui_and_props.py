@@ -856,6 +856,15 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default='X',
         )
 
+    bpy.types.Object.bfu_export_animation_without_mesh = BoolProperty(
+        name="Export animation without mesh",
+        description=(
+            "If checked, When exporting animation, do not include mesh data in the FBX file."
+            ),
+        override={'LIBRARY_OVERRIDABLE'},
+        default=True
+        )
+
     bpy.types.Object.bfu_mirror_symmetry_right_side_bones = BoolProperty(
         name="Revert direction of symmetry right side bones",
         description=(
@@ -1524,10 +1533,13 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                     unreal_skeleton.prop(obj, "bfu_target_skeleton_custom_name")
                                 if obj.bfu_skeleton_search_mode == "custom_reference":
                                     unreal_skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
-                                unreal_skeleton.prop(obj, "bfu_mirror_symmetry_right_side_bones")
-                                MirrorSymmetryRightSideBonesRow = unreal_skeleton.row()
-                                MirrorSymmetryRightSideBonesRow.enabled = obj.bfu_mirror_symmetry_right_side_bones
-                                MirrorSymmetryRightSideBonesRow.prop(obj, "bfu_use_ue_mannequin_bone_alignment")
+                                ue_standard_skeleton = layout.column()
+                                ue_standard_skeleton.enabled = obj.bfu_export_procedure == "ue-standard"
+                                ue_standard_skeleton.prop(obj, "bfu_export_animation_without_mesh")
+                                ue_standard_skeleton.prop(obj, "bfu_mirror_symmetry_right_side_bones")
+                                mirror_symmetry_right_side_bones = ue_standard_skeleton.row()
+                                mirror_symmetry_right_side_bones.enabled = obj.bfu_mirror_symmetry_right_side_bones
+                                mirror_symmetry_right_side_bones.prop(obj, "bfu_use_ue_mannequin_bone_alignment")
 
             scene.bfu_modular_skeletal_mesh_properties_expanded.draw(layout)
             if scene.bfu_modular_skeletal_mesh_properties_expanded.is_expend():
