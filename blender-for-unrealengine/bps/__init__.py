@@ -27,6 +27,7 @@ import importlib
 from . import advprint
 from . import utils
 from . import math
+from . import color_set
 
 if "advprint" in locals():
     importlib.reload(advprint)
@@ -34,3 +35,5 @@ if "utils" in locals():
     importlib.reload(utils)
 if "math" in locals():
     importlib.reload(math)
+if "math" in locals():
+    importlib.reload(color_set)

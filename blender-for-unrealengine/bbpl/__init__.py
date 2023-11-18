@@ -27,6 +27,7 @@ import importlib
 
 
 from . import blender_layout
+from . import backward_compatibility
 from . import basics
 from . import utils
 from . import rig_utils
@@ -38,6 +39,8 @@ from . import ui_utils
 
 if "blender_layout" in locals():
     importlib.reload(blender_layout)
+if "backward_compatibility" in locals():
+    importlib.reload(backward_compatibility)
 if "basics" in locals():
     importlib.reload(basics)
 if "utils" in locals():
@@ -66,10 +69,12 @@ def register():
         bpy.utils.register_class(cls)
 
     blender_layout.register()
+    backward_compatibility.register()
 
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
+    backward_compatibility.unregister()
     blender_layout.unregister()
