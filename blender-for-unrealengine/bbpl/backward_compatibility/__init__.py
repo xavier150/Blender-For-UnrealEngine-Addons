@@ -92,7 +92,7 @@ class RigActionUpdater:
                     # ---
 
                     new_target = current_target.replace(old_data_path, new_data_path)
-                    if new_target not in old_data_path:
+                    if new_target not in cache_data_paths:
                         action_fcurve.data_path = new_target
                         if self.print_log:
                             print(f'"{current_target}" updated to "{new_target}" in {action.name} action.')
