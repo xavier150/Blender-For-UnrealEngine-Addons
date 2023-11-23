@@ -167,7 +167,7 @@ def ExportSingleFbxAction(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
-            animation_only=active.bfu_export_animation_without_mesh,
+            animation_only=True,
             global_matrix=axis_conversion(to_forward=active.bfu_export_axis_forward, to_up=active.bfu_export_axis_up).to_4x4(),
             apply_unit_scale=True,
             global_scale=bfu_utils.GetObjExportScale(active),
