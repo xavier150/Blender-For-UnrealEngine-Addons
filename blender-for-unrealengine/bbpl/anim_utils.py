@@ -339,6 +339,10 @@ class ProxyCopy_Constraint:
             self.owner_space = constraint.owner_space
             # Add more constraint parameters here as needed
 
+            if self.type == 'CHILD_OF':
+                self.inverse_matrix = constraint.inverse_matrix.copy() 
+
+
     def paste_data_on(self, target_constraint):
         """
         Pastes the saved data onto the target constraint.
@@ -359,6 +363,10 @@ class ProxyCopy_Constraint:
             target_constraint.target_space = self.target_space
             target_constraint.owner_space = self.owner_space
             # Copy more constraint parameters here as needed
+
+            if self.type == 'CHILD_OF':
+                target_constraint.inverse_matrix = self.inverse_matrix 
+
 
 class BoneConstraintManagment():
     """
@@ -387,7 +395,7 @@ class BoneConstraintManagment():
             for constraint in bone.constraints:
                 self.saved_constraints.append(ProxyCopy_Constraint(constraint))
 
-            print(f"Constraints for bone {bone_name} saved successfully.")
+            #print(f"Constraints for bone {bone_name} saved successfully.")
         else:
             print(f"Bone {bone_name} not found in the armature.")
 
@@ -445,7 +453,7 @@ class RigConstraintManagment():
             if bone:
                 self.saved_bones_constraints[bone_name] = constraints
 
-                print(f"Constraints for bone {bone_name} saved successfully.")
+                #print(f"Constraints for bone {bone_name} saved successfully.")
             else:
                 print(f"Bone {bone_name} not found in the armature.")
 

@@ -24,38 +24,11 @@
 
 import bpy
 import importlib
+from . import rig_utils
+from .. import utils
 
-from . import blender_layout
-from . import backward_compatibility
-from . import blender_rig
-from . import basics
-from . import utils
-from . import rig_bone_visual
-from . import skin_utils
-from . import anim_utils
-from . import scene_utils
-from . import ui_utils
-
-if "blender_layout" in locals():
-    importlib.reload(blender_layout)
-if "backward_compatibility" in locals():
-    importlib.reload(backward_compatibility)
-if "blender_rig" in locals():
-    importlib.reload(blender_rig)
-if "basics" in locals():
-    importlib.reload(basics)
-if "utils" in locals():
-    importlib.reload(utils)
-if "rig_bone_visual" in locals():
-    importlib.reload(rig_bone_visual)
-if "skin_utils" in locals():
-    importlib.reload(skin_utils)
-if "anim_utils" in locals():
-    importlib.reload(anim_utils)
-if "scene_utils" in locals():
-    importlib.reload(scene_utils)
-if "ui_utils" in locals():
-    importlib.reload(ui_utils)
+if "rig_utils" in locals():
+    importlib.reload(rig_utils)
 
 
 classes = (
@@ -67,15 +40,7 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    blender_layout.register()
-    backward_compatibility.register()
-    blender_rig.register()
-
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
-
-    blender_rig.unregister()
-    backward_compatibility.unregister()
-    blender_layout.unregister()

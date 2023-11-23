@@ -24,7 +24,7 @@
 
 import bpy
 import mathutils
-from . import utils
+from .. import utils
 
 
 def create_safe_bone(arm, bone_name, context_id=None):
@@ -33,8 +33,6 @@ def create_safe_bone(arm, bone_name, context_id=None):
     Blender 4.0 -> context_id is the bone collection name.
     Blender 3.6 and older -> context_id is the bone layer index.
     """
-    #if bone_name == "rp_c_Eye_L":
-    #    k=k
 
     if bone_name in arm.data.edit_bones:
         print("Bone already exists! : " + bone_name)
@@ -148,6 +146,14 @@ def add_bone_to_collection(arm, bone_name, collection_name):
     col.assign(bone)
     return col
 
+def remove_bone_from_collection(arm, bone_name, collection_name):
+    #Remove bone from collection.
+    if collection_name in arm.data.collections:
+        col = arm.data.collections[collection_name]
+        bone = arm.data.edit_bones[bone_name]
+        col.unassign(bone)
+        return col
+
 def change_current_layer(layer, source):
     """
     Change the current active layer to the specified layer.
@@ -245,7 +251,20 @@ def set_bone_orientation(armature, bone_name, vector, roll):
     bone.roll = roll
 
 
-def set_bone_length(armature, bone_name, new_length, apply_tail=True):
+def get_bone_with_length(armature, bone_name, new_length, apply_tail=True):
+    """
+    Evaluate the edit_bone tail position with specific length
+    """
+    bone = armature.data.edit_bones[bone_name]
+    vector = bone.tail - bone.head
+    vector.normalize()
+
+    new_tail = bone.head + (vector * new_length)
+    return new_tail
+
+
+
+def set_bone_length(armature, bone_name, new_length):
     """
     Définit la longueur d'un os dans l'armature.
     """
@@ -254,10 +273,9 @@ def set_bone_length(armature, bone_name, new_length, apply_tail=True):
     vector.normalize()
 
     new_tail = bone.head + (vector * new_length)
-    if apply_tail:
-        bone.tail = new_tail
-    return new_tail
 
+    bone.tail = new_tail
+    return new_tail
 
 def get_bone_vector(armature, bone_name):
     """
@@ -408,7 +426,7 @@ def subdivise_one_bone(armature, bone_name, subdivise_prefix_name="Subdivise_", 
     Returns:
         list: A list of the created bones.
     """
-    print("bone_name ->", bone_name)
+
     # Vars
     edit_bone = armature.data.edit_bones[bone_name]
     original_tail = edit_bone.tail + mathutils.Vector((0, 0, 0))
@@ -517,13 +535,11 @@ def set_bones_lock(armature, bone_names, lock):
 def set_bone_lock(armature, bone_name, lock):
     # Check if we are in Pose mode
     if armature.mode != 'POSE':
-        print("Error: You must be in Pose mode to modify bone locks.")
-        return
+        raise TypeError("Error: You must be in Pose mode to modify bone locks.")
     
     # Check if the bone exists in the armature
     if bone_name not in armature.pose.bones:
-        print(f"Error: Bone '{bone_name}' does not exist in the armature.")
-        return
+        raise TypeError(f"Error: Bone '{bone_name}' does not exist in the armature.")
 
     pose_bone = armature.pose.bones[bone_name]
 

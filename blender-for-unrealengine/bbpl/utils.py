@@ -692,3 +692,15 @@ class SaveTransformObject:
 def make_override_library_object(obj):
     select_specific_object(obj)
     bpy.ops.object.make_override_library()
+
+def recursive_delete_collection(collection):
+    # Supprimer d'abord les objets dans la collection
+    for obj in collection.objects:
+        bpy.data.objects.remove(obj)
+    
+    # Récursivement supprimer les sous-collections
+    for sub_collection in collection.children:
+        recursive_delete_collection(sub_collection)
+    
+    # Enfin, supprimer la collection elle-même
+    bpy.data.collections.remove(collection)
