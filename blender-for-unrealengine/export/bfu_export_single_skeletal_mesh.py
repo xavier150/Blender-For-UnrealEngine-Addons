@@ -231,7 +231,7 @@ def ExportSingleSkeletalMesh(
             bake_space_transform=False
             )
     elif (export_procedure == "auto-rig-pro"):
-        export_fbx_bin.save(
+        bpy.ops.export_scene.fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=False,

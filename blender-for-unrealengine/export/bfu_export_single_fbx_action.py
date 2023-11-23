@@ -237,7 +237,7 @@ def ExportSingleFbxAction(
         OriginalActionName = active.animation_data.action.name
         active.animation_data.action.name = TempName
 
-        export_fbx_bin.save(
+        bpy.ops.export_scene.fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=True,
