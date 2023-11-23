@@ -1,7 +1,7 @@
+# SPDX-FileCopyrightText: 2013 Campbell Barton
+# SPDX-FileCopyrightText: 2014 Bastien Montagne
+#
 # SPDX-License-Identifier: GPL-2.0-or-later
-
-# Script copyright (C) Campbell Barton, Bastien Montagne
-
 
 import math
 import time
@@ -10,6 +10,8 @@ import re
 from collections import namedtuple
 from collections.abc import Iterable
 from itertools import zip_longest, chain
+from dataclasses import dataclass, field
+from typing import Callable
 import numpy as np
 
 import bpy
@@ -65,6 +67,9 @@ MAT_CONVERT_BONE = Matrix()
 
 BLENDER_OTHER_OBJECT_TYPES = {'CURVE', 'SURFACE', 'FONT', 'META'}
 BLENDER_OBJECT_TYPES_MESHLIKE = {'MESH'} | BLENDER_OTHER_OBJECT_TYPES
+
+SHAPE_KEY_SLIDER_HARD_MIN = bpy.types.ShapeKey.bl_rna.properties["slider_min"].hard_min
+SHAPE_KEY_SLIDER_HARD_MAX = bpy.types.ShapeKey.bl_rna.properties["slider_max"].hard_max
 
 
 # Lamps.
@@ -413,8 +418,13 @@ def nors_transformed(raw_nors, m=None, dtype=None):
 
 
 def astype_view_signedness(arr, new_dtype):
-    """Unsafely views arr as new_dtype if the itemsize and byteorder of arr matches but the signedness does not,
-    otherwise calls np.ndarray.astype with copy=False.
+    """Unsafely views arr as new_dtype if the itemsize and byteorder of arr matches but the signedness does not.
+
+    Safely views arr as new_dtype if both arr and new_dtype have the same itemsize, byteorder and signedness, but could
+    have a different character code, e.g. 'i' and 'l'. np.ndarray.astype with copy=False does not normally create this
+    view, but Blender can be picky about the character code used, so this function will create the view.
+
+    Otherwise, calls np.ndarray.astype with copy=False.
 
     The benefit of copy=False is that if the array can be safely viewed as the new type, then a view is made, instead of
     a copy with the new type.
@@ -435,13 +445,14 @@ def astype_view_signedness(arr, new_dtype):
     # else is left to .astype.
     arr_kind = arr_dtype.kind
     new_kind = new_dtype.kind
+    # Signed and unsigned int are opposite in terms of signedness. Other types don't have signedness.
+    integer_kinds = {'i', 'u'}
     if (
-        # Signed and unsigned int are opposite in terms of signedness. Other types don't have signedness.
-        ((arr_kind == 'i' and new_kind == 'u') or (arr_kind == 'u' and new_kind == 'i'))
+        arr_kind in integer_kinds and new_kind in integer_kinds
         and arr_dtype.itemsize == new_dtype.itemsize
         and arr_dtype.byteorder == new_dtype.byteorder
     ):
-        # new_dtype has opposite signedness and matching itemsize and byteorder, so return a view of the new type.
+        # arr and new_dtype have signedness and matching itemsize and byteorder, so return a view of the new type.
         return arr.view(new_dtype)
     else:
         return arr.astype(new_dtype, copy=False)
@@ -591,6 +602,190 @@ def ensure_object_not_in_edit_mode(context, obj):
             scene.collection.objects.unlink(obj)
 
     return True
+
+
+def expand_shape_key_range(shape_key, value_to_fit):
+    """Attempt to expand the slider_min/slider_max of a shape key to fit `value_to_fit` within the slider range,
+    expanding slightly beyond `value_to_fit` if possible, so that the new slider_min/slider_max is not the same as
+    `value_to_fit`. Blender has a hard minimum and maximum for slider values, so it may not be possible to fit the value
+    within the slider range.
+
+    If `value_to_fit` is already within the slider range, no changes are made.
+
+    First tries setting slider_min/slider_max to double `value_to_fit`, otherwise, expands the range in the direction of
+    `value_to_fit` by double the distance to `value_to_fit`.
+
+    The new slider_min/slider_max is rounded down/up to the nearest whole number for a more visually pleasing result.
+
+    Returns whether it was possible to expand the slider range to fit `value_to_fit`."""
+    if value_to_fit < (slider_min := shape_key.slider_min):
+        if value_to_fit < 0.0:
+            # For the most common case, set slider_min to double value_to_fit.
+            target_slider_min = value_to_fit * 2.0
+        else:
+            # Doubling value_to_fit would make it larger, so instead decrease slider_min by double the distance between
+            # slider_min and value_to_fit.
+            target_slider_min = slider_min - (slider_min - value_to_fit) * 2.0
+        # Set slider_min to the first whole number less than or equal to target_slider_min.
+        shape_key.slider_min = math.floor(target_slider_min)
+
+        return value_to_fit >= SHAPE_KEY_SLIDER_HARD_MIN
+    elif value_to_fit > (slider_max := shape_key.slider_max):
+        if value_to_fit > 0.0:
+            # For the most common case, set slider_max to double value_to_fit.
+            target_slider_max = value_to_fit * 2.0
+        else:
+            # Doubling value_to_fit would make it smaller, so instead increase slider_max by double the distance between
+            # slider_max and value_to_fit.
+            target_slider_max = slider_max + (value_to_fit - slider_max) * 2.0
+        # Set slider_max to the first whole number greater than or equal to target_slider_max.
+        shape_key.slider_max = math.ceil(target_slider_max)
+
+        return value_to_fit <= SHAPE_KEY_SLIDER_HARD_MAX
+    else:
+        # Value is already within the range.
+        return True
+
+
+# ##### Attribute utils. #####
+AttributeDataTypeInfo = namedtuple("AttributeDataTypeInfo", ["dtype", "foreach_attribute", "item_size"])
+_attribute_data_type_info_lookup = {
+    'FLOAT': AttributeDataTypeInfo(np.single, "value", 1),
+    'INT': AttributeDataTypeInfo(np.intc, "value", 1),
+    'FLOAT_VECTOR': AttributeDataTypeInfo(np.single, "vector", 3),
+    'FLOAT_COLOR': AttributeDataTypeInfo(np.single, "color", 4),  # color_srgb is an alternative
+    'BYTE_COLOR': AttributeDataTypeInfo(np.single, "color", 4),  # color_srgb is an alternative
+    'STRING': AttributeDataTypeInfo(None, "value", 1),  # Not usable with foreach_get/set
+    'BOOLEAN': AttributeDataTypeInfo(bool, "value", 1),
+    'FLOAT2': AttributeDataTypeInfo(np.single, "vector", 2),
+    'INT8': AttributeDataTypeInfo(np.intc, "value", 1),
+    'INT32_2D': AttributeDataTypeInfo(np.intc, "value", 2),
+}
+
+
+def attribute_get(attributes, name, data_type, domain):
+    """Get an attribute by its name, data_type and domain.
+
+    Returns None if no attribute with this name, data_type and domain exists."""
+    attr = attributes.get(name)
+    if not attr:
+        return None
+    if attr.data_type == data_type and attr.domain == domain:
+        return attr
+    # It shouldn't normally happen, but it's possible there are multiple attributes with the same name, but different
+    # data_types or domains.
+    for attr in attributes:
+        if attr.name == name and attr.data_type == data_type and attr.domain == domain:
+            return attr
+    return None
+
+
+def attribute_foreach_set(attribute, array_or_list, foreach_attribute=None):
+    """Set every value of an attribute with foreach_set."""
+    if foreach_attribute is None:
+        foreach_attribute = _attribute_data_type_info_lookup[attribute.data_type].foreach_attribute
+    attribute.data.foreach_set(foreach_attribute, array_or_list)
+
+
+def attribute_to_ndarray(attribute, foreach_attribute=None):
+    """Create a NumPy ndarray from an attribute."""
+    data = attribute.data
+    data_type_info = _attribute_data_type_info_lookup[attribute.data_type]
+    ndarray = np.empty(len(data) * data_type_info.item_size, dtype=data_type_info.dtype)
+    if foreach_attribute is None:
+        foreach_attribute = data_type_info.foreach_attribute
+    data.foreach_get(foreach_attribute, ndarray)
+    return ndarray
+
+
+@dataclass
+class AttributeDescription:
+    """Helper class to reduce duplicate code for handling built-in Blender attributes."""
+    name: str
+    # Valid identifiers can be found in bpy.types.Attribute.bl_rna.properties["data_type"].enum_items
+    data_type: str
+    # Valid identifiers can be found in bpy.types.Attribute.bl_rna.properties["domain"].enum_items
+    domain: str
+    # Some attributes are required to exist if certain conditions are met. If a required attribute does not exist when
+    # attempting to get it, an AssertionError is raised.
+    is_required_check: Callable[[bpy.types.AttributeGroup], bool] = None
+    # NumPy dtype that matches the internal C data of this attribute.
+    dtype: np.dtype = field(init=False)
+    # The default attribute name to use with foreach_get and foreach_set.
+    foreach_attribute: str = field(init=False)
+    # The number of elements per value of the attribute when flattened into a 1-dimensional list/array.
+    item_size: int = field(init=False)
+
+    def __post_init__(self):
+        data_type_info = _attribute_data_type_info_lookup[self.data_type]
+        self.dtype = data_type_info.dtype
+        self.foreach_attribute = data_type_info.foreach_attribute
+        self.item_size = data_type_info.item_size
+
+    def is_required(self, attributes):
+        """Check if the attribute is required to exist in the provided attributes."""
+        is_required_check = self.is_required_check
+        return is_required_check and is_required_check(attributes)
+
+    def get(self, attributes):
+        """Get the attribute.
+
+        If the attribute is required, but does not exist, an AssertionError is raised, otherwise None is returned."""
+        attr = attribute_get(attributes, self.name, self.data_type, self.domain)
+        if not attr and self.is_required(attributes):
+            raise AssertionError("Required attribute '%s' with type '%s' and domain '%s' not found in %r"
+                                 % (self.name, self.data_type, self.domain, attributes))
+        return attr
+
+    def ensure(self, attributes):
+        """Get the attribute, creating it if it does not exist.
+
+        Raises a RuntimeError if the attribute could not be created, which should only happen when attempting to create
+        an attribute with a reserved name, but with the wrong data_type or domain. See usage of
+        BuiltinCustomDataLayerProvider in Blender source for most reserved names.
+
+        There is no guarantee that the returned attribute has the desired name because the name could already be in use
+        by another attribute with a different data_type and/or domain."""
+        attr = self.get(attributes)
+        if attr:
+            return attr
+
+        attr = attributes.new(self.name, self.data_type, self.domain)
+        if not attr:
+            raise RuntimeError("Could not create attribute '%s' with type '%s' and domain '%s' in %r"
+                               % (self.name, self.data_type, self.domain, attributes))
+        return attr
+
+    def foreach_set(self, attributes, array_or_list, foreach_attribute=None):
+        """Get the attribute, creating it if it does not exist, and then set every value in the attribute."""
+        attribute_foreach_set(self.ensure(attributes), array_or_list, foreach_attribute)
+
+    def get_ndarray(self, attributes, foreach_attribute=None):
+        """Get the attribute and if it exists, return a NumPy ndarray containing its data, otherwise return None."""
+        attr = self.get(attributes)
+        return attribute_to_ndarray(attr, foreach_attribute) if attr else None
+
+    def to_ndarray(self, attributes, foreach_attribute=None):
+        """Get the attribute and if it exists, return a NumPy ndarray containing its data, otherwise return a
+        zero-length ndarray."""
+        ndarray = self.get_ndarray(attributes, foreach_attribute)
+        return ndarray if ndarray is not None else np.empty(0, dtype=self.dtype)
+
+
+# Built-in Blender attributes
+# Only attributes used by the importer/exporter are included here.
+# See usage of BuiltinCustomDataLayerProvider in Blender source to find most built-in attributes.
+MESH_ATTRIBUTE_MATERIAL_INDEX = AttributeDescription("material_index", 'INT', 'FACE')
+MESH_ATTRIBUTE_POSITION = AttributeDescription("position", 'FLOAT_VECTOR', 'POINT',
+                                               is_required_check=lambda attributes: bool(attributes.id_data.vertices))
+MESH_ATTRIBUTE_SHARP_EDGE = AttributeDescription("sharp_edge", 'BOOLEAN', 'EDGE')
+MESH_ATTRIBUTE_EDGE_VERTS = AttributeDescription(".edge_verts", 'INT32_2D', 'EDGE',
+                                                 is_required_check=lambda attributes: bool(attributes.id_data.edges))
+MESH_ATTRIBUTE_CORNER_VERT = AttributeDescription(".corner_vert", 'INT', 'CORNER',
+                                                  is_required_check=lambda attributes: bool(attributes.id_data.loops))
+MESH_ATTRIBUTE_CORNER_EDGE = AttributeDescription(".corner_edge", 'INT', 'CORNER',
+                                                  is_required_check=lambda attributes: bool(attributes.id_data.loops))
+MESH_ATTRIBUTE_SHARP_FACE = AttributeDescription("sharp_face", 'BOOLEAN', 'FACE')
 
 
 # ##### UIDs code. #####
@@ -773,6 +968,10 @@ def _elem_data_vec(elem, name, value, func_name):
 
 def elem_data_single_bool(elem, name, value):
     return _elem_data_single(elem, name, value, "add_bool")
+
+
+def elem_data_single_char(elem, name, value):
+    return _elem_data_single(elem, name, value, "add_char")
 
 
 def elem_data_single_int8(elem, name, value):
@@ -1040,8 +1239,10 @@ class AnimationCurveNodeWrapper:
     and easy API to handle those.
     """
     __slots__ = (
-        'elem_keys', '_keys', 'default_values', 'fbx_group', 'fbx_gname', 'fbx_props',
-        'force_keying', 'force_startend_keying')
+        'elem_keys', 'default_values', 'fbx_group', 'fbx_gname', 'fbx_props',
+        'force_keying', 'force_startend_keying',
+        '_frame_times_array', '_frame_values_array', '_frame_write_mask_array',
+    )
 
     kinds = {
         'LCL_TRANSLATION': ("Lcl Translation", "T", ("X", "Y", "Z")),
@@ -1067,7 +1268,9 @@ class AnimationCurveNodeWrapper:
             self.fbx_props = [self.kinds[kind][2]]
         self.force_keying = force_keying
         self.force_startend_keying = force_startend_keying
-        self._keys = []  # (frame, values, write_flags)
+        self._frame_times_array = None
+        self._frame_values_array = None
+        self._frame_write_mask_array = None
         if default_values is not ...:
             assert(len(default_values) == len(self.fbx_props[0]))
             self.default_values = default_values
@@ -1076,7 +1279,7 @@ class AnimationCurveNodeWrapper:
 
     def __bool__(self):
         # We are 'True' if we do have some validated keyframes...
-        return bool(self._keys) and (True in ((True in k[2]) for k in self._keys))
+        return self._frame_write_mask_array is not None and bool(np.any(self._frame_write_mask_array))
 
     def add_group(self, elem_key, fbx_group, fbx_gname, fbx_props):
         """
@@ -1089,19 +1292,31 @@ class AnimationCurveNodeWrapper:
         self.fbx_gname.append(fbx_gname)
         self.fbx_props.append(fbx_props)
 
-    def add_keyframe(self, frame, values):
+    def set_keyframes(self, keyframe_times, keyframe_values):
         """
-        Add a new keyframe to all curves of the group.
+        Set all keyframe times and values of the group.
+        Values can be a 2D array where each row is the values for a separate curve.
         """
-        assert(len(values) == len(self.fbx_props[0]))
-        self._keys.append((frame, values, [True] * len(values)))  # write everything by default.
+        # View 1D keyframe_values as 2D with a single row, so that the same code can be used for both 1D and
+        # 2D inputs.
+        if len(keyframe_values.shape) == 1:
+            keyframe_values = keyframe_values[np.newaxis]
+        # There must be a time for each column of values.
+        assert(len(keyframe_times) == keyframe_values.shape[1])
+        # There must be as many rows of values as there are properties.
+        assert(len(self.fbx_props[0]) == len(keyframe_values))
+        write_mask = np.full_like(keyframe_values, True, dtype=bool)  # write everything by default
+        self._frame_times_array = keyframe_times
+        self._frame_values_array = keyframe_values
+        self._frame_write_mask_array = write_mask
 
     def simplify(self, fac, step, force_keep=False):
         """
         Simplifies sampled curves by only enabling samples when:
             * their values relatively differ from the previous sample ones.
         """
-        if not self._keys:
+        if self._frame_times_array is None:
+            # Keyframes have not been added yet.
             return
 
         if fac == 0.0:
@@ -1110,36 +1325,155 @@ class AnimationCurveNodeWrapper:
         # So that, with default factor and step values (1), we get:
         min_reldiff_fac = fac * 1.0e-3  # min relative value evolution: 0.1% of current 'order of magnitude'.
         min_absdiff_fac = 0.1  # A tenth of reldiff...
-        keys = self._keys
 
-        p_currframe, p_key, p_key_write = keys[0]
-        p_keyed = list(p_key)
-        are_keyed = [False] * len(p_key)
-        for currframe, key, key_write in keys:
-            for idx, (val, p_val) in enumerate(zip(key, p_key)):
-                key_write[idx] = False
-                p_keyedval = p_keyed[idx]
-                if val == p_val:
-                    # Never write keyframe when value is exactly the same as prev one!
-                    continue
-                # This is contracted form of relative + absolute-near-zero difference:
-                #     absdiff = abs(a - b)
-                #     if absdiff < min_reldiff_fac * min_absdiff_fac:
-                #         return False
-                #     return (absdiff / ((abs(a) + abs(b)) / 2)) > min_reldiff_fac
-                # Note that we ignore the '/ 2' part here, since it's not much significant for us.
-                if abs(val - p_val) > (min_reldiff_fac * max(abs(val) + abs(p_val), min_absdiff_fac)):
-                    # If enough difference from previous sampled value, key this value *and* the previous one!
-                    key_write[idx] = True
-                    p_key_write[idx] = True
-                    p_keyed[idx] = val
-                    are_keyed[idx] = True
-                elif abs(val - p_keyedval) > (min_reldiff_fac * max((abs(val) + abs(p_keyedval)), min_absdiff_fac)):
-                    # Else, if enough difference from previous keyed value, key this value only!
-                    key_write[idx] = True
-                    p_keyed[idx] = val
-                    are_keyed[idx] = True
-            p_currframe, p_key, p_key_write = currframe, key, key_write
+        # Initialise to no values enabled for writing.
+        self._frame_write_mask_array[:] = False
+
+        # Values are enabled for writing if they differ enough from either of their adjacent values or if they differ
+        # enough from the closest previous value that is enabled due to either of these conditions.
+        for sampled_values, enabled_mask in zip(self._frame_values_array, self._frame_write_mask_array):
+            # Create overlapping views of the 'previous' (all but the last) and 'current' (all but the first)
+            # `sampled_values` and `enabled_mask`.
+            # Calculate absolute values from `sampled_values` so that the 'previous' and 'current' absolute arrays can
+            # be views into the same array instead of separately calculated arrays.
+            abs_sampled_values = np.abs(sampled_values)
+            # 'previous' views.
+            p_val_view = sampled_values[:-1]
+            p_abs_val_view = abs_sampled_values[:-1]
+            p_enabled_mask_view = enabled_mask[:-1]
+            # 'current' views.
+            c_val_view = sampled_values[1:]
+            c_abs_val_view = abs_sampled_values[1:]
+            c_enabled_mask_view = enabled_mask[1:]
+
+            # If enough difference from previous sampled value, enable the current value *and* the previous one!
+            # The difference check is symmetrical, so this will compare each value to both of its adjacent values.
+            # Unless it is forcefully enabled later, this is the only way that the first value can be enabled.
+            # This is a contracted form of relative + absolute-near-zero difference:
+            # def is_different(a, b):
+            #     abs_diff = abs(a - b)
+            #     if abs_diff < min_reldiff_fac * min_absdiff_fac:
+            #         return False
+            #     return (abs_diff / ((abs(a) + abs(b)) / 2)) > min_reldiff_fac
+            # Note that we ignore the '/ 2' part here, since it's not much significant for us.
+            # Contracted form using only builtin Python functions:
+            #     return abs(a - b) > (min_reldiff_fac * max(abs(a) + abs(b), min_absdiff_fac))
+            abs_diff = np.abs(c_val_view - p_val_view)
+            different_if_greater_than = min_reldiff_fac * np.maximum(c_abs_val_view + p_abs_val_view, min_absdiff_fac)
+            enough_diff_p_val_mask = abs_diff > different_if_greater_than
+            # Enable both the current values *and* the previous values where `enough_diff_p_val_mask` is True. Some
+            # values may get set to True twice because the views overlap, but this is not a problem.
+            p_enabled_mask_view[enough_diff_p_val_mask] = True
+            c_enabled_mask_view[enough_diff_p_val_mask] = True
+
+            # Else, if enough difference from previous enabled value, enable the current value only!
+            # For each 'current' value, get the index of the nearest previous enabled value in `sampled_values` (or
+            # itself if the value is enabled).
+            # Start with an array that is the index of the 'current' value in `sampled_values`. The 'current' values are
+            # all but the first value, so the indices will be from 1 to `len(sampled_values)` exclusive.
+            # Let len(sampled_values) == 9:
+            #   [1, 2, 3, 4, 5, 6, 7, 8]
+            p_enabled_idx_in_sampled_values = np.arange(1, len(sampled_values))
+            # Replace the indices of all disabled values with 0 in preparation of filling them in with the index of the
+            # nearest previous enabled value. We choose to replace with 0 so that if there is no nearest previous
+            # enabled value, we instead default to `sampled_values[0]`.
+            c_val_disabled_mask = ~c_enabled_mask_view
+            # Let `c_val_disabled_mask` be:
+            #   [F, F, T, F, F, T, T, T]
+            # Set indices to 0 where `c_val_disabled_mask` is True:
+            #   [1, 2, 3, 4, 5, 6, 7, 8]
+            #          v        v  v  v
+            #   [1, 2, 0, 4, 5, 0, 0, 0]
+            p_enabled_idx_in_sampled_values[c_val_disabled_mask] = 0
+            # Accumulative maximum travels across the array from left to right, filling in the zeroed indices with the
+            # maximum value so far, which will be the closest previous enabled index because the non-zero indices are
+            # strictly increasing.
+            #   [1, 2, 0, 4, 5, 0, 0, 0]
+            #          v        v  v  v
+            #   [1, 2, 2, 4, 5, 5, 5, 5]
+            p_enabled_idx_in_sampled_values = np.maximum.accumulate(p_enabled_idx_in_sampled_values)
+            # Only disabled values need to be checked against their nearest previous enabled values.
+            # We can additionally ignore all values which equal their immediately previous value because those values
+            # will never be enabled if they were not enabled by the earlier difference check against immediately
+            # previous values.
+            p_enabled_diff_to_check_mask = np.logical_and(c_val_disabled_mask, p_val_view != c_val_view)
+            # Convert from a mask to indices because we need the indices later and because the array of indices will
+            # usually be smaller than the mask array making it faster to index other arrays with.
+            p_enabled_diff_to_check_idx = np.flatnonzero(p_enabled_diff_to_check_mask)
+            # `p_enabled_idx_in_sampled_values` from earlier:
+            #   [1, 2, 2, 4, 5, 5, 5, 5]
+            # `p_enabled_diff_to_check_mask` assuming no values equal their immediately previous value:
+            #   [F, F, T, F, F, T, T, T]
+            # `p_enabled_diff_to_check_idx`:
+            #   [      2,       5, 6, 7]
+            # `p_enabled_idx_in_sampled_values_to_check`:
+            #   [      2,       5, 5, 5]
+            p_enabled_idx_in_sampled_values_to_check = p_enabled_idx_in_sampled_values[p_enabled_diff_to_check_idx]
+            # Get the 'current' disabled values that need to be checked.
+            c_val_to_check = c_val_view[p_enabled_diff_to_check_idx]
+            c_abs_val_to_check = c_abs_val_view[p_enabled_diff_to_check_idx]
+            # Get the nearest previous enabled value for each value to be checked.
+            nearest_p_enabled_val = sampled_values[p_enabled_idx_in_sampled_values_to_check]
+            abs_nearest_p_enabled_val = np.abs(nearest_p_enabled_val)
+            # Check the relative + absolute-near-zero difference again, but against the nearest previous enabled value
+            # this time.
+            abs_diff = np.abs(c_val_to_check - nearest_p_enabled_val)
+            different_if_greater_than = (min_reldiff_fac
+                                         * np.maximum(c_abs_val_to_check + abs_nearest_p_enabled_val, min_absdiff_fac))
+            enough_diff_p_enabled_val_mask = abs_diff > different_if_greater_than
+            # If there are any that are different enough from the previous enabled value, then we have to check them all
+            # iteratively because enabling a new value can change the nearest previous enabled value of some elements,
+            # which changes their relative + absolute-near-zero difference:
+            # `p_enabled_diff_to_check_idx`:
+            #   [2, 5, 6, 7]
+            # `p_enabled_idx_in_sampled_values_to_check`:
+            #   [2, 5, 5, 5]
+            # Let `enough_diff_p_enabled_val_mask` be:
+            #   [F, F, T, T]
+            # The first index that is newly enabled is 6:
+            #   [2, 5,>6<,5]
+            # But 6 > 5, so the next value's nearest previous enabled index is also affected:
+            #   [2, 5, 6,>6<]
+            # We had calculated a newly enabled index of 7 too, but that was calculated against the old nearest previous
+            # enabled index of 5, which has now been updated to 6, so whether 7 is enabled or not needs to be
+            # recalculated:
+            #   [F, F, T, ?]
+            if np.any(enough_diff_p_enabled_val_mask):
+                # Accessing .data, the memoryview of the array, iteratively or by individual index is faster than doing
+                # the same with the array itself.
+                zipped = zip(p_enabled_diff_to_check_idx.data,
+                             c_val_to_check.data,
+                             c_abs_val_to_check.data,
+                             p_enabled_idx_in_sampled_values_to_check.data,
+                             enough_diff_p_enabled_val_mask.data)
+                # While iterating, we could set updated values into `enough_diff_p_enabled_val_mask` as we go and then
+                # update `enabled_mask` in bulk after the iteration, but if we're going to update an array while
+                # iterating, we may as well update `enabled_mask` directly instead and skip the bulk update.
+                # Additionally, the number of `True` writes to `enabled_mask` is usually much less than the number of
+                # updates that would be required to `enough_diff_p_enabled_val_mask`.
+                c_enabled_mask_view_mv = c_enabled_mask_view.data
+
+                # While iterating, keep track of the most recent newly enabled index, so we can tell when we need to
+                # recalculate whether the current value needs to be enabled.
+                new_p_enabled_idx = -1
+                # Keep track of its value too for performance.
+                new_p_enabled_val = -1
+                new_abs_p_enabled_val = -1
+                for cur_idx, c_val, c_abs_val, old_p_enabled_idx, enough_diff in zipped:
+                    if new_p_enabled_idx > old_p_enabled_idx:
+                        # The nearest previous enabled value is newly enabled and was not included when
+                        # `enough_diff_p_enabled_val_mask` was calculated, so whether the current value is different
+                        # enough needs to be recalculated using the newly enabled value.
+                        # Check if the relative + absolute-near-zero difference is enough to enable this value.
+                        enough_diff = (abs(c_val - new_p_enabled_val)
+                                       > (min_reldiff_fac * max(c_abs_val + new_abs_p_enabled_val, min_absdiff_fac)))
+                    if enough_diff:
+                        # The current value needs to be enabled.
+                        c_enabled_mask_view_mv[cur_idx] = True
+                        # Update the index and values for this newly enabled value.
+                        new_p_enabled_idx = cur_idx
+                        new_p_enabled_val = c_val
+                        new_abs_p_enabled_val = c_abs_val
 
         # If we write nothing (action doing nothing) and are in 'force_keep' mode, we key everything! :P
         # See T41766.
@@ -1148,24 +1482,26 @@ class AnimationCurveNodeWrapper:
         # one key in this case.
         # See T41719, T41605, T41254...
         if self.force_keying or (force_keep and not self):
-            are_keyed[:] = [True] * len(are_keyed)
+            are_keyed = [True] * len(self._frame_write_mask_array)
+        else:
+            are_keyed = np.any(self._frame_write_mask_array, axis=1)
 
         # If we did key something, ensure first and last sampled values are keyed as well.
         if self.force_startend_keying:
-            for idx, is_keyed in enumerate(are_keyed):
+            for is_keyed, frame_write_mask in zip(are_keyed, self._frame_write_mask_array):
                 if is_keyed:
-                    keys[0][2][idx] = keys[-1][2][idx] = True
+                    frame_write_mask[:1] = True
+                    frame_write_mask[-1:] = True
 
     def get_final_data(self, scene, ref_id, force_keep=False):
         """
         Yield final anim data for this 'curvenode' (for all curvenodes defined).
         force_keep is to force to keep a curve even if it only has one valid keyframe.
         """
-        curves = [[] for k in self._keys[0][1]]
-        for currframe, key, key_write in self._keys:
-            for curve, val, wrt in zip(curves, key, key_write):
-                if wrt:
-                    curve.append((currframe, val))
+        curves = [
+            (self._frame_times_array[write_mask], values[write_mask])
+            for values, write_mask in zip(self._frame_values_array, self._frame_write_mask_array)
+        ]
 
         force_keep = force_keep or self.force_keying
         for elem_key, fbx_group, fbx_gname, fbx_props in \
@@ -1176,8 +1512,9 @@ class AnimationCurveNodeWrapper:
                 fbx_item = FBX_ANIM_PROPSGROUP_NAME + "|" + fbx_item
                 curve_key = get_blender_anim_curve_key(scene, ref_id, elem_key, fbx_group, fbx_item)
                 # (curve key, default value, keyframes, write flag).
-                group[fbx_item] = (curve_key, def_val, c,
-                                   True if (len(c) > 1 or (len(c) > 0 and force_keep)) else False)
+                times = c[0]
+                write_flag = len(times) > (0 if force_keep else 1)
+                group[fbx_item] = (curve_key, def_val, c, write_flag)
             yield elem_key, group_key, group, fbx_group, fbx_gname
 
 
