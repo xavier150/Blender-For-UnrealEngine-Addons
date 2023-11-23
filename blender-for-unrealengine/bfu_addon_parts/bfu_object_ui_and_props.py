@@ -1248,6 +1248,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.bfu_export_axis_up',
                             'obj.bfu_export_primary_bone_axis',
                             'obj.bfu_export_secondary_bone_axis',
+                            'obj.bfu_export_animation_without_mesh',
                             'obj.bfu_mirror_symmetry_right_side_bones',
                             'obj.bfu_use_ue_mannequin_bone_alignment',
                             'obj.bfu_disable_free_scale_animation',
