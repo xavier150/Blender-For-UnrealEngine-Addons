@@ -125,6 +125,7 @@ def WriteImportAssetScript():
             asset_data["use_custom_light_map_resolution"] = bfu_utils.GetUseCustomLightMapResolution(asset.object)
             asset_data["light_map_resolution"] = bfu_utils.GetCompuntedLightMap(asset.object)
             asset_data["collision_trace_flag"] = asset.object.bfu_collision_trace_flag
+            asset_data["enable_skeletal_mesh_per_poly_collision"] = asset.object.bfu_enable_skeletal_mesh_per_poly_collision
 
         data['assets'].append(asset_data)
 

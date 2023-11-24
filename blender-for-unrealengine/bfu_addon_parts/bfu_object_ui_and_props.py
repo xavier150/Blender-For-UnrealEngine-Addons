@@ -502,6 +502,12 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 4)
             ]
         )
+    
+    bpy.types.Object.bfu_enable_skeletal_mesh_per_poly_collision = bpy.props.BoolProperty(
+        name="Enable Per-Poly Collision",
+        description="Enable per-polygon collision for Skeletal Mesh",
+        default=False
+    )
 
     bpy.types.Object.bfu_vertex_color_import_option = EnumProperty(
         name="Vertex Color Import Option",
@@ -1220,6 +1226,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.bfu_auto_generate_collision',
                             'obj.bfu_material_search_location',
                             'obj.bfu_collision_trace_flag',
+                            'obj.bfu_enable_skeletal_mesh_per_poly_collision',
                             'obj.bfu_vertex_color_import_option',
                             'obj.bfu_vertex_color_override_color',
                             'obj.bfu_vertex_color_to_use',
@@ -1745,24 +1752,25 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     if obj.bfu_export_type == "export_recursive":
 
                         # StaticMesh prop
-                        if bfu_utils.GetAssetType(obj) == "StaticMesh":
-                            StaticMeshCollisionTraceFlag = layout.row()
-                            StaticMeshCollisionTraceFlag.prop(
-                                obj,
-                                'bfu_collision_trace_flag'
-                                )
+                        if bfu_ui_utils.display_asset_type_filter(obj, "StaticMesh"):
                             if not obj.bfu_export_as_lod_mesh:
-                                bfu_auto_generate_collision = layout.row()
-                                bfu_auto_generate_collision.prop(
+                                auto_generate_collision = layout.row()
+                                auto_generate_collision.prop(
                                     obj,
                                     'bfu_auto_generate_collision'
                                     )
+                                collision_trace_flag = layout.row()
+                                collision_trace_flag.prop(
+                                    obj,
+                                    'bfu_collision_trace_flag'
+                                    )
                         # SkeletalMesh prop
-                        if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+                        if bfu_ui_utils.display_asset_type_filter(obj, "SkeletalMesh"):
                             if not obj.bfu_export_as_lod_mesh:
-                                bfu_create_physics_asset = layout.row()
-                                bfu_create_physics_asset.prop(obj, "bfu_create_physics_asset")
-
+                                create_physics_asset = layout.row()
+                                create_physics_asset.prop(obj, "bfu_create_physics_asset")
+                                enable_skeletal_mesh_per_poly_collision = layout.row()
+                                enable_skeletal_mesh_per_poly_collision.prop(obj, 'bfu_enable_skeletal_mesh_per_poly_collision')
 
             scene.bfu_object_material_properties_expanded.draw(layout)
             if scene.bfu_object_material_properties_expanded.is_expend():

@@ -105,6 +105,7 @@ def ImportAllAssets():
 
         additional_data = GetAdditionalData()
 
+
         def ImportTask():
             # New import task
             # Property
@@ -351,7 +352,6 @@ def ImportAllAssets():
                         return
 
             # ###############[ Post treatment ]################
-
             asset_import_data = asset.get_editor_property('asset_import_data')
             if asset_data["asset_type"] == "StaticMesh":
                 if "static_mesh_lod_group" in asset_data:
@@ -366,14 +366,17 @@ def ImportAllAssets():
                             unreal.EditorStaticMeshLibrary.set_lod_build_settings(asset, 0, build_settings)
 
                 if "collision_trace_flag" in asset_data:
-                    if asset_data["collision_trace_flag"] == "CTF_UseDefault":
-                        asset.get_editor_property('body_setup').set_editor_property('collision_trace_flag', unreal.CollisionTraceFlag.CTF_USE_DEFAULT)
-                    elif asset_data["collision_trace_flag"] == "CTF_UseSimpleAndComplex":
-                        asset.get_editor_property('body_setup').set_editor_property('collision_trace_flag', unreal.CollisionTraceFlag.CTF_USE_SIMPLE_AND_COMPLEX)
-                    elif asset_data["collision_trace_flag"] == "CTF_UseSimpleAsComplex":
-                        asset.get_editor_property('body_setup').set_editor_property('collision_trace_flag', unreal.CollisionTraceFlag.CTF_USE_SIMPLE_AS_COMPLEX)
-                    elif asset_data["collision_trace_flag"] == "CTF_UseComplexAsSimple":
-                        asset.get_editor_property('body_setup').set_editor_property('collision_trace_flag', unreal.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE)
+                    collision_data = asset.get_editor_property('body_setup')
+                    if collision_data:
+                        if asset_data["collision_trace_flag"] == "CTF_UseDefault":
+                            collision_data.set_editor_property('collision_trace_flag', unreal.CollisionTraceFlag.CTF_USE_DEFAULT)
+                        elif asset_data["collision_trace_flag"] == "CTF_UseSimpleAndComplex":
+                            collision_data.set_editor_property('collision_trace_flag', unreal.CollisionTraceFlag.CTF_USE_SIMPLE_AND_COMPLEX)
+                        elif asset_data["collision_trace_flag"] == "CTF_UseSimpleAsComplex":
+                            collision_data.set_editor_property('collision_trace_flag', unreal.CollisionTraceFlag.CTF_USE_SIMPLE_AS_COMPLEX)
+                        elif asset_data["collision_trace_flag"] == "CTF_UseComplexAsSimple":
+                            collision_data.set_editor_property('collision_trace_flag', unreal.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE)
+
 
             if asset_data["asset_type"] == "StaticMesh":
                 if "generate_lightmap_u_vs" in asset_data:
@@ -388,6 +391,9 @@ def ImportAllAssets():
                     old_skeleton_name = p.split('.')[0]+'_Skeleton.'+p.split('.')[1]+'_Skeleton'
                     new_skeleton_name = asset_data["animation_skeleton_path"]
                     unreal.EditorAssetLibrary.rename_asset(old_skeleton_name, new_skeleton_name)
+
+                if "enable_skeletal_mesh_per_poly_collision" in asset_data:
+                    asset.set_editor_property('enable_per_poly_collision', asset_data["enable_skeletal_mesh_per_poly_collision"])
                     
 
             # Socket
