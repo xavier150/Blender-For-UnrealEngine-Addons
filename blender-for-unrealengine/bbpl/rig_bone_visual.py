@@ -163,11 +163,11 @@ def generate_bone_shape_from_prop(
         shape_collection = utils.get_rig_collection(armature, "SHAPE")
         shape_collection.objects.link(obj)
 
-    def apply_shape_modifiers(object):
+    def apply_shape_modifiers(obj):
         scene.render.use_simplify = False
-        utils.mode_set_on_target(new_shape, "OBJECT") # Switch to OBJECT mode to apply modifiers
-        for modifier in object.modifiers:
-            bpy.ops.object.modifier_apply(modifier=modifier.name)
+        utils.mode_set_on_target(obj, "OBJECT") # Switch to OBJECT mode to apply modifiers
+        for mod in obj.modifiers:
+            bpy.ops.object.modifier_apply(modifier=mod.name)
 
     # Créer la nouvelle forme
     new_shape = object_to_use.copy()
