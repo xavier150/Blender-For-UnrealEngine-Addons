@@ -137,7 +137,11 @@ def CreateSequencer():
     # Set playback range
     seq.set_playback_end_seconds((endFrame-secureCrop)/float(frameRateNumerator))
     seq.set_playback_start_seconds(startFrame/float(frameRateNumerator))  # set_playback_end_seconds
-    camera_cut_track = seq.add_master_track(unreal.MovieSceneCameraCutTrack)
+    if GetUnrealVersion() >= 5.1:
+        camera_cut_track = seq.add_track(unreal.MovieSceneCameraCutTrack)
+    else:
+        camera_cut_track = seq.add_master_track(unreal.MovieSceneCameraCutTrack)
+
     camera_cut_track.set_editor_property('display_name', 'Imported Camera Cuts')
     if GetUnrealVersion() >= 4.26:
         camera_cut_track.set_color_tint(unreal.Color(b=200, g=0, r=0, a=0))
