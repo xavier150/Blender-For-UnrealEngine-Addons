@@ -26,7 +26,7 @@ from .. import bfu_write_text
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bbpl
-from ..bfu_addon_parts import bfu_export_procedure
+from ..import bfu_addon_parts
 
 dup_temp_name = "BFU_Temp"  # DuplicateTemporarilyNameForUe4Export
 Export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
@@ -636,7 +636,7 @@ def ExportAutoProRig(
     #bpy.ops.id.arp_export_fbx_panel(filepath=filepath)
 
 
-def ExportSingleAdditionalTrackCamera(dirpath, filename, obj):
+def ExportSingleAdditionalTrackCamera(dirpath, filename, obj, pre_bake_camera: bfu_addon_parts.bfu_camera_data.CameraDataAtFrame = None):
     # Export additional camera track for ue4
     # FocalLength
     # FocusDistance
@@ -644,7 +644,7 @@ def ExportSingleAdditionalTrackCamera(dirpath, filename, obj):
 
     absdirpath = bpy.path.abspath(dirpath)
     bfu_basics.VerifiDirs(absdirpath)
-    AdditionalTrack = bfu_write_text.WriteCameraAnimationTracks(obj)
+    AdditionalTrack = bfu_write_text.WriteCameraAnimationTracks(obj, pre_bake_camera=pre_bake_camera)
     return bfu_write_text.ExportSingleJson(
         AdditionalTrack,
         absdirpath,
@@ -669,22 +669,22 @@ def get_final_export_primary_bone_axis(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_primary_bone_axis
     else:
-        return bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["primary_bone_axis"]
+        return bfu_addon_parts.bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["primary_bone_axis"]
 
 def get_final_export_secondary_bone_axis(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_secondary_bone_axis
     else:
-        return bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["secondary_bone_axis"]
+        return bfu_addon_parts.bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["secondary_bone_axis"]
 
 def get_export_axis_forward(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_axis_forward
     else:
-        return bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["axis_forward"]
+        return bfu_addon_parts.bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["axis_forward"]
 
 def get_export_axis_up(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_axis_up
     else:
-        return bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["axis_up"]
+        return bfu_addon_parts.bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["axis_up"]

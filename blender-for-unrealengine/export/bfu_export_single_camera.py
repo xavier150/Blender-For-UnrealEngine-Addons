@@ -26,6 +26,7 @@ from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_naming
 from .. import bfu_export_logs
+from .. import bfu_addon_parts
 from ..fbxio import export_fbx_bin
 
 if "bpy" in locals():
@@ -42,7 +43,7 @@ if "bpy" in locals():
         importlib.reload(export_fbx_bin)
 
 
-def ProcessCameraExport(op, obj):
+def ProcessCameraExport(op, obj, pre_bake_camera: bfu_addon_parts.bfu_camera_data.CameraDataAtFrame = None):
     addon_prefs = bfu_basics.GetAddonPrefs()
     counter = bps.utils.CounterTimer()
     dirpath = bfu_utils.GetObjExportDir(obj)
@@ -68,16 +69,14 @@ def ProcessCameraExport(op, obj):
 
         ExportSingleFbxCamera(op, dirpath, file.GetFileWithExtension(), obj)
 
+    if scene.text_AdditionalData and addon_prefs.useGeneratedScripts:
 
-    if obj.bfu_export_as_lod_mesh is False:
-        if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
-
-            file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
-            file.file_name = bfu_naming.get_camera_file_name(obj, obj.name+"_AdditionalTrack", "")
-            file.file_extension = "json"
-            file.file_path = dirpath
-            file.file_type = "AdditionalTrack"
-            bfu_export_utils.ExportSingleAdditionalTrackCamera(dirpath, file.GetFileWithExtension(), obj)
+        file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
+        file.file_name = bfu_naming.get_camera_file_name(obj, obj.name+"_AdditionalTrack", "")
+        file.file_extension = "json"
+        file.file_path = dirpath
+        file.file_type = "AdditionalTrack"
+        bfu_export_utils.ExportSingleAdditionalTrackCamera(dirpath, file.GetFileWithExtension(), obj, pre_bake_camera)
 
     MyAsset.EndAssetExport(True)
     return MyAsset

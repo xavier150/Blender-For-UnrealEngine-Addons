@@ -57,7 +57,6 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
             file: bfu_export_logs.BFU_OT_FileExport
             if file.file_type == file_type:
                 return file
-        print("File type not found in this assets:", file_type)
 
     def GetFilename(self):
         main_file = self.files[0]

@@ -30,6 +30,7 @@ from .. import bps
 from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
+from .. import bfu_addon_parts
 
 if "bpy" in locals():
     import importlib
@@ -220,23 +221,38 @@ def export_collection_from_asset_list(op, asset_list: bfu_cached_asset_list.Asse
 
 def export_camera_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToExport):
     scene = bpy.context.scene
-
+    addon_prefs = bfu_basics.GetAddonPrefs()
     print("Start Export camera(s)")
+
+    camera_data_list = []
+    # Preparre asset to export
     for asset in asset_list:
         asset: bfu_cached_asset_list.AssetToExport
         if asset.asset_type == "Camera":
             obj = asset.obj
             if obj.bfu_export_type == "export_recursive":
                 if bfu_utils.GetAssetType(obj) == "Camera" and IsValidObjectForExport(scene, obj):
-                    # Save current start/end frame
-                    UserStartFrame = scene.frame_start
-                    UserEndFrame = scene.frame_end
-                    bfu_export_single_camera.ProcessCameraExport(op, obj)
+                    if scene.text_AdditionalData and addon_prefs.useGeneratedScripts:
+                        animation_start_frame = bfu_utils.GetDesiredActionStartEndTime(obj, obj.animation_data.action)[0]
+                        animation_end_frame = bfu_utils.GetDesiredActionStartEndTime(obj, obj.animation_data.action)[1]
+                        camera_tracks = bfu_addon_parts.bfu_camera_data.CameraDataAtFrame()
+                        camera_tracks.EvaluateTracks(obj, animation_start_frame, animation_end_frame)
+                    else:
+                        camera_tracks = None
+                    camera_data_list.append((obj, camera_tracks))
 
-                    # Resets previous start/end frame
-                    scene.frame_start = UserStartFrame
-                    scene.frame_end = UserEndFrame
-                    #UpdateExportProgress()
+
+    #Start export
+    for obj, pre_bake in camera_data_list:
+        # Save current start/end frame
+        UserStartFrame = scene.frame_start
+        UserEndFrame = scene.frame_end
+        bfu_export_single_camera.ProcessCameraExport(op, obj, pre_bake)
+
+        # Resets previous start/end frame
+        scene.frame_start = UserStartFrame
+        scene.frame_end = UserEndFrame
+        #UpdateExportProgress()
 
 def export_static_mesh_from_asset_list(op, asset_list: [bfu_cached_asset_list.AssetToExport]):
     scene = bpy.context.scene
