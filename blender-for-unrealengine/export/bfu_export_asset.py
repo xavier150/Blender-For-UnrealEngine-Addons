@@ -228,7 +228,7 @@ def export_camera_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToE
 
     use_camera_evaluate = (scene.text_AdditionalData and addon_prefs.useGeneratedScripts)
     if use_camera_evaluate:
-        multi_camera_tracks = bfu_camera.bfu_camera_data.MultiCameraDataAtFrame()
+        multi_camera_tracks = bfu_camera.bfu_camera_data.BFU_MultiCameraTracks()
         multi_camera_tracks.set_start_end_frames(scene.frame_start, scene.frame_end+1)
     
     # Preparre asset to export

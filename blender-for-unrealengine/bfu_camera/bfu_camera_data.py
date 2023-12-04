@@ -9,9 +9,7 @@ from .. import bfu_utils
 
 def set_current_frame(new_frame):
     scene = bpy.context.scene
-    print("PrepareFrameSet", scene.frame_current, new_frame)
     scene.frame_set(new_frame)
-    print("EndFrameSet")
 
 
 def getCameraFocusDistance(Camera, Target):
@@ -81,7 +79,7 @@ def getAllKeysByFcurves(obj, DataPath, DataValue, frame_start, frame_end, IsData
         return keys
     return[(frame_start, DataValue)]
 
-class CameraDataAtFrame():
+class BFU_CameraTracks():
 
     def __init__(self):
         self.transform_track = {}
@@ -96,7 +94,7 @@ class CameraDataAtFrame():
         self.aperture_fstop = {}
         self.hide_viewport = {}
 
-    def EvaluateTracksAtFrame(self, camera, frame):
+    def evaluate_track_at_frame(self, camera, frame):
         scene = bpy.context.scene
         set_current_frame(frame)
 
@@ -168,39 +166,41 @@ class CameraDataAtFrame():
         boolKey = getOneKeysByFcurves(camera, "hide_viewport", camera.hide_viewport, frame, False)
         self.hide_viewport[frame] = (boolKey < 1)  # Inversed for convert hide to spawn
 
-    def EvaluateTracks(self, camera, frame_start, frame_end):
+    def evaluate_all_tracks(self, camera, frame_start, frame_end):
         
-        print("Start evaluate camera " + camera.name + "From " + str(frame_start) + " to " + str(frame_end))
-        Timer = bps.utils.CounterTimer()
-
         scene = bpy.context.scene
         addon_prefs = bfu_basics.GetAddonPrefs()
 
-        saveFrame = scene.frame_current
-        if camera is None:
-            return
+        print("Start evaluate camera " + camera.name + "From " + str(frame_start) + " to " + str(frame_end))
+        Timer = bps.utils.CounterTimer()
         
         slms = bfu_utils.TimelineMarkerSequence()
+        
+        # Save scene data
+        save_current_frame = scene.frame_current
+        save_use_simplify = bpy.context.scene.render.use_simplify
 
 
         for frame in range(frame_start, frame_end+1):
             if len(slms.marker_sequences) > 0 and addon_prefs.bakeOnlyKeyVisibleInCut:
+                # Bake only frames visible in cut
                 marker_sequence = slms.GetMarkerSequenceAtFrame(frame)
                 if marker_sequence:
                     marker = marker_sequence.marker
                     if marker.camera == camera:
-                        self.EvaluateTracksAtFrame(camera, frame)
+                        self.evaluate_track_at_frame(camera, frame)
             else:
-                self.EvaluateTracksAtFrame(camera, frame)
+                # Bake all frames
+                self.evaluate_track_at_frame(camera, frame)
 
-        set_current_frame(saveFrame)
+        set_current_frame(save_current_frame)
 
         print("Evaluate " + camera.name + " finished in " + Timer.get_str_time())
         print("-----")
         return
 
  
-class MultiCameraDataAtFrame():
+class BFU_MultiCameraTracks():
 
     def __init__(self):
         self.cameras_to_evaluate = []
@@ -216,10 +216,46 @@ class MultiCameraDataAtFrame():
         self.frame_end = frame_end
 
     def evaluate_all_cameras(self):
+        # Evalutate all cameras at same time will avoid frames switch
+
+        frame_start = self.frame_start
+        frame_end = self.frame_end
+        scene = bpy.context.scene
+        addon_prefs = bfu_basics.GetAddonPrefs()
+
+
+        Timer = bps.utils.CounterTimer()
+
+        slms = bfu_utils.TimelineMarkerSequence()
+
+        # Save scene data
+        save_current_frame = scene.frame_current
+        save_use_simplify = bpy.context.scene.render.use_simplify
+        bpy.context.scene.render.use_simplify = True
+
         for camera in self.cameras_to_evaluate:
-            camera_tracks = CameraDataAtFrame()
-            camera_tracks.EvaluateTracks(camera, self.frame_start, self.frame_end)
+            camera_tracks = BFU_CameraTracks()
             self.evaluate_cameras[camera] = camera_tracks
+
+        print("Start evaluate " + str(len(self.cameras_to_evaluate)) + " camera(s) " + str(frame_start) + " to " + str(frame_end))
+
+        for frame in range(frame_start, frame_end):
+            for camera in self.cameras_to_evaluate:
+                evaluate = self.get_evaluate_camera_data(camera)
+                if len(slms.marker_sequences) > 0 and addon_prefs.bakeOnlyKeyVisibleInCut:
+                    # Bake only frames visible in cuts
+                    marker_sequence = slms.GetMarkerSequenceAtFrame(frame)
+                    if marker_sequence:
+                        marker = marker_sequence.marker
+                        if marker.camera == camera:
+                            
+                            evaluate.evaluate_track_at_frame(camera, frame)
+
+                else:
+                    # Bake all frames
+                    evaluate.evaluate_track_at_frame(camera, frame)
+
+        bpy.context.scene.render.use_simplify = save_use_simplify
 
     def get_evaluate_camera_data(self, obj: bpy.types.Object):
         return self.evaluate_cameras[obj]

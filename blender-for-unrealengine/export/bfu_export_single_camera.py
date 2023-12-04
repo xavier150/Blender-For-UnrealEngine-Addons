@@ -43,7 +43,7 @@ if "bpy" in locals():
         importlib.reload(export_fbx_bin)
 
 
-def ProcessCameraExport(op, obj, pre_bake_camera: bfu_camera.bfu_camera_data.CameraDataAtFrame = None):
+def ProcessCameraExport(op, obj, pre_bake_camera: bfu_camera.bfu_camera_data.BFU_CameraTracks = None):
     addon_prefs = bfu_basics.GetAddonPrefs()
     counter = bps.utils.CounterTimer()
     dirpath = bfu_utils.GetObjExportDir(obj)

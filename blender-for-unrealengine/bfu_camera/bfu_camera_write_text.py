@@ -3,7 +3,7 @@ import bpy
 from . import bfu_camera_data
 from .. import languages
 
-def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=None, pre_bake_camera: bfu_camera_data.CameraDataAtFrame = None):
+def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=None, pre_bake_camera: bfu_camera_data.BFU_CameraTracks = None):
     # Write as json file
 
     scene = bpy.context.scene
@@ -38,7 +38,7 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
     if pre_bake_camera:
         camera_tracks = pre_bake_camera
     else:
-        multi_camera_tracks = bfu_camera_data.MultiCameraDataAtFrame()
+        multi_camera_tracks = bfu_camera_data.BFU_MultiCameraTracks()
         multi_camera_tracks.add_camera_to_evaluate(obj)
         multi_camera_tracks.set_start_end_frames(target_frame_start, target_frame_end)
         multi_camera_tracks.evaluate_all_cameras()
