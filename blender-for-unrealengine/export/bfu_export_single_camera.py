@@ -20,13 +20,13 @@
 import bpy
 from bpy_extras.io_utils import axis_conversion
 from . import bfu_export_utils
+from .. import bfu_camera
 from .. import bps
 from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_naming
 from .. import bfu_export_logs
-from .. import bfu_addon_parts
 from ..fbxio import export_fbx_bin
 
 if "bpy" in locals():
@@ -43,7 +43,7 @@ if "bpy" in locals():
         importlib.reload(export_fbx_bin)
 
 
-def ProcessCameraExport(op, obj, pre_bake_camera: bfu_addon_parts.bfu_camera_data.CameraDataAtFrame = None):
+def ProcessCameraExport(op, obj, pre_bake_camera: bfu_camera.bfu_camera_data.CameraDataAtFrame = None):
     addon_prefs = bfu_basics.GetAddonPrefs()
     counter = bps.utils.CounterTimer()
     dirpath = bfu_utils.GetObjExportDir(obj)
@@ -56,8 +56,8 @@ def ProcessCameraExport(op, obj, pre_bake_camera: bfu_addon_parts.bfu_camera_dat
     MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = bfu_utils.GetAssetType(obj)
-    MyAsset.animation_start_frame = bfu_utils.GetDesiredActionStartEndTime(obj, obj.animation_data.action)[0]
-    MyAsset.animation_end_frame = bfu_utils.GetDesiredActionStartEndTime(obj, obj.animation_data.action)[1]
+    MyAsset.animation_start_frame = scene.frame_start
+    MyAsset.animation_end_frame = scene.frame_end+1
     MyAsset.StartAssetExport()
 
     if obj.bfu_export_fbx_camera:
@@ -76,7 +76,7 @@ def ProcessCameraExport(op, obj, pre_bake_camera: bfu_addon_parts.bfu_camera_dat
         file.file_extension = "json"
         file.file_path = dirpath
         file.file_type = "AdditionalTrack"
-        bfu_export_utils.ExportSingleAdditionalTrackCamera(dirpath, file.GetFileWithExtension(), obj, pre_bake_camera)
+        bfu_camera.bfu_camera_export_utils.ExportSingleAdditionalTrackCamera(dirpath, file.GetFileWithExtension(), obj, pre_bake_camera)
 
     MyAsset.EndAssetExport(True)
     return MyAsset

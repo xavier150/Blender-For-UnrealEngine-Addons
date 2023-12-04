@@ -14,7 +14,6 @@ from .. import bfu_utils
 from .. import bfu_ui_utils
 
 
-
 class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
     # Tool panel with Collisions And Sockets
 
@@ -36,123 +35,6 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         default="MySocket"
         )
 
-    class BFU_OT_CopyRegularCamerasButton(Operator):
-        bl_label = "Copy Regular Cameras for Unreal"
-        bl_idname = "object.copy_regular_cameras_command"
-        bl_description = "Copy Regular Cameras Script command"
-
-        def execute(self, context):
-            objs = context.selected_objects
-            result = bfu_utils.GetImportCameraScriptCommand(objs, False)
-            if result[0]:
-                bfu_basics.setWindowsClipboard(result[1])
-                self.report({'INFO'}, result[2])
-            else:
-                self.report({'WARNING'}, result[2])
-            return {'FINISHED'}
-
-    class BFU_OT_CopyCineCamerasButton(Operator):
-        bl_label = "Copy Cine Cameras for Unreal"
-        bl_idname = "object.copy_cine_cameras_command"
-        bl_description = "Copy Cine Cameras Script command"
-
-        def execute(self, context):
-            objs = context.selected_objects
-            result = bfu_utils.GetImportCameraScriptCommand(objs, True)
-            if result[0]:
-                bfu_basics.setWindowsClipboard(result[1])
-                self.report({'INFO'}, result[2])
-            else:
-                self.report({'WARNING'}, result[2])
-            return {'FINISHED'}
-
-    class BFU_OT_ConvertToCollisionButtonBox(Operator):
-        bl_label = "Convert to box (UBX)"
-        bl_idname = "object.converttoboxcollision"
-        bl_description = (
-            "Convert selected mesh(es) to Unreal" +
-            " collision ready for export (Boxes type)")
-
-        def execute(self, context):
-            ConvertedObj = bfu_utils.Ue4SubObj_set("Box")
-            if len(ConvertedObj) > 0:
-                self.report(
-                    {'INFO'},
-                    str(len(ConvertedObj)) +
-                    " object(s) of the selection have be" +
-                    " converted to UE4 Box collisions.")
-            else:
-                self.report(
-                    {'WARNING'},
-                    "Please select two objects." +
-                    " (Active object is the owner of the collision)")
-            return {'FINISHED'}
-
-    class BFU_OT_ConvertToCollisionButtonCapsule(Operator):
-        bl_label = "Convert to capsule (UCP)"
-        bl_idname = "object.converttocapsulecollision"
-        bl_description = (
-            "Convert selected mesh(es) to Unreal collision" +
-            " ready for export (Capsules type)")
-
-        def execute(self, context):
-            ConvertedObj = bfu_utils.Ue4SubObj_set("Capsule")
-            if len(ConvertedObj) > 0:
-                self.report(
-                    {'INFO'},
-                    str(len(ConvertedObj)) +
-                    " object(s) of the selection have be converted" +
-                    " to UE4 Capsule collisions.")
-            else:
-                self.report(
-                    {'WARNING'},
-                    "Please select two objects." +
-                    " (Active object is the owner of the collision)")
-            return {'FINISHED'}
-
-    class BFU_OT_ConvertToCollisionButtonSphere(Operator):
-        bl_label = "Convert to sphere (USP)"
-        bl_idname = "object.converttospherecollision"
-        bl_description = (
-            "Convert selected mesh(es)" +
-            " to Unreal collision ready for export (Spheres type)")
-
-        def execute(self, context):
-            ConvertedObj = bfu_utils.Ue4SubObj_set("Sphere")
-            if len(ConvertedObj) > 0:
-                self.report(
-                    {'INFO'},
-                    str(len(ConvertedObj)) +
-                    " object(s) of the selection have" +
-                    " be converted to UE4 Sphere collisions.")
-            else:
-                self.report(
-                    {'WARNING'},
-                    "Please select two objects." +
-                    " (Active object is the owner of the collision)")
-            return {'FINISHED'}
-
-    class BFU_OT_ConvertToCollisionButtonConvex(Operator):
-        bl_label = "Convert to convex shape (UCX)"
-        bl_idname = "object.converttoconvexcollision"
-        bl_description = (
-            "Convert selected mesh(es) to Unreal" +
-            " collision ready for export (Convex shapes type)")
-
-        def execute(self, context):
-            ConvertedObj = bfu_utils.Ue4SubObj_set("Convex")
-            if len(ConvertedObj) > 0:
-                self.report(
-                    {'INFO'},
-                    str(len(ConvertedObj)) +
-                    " object(s) of the selection have be" +
-                    " converted to UE4 Convex Shape collisions.")
-            else:
-                self.report(
-                    {'WARNING'},
-                    "Please select two objects." +
-                    " (Active object is the owner of the collision)")
-            return {'FINISHED'}
 
     class BFU_OT_ConvertToStaticSocketButton(Operator):
         bl_label = "Convert to StaticMesh socket"
@@ -378,12 +260,6 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
 
 classes = (
     BFU_PT_BlenderForUnrealTool,
-    BFU_PT_BlenderForUnrealTool.BFU_OT_CopyRegularCamerasButton,
-    BFU_PT_BlenderForUnrealTool.BFU_OT_CopyCineCamerasButton,
-    BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToCollisionButtonBox,
-    BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToCollisionButtonCapsule,
-    BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToCollisionButtonSphere,
-    BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToCollisionButtonConvex,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToStaticSocketButton,
     BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToSkeletalSocketButton,
     BFU_PT_BlenderForUnrealTool.BFU_OT_CopySkeletalSocketButton,

@@ -84,7 +84,6 @@ def getAllKeysByFcurves(obj, DataPath, DataValue, frame_start, frame_end, IsData
 class CameraDataAtFrame():
 
     def __init__(self):
-        scene = bpy.context.scene
         self.transform_track = {}
         self.near_clipping_plane = {}
         self.far_clipping_plane = {}
@@ -199,4 +198,28 @@ class CameraDataAtFrame():
         print("Evaluate " + camera.name + " finished in " + Timer.get_str_time())
         print("-----")
         return
-   
+
+ 
+class MultiCameraDataAtFrame():
+
+    def __init__(self):
+        self.cameras_to_evaluate = []
+        self.frame_start = 0
+        self.frame_end = 1
+        self.evaluate_cameras = {}
+
+    def add_camera_to_evaluate(self, obj: bpy.types.Object):
+        self.cameras_to_evaluate.append(obj)
+
+    def set_start_end_frames(self, frame_start: int, frame_end: int):
+        self.frame_start = frame_start
+        self.frame_end = frame_end
+
+    def evaluate_all_cameras(self):
+        for camera in self.cameras_to_evaluate:
+            camera_tracks = CameraDataAtFrame()
+            camera_tracks.EvaluateTracks(camera, self.frame_start, self.frame_end)
+            self.evaluate_cameras[camera] = camera_tracks
+
+    def get_evaluate_camera_data(self, obj: bpy.types.Object):
+        return self.evaluate_cameras[obj]

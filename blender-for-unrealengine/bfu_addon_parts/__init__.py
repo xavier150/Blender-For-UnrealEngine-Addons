@@ -8,7 +8,6 @@ from . import bfu_tool_ui_and_props
 from . import bfu_export_ui_and_props
 from . import bfu_export_correct_and_improv_panel
 from . import bfu_debug_ui_and_props_panel
-from . import bfu_camera_data
 
 
 if "bfu_modular_skeletal_specified_parts_meshs" in locals():
@@ -25,8 +24,6 @@ if "bfu_export_correct_and_improv_panel" in locals():
     importlib.reload(bfu_export_correct_and_improv_panel)
 if "bfu_debug_ui_and_props_panel" in locals():
     importlib.reload(bfu_debug_ui_and_props_panel)
-if "bfu_camera_data" in locals():
-    importlib.reload(bfu_camera_data)
 
 classes = (
 )

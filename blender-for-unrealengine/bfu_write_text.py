@@ -30,7 +30,6 @@ from . import bfu_naming
 from . import bfu_export_logs
 from . import bfu_write_import_asset_script
 from . import bfu_write_import_sequencer_script
-from . import bfu_addon_parts
 from .export import bfu_export_get_info
 
 
@@ -134,58 +133,6 @@ def WriteExportLog():
 
     return ExportLog
 
-
-def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=None, pre_bake_camera: bfu_addon_parts.bfu_camera_data.CameraDataAtFrame = None):
-    # Write as json file
-
-    scene = bpy.context.scene
-    if target_frame_start is None:
-        target_frame_start = scene.frame_start
-    if target_frame_end is None:
-        target_frame_end = scene.frame_end+1
-
-
-    scene = bpy.context.scene
-    data = {}
-    data['Coment'] = {
-        '1/3': languages.ti('write_text_additional_track_start'),
-        '2/3': languages.ti('write_text_additional_track_camera'),
-        '3/3': languages.ti('write_text_additional_track_end'),
-    }
-
-    data["resolution_x"] = scene.render.resolution_x
-    data["resolution_y"] = scene.render.resolution_y
-    data["desired_screen_ratio"] = scene.render.resolution_x / scene.render.resolution_y
-    data["frame_start"] = target_frame_start
-    data["frame_end"] = target_frame_end
-
-    # Frames is old, need to update and remove.
-    data['Frames'] = []
-    data['Frames'].append({
-        'frame_start': target_frame_start,
-        'frame_end': target_frame_end,
-    })
-
- 
-    if pre_bake_camera:
-        camera_tracks = pre_bake_camera
-    else:
-        camera_tracks = bfu_addon_parts.bfu_camera_data.CameraDataAtFrame()
-        camera_tracks.EvaluateTracks(obj, target_frame_start, target_frame_end)
-
-    data['Camera transform'] = camera_tracks.transform_track
-    data["Camera NearClippingPlane"] = camera_tracks.near_clipping_plane
-    data["Camera FarClippingPlane"] = camera_tracks.far_clipping_plane
-    data["Camera FieldOfView"] = camera_tracks.fov
-    data["Camera FocalAngle"] = camera_tracks.angle
-    data['Camera FocalLength'] = camera_tracks.lens
-    data['Camera SensorWidth'] = camera_tracks.sensor_width
-    data['Camera SensorHeight'] = camera_tracks.sensor_height
-    data['Camera FocusDistance'] = camera_tracks.focus_distance
-    data['Camera Aperture'] = camera_tracks.aperture_fstop
-    data['Camera Spawned'] = camera_tracks.hide_viewport
-
-    return data
 
 
 

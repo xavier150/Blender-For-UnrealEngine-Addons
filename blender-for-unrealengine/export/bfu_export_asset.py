@@ -30,7 +30,7 @@ from .. import bps
 from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
-from .. import bfu_addon_parts
+from .. import bfu_camera
 
 if "bpy" in locals():
     import importlib
@@ -224,30 +224,37 @@ def export_camera_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToE
     addon_prefs = bfu_basics.GetAddonPrefs()
     print("Start Export camera(s)")
 
-    camera_data_list = []
+    camera_list = []
+
+    use_camera_evaluate = (scene.text_AdditionalData and addon_prefs.useGeneratedScripts)
+    if use_camera_evaluate:
+        multi_camera_tracks = bfu_camera.bfu_camera_data.MultiCameraDataAtFrame()
+        multi_camera_tracks.set_start_end_frames(scene.frame_start, scene.frame_end+1)
+    
     # Preparre asset to export
     for asset in asset_list:
         asset: bfu_cached_asset_list.AssetToExport
         if asset.asset_type == "Camera":
             obj = asset.obj
             if obj.bfu_export_type == "export_recursive":
-                if bfu_utils.GetAssetType(obj) == "Camera" and IsValidObjectForExport(scene, obj):
-                    if scene.text_AdditionalData and addon_prefs.useGeneratedScripts:
-                        animation_start_frame = bfu_utils.GetDesiredActionStartEndTime(obj, obj.animation_data.action)[0]
-                        animation_end_frame = bfu_utils.GetDesiredActionStartEndTime(obj, obj.animation_data.action)[1]
-                        camera_tracks = bfu_addon_parts.bfu_camera_data.CameraDataAtFrame()
-                        camera_tracks.EvaluateTracks(obj, animation_start_frame, animation_end_frame)
-                    else:
-                        camera_tracks = None
-                    camera_data_list.append((obj, camera_tracks))
+                if bfu_utils.GetAssetType(obj) == "Camera" and IsValidObjectForExport(scene, obj):                    
+                    camera_list.append(obj)
+                    multi_camera_tracks.add_camera_to_evaluate(obj)
 
+    if use_camera_evaluate:
+        multi_camera_tracks.evaluate_all_cameras()
 
     #Start export
-    for obj, pre_bake in camera_data_list:
+    for obj in camera_list:
         # Save current start/end frame
         UserStartFrame = scene.frame_start
         UserEndFrame = scene.frame_end
-        bfu_export_single_camera.ProcessCameraExport(op, obj, pre_bake)
+
+        if use_camera_evaluate:
+            camera_tracks = multi_camera_tracks.get_evaluate_camera_data(obj)
+        else:
+            camera_tracks = None
+        bfu_export_single_camera.ProcessCameraExport(op, obj, camera_tracks)
 
         # Resets previous start/end frame
         scene.frame_start = UserStartFrame

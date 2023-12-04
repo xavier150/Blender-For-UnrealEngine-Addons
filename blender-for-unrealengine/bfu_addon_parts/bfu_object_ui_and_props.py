@@ -996,36 +996,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 )
             return {'FINISHED'}
 
-    class BFU_OT_CopyRegularCameraButton(Operator):
-        bl_label = "Copy Regular Camera for Unreal"
-        bl_idname = "object.copy_regular_camera_command"
-        bl_description = "Copy Regular Camera Script command"
-
-        def execute(self, context):
-            obj = context.object
-            result = bfu_utils.GetImportCameraScriptCommand([obj], False)
-            if result[0]:
-                bfu_basics.setWindowsClipboard(result[1])
-                self.report({'INFO'}, result[2])
-            else:
-                self.report({'WARNING'}, result[2])
-            return {'FINISHED'}
-
-    class BFU_OT_CopyCineCameraButton(Operator):
-        bl_label = "Copy Cine Camera for Unreal"
-        bl_idname = "object.copy_cine_camera_command"
-        bl_description = "Copy Cine Camera Script command"
-
-        def execute(self, context):
-            obj = context.object
-            result = bfu_utils.GetImportCameraScriptCommand([obj], True)
-            if result[0]:
-                bfu_basics.setWindowsClipboard(result[1])
-                self.report({'INFO'}, result[2])
-            else:
-                self.report({'WARNING'}, result[2])
-            return {'FINISHED'}
-
     class BFU_OT_ComputLightMap(Operator):
         bl_label = "Calculate surface area"
         bl_idname = "object.computlightmap"
@@ -1922,8 +1892,6 @@ classes = (
     BFU_PT_BlenderForUnrealObject.BFU_MT_ObjectGlobalPropertiesPresets,
     BFU_PT_BlenderForUnrealObject.BFU_OT_AddObjectGlobalPropertiesPreset,
     BFU_PT_BlenderForUnrealObject.BFU_OT_OpenDocumentationPage,
-    BFU_PT_BlenderForUnrealObject.BFU_OT_CopyRegularCameraButton,
-    BFU_PT_BlenderForUnrealObject.BFU_OT_CopyCineCameraButton,
     BFU_PT_BlenderForUnrealObject.BFU_OT_ComputLightMap,
     BFU_PT_BlenderForUnrealObject.BFU_UL_ActionExportTarget,
     BFU_PT_BlenderForUnrealObject.BFU_OT_UpdateObjActionListButton,

@@ -26,7 +26,8 @@ from .. import bfu_write_text
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bbpl
-from ..import bfu_addon_parts
+from .. import bfu_addon_parts
+from .. import bfu_camera
 
 dup_temp_name = "BFU_Temp"  # DuplicateTemporarilyNameForUe4Export
 Export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
@@ -634,23 +635,6 @@ def ExportAutoProRig(
     print("Start AutoProRig Export")
     # TODO Need update
     #bpy.ops.id.arp_export_fbx_panel(filepath=filepath)
-
-
-def ExportSingleAdditionalTrackCamera(dirpath, filename, obj, pre_bake_camera: bfu_addon_parts.bfu_camera_data.CameraDataAtFrame = None):
-    # Export additional camera track for ue4
-    # FocalLength
-    # FocusDistance
-    # Aperture
-
-    absdirpath = bpy.path.abspath(dirpath)
-    bfu_basics.VerifiDirs(absdirpath)
-    AdditionalTrack = bfu_write_text.WriteCameraAnimationTracks(obj, pre_bake_camera=pre_bake_camera)
-    return bfu_write_text.ExportSingleJson(
-        AdditionalTrack,
-        absdirpath,
-        filename
-        )
-
 
 def ExportAdditionalParameter(dirpath, filename, unreal_exported_asset):
     # Export additional parameter from static and skeletal mesh track for ue4

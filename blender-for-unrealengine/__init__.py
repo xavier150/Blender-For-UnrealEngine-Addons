@@ -35,6 +35,8 @@ import importlib
 from . import bps
 from . import bbpl
 from . import bfu_propertys
+from . import bfu_camera
+from . import bfu_collision
 from . import bfu_addon_parts
 from . import bfu_ui_utils
 from . import bfu_addon_pref
@@ -58,6 +60,10 @@ if "bbpl" in locals():
     importlib.reload(bbpl)
 if "bfu_propertys" in locals():
     importlib.reload(bfu_propertys)
+if "bfu_camera" in locals():
+    importlib.reload(bfu_camera)
+if "bfu_collision" in locals():
+    importlib.reload(bfu_collision)
 if "bfu_addon_parts" in locals():
     importlib.reload(bfu_addon_parts)
 if "bfu_ui_utils" in locals():
@@ -122,6 +128,8 @@ def register():
 
     bbpl.register()
     bfu_propertys.register()
+    bfu_camera.register()
+    bfu_collision.register()
     bfu_addon_parts.register()
     bfu_ui_utils.register()
     bfu_addon_pref.register()
@@ -143,5 +151,7 @@ def unregister():
     bfu_addon_pref.unregister()
     bfu_ui_utils.unregister()
     bfu_addon_parts.unregister()
+    bfu_camera.unregister()
+    bfu_collision.unregister()
     bfu_propertys.unregister()
     bbpl.unregister()
