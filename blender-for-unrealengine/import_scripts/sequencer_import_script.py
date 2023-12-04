@@ -15,7 +15,7 @@ except ImportError:
 
 def CheckTasks():
 
-    if GetUnrealVersion() >= 4.20:  # TO DO: EditorAssetLibrary was added in witch version exactly?
+    if is_unreal_version_greater_or_equal(4,20):  # TO DO: EditorAssetLibrary was added in witch version exactly?
         if not hasattr(unreal, 'EditorAssetLibrary'):
             print('--------------------------------------------------')
             print('WARNING: Editor Scripting Utilities should be activated.')
@@ -46,11 +46,21 @@ def JsonLoadFile(json_file_path):
             return JsonLoad(json_file)
 
 
-def GetUnrealVersion():
-    version = unreal.SystemLibrary.get_engine_version().split(".")
-    float_version = int(version[0]) + float(float(version[1])/100)
-    return float_version
+def get_unreal_version():
+    version_info = unreal.SystemLibrary.get_engine_version().split('-')[0]
+    version_numbers = version_info.split('.')
+    major = int(version_numbers[0])
+    minor = int(version_numbers[1])
+    patch = int(version_numbers[2])
+    return major, minor, patch
 
+def is_unreal_version_greater_or_equal(target_major, target_minor=0, target_patch=0):
+    major, minor, patch = get_unreal_version()
+    
+    if major > target_major or (major == target_major and minor >= target_minor) or (major == target_major and minor == target_minor and patch >= target_patch):
+        return True
+    else:
+        return False
 
 def CreateSequencer():
 
@@ -77,7 +87,7 @@ def CreateSequencer():
             frame = unreal.FrameNumber(int(key))
 
 
-            if GetUnrealVersion() >= 5.0:
+            if is_unreal_version_greater_or_equal(5,0):
                 sequencer_section.get_all_channels()[0].add_key(frame, value["location_x"])
                 sequencer_section.get_all_channels()[1].add_key(frame, value["location_y"])
                 sequencer_section.get_all_channels()[2].add_key(frame, value["location_z"])
@@ -102,7 +112,7 @@ def CreateSequencer():
         for key in track_dict.keys():
             frame = unreal.FrameNumber(int(key))
             value = track_dict[key]
-            if GetUnrealVersion() >= 5.0:
+            if is_unreal_version_greater_or_equal(5,0):
                 sequencer_section.get_all_channels()[0].add_key(frame, value)
             else:
                 sequencer_section.get_channels()[0].add_key(frame, value)
@@ -111,7 +121,7 @@ def CreateSequencer():
         for key in track_dict.keys():
             frame = unreal.FrameNumber(int(key))
             value = track_dict[key]
-            if GetUnrealVersion() >= 5.0:
+            if is_unreal_version_greater_or_equal(5,0):
                 sequencer_section.get_all_channels()[0].add_key(frame, value)
             else:
                 sequencer_section.get_channels()[0].add_key(frame, value)
@@ -137,13 +147,13 @@ def CreateSequencer():
     # Set playback range
     seq.set_playback_end_seconds((endFrame-secureCrop)/float(frameRateNumerator))
     seq.set_playback_start_seconds(startFrame/float(frameRateNumerator))  # set_playback_end_seconds
-    if GetUnrealVersion() >= 5.1:
+    if is_unreal_version_greater_or_equal(5,2):
         camera_cut_track = seq.add_track(unreal.MovieSceneCameraCutTrack)
     else:
         camera_cut_track = seq.add_master_track(unreal.MovieSceneCameraCutTrack)
 
     camera_cut_track.set_editor_property('display_name', 'Imported Camera Cuts')
-    if GetUnrealVersion() >= 4.26:
+    if is_unreal_version_greater_or_equal(4,26):
         camera_cut_track.set_color_tint(unreal.Color(b=200, g=0, r=0, a=0))
     else:
         pass
@@ -201,11 +211,10 @@ def CreateSequencer():
 
         TrackFocusDistance = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)
 
-        if GetUnrealVersion() >= 4.24:
+        if is_unreal_version_greater_or_equal(4,24):
             TrackFocusDistance.set_property_name_and_path('FocusSettings.ManualFocusDistance', 'FocusSettings.ManualFocusDistance')
             TrackFocusDistance.set_editor_property('display_name', 'Manual Focus Distance (Focus Settings)')
         else:
-            print(GetUnrealVersion())
             TrackFocusDistance.set_property_name_and_path('ManualFocusDistance', 'ManualFocusDistance')
             TrackFocusDistance.set_editor_property('display_name', 'Current Focus Distance')
 
@@ -246,7 +255,7 @@ def CreateSequencer():
         else:
             current_camera_binding = camera_binding
 
-        if GetUnrealVersion() >= 4.26:
+        if is_unreal_version_greater_or_equal(4,26):
             current_camera_binding.set_display_name(camera_data["name"])
         else:
             pass
@@ -285,9 +294,11 @@ def CreateSequencer():
             for camera in ImportedCamera:
                 if camera[0] == section["camera_name"]:
                     camera_binding_id = unreal.MovieSceneObjectBindingID()
-                    if GetUnrealVersion() >= 4.27:
+                    if is_unreal_version_greater_or_equal(5,3):
                         camera_binding_id = seq.get_binding_id(camera[1])
-                    elif GetUnrealVersion() >= 4.26:
+                    elif is_unreal_version_greater_or_equal(4,27):
+                        camera_binding_id = seq.get_portable_binding_id(seq, camera[1])
+                    elif is_unreal_version_greater_or_equal(4,26):
                         camera_binding_id = seq.make_binding_id(camera[1], unreal.MovieSceneObjectBindingSpace.LOCAL)
                     else:
                         camera_binding_id = seq.make_binding_id(camera[1])
@@ -305,10 +316,10 @@ def CreateSequencer():
         print('=========================')
 
     # Select and open seq in content browser
-    if GetUnrealVersion() >= 5.0:
+    if is_unreal_version_greater_or_equal(5,0):
         pass #TO DO make crate the engine
         #unreal.AssetEditorSubsystem.open_editor_for_assets(unreal.AssetEditorSubsystem(), [unreal.load_asset(seq.get_path_name())])
-    elif GetUnrealVersion() >= 4.26:
+    elif is_unreal_version_greater_or_equal(4,26):
         unreal.AssetEditorSubsystem.open_editor_for_assets(unreal.AssetEditorSubsystem(), [unreal.load_asset(seq.get_path_name())])
     else:
         unreal.AssetToolsHelpers.get_asset_tools().open_editor_for_assets([unreal.load_asset(seq.get_path_name())])

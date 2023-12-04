@@ -45,10 +45,21 @@ def JsonLoadFile(json_file_path):
             return JsonLoad(json_file)
 
 
-def GetUnrealVersion():
-    version = unreal.SystemLibrary.get_engine_version().split(".")
-    float_version = int(version[0]) + float(float(version[1])/100)
-    return float_version
+def get_unreal_version():
+    version_info = unreal.SystemLibrary.get_engine_version().split('-')[0]
+    version_numbers = version_info.split('.')
+    major = int(version_numbers[0])
+    minor = int(version_numbers[1])
+    patch = int(version_numbers[2])
+    return major, minor, patch
+
+def is_unreal_version_greater_or_equal(target_major, target_minor=0, target_patch=0):
+    major, minor, patch = get_unreal_version()
+    
+    if major > target_major or (major == target_major and minor >= target_minor) or (major == target_major and minor == target_minor and patch >= target_patch):
+        return True
+    else:
+        return False
 
 
 def ImportAllAssets():
