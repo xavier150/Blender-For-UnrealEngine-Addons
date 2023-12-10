@@ -19,7 +19,7 @@ except ImportError:
 
 def CheckTasks():
 
-    if GetUnrealVersion() >= 4.20:  # TO DO: EditorAssetLibrary was added in witch version exactly?
+    if is_unreal_version_greater_or_equal(4,20):  # TO DO: EditorAssetLibrary was added in witch version exactly?
         if not hasattr(unreal, 'EditorAssetLibrary'):
             print('--------------------------------------------------')
             print('WARNING: Editor Scripting Utilities should be activated.')
