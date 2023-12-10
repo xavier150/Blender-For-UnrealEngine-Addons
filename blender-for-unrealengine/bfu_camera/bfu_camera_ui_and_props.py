@@ -27,7 +27,7 @@ from bpy.types import (
 from . import bfu_camera_utils
 from .. import bfu_basics
 from .. import bfu_utils
-from .. import bfu_ui_utils
+from .. import bfu_ui
 
 
 # Object button

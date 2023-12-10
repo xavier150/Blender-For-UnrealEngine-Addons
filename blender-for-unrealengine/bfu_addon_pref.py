@@ -19,31 +19,9 @@
 import os
 import bpy
 
-from .export import bfu_export_asset
-from . import bfu_write_text
-from . import bfu_basics
-from . import bfu_utils
-from . import bfu_check_potential_error
-from . import bfu_ui_utils
+from . import bfu_ui
 from . import languages
 
-
-if "bpy" in locals():
-    import importlib
-    if "bfu_export_asset" in locals():
-        importlib.reload(bfu_export_asset)
-    if "bfu_write_text" in locals():
-        importlib.reload(bfu_write_text)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-    if "bfu_check_potential_error" in locals():
-        importlib.reload(bfu_check_potential_error)
-    if "bfu_ui_utils" in locals():
-        importlib.reload(bfu_ui_utils)
-    if "languages" in locals():
-        importlib.reload(languages)
 
 
 class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
@@ -137,12 +115,6 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         default=1,
         )
 
-    exportCameraAsFBX: bpy.props.BoolProperty(
-        name=(languages.ti('export_camera_as_fbx_name')),
-        description=(languages.tt('export_camera_as_fbx_desc')),
-        default=False,
-        )
-
     bakeOnlyKeyVisibleInCut: bpy.props.BoolProperty(
         name=(languages.ti('bake_only_key_visible_in_cut_name')),
         description=(languages.tt('bake_only_key_visible_in_cut_desc')),
@@ -227,7 +199,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 
         rootBone = ColumnLeft.box()
 
-        bfu_ui_utils.LabelWithDocButton(
+        bfu_ui.bfu_ui_utils.LabelWithDocButton(
             rootBone,
             "SKELETON & ROOT BONE",
             "skeleton--root-bone"
@@ -253,7 +225,6 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 
         camera = ColumnLeft.box()
         camera.label(text='CAMERA')
-        camera.prop(self, "exportCameraAsFBX")
         camera.prop(self, "bakeOnlyKeyVisibleInCut")
 
         data = ColumnRight.box()

@@ -36,12 +36,12 @@ from bpy.types import (
         Operator,
         )
 
-from . import bfu_export_procedure
+from .. import bfu_export_procedure
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_cached_asset_list
 from ..export import bfu_export_get_info
-from .. import bfu_ui_utils
+from .. import bfu_ui
 from .. import languages
 
 
@@ -105,11 +105,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         )
 
     bpy.types.Object.bfu_export_fbx_camera = BoolProperty(
-        name="Export camera fbx",
-        description=(
-            'True: export .Fbx object and AdditionalTrack.ini ' +
-            'Else: export only AdditionalTrack.ini'
-            ),
+        name=(languages.ti('export_camera_as_fbx_name')),
+        description=(languages.tt('export_camera_as_fbx_desc')),
         override={'LIBRARY_OVERRIDABLE'},
         default=False,
         )
@@ -1327,6 +1324,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             return {'FINISHED'}
 
     def draw(self, context):
+        
         scene = bpy.context.scene
         obj = bpy.context.object
         addon_prefs = bfu_basics.GetAddonPrefs()
@@ -1365,7 +1363,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         if scene.bfu_active_tab == "SCENE":
             layout.row().prop(scene, "bfu_active_scene_tab", expand=True)
 
-        if bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
+        if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
             
             scene.bfu_object_properties_expanded.draw(layout)
             if scene.bfu_object_properties_expanded.is_expend():
@@ -1399,6 +1397,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         if obj.type == "CAMERA":
                             CameraProp.prop(obj, 'bfu_export_fbx_camera')
                             CameraProp.prop(obj, 'bfu_fix_axis_flippings')
+                            bfu_export_procedure.bfu_export_procedure_ui.draw_object_export_procedure(layout, obj)
 
                         else:
                             ProxyProp = layout.column()
@@ -1414,9 +1413,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 else:
                                     ProxyProp.label(text="Proxy child not found")
 
-                            if obj.type == "ARMATURE":
-                                export_procedure_prop = layout.column()
-                                export_procedure_prop.prop(obj, 'bfu_export_procedure')
+                            bfu_export_procedure.bfu_export_procedure_ui.draw_object_export_procedure(layout, obj)
 
                             if not bfu_utils.GetExportAsProxy(obj):
                                 AlembicProp = layout.column()
@@ -1480,7 +1477,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 BoneAxisProperty.prop(obj, 'bfu_export_secondary_bone_axis')
                         else:
                             box = layout.box()
-                            preset = bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)  # Obtenez le dictionnaire de preset
+                            preset = bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)  # Obtenez le dictionnaire de preset
                             var_lines = box.column()
                             # Utilisez une boucle pour itérer sur les éléments du dictionnaire
                             for key, value in preset.items():
@@ -1512,7 +1509,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 if obj.bfu_skeleton_search_mode == "custom_reference":
                                     unreal_skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
                                 ue_standard_skeleton = layout.column()
-                                ue_standard_skeleton.enabled = obj.bfu_export_procedure == "ue-standard"
+                                ue_standard_skeleton.enabled = obj.bfu_skeleton_export_procedure == "ue-standard"
                                 ue_standard_skeleton.prop(obj, "bfu_export_animation_without_mesh")
                                 ue_standard_skeleton.prop(obj, "bfu_mirror_symmetry_right_side_bones")
                                 mirror_symmetry_right_side_bones = ue_standard_skeleton.row()
@@ -1533,9 +1530,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             if obj.bfu_modular_skeletal_mesh_mode == "specified_parts":
                                 obj.bfu_modular_skeletal_specified_parts_meshs_template.draw(modular_skeletal_mesh)
 
-
-
-        if bfu_ui_utils.DisplayPropertyFilter("OBJECT", "ANIM"):
+        if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "ANIM"):
             if obj is not None:
                 if obj.bfu_export_type == "export_recursive" and not obj.bfu_export_as_lod_mesh:
 
@@ -1567,7 +1562,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                     ActionListProperty.prop(obj, 'bfu_prefix_name_to_export')
 
                             # Action Time
-                            if obj.type != "CAMERA" and obj.bfu_export_procedure != "auto-rig-pro":
+                            if obj.type != "CAMERA" and obj.bfu_skeleton_export_procedure != "auto-rig-pro":
                                 ActionTimeProperty = layout.column()
                                 ActionTimeProperty.enabled = obj.bfu_anim_action_export_enum != 'dont_export'
                                 ActionTimeProperty.prop(obj, 'bfu_anim_action_start_end_time_enum')
@@ -1620,12 +1615,12 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             NLAAnimChild = NLAAnim.column()
                             NLAAnimChild.enabled = obj.bfu_anim_nla_use
                             NLAAnimChild.prop(obj, 'bfu_anim_nla_export_name')
-                            if obj.bfu_export_procedure == "auto-rig-pro":
+                            if obj.bfu_skeleton_export_procedure == "auto-rig-pro":
                                 NLAAnim.enabled = False
                                 NLAAnimChild.enabled = False
 
                         # NLA Time
-                        if obj.type != "CAMERA" and obj.bfu_export_procedure != "auto-rig-pro":
+                        if obj.type != "CAMERA" and obj.bfu_skeleton_export_procedure != "auto-rig-pro":
                             NLATimeProperty = layout.column()
                             NLATimeProperty.enabled = obj.bfu_anim_nla_use
                             NLATimeProperty.prop(obj, 'bfu_anim_nla_start_end_time_enum')
@@ -1653,7 +1648,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         # Animation fbx properties
                         if (bfu_utils.GetAssetType(obj) != "Alembic"):
                             propsFbx = layout.row()
-                            if obj.bfu_export_procedure != "auto-rig-pro":
+                            if obj.bfu_skeleton_export_procedure != "auto-rig-pro":
                                 propsFbx.prop(obj, 'bfu_sample_anim_for_export')
                             propsFbx.prop(obj, 'bfu_simplify_anim_for_export')
                         propsScaleAnimation = layout.row()
@@ -1684,7 +1679,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             else:
                 layout.label(text='(No properties to show.)')
 
-        if bfu_ui_utils.DisplayPropertyFilter("OBJECT", "MISC"):
+        if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "MISC"):
 
             scene.bfu_object_lod_properties_expanded.draw(layout)
             if scene.bfu_object_lod_properties_expanded.is_expend():
@@ -1722,7 +1717,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     if obj.bfu_export_type == "export_recursive":
 
                         # StaticMesh prop
-                        if bfu_ui_utils.display_asset_type_filter(obj, "StaticMesh"):
+                        if bfu_ui.bfu_ui_utils.display_asset_type_filter(obj, "StaticMesh"):
                             if not obj.bfu_export_as_lod_mesh:
                                 auto_generate_collision = layout.row()
                                 auto_generate_collision.prop(
@@ -1735,7 +1730,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                     'bfu_collision_trace_flag'
                                     )
                         # SkeletalMesh prop
-                        if bfu_ui_utils.display_asset_type_filter(obj, "SkeletalMesh"):
+                        if bfu_ui.bfu_ui_utils.display_asset_type_filter(obj, "SkeletalMesh"):
                             if not obj.bfu_export_as_lod_mesh:
                                 create_physics_asset = layout.row()
                                 create_physics_asset.prop(obj, "bfu_create_physics_asset")
@@ -1823,7 +1818,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     bfu_convert_geometry_node_attribute_to_uv = layout.column()
                     convert_geometry_node_attribute_to_uv_use = bfu_convert_geometry_node_attribute_to_uv.row()
                     convert_geometry_node_attribute_to_uv_use.prop(obj, 'bfu_convert_geometry_node_attribute_to_uv')
-                    bfu_ui_utils.DocPageButton(convert_geometry_node_attribute_to_uv_use, "wiki/UV-Maps", "Geometry Node UV")
+                    bfu_ui.bfu_ui_utils.DocPageButton(convert_geometry_node_attribute_to_uv_use, "wiki/UV-Maps", "Geometry Node UV")
                     bfu_convert_geometry_node_attribute_to_uv_name = bfu_convert_geometry_node_attribute_to_uv.row()
                     bfu_convert_geometry_node_attribute_to_uv_name.prop(obj, 'bfu_convert_geometry_node_attribute_to_uv_name')
                     bfu_convert_geometry_node_attribute_to_uv_name.enabled = obj.bfu_convert_geometry_node_attribute_to_uv
@@ -1831,9 +1826,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     # Extreme UV Scale
                     bfu_correct_extrem_uv_scale = layout.row()
                     bfu_correct_extrem_uv_scale.prop(obj, 'bfu_correct_extrem_uv_scale')
-                    bfu_ui_utils.DocPageButton(bfu_correct_extrem_uv_scale, "wiki/UV-Maps", "Extreme UV Scale")
+                    bfu_ui.bfu_ui_utils.DocPageButton(bfu_correct_extrem_uv_scale, "wiki/UV-Maps", "Extreme UV Scale")
 
-        if bfu_ui_utils.DisplayPropertyFilter("SCENE", "GENERAL"):
+        if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("SCENE", "GENERAL"):
 
             scene.bfu_collection_properties_expanded.draw(layout)
             if scene.bfu_collection_properties_expanded.is_expend():
@@ -1858,6 +1853,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         col = bpy.data.collections[col_name]
                         col_prop = layout
                         col_prop.prop(col, 'bfu_export_folder_name', icon='FILE_FOLDER')
+                        bfu_export_procedure.bfu_export_procedure_ui.draw_collection_export_procedure(layout, col)
 
                 collectionPropertyInfo = layout.row().box().split(factor=0.75)
                 collection_asset_cache = bfu_cached_asset_list.GetCollectionAssetCache()

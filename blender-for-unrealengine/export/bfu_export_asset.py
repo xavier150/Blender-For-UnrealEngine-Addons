@@ -63,7 +63,7 @@ if "bpy" in locals():
 def IsValidActionForExport(scene, obj, animType):
     if animType == "Action":
         if scene.anin_export:
-            if obj.bfu_export_procedure == 'auto-rig-pro':
+            if obj.bfu_skeleton_export_procedure == 'auto-rig-pro':
                 if bfu_basics.CheckPluginIsActivated('auto_rig_pro-master'):
                     return True
             else:
@@ -72,7 +72,7 @@ def IsValidActionForExport(scene, obj, animType):
             return False
     elif animType == "Pose":
         if scene.anin_export:
-            if obj.bfu_export_procedure == 'auto-rig-pro':
+            if obj.bfu_skeleton_export_procedure == 'auto-rig-pro':
                 if bfu_basics.CheckPluginIsActivated('auto_rig_pro-master'):
                     return True
             else:
@@ -81,7 +81,7 @@ def IsValidActionForExport(scene, obj, animType):
             return False
     elif animType == "NLA":
         if scene.anin_export:
-            if obj.bfu_export_procedure == 'auto-rig-pro':
+            if obj.bfu_skeleton_export_procedure == 'auto-rig-pro':
                 return False
             else:
                 return True
@@ -101,7 +101,7 @@ def IsValidObjectForExport(scene, obj):
         return scene.static_export
     if objType == "SkeletalMesh":
         if scene.skeletal_export:
-            if obj.bfu_export_procedure == 'auto-rig-pro':
+            if obj.bfu_skeleton_export_procedure == 'auto-rig-pro':
                 if bfu_basics.CheckPluginIsActivated('auto_rig_pro-master'):
                     return True
             else:
@@ -187,15 +187,6 @@ def process_export(op):
             if Asset.obj not in obj_list:
                 obj_list.append(Asset.obj)
 
-    '''
-    ExportAllAssetByList(
-        op,
-        targetobjects=obj_list,
-        targetActionName=action_list,
-        targetcollection=col_list,
-    )
-    '''
-
     MyCurrentDataSave.reset_select_by_name()
     MyCurrentDataSave.reset_scene_at_save(print_removed_items = True)
 
@@ -217,7 +208,24 @@ def export_all_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToExpo
     export_nonlinear_animation_from_asset_list(op, asset_list)
 
 def export_collection_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToExport):
-    pass
+    scene = bpy.context.scene
+    addon_prefs = bfu_basics.GetAddonPrefs()
+    print("Start Export collection(s)")
+
+    if scene.static_collection_export:
+        collection_asset_cache = bfu_cached_asset_list.GetCollectionAssetCache()
+        collection_export_asset_list = collection_asset_cache.GetCollectionAssetList()
+        for col in collection_export_asset_list:
+            # Save current start/end frame
+            UserStartFrame = scene.frame_start
+            UserEndFrame = scene.frame_end
+            bfu_export_single_static_mesh_collection.ProcessCollectionExport(op, col)
+
+            # Resets previous start/end frame
+            scene.frame_start = UserStartFrame
+            scene.frame_end = UserEndFrame
+
+
 
 def export_camera_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToExport):
     scene = bpy.context.scene
@@ -379,67 +387,3 @@ def export_nonlinear_animation_from_asset_list(op, asset_list: bfu_cached_asset_
                             scene.frame_start = UserStartFrame
                             scene.frame_end = UserEndFrame
 
-
-def ExportAllAssetByList(op, targetobjects, targetActionName, targetcollection):
-    # Export all objects that need to be exported from a list
-
-    print(len(targetobjects), len(targetcollection))
-    if len(targetobjects) < 1 and len(targetcollection) < 1:
-        return
-
-    scene = bpy.context.scene
-    counter = bps.utils.CounterTimer()
-
-    final_asset_cache = bfu_cached_asset_list.GetfinalAssetCache()
-    final_asset_list_to_export = final_asset_cache.GetFinalAssetList()
-    NumberAssetToExport = len(final_asset_list_to_export)
-
-    def UpdateExportProgress(time=None):
-        exported_assets = len(scene.UnrealExportedAssetsList)
-        remain_assets = exported_assets/NumberAssetToExport
-
-        wm = bpy.context.window_manager
-
-        if remain_assets == NumberAssetToExport:
-            wm.progress_begin(0, remain_assets)
-
-        wm.progress_update(exported_assets)
-
-        if remain_assets == 0:
-            wm.progress_end()
-
-        bfu_utils.UpdateProgress("Export assets", remain_assets, time)
-
-    UpdateExportProgress()
-
-    # Export collections
-    print("Start Export collection(s)")
-    if scene.static_collection_export:
-        collection_asset_cache = bfu_cached_asset_list.GetCollectionAssetCache()
-        collection_export_asset_list = collection_asset_cache.GetCollectionAssetList()
-        for col in collection_export_asset_list:
-            if col.name in targetcollection:
-                # Save current start/end frame
-                UserStartFrame = scene.frame_start
-                UserEndFrame = scene.frame_end
-                bfu_export_single_static_mesh_collection.ProcessCollectionExport(op, col)
-
-                # Resets previous start/end frame
-                scene.frame_start = UserStartFrame
-                scene.frame_end = UserEndFrame
-                UpdateExportProgress()
-
-    # Export assets
-    for obj in targetobjects:
-        if obj.bfu_export_type == "export_recursive":
-            pass
-
-
-
-
-
-
-
-
-
-    UpdateExportProgress(counter.get_time())

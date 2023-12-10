@@ -28,6 +28,7 @@ from .. import bfu_utils
 from .. import bbpl
 from .. import bfu_addon_parts
 from .. import bfu_camera
+from .. import bfu_export_procedure
 
 dup_temp_name = "BFU_Temp"  # DuplicateTemporarilyNameForUe4Export
 Export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
@@ -538,7 +539,7 @@ def ClearVertexColorForUnrealExport(parent):
 def GetShouldRescaleRig(obj):
     # This will return if the rig should be rescale.
 
-    if obj.bfu_export_procedure == "auto-rig-pro":
+    if obj.bfu_skeleton_export_procedure == "auto-rig-pro":
         return False
 
     addon_prefs = bfu_basics.GetAddonPrefs()
@@ -653,22 +654,22 @@ def get_final_export_primary_bone_axis(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_primary_bone_axis
     else:
-        return bfu_addon_parts.bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["primary_bone_axis"]
+        return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["primary_bone_axis"]
 
 def get_final_export_secondary_bone_axis(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_secondary_bone_axis
     else:
-        return bfu_addon_parts.bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["secondary_bone_axis"]
+        return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["secondary_bone_axis"]
 
 def get_export_axis_forward(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_axis_forward
     else:
-        return bfu_addon_parts.bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["axis_forward"]
+        return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["axis_forward"]
 
 def get_export_axis_up(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_axis_up
     else:
-        return bfu_addon_parts.bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["axis_up"]
+        return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["axis_up"]

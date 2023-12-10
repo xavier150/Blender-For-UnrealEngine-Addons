@@ -124,7 +124,7 @@ def ExportSingleFbxAction(
         bfu_utils.RemoveSocketFromSelectForProxyArmature()
 
     active.animation_data.action = targetAction  # Apply desired action
-    export_procedure = active.bfu_export_procedure
+    skeleton_export_procedure = active.bfu_skeleton_export_procedure
 
     if addon_prefs.bakeArmatureAction:
         bfu_export_utils.BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)
@@ -162,7 +162,7 @@ def ExportSingleFbxAction(
 
     asset_name.SetExportName()
 
-    if (export_procedure == "ue-standard"):
+    if (skeleton_export_procedure == "ue-standard"):
         export_fbx_bin.save(
             operator=op,
             context=bpy.context,
@@ -200,7 +200,7 @@ def ExportSingleFbxAction(
             axis_up=bfu_export_utils.get_export_axis_up(obj),
             bake_space_transform=False
             )
-    elif (export_procedure == "blender-standard"):
+    elif (skeleton_export_procedure == "blender-standard"):
         bpy.ops.export_scene.fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
@@ -230,7 +230,7 @@ def ExportSingleFbxAction(
             axis_up=bfu_export_utils.get_export_axis_up(obj),
             bake_space_transform=False
             )
-    elif (export_procedure == "auto-rig-pro"):
+    elif (skeleton_export_procedure == "auto-rig-pro"):
 
         # Rename Action name for export
         TempName = "ActionAutoRigProTempExportNameForUnreal"

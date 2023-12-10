@@ -105,7 +105,7 @@ def ExportSingleFbxNLAAnim(
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
 
-    export_procedure = active.bfu_export_procedure
+    skeleton_export_procedure = active.bfu_skeleton_export_procedure
 
     animation_data = bbpl.anim_utils.AnimationManagment()
     animation_data.save_animation_data(obj)
@@ -144,7 +144,7 @@ def ExportSingleFbxNLAAnim(
 
     asset_name.SetExportName()
 
-    if (export_procedure == "ue-standard"):
+    if (skeleton_export_procedure == "ue-standard"):
         export_fbx_bin.save(
             operator=op,
             context=bpy.context,
@@ -181,7 +181,7 @@ def ExportSingleFbxNLAAnim(
             axis_up=bfu_export_utils.get_export_axis_up(obj),
             bake_space_transform=False
             )
-    elif (export_procedure == "blender-standard"):
+    elif (skeleton_export_procedure == "blender-standard"):
         bpy.ops.export_scene.fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
@@ -210,7 +210,7 @@ def ExportSingleFbxNLAAnim(
             axis_up=bfu_export_utils.get_export_axis_up(obj),
             bake_space_transform=False
             )
-    elif (export_procedure == "auto-rig-pro"):
+    elif (skeleton_export_procedure == "auto-rig-pro"):
         bpy.ops.export_scene.fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             # export_rig_name=GetDesiredExportArmatureName(active),

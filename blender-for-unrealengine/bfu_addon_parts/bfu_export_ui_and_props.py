@@ -15,7 +15,7 @@ from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_check_potential_error
 from .. import bfu_cached_asset_list
-from .. import bfu_ui_utils
+from .. import bfu_ui
 from .. import bbpl
 from .. import bps
 
@@ -220,6 +220,7 @@ class BFU_PT_Export(bpy.types.Panel):
             def draw(self, context):
                 col = self.layout.column()
                 for asset in final_asset_list_to_export:
+                    asset :bfu_cached_asset_list.AssetToExport
                     row = col.row()
                     if asset.obj is not None:
                         if asset.action is not None:
@@ -241,7 +242,7 @@ class BFU_PT_Export(bpy.types.Panel):
                                     " ("+asset.asset_type+")")
                             else:
                                 row.label(
-                                    text="- "+asset.obj +
+                                    text="- "+asset.obj.name +
                                     " ("+asset.asset_type+")")
 
                     else:
@@ -487,11 +488,7 @@ class BFU_PT_Export(bpy.types.Panel):
 
             self.report(
                 {'INFO'},
-                "Export of " +
-                str(len(scene.UnrealExportedAssetsList)) +
-                " asset(s) has been finalized in " +
-                str(round(counter.get_time(), 2)) +
-                "seconds. Look in console for more info.")
+                "Export of " + str(len(scene.UnrealExportedAssetsList)) + " asset(s) has been finalized in " + counter.get_str_time() + " Look in console for more info.")
             print(
                 "=========================" +
                 " Exported asset(s) " +

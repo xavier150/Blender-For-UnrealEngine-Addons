@@ -19,7 +19,7 @@
 
 import os
 import bpy
-from . import bfu_utils
+from .. import bfu_utils
 
 def display_asset_type_filter(obj, filter):
     """

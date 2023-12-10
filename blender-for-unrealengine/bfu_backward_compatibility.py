@@ -39,6 +39,9 @@ def update_old_variables():
     print("Updating old bfu variables...")
 
     for obj in bpy.data.objects:
+
+
+        update_variable(obj, ["bfu_export_procedure"], "bfu_skeleton_export_procedure")
         update_variable(obj, ["ExportEnum"], "bfu_export_type", enum_callback)
         update_variable(obj, ["exportFolderName"], "bfu_export_folder_name")
         update_variable(obj, ["ExportAsAlembic"], "bfu_export_as_alembic")

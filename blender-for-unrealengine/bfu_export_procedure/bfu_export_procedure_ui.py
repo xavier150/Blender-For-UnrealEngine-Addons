@@ -16,47 +16,30 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-import os
 import bpy
-import addon_utils
-import time
+from .. import bfu_utils
 
-from bpy.props import (
-        StringProperty,
-        BoolProperty,
-        EnumProperty,
-        IntProperty,
-        FloatProperty,
-        FloatVectorProperty,
-        PointerProperty,
-        CollectionProperty,
-        )
+def draw_object_export_procedure(layout, obj: bpy.types.Object):
+    if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+        export_procedure_prop = layout.column()
+        export_procedure_prop.prop(obj, 'bfu_skeleton_export_procedure')
+    elif obj.bfu_export_as_alembic:
+        export_procedure_prop = layout.column()
+        export_procedure_prop.prop(obj, 'bfu_alembic_export_procedure')
+    elif obj.type == "CAMERA":
+        export_procedure_prop = layout.column()
+        export_procedure_prop.prop(obj, 'bfu_camera_export_procedure')
+    else:
+        export_procedure_prop = layout.column()
+        export_procedure_prop.prop(obj, 'bfu_static_export_procedure')
 
-from bpy.types import (
-        Operator,
-        )
-
-from .export import bfu_export_asset
-from . import bfu_write_text
-from . import bfu_basics
-from . import bfu_utils
-from .export import bfu_export_get_info
-from . import bfu_check_potential_error
-from . import bfu_ui_utils
-from . import languages
-
-from . import bbpl
-from . import bps
-
-
-
+def draw_collection_export_procedure(layout, col: bpy.types.Collection):
+    export_procedure_prop = layout.column()
+    export_procedure_prop.prop(col, 'bfu_collection_export_procedure')
 
 
 classes = (
 )
-
-
-
 
 def register():
     for cls in classes:

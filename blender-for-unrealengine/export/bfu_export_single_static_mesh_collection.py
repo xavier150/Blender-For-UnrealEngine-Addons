@@ -18,6 +18,7 @@
 
 
 import bpy
+from bpy_extras.io_utils import axis_conversion
 from . import bfu_export_utils
 from .. import bbpl
 from .. import bfu_basics
@@ -25,6 +26,7 @@ from .. import bfu_utils
 from .. import bfu_naming
 from .. import bfu_check_potential_error
 from .. import bfu_export_logs
+from ..fbxio import export_fbx_bin
 
 if "bpy" in locals():
     import importlib
@@ -38,8 +40,10 @@ if "bpy" in locals():
         importlib.reload(bfu_utils)
     if "bfu_check_potential_error" in locals():
         importlib.reload(bfu_check_potential_error)
+    if "export_fbx_bin" in locals():
+        importlib.reload(export_fbx_bin)
 
-def ProcessCollectionExport(col):
+def ProcessCollectionExport(op, col):
 
     addon_prefs = bfu_basics.GetAddonPrefs()
     dirpath = bfu_utils.GetCollectionExportDir(bpy.data.collections[col.name])
@@ -60,7 +64,7 @@ def ProcessCollectionExport(col):
     file.file_type = "FBX"
 
     MyAsset.StartAssetExport()
-    ExportSingleStaticMeshCollection(dirpath, file.GetFileWithExtension(), col.name)
+    ExportSingleStaticMeshCollection(op, dirpath, file.GetFileWithExtension(), col.name)
 
     if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
         
@@ -76,9 +80,10 @@ def ProcessCollectionExport(col):
 
 
 def ExportSingleStaticMeshCollection(
+        op,
         dirpath,
         filename,
-        collectionName
+        collection_name
         ):
 
     '''
@@ -90,11 +95,11 @@ def ExportSingleStaticMeshCollection(
 
     scene = bpy.context.scene
     addon_prefs = bfu_basics.GetAddonPrefs()
-    collection = bpy.data.collections[collectionName]
+    col = bpy.data.collections[collection_name]
 
     bbpl.utils.safe_mode_set('OBJECT')
 
-    bfu_utils.SelectCollectionObjects(collection)
+    bfu_utils.SelectCollectionObjects(col)
     duplicate_data = bfu_export_utils.DuplicateSelectForExport()
     bfu_export_utils.SetDuplicateNameForExport(duplicate_data)
 
@@ -111,26 +116,51 @@ def ExportSingleStaticMeshCollection(
     bfu_check_potential_error.UpdateNameHierarchy(
         bfu_utils.GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
         )
+    
+    static_export_procedure = col.bfu_collection_export_procedure
 
-    bpy.ops.export_scene.fbx(
-        filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
-        check_existing=False,
-        use_selection=True,
-        global_scale=1,
-        object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
-        use_custom_props=addon_prefs.exportWithCustomProps,
-        use_custom_curves=True,
-        mesh_smooth_type="FACE",
-        add_leaf_bones=False,
-        # use_armature_deform_only=active.bfu_export_deform_only,
-        bake_anim=False,
-        use_metadata=addon_prefs.exportWithMetaData,
-        # primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
-        # secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
-        # axis_forward=bfu_export_utils.get_export_axis_forward(obj),
-        # axis_up=bfu_export_utils.get_export_axis_up(obj),
-        bake_space_transform=False
-        )
+    if (static_export_procedure == "ue-standard"):
+        export_fbx_bin.save(
+            operator=op,
+            context=bpy.context,
+            filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
+            check_existing=False,
+            use_selection=True,
+            global_scale=1,
+            object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
+            use_custom_props=addon_prefs.exportWithCustomProps,
+            use_custom_curves=True,
+            mesh_smooth_type="FACE",
+            add_leaf_bones=False,
+            # use_armature_deform_only=active.bfu_export_deform_only,
+            bake_anim=False,
+            use_metadata=addon_prefs.exportWithMetaData,
+            # primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
+            # secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
+            # axis_forward=bfu_export_utils.get_export_axis_forward(obj),
+            # axis_up=bfu_export_utils.get_export_axis_up(obj),
+            bake_space_transform=False
+            )
+    elif (static_export_procedure == "blender-standard"):
+        bpy.ops.export_scene.fbx(
+            filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
+            check_existing=False,
+            use_selection=True,
+            global_scale=1,
+            object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
+            use_custom_props=addon_prefs.exportWithCustomProps,
+            mesh_smooth_type="FACE",
+            add_leaf_bones=False,
+            # use_armature_deform_only=active.bfu_export_deform_only,
+            bake_anim=False,
+            use_metadata=addon_prefs.exportWithMetaData,
+            # primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
+            # secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
+            # axis_forward=bfu_export_utils.get_export_axis_forward(obj),
+            # axis_up=bfu_export_utils.get_export_axis_up(obj),
+            bake_space_transform=False
+            )
+    
     for obj in bpy.context.selected_objects:
         bfu_export_utils.ClearVertexColorForUnrealExport(obj)
         bfu_export_utils.ResetSocketsExportName(obj)

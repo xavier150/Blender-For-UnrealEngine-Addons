@@ -38,7 +38,7 @@ from . import bfu_propertys
 from . import bfu_camera
 from . import bfu_collision
 from . import bfu_addon_parts
-from . import bfu_ui_utils
+from . import bfu_export_procedure
 from . import bfu_addon_pref
 from . import bfu_export_logs
 from . import bfu_ui
@@ -66,8 +66,8 @@ if "bfu_collision" in locals():
     importlib.reload(bfu_collision)
 if "bfu_addon_parts" in locals():
     importlib.reload(bfu_addon_parts)
-if "bfu_ui_utils" in locals():
-    importlib.reload(bfu_ui_utils)
+if "bfu_export_procedure" in locals():
+    importlib.reload(bfu_export_procedure)
 if "bfu_addon_pref" in locals():
     importlib.reload(bfu_addon_pref)
 if "bfu_export_logs" in locals():
@@ -120,8 +120,6 @@ class BFUCachedAction(bpy.types.PropertyGroup):
 classes = (
 )
 
-
-
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
@@ -131,7 +129,7 @@ def register():
     bfu_camera.register()
     bfu_collision.register()
     bfu_addon_parts.register()
-    bfu_ui_utils.register()
+    bfu_export_procedure.register()
     bfu_addon_pref.register()
     bfu_export_logs.register()
     bfu_ui.register()
@@ -149,7 +147,7 @@ def unregister():
     bfu_ui.unregister()
     bfu_export_logs.unregister()
     bfu_addon_pref.unregister()
-    bfu_ui_utils.unregister()
+    bfu_export_procedure.unregister()
     bfu_addon_parts.unregister()
     bfu_camera.unregister()
     bfu_collision.unregister()
