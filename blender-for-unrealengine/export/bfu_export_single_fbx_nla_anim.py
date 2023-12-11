@@ -99,6 +99,7 @@ def ExportSingleFbxNLAAnim(
         bfu_export_utils.SetDuplicateNameForExport(duplicate_data)
 
     if export_as_proxy is False:
+        bfu_export_utils.ConvertSelectedCurveToMesh()
         bfu_export_utils.MakeSelectVisualReal()
 
     BaseTransform = obj.matrix_world.copy()

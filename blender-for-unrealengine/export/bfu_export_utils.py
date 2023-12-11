@@ -208,6 +208,33 @@ def ResetDuplicateNameAfterExport(duplicate_data):
         user_selected.name = bfu_utils.GetObjOriginName(user_selected)
         bfu_utils.ClearObjOriginNameVar(user_selected)
 
+def ConvertSelectedCurveToMesh():
+    # Have to convert curve to mesh before MakeSelectVisualReal for avoid double duplicate issue.
+    select = bbpl.utils.UserSelectSave()
+    select.save_current_select()
+    
+    bpy.ops.object.select_all(action='DESELECT')
+
+    
+    for selected_obj in select.user_selecteds:
+        if selected_obj.type == "CURVE":
+            selected_obj.select_set(True)
+
+    # Save object list
+    previous_objects = []
+    for obj in bpy.data.objects:
+        previous_objects.append(obj)
+
+    # Convert to mesh
+    bpy.ops.object.convert(target='MESH')
+
+
+    select.reset_select_by_name()
+    
+    # Select the new objects
+    for obj in bpy.data.objects:
+        if obj not in previous_objects:
+            obj.select_set(True)
 
 def MakeSelectVisualReal():
     select = bbpl.utils.UserSelectSave()
@@ -223,20 +250,18 @@ def MakeSelectVisualReal():
 
     # Make Instances Real
     bpy.ops.object.duplicates_make_real(
-        use_base_parent=True,
+        use_base_parent=False,
         use_hierarchy=True
         )
 
     select.reset_select_by_name()
-
+    
     # Select the new objects
     for obj in bpy.data.objects:
         if obj not in previous_objects:
             obj.select_set(True)
 
 # Sockets
-
-
 def SetSocketsExportName(obj):
     '''
     Try to apply the custom SocketName

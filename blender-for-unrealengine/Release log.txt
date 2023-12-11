@@ -473,3 +473,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Export collections product ui script fail.
 - Fixed: Camera FBX are not exported when bfu_export_fbx_camera == True.
 - Fixed: Show Asset To Export Button do product script fail.
+- Fixed: Curve mesh is duplicate durring export.

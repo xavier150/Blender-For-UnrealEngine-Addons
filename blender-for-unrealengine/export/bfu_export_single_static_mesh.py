@@ -107,7 +107,8 @@ def ExportSingleStaticMesh(
     asset_name = bfu_export_utils.PrepareExportName(obj, False)
     duplicate_data = bfu_export_utils.DuplicateSelectForExport()
     bfu_export_utils.SetDuplicateNameForExport(duplicate_data)
-
+    
+    bfu_export_utils.ConvertSelectedCurveToMesh()
     bfu_export_utils.MakeSelectVisualReal()
 
     bfu_utils.ApplyNeededModifierToSelect()
