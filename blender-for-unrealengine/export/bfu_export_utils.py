@@ -226,8 +226,8 @@ def ConvertSelectedCurveToMesh():
         previous_objects.append(obj)
 
     # Convert to mesh
-    bpy.ops.object.convert(target='MESH')
-
+    if bpy.context.selected_objects:
+        bpy.ops.object.convert(target='MESH')
 
     select.reset_select_by_name()
     
