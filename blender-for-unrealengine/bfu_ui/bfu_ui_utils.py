@@ -81,6 +81,7 @@ def DocPageButton(layout, doc_page, doc_octicon=""):
         icon="HELP",
         text=""
         )
+    
     docOperator.page = doc_page
     docOperator.octicon = doc_octicon
 
