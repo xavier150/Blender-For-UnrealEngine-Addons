@@ -68,7 +68,7 @@ def update_old_variables():
         update_variable(obj, ["correct_extrem_uv_scale"], "bfu_correct_extrem_uv_scale")
         update_variable(obj, ["AutoGenerateCollision"], "bfu_auto_generate_collision")
         update_variable(obj, ["MaterialSearchLocation"], "bfu_material_search_location")
-        update_variable(obj, ["CollisionTraceFlag"], "bfu_collision_trace_flag")
+        update_variable(obj, ["CollisionTraceFlag"], "bfu_collision_trace_flag", enum_callback)
         update_variable(obj, ["VertexColorImportOption"], "bfu_vertex_color_import_option", enum_callback)
         update_variable(obj, ["VertexOverrideColor"], "bfu_vertex_color_override_color")
         update_variable(obj, ["VertexColorToUse"], "bfu_vertex_color_to_use", enum_callback)
