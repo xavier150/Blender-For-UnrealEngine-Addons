@@ -1,10 +1,5 @@
 import bpy
 
-from bpy.props import (
-        StringProperty,
-        BoolProperty,
-        )
-
 from .. import bfu_utils
 
 class BFU_PT_BlenderForUnrealDebug(bpy.types.Panel):
@@ -16,22 +11,25 @@ class BFU_PT_BlenderForUnrealDebug(bpy.types.Panel):
     bl_region_type = "UI"
     bl_category = "Unreal Engine"
 
-    bpy.types.Object.bfu_use_socket_custom_Name = BoolProperty(
+    bpy.types.Object.bfu_use_socket_custom_Name = bpy.props.BoolProperty(
         name="Socket custom name",
         description='Use a custom name in Unreal Engine for this socket?',
         default=False
         )
 
-    bpy.types.Object.bfu_socket_custom_Name = StringProperty(
+    bpy.types.Object.bfu_socket_custom_Name = bpy.props.StringProperty(
         name="",
         description='',
         default="MySocket"
         )
 
+    print("INIT")
     def draw(self, context):
+        
         layout = self.layout
         obj = context.object
         layout.label(text="This panel is only for Debug", icon='INFO')
+        
         if obj:
             layout.label(text="Full path name as Static Mesh:")
             layout.label(text="GetObjExportDir(local):" + bfu_utils.GetObjExportDir(obj, False))
@@ -47,7 +45,7 @@ class BFU_PT_BlenderForUnrealDebug(bpy.types.Panel):
 # -------------------------------------------------------------------
 
 classes = (
-        # BFU_PT_BlenderForUnrealDebug, # Unhide for dev
+    # BFU_PT_BlenderForUnrealDebug, # Unhide for dev
 )
 
 

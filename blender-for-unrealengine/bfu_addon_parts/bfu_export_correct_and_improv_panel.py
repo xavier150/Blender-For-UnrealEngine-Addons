@@ -1,9 +1,5 @@
 import bpy
 
-from bpy.types import (
-        Operator,
-        )
-
 from .. import bfu_utils
 
 class BFU_PT_CorrectAndImprov(bpy.types.Panel):
@@ -13,11 +9,10 @@ class BFU_PT_CorrectAndImprov(bpy.types.Panel):
     bl_label = "Correct and improv"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Unreal Engine 4 bis"
-    bl_parent_id = "BFU_PT_BlenderForUnrealObject"
+    bl_category = "Unreal Engine"
 
-    class BFU_OT_CorrectExtremUV(Operator):
-        bl_label = "Correct extrem UV For Unreal"
+    class BFU_OT_CorrectExtremUV(bpy.types.Operator):
+        bl_label = "Correct Extrem UV For Unreal"
         bl_idname = "object.correct_extrem_uv"
         bl_description = (
             "Correct extrem UV island of the selected object" +
