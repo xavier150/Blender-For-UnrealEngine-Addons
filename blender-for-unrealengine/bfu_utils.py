@@ -566,7 +566,7 @@ def GetDesiredNLAStartEndTime(obj):
 
 
 def GetUseCustomLightMapResolution(obj):
-    if obj.bfu_static_mesh_light_map_enum == "Default":
+    if obj.bfu_static_mesh_light_map_mode == "Default":
         return False
     return True
 
@@ -615,13 +615,13 @@ def GetExportRealSurfaceArea(obj):
 
 
 def GetCompuntedLightMap(obj):
-    if obj.bfu_static_mesh_light_map_enum == "Default":
+    if obj.bfu_static_mesh_light_map_mode == "Default":
         return -1
 
-    if obj.bfu_static_mesh_light_map_enum == "CustomMap":
+    if obj.bfu_static_mesh_light_map_mode == "CustomMap":
         return obj.bfu_static_mesh_custom_light_map_res
 
-    if obj.bfu_static_mesh_light_map_enum == "SurfaceArea":
+    if obj.bfu_static_mesh_light_map_mode == "SurfaceArea":
         # Get the area
         area = obj.computedStaticMeshLightMapRes
         area **= 0.5  # Adapte for light map

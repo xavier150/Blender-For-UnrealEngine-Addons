@@ -317,8 +317,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default="SmallProp"
         )
 
-    bpy.types.Object.bfu_static_mesh_light_map_enum = EnumProperty(
-        name="Light map",
+    bpy.types.Object.bfu_static_mesh_light_map_mode = EnumProperty(
+        name="Light Map",
         description='Specify how the light map resolution will be generated',
         override={'LIBRARY_OVERRIDABLE'},
         items=[
@@ -331,14 +331,14 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 "Set the custom light map resolution",
                 2),
             ("SurfaceArea",
-                "surface Area",
+                "Surface Area",
                 "Set light map resolution depending on the surface Area",
                 3)
             ]
         )
 
     bpy.types.Object.bfu_static_mesh_custom_light_map_res = IntProperty(
-        name="Light Map resolution",
+        name="Light Map Resolution",
         description="This is the resolution of the light map",
         override={'LIBRARY_OVERRIDABLE'},
         soft_max=2048,
@@ -349,7 +349,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         )
 
     bpy.types.Object.computedStaticMeshLightMapRes = FloatProperty(
-        name="computed Light Map resolution",
+        name="Computed Light Map Resolution",
         description="This is the computed resolution of the light map",
         override={'LIBRARY_OVERRIDABLE'},
         default=64.0
@@ -1181,7 +1181,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.bfu_target_skeleton_custom_ref',
                             'obj.bfu_use_static_mesh_lod_group',
                             'obj.bfu_static_mesh_lod_group',
-                            'obj.bfu_static_mesh_light_map_enum',
+                            'obj.bfu_static_mesh_light_map_mode',
                             'obj.bfu_static_mesh_custom_light_map_res',
                             'obj.bfu_static_mesh_light_map_surface_scale',
                             'obj.bfu_static_mesh_light_map_round_power_of_two',
@@ -1792,11 +1792,11 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         # Light map
                         if bfu_utils.GetAssetType(obj) == "StaticMesh":
                             StaticMeshLightMapRes = layout.box()
-                            StaticMeshLightMapRes.prop(obj, 'bfu_static_mesh_light_map_enum')
-                            if obj.bfu_static_mesh_light_map_enum == "CustomMap":
+                            StaticMeshLightMapRes.prop(obj, 'bfu_static_mesh_light_map_mode')
+                            if obj.bfu_static_mesh_light_map_mode == "CustomMap":
                                 CustomLightMap = StaticMeshLightMapRes.column()
                                 CustomLightMap.prop(obj, 'bfu_static_mesh_custom_light_map_res')
-                            if obj.bfu_static_mesh_light_map_enum == "SurfaceArea":
+                            if obj.bfu_static_mesh_light_map_mode == "SurfaceArea":
                                 SurfaceAreaLightMap = StaticMeshLightMapRes.column()
                                 SurfaceAreaLightMapButton = SurfaceAreaLightMap.row()
                                 SurfaceAreaLightMapButton.operator("object.computlightmap", icon='TEXTURE')
@@ -1804,7 +1804,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 SurfaceAreaLightMap.prop(obj, 'bfu_use_static_mesh_light_map_world_scale')
                                 SurfaceAreaLightMap.prop(obj, 'bfu_static_mesh_light_map_surface_scale')
                                 SurfaceAreaLightMap.prop(obj, 'bfu_static_mesh_light_map_round_power_of_two')
-                            if obj.bfu_static_mesh_light_map_enum != "Default":
+                            if obj.bfu_static_mesh_light_map_mode != "Default":
                                 CompuntedLightMap = str(bfu_utils.GetCompuntedLightMap(obj))
                                 StaticMeshLightMapRes.label(text='Compunted light map: ' + CompuntedLightMap)
                             bfu_generate_light_map_uvs = layout.row()

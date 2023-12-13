@@ -57,7 +57,7 @@ def update_old_variables():
 
         update_variable(obj, ["UseStaticMeshLODGroup"], "bfu_use_static_mesh_lod_group")
         update_variable(obj, ["StaticMeshLODGroup"], "bfu_static_mesh_lod_group")
-        update_variable(obj, ["StaticMeshLightMapEnum"], "bfu_static_mesh_light_map_enum")
+        update_variable(obj, ["StaticMeshLightMapEnum", "bfu_static_mesh_light_map_enum"], "bfu_static_mesh_light_map_mode", enum_callback)
         update_variable(obj, ["customStaticMeshLightMapRes"], "bfu_static_mesh_custom_light_map_res")
         update_variable(obj, ["staticMeshLightMapSurfaceScale"], "bfu_static_mesh_light_map_surface_scale")
         update_variable(obj, ["staticMeshLightMapRoundPowerOfTwo"], "bfu_static_mesh_light_map_round_power_of_two")
