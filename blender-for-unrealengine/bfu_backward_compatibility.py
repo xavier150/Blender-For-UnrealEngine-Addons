@@ -41,7 +41,7 @@ def update_old_variables():
     for obj in bpy.data.objects:
 
 
-        update_variable(obj, ["bfu_export_procedure"], "bfu_skeleton_export_procedure")
+        update_variable(obj, ["bfu_export_procedure"], "bfu_skeleton_export_procedure", enum_callback)
         update_variable(obj, ["ExportEnum"], "bfu_export_type", enum_callback)
         update_variable(obj, ["exportFolderName"], "bfu_export_folder_name")
         update_variable(obj, ["ExportAsAlembic"], "bfu_export_as_alembic")
@@ -67,7 +67,7 @@ def update_old_variables():
         update_variable(obj, ["convert_geometry_node_attribute_to_uv_name"], "bfu_convert_geometry_node_attribute_to_uv_name")
         update_variable(obj, ["correct_extrem_uv_scale"], "bfu_correct_extrem_uv_scale")
         update_variable(obj, ["AutoGenerateCollision"], "bfu_auto_generate_collision")
-        update_variable(obj, ["MaterialSearchLocation"], "bfu_material_search_location")
+        update_variable(obj, ["MaterialSearchLocation"], "bfu_material_search_location", enum_callback)
         update_variable(obj, ["CollisionTraceFlag"], "bfu_collision_trace_flag", enum_callback)
         update_variable(obj, ["VertexColorImportOption"], "bfu_vertex_color_import_option", enum_callback)
         update_variable(obj, ["VertexOverrideColor"], "bfu_vertex_color_override_color")
