@@ -227,6 +227,7 @@ def ConvertSelectedCurveToMesh():
 
     # Convert to mesh
     if bpy.context.selected_objects:
+        bpy.context.view_layer.objects.active = bpy.context.selected_objects[0] #Convert fail if active is none.
         bpy.ops.object.convert(target='MESH')
 
     select.reset_select_by_name()
