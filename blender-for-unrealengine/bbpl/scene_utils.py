@@ -24,6 +24,16 @@
 
 import bpy
 
+def get_use_local_view():
+    """
+    Check if the user use local view in an area
+    """
+    areas = bpy.context.screen.areas
+    for area in areas:
+        if area.type == 'VIEW_3D':
+            if area.spaces.active.local_view:  # Check if using local view
+                return True
+    return False
 
 def move_to_global_view():
     """
