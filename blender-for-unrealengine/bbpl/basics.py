@@ -60,28 +60,6 @@ def check_plugin_is_activated(plugin_name):
     return is_enabled and is_loaded
 
 
-
-def move_to_global_view():
-    """
-    Moves the active Blender viewport to the global view.
-
-    Returns:
-        None
-    """
-    for area in bpy.context.screen.areas:
-        if area.type == 'VIEW_3D':
-            space = area.spaces[0]
-            if space.local_view:  # check if using local view
-                for region in area.regions:
-                    if region.type == 'WINDOW':
-                        # override context and switch to global view
-                        override = {'area': area, 'region': region}
-                        bpy.ops.view3d.localview(override)
-
-
-
-
-
 def checks_relationship(arrayA, arrayB):
     """
     Checks if there is an identical variable between two lists.
