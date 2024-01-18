@@ -113,8 +113,12 @@ class BBPL_UI_TemplateList(bpy.types.PropertyGroup):
             return self.template_collection[self.active_template_property]
 
     def get_name(self):
-        prop_name = self.id_properties_ensure().name
-        return prop_name
+        if bpy.app.version >= (3, 0, 0):
+            prop_name = self.id_properties_ensure().name
+            return prop_name
+        else:
+            prop_name = self.path_from_id()
+            return prop_name
 
     def draw(self, layout: bpy.types.UILayout):
 

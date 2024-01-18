@@ -476,3 +476,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Show Asset To Export Button do product script fail.
 - Fixed: Curve mesh is duplicate durring export.
 - Fixed: Script fail in Blender 4.0 when switch to global view.
+- Fixed: UI script fail in Blender 2.9.
