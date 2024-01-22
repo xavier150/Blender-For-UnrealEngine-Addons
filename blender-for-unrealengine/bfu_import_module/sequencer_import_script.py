@@ -58,14 +58,11 @@ def RunImportScriptWithJsonData():
 
     sequence_data = JsonLoadFile(os.path.join(dir_path, json_data_file))
     
-    import_module_path = sequence_data["info"]["import_modiule_path"]  # Module to run
-    print("Module path to import:", import_module_path)
-    
+    import_module_path = sequence_data["info"]["import_modiule_path"]  # Module to run   
     imported_module, module_name = load_module(import_module_path)
 
     unload_module(module_name)
     imported_module.run_sequencer_import(sequence_data)
 
-print("Start importing assets.")
-RunImportScriptWithJsonData()
-print("Importing assets finished.")
+if __name__ == "__main__":
+    RunImportScriptWithJsonData()

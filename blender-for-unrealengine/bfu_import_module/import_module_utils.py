@@ -16,29 +16,22 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-import importlib
+import sys
+import json
 
-from . import bps
-from . import import_module_utils
-from . import import_module_unreal_utils
-from . import asset_import
-from . import sequencer_import
+def JsonLoad(json_file):
+    # Changed in Python 3.9: The keyword argument encoding has been removed.
+    if sys.version_info >= (3, 9):
+        return json.load(json_file)
+    else:
+        return json.load(json_file, encoding="utf8")
 
-if "bps" in locals():
-    importlib.reload(bps)
-if "import_module_utils" in locals():
-    importlib.reload(import_module_utils)
-if "import_module_unreal_utils" in locals():
-    importlib.reload(import_module_unreal_utils)
-if "asset_import" in locals():
-    importlib.reload(asset_import)
-if "sequencer_import" in locals():
-    importlib.reload(sequencer_import)
 
-def run_asset_import(assets_data):
-    if asset_import.ready_for_asset_import():
-        return asset_import.ImportAllAssets(assets_data)
+def JsonLoadFile(json_file_path):
+    if sys.version_info[0] < 3:
+        with open(json_file_path, "r") as json_file:
+            return JsonLoad(json_file)
+    else:
+        with open(json_file_path, "r", encoding="utf8") as json_file:
+            return JsonLoad(json_file)
 
-def run_sequencer_import(sequence_data):
-    if sequencer_import.ready_for_sequence_import():
-        return sequencer_import.CreateSequencer(sequence_data)
