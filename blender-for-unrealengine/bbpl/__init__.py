@@ -28,6 +28,7 @@ import importlib
 from . import blender_layout
 from . import backward_compatibility
 from . import blender_rig
+from . import blender_addon
 from . import basics
 from . import utils
 from . import rig_bone_visual
@@ -42,6 +43,8 @@ if "backward_compatibility" in locals():
     importlib.reload(backward_compatibility)
 if "blender_rig" in locals():
     importlib.reload(blender_rig)
+if "blender_addon" in locals():
+    importlib.reload(blender_addon)
 if "basics" in locals():
     importlib.reload(basics)
 if "utils" in locals():
@@ -70,12 +73,14 @@ def register():
     blender_layout.register()
     backward_compatibility.register()
     blender_rig.register()
+    blender_addon.register()
 
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
+    blender_addon.unregister()
     blender_rig.unregister()
     backward_compatibility.unregister()
     blender_layout.unregister()

@@ -18,17 +18,21 @@
 
 import bpy
 from . import languages
+from . import bfu_write_utils
 
 
 def WriteImportSequencerTracks():
     scene = bpy.context.scene
 
     data = {}
-    data['Coment'] = {
+    data['comment'] = {
         '1/3': languages.ti('write_text_additional_track_start'),
-        '2/3': languages.ti('write_text_additional_track_camera'),
+        '2/3': languages.ti('write_text_additional_track_all'),
         '3/3': languages.ti('write_text_additional_track_end'),
     }
+
+    bfu_write_utils.add_generated_json_meta_data(data)
+
     data['spawnable_camera'] = True  # Default but open for change
     data['startFrame'] = scene.frame_start
     data['endFrame'] = scene.frame_end

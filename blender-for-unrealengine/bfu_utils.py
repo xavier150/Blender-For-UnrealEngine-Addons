@@ -25,6 +25,7 @@ import mathutils
 import math
 import os
 import math
+import addon_utils
 from . import bbpl
 from . import bps
 from . import bfu_basics

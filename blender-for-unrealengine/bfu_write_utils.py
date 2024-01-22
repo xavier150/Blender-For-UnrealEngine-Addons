@@ -16,8 +16,10 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
+import os
 import bpy
-
+import datetime
+from . import bbpl
 from . import bfu_basics
 from . import bfu_utils
 
@@ -58,3 +60,25 @@ def WriteImportPythonHeadComment(useSequencer=False):
     ImportScript += "\n"
     ImportScript += "\n"
     return ImportScript
+
+def add_generated_json_meta_data(json_data):
+    
+    current_datetime = datetime.datetime.now()
+    current_datetime_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = int(current_datetime.timestamp())
+
+    blender_file_path = bpy.data.filepath
+    version_str = 'Version '+ bbpl.blender_addon.addon_utils.get_addon_version_str("Blender for UnrealEngine")
+    addon_path = bbpl.blender_addon.addon_utils.get_addon_path("Blender for UnrealEngine")
+    import_modiule_path = os.path.join(addon_path, "import_scripts")
+
+
+    json_data['info'] = {
+        'date_time_str': current_datetime_str,
+        "timestamp": timestamp,
+        "blender_file": blender_file_path,
+        'addon_version': version_str,
+        'addon_path': addon_path,
+        'import_modiule_path': import_modiule_path,
+    }
+

@@ -36,6 +36,7 @@ from bpy.types import (
         Operator,
         )
 
+from .. import bbpl
 from .. import bfu_export_procedure
 from .. import bfu_basics
 from .. import bfu_utils
@@ -1332,15 +1333,11 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         addon_prefs = bfu_basics.GetAddonPrefs()
         layout = self.layout
 
-        version = (0, 0, 0)
-        # pylint: disable=no-value-for-parameter
-        for addon in addon_utils.modules():
-            if addon.bl_info['name'] == "Blender for UnrealEngine":
-                version = addon.bl_info.get('version', (0, 0, 0))
+        version_str = 'Version '+ bbpl.blender_addon.addon_utils.get_addon_version_str("Blender for UnrealEngine")
 
         credit_box = layout.box()
         credit_box.label(text=languages.ti('intro'))
-        credit_box.label(text='Version '+'.'.join([str(x) for x in version]))
+        credit_box.label(text=version_str)
         credit_box.operator("object.bfu_open_documentation_page", icon="HELP")
 
         row = layout.row(align=True)

@@ -2,6 +2,7 @@ import bpy
 
 from . import bfu_camera_data
 from .. import languages
+from .. import bfu_write_utils
 
 def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=None, pre_bake_camera: bfu_camera_data.BFU_CameraTracks = None):
     # Write as json file
@@ -15,11 +16,13 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
 
     scene = bpy.context.scene
     data = {}
-    data['Coment'] = {
+    data['comment'] = {
         '1/3': languages.ti('write_text_additional_track_start'),
         '2/3': languages.ti('write_text_additional_track_camera'),
         '3/3': languages.ti('write_text_additional_track_end'),
     }
+
+    bfu_write_utils.add_generated_json_meta_data(data)
 
     data["resolution_x"] = scene.render.resolution_x
     data["resolution_y"] = scene.render.resolution_y
