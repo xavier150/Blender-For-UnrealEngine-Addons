@@ -41,6 +41,8 @@ def update_old_variables():
     for obj in bpy.data.objects:
 
 
+        update_variable(obj, ["exportWithCustomProps"], "bfu_export_with_custom_props")
+        update_variable(obj, ["exportWithMetaData"], "bfu_export_with_meta_data")
         update_variable(obj, ["bfu_export_procedure"], "bfu_skeleton_export_procedure", enum_callback)
         update_variable(obj, ["ExportEnum"], "bfu_export_type", enum_callback)
         update_variable(obj, ["exportFolderName"], "bfu_export_folder_name")

@@ -102,7 +102,7 @@ bl_info = {
     'blender': (2, 80, 0),
     'location': 'View3D > UI > Unreal Engine',
     'description': "This add-ons allows to easily export several "
-    "objects at the same time for use in unreal engine 4.",
+    "objects at the same time for use in Unreal Engine.",
     'warning': '',
     "wiki_url": "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki",
     'tracker_url': 'https://github.com/xavier150/Blender-For-UnrealEngine-Addons/issues',

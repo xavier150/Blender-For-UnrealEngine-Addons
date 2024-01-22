@@ -127,24 +127,6 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         default=False,
         )
 
-    exportWithCustomProps: bpy.props.BoolProperty(
-        name=(languages.ti('export_with_custom_props_name')),
-        description=(languages.tt('export_with_custom_props_desc')),
-        default=False,
-        )
-
-    exportWithCustomCurves: bpy.props.BoolProperty(
-        name=(languages.ti('export_with_custom_curves_name')),
-        description=(languages.tt('export_with_custom_curves_desc')),
-        default=False,
-        )
-
-    exportWithMetaData: bpy.props.BoolProperty(
-        name=(languages.ti('export_with_meta_data_name')),
-        description=(languages.tt('export_with_meta_data_desc')),
-        default=False,
-        )
-
     revertExportPath: bpy.props.BoolProperty(
         name=(languages.ti('revert_export_path_name')),
         description=(languages.tt('revert_export_path_desc')),
@@ -231,8 +213,6 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         data.label(text='DATA')
         data.prop(self, "ignoreNLAForAction")
         data.prop(self, "bakeArmatureAction")
-        data.prop(self, "exportWithCustomProps")
-        data.prop(self, "exportWithMetaData")
         data.prop(self, "revertExportPath")
 
         other = ColumnRight.box()

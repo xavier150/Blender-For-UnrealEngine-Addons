@@ -1218,6 +1218,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             'obj.bfu_anim_naming_custom',
                             'obj.bfu_export_global_scale',
                             'obj.bfu_override_procedure_preset',
+                            'obj.bfu_export_with_custom_props',
+                            'obj.bfu_export_with_meta_data',
                             'obj.bfu_export_axis_forward',
                             'obj.bfu_export_axis_up',
                             'obj.bfu_export_primary_bone_axis',
@@ -1467,6 +1469,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             transformProp.prop(obj, "bfu_additional_location_for_export")
 
                         AxisProperty = layout.column()
+                        
                         AxisProperty.prop(obj, 'bfu_override_procedure_preset')
                         if obj.bfu_override_procedure_preset:
                             AxisProperty.prop(obj, 'bfu_export_axis_forward')
@@ -1483,6 +1486,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             for key, value in preset.items():
                                 # Concaténez la clé et la valeur dans la chaîne de caractères
                                 var_lines.label(text=f"{key} -> {value}\n")
+                        export_data = layout.column()
+                        export_data.prop(obj, "bfu_export_with_custom_props")
+                        export_data.prop(obj, "bfu_export_with_meta_data")
 
                             
                 else:
@@ -1904,30 +1910,44 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bpy.types.Scene.bfu_collection_asset_list = CollectionProperty(
+    bpy.types.Scene.bfu_collection_asset_list = bpy.props.CollectionProperty(
         type=BFU_OT_SceneCollectionExport,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE', 'USE_INSERTION'},
         )
 
-    bpy.types.Scene.bfu_active_collection_asset_list = IntProperty(
+    bpy.types.Scene.bfu_active_collection_asset_list = bpy.props.IntProperty(
         name="Active Collection",
         description="Index of the currently active collection",
         override={'LIBRARY_OVERRIDABLE'},
         default=0
         )
 
-    bpy.types.Object.bfu_animation_asset_list = CollectionProperty(
+    bpy.types.Object.bfu_animation_asset_list = bpy.props.CollectionProperty(
         type=BFU_OT_ObjExportAction,
         options={'LIBRARY_EDITABLE'},
         override={'LIBRARY_OVERRIDABLE', 'USE_INSERTION'},
         )
 
-    bpy.types.Object.bfu_active_animation_asset_list = IntProperty(
+    bpy.types.Object.bfu_active_animation_asset_list = bpy.props.IntProperty(
         name="Active Scene Action",
         description="Index of the currently active object action",
         override={'LIBRARY_OVERRIDABLE'},
         default=0
+        )
+    
+    bpy.types.Object.bfu_export_with_custom_props = bpy.props.BoolProperty(
+        name=(languages.ti('export_with_custom_props_name')),
+        description=(languages.tt('export_with_custom_props_desc')),
+        override={'LIBRARY_OVERRIDABLE'},
+        default=False,
+        )
+
+    bpy.types.Object.bfu_export_with_meta_data = bpy.props.BoolProperty(
+        name=(languages.ti('export_with_meta_data_name')),
+        description=(languages.tt('export_with_meta_data_desc')),
+        override={'LIBRARY_OVERRIDABLE'},
+        default=False,
         )
 
 
