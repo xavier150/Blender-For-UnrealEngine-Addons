@@ -172,7 +172,7 @@ class BFU_CameraTracks():
         addon_prefs = bfu_basics.GetAddonPrefs()
 
         print("Start evaluate camera " + camera.name + "From " + str(frame_start) + " to " + str(frame_end))
-        Timer = bps.utils.CounterTimer()
+        counter = bps.utils.CounterTimer()
         
         slms = bfu_utils.TimelineMarkerSequence()
         
@@ -195,7 +195,7 @@ class BFU_CameraTracks():
 
         set_current_frame(save_current_frame)
 
-        print("Evaluate " + camera.name + " finished in " + Timer.get_str_time())
+        print("Evaluate " + camera.name + " finished in " + counter.get_str_time())
         print("-----")
         return
 
@@ -224,7 +224,7 @@ class BFU_MultiCameraTracks():
         addon_prefs = bfu_basics.GetAddonPrefs()
 
 
-        Timer = bps.utils.CounterTimer()
+        counter = bps.utils.CounterTimer()
 
         slms = bfu_utils.TimelineMarkerSequence()
 
