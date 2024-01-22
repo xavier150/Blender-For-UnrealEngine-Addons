@@ -70,7 +70,7 @@ def add_generated_json_meta_data(json_data):
     blender_file_path = bpy.data.filepath
     version_str = 'Version '+ bbpl.blender_addon.addon_utils.get_addon_version_str("Blender for UnrealEngine")
     addon_path = bbpl.blender_addon.addon_utils.get_addon_path("Blender for UnrealEngine")
-    import_modiule_path = os.path.join(addon_path, "import_scripts")
+    import_modiule_path = os.path.join(addon_path, "bfu_import_module")
 
 
     json_data['info'] = {

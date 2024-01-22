@@ -62,15 +62,15 @@ def is_unreal_version_greater_or_equal(target_major, target_minor=0, target_patc
         return False
 
 
-def ImportAllAssets():
+def ImportAllAssets(assets_data):
 
     # Prepare process import
     json_data_file = 'ImportAssetData.json'
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
-    import_assets_data = JsonLoadFile(os.path.join(dir_path, json_data_file))
+    assets_data
 
-    bfu_unreal_import_location = import_assets_data['bfu_unreal_import_location']
+    bfu_unreal_import_location = assets_data['bfu_unreal_import_location']
     ImportedList = []
     ImportFailList = []
 
@@ -88,14 +88,14 @@ def ImportAllAssets():
 
     def GetAssetByType(type):
         target_assets = []
-        for asset in import_assets_data["assets"]:
+        for asset in assets_data["assets"]:
             if asset["asset_type"] == type:
                 target_assets.append(asset)
         return target_assets
 
     def ImportAsset(asset_data):
 
-        counter = str(len(ImportedList)+1) + "/" + str(len(import_assets_data["assets"]))
+        counter = str(len(ImportedList)+1) + "/" + str(len(assets_data["assets"]))
         print("Import asset " + counter + ": ", asset_data["asset_name"])
 
         if asset_data["asset_type"] == "StaticMesh" or asset_data["asset_type"] == "SkeletalMesh":
@@ -502,7 +502,7 @@ def ImportAllAssets():
     # Process import
 
     print('========================= Import started ! =========================')
-    print(import_assets_data["assets"])
+    print(assets_data["assets"])
 
     # Import assets with a specific order
 
@@ -552,10 +552,3 @@ def ImportAllAssets():
     else:
         return 'Assets imported with success !'
 
-
-print("Start importing assets.")
-
-if CheckTasks():
-    print(ImportAllAssets())
-
-print("Importing assets finished.")

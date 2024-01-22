@@ -62,13 +62,11 @@ def is_unreal_version_greater_or_equal(target_major, target_minor=0, target_patc
     else:
         return False
 
-def CreateSequencer():
+def CreateSequencer(sequence_data):
 
     # Prepare process import
     json_data_file = 'ImportSequencerData.json'
     dir_path = os.path.dirname(os.path.realpath(__file__))
-
-    sequence_data = JsonLoadFile(os.path.join(dir_path, json_data_file))
 
     spawnable_camera = sequence_data['spawnable_camera']
     startFrame = sequence_data['startFrame']
@@ -327,10 +325,3 @@ def CreateSequencer():
     unreal.EditorAssetLibrary.sync_browser_to_objects([seq.get_path_name()])
     return 'Sequencer created with success !'
 
-
-print("Start importing sequencer.")
-
-if CheckTasks():
-    print(CreateSequencer())
-
-print("Importing sequencer finished.")

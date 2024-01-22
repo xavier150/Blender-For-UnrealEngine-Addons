@@ -213,7 +213,7 @@ def WriteAllTextFiles():
             ExportSingleText(Text, scene.bfu_export_other_file_path, Filename)
 
     # Import script
-    bfu_path = os.path.join("addons", "blender-for-unrealengine", "import_scripts")
+    bfu_path = os.path.join("addons", "blender-for-unrealengine", "bfu_import_module")
     bfu_path_ref = os.path.join(bpy.utils.user_resource('SCRIPTS'), bfu_path)
 
     if scene.text_ImportAssetScript:
