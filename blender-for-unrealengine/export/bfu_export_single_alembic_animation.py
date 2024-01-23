@@ -37,6 +37,8 @@ def ProcessAlembicExport(obj):
     MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = "Alembic"
+    MyAsset.animation_start_frame = scene.frame_start + obj.bfu_anim_action_start_frame_offset
+    MyAsset.animation_end_frame = scene.frame_end + obj.bfu_anim_action_end_frame_offset
 
     file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
     file.file_name = bfu_naming.get_alembic_file_name(obj, obj.name, "")
@@ -72,14 +74,17 @@ def ExportSingleAlembicAnimation(
     scene.frame_start += obj.bfu_anim_action_start_frame_offset
     scene.frame_end += obj.bfu_anim_action_end_frame_offset
 
+    alembic_export_procedure = obj.bfu_alembic_export_procedure
+
     # Export
-    bpy.ops.wm.alembic_export(
-        filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
-        check_existing=False,
-        selected=True,
-        triangulate=True,
-        global_scale=1,
-        )
+    if (alembic_export_procedure == "blender-standard"):
+        bpy.ops.wm.alembic_export(
+            filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
+            check_existing=False,
+            selected=True,
+            triangulate=True,
+            global_scale=1,
+            )
 
     scene.frame_start -= obj.bfu_anim_action_start_frame_offset
     scene.frame_end -= obj.bfu_anim_action_end_frame_offset

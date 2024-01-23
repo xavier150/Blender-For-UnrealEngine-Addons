@@ -203,7 +203,10 @@ class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
             collection_asset_cache = GetCollectionAssetCache()
             collection_export_asset_list = collection_asset_cache.GetCollectionAssetList()
             for col_asset in collection_export_asset_list:
-                collectionList.append(col_asset.name)
+                if col_asset.name in bpy.data.collections:
+                    collection = bpy.data.collections[col_asset.name]
+                    collectionList.append(collection)
+                
 
         elif export_filter == "only_object" or export_filter == "only_object_action":
             recuList = bfu_utils.GetAllobjectsByExportType("export_recursive")

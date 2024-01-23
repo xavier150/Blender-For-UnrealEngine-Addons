@@ -21,17 +21,20 @@ import os
 import bpy
 from . import languages
 from . import bfu_utils
+from . import bfu_write_utils
 
 def WriteImportAssetScript():
     # Generate a script for import assets in Ue4
     scene = bpy.context.scene
 
     data = {}
-    data['Coment'] = {
+    data['comment'] = {
         '1/3': languages.ti('write_text_additional_track_start'),
-        '2/3': languages.ti('write_text_additional_track_camera'),
+        '2/3': languages.ti('write_text_additional_track_all'),
         '3/3': languages.ti('write_text_additional_track_end'),
     }
+
+    bfu_write_utils.add_generated_json_meta_data(data)
 
     data['bfu_unreal_import_location'] = '/' + scene.bfu_unreal_import_module + '/' + scene.bfu_unreal_import_location
 
@@ -39,7 +42,7 @@ def WriteImportAssetScript():
     data['assets'] = []
     for asset in scene.UnrealExportedAssetsList:
         asset_data = {}
-        asset_data["scene_unit_scale"] = scene.unit_settings.scale_length
+        asset_data["scene_unit_scale"] = round(scene.unit_settings.scale_length, 8) #Have to round for avoid microscopic offset
 
         asset_data["asset_name"] = asset.asset_name
         asset_data["asset_global_scale"] = asset.asset_global_scale
@@ -107,6 +110,10 @@ def WriteImportAssetScript():
             elif(asset.object.bfu_skeleton_search_mode) == "custom_reference":
                 asset_data["animation_skeleton_path"] = asset.object.bfu_target_skeleton_custom_ref.replace('\\', '/')
 
+        if bfu_utils.GetIsAnimation(asset.asset_type):
+            asset_data["animation_start_frame"] = asset.animation_start_frame
+            asset_data["animation_end_frame"] = asset.animation_end_frame    
+
         if asset.object:
             asset_data["create_physics_asset"] = asset.object.bfu_create_physics_asset
             asset_data["material_search_location"] = asset.object.bfu_material_search_location
@@ -121,6 +128,7 @@ def WriteImportAssetScript():
             asset_data["use_custom_light_map_resolution"] = bfu_utils.GetUseCustomLightMapResolution(asset.object)
             asset_data["light_map_resolution"] = bfu_utils.GetCompuntedLightMap(asset.object)
             asset_data["collision_trace_flag"] = asset.object.bfu_collision_trace_flag
+            asset_data["enable_skeletal_mesh_per_poly_collision"] = asset.object.bfu_enable_skeletal_mesh_per_poly_collision
 
         data['assets'].append(asset_data)
 

@@ -16,53 +16,26 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-import os
 import bpy
-import addon_utils
-import time
+import importlib
 
-from bpy.props import (
-        StringProperty,
-        BoolProperty,
-        EnumProperty,
-        IntProperty,
-        FloatProperty,
-        FloatVectorProperty,
-        PointerProperty,
-        CollectionProperty,
-        )
+from . import bfu_collision_ui_and_props
 
-from bpy.types import (
-        Operator,
-        )
-
-from .export import bfu_export_asset
-from . import bfu_write_text
-from . import bfu_basics
-from . import bfu_utils
-from .export import bfu_export_get_info
-from . import bfu_check_potential_error
-from . import bfu_ui_utils
-from . import languages
-
-from . import bbpl
-from . import bps
-
-
-
-
+if "bfu_collision_ui_and_props" in locals():
+    importlib.reload(bfu_collision_ui_and_props)
 
 classes = (
 )
-
-
 
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
+    bfu_collision_ui_and_props.register()
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
+
+    bfu_collision_ui_and_props.unregister()

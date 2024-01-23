@@ -39,6 +39,11 @@ def update_old_variables():
     print("Updating old bfu variables...")
 
     for obj in bpy.data.objects:
+
+
+        update_variable(obj, ["exportWithCustomProps"], "bfu_export_with_custom_props")
+        update_variable(obj, ["exportWithMetaData"], "bfu_export_with_meta_data")
+        update_variable(obj, ["bfu_export_procedure"], "bfu_skeleton_export_procedure", enum_callback)
         update_variable(obj, ["ExportEnum"], "bfu_export_type", enum_callback)
         update_variable(obj, ["exportFolderName"], "bfu_export_folder_name")
         update_variable(obj, ["ExportAsAlembic"], "bfu_export_as_alembic")
@@ -54,7 +59,7 @@ def update_old_variables():
 
         update_variable(obj, ["UseStaticMeshLODGroup"], "bfu_use_static_mesh_lod_group")
         update_variable(obj, ["StaticMeshLODGroup"], "bfu_static_mesh_lod_group")
-        update_variable(obj, ["StaticMeshLightMapEnum"], "bfu_static_mesh_light_map_enum")
+        update_variable(obj, ["StaticMeshLightMapEnum", "bfu_static_mesh_light_map_enum"], "bfu_static_mesh_light_map_mode", enum_callback)
         update_variable(obj, ["customStaticMeshLightMapRes"], "bfu_static_mesh_custom_light_map_res")
         update_variable(obj, ["staticMeshLightMapSurfaceScale"], "bfu_static_mesh_light_map_surface_scale")
         update_variable(obj, ["staticMeshLightMapRoundPowerOfTwo"], "bfu_static_mesh_light_map_round_power_of_two")
@@ -64,8 +69,8 @@ def update_old_variables():
         update_variable(obj, ["convert_geometry_node_attribute_to_uv_name"], "bfu_convert_geometry_node_attribute_to_uv_name")
         update_variable(obj, ["correct_extrem_uv_scale"], "bfu_correct_extrem_uv_scale")
         update_variable(obj, ["AutoGenerateCollision"], "bfu_auto_generate_collision")
-        update_variable(obj, ["MaterialSearchLocation"], "bfu_material_search_location")
-        update_variable(obj, ["CollisionTraceFlag"], "bfu_collision_trace_flag")
+        update_variable(obj, ["MaterialSearchLocation"], "bfu_material_search_location", enum_callback)
+        update_variable(obj, ["CollisionTraceFlag"], "bfu_collision_trace_flag", enum_callback)
         update_variable(obj, ["VertexColorImportOption"], "bfu_vertex_color_import_option", enum_callback)
         update_variable(obj, ["VertexOverrideColor"], "bfu_vertex_color_override_color")
         update_variable(obj, ["VertexColorToUse"], "bfu_vertex_color_to_use", enum_callback)

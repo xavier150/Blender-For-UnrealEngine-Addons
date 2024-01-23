@@ -36,9 +36,11 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
     files: bpy.props.CollectionProperty(type=BFU_OT_FileExport)
     object: bpy.props.PointerProperty(type=bpy.types.Object)
     collection: bpy.props.PointerProperty(type=bpy.types.Collection)
-    export_start_time: bpy.props.FloatProperty(default=0)
-    export_end_time: bpy.props.FloatProperty(default=0)
+    export_start_time: bpy.props.FloatProperty(default=0.0)
+    export_end_time: bpy.props.FloatProperty(default=0.0)
     export_success: bpy.props.BoolProperty(default=False)
+    animation_start_frame: bpy.props.IntProperty(default=0)
+    animation_end_frame: bpy.props.IntProperty(default=0)
 
     def StartAssetExport(self):
         self.export_start_time = time.perf_counter()
@@ -55,7 +57,6 @@ class BFU_OT_UnrealExportedAsset(bpy.types.PropertyGroup):
             file: bfu_export_logs.BFU_OT_FileExport
             if file.file_type == file_type:
                 return file
-        print("File type not found in this assets:", file_type)
 
     def GetFilename(self):
         main_file = self.files[0]

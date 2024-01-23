@@ -107,7 +107,8 @@ def ExportSingleStaticMesh(
     asset_name = bfu_export_utils.PrepareExportName(obj, False)
     duplicate_data = bfu_export_utils.DuplicateSelectForExport()
     bfu_export_utils.SetDuplicateNameForExport(duplicate_data)
-
+    
+    bfu_export_utils.ConvertSelectedCurveToMesh()
     bfu_export_utils.MakeSelectVisualReal()
 
     bfu_utils.ApplyNeededModifierToSelect()
@@ -130,38 +131,65 @@ def ExportSingleStaticMesh(
         )
 
     asset_name.SetExportName()
+    static_export_procedure = obj.bfu_static_export_procedure
 
-    export_fbx_bin.save(
-        op,
-        bpy.context,
-        filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
-        check_existing=False,
-        use_selection=True,
-        global_matrix=axis_conversion(to_forward=active.bfu_export_axis_forward, to_up=active.bfu_export_axis_up).to_4x4(),
-        apply_unit_scale=True,
-        global_scale=bfu_utils.GetObjExportScale(active),
-        apply_scale_options='FBX_SCALE_NONE',
-        object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
-        use_custom_props=addon_prefs.exportWithCustomProps,
-        use_custom_curves=True,
-        mesh_smooth_type="FACE",
-        add_leaf_bones=False,
-        use_armature_deform_only=active.bfu_export_deform_only,
-        bake_anim=False,
-        path_mode='AUTO',
-        embed_textures=False,
-        batch_mode='OFF',
-        use_batch_own_dir=True,
-        use_metadata=addon_prefs.exportWithMetaData,
-        primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(active),
-        secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(active),
-        mirror_symmetry_right_side_bones=active.bfu_mirror_symmetry_right_side_bones,
-        use_ue_mannequin_bone_alignment=active.bfu_use_ue_mannequin_bone_alignment,
-        disable_free_scale_animation=active.bfu_disable_free_scale_animation,
-        axis_forward=bfu_export_utils.get_export_axis_forward(active),
-        axis_up=bfu_export_utils.get_export_axis_up(active),
-        bake_space_transform=False
-        )
+    if (static_export_procedure == "ue-standard"):
+        export_fbx_bin.save(
+            operator=op,
+            context=bpy.context,
+            filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
+            check_existing=False,
+            use_selection=True,
+            global_matrix=axis_conversion(to_forward=active.bfu_export_axis_forward, to_up=active.bfu_export_axis_up).to_4x4(),
+            apply_unit_scale=True,
+            global_scale=bfu_utils.GetObjExportScale(active),
+            apply_scale_options='FBX_SCALE_NONE',
+            object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
+            use_custom_props=obj.bfu_export_with_custom_props,
+            use_custom_curves=True,
+            mesh_smooth_type="FACE",
+            add_leaf_bones=False,
+            use_armature_deform_only=active.bfu_export_deform_only,
+            bake_anim=False,
+            path_mode='AUTO',
+            embed_textures=False,
+            batch_mode='OFF',
+            use_batch_own_dir=True,
+            use_metadata=obj.bfu_export_with_meta_data,
+            primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(active),
+            secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(active),
+            mirror_symmetry_right_side_bones=active.bfu_mirror_symmetry_right_side_bones,
+            use_ue_mannequin_bone_alignment=active.bfu_use_ue_mannequin_bone_alignment,
+            disable_free_scale_animation=active.bfu_disable_free_scale_animation,
+            axis_forward=bfu_export_utils.get_export_axis_forward(active),
+            axis_up=bfu_export_utils.get_export_axis_up(active),
+            bake_space_transform=False
+            )
+    elif (static_export_procedure == "blender-standard"):
+        bpy.ops.export_scene.fbx(
+            filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
+            check_existing=False,
+            use_selection=True,
+            apply_unit_scale=True,
+            global_scale=bfu_utils.GetObjExportScale(active),
+            apply_scale_options='FBX_SCALE_NONE',
+            object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
+            use_custom_props=obj.bfu_export_with_custom_props,
+            mesh_smooth_type="FACE",
+            add_leaf_bones=False,
+            use_armature_deform_only=active.bfu_export_deform_only,
+            bake_anim=False,
+            path_mode='AUTO',
+            embed_textures=False,
+            batch_mode='OFF',
+            use_batch_own_dir=True,
+            use_metadata=obj.bfu_export_with_meta_data,
+            primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(active),
+            secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(active),
+            axis_forward=bfu_export_utils.get_export_axis_forward(active),
+            axis_up=bfu_export_utils.get_export_axis_up(active),
+            bake_space_transform=False
+            )
 
     asset_name.ResetNames()
 

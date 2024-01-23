@@ -26,7 +26,9 @@ from .. import bfu_write_text
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bbpl
-from ..bfu_addon_parts import bfu_export_procedure
+from .. import bfu_addon_parts
+from .. import bfu_camera
+from .. import bfu_export_procedure
 
 dup_temp_name = "BFU_Temp"  # DuplicateTemporarilyNameForUe4Export
 Export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
@@ -206,6 +208,34 @@ def ResetDuplicateNameAfterExport(duplicate_data):
         user_selected.name = bfu_utils.GetObjOriginName(user_selected)
         bfu_utils.ClearObjOriginNameVar(user_selected)
 
+def ConvertSelectedCurveToMesh():
+    # Have to convert curve to mesh before MakeSelectVisualReal for avoid double duplicate issue.
+    select = bbpl.utils.UserSelectSave()
+    select.save_current_select()
+    
+    bpy.ops.object.select_all(action='DESELECT')
+
+    
+    for selected_obj in select.user_selecteds:
+        if selected_obj.type == "CURVE":
+            selected_obj.select_set(True)
+
+    # Save object list
+    previous_objects = []
+    for obj in bpy.data.objects:
+        previous_objects.append(obj)
+
+    # Convert to mesh
+    if bpy.context.selected_objects:
+        bpy.context.view_layer.objects.active = bpy.context.selected_objects[0] #Convert fail if active is none.
+        bpy.ops.object.convert(target='MESH')
+
+    select.reset_select_by_name()
+    
+    # Select the new objects
+    for obj in bpy.data.objects:
+        if obj not in previous_objects:
+            obj.select_set(True)
 
 def MakeSelectVisualReal():
     select = bbpl.utils.UserSelectSave()
@@ -221,20 +251,18 @@ def MakeSelectVisualReal():
 
     # Make Instances Real
     bpy.ops.object.duplicates_make_real(
-        use_base_parent=True,
+        use_base_parent=False,
         use_hierarchy=True
         )
 
     select.reset_select_by_name()
-
+    
     # Select the new objects
     for obj in bpy.data.objects:
         if obj not in previous_objects:
             obj.select_set(True)
 
 # Sockets
-
-
 def SetSocketsExportName(obj):
     '''
     Try to apply the custom SocketName
@@ -537,7 +565,7 @@ def ClearVertexColorForUnrealExport(parent):
 def GetShouldRescaleRig(obj):
     # This will return if the rig should be rescale.
 
-    if obj.bfu_export_procedure == "auto-rig-pro":
+    if obj.bfu_skeleton_export_procedure == "auto-rig-pro":
         return False
 
     addon_prefs = bfu_basics.GetAddonPrefs()
@@ -635,23 +663,6 @@ def ExportAutoProRig(
     # TODO Need update
     #bpy.ops.id.arp_export_fbx_panel(filepath=filepath)
 
-
-def ExportSingleAdditionalTrackCamera(dirpath, filename, obj):
-    # Export additional camera track for ue4
-    # FocalLength
-    # FocusDistance
-    # Aperture
-
-    absdirpath = bpy.path.abspath(dirpath)
-    bfu_basics.VerifiDirs(absdirpath)
-    AdditionalTrack = bfu_write_text.WriteCameraAnimationTracks(obj)
-    return bfu_write_text.ExportSingleJson(
-        AdditionalTrack,
-        absdirpath,
-        filename
-        )
-
-
 def ExportAdditionalParameter(dirpath, filename, unreal_exported_asset):
     # Export additional parameter from static and skeletal mesh track for ue4
     # SocketsList
@@ -669,22 +680,22 @@ def get_final_export_primary_bone_axis(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_primary_bone_axis
     else:
-        return bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["primary_bone_axis"]
+        return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["primary_bone_axis"]
 
 def get_final_export_secondary_bone_axis(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_secondary_bone_axis
     else:
-        return bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["secondary_bone_axis"]
+        return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["secondary_bone_axis"]
 
 def get_export_axis_forward(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_axis_forward
     else:
-        return bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["axis_forward"]
+        return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["axis_forward"]
 
 def get_export_axis_up(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_axis_up
     else:
-        return bfu_export_procedure.get_procedure_preset(obj.bfu_export_procedure)["axis_up"]
+        return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["axis_up"]

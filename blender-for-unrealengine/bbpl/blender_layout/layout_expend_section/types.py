@@ -33,8 +33,13 @@ class BBPL_UI_ExpendSection(bpy.types.PropertyGroup):
     )
     
     def get_name(self):
-        prop_rna = self.id_data.bl_rna.properties[self.id_properties_ensure().name]
-        return prop_rna.name
+        if bpy.app.version >= (3, 0, 0):
+            prop_rna = self.id_data.bl_rna.properties[self.id_properties_ensure().name]
+            return prop_rna.name
+        else:
+            prop_rna = self.id_data.bl_rna.properties[self.path_from_id()]
+            return prop_rna.name
+
 
     def draw(self, layout: bpy.types.UILayout):
         tria_icon = "TRIA_DOWN" if self.expend else "TRIA_RIGHT"

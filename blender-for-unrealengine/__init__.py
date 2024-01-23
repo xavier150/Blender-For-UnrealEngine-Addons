@@ -35,13 +35,16 @@ import importlib
 from . import bps
 from . import bbpl
 from . import bfu_propertys
+from . import bfu_camera
+from . import bfu_collision
 from . import bfu_addon_parts
-from . import bfu_ui_utils
+from . import bfu_export_procedure
 from . import bfu_addon_pref
 from . import bfu_export_logs
 from . import bfu_ui
 from . import bfu_check_potential_error
 from . import bfu_write_text
+from . import bfu_write_utils
 from . import bfu_write_import_asset_script
 from . import bfu_write_import_sequencer_script
 from . import bfu_basics
@@ -58,10 +61,14 @@ if "bbpl" in locals():
     importlib.reload(bbpl)
 if "bfu_propertys" in locals():
     importlib.reload(bfu_propertys)
+if "bfu_camera" in locals():
+    importlib.reload(bfu_camera)
+if "bfu_collision" in locals():
+    importlib.reload(bfu_collision)
 if "bfu_addon_parts" in locals():
     importlib.reload(bfu_addon_parts)
-if "bfu_ui_utils" in locals():
-    importlib.reload(bfu_ui_utils)
+if "bfu_export_procedure" in locals():
+    importlib.reload(bfu_export_procedure)
 if "bfu_addon_pref" in locals():
     importlib.reload(bfu_addon_pref)
 if "bfu_export_logs" in locals():
@@ -72,6 +79,8 @@ if "bfu_check_potential_error" in locals():
     importlib.reload(bfu_check_potential_error)
 if "bfu_write_text" in locals():
     importlib.reload(bfu_write_text)
+if "bfu_write_utils" in locals():
+    importlib.reload(bfu_write_utils)
 if "bfu_write_import_asset_script" in locals():
     importlib.reload(bfu_write_import_asset_script)
 if "bfu_write_import_sequencer_script" in locals():
@@ -96,7 +105,7 @@ bl_info = {
     'blender': (2, 80, 0),
     'location': 'View3D > UI > Unreal Engine',
     'description': "This add-ons allows to easily export several "
-    "objects at the same time for use in unreal engine 4.",
+    "objects at the same time for use in Unreal Engine.",
     'warning': '',
     "wiki_url": "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki",
     'tracker_url': 'https://github.com/xavier150/Blender-For-UnrealEngine-Addons/issues',
@@ -114,16 +123,16 @@ class BFUCachedAction(bpy.types.PropertyGroup):
 classes = (
 )
 
-
-
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
     bbpl.register()
     bfu_propertys.register()
+    bfu_camera.register()
+    bfu_collision.register()
     bfu_addon_parts.register()
-    bfu_ui_utils.register()
+    bfu_export_procedure.register()
     bfu_addon_pref.register()
     bfu_export_logs.register()
     bfu_ui.register()
@@ -141,7 +150,9 @@ def unregister():
     bfu_ui.unregister()
     bfu_export_logs.unregister()
     bfu_addon_pref.unregister()
-    bfu_ui_utils.unregister()
+    bfu_export_procedure.unregister()
     bfu_addon_parts.unregister()
+    bfu_camera.unregister()
+    bfu_collision.unregister()
     bfu_propertys.unregister()
     bbpl.unregister()

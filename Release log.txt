@@ -461,6 +461,7 @@ It is now possible to force the duration of an animation according to the scene 
 - New: Alembic animation support multiple unit scales and global scale.
 - New: Selection filter "Only selected" and "Only selected and active action" now filter only visible objects.
 - New: Modular export (Export several skeletal meshs with the same skeleton)
+- New: You can enable skeletal mesh per poly collision.
 - Fixed: Blender 3.5 may crash during NLA Export. (Interacting with an NlaStripFCurves not linked to an object could lead to a crash in Blender 3.5.)
 - Fixed: Applying skeletal export scale with Proxy and Unit Scale not set to 0.01 could result in a script error.
 - Fixed: Using "Convert Attribute to UV" can swap UV Indices in the exported mesh.
@@ -468,4 +469,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Hidden objects and collections are unhidden after export when using the same name.
 - Fixed: Skeletons imported with skeletal meshes use incorrect names.
 - Fixed: Collection.exclude is not recovery after export when using multi view layers.
-- Fixed: Camera import script don't work in Unreal Engine 5.3
+- Fixed: Camera import script doesn’t work in Unreal Engine 5.3

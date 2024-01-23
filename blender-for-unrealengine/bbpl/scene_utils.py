@@ -24,27 +24,42 @@
 
 import bpy
 
+def get_use_local_view():
+    """
+    Check if the user use local view in an area
+    """
+    areas = bpy.context.screen.areas
+    for area in areas:
+        if area.type == 'VIEW_3D':
+            if area.spaces.active.local_view:  # Check if using local view
+                return True
+    return False
 
 def move_to_global_view():
     """
-    Move from local view to global view in all 3D view areas.
+    Move from local view to global view in all 3D view areas. 
+    Thanks Cmomoney!
+
+    Blender 4.0 -> Set localview with context temp_override
+    Blender 3.6 and older -> Set localview with custom context override
     """
-    local_view_areas = []
-
-    for area in bpy.context.screen.areas:
+    context = bpy.context
+    areas = context.screen.areas
+    for area in areas:
         if area.type == 'VIEW_3D':
-            space = area.spaces[0]
-            if space.local_view:  # Check if using local view
-                local_view_areas.append(area)
-
-    for local_view_area in local_view_areas:
-        for region in local_view_area.regions:
-            if region.type == 'WINDOW':
-                # Override context and switch to global view
-                override = {'area': local_view_area, 'region': region}
-                bpy.ops.view3d.localview(override)
-
-    return local_view_areas
+            if area.spaces.active.local_view:  # Check if using local view
+                for region in area.regions:
+                    if region.type == 'WINDOW':
+                        # Override context and switch to global view
+                        
+                        if bpy.app.version >= (4, 0, 0):
+                            with context.temp_override(area=area, region=region):
+                                bpy.ops.view3d.localview() #switch to global view
+                        else:
+                            override_context = context.copy()
+                            override_context['area'] = area
+                            override_context['region'] = region
+                            bpy.ops.view3d.localview(override_context) #switch to global view
 
 
 def move_to_local_view(local_view_areas):

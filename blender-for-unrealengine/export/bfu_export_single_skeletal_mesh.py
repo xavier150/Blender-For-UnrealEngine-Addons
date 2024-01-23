@@ -112,6 +112,9 @@ def ExportSingleSkeletalMesh(
     duplicate_data = bfu_export_utils.DuplicateSelectForExport()
     bfu_export_utils.SetDuplicateNameForExport(duplicate_data)
 
+    bfu_export_utils.ConvertSelectedCurveToMesh()
+    bfu_export_utils.MakeSelectVisualReal()
+
     bfu_utils.ApplyNeededModifierToSelect()
     for armature in bpy.context.selected_objects:
         bfu_export_utils.ConvertGeometryNodeAttributeToUV(armature)
@@ -123,7 +126,7 @@ def ExportSingleSkeletalMesh(
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
 
-    export_procedure = active.bfu_export_procedure
+    skeleton_export_procedure = active.bfu_skeleton_export_procedure
 
     if export_as_proxy:
         bfu_export_utils.ApplyProxyData(active)
@@ -157,7 +160,7 @@ def ExportSingleSkeletalMesh(
     asset_name.SetExportName()
 
 
-    if (export_procedure == "ue-standard"):
+    if (skeleton_export_procedure == "ue-standard"):
         export_fbx_bin.save(
             operator=op,
             context=bpy.context,
@@ -176,7 +179,7 @@ def ExportSingleSkeletalMesh(
                 'LIGHT',
                 'MESH',
                 'OTHER'},
-            use_custom_props=addon_prefs.exportWithCustomProps,
+            use_custom_props=active.bfu_export_with_custom_props,
             use_custom_curves=True,
             mesh_smooth_type="FACE",
             add_leaf_bones=False,
@@ -187,7 +190,7 @@ def ExportSingleSkeletalMesh(
             embed_textures=False,
             batch_mode='OFF',
             use_batch_own_dir=True,
-            use_metadata=addon_prefs.exportWithMetaData,
+            use_metadata=active.bfu_export_with_meta_data,
             primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(active),
             secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(active),
             mirror_symmetry_right_side_bones=active.bfu_mirror_symmetry_right_side_bones,
@@ -197,7 +200,7 @@ def ExportSingleSkeletalMesh(
             axis_up=bfu_export_utils.get_export_axis_up(active),
             bake_space_transform=False
             )
-    elif (export_procedure == "blender-standard"):
+    elif (skeleton_export_procedure == "blender-standard"):
         bpy.ops.export_scene.fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
@@ -213,7 +216,7 @@ def ExportSingleSkeletalMesh(
                 'LIGHT',
                 'MESH',
                 'OTHER'},
-            use_custom_props=addon_prefs.exportWithCustomProps,
+            use_custom_props=active.bfu_export_with_custom_props,
             mesh_smooth_type="FACE",
             add_leaf_bones=False,
             use_armature_deform_only=active.bfu_export_deform_only,
@@ -223,15 +226,15 @@ def ExportSingleSkeletalMesh(
             embed_textures=False,
             batch_mode='OFF',
             use_batch_own_dir=True,
-            use_metadata=addon_prefs.exportWithMetaData,
+            use_metadata=active.bfu_export_with_meta_data,
             primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(active),
             secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(active),
             axis_forward=bfu_export_utils.get_export_axis_forward(active),
             axis_up=bfu_export_utils.get_export_axis_up(active),
             bake_space_transform=False
             )
-    elif (export_procedure == "auto-rig-pro"):
-        export_fbx_bin.save(
+    elif (skeleton_export_procedure == "auto-rig-pro"):
+        bpy.ops.export_scene.fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=False,

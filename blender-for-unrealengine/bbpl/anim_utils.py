@@ -25,6 +25,7 @@
 import bpy
 import mathutils
 from . import scene_utils
+from . import utils
 
 
 class NLA_Save:
@@ -181,7 +182,7 @@ class ProxyCopy_NlaStrip:
         nla_strip.extrapolation = self.extrapolation
         for fcurve in self.fcurves:
             new_fcurve = nla_strip.fcurves.find(fcurve.data_path)  # Can't create so use find
-            fcurve.PasteDataOn(new_fcurve)
+            fcurve.paste_data_on(new_fcurve)
         nla_strip.frame_end = self.frame_end
         if bpy.app.version >= (3, 3, 0):
             nla_strip.frame_end_ui = self.frame_end_ui
@@ -219,7 +220,6 @@ class ProxyCopy_FCurve():
 
     def paste_data_on(self, fcurve: bpy.types.FCurve):
         pass
-
 
 class AnimationManagment():
     """
@@ -309,3 +309,162 @@ def reset_armature_pose(obj):
         b.rotation_euler = mathutils.Vector((0, 0, 0))
         b.scale = mathutils.Vector((1, 1, 1))
         b.location = mathutils.Vector((0, 0, 0))
+
+
+class ProxyCopy_Constraint:
+    """
+    Proxy class for copying Blender PoseBoneConstraints.
+
+    It is used to safely copy Blender PoseBoneConstraints.
+    """
+
+    def __init__(self, constraint):
+        """
+        Initializes the ProxyCopy_Constraint object.
+
+        Args:
+            constraint (bpy.types.Constraint): The constraint to copy.
+
+        Returns:
+            None
+        """
+        if constraint:
+            self.type = constraint.type
+            self.name = constraint.name
+            self.target = constraint.target
+            self.subtarget = constraint.subtarget
+            self.influence = constraint.influence
+            self.mute = constraint.mute
+            self.target_space = constraint.target_space
+            self.owner_space = constraint.owner_space
+            # Add more constraint parameters here as needed
+
+            if self.type == 'CHILD_OF':
+                self.inverse_matrix = constraint.inverse_matrix.copy() 
+
+
+    def paste_data_on(self, target_constraint):
+        """
+        Pastes the saved data onto the target constraint.
+
+        Args:
+            target_constraint (bpy.types.Constraint): The target constraint to apply the data to.
+
+        Returns:
+            None
+        """
+        if target_constraint:
+            #target_constraint.type = self.type
+            target_constraint.name = self.name
+            target_constraint.target = self.target
+            target_constraint.subtarget = self.subtarget
+            target_constraint.influence = self.influence
+            target_constraint.mute = self.mute
+            target_constraint.target_space = self.target_space
+            target_constraint.owner_space = self.owner_space
+            # Copy more constraint parameters here as needed
+
+            if self.type == 'CHILD_OF':
+                target_constraint.inverse_matrix = self.inverse_matrix 
+
+
+class BoneConstraintManagment():
+    """
+    Helper class for managing Bone Constraint data in Blender.
+    """
+
+    def __init__(self):
+        self.saved_constraints = []
+
+    def save_bone_constraints_data(self, armature, bone_name):
+        """
+        Saves the constraints data from an armature bone.
+
+        Args:
+            armature: The armature object where the bone is located.
+            bone_name: The name of the bone you want to save constraints for.
+        """
+        # Get the bone object from the armature
+        bone = armature.pose.bones.get(bone_name)
+
+        if bone:
+            # Clear the saved_constraints list to start fresh
+            self.saved_constraints.clear()
+
+            # Get the list of constraints on the bone and save them
+            for constraint in bone.constraints:
+                self.saved_constraints.append(ProxyCopy_Constraint(constraint))
+
+            #print(f"Constraints for bone {bone_name} saved successfully.")
+        else:
+            print(f"Bone {bone_name} not found in the armature.")
+
+
+    def set_bone_constraints_data(self, armature, bone_name, replace=True):
+        """
+        Sets the constraints data on the bone of an armature.
+
+        Args:
+            armature: The armature object where the bone is located.
+            bone_name: The name of the bone on which you want to set constraints.
+            replace: If True, replace existing constraints; if False, keep them and add saved constraints.
+        """
+        # Get the bone object from the armature
+        bone = armature.pose.bones.get(bone_name)
+
+        if bone:
+            if replace:
+                # Remove all existing constraints on the bone
+                for old_constraint in bone.constraints:
+                    bone.constraints.remove(old_constraint)
+
+            # Add the saved constraints to the bone
+            for constraint_data in self.saved_constraints:
+                new_constraint = bone.constraints.new(type=constraint_data.type)
+                constraint_data.paste_data_on(new_constraint)
+
+            print(f"Constraints for bone {bone_name} set successfully.")
+        else:
+            print(f"Bone {bone_name} not found in the armature.")
+
+class RigConstraintManagment():
+    """
+    Helper class for managing Rig Constraint data in Blender.
+    """
+
+    def __init__(self):
+        self.saved_bones_constraints = {}
+
+    def save_rig_constraints_data(self, armature, bone_names):
+        """
+        Saves the constraints data from an armature bone.
+
+        Args:
+            armature: The armature object where the bone is located.
+            bone_names: The names of the bones you want to save constraints for.
+        """
+        self.saved_bones_constraints.clear()
+
+        for bone_name in bone_names:
+            bone = armature.pose.bones.get(bone_name)
+            constraints = BoneConstraintManagment()
+            constraints.save_bone_constraints_data(armature, bone_name)
+
+            if bone:
+                self.saved_bones_constraints[bone_name] = constraints
+
+                #print(f"Constraints for bone {bone_name} saved successfully.")
+            else:
+                print(f"Bone {bone_name} not found in the armature.")
+
+
+    def set_rig_constraints_data(self, armature, replace=True):
+        """
+        Sets the constraints data on the bones of an armature.
+
+        Args:
+            armature: The armature object where the bones are located.
+            replace: If True, replace existing constraints; if False, keep them and add saved constraints.
+        """
+        for bone_name, constraints in self.saved_bones_constraints.items():
+            constraints.set_bone_constraints_data(armature, bone_name, replace)

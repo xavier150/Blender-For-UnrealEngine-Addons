@@ -53,6 +53,8 @@ def ProcessActionExport(op, obj, action, action_curve_scale):
     MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.folder_name = obj.bfu_export_folder_name
     MyAsset.asset_type = bfu_utils.GetActionType(action)
+    MyAsset.animation_start_frame = bfu_utils.GetDesiredActionStartEndTime(obj, action)[0]
+    MyAsset.animation_end_frame = bfu_utils.GetDesiredActionStartEndTime(obj, action)[1]
 
     file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
     file.file_name = bfu_naming.get_animation_file_name(obj, action, "")
@@ -105,6 +107,7 @@ def ExportSingleFbxAction(
         bfu_export_utils.SetDuplicateNameForExport(duplicate_data)
 
     if export_as_proxy is False:
+        bfu_export_utils.ConvertSelectedCurveToMesh()
         bfu_export_utils.MakeSelectVisualReal()
 
     BaseTransform = obj.matrix_world.copy()
@@ -122,7 +125,7 @@ def ExportSingleFbxAction(
         bfu_utils.RemoveSocketFromSelectForProxyArmature()
 
     active.animation_data.action = targetAction  # Apply desired action
-    export_procedure = active.bfu_export_procedure
+    skeleton_export_procedure = active.bfu_skeleton_export_procedure
 
     if addon_prefs.bakeArmatureAction:
         bfu_export_utils.BakeArmatureAnimation(active, scene.frame_start, scene.frame_end)
@@ -160,7 +163,7 @@ def ExportSingleFbxAction(
 
     asset_name.SetExportName()
 
-    if (export_procedure == "ue-standard"):
+    if (skeleton_export_procedure == "ue-standard"):
         export_fbx_bin.save(
             operator=op,
             context=bpy.context,
@@ -173,7 +176,7 @@ def ExportSingleFbxAction(
             global_scale=bfu_utils.GetObjExportScale(active),
             apply_scale_options='FBX_SCALE_NONE',
             object_types={'ARMATURE', 'EMPTY', 'MESH'},
-            use_custom_props=addon_prefs.exportWithCustomProps,
+            use_custom_props=obj.bfu_export_with_custom_props,
             use_custom_curves=True,
             mesh_smooth_type="FACE",
             add_leaf_bones=False,
@@ -188,7 +191,7 @@ def ExportSingleFbxAction(
             embed_textures=False,
             batch_mode='OFF',
             use_batch_own_dir=True,
-            use_metadata=addon_prefs.exportWithMetaData,
+            use_metadata=obj.bfu_export_with_meta_data,
             primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
             secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
             mirror_symmetry_right_side_bones=active.bfu_mirror_symmetry_right_side_bones,
@@ -198,7 +201,7 @@ def ExportSingleFbxAction(
             axis_up=bfu_export_utils.get_export_axis_up(obj),
             bake_space_transform=False
             )
-    elif (export_procedure == "blender-standard"):
+    elif (skeleton_export_procedure == "blender-standard"):
         bpy.ops.export_scene.fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
@@ -207,7 +210,7 @@ def ExportSingleFbxAction(
             global_scale=bfu_utils.GetObjExportScale(active),
             apply_scale_options='FBX_SCALE_NONE',
             object_types={'ARMATURE', 'EMPTY', 'MESH'},
-            use_custom_props=addon_prefs.exportWithCustomProps,
+            use_custom_props=obj.bfu_export_with_custom_props,
             mesh_smooth_type="FACE",
             add_leaf_bones=False,
             use_armature_deform_only=active.bfu_export_deform_only,
@@ -221,21 +224,21 @@ def ExportSingleFbxAction(
             embed_textures=False,
             batch_mode='OFF',
             use_batch_own_dir=True,
-            use_metadata=addon_prefs.exportWithMetaData,
+            use_metadata=obj.bfu_export_with_meta_data,
             primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
             secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
             axis_forward=bfu_export_utils.get_export_axis_forward(obj),
             axis_up=bfu_export_utils.get_export_axis_up(obj),
             bake_space_transform=False
             )
-    elif (export_procedure == "auto-rig-pro"):
+    elif (skeleton_export_procedure == "auto-rig-pro"):
 
         # Rename Action name for export
         TempName = "ActionAutoRigProTempExportNameForUnreal"
         OriginalActionName = active.animation_data.action.name
         active.animation_data.action.name = TempName
 
-        export_fbx_bin.save(
+        bpy.ops.export_scene.fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=True,
