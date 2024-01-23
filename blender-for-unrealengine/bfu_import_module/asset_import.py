@@ -21,8 +21,9 @@ import os.path
 from . import bps
 from . import import_module_utils
 from . import import_module_unreal_utils
+from . import import_module_post_treatment
 
-try:  # TO DO: Found a better way to check that.
+try:
     import unreal
 except ImportError:
     import unreal_engine as unreal
@@ -61,23 +62,28 @@ def ImportAsset(asset_data):
                 return import_module_utils.JsonLoadFile(asset_data["additional_tracks_path"])
         return None
 
-    additional_data = GetAdditionalData()
+    asset_additional_data = GetAdditionalData()
 
 
 
     if asset_data["asset_type"] == "Animation" or asset_data["asset_type"] == "SkeletalMesh":
+        origin_skeletal_mesh = None
+        origin_skeleton = None
+
         find_asset = unreal.find_asset(asset_data["animation_skeleton_path"])
         if isinstance(find_asset, unreal.Skeleton):
-            OriginSkeleton = find_asset
+            origin_skeleton = find_asset
         elif isinstance(find_asset, unreal.SkeletalMesh):
-            OriginSkeleton = find_asset.skeleton
+            origin_skeletal_mesh = find_asset
+            origin_skeleton = find_asset.skeleton
         else:
-            OriginSkeleton = None
-        if OriginSkeleton:
+            origin_skeleton = None
+        if origin_skeleton:
             pass
             #print("Setting skeleton asset: " + OriginSkeleton.get_full_name())
         else:
-            message = "Could not find skeleton at the path: " + asset_data["animation_skeleton_path"]
+            message = "WARNING: Could not find skeleton." + "\n"
+            message += '"animation_skeleton_path": ' + asset_data["animation_skeleton_path"]
             import_module_unreal_utils.show_warning_message("Skeleton not found.", message)
 
     # docs.unrealengine.com/4.26/en-US/PythonAPI/class/AssetImportTask.html
@@ -139,25 +145,8 @@ def ImportAsset(asset_data):
         GetAlembicImportData().conversion_settings.set_editor_property("rotation", rotation)
 
     # Vertex color
-    vertex_override_color = None
-    vertex_color_import_option = None
-    if additional_data:
-
-        vertex_color_import_option = unreal.VertexColorImportOption.REPLACE  # Default
-        if "vertex_color_import_option" in additional_data:
-            if additional_data["vertex_color_import_option"] == "IGNORE":
-                vertex_color_import_option = unreal.VertexColorImportOption.IGNORE
-            elif additional_data["vertex_color_import_option"] == "OVERRIDE":
-                vertex_color_import_option = unreal.VertexColorImportOption.OVERRIDE
-            elif additional_data["vertex_color_import_option"] == "REPLACE":
-                vertex_color_import_option = unreal.VertexColorImportOption.REPLACE
-
-        if "vertex_override_color" in additional_data:
-            vertex_override_color = unreal.LinearColor(
-                additional_data["vertex_override_color"][0],
-                additional_data["vertex_override_color"][1],
-                additional_data["vertex_override_color"][2]
-                )
+    vertex_override_color = import_module_unreal_utils.get_vertex_override_color(asset_additional_data)
+    vertex_color_import_option = import_module_unreal_utils.get_vertex_color_import_option(asset_additional_data)
 
     # #################################[Change]
 
@@ -181,12 +170,12 @@ def ImportAsset(asset_data):
 
     else:
         if asset_data["asset_type"] == "Animation" or asset_data["asset_type"] == "SkeletalMesh":
-            if OriginSkeleton:
-                task.get_editor_property('options').set_editor_property('Skeleton', OriginSkeleton)
+            if origin_skeleton:
+                task.get_editor_property('options').set_editor_property('Skeleton', origin_skeleton)
             else:
                 if asset_data["asset_type"] == "Animation":
                     fail_reason = 'Skeleton ' + asset_data["animation_skeleton_path"] + ' Not found for ' + asset_data["asset_name"] + ' asset.'
-                    return fail_reason
+                    return fail_reason, None, None
                 else:
                     print("Skeleton is not set, a new skeleton asset will be created...")
 
@@ -250,9 +239,9 @@ def ImportAsset(asset_data):
     # ###############[ pre import ]################
 
     # Check is the file alredy exit
-    if additional_data:
-        if "preview_import_path" in additional_data:
-            task_asset_full_path = task.destination_path+"/"+additional_data["preview_import_path"]+"."+additional_data["preview_import_path"]
+    if asset_additional_data:
+        if "preview_import_path" in asset_additional_data:
+            task_asset_full_path = task.destination_path+"/"+asset_additional_data["preview_import_path"]+"."+asset_additional_data["preview_import_path"]
             find_asset = unreal.find_asset(task_asset_full_path)
             if find_asset:
 
@@ -284,18 +273,18 @@ def ImportAsset(asset_data):
     unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
 
     if len(task.imported_object_paths) > 0:
-        asset = unreal.find_asset(task.imported_object_paths[0])
+        asset_path = task.imported_object_paths[0]
+        asset = unreal.find_asset(asset_path)
     else:
         asset = None
 
     if asset is None:
         fail_reason = 'Error zero imported object for: ' + asset_data["asset_name"]
-        return fail_reason
+        return fail_reason, None, None
 
     if asset_data["asset_type"] == "Animation":
         # For animation remove the extra mesh
-        p = task.imported_object_paths[0]
-        if type(unreal.find_asset(p)) is not unreal.AnimSequence:
+        if type(asset) is not unreal.AnimSequence:
             animAssetName = p.split('.')[0]+'_anim.'+p.split('.')[1]+'_anim'
             animAssetNameDesiredPath = p.split('.')[0]+'.'+p.split('.')[1]
             animAsset = unreal.find_asset(animAssetName)
@@ -305,7 +294,7 @@ def ImportAsset(asset_data):
                 asset = animAsset
             else:
                 fail_reason = 'animAsset ' + asset_data["asset_name"] + ' not found for after inport: ' + animAssetName
-                return fail_reason
+                return fail_reason, None, None
 
     # ###############[ Post treatment ]################
     asset_import_data = asset.get_editor_property('asset_import_data')
@@ -341,7 +330,7 @@ def ImportAsset(asset_data):
 
     if asset_data["asset_type"] == "SkeletalMesh":
         asset_import_data.set_editor_property('normal_import_method', unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS)
-        if OriginSkeleton is None:
+        if origin_skeleton is None:
             #Unreal create a new skeleton when no skeleton was selected, so addon rename it.
             p = task.imported_object_paths[0]
             old_skeleton_name = p.split('.')[0]+'_Skeleton.'+p.split('.')[1]+'_Skeleton'
@@ -355,7 +344,7 @@ def ImportAsset(asset_data):
     # Socket
     if asset_data["asset_type"] == "SkeletalMesh":
         # Import the SkeletalMesh socket(s)
-        sockets_to_add = additional_data["Sockets"]
+        sockets_to_add = asset_additional_data["Sockets"]
         for socket in sockets_to_add:
             old_socket = asset.find_socket(socket["SocketName"])
             if old_socket:
@@ -378,56 +367,15 @@ def ImportAsset(asset_data):
                 # skeleton.add_socket(new_socket)
 
     # Lod
-    if asset_data["asset_type"] == "StaticMesh" or asset_data["asset_type"] == "SkeletalMesh":
-        if asset_data["asset_type"] == "StaticMesh":
-            unreal.EditorStaticMeshLibrary.remove_lods(asset)  # Import the StaticMesh lod(s)
+    if asset_data["asset_type"] == "StaticMesh":
+        import_module_post_treatment.set_static_mesh_lods(asset, asset_data, asset_additional_data)
 
-        if asset_data["asset_type"] == "SkeletalMesh" or asset_data["asset_type"] == "StaticMesh":
+    if asset_data["asset_type"] == "SkeletalMesh":
+        import_module_post_treatment.set_skeletal_mesh_lods(asset, asset_data, asset_additional_data)
 
-            def ImportStaticLod(lod_name, lod_number):
-                if "LevelOfDetail" in additional_data:
-                    if lod_name in additional_data["LevelOfDetail"]:
-                        lodTask = unreal.AssetImportTask()
-                        lodTask.filename = additional_data["LevelOfDetail"][lod_name]
-                        destination_path = os.path.normpath(asset_data["full_import_path"]).replace('\\', '/')
-                        lodTask.destination_path = destination_path
-                        lodTask.automated = True
-                        lodTask.replace_existing = True
-
-                        # Set vertex color import settings to replicate base StaticMesh's behaviour
-                        if asset_data["asset_type"] == "Alembic":
-                            lodTask.set_editor_property('options', unreal.AbcImportSettings())
-                        else:
-                            lodTask.set_editor_property('options', unreal.FbxImportUI())
-
-                        lodTask.get_editor_property('options').static_mesh_import_data.set_editor_property('vertex_color_import_option', vertex_color_import_option)
-                        lodTask.get_editor_property('options').static_mesh_import_data.set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
-
-                        unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([lodTask])
-                        if len(lodTask.imported_object_paths) > 0:
-                            lodAsset = unreal.find_asset(lodTask.imported_object_paths[0])
-                            slot_replaced = unreal.EditorStaticMeshLibrary.set_lod_from_static_mesh(asset, lod_number, lodAsset, 0, True)
-                            unreal.EditorAssetLibrary.delete_asset(lodTask.imported_object_paths[0])
-
-            def ImportSkeletalLod(lod_name, lod_number):
-                if "LevelOfDetail" in additional_data:
-                    if lod_name in additional_data["LevelOfDetail"]:
-                        # Unreal python no longer support Skeletal mesh LODS import.
-                        pass
-
-            if asset_data["asset_type"] == "StaticMesh":
-                ImportStaticLod("lod_1", 1)
-                ImportStaticLod("lod_2", 2)
-                ImportStaticLod("lod_3", 3)
-                ImportStaticLod("lod_4", 4)
-                ImportStaticLod("lod_5", 5)
-
-            elif asset_data["asset_type"] == "SkeletalMesh":
-                ImportSkeletalLod("lod_1", 1)
-                ImportSkeletalLod("lod_2", 2)
-                ImportSkeletalLod("lod_3", 3)
-                ImportSkeletalLod("lod_4", 4)
-                ImportSkeletalLod("lod_5", 5)
+    # Preview mesh
+    if asset_data["asset_type"] == "Animation":
+        import_module_post_treatment.set_sequence_preview_skeletal_mesh(asset, origin_skeletal_mesh)
 
     # Vertex color
     if vertex_override_color:
@@ -443,12 +391,7 @@ def ImportAsset(asset_data):
 
 
 
-def ImportAllAssets(assets_data):
-    
-
-
-
-    bfu_unreal_import_location = assets_data['bfu_unreal_import_location']
+def ImportAllAssets(assets_data, show_finished_popup=True):
     ImportedList = []
     ImportFailList = []
 
@@ -523,22 +466,23 @@ def ImportAllAssets(assets_data):
     unreal.EditorAssetLibrary.sync_browser_to_objects(PathList)
     print('=========================')
 
-    if len(ImportFailList) > 0:
-        message = 'Some asset(s) could not be imported.' + "\n"
-    else:
-        message = 'All assets imported with success!' + "\n"
+    if show_finished_popup:
+        if len(ImportFailList) > 0:
+            message = 'Some asset(s) could not be imported.' + "\n"
+        else:
+            message = 'All assets imported with success!' + "\n"
 
-    message += "Import finished in " + counter.get_str_time() + "\n"
-    message += "\n"
-    for import_row in import_log:
-        message += import_row + "\n"
-
-    if len(ImportFailList) > 0:
+        message += "Import finished in " + counter.get_str_time() + "\n"
         message += "\n"
-        for error in ImportFailList:
-            message += error + "\n"
+        for import_row in import_log:
+            message += import_row + "\n"
 
-    title = "Import finished!"
-    import_module_unreal_utils.show_simple_message(title, message)
+        if len(ImportFailList) > 0:
+            message += "\n"
+            for error in ImportFailList:
+                message += error + "\n"
+
+        title = "Import finished!"
+        import_module_unreal_utils.show_simple_message(title, message)
 
     return True

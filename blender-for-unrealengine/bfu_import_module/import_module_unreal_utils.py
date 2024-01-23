@@ -18,7 +18,7 @@
 
 import string
 
-try:  # TO DO: Found a better way to check that.
+try:
     import unreal
 except ImportError:
     import unreal_engine as unreal
@@ -58,3 +58,30 @@ def show_warning_message(title, message):
     print('--------------------------------------------------')
     print(message)
     return unreal.EditorDialog.show_message(title, message, unreal.AppMsgType.OK)
+
+def get_vertex_override_color(asset_additional_data):
+    if asset_additional_data is None:
+        return None
+
+    if "vertex_override_color" in asset_additional_data:
+        vertex_override_color = unreal.LinearColor(
+            asset_additional_data["vertex_override_color"][0],
+            asset_additional_data["vertex_override_color"][1],
+            asset_additional_data["vertex_override_color"][2]
+            )
+        return vertex_override_color
+
+def get_vertex_color_import_option(asset_additional_data):
+    if asset_additional_data is None:
+        return None
+
+    vertex_color_import_option = unreal.VertexColorImportOption.REPLACE  # Default
+    if "vertex_color_import_option" in asset_additional_data:
+        if asset_additional_data["vertex_color_import_option"] == "IGNORE":
+            vertex_color_import_option = unreal.VertexColorImportOption.IGNORE
+        elif asset_additional_data["vertex_color_import_option"] == "OVERRIDE":
+            vertex_color_import_option = unreal.VertexColorImportOption.OVERRIDE
+        elif asset_additional_data["vertex_color_import_option"] == "REPLACE":
+            vertex_color_import_option = unreal.VertexColorImportOption.REPLACE
+    return vertex_color_import_option
+

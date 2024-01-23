@@ -21,6 +21,7 @@ import importlib
 from . import bps
 from . import import_module_utils
 from . import import_module_unreal_utils
+from . import import_module_post_treatment
 from . import asset_import
 from . import sequencer_import
 
@@ -30,15 +31,17 @@ if "import_module_utils" in locals():
     importlib.reload(import_module_utils)
 if "import_module_unreal_utils" in locals():
     importlib.reload(import_module_unreal_utils)
+if "import_module_post_treatment" in locals():
+    importlib.reload(import_module_post_treatment)
 if "asset_import" in locals():
     importlib.reload(asset_import)
 if "sequencer_import" in locals():
     importlib.reload(sequencer_import)
 
-def run_asset_import(assets_data):
+def run_asset_import(assets_data, show_finished_popup=True):
     if asset_import.ready_for_asset_import():
-        return asset_import.ImportAllAssets(assets_data)
+        return asset_import.ImportAllAssets(assets_data, show_finished_popup)
 
-def run_sequencer_import(sequence_data):
+def run_sequencer_import(sequence_data, show_finished_popup=True):
     if sequencer_import.ready_for_sequence_import():
-        return sequencer_import.CreateSequencer(sequence_data)
+        return sequencer_import.CreateSequencer(sequence_data, show_finished_popup)

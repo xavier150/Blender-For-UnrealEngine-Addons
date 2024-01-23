@@ -21,7 +21,7 @@ from . import bps
 from . import import_module_utils
 from . import import_module_unreal_utils
 
-try:  # TO DO: Found a better way to check that.
+try:
     import unreal
 except ImportError:
     import unreal_engine as unreal
@@ -44,7 +44,7 @@ def ready_for_sequence_import():
         return False
     return True
 
-def CreateSequencer(sequence_data):
+def CreateSequencer(sequence_data, show_finished_popup=True):
 
     spawnable_camera = sequence_data['spawnable_camera']
     startFrame = sequence_data['startFrame']
