@@ -86,26 +86,46 @@ def WriteImportAssetScript():
             asset_data["additional_tracks_path"] = None
 
         if bfu_utils.GetIsAnimation(asset.asset_type) or asset.asset_type == "SkeletalMesh":
+            
+            # Skeleton
             if(asset.object.bfu_engine_ref_skeleton_search_mode) == "auto":
                 asset_data["target_skeleton_ref"] = bfu_unreal_utils.GetPredictedSkeletonRef(asset.object)
 
             elif(asset.object.bfu_engine_ref_skeleton_search_mode) == "custom_name":
-                customName = bfu_utils.ValidUnrealAssetsName(asset.object.bfu_engine_ref_skeleton_custom_name)
-                SkeletonName = customName+"."+customName
-                SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
-
-                target_skeleton_ref = os.path.join("/" + scene.bfu_unreal_import_module + "/", scene.bfu_unreal_import_location, SkeletonLoc)
+                name = bfu_utils.ValidUnrealAssetsName(asset.object.bfu_engine_ref_skeleton_custom_name)
+                target_skeleton_ref = os.path.join("/" + scene.bfu_unreal_import_module + "/", scene.bfu_unreal_import_location, asset.folder_name, name+"."+name)
                 target_skeleton_ref = target_skeleton_ref.replace('\\', '/')
                 asset_data["target_skeleton_ref"] = target_skeleton_ref
 
             elif(asset.object.bfu_engine_ref_skeleton_search_mode) == "custom_path_name":
-                customName = bfu_utils.ValidUnrealAssetsName(asset.object.bfu_engine_ref_skeleton_custom_name)
-                SkeletonName = customName+"."+customName
-                SkeletonLoc = os.path.join("/" + scene.bfu_unreal_import_module + "/", asset.object.bfu_engine_ref_skeleton_custom_path, SkeletonName)
-                asset_data["target_skeleton_ref"] = SkeletonLoc.replace('\\', '/')
+                name = bfu_utils.ValidUnrealAssetsName(asset.object.bfu_engine_ref_skeleton_custom_name)
+                target_skeleton_ref = os.path.join("/" + scene.bfu_unreal_import_module + "/", asset.object.bfu_engine_ref_skeleton_custom_path, name+"."+name)
+                target_skeleton_ref = target_skeleton_ref.replace('\\', '/')
+                asset_data["target_skeleton_ref"] = target_skeleton_ref
 
             elif(asset.object.bfu_engine_ref_skeleton_search_mode) == "custom_reference":
-                asset_data["target_skeleton_ref"] = asset.object.bfu_engine_ref_skeleton_custom_ref.replace('\\', '/')
+                target_skeleton_ref = asset.object.bfu_engine_ref_skeleton_custom_ref.replace('\\', '/')
+                asset_data["target_skeleton_ref"] = target_skeleton_ref
+
+            # Skeletal Mesh
+            if(asset.object.bfu_engine_ref_skeletal_mesh_search_mode) == "auto":
+                asset_data["target_skeletal_mesh_ref"] = bfu_unreal_utils.GetPredictedSkeletalMeshRef(asset.object)
+
+            elif(asset.object.bfu_engine_ref_skeletal_mesh_search_mode) == "custom_name":
+                name = bfu_utils.ValidUnrealAssetsName(asset.object.bfu_engine_ref_skeletal_mesh_custom_name)
+                target_skeletal_mesh_ref = os.path.join("/" + scene.bfu_unreal_import_module + "/", scene.bfu_unreal_import_location, asset.folder_name, name+"."+name)
+                target_skeletal_mesh_ref = target_skeletal_mesh_ref.replace('\\', '/')
+                asset_data["target_skeletal_mesh_ref"] = target_skeletal_mesh_ref
+
+            elif(asset.object.bfu_engine_ref_skeletal_mesh_search_mode) == "custom_path_name":
+                name = bfu_utils.ValidUnrealAssetsName(asset.object.bfu_engine_ref_skeletal_mesh_custom_name)
+                target_skeletal_mesh_ref = os.path.join("/" + scene.bfu_unreal_import_module + "/", asset.object.bfu_engine_ref_skeletal_mesh_custom_path, name+"."+name)
+                target_skeletal_mesh_ref = target_skeletal_mesh_ref.replace('\\', '/')
+                asset_data["target_skeletal_mesh_ref"] = target_skeletal_mesh_ref
+
+            elif(asset.object.bfu_engine_ref_skeletal_mesh_search_mode) == "custom_reference":
+                target_skeletal_mesh_ref = asset.object.bfu_engine_ref_skeletal_mesh_custom_ref.replace('\\', '/')
+                asset_data["target_skeletal_mesh_ref"] = target_skeletal_mesh_ref
 
         if bfu_utils.GetIsAnimation(asset.asset_type):
             asset_data["animation_start_frame"] = asset.animation_start_frame

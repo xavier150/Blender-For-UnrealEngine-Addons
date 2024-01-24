@@ -1431,18 +1431,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         # SkeletalMesh prop
                         if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
                             if not obj.bfu_export_as_lod_mesh:
-
                                 unreal_engine_refs = layout.column()
-                                unreal_engine_refs.prop(obj, "bfu_engine_ref_skeleton_search_mode")
-                                if obj.bfu_engine_ref_skeleton_search_mode == "auto":
-                                    pass
-                                if obj.bfu_engine_ref_skeleton_search_mode == "custom_name":
-                                    unreal_engine_refs.prop(obj, "bfu_engine_ref_skeleton_custom_name")
-                                if obj.bfu_engine_ref_skeleton_search_mode == "custom_path_name":
-                                    unreal_engine_refs.prop(obj, "bfu_engine_ref_skeleton_custom_path")
-                                    unreal_engine_refs.prop(obj, "bfu_engine_ref_skeleton_custom_name")
-                                if obj.bfu_engine_ref_skeleton_search_mode == "custom_reference":
-                                    unreal_engine_refs.prop(obj, "bfu_engine_ref_skeleton_custom_ref")
+                                bfu_unreal_engine_refs_props.draw_skeleton_prop(unreal_engine_refs, obj)
+                                bfu_unreal_engine_refs_props.draw_skeletal_mesh_prop(unreal_engine_refs, obj)
 
             scene.bfu_modular_skeletal_mesh_properties_expanded.draw(layout)
             if scene.bfu_modular_skeletal_mesh_properties_expanded.is_expend():
