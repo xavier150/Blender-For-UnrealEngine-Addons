@@ -1611,3 +1611,4 @@ def ClearAllBFUTempVars(obj):
     ClearVarOnObject(obj, "BFU_OriginName")
     ClearVarOnObject(obj, "BFU_ExportAsProxy")
     ClearVarOnObject(obj, "BFU_ExportProxyChild")
+

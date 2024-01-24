@@ -19,9 +19,11 @@
 
 import os
 import bpy
+from . import bfu_export_logs
 from . import languages
 from . import bfu_utils
 from . import bfu_write_utils
+from . import bfu_unreal_utils
 
 def WriteImportAssetScript():
     # Generate a script for import assets in Ue4
@@ -41,6 +43,7 @@ def WriteImportAssetScript():
     # Import assets
     data['assets'] = []
     for asset in scene.UnrealExportedAssetsList:
+        asset: bfu_export_logs.BFU_OT_UnrealExportedAsset
         asset_data = {}
         asset_data["scene_unit_scale"] = round(scene.unit_settings.scale_length, 8) #Have to round for avoid microscopic offset
 
@@ -84,31 +87,25 @@ def WriteImportAssetScript():
 
         if bfu_utils.GetIsAnimation(asset.asset_type) or asset.asset_type == "SkeletalMesh":
             if(asset.object.bfu_skeleton_search_mode) == "auto":
-                customName = scene.bfu_skeleton_prefix_export_name+bfu_utils.ValidUnrealAssetsName(asset.skeleton_name)+"_Skeleton"
-                SkeletonName = customName+"."+customName
-                SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
-
-                animation_skeleton_path = os.path.join("/" + scene.bfu_unreal_import_module + "/", scene.bfu_unreal_import_location, SkeletonLoc)
-                animation_skeleton_path = animation_skeleton_path.replace('\\', '/')
-                asset_data["animation_skeleton_path"] = animation_skeleton_path
+                asset_data["target_skeleton_ref"] = bfu_unreal_utils.GetPredictedSkeletonRef(asset.object)
 
             elif(asset.object.bfu_skeleton_search_mode) == "custom_name":
                 customName = bfu_utils.ValidUnrealAssetsName(asset.object.bfu_target_skeleton_custom_name)
                 SkeletonName = customName+"."+customName
                 SkeletonLoc = os.path.join(asset.folder_name, SkeletonName)
 
-                animation_skeleton_path = os.path.join("/" + scene.bfu_unreal_import_module + "/", scene.bfu_unreal_import_location, SkeletonLoc)
-                animation_skeleton_path = animation_skeleton_path.replace('\\', '/')
-                asset_data["animation_skeleton_path"] = animation_skeleton_path
+                target_skeleton_ref = os.path.join("/" + scene.bfu_unreal_import_module + "/", scene.bfu_unreal_import_location, SkeletonLoc)
+                target_skeleton_ref = target_skeleton_ref.replace('\\', '/')
+                asset_data["target_skeleton_ref"] = target_skeleton_ref
 
             elif(asset.object.bfu_skeleton_search_mode) == "custom_path_name":
                 customName = bfu_utils.ValidUnrealAssetsName(asset.object.bfu_target_skeleton_custom_name)
                 SkeletonName = customName+"."+customName
                 SkeletonLoc = os.path.join("/" + scene.bfu_unreal_import_module + "/", asset.object.bfu_target_skeleton_custom_path, SkeletonName)
-                asset_data["animation_skeleton_path"] = SkeletonLoc.replace('\\', '/')
+                asset_data["target_skeleton_ref"] = SkeletonLoc.replace('\\', '/')
 
             elif(asset.object.bfu_skeleton_search_mode) == "custom_reference":
-                asset_data["animation_skeleton_path"] = asset.object.bfu_target_skeleton_custom_ref.replace('\\', '/')
+                asset_data["target_skeleton_ref"] = asset.object.bfu_target_skeleton_custom_ref.replace('\\', '/')
 
         if bfu_utils.GetIsAnimation(asset.asset_type):
             asset_data["animation_start_frame"] = asset.animation_start_frame
