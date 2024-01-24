@@ -1519,6 +1519,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 mirror_symmetry_right_side_bones.enabled = obj.bfu_mirror_symmetry_right_side_bones
                                 mirror_symmetry_right_side_bones.prop(obj, "bfu_use_ue_mannequin_bone_alignment")
 
+            scene.bfu_engine_ref_properties_expanded.draw(layout)
+            if scene.bfu_engine_ref_properties_expanded.is_expend():
+                pass
+
             scene.bfu_modular_skeletal_mesh_properties_expanded.draw(layout)
             if scene.bfu_modular_skeletal_mesh_properties_expanded.is_expend():
                 if obj.bfu_export_type == "export_recursive":

@@ -51,6 +51,7 @@ def register():
     bpy.types.Scene.bfu_animation_advanced_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Animation Advanced Properties")
 
     bpy.types.Scene.bfu_skeleton_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Skeleton")
+    bpy.types.Scene.bfu_engine_ref_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Engine Refs")
     bpy.types.Scene.bfu_modular_skeletal_mesh_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Modular Skeletal Mesh")
 
     bpy.types.Scene.bfu_collection_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Collection Properties")
@@ -106,6 +107,7 @@ def unregister():
     del bpy.types.Scene.bfu_animation_advanced_properties_expanded
 
     del bpy.types.Scene.bfu_skeleton_properties_expanded
+    del bpy.types.Scene.bfu_engine_ref_properties_expanded
     del bpy.types.Scene.bfu_modular_skeletal_mesh_properties_expanded
 
     del bpy.types.Scene.bfu_collection_properties_expanded
