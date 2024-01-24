@@ -35,7 +35,7 @@ from bpy.props import (
 from bpy.types import (
         Operator,
         )
-
+from . import bfu_unreal_engine_refs_props
 from .. import bbpl
 from .. import bfu_export_procedure
 from .. import bfu_basics
@@ -221,29 +221,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=True
         )
 
-    bpy.types.Object.bfu_skeleton_search_mode = EnumProperty(
-        name="Skeleton search mode",
-        description='Specify the skeleton location in Unreal',
-        override={'LIBRARY_OVERRIDABLE'},
-        items=[
-            ("auto",
-                "Auto",
-                "...",
-                1),
-            ("custom_name",
-                "Custom name",
-                "Default location with custom name",
-                2),
-            ("custom_path_name",
-                "Custom path and name",
-                "Set the custom light map resolution",
-                3),
-            ("custom_reference",
-                "custom reference",
-                "Reference from Unreal.",
-                4)
-            ]
-        )
+
     
     bpy.types.Object.bfu_modular_skeletal_mesh_mode = EnumProperty(
         name="Modular Skeletal Mesh Mode",
@@ -272,29 +250,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default="_"
         )
 
-    bpy.types.Object.bfu_target_skeleton_custom_path = StringProperty(
-        name="",
-        description="The path of the Skeleton in Unreal. Skeleton not the skeletal mesh.",
-        override={'LIBRARY_OVERRIDABLE'},
-        default="ImportedFbx"
-        )
-
-    bpy.types.Object.bfu_target_skeleton_custom_name = StringProperty(
-        name="",
-        description="The name of the Skeleton in Unreal. Skeleton not the skeletal mesh.",
-        override={'LIBRARY_OVERRIDABLE'},
-        default="SKM_MySketonName_Skeleton"
-        )
-
-    bpy.types.Object.bfu_target_skeleton_custom_ref = StringProperty(
-        name="",
-        description=(
-            "The full reference of the skeleton in Unreal. " +
-            "(Use right clic on asset and copy reference.)"
-            ),
-        override={'LIBRARY_OVERRIDABLE'},
-        default="SkeletalMesh'/Game/ImportedFbx/SKM_MySketonName_Skeleton.SKM_MySketonName_Skeleton'"
-        )
 
     # StaticMeshImportData
     # https://api.unrealengine.com/INT/API/Editor/UnrealEd/Factories/UFbxStaticMeshImportData/index.html
@@ -1143,11 +1098,94 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
     from bl_operators.presets import AddPresetBase
 
+
+
     class BFU_OT_AddObjectGlobalPropertiesPreset(AddPresetBase, Operator):
         bl_idname = 'object.add_globalproperties_preset'
         bl_label = 'Add or remove a preset for Global properties'
         bl_description = 'Add or remove a preset for Global properties'
         preset_menu = 'BFU_MT_ObjectGlobalPropertiesPresets'
+
+        def get_object_global_preset_propertys():
+            preset_values = [
+                'obj.bfu_export_type',
+                'obj.bfu_export_folder_name',
+                'col.bfu_export_folder_name',
+                'obj.bfu_export_fbx_camera',
+                'obj.bfu_fix_axis_flippings',
+                'obj.bfu_export_as_alembic',
+                'obj.bfu_export_as_lod_mesh',
+                'obj.bfu_export_skeletal_mesh_as_static_mesh',
+                'obj.bfu_export_deform_only',
+                'obj.bfu_lod_target1',
+                'obj.bfu_lod_target2',
+                'obj.bfu_lod_target3',
+                'obj.bfu_lod_target4',
+                'obj.bfu_lod_target5',
+                'obj.bfu_create_physics_asset',
+                'obj.bfu_modular_skeletal_mesh_mode',
+                'obj.bfu_modular_skeletal_mesh_every_meshs_separate',
+                'obj.bfu_modular_skeletal_specified_parts_meshs_template',
+                'obj.bfu_use_static_mesh_lod_group',
+                'obj.bfu_static_mesh_lod_group',
+                'obj.bfu_static_mesh_light_map_mode',
+                'obj.bfu_static_mesh_custom_light_map_res',
+                'obj.bfu_static_mesh_light_map_surface_scale',
+                'obj.bfu_static_mesh_light_map_round_power_of_two',
+                'obj.bfu_use_static_mesh_light_map_world_scale',
+                'obj.bfu_generate_light_map_uvs',
+                'obj.bfu_convert_geometry_node_attribute_to_uv',
+                'obj.bfu_convert_geometry_node_attribute_to_uv_name',
+                'obj.bfu_correct_extrem_uv_scale',
+                'obj.bfu_auto_generate_collision',
+                'obj.bfu_material_search_location',
+                'obj.bfu_collision_trace_flag',
+                'obj.bfu_enable_skeletal_mesh_per_poly_collision',
+                'obj.bfu_vertex_color_import_option',
+                'obj.bfu_vertex_color_override_color',
+                'obj.bfu_vertex_color_to_use',
+                'obj.bfu_vertex_color_index_to_use',
+                'obj.bfu_anim_action_export_enum',
+                'obj.bfu_prefix_name_to_export',
+                'obj.bfu_anim_action_start_end_time_enum',
+                'obj.bfu_anim_nla_start_end_time_enum',
+                'obj.bfu_anim_action_start_frame_offset',
+                'obj.bfu_anim_action_end_frame_offset',
+                'obj.bfu_anim_action_custom_start_frame',
+                'obj.bfu_anim_action_custom_end_frame',
+                'obj.bfu_anim_nla_start_frame_offset',
+                'obj.bfu_anim_nla_end_frame_offset',
+                'obj.bfu_anim_nla_custom_start_frame',
+                'obj.bfu_anim_nla_custom_end_frame',
+                'obj.bfu_sample_anim_for_export',
+                'obj.bfu_simplify_anim_for_export',
+                'obj.bfu_anim_nla_use',
+                'obj.bfu_anim_nla_export_name',
+                'obj.bfu_anim_naming_type',
+                'obj.bfu_anim_naming_custom',
+                'obj.bfu_export_global_scale',
+                'obj.bfu_override_procedure_preset',
+                'obj.bfu_export_with_custom_props',
+                'obj.bfu_export_with_meta_data',
+                'obj.bfu_export_axis_forward',
+                'obj.bfu_export_axis_up',
+                'obj.bfu_export_primary_bone_axis',
+                'obj.bfu_export_secondary_bone_axis',
+                'obj.bfu_export_animation_without_mesh',
+                'obj.bfu_mirror_symmetry_right_side_bones',
+                'obj.bfu_use_ue_mannequin_bone_alignment',
+                'obj.bfu_disable_free_scale_animation',
+                'obj.bfu_move_to_center_for_export',
+                'obj.bfu_rotate_to_zero_for_export',
+                'obj.bfu_move_action_to_center_for_export',
+                'obj.bfu_rotate_action_to_zero_for_export',
+                'obj.bfu_move_nla_to_center_for_export',
+                'obj.bfu_rotate_nla_to_zero_for_export',
+                'obj.bfu_additional_location_for_export',
+                'obj.bfu_additional_rotation_for_export',
+                ]
+            preset_values += bfu_unreal_engine_refs_props.get_preset_values()
+            return preset_values
 
         # Common variable used for all preset values
         preset_defines = [
@@ -1157,90 +1195,12 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                          ]
 
         # Properties to store in the preset
-        preset_values = [
-                            'obj.bfu_export_type',
-                            'obj.bfu_export_folder_name',
-                            'col.bfu_export_folder_name',
-                            'obj.bfu_export_fbx_camera',
-                            'obj.bfu_fix_axis_flippings',
-                            'obj.bfu_export_as_alembic',
-                            'obj.bfu_export_as_lod_mesh',
-                            'obj.bfu_export_skeletal_mesh_as_static_mesh',
-                            'obj.bfu_export_deform_only',
-                            'obj.bfu_lod_target1',
-                            'obj.bfu_lod_target2',
-                            'obj.bfu_lod_target3',
-                            'obj.bfu_lod_target4',
-                            'obj.bfu_lod_target5',
-                            'obj.bfu_create_physics_asset',
-                            'obj.bfu_skeleton_search_mode',
-                            'obj.bfu_modular_skeletal_mesh_mode',
-                            'obj.bfu_modular_skeletal_mesh_every_meshs_separate',
-                            'obj.bfu_modular_skeletal_specified_parts_meshs_template',
-                            'obj.bfu_target_skeleton_custom_path',
-                            'obj.bfu_target_skeleton_custom_name',
-                            'obj.bfu_target_skeleton_custom_ref',
-                            'obj.bfu_use_static_mesh_lod_group',
-                            'obj.bfu_static_mesh_lod_group',
-                            'obj.bfu_static_mesh_light_map_mode',
-                            'obj.bfu_static_mesh_custom_light_map_res',
-                            'obj.bfu_static_mesh_light_map_surface_scale',
-                            'obj.bfu_static_mesh_light_map_round_power_of_two',
-                            'obj.bfu_use_static_mesh_light_map_world_scale',
-                            'obj.bfu_generate_light_map_uvs',
-                            'obj.bfu_convert_geometry_node_attribute_to_uv',
-                            'obj.bfu_convert_geometry_node_attribute_to_uv_name',
-                            'obj.bfu_correct_extrem_uv_scale',
-                            'obj.bfu_auto_generate_collision',
-                            'obj.bfu_material_search_location',
-                            'obj.bfu_collision_trace_flag',
-                            'obj.bfu_enable_skeletal_mesh_per_poly_collision',
-                            'obj.bfu_vertex_color_import_option',
-                            'obj.bfu_vertex_color_override_color',
-                            'obj.bfu_vertex_color_to_use',
-                            'obj.bfu_vertex_color_index_to_use',
-                            'obj.bfu_anim_action_export_enum',
-                            'obj.bfu_prefix_name_to_export',
-                            'obj.bfu_anim_action_start_end_time_enum',
-                            'obj.bfu_anim_nla_start_end_time_enum',
-                            'obj.bfu_anim_action_start_frame_offset',
-                            'obj.bfu_anim_action_end_frame_offset',
-                            'obj.bfu_anim_action_custom_start_frame',
-                            'obj.bfu_anim_action_custom_end_frame',
-                            'obj.bfu_anim_nla_start_frame_offset',
-                            'obj.bfu_anim_nla_end_frame_offset',
-                            'obj.bfu_anim_nla_custom_start_frame',
-                            'obj.bfu_anim_nla_custom_end_frame',
-                            'obj.bfu_sample_anim_for_export',
-                            'obj.bfu_simplify_anim_for_export',
-                            'obj.bfu_anim_nla_use',
-                            'obj.bfu_anim_nla_export_name',
-                            'obj.bfu_anim_naming_type',
-                            'obj.bfu_anim_naming_custom',
-                            'obj.bfu_export_global_scale',
-                            'obj.bfu_override_procedure_preset',
-                            'obj.bfu_export_with_custom_props',
-                            'obj.bfu_export_with_meta_data',
-                            'obj.bfu_export_axis_forward',
-                            'obj.bfu_export_axis_up',
-                            'obj.bfu_export_primary_bone_axis',
-                            'obj.bfu_export_secondary_bone_axis',
-                            'obj.bfu_export_animation_without_mesh',
-                            'obj.bfu_mirror_symmetry_right_side_bones',
-                            'obj.bfu_use_ue_mannequin_bone_alignment',
-                            'obj.bfu_disable_free_scale_animation',
-                            'obj.bfu_move_to_center_for_export',
-                            'obj.bfu_rotate_to_zero_for_export',
-                            'obj.bfu_move_action_to_center_for_export',
-                            'obj.bfu_rotate_action_to_zero_for_export',
-                            'obj.bfu_move_nla_to_center_for_export',
-                            'obj.bfu_rotate_nla_to_zero_for_export',
-                            'obj.bfu_additional_location_for_export',
-                            'obj.bfu_additional_rotation_for_export',
-                        ]
+        preset_values = get_object_global_preset_propertys()
 
         # Directory to store the presets
         preset_subdir = 'blender-for-unrealengine/global-properties-presets'
+
+
 
     class BFU_UL_CollectionExportTarget(bpy.types.UIList):
 
@@ -1500,17 +1460,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
                             if not obj.bfu_export_as_lod_mesh:
 
-                                unreal_skeleton = layout.column()
-                                unreal_skeleton.prop(obj, "bfu_skeleton_search_mode")
-                                if obj.bfu_skeleton_search_mode == "auto":
-                                    pass
-                                if obj.bfu_skeleton_search_mode == "custom_name":
-                                    unreal_skeleton.prop(obj, "bfu_target_skeleton_custom_name")
-                                if obj.bfu_skeleton_search_mode == "custom_path_name":
-                                    unreal_skeleton.prop(obj, "bfu_target_skeleton_custom_path")
-                                    unreal_skeleton.prop(obj, "bfu_target_skeleton_custom_name")
-                                if obj.bfu_skeleton_search_mode == "custom_reference":
-                                    unreal_skeleton.prop(obj, "bfu_target_skeleton_custom_ref")
                                 ue_standard_skeleton = layout.column()
                                 ue_standard_skeleton.enabled = obj.bfu_skeleton_export_procedure == "ue-standard"
                                 ue_standard_skeleton.prop(obj, "bfu_export_animation_without_mesh")
@@ -1521,7 +1470,24 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
             scene.bfu_engine_ref_properties_expanded.draw(layout)
             if scene.bfu_engine_ref_properties_expanded.is_expend():
-                pass
+                if addon_prefs.useGeneratedScripts and obj is not None:
+                    if obj.bfu_export_type == "export_recursive":
+
+                        # SkeletalMesh prop
+                        if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+                            if not obj.bfu_export_as_lod_mesh:
+
+                                unreal_engine_refs = layout.column()
+                                unreal_engine_refs.prop(obj, "bfu_skeleton_search_mode")
+                                if obj.bfu_skeleton_search_mode == "auto":
+                                    pass
+                                if obj.bfu_skeleton_search_mode == "custom_name":
+                                    unreal_engine_refs.prop(obj, "bfu_target_skeleton_custom_name")
+                                if obj.bfu_skeleton_search_mode == "custom_path_name":
+                                    unreal_engine_refs.prop(obj, "bfu_target_skeleton_custom_path")
+                                    unreal_engine_refs.prop(obj, "bfu_target_skeleton_custom_name")
+                                if obj.bfu_skeleton_search_mode == "custom_reference":
+                                    unreal_engine_refs.prop(obj, "bfu_target_skeleton_custom_ref")
 
             scene.bfu_modular_skeletal_mesh_properties_expanded.draw(layout)
             if scene.bfu_modular_skeletal_mesh_properties_expanded.is_expend():
