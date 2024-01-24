@@ -2224,7 +2224,7 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
     back_currframe = scene.frame_current
     animdata_ob = {}
     p_rots = {}
-    custom_curves = {}
+    animdata_custom_curves = {}
 
     for ob_obj in objects:
         if ob_obj.parented_to_armature:
@@ -2238,19 +2238,19 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
                                ACNW(ob_obj.key, 'LCL_SCALING', force_key, force_sek, scale))
         p_rots[ob_obj] = rot
         # Collect custom values per bone
-        if scene_data.settings.use_custom_props and ob_obj.is_bone:
+        if scene_data.settings.use_custom_curves and ob_obj.is_bone:
             bid = ob_obj.bdata_pose_bone
             rna_properties = {prop.identifier for prop in bid.bl_rna.properties if prop.is_runtime}
             for curve_name in bid.keys():
                 if curve_name == '_RNA_UI' or curve_name in rna_properties:
                     continue
-                value = ob_obj.bdata_pose_bone[curve_name]
+                value = bid[curve_name]
                 if isinstance(value, float):
-                    custom_curves[curve_name]=(ACNW(ob_obj.key, 'CUSTOM', force_key, force_sek, (curve_name,)), ob_obj.bdata_pose_bone)
-                    #print("!##BONE CUSTOM", ob_obj.bdata_pose_bone.name, ob_obj.key, curve_name)
+                    animdata_custom_curves[curve_name]=(ACNW(ob_obj.key, 'CUSTOM', force_key, force_sek, (curve_name,)), bid)
+                    print("!##BONE CUSTOM", ob_obj.bdata_pose_bone.name, ob_obj.key, curve_name)
 
     # Loop through the data empties to get the root object to associate the custom values
-    if scene_data.settings.use_custom_props:
+    if scene_data.settings.use_custom_curves:
         for root_obj, root_key in scene_data.data_empties.items():
             ACNW = AnimationCurveNodeWrapper
             bid = bpy.data.objects[root_obj.name]
@@ -2260,8 +2260,8 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
                     continue
                 value = bid[curve_name]
                 if isinstance(value, float):
-                    custom_curves[curve_name]=(ACNW(root_obj.key, 'CUSTOM', force_key, force_sek, (curve_name,)), bid)
-                    #print("!##CUSTOM", bid.name, root_obj.key, curve_name)
+                    animdata_custom_curves[curve_name]=(ACNW(root_obj.key, 'CUSTOM', force_key, force_sek, (curve_name,)), bid)
+                    print("!##CUSTOM", bid.name, root_obj.key, curve_name)
 
     force_key = (simplify_fac == 0.0)
     animdata_shapes = {}
@@ -2339,12 +2339,15 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
             for camera in animdata_cameras_only:
                 yield camera.lens
                 yield camera.dof.focus_distance
+            for k, v in animdata_custom_curves.items():
+                yield v[1][k]
 
     # Providing `count` to np.fromiter pre-allocates the array, avoiding extra memory allocations while iterating.
     num_ob_values = len(animdata_ob) * 9  # Location, rotation and scale, each of which have x, y, and z components
     num_shape_values = len(animdata_shapes)  # Only 1 value per shape key
     num_camera_values = len(animdata_cameras) * 2  # Focal length (`.lens`) and focus distance
-    num_values_per_frame = num_ob_values + num_shape_values + num_camera_values
+    num_custom_curve_values = len(animdata_custom_curves)  # Only 1 value per custom property
+    num_values_per_frame = num_ob_values + num_shape_values + num_camera_values + num_custom_curve_values
     num_frames = len(real_currframes)
     all_values_flat = np.fromiter(frame_values_gen(), dtype=float, count=num_frames * num_values_per_frame)
 
@@ -2354,12 +2357,12 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
     # View such that each column is all values for a single frame and each row is all values for a single curve.
     all_values = all_values_flat.reshape(num_frames, num_values_per_frame).T
     # Split into views of the arrays for each curve type.
-    split_at = [num_ob_values, num_shape_values, num_camera_values]
+    split_at = [num_ob_values, num_shape_values, num_camera_values, num_custom_curve_values]
     # For unequal sized splits, np.split takes indices to split at, which can be acquired through a cumulative sum
     # across the list.
     # The last value isn't needed, because the last split is assumed to go to the end of the array.
     split_at = np.cumsum(split_at[:-1])
-    all_ob_values, all_shape_key_values, all_camera_values = np.split(all_values, split_at)
+    all_ob_values, all_shape_key_values, all_camera_values, all_custom_curve_values = np.split(all_values, split_at)
 
     all_anims = []
 
@@ -2399,6 +2402,12 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
         anim_camera_focus_distance.set_keyframes(real_currframes, focus_distance_values)
         all_anims.append(anim_camera_lens)
         all_anims.append(anim_camera_focus_distance)
+
+    # Set custom animation curves for UnrealEngine.
+    for (anim_custom_curve, _custom_curve_holder), custom_curve_values in zip(animdata_custom_curves.values(), all_custom_curve_values):
+        anim_custom_curve.set_keyframes(real_currframes, custom_curve_values)
+        print(f"anim_custom_curve : {anim_custom_curve.fbx_gname} : {custom_curve_values}")
+        all_anims.append(anim_custom_curve)
 
     animations = {}
 
@@ -3548,7 +3557,7 @@ def save_single(operator, scene, depsgraph, filepath="",
         use_ue_mannequin_bone_alignment, bone_align_matrix_dict, disable_free_scale_animation,
         bake_anim, bake_anim_use_all_bones, bake_anim_use_nla_strips, bake_anim_use_all_actions,
         bake_anim_step, bake_anim_simplify_factor, bake_anim_force_startend_keying,
-        False, media_settings, use_custom_props, colors_type, prioritize_active_color
+        False, media_settings, use_custom_props, use_custom_curves, colors_type, prioritize_active_color
     )
 
     import bpy_extras.io_utils
@@ -3623,6 +3632,7 @@ def defaults_unity3d():
         "use_armature_deform_only": True,
 
         "use_custom_props": True,
+        "use_custom_curves": False,
 
         "bake_anim": True,
         "bake_anim_simplify_factor": 1.0,

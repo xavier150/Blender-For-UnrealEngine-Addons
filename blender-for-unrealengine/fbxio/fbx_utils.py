@@ -1966,7 +1966,7 @@ FBXExportSettings = namedtuple("FBXExportSettings", (
     "use_ue_mannequin_bone_alignment", "bone_align_matrix_dict", "disable_free_scale_animation",
     "bake_anim", "bake_anim_use_all_bones", "bake_anim_use_nla_strips", "bake_anim_use_all_actions",
     "bake_anim_step", "bake_anim_simplify_factor", "bake_anim_force_startend_keying",
-    "use_metadata", "media_settings", "use_custom_props", "colors_type", "prioritize_active_color"
+    "use_metadata", "media_settings", "use_custom_props", "use_custom_curves", "colors_type", "prioritize_active_color"
 ))
 
 # Helper container gathering some data we need multiple times:
