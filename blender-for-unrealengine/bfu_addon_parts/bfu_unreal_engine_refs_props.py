@@ -36,7 +36,7 @@ def register():
         bpy.utils.register_class(cls)
 
     bpy.types.Object.bfu_engine_ref_skeleton_search_mode = bpy.props.EnumProperty(
-        name="Skeleton search mode",
+        name="Skeleton Ref",
         description='Specify the skeleton location in Unreal',
         override={'LIBRARY_OVERRIDABLE'},
         items=[

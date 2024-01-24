@@ -24,6 +24,13 @@ from ..bbpl.blender_layout.layout_template_list.types import (
         BBPL_UI_TemplateList,
         )
 
+def get_preset_values():
+    preset_values = [
+        'obj.bfu_modular_skeletal_mesh_mode',
+        'obj.bfu_modular_skeletal_mesh_every_meshs_separate',
+        'obj.bfu_modular_skeletal_specified_parts_meshs_template'
+        ]
+    return preset_values
 
 class BFU_UL_ModularSkeletalSpecifiedPartsTargetItem(BBPL_UI_TemplateItem):
     enabled: bpy.props.BoolProperty(
@@ -177,9 +184,41 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
+    bpy.types.Object.bfu_modular_skeletal_mesh_mode = bpy.props.EnumProperty(
+        name="Modular Skeletal Mesh Mode",
+        description='Modular skeletal mesh mode',
+        override={'LIBRARY_OVERRIDABLE'},
+        items=[
+            ("all_in_one",
+                "All In One",
+                "Export all child meshs  of the armature as one skeletal mesh.",
+                1),
+            ("every_meshs",
+                "Every Meshs",
+                "Export one skeletal mesh for every child meshs of the armature.",
+                2),
+            ("specified_parts",
+                "Specified Parts",
+                "Export specified mesh parts.",
+                3)
+            ]
+        )
+    
+    bpy.types.Object.bfu_modular_skeletal_mesh_every_meshs_separate = bpy.props.StringProperty(
+        name="Separate string",
+        description="String between armature name and mesh name",
+        override={'LIBRARY_OVERRIDABLE'},
+        default="_"
+        )
+
+
     bpy.types.Object.bfu_modular_skeletal_specified_parts_meshs_template = bpy.props.PointerProperty(type=BFU_ModularSkeletalSpecifiedPartsMeshs)
 
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
+
+    del bpy.types.Object.bfu_modular_skeletal_specified_parts_meshs_template
+    del bpy.types.Object.bfu_modular_skeletal_mesh_every_meshs_separate
+    del bpy.types.Object.bfu_modular_skeletal_mesh_mode

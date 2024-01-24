@@ -35,6 +35,7 @@ from bpy.props import (
 from bpy.types import (
         Operator,
         )
+from . import bfu_modular_skeletal_specified_parts_meshs
 from . import bfu_unreal_engine_refs_props
 from .. import bbpl
 from .. import bfu_export_procedure
@@ -1123,9 +1124,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 'obj.bfu_lod_target4',
                 'obj.bfu_lod_target5',
                 'obj.bfu_create_physics_asset',
-                'obj.bfu_modular_skeletal_mesh_mode',
-                'obj.bfu_modular_skeletal_mesh_every_meshs_separate',
-                'obj.bfu_modular_skeletal_specified_parts_meshs_template',
                 'obj.bfu_use_static_mesh_lod_group',
                 'obj.bfu_static_mesh_lod_group',
                 'obj.bfu_static_mesh_light_map_mode',
@@ -1184,6 +1182,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 'obj.bfu_additional_location_for_export',
                 'obj.bfu_additional_rotation_for_export',
                 ]
+            preset_values += bfu_modular_skeletal_specified_parts_meshs.get_preset_values()
             preset_values += bfu_unreal_engine_refs_props.get_preset_values()
             return preset_values
 
