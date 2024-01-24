@@ -70,7 +70,7 @@ def ImportAsset(asset_data):
         origin_skeletal_mesh = None
         origin_skeleton = None
 
-        find_asset = unreal.find_asset(asset_data["animation_skeleton_path"])
+        find_asset = unreal.find_asset(asset_data["target_skeleton_ref"])
         if isinstance(find_asset, unreal.Skeleton):
             origin_skeleton = find_asset
         elif isinstance(find_asset, unreal.SkeletalMesh):
@@ -78,13 +78,12 @@ def ImportAsset(asset_data):
             origin_skeleton = find_asset.skeleton
         else:
             origin_skeleton = None
-        if origin_skeleton:
-            pass
-            #print("Setting skeleton asset: " + OriginSkeleton.get_full_name())
-        else:
-            message = "WARNING: Could not find skeleton." + "\n"
-            message += '"animation_skeleton_path": ' + asset_data["animation_skeleton_path"]
-            import_module_unreal_utils.show_warning_message("Skeleton not found.", message)
+        
+        if origin_skeleton is None:
+            if asset_data["asset_type"] == "Animation":
+                message = "WARNING: Could not find skeleton." + "\n"
+                message += '"target_skeleton_ref": ' + asset_data["target_skeleton_ref"]
+                import_module_unreal_utils.show_warning_message("Skeleton not found.", message)
 
     # docs.unrealengine.com/4.26/en-US/PythonAPI/class/AssetImportTask.html
     task = unreal.AssetImportTask()
@@ -174,7 +173,7 @@ def ImportAsset(asset_data):
                 task.get_editor_property('options').set_editor_property('Skeleton', origin_skeleton)
             else:
                 if asset_data["asset_type"] == "Animation":
-                    fail_reason = 'Skeleton ' + asset_data["animation_skeleton_path"] + ' Not found for ' + asset_data["asset_name"] + ' asset.'
+                    fail_reason = 'Skeleton ' + asset_data["target_skeleton_ref"] + ' Not found for ' + asset_data["asset_name"] + ' asset.'
                     return fail_reason, None, None
                 else:
                     print("Skeleton is not set, a new skeleton asset will be created...")
@@ -334,7 +333,7 @@ def ImportAsset(asset_data):
             #Unreal create a new skeleton when no skeleton was selected, so addon rename it.
             p = task.imported_object_paths[0]
             old_skeleton_name = p.split('.')[0]+'_Skeleton.'+p.split('.')[1]+'_Skeleton'
-            new_skeleton_name = asset_data["animation_skeleton_path"]
+            new_skeleton_name = asset_data["target_skeleton_ref"]
             unreal.EditorAssetLibrary.rename_asset(old_skeleton_name, new_skeleton_name)
 
         if "enable_skeletal_mesh_per_poly_collision" in asset_data:

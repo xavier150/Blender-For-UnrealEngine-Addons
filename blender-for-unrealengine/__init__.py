@@ -49,6 +49,7 @@ from . import bfu_write_import_asset_script
 from . import bfu_write_import_sequencer_script
 from . import bfu_basics
 from . import bfu_utils
+from . import bfu_unreal_utils
 from . import bfu_naming
 from . import bfu_backward_compatibility
 from . import bfu_cached_asset_list
@@ -89,6 +90,8 @@ if "bfu_basics" in locals():
     importlib.reload(bfu_basics)
 if "bfu_utils" in locals():
     importlib.reload(bfu_utils)
+if "bfu_unreal_utils" in locals():
+    importlib.reload(bfu_unreal_utils)
 if "bfu_naming" in locals():
     importlib.reload(bfu_naming)
 if "bfu_export_asset" in locals():

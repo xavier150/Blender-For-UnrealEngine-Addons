@@ -19,11 +19,6 @@
 
 
 import bpy
-
-from bpy.types import (
-        Operator,
-        )
-
 from . import bfu_camera_utils
 from .. import bfu_basics
 from .. import bfu_utils
@@ -31,7 +26,7 @@ from .. import bfu_ui
 
 
 # Object button
-class BFU_OT_CopyRegularCameraButton(Operator):
+class BFU_OT_CopyRegularCameraButton(bpy.types.Operator):
     bl_label = "Copy Regular Camera for Unreal"
     bl_idname = "object.copy_regular_camera_command"
     bl_description = "Copy Regular Camera Script command"
@@ -46,7 +41,7 @@ class BFU_OT_CopyRegularCameraButton(Operator):
             self.report({'WARNING'}, result[2])
         return {'FINISHED'}
 
-class BFU_OT_CopyCineCameraButton(Operator):
+class BFU_OT_CopyCineCameraButton(bpy.types.Operator):
     bl_label = "Copy Cine Camera for Unreal"
     bl_idname = "object.copy_cine_camera_command"
     bl_description = "Copy Cine Camera Script command"
@@ -62,7 +57,7 @@ class BFU_OT_CopyCineCameraButton(Operator):
         return {'FINISHED'}
 
 # Scene button
-class BFU_OT_CopyRegularCamerasButton(Operator):
+class BFU_OT_CopyRegularCamerasButton(bpy.types.Operator):
     bl_label = "Copy Regular Cameras for Unreal"
     bl_idname = "object.copy_regular_cameras_command"
     bl_description = "Copy Regular Cameras Script command"
@@ -77,7 +72,7 @@ class BFU_OT_CopyRegularCamerasButton(Operator):
             self.report({'WARNING'}, result[2])
         return {'FINISHED'}
 
-class BFU_OT_CopyCineCamerasButton(Operator):
+class BFU_OT_CopyCineCamerasButton(bpy.types.Operator):
     bl_label = "Copy Cine Cameras for Unreal"
     bl_idname = "object.copy_cine_cameras_command"
     bl_description = "Copy Cine Cameras Script command"

@@ -1,14 +1,4 @@
 import bpy
-
-from bpy.props import (
-        StringProperty,
-        BoolProperty,
-        )
-
-from bpy.types import (
-        Operator,
-        )
-
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui
@@ -23,20 +13,20 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
     bl_region_type = "UI"
     bl_category = "Unreal Engine"
 
-    bpy.types.Object.bfu_use_socket_custom_Name = BoolProperty(
+    bpy.types.Object.bfu_use_socket_custom_Name = bpy.props.BoolProperty(
         name="Socket custom name",
         description='Use a custom name in Unreal Engine for this socket?',
         default=False
         )
 
-    bpy.types.Object.bfu_socket_custom_Name = StringProperty(
+    bpy.types.Object.bfu_socket_custom_Name = bpy.props.StringProperty(
         name="",
         description='',
         default="MySocket"
         )
 
 
-    class BFU_OT_ConvertToStaticSocketButton(Operator):
+    class BFU_OT_ConvertToStaticSocketButton(bpy.types.Operator):
         bl_label = "Convert to StaticMesh socket"
         bl_idname = "object.converttostaticsocket"
         bl_description = (
@@ -58,7 +48,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     " (Active object is the owner of the socket)")
             return {'FINISHED'}
 
-    class BFU_OT_ConvertToSkeletalSocketButton(Operator):
+    class BFU_OT_ConvertToSkeletalSocketButton(bpy.types.Operator):
         bl_label = "Convert to SkeletalMesh socket"
         bl_idname = "object.converttoskeletalsocket"
         bl_description = (
@@ -80,7 +70,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                     "(Active object is the owner of the socket)")
             return {'FINISHED'}
 
-    class BFU_OT_CopySkeletalSocketButton(Operator):
+    class BFU_OT_CopySkeletalSocketButton(bpy.types.Operator):
         bl_label = "Copy Skeletal Mesh socket for Unreal"
         bl_idname = "object.copy_skeletalsocket_command"
         bl_description = "Copy Skeletal Socket Script command"
@@ -95,7 +85,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
                         "Skeletal sockets copied. Paste in Unreal Engine Skeletal Mesh assets for import sockets. (Ctrl+V)")
             return {'FINISHED'}
 
-    class BFU_OT_ComputAllLightMap(Operator):
+    class BFU_OT_ComputAllLightMap(bpy.types.Operator):
         bl_label = "Calculate all surface area"
         bl_idname = "object.computalllightmap"
         bl_description = (
