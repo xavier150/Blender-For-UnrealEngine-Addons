@@ -1,14 +1,5 @@
 import os
 import bpy
-
-from bpy.props import (
-        StringProperty,
-        )
-
-from bpy.types import (
-        Operator,
-        )
-
 from ..export import bfu_export_asset
 from .. import bfu_write_text
 from .. import bfu_basics
@@ -157,7 +148,7 @@ class BFU_PT_Export(bpy.types.Panel):
 
     from bl_operators.presets import AddPresetBase
 
-    class BFU_OT_AddNomenclaturePreset(AddPresetBase, Operator):
+    class BFU_OT_AddNomenclaturePreset(AddPresetBase, bpy.types.Operator):
         bl_idname = 'object.add_nomenclature_preset'
         bl_label = 'Add or remove a preset for Nomenclature'
         bl_description = 'Add or remove a preset for Nomenclature'
@@ -195,7 +186,7 @@ class BFU_PT_Export(bpy.types.Panel):
         # Directory to store the presets
         preset_subdir = 'blender-for-unrealengine/nomenclature-presets'
 
-    class BFU_OT_ShowAssetToExport(Operator):
+    class BFU_OT_ShowAssetToExport(bpy.types.Operator):
         bl_label = "Show asset(s)"
         bl_idname = "object.showasset"
         bl_description = "Click to show assets that are to be exported."
@@ -253,7 +244,7 @@ class BFU_PT_Export(bpy.types.Panel):
                 icon='PACKAGE')
             return {'FINISHED'}
 
-    class BFU_OT_CheckPotentialErrorPopup(Operator):
+    class BFU_OT_CheckPotentialErrorPopup(bpy.types.Operator):
         bl_label = "Check potential errors"
         bl_idname = "object.checkpotentialerror"
         bl_description = "Check potential errors"
@@ -266,13 +257,13 @@ class BFU_PT_Export(bpy.types.Panel):
             bpy.ops.object.openpotentialerror("INVOKE_DEFAULT", correctedProperty=correctedProperty)
             return {'FINISHED'}
 
-    class BFU_OT_OpenPotentialErrorPopup(Operator):
+    class BFU_OT_OpenPotentialErrorPopup(bpy.types.Operator):
         bl_label = "Open potential errors"
         bl_idname = "object.openpotentialerror"
         bl_description = "Open potential errors"
         correctedProperty: bpy.props.IntProperty(default=0)
 
-        class BFU_OT_FixitTarget(Operator):
+        class BFU_OT_FixitTarget(bpy.types.Operator):
             bl_label = "Fix it !"
             bl_idname = "object.fixit_objet"
             bl_description = "Correct target error"
@@ -283,7 +274,7 @@ class BFU_PT_Export(bpy.types.Panel):
                 self.report({'INFO'}, result)
                 return {'FINISHED'}
 
-        class BFU_OT_SelectObjectButton(Operator):
+        class BFU_OT_SelectObjectButton(bpy.types.Operator):
             bl_label = "Select(Object)"
             bl_idname = "object.select_error_objet"
             bl_description = "Select target Object."
@@ -293,7 +284,7 @@ class BFU_PT_Export(bpy.types.Panel):
                 bfu_check_potential_error.SelectPotentialErrorObject(self.errorIndex)
                 return {'FINISHED'}
 
-        class BFU_OT_SelectVertexButton(Operator):
+        class BFU_OT_SelectVertexButton(bpy.types.Operator):
             bl_label = "Select(Vertex)"
             bl_idname = "object.select_error_vertex"
             bl_description = "Select target Vertex."
@@ -303,7 +294,7 @@ class BFU_PT_Export(bpy.types.Panel):
                 bfu_check_potential_error.SelectPotentialErrorVertex(self.errorIndex)
                 return {'FINISHED'}
 
-        class BFU_OT_SelectPoseBoneButton(Operator):
+        class BFU_OT_SelectPoseBoneButton(bpy.types.Operator):
             bl_label = "Select(PoseBone)"
             bl_idname = "object.select_error_posebone"
             bl_description = "Select target Pose Bone."
@@ -313,11 +304,11 @@ class BFU_PT_Export(bpy.types.Panel):
                 bfu_check_potential_error.SelectPotentialErrorPoseBone(self.errorIndex)
                 return {'FINISHED'}
 
-        class BFU_OT_OpenPotentialErrorDocs(Operator):
+        class BFU_OT_OpenPotentialErrorDocs(bpy.types.Operator):
             bl_label = "Open docs"
             bl_idname = "object.open_potential_error_docs"
             bl_description = "Open potential error docs."
-            octicon: StringProperty(default="")
+            octicon: bpy.props.StringProperty(default="")
 
             def execute(self, context):
                 os.system(
@@ -416,7 +407,7 @@ class BFU_PT_Export(bpy.types.Panel):
                             "object.select_error_posebone")
                         props.errorIndex = x
 
-    class BFU_OT_ExportForUnrealEngineButton(Operator):
+    class BFU_OT_ExportForUnrealEngineButton(bpy.types.Operator):
         bl_label = "Export for Unreal Engine"
         bl_idname = "object.exportforunreal"
         bl_description = "Export all assets of this scene."
@@ -505,7 +496,7 @@ class BFU_PT_Export(bpy.types.Panel):
 
             return {'FINISHED'}
 
-    class BFU_OT_CopyImportAssetScriptCommand(Operator):
+    class BFU_OT_CopyImportAssetScriptCommand(bpy.types.Operator):
         bl_label = "Copy import script (Assets)"
         bl_idname = "object.copy_importassetscript_command"
         bl_description = "Copy Import Asset Script command"
@@ -519,7 +510,7 @@ class BFU_PT_Export(bpy.types.Panel):
                 " copied")
             return {'FINISHED'}
 
-    class BFU_OT_CopyImportSequencerScriptCommand(Operator):
+    class BFU_OT_CopyImportSequencerScriptCommand(bpy.types.Operator):
         bl_label = "Copy import script (Sequencer)"
         bl_idname = "object.copy_importsequencerscript_command"
         bl_description = "Copy Import Sequencer Script command"

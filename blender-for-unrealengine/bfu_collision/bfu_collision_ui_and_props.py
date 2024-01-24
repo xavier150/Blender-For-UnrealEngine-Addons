@@ -18,17 +18,12 @@
 
 
 import bpy
-
-from bpy.types import (
-        Operator,
-        )
-
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui
 
 
-class BFU_OT_ConvertToCollisionButtonBox(Operator):
+class BFU_OT_ConvertToCollisionButtonBox(bpy.types.Operator):
     bl_label = "Convert to box (UBX)"
     bl_idname = "object.converttoboxcollision"
     bl_description = (
@@ -50,7 +45,7 @@ class BFU_OT_ConvertToCollisionButtonBox(Operator):
                 " (Active object is the owner of the collision)")
         return {'FINISHED'}
 
-class BFU_OT_ConvertToCollisionButtonCapsule(Operator):
+class BFU_OT_ConvertToCollisionButtonCapsule(bpy.types.Operator):
     bl_label = "Convert to capsule (UCP)"
     bl_idname = "object.converttocapsulecollision"
     bl_description = (
@@ -72,7 +67,7 @@ class BFU_OT_ConvertToCollisionButtonCapsule(Operator):
                 " (Active object is the owner of the collision)")
         return {'FINISHED'}
 
-class BFU_OT_ConvertToCollisionButtonSphere(Operator):
+class BFU_OT_ConvertToCollisionButtonSphere(bpy.types.Operator):
     bl_label = "Convert to sphere (USP)"
     bl_idname = "object.converttospherecollision"
     bl_description = (
@@ -94,7 +89,7 @@ class BFU_OT_ConvertToCollisionButtonSphere(Operator):
                 " (Active object is the owner of the collision)")
         return {'FINISHED'}
 
-class BFU_OT_ConvertToCollisionButtonConvex(Operator):
+class BFU_OT_ConvertToCollisionButtonConvex(bpy.types.Operator):
     bl_label = "Convert to convex shape (UCX)"
     bl_idname = "object.converttoconvexcollision"
     bl_description = (
