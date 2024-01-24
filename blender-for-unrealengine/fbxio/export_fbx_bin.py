@@ -2247,7 +2247,7 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
                 value = bid[curve_name]
                 if isinstance(value, float):
                     animdata_custom_curves[curve_name]=(ACNW(ob_obj.key, 'CUSTOM', force_key, force_sek, (curve_name,)), bid)
-                    print("!##BONE CUSTOM", ob_obj.bdata_pose_bone.name, ob_obj.key, curve_name)
+                    # print("!##BONE CUSTOM", ob_obj.bdata_pose_bone.name, ob_obj.key, curve_name)
 
     # Loop through the data empties to get the root object to associate the custom values
     if scene_data.settings.use_custom_props:
@@ -2261,7 +2261,7 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
                 value = bid[curve_name]
                 if isinstance(value, float):
                     animdata_custom_curves[curve_name]=(ACNW(root_obj.key, 'CUSTOM', force_key, force_sek, (curve_name,)), bid)
-                    print("!##CUSTOM", bid.name, root_obj.key, curve_name)
+                    # print("!##CUSTOM", bid.name, root_obj.key, curve_name)
 
     force_key = (simplify_fac == 0.0)
     animdata_shapes = {}
@@ -2340,6 +2340,7 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
                 yield camera.lens
                 yield camera.dof.focus_distance
             for k, v in animdata_custom_curves.items():
+                # TODO: This value will not be updated when property has driver. Fix it.
                 yield v[1][k]
 
     # Providing `count` to np.fromiter pre-allocates the array, avoiding extra memory allocations while iterating.
@@ -2406,7 +2407,7 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
     # Set custom animation curves for UnrealEngine.
     for (anim_custom_curve, _custom_curve_holder), custom_curve_values in zip(animdata_custom_curves.values(), all_custom_curve_values):
         anim_custom_curve.set_keyframes(real_currframes, custom_curve_values)
-        print(f"anim_custom_curve : {anim_custom_curve.fbx_gname} : {custom_curve_values}")
+        # print(f"anim_custom_curve : {anim_custom_curve.fbx_gname} : {custom_curve_values}")
         all_anims.append(anim_custom_curve)
 
     animations = {}
