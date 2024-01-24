@@ -130,7 +130,6 @@ def ExportSingleStaticMeshCollection(
             global_scale=1,
             object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
             use_custom_props=obj.bfu_export_with_custom_props,
-            use_custom_curves=True,
             mesh_smooth_type="FACE",
             add_leaf_bones=False,
             # use_armature_deform_only=active.bfu_export_deform_only,

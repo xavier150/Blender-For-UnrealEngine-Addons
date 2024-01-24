@@ -2238,7 +2238,7 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
                                ACNW(ob_obj.key, 'LCL_SCALING', force_key, force_sek, scale))
         p_rots[ob_obj] = rot
         # Collect custom values per bone
-        if scene_data.settings.use_custom_curves and ob_obj.is_bone:
+        if scene_data.settings.use_custom_props and ob_obj.is_bone:
             bid = ob_obj.bdata_pose_bone
             rna_properties = {prop.identifier for prop in bid.bl_rna.properties if prop.is_runtime}
             for curve_name in bid.keys():
@@ -2250,7 +2250,7 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
                     print("!##BONE CUSTOM", ob_obj.bdata_pose_bone.name, ob_obj.key, curve_name)
 
     # Loop through the data empties to get the root object to associate the custom values
-    if scene_data.settings.use_custom_curves:
+    if scene_data.settings.use_custom_props:
         for root_obj, root_key in scene_data.data_empties.items():
             ACNW = AnimationCurveNodeWrapper
             bid = bpy.data.objects[root_obj.name]
@@ -3452,7 +3452,6 @@ def save_single(operator, scene, depsgraph, filepath="",
                 use_triangles=False,
                 embed_textures=False,
                 use_custom_props=False,
-                use_custom_curves=False,
                 bake_space_transform=False,
                 armature_nodetype='NULL',
                 colors_type='SRGB',
@@ -3557,7 +3556,7 @@ def save_single(operator, scene, depsgraph, filepath="",
         use_ue_mannequin_bone_alignment, bone_align_matrix_dict, disable_free_scale_animation,
         bake_anim, bake_anim_use_all_bones, bake_anim_use_nla_strips, bake_anim_use_all_actions,
         bake_anim_step, bake_anim_simplify_factor, bake_anim_force_startend_keying,
-        False, media_settings, use_custom_props, use_custom_curves, colors_type, prioritize_active_color
+        False, media_settings, use_custom_props, colors_type, prioritize_active_color
     )
 
     import bpy_extras.io_utils
@@ -3632,7 +3631,6 @@ def defaults_unity3d():
         "use_armature_deform_only": True,
 
         "use_custom_props": True,
-        "use_custom_curves": False,
 
         "bake_anim": True,
         "bake_anim_simplify_factor": 1.0,
