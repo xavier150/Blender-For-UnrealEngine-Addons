@@ -1788,12 +1788,12 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
 
 class BFU_OT_SceneCollectionExport(bpy.types.PropertyGroup):
-    name: StringProperty(name="collection data name", default="Unknown", override={'LIBRARY_OVERRIDABLE'})
-    use: BoolProperty(name="export this collection", default=False, override={'LIBRARY_OVERRIDABLE'})
+    name: bpy.props.StringProperty(name="collection data name", default="Unknown", override={'LIBRARY_OVERRIDABLE'})
+    use: bpy.props.BoolProperty(name="export this collection", default=False, override={'LIBRARY_OVERRIDABLE'})
 
 class BFU_OT_ObjExportAction(bpy.types.PropertyGroup):
-    name: StringProperty(name="Action data name", default="Unknown", override={'LIBRARY_OVERRIDABLE'})
-    use: BoolProperty(name="use this action", default=False, override={'LIBRARY_OVERRIDABLE'})
+    name: bpy.props.StringProperty(name="Action data name", default="Unknown", override={'LIBRARY_OVERRIDABLE'})
+    use: bpy.props.BoolProperty(name="use this action", default=False, override={'LIBRARY_OVERRIDABLE'})
 
 
 
