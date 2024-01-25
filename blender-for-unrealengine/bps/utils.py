@@ -24,13 +24,15 @@
 
 import time
 
-
 class CounterTimer():
     """
     A simple timer.
     """
 
     def __init__(self):
+        """
+        Initialize the CounterTimer.
+        """
         self.start = time.perf_counter()
 
     def reset_time(self):
@@ -41,13 +43,19 @@ class CounterTimer():
 
     def get_time(self):
         """
-        Get the elapsed time since the timer started. (Class create)
+        Get the elapsed time since the timer started.
+
+        Returns:
+            float: Elapsed time in seconds.
         """
         return time.perf_counter() - self.start
         
     def get_str_time(self):
         """
-        Get the elapsed str time since the timer started. (Class create)
+        Get the elapsed str time since the timer started.
+
+        Returns:
+            str: Elapsed time formatted as a string.
         """
         elapsed_time = self.get_time()
         if elapsed_time < 60:
@@ -59,4 +67,3 @@ class CounterTimer():
             hours, remainder = divmod(elapsed_time, 3600)
             minutes, seconds = divmod(remainder, 60)
             return f"{int(hours)} heures, {int(minutes)} minutes et {seconds:.2f} secondes"
-
