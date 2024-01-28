@@ -64,9 +64,7 @@ def ImportAsset(asset_data):
 
     asset_additional_data = GetAdditionalData()
 
-
-
-    if asset_data["asset_type"] == "Animation" or asset_data["asset_type"] == "SkeletalMesh":
+    if asset_data["asset_type"] in ["Animation", "SkeletalMesh"]:
         origin_skeletal_mesh = None
         origin_skeleton = None
 
@@ -85,20 +83,20 @@ def ImportAsset(asset_data):
                 message += '"target_skeleton_ref": ' + asset_data["target_skeleton_ref"]
                 import_module_unreal_utils.show_warning_message("Skeleton not found.", message)
 
-    # docs.unrealengine.com/4.26/en-US/PythonAPI/class/AssetImportTask.html
+    # docs.unrealengine.com/5.3/en-US/PythonAPI/class/AssetImportTask.html
     task = unreal.AssetImportTask()
 
-    def GetStaticMeshImportData():
+    def GetStaticMeshImportData() -> unreal.FbxStaticMeshImportData:
         if asset_data["asset_type"] == "StaticMesh":
             return task.get_editor_property('options').static_mesh_import_data
         return None
 
-    def GetSkeletalMeshImportData():
+    def GetSkeletalMeshImportData() -> unreal.FbxSkeletalMeshImportData:
         if asset_data["asset_type"] == "SkeletalMesh":
             return task.get_editor_property('options').skeletal_mesh_import_data
         return None
 
-    def GetAnimationImportData():
+    def GetAnimationImportData() -> unreal.FbxAnimSequenceImportData:
         if asset_data["asset_type"] == "Animation":
             return task.get_editor_property('options').anim_sequence_import_data
         return None
@@ -132,16 +130,17 @@ def ImportAsset(asset_data):
         task.set_editor_property('options', unreal.FbxImportUI())
 
     # Alembic
-    if GetAlembicImportData():
-        GetAlembicImportData().static_mesh_settings.set_editor_property("merge_meshes", True)
-        GetAlembicImportData().set_editor_property("import_type", unreal.AlembicImportType.SKELETAL)
-        GetAlembicImportData().conversion_settings.set_editor_property("flip_u", False)
-        GetAlembicImportData().conversion_settings.set_editor_property("flip_v", True)
+    alembic_import_data = GetAlembicImportData()
+    if alembic_import_data:
+        alembic_import_data.static_mesh_settings.set_editor_property("merge_meshes", True)
+        alembic_import_data.set_editor_property("import_type", unreal.AlembicImportType.SKELETAL)
+        alembic_import_data.conversion_settings.set_editor_property("flip_u", False)
+        alembic_import_data.conversion_settings.set_editor_property("flip_v", True)
         scale = asset_data["scene_unit_scale"] * asset_data["asset_global_scale"]
         ue_scale = unreal.Vector(scale * 100, scale * -100, scale * 100) # Unit scale * object scale * 100
         rotation = unreal.Vector(90, 0, 0)
-        GetAlembicImportData().conversion_settings.set_editor_property("scale", ue_scale) 
-        GetAlembicImportData().conversion_settings.set_editor_property("rotation", rotation)
+        alembic_import_data.conversion_settings.set_editor_property("scale", ue_scale) 
+        alembic_import_data.conversion_settings.set_editor_property("rotation", rotation)
 
     # Vertex color
     vertex_override_color = import_module_unreal_utils.get_vertex_override_color(asset_additional_data)
@@ -156,6 +155,8 @@ def ImportAsset(asset_data):
     anim_sequence_import_data = GetAnimationImportData()
     if anim_sequence_import_data:
         anim_sequence_import_data.import_translation = unreal.Vector(0, 0, 0)
+        if "do_not_import_curve_with_zero" in asset_data:
+            anim_sequence_import_data.set_editor_property('do_not_import_curve_with_zero', asset_data["do_not_import_curve_with_zero"]) 
 
     # Vertex color
     if vertex_color_import_option and GetMeshImportData():
