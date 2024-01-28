@@ -30,6 +30,7 @@ from .. import bfu_cached_asset_list
 from ..export import bfu_export_get_info
 from .. import bfu_ui
 from .. import languages
+from .. import bfu_custom_property
 
 
 
@@ -1119,7 +1120,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 'obj.bfu_anim_naming_custom',
                 'obj.bfu_export_global_scale',
                 'obj.bfu_override_procedure_preset',
-                'obj.bfu_export_with_custom_props',
                 'obj.bfu_export_with_meta_data',
                 'obj.bfu_export_axis_forward',
                 'obj.bfu_export_axis_up',
@@ -1140,6 +1140,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 ]
             preset_values += bfu_modular_skeletal_specified_parts_meshs.get_preset_values()
             preset_values += bfu_unreal_engine_refs_props.get_preset_values()
+            preset_values += bfu_custom_property.bfu_custom_property_props.get_preset_values()
             return preset_values
 
         # Common variable used for all preset values
@@ -1399,7 +1400,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 # Concaténez la clé et la valeur dans la chaîne de caractères
                                 var_lines.label(text=f"{key} -> {value}\n")
                         export_data = layout.column()
-                        export_data.prop(obj, "bfu_export_with_custom_props")
+                        bfu_custom_property.bfu_custom_property_utils.draw_custom_property_prop(export_data, obj)
                         export_data.prop(obj, "bfu_export_with_meta_data")
 
                             
@@ -1849,13 +1850,6 @@ def register():
         default=0
         )
     
-    bpy.types.Object.bfu_export_with_custom_props = bpy.props.BoolProperty(
-        name=(languages.ti('export_with_custom_props_name')),
-        description=(languages.tt('export_with_custom_props_desc')),
-        override={'LIBRARY_OVERRIDABLE'},
-        default=False,
-        )
-
     bpy.types.Object.bfu_export_with_meta_data = bpy.props.BoolProperty(
         name=(languages.ti('export_with_meta_data_name')),
         description=(languages.tt('export_with_meta_data_desc')),
