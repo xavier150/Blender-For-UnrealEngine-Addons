@@ -73,9 +73,9 @@ def GetImportCameraScriptCommand(objs, CineCamera=True):
             # CameraComponent
             t += "         " + "Begin Object Name=\"CameraComponent\"" + "\n"
             t += "            " + "Filmback=(SensorWidth="+str(SensorWidth)+",SensorHeight="+str(SensorHeight)+", SensorAspectRatio="+str(AspectRatio)+")" + "\n"
-            t += "            " + "CurrentAperture="+str(Aperture)+")" + "\n"
+            t += "            " + "FocusSettings=(ManualFocusDistance="+str(FocusDistance)+")" + "\n"
             t += "            " + "CurrentFocalLength="+str(FocalLength)+")" + "\n"
-            t += "            " + "CurrentFocusDistance="+str(FocusDistance)+")" + "\n"
+            t += "            " + "CurrentAperture="+str(Aperture)+")" + "\n"
             t += "            " + "CurrentFocusDistance="+str(FocusDistance)+")" + "\n"
             t += "            " + "CustomNearClippingPlane="+str(NearClippingPlane)+")" + "\n"
             t += "            " + "CustomFarClippingPlane="+str(FarClippingPlane)+")" + "\n"
