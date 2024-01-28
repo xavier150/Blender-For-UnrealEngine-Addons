@@ -82,6 +82,7 @@ def update_bone_shape(
     shape_rotation=(0.0, 0.0, 0.0),
     override_transform_bone_name=""
 ):
+
     '''
     Updates the custom shape of a bone in the armature.
 
@@ -101,7 +102,7 @@ def update_bone_shape(
     Raises:
         KeyError: If the bone name or override transform bone name is not found in the armature.
     '''
-
+    
     bone = armature.pose.bones.get(bone_name)
     if not bone:
         raise KeyError(f"Bone '{bone_name}' not found in the armature.")
@@ -126,7 +127,7 @@ def update_bone_shape(
 def generate_bone_shape_from_prop(
         armature,
         bone_name,
-        object_to_use,
+        object_to_use: bpy.types.Object,
         shape_mirror_mode=False,
         shape_target_origin="BoneOrigin",
         construct_add_line=False,
@@ -150,7 +151,7 @@ def generate_bone_shape_from_prop(
         KeyError: If the bone name is not found in the armature.
     '''
 
-
+    
     scene = bpy.context.scene
     bone = armature.data.bones.get(bone_name)
     new_shape_name = "Shape_CustomGeneratedShape_" + bone_name
@@ -165,13 +166,26 @@ def generate_bone_shape_from_prop(
 
     def apply_shape_modifiers(obj):
         scene.render.use_simplify = False
-        utils.mode_set_on_target(obj, "OBJECT") # Switch to OBJECT mode to apply modifiers
-        for mod in obj.modifiers:
-            bpy.ops.object.modifier_apply(modifier=mod.name)
+
+        # Exit current mode
+        #if bpy.context.object.mode != 'OBJECT':
+        #    if bpy.ops.object.mode_set.poll():
+        #        bpy.ops.object.mode_set(mode='OBJECT')
+        
+        if bpy.app.version >= (4, 0, 0):
+            with bpy.context.temp_override(active_object=obj, object=obj):
+                for mod in obj.modifiers:
+                    bpy.ops.object.modifier_apply(modifier=mod.name)
+        else:
+            override_context = bpy.context.copy()
+            override_context['active_object'] = obj
+            override_context['object'] = obj
+            for mod in obj.modifiers:
+                bpy.ops.object.modifier_apply(override_context, modifier=mod.name)
 
     # Créer la nouvelle forme
     new_shape = object_to_use.copy()
-    new_shape.name = new_shape_name
+    #new_shape.name = new_shape_name #Why this take so many time??? Around 4000% more time!
     new_shape.data = new_shape.data.copy()
     link_shape_object(new_shape)
     
@@ -181,9 +195,6 @@ def generate_bone_shape_from_prop(
 
 
     if shape_target_origin != "BoneOrigin" or shape_mirror_mode or construct_add_line:
-
-        
-
         # ...
         def mirror_bmesh(verts):
             for v in verts:
@@ -216,10 +227,9 @@ def generate_bone_shape_from_prop(
                 v2 = bm.verts.new((0.0, bone_length, 0.0))
             bm.edges.new((v1, v2))
 
-        utils.mode_set_on_target(new_shape, "EDIT") # Switch to EDIT mode to edit mesh data
-
         me = new_shape.data
-        bm = bmesh.from_edit_mesh(me)
+        bm = bmesh.new()
+        bm.from_mesh(me)
 
         if shape_mirror_mode:
             mirror_bmesh(bm.verts)
@@ -230,53 +240,10 @@ def generate_bone_shape_from_prop(
         if construct_add_line:
             add_bmesh_line(bm)
 
+        bm.to_mesh(me)
         bm.free()
 
     return new_shape
-
-def update_bone_shape_by_name(
-    armature,
-    bone_name,
-    shape_obj_name,
-    use_bone_size=True,
-    shape_scale=(1.0, 1.0, 1.0),
-    shape_translation=(0.0, 0.0, 0.0),
-    shape_rotation=(0.0, 0.0, 0.0),
-    override_transform_bone_name=""
-):
-    """
-    Deprecated function. Updates the shape of a bone in the armature based on the provided shape object name.
-
-    Args:
-        armature (bpy.types.Object): The armature object.
-        bone_name (str): The name of the bone.
-        shape_obj_name (str): The name of the shape object.
-        use_bone_size (bool, optional): Indicates whether to use the bone's size. Defaults to True.
-        shape_scale (tuple, optional): The scale of the shape object. Defaults to (1.0, 1.0, 1.0).
-        shape_translation (tuple, optional): The translation offset of the shape object. Defaults to (0.0, 0.0, 0.0).
-        shape_rotation (tuple, optional): The rotation angles of the shape object in radians. Defaults to (0.0, 0.0, 0.0).
-        override_transform_bone_name (str, optional): The name of the bone used for transforming the shape object. Defaults to "".
-
-    Returns:
-        bool: True if the bone shape was updated successfully, False otherwise.
-    """
-
-    # Deprecated
-    shape_obj = bpy.data.objects.get(shape_obj_name, None)
-    if not shape_obj:
-        print(f'Shape "{shape_obj_name}" not found.')
-        return False
-
-    return update_bone_shape(
-        armature=armature,
-        bone_name=bone_name,
-        shape_obj=shape_obj,
-        use_bone_size=use_bone_size,
-        shape_scale=shape_scale,
-        shape_translation=shape_translation,
-        shape_rotation=shape_rotation,
-        override_transform_bone_name=override_transform_bone_name
-    )
 
 
 def create_bone_group(armature, name, theme="DEFAULT"):

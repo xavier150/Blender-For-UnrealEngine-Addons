@@ -102,6 +102,27 @@ class BBPL_UI_TemplateList(bpy.types.PropertyGroup):
     rows: bpy.props.IntProperty(default = 6)
     maxrows: bpy.props.IntProperty(default = 6)
 
+    def __len__(self):
+        return len(self.template_collection)
+    
+    def __iter__(self):
+        return iter(self.template_collection)
+    
+    def __getitem__(self, index):
+        return self.template_collection[index]
+    
+    def find(self, item):
+        return self.template_collection.find(item)
+    
+    def clear(self):
+        return self.template_collection.clear()
+    
+    def add(self):
+        return self.template_collection.add()
+
+    def items(self):
+        return self.template_collection.items()
+
     def get_template_collection(self):
         return self.template_collection
     
@@ -121,7 +142,6 @@ class BBPL_UI_TemplateList(bpy.types.PropertyGroup):
             return prop_name
 
     def draw(self, layout: bpy.types.UILayout):
-
         template_row = layout.row()
         template_row.template_list(
             self.template_collection_uilist_class, "",  # type and unique id
