@@ -4,8 +4,11 @@ from . import bfu_camera_data
 from .. import languages
 from .. import bfu_write_utils
 
+def WriteOneFrameCameraAnimationTracks(obj, target_frame=None, pre_bake_camera: bfu_camera_data.BFU_CameraTracks = None):
+    return WriteCameraAnimationTracks(obj, target_frame, target_frame+1, pre_bake_camera)
+
 def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=None, pre_bake_camera: bfu_camera_data.BFU_CameraTracks = None):
-    # Write as json file
+    # Write as data camera animation tracks
 
     scene = bpy.context.scene
     if target_frame_start is None:

@@ -19,7 +19,7 @@ def GetImportCameraScriptCommand(objs, CineCamera=True):
 
             # First I get the camera data.
             # This is a very bad way to do this. I need do a new python file specific to camera with class to get data.
-            data = bfu_camera_write_text.WriteCameraAnimationTracks(camera, frame_current, frame_current)
+            data = bfu_camera_write_text.WriteOneFrameCameraAnimationTracks(camera, frame_current)
             transform_track = data["Camera transform"][frame_current]
             location_x = transform_track["location_x"]
             location_y = transform_track["location_y"]
