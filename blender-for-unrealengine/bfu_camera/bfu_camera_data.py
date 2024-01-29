@@ -258,6 +258,7 @@ class BFU_MultiCameraTracks():
                     # Bake all frames
                     evaluate.evaluate_track_at_frame(camera, frame)
 
+        scene.frame_current = save_current_frame
         bpy.context.scene.render.use_simplify = save_use_simplify
 
     def get_evaluate_camera_data(self, obj: bpy.types.Object):
