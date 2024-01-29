@@ -2,6 +2,7 @@ import bpy
 
 from . import bfu_camera_write_text
 from . import bfu_camera_data
+from .. import languages
 
 def get_enum_cameras_list():
     camera_types = [

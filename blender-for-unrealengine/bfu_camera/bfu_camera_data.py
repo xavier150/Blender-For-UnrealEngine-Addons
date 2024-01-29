@@ -96,6 +96,7 @@ class BFU_CameraTracks():
 
     def evaluate_track_at_frame(self, camera, frame):
         scene = bpy.context.scene
+        addon_prefs = bfu_basics.GetAddonPrefs()
         set_current_frame(frame)
 
         array_transform = bfu_utils.EvaluateCameraPositionForUnreal(camera)
@@ -153,15 +154,18 @@ class BFU_CameraTracks():
         if key > 0:
             self.focus_distance[frame] = key / scale_length
         else:
-            self.focus_distance[frame] = 100000  # 100000 is default value in ue4
+            self.focus_distance[frame] = 100000  # 100000 is default value in Unreal Engine
 
         # Write Aperture (Depth of Field) keys
         render_engine = scene.render.engine
         if render_engine == "BLENDER_EEVEE" or render_engine == "CYCLES" or render_engine == "BLENDER_WORKBENCH":
             key = getOneKeysByFcurves(camera, "dof.aperture_fstop", camera.data.dof.aperture_fstop, frame)
-            self.aperture_fstop[frame] = key
+            if addon_prefs.scale_camera_fstop_with_unit_scale:
+                self.aperture_fstop[frame] = key / scale_length
+            else:
+                self.aperture_fstop[frame] = key
         else:
-            self.aperture_fstop[frame] = 2.8  # 2.8 is default value in ue4
+            self.aperture_fstop[frame] = 2.8  # 2.8 is default value in Unreal Engine
 
         boolKey = getOneKeysByFcurves(camera, "hide_viewport", camera.hide_viewport, frame, False)
         self.hide_viewport[frame] = (boolKey < 1)  # Inversed for convert hide to spawn

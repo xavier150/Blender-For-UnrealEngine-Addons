@@ -21,8 +21,7 @@ import bpy
 
 from . import bfu_ui
 from . import languages
-
-
+from . import bfu_camera
 
 class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
     # this must match the addon name, use '__package__'
@@ -115,12 +114,6 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         default=1,
         )
 
-    bakeOnlyKeyVisibleInCut: bpy.props.BoolProperty(
-        name=(languages.ti('bake_only_key_visible_in_cut_name')),
-        description=(languages.tt('bake_only_key_visible_in_cut_desc')),
-        default=True,
-        )
-
     ignoreNLAForAction: bpy.props.BoolProperty(
         name=(languages.ti('ignore_nla_for_action_name')),
         description=(languages.tt('ignore_nla_for_action_desc')),
@@ -156,7 +149,21 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
             ),
         default=True,
         )
+    
+    #CAMERA
 
+    bake_only_key_visible_in_cut: bpy.props.BoolProperty(
+        name=(languages.ti('bake_only_key_visible_in_cut_name')),
+        description=(languages.tt('bake_only_key_visible_in_cut_desc')),
+        default=True,
+        )
+    
+    scale_camera_fstop_with_unit_scale: bpy.props.BoolProperty(
+        name="Scale camera F-Stop with Unit Scale",
+        description="Scale camera F-Stop with Unit Scale",
+        default=False,
+        )
+    
     class BFU_OT_NewReleaseInfo(bpy.types.Operator):
         """Open last release page"""
         bl_label = "Open last release page"
@@ -206,8 +213,13 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         socketRescale.prop(self, "skeletalSocketsImportedSize")
 
         camera = ColumnLeft.box()
-        camera.label(text='CAMERA')
-        camera.prop(self, "bakeOnlyKeyVisibleInCut")
+        bfu_ui.bfu_ui_utils.LabelWithDocButton(
+            camera,
+            "CAMERA",
+            "Cameras"
+            )
+        camera.prop(self, "bake_only_key_visible_in_cut")
+        camera.prop(self, "scale_camera_fstop_with_unit_scale")
 
         data = ColumnRight.box()
         data.label(text='DATA')

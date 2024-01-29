@@ -29,6 +29,7 @@ from ..bbpl.blender_layout.layout_expend_section.types import (
         BBPL_UI_ExpendSection,
         )
 
+
 def get_preset_values():
     preset_values = [
         'obj.bfu_export_fbx_camera',
@@ -140,7 +141,6 @@ def register():
         description="Choose the type of camera",
         items=bfu_camera_utils.get_enum_cameras_list(),
         default=bfu_camera_utils.get_enum_cameras_default()
-
     )
 
 def unregister():
