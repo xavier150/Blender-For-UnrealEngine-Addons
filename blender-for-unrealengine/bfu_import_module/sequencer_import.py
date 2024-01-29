@@ -160,7 +160,7 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
         sectionSensorWidth = TrackSensorWidth.add_section()
         sectionSensorWidth.set_end_frame_bounded(False)
         sectionSensorWidth.set_start_frame_bounded(False)
-        AddSequencerSectionFloatKeysByIniFile(sectionSensorWidth, camera_tracks['Camera SensorWidth'])
+        AddSequencerSectionFloatKeysByIniFile(sectionSensorWidth, camera_tracks['UE Camera SensorWidth'])
 
         TrackSensorHeight = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)
         TrackSensorHeight.set_property_name_and_path('Filmback.SensorHeight', 'Filmback.SensorHeight')
@@ -168,21 +168,7 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
         sectionSensorHeight = TrackSensorHeight.add_section()
         sectionSensorHeight.set_end_frame_bounded(False)
         sectionSensorHeight.set_start_frame_bounded(False)
-
-        crop_camera_sensor_height = {}
-        for key in camera_tracks['Camera SensorHeight'].keys():
-            original_width = float(camera_tracks['Camera SensorWidth'][key])
-            original_height = float(camera_tracks['Camera SensorHeight'][key])
-            res_x = float(sequence_data['render_resolution_x'])
-            res_y = float(sequence_data['render_resolution_y'])
-            pixel_x = float(sequence_data['pixel_aspect_x'])
-            pixel_y = float(sequence_data['pixel_aspect_y'])
-            res_ratio = res_x / res_y
-            pixel_ratio = pixel_x / pixel_y
-
-            crop_camera_sensor_height[key] = (original_width / (res_ratio * pixel_ratio))
-
-        AddSequencerSectionFloatKeysByIniFile(sectionSensorHeight, crop_camera_sensor_height)
+        AddSequencerSectionFloatKeysByIniFile(sectionSensorHeight, camera_tracks['UE Camera SensorHeight'])
 
         TrackFocusDistance = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)
 
@@ -222,7 +208,7 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
         transform_section = transform_track.add_section()
         transform_section.set_end_frame_bounded(False)
         transform_section.set_start_frame_bounded(False)
-        AddSequencerSectionTransformKeysByIniFile(transform_section, camera_tracks['Camera Transform'])
+        AddSequencerSectionTransformKeysByIniFile(transform_section, camera_tracks['UE Camera Transform'])
 
         # Set property binding
         if spawnable_camera:

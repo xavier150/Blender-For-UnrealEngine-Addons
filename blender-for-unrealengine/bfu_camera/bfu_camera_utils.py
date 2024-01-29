@@ -26,7 +26,7 @@ def AddCameraToCommand(camera: bpy.types.Object, pre_bake_camera: bfu_camera_dat
         # First I get the camera data.
         # This is a very bad way to do this. I need do a new python file specific to camera with class to get data.
         data = bfu_camera_write_text.WriteOneFrameCameraAnimationTracks(camera, frame_current, pre_bake_camera)
-        transform_track = data["Camera Transform"][frame_current]
+        transform_track = data["UE Camera Transform"][frame_current]
         location_x = transform_track["location_x"]
         location_y = transform_track["location_y"]
         location_z = transform_track["location_z"]
@@ -40,8 +40,8 @@ def AddCameraToCommand(camera: bpy.types.Object, pre_bake_camera: bfu_camera_dat
         FarClippingPlane = data["Camera FarClippingPlane"][frame_current]
         FieldOfView = data["Camera FieldOfView"][frame_current]
         FocalLength = data["Camera FocalLength"][frame_current]
-        SensorWidth = data["Camera SensorWidth"][frame_current]
-        SensorHeight = data["Camera SensorHeight"][frame_current]
+        SensorWidth = data["UE Camera SensorWidth"][frame_current]
+        SensorHeight = data["UE Camera SensorHeight"][frame_current]
         FocusDistance = data["Camera FocusDistance"][frame_current]
         Aperture = data["Camera Aperture"][frame_current]
         AspectRatio = data["desired_screen_ratio"]
