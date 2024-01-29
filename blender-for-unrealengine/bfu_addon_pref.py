@@ -19,9 +19,10 @@
 import os
 import bpy
 
+from . import bbpl
 from . import bfu_ui
 from . import languages
-from . import bfu_camera
+from .bbpl.blender_layout import layout_doc_button
 
 class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
     # this must match the addon name, use '__package__'
@@ -178,7 +179,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
             return {'FINISHED'}
 
     def draw(self, context):
-        layout = self.layout
+        layout: bpy.types.UILayout = self.layout
 
         boxColumn = layout.column().split(
             factor=0.5
@@ -188,11 +189,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 
         rootBone = ColumnLeft.box()
 
-        bfu_ui.bfu_ui_utils.LabelWithDocButton(
-            rootBone,
-            "SKELETON & ROOT BONE",
-            "skeleton--root-bone"
-            )
+        layout_doc_button.add_right_doc_page_operator(rootBone, text="SKELETON & ROOT BONE", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Skeleton-&-Root-bone")
         rootBone.prop(self, "add_skeleton_root_bone")
         rootBoneName = rootBone.column()
         rootBoneName.enabled = self.add_skeleton_root_bone
@@ -213,11 +210,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         socketRescale.prop(self, "skeletalSocketsImportedSize")
 
         camera = ColumnLeft.box()
-        bfu_ui.bfu_ui_utils.LabelWithDocButton(
-            camera,
-            "CAMERA",
-            "Cameras"
-            )
+        layout_doc_button.add_right_doc_page_operator(camera, text="CAMERA", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Cameras")
         camera.prop(self, "bake_only_key_visible_in_cut")
         camera.prop(self, "scale_camera_fstop_with_unit_scale")
 

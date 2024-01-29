@@ -1718,7 +1718,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     bfu_convert_geometry_node_attribute_to_uv = layout.column()
                     convert_geometry_node_attribute_to_uv_use = bfu_convert_geometry_node_attribute_to_uv.row()
                     convert_geometry_node_attribute_to_uv_use.prop(obj, 'bfu_convert_geometry_node_attribute_to_uv')
-                    bfu_ui.bfu_ui_utils.DocPageButton(convert_geometry_node_attribute_to_uv_use, "wiki/UV-Maps", "Geometry Node UV")
+                    bbpl.blender_layout.layout_doc_button.add_doc_page_operator(convert_geometry_node_attribute_to_uv_use, url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/UV-Maps#geometry-node-uv")
                     bfu_convert_geometry_node_attribute_to_uv_name = bfu_convert_geometry_node_attribute_to_uv.row()
                     bfu_convert_geometry_node_attribute_to_uv_name.prop(obj, 'bfu_convert_geometry_node_attribute_to_uv_name')
                     bfu_convert_geometry_node_attribute_to_uv_name.enabled = obj.bfu_convert_geometry_node_attribute_to_uv
@@ -1726,7 +1726,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     # Extreme UV Scale
                     bfu_correct_extrem_uv_scale = layout.row()
                     bfu_correct_extrem_uv_scale.prop(obj, 'bfu_correct_extrem_uv_scale')
-                    bfu_ui.bfu_ui_utils.DocPageButton(bfu_correct_extrem_uv_scale, "wiki/UV-Maps", "Extreme UV Scale")
+                    bbpl.blender_layout.layout_doc_button.add_doc_page_operator(bfu_correct_extrem_uv_scale, url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/UV-Maps#extreme-uv-scale")
 
         if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("SCENE", "GENERAL"):
 
