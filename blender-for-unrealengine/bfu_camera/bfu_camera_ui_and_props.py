@@ -50,15 +50,12 @@ def draw_ui_object_camera(layout: bpy.types.UILayout, obj: bpy.types.Object):
     scene.bfu_camera_properties_expanded.draw(camera_ui)
     if scene.bfu_camera_properties_expanded.is_expend():
         if obj.type == "CAMERA":
-
             camera_ui_pop = camera_ui.column()
             camera_ui_pop.prop(obj, 'bfu_desired_camera_type')
             camera_ui_pop.prop(obj, 'bfu_export_fbx_camera')
             camera_ui_pop.prop(obj, 'bfu_fix_axis_flippings')
             camera_ui_pop.enabled = obj.bfu_export_type == "export_recursive"
-            
-            camera_ui.operator("object.copy_regular_camera_command", icon="COPYDOWN")
-            camera_ui.operator("object.copy_cine_camera_command", icon="COPYDOWN")
+            camera_ui.operator("object.bfu_copy_active_camera_data", icon="COPYDOWN")
 
 
 def draw_ui_scene_camera(layout: bpy.types.UILayout):
@@ -67,35 +64,18 @@ def draw_ui_scene_camera(layout: bpy.types.UILayout):
     scene = bpy.context.scene  
     scene.bfu_camera_tools_expanded.draw(camera_ui)
     if scene.bfu_camera_tools_expanded.is_expend():
-
-        camera_ui.operator("object.copy_regular_cameras_command", icon="COPYDOWN")
-        camera_ui.operator("object.copy_cine_cameras_command", icon="COPYDOWN")
+        camera_ui.operator("object.copy_selected_cameras_data", icon="COPYDOWN")
     
 
 # Object button
-class BFU_OT_CopyRegularCameraButton(bpy.types.Operator):
-    bl_label = "Copy Regular Camera for Unreal"
-    bl_idname = "object.copy_regular_camera_command"
-    bl_description = "Copy Regular Camera Script command"
+class BFU_OT_CopyActiveCameraOperator(bpy.types.Operator):
+    bl_label = "Copy active camera for Unreal"
+    bl_idname = "object.bfu_copy_active_camera_data"
+    bl_description = "Copy active camera data. (Use CTRL+V in Unreal viewport)"
 
     def execute(self, context):
         obj = context.object
-        result = bfu_camera_utils.GetImportCameraScriptCommand([obj], False)
-        if result[0]:
-            bfu_basics.setWindowsClipboard(result[1])
-            self.report({'INFO'}, result[2])
-        else:
-            self.report({'WARNING'}, result[2])
-        return {'FINISHED'}
-
-class BFU_OT_CopyCineCameraButton(bpy.types.Operator):
-    bl_label = "Copy Cine Camera for Unreal"
-    bl_idname = "object.copy_cine_camera_command"
-    bl_description = "Copy Cine Camera Script command"
-
-    def execute(self, context):
-        obj = context.object
-        result = bfu_camera_utils.GetImportCameraScriptCommand([obj], True)
+        result = bfu_camera_utils.GetImportCameraScriptCommand([obj])
         if result[0]:
             bfu_basics.setWindowsClipboard(result[1])
             self.report({'INFO'}, result[2])
@@ -104,29 +84,14 @@ class BFU_OT_CopyCineCameraButton(bpy.types.Operator):
         return {'FINISHED'}
 
 # Scene button
-class BFU_OT_CopyRegularCamerasButton(bpy.types.Operator):
-    bl_label = "Copy Regular Cameras for Unreal"
-    bl_idname = "object.copy_regular_cameras_command"
-    bl_description = "Copy Regular Cameras Script command"
+class BFU_OT_CopySelectedCamerasOperator(bpy.types.Operator):
+    bl_label = "Copy selected camera(s) for Unreal"
+    bl_idname = "object.copy_selected_cameras_data"
+    bl_description = "Copy selected camera(s) data. (Use CTRL+V in Unreal viewport)"
 
     def execute(self, context):
         objs = context.selected_objects
-        result = bfu_camera_utils.GetImportCameraScriptCommand(objs, False)
-        if result[0]:
-            bfu_basics.setWindowsClipboard(result[1])
-            self.report({'INFO'}, result[2])
-        else:
-            self.report({'WARNING'}, result[2])
-        return {'FINISHED'}
-
-class BFU_OT_CopyCineCamerasButton(bpy.types.Operator):
-    bl_label = "Copy Cine Cameras for Unreal"
-    bl_idname = "object.copy_cine_cameras_command"
-    bl_description = "Copy Cine Cameras Script command"
-
-    def execute(self, context):
-        objs = context.selected_objects
-        result = bfu_camera_utils.GetImportCameraScriptCommand(objs, True)
+        result = bfu_camera_utils.GetImportCameraScriptCommand(objs)
         if result[0]:
             bfu_basics.setWindowsClipboard(result[1])
             self.report({'INFO'}, result[2])
@@ -142,10 +107,8 @@ class BFU_UI_CamerasExpendSection(BBPL_UI_ExpendSection):
 # -------------------------------------------------------------------
 
 classes = (
-    BFU_OT_CopyRegularCameraButton,
-    BFU_OT_CopyCineCameraButton,
-    BFU_OT_CopyRegularCamerasButton,
-    BFU_OT_CopyCineCamerasButton,
+    BFU_OT_CopyActiveCameraOperator,
+    BFU_OT_CopySelectedCamerasOperator,
     BFU_UI_CamerasExpendSection
 )
 

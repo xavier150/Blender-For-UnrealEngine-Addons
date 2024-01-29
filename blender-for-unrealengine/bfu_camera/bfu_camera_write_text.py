@@ -51,7 +51,6 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
         camera_tracks = multi_camera_tracks.get_evaluate_camera_data(obj)
 
     data['Camera transform'] = camera_tracks.transform_track
-    print(data['Camera transform'])
     data["Camera NearClippingPlane"] = camera_tracks.near_clipping_plane
     data["Camera FarClippingPlane"] = camera_tracks.far_clipping_plane
     data["Camera FieldOfView"] = camera_tracks.fov
