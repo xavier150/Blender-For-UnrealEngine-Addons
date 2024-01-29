@@ -32,7 +32,7 @@ from ... import __internal__
 def create_operator_class():
     # Create an custom class ussing addon name for avoid name collision.
     
-    class CustomOpenTargetWebPageOperator(bpy.types.Operator):
+    class CustomOpenTargetWebPage_Operator(bpy.types.Operator):
         bl_label = "Documentation"
         bl_idname = utils.get_operator_name()
         bl_description = "Click for open URL."
@@ -47,8 +47,8 @@ def create_operator_class():
                 self.report({'WARNING'}, "Invalid URL. Only HTTP and HTTPS URLs are allowed.")
                 return {'CANCELLED'}
 
-    CustomOpenTargetWebPageOperator.__name__ = utils.get_class_name()
-    return CustomOpenTargetWebPageOperator
+    CustomOpenTargetWebPage_Operator.__name__ = utils.get_class_name()
+    return CustomOpenTargetWebPage_Operator
 
 
 
