@@ -62,8 +62,7 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
             value = track_dict[key]  # (x,y,z x,y,z x,y,z)
             frame = unreal.FrameNumber(int(key))
 
-
-            if import_module_utils.is_unreal_version_greater_or_equal(5,0):
+            if import_module_unreal_utils.is_unreal_version_greater_or_equal(5,0):
                 sequencer_section.get_all_channels()[0].add_key(frame, value["location_x"])
                 sequencer_section.get_all_channels()[1].add_key(frame, value["location_y"])
                 sequencer_section.get_all_channels()[2].add_key(frame, value["location_z"])
