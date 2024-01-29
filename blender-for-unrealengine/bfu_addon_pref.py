@@ -160,9 +160,15 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         )
     
     scale_camera_fstop_with_unit_scale: bpy.props.BoolProperty(
-        name="Scale camera F-Stop with Unit Scale",
-        description="Scale camera F-Stop with Unit Scale",
-        default=False,
+        name="Scale F-Stop by Unit Scale",
+        description="Scale camera F-Stop with Unit Scale.",
+        default=True,
+        )
+    
+    scale_camera_focus_distance_with_unit_scale: bpy.props.BoolProperty(
+        name="Scale focus distance by Unit Scale",
+        description="Scale camera focus distance with Unit Scale.",
+        default=True,
         )
     
     class BFU_OT_NewReleaseInfo(bpy.types.Operator):
@@ -212,7 +218,9 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         camera = ColumnLeft.box()
         layout_doc_button.add_right_doc_page_operator(camera, text="CAMERA", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Cameras")
         camera.prop(self, "bake_only_key_visible_in_cut")
+        layout_doc_button.add_right_doc_page_operator(camera, text="About depth of Field -> ", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Camera-Depth-of-Field")
         camera.prop(self, "scale_camera_fstop_with_unit_scale")
+        camera.prop(self, "scale_camera_focus_distance_with_unit_scale")
 
         data = ColumnRight.box()
         data.label(text='DATA')

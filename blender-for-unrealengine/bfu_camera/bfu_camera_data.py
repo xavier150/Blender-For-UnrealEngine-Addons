@@ -151,7 +151,10 @@ class BFU_CameraTracks():
             key = key * 100 * unit_scale
 
         if key > 0:
-            self.focus_distance[frame] = key / unit_scale
+            if addon_prefs.scale_camera_focus_distance_with_unit_scale:
+                self.focus_distance[frame] = key / unit_scale
+            else:
+                self.aperture_fstop[frame] = key
         else:
             self.focus_distance[frame] = 100000  # 100000 is default value in Unreal Engine
 
