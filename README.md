@@ -33,6 +33,7 @@ By using Blender For Unreal Engine you can generate python scripts to import the
 - [Collisions](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Collisions)
 - [Sockets](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Sockets)
 - [Cameras](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Cameras)
+- [Camera Depth of Field](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Camera-Depth-of-Field)
 - [Camera Shift](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Camera-Shift)
 - [Animations](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Animations)
 - [Materials](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Material)
