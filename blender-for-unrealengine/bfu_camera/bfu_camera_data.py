@@ -206,17 +206,15 @@ class BFU_CameraTracks():
         # Get FocusDistance
         if camera.data.dof.focus_object is not None:
             key = getCameraFocusDistance(camera, camera.data.dof.focus_object)
-            key = key * 100 * unit_scale
 
         else:
             key = getOneKeysByFcurves(camera, "dof.focus_distance", camera.data.dof.focus_distance, frame)
-            key = key * 100 * unit_scale
 
         if key > 0:
             if addon_prefs.scale_camera_focus_distance_with_unit_scale:
-                self.focus_distance[frame] = key / unit_scale
+                self.focus_distance[frame] = key * 100 * unit_scale
             else:
-                self.aperture_fstop[frame] = key
+                self.focus_distance[frame] = key * 100
         else:
             self.focus_distance[frame] = 100000  # 100000 is default value in Unreal Engine
 
