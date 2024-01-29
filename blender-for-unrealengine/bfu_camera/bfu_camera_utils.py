@@ -2,6 +2,16 @@ import bpy
 
 from . import bfu_camera_write_text
 
+def get_enum_cameras_list():
+    camera_types = [
+        ("REGULAR", "Regular", "Regular camera, for standard gameplay views."),
+        ("CINEMATIC", "Cinematic", "The Cine Camera Actor is a specialized Camera Actor with additional settings that replicate real-world film camera behavior. You can use the Filmback, Lens, and Focus settings to create realistic scenes, while adhering to industry standards."),
+    ]
+    return camera_types
+
+def get_enum_cameras_default():
+    return "CINEMATIC"
+
 def GetImportCameraScriptCommand(objs, CineCamera=True):
     # Return (success, command)
 

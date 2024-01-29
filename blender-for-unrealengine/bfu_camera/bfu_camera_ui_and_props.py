@@ -37,7 +37,7 @@ def get_preset_values():
     return preset_values
 
 def draw_ui_object_camera(layout: bpy.types.UILayout, obj: bpy.types.Object):
-    scene = bpy.context.scene   
+  
 
     if obj is None:
         return
@@ -46,11 +46,13 @@ def draw_ui_object_camera(layout: bpy.types.UILayout, obj: bpy.types.Object):
         return
 
     camera_ui = layout.column()
-    scene.bfu_export_filter_properties_expanded.draw(camera_ui)
-    if scene.bfu_export_filter_properties_expanded.is_expend():
+    scene = bpy.context.scene 
+    scene.bfu_camera_properties_expanded.draw(camera_ui)
+    if scene.bfu_camera_properties_expanded.is_expend():
         if obj.type == "CAMERA":
 
             camera_ui_pop = camera_ui.column()
+            camera_ui_pop.prop(obj, 'bfu_desired_camera_type')
             camera_ui_pop.prop(obj, 'bfu_export_fbx_camera')
             camera_ui_pop.prop(obj, 'bfu_fix_axis_flippings')
             camera_ui_pop.enabled = obj.bfu_export_type == "export_recursive"
@@ -59,8 +61,15 @@ def draw_ui_object_camera(layout: bpy.types.UILayout, obj: bpy.types.Object):
             camera_ui.operator("object.copy_cine_camera_command", icon="COPYDOWN")
 
 
-def draw_ui_scene_camera(layout: bpy.types.UILayout, obj: bpy.types.Object):
-    return
+def draw_ui_scene_camera(layout: bpy.types.UILayout):
+
+    camera_ui = layout.column()
+    scene = bpy.context.scene  
+    scene.bfu_camera_tools_expanded.draw(camera_ui)
+    if scene.bfu_camera_tools_expanded.is_expend():
+
+        camera_ui.operator("object.copy_regular_cameras_command", icon="COPYDOWN")
+        camera_ui.operator("object.copy_cine_cameras_command", icon="COPYDOWN")
     
 
 # Object button
@@ -145,7 +154,9 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     
-    bpy.types.Scene.bfu_export_filter_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_CamerasExpendSection, name="Camera Properties")
+    bpy.types.Scene.bfu_camera_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_CamerasExpendSection, name="Camera Properties")
+    bpy.types.Scene.bfu_camera_tools_expanded = bpy.props.PointerProperty(type=BFU_UI_CamerasExpendSection, name="Camera")
+
     bpy.types.Object.bfu_export_fbx_camera = bpy.props.BoolProperty(
         name=(languages.ti('export_camera_as_fbx_name')),
         description=(languages.tt('export_camera_as_fbx_desc')),
@@ -160,11 +171,20 @@ def register():
         override={'LIBRARY_OVERRIDABLE'},
         default=True,
         )
+    
+    bpy.types.Object.bfu_desired_camera_type = bpy.props.EnumProperty(
+        name="Camera Type",
+        description="Choose the type of camera",
+        items=bfu_camera_utils.get_enum_cameras_list(),
+        default=bfu_camera_utils.get_enum_cameras_default()
+
+    )
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
+    del bpy.types.Object.bfu_desired_camera_type
     del bpy.types.Object.bfu_fix_axis_flippings
     del bpy.types.Object.bfu_export_fbx_camera
     del bpy.types.Scene.bfu_export_filter_properties_expanded

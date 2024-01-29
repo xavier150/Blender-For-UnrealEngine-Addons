@@ -2,6 +2,7 @@ import bpy
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui
+from .. import bfu_camera
 
 
 class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
@@ -149,12 +150,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         ready_for_convert_socket = False
 
 
-        scene.bfu_camera_expanded.draw(layout)
-        if scene.bfu_camera_expanded.is_expend():
-            copy_camera_buttons = layout.column()
-            copy_camera_buttons.operator("object.copy_regular_cameras_command", icon="COPYDOWN")
-            copy_camera_buttons.operator("object.copy_cine_cameras_command", icon="COPYDOWN")
-
+        bfu_camera.bfu_camera_ui_and_props.draw_ui_scene_camera(layout)
 
         scene.bfu_collision_socket_expanded.draw(layout)
         if scene.bfu_collision_socket_expanded.is_expend():
