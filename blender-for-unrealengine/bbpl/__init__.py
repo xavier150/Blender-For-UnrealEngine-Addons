@@ -25,6 +25,7 @@
 import bpy
 import importlib
 
+from . import __internal__
 from . import blender_layout
 from . import backward_compatibility
 from . import blender_rig
@@ -37,6 +38,8 @@ from . import anim_utils
 from . import scene_utils
 from . import ui_utils
 
+if "__internal__" in locals():
+    importlib.reload(__internal__)
 if "blender_layout" in locals():
     importlib.reload(blender_layout)
 if "backward_compatibility" in locals():

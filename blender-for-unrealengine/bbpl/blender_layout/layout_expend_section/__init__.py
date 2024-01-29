@@ -25,9 +25,16 @@
 import bpy
 import importlib
 from . import types
+from . import functions
+from . import utils
+from .functions import *
 
 if "types" in locals():
     importlib.reload(types)
+if "functions" in locals():
+    importlib.reload(functions)
+if "utils" in locals():
+    importlib.reload(utils)
 
 classes = (
 )
@@ -35,8 +42,12 @@ classes = (
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
+    
+    types.register()
 
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
+
+    types.unregister()

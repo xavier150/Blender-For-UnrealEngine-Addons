@@ -23,31 +23,62 @@
 # ----------------------------------------------
 
 import bpy
+from . import utils
+from ... import __internal__
 
-class BBPL_UI_ExpendSection(bpy.types.PropertyGroup):
+current_class = None
 
-    expend: bpy.props.BoolProperty(
-        name="Use",
-        description="Click to expand / collapse",
-        default=False
-    )
-    
-    def get_name(self):
-        if bpy.app.version >= (3, 0, 0):
-            prop_rna = self.id_data.bl_rna.properties[self.id_properties_ensure().name]
-            return prop_rna.name
-        else:
-            prop_rna = self.id_data.bl_rna.properties[self.path_from_id()]
-            return prop_rna.name
+def get_expend_section_class():
+    global current_class
+    return current_class
 
 
-    def draw(self, layout: bpy.types.UILayout):
-        tria_icon = "TRIA_DOWN" if self.expend else "TRIA_RIGHT"
-        description = "Click to collapse" if self.expend else "Click to expand"
-        layout.row().prop(self, "expend", icon=tria_icon, icon_only=True, text=self.get_name(), emboss=False, toggle=True, expand=True)
-        if self.expend:
-            pass
+def create_ui_accordion_class():
+    # Create an custom class ussing addon name for avoid name collision.
 
-    def is_expend(self):
-        return self.expend
+    class CustomUIExpendSectionPropertyGroup(bpy.types.PropertyGroup):
+        expend: bpy.props.BoolProperty(
+            name="Use",
+            description="Click to expand / collapse",
+            default=False
+        )
+        
+        def get_name(self):
+            if bpy.app.version >= (3, 0, 0):
+                prop_rna = self.id_data.bl_rna.properties[self.id_properties_ensure().name]
+                return prop_rna.name
+            else:
+                prop_rna = self.id_data.bl_rna.properties[self.path_from_id()]
+                return prop_rna.name
 
+
+        def draw(self, layout: bpy.types.UILayout):
+            tria_icon = "TRIA_DOWN" if self.expend else "TRIA_RIGHT"
+            description = "Click to collapse" if self.expend else "Click to expand"
+            layout.row().prop(self, "expend", icon=tria_icon, icon_only=True, text=self.get_name(), emboss=False, toggle=True, expand=True)
+            if self.expend:
+                pass
+
+        def is_expend(self):
+            return self.expend
+        
+    CustomUIExpendSectionPropertyGroup.__name__ = utils.get_class_name()
+    return CustomUIExpendSectionPropertyGroup
+
+classes = (
+)
+
+def register():
+    global current_class
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
+    BBPL_UI_ExpendSection = create_ui_accordion_class()
+    current_class = BBPL_UI_ExpendSection
+    bpy.utils.register_class(BBPL_UI_ExpendSection)
+
+
+
+def unregister():
+    for cls in reversed(classes):
+        bpy.utils.unregister_class(cls)

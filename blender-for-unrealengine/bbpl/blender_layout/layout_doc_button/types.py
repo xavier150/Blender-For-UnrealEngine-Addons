@@ -26,19 +26,12 @@ import bpy
 import os
 import webbrowser
 from . import utils
+from ... import __internal__
 
 
-
-
-def register_operator():
-    package_name = utils.get_package_name()
-    BBPL_OT_OpenTargetWebPage = create_operator_class(package_name)
-    bpy.utils.register_class(BBPL_OT_OpenTargetWebPage)
-
-
-def create_operator_class(idname_suffix):
+def create_operator_class():
     # Create an custom class ussing addon name for avoid name collision.
-    print(idname_suffix)
+    
     class CustomOpenTargetWebPageOperator(bpy.types.Operator):
         bl_label = "Documentation"
         bl_idname = utils.get_operator_name()
@@ -54,7 +47,7 @@ def create_operator_class(idname_suffix):
                 self.report({'WARNING'}, "Invalid URL. Only HTTP and HTTPS URLs are allowed.")
                 return {'CANCELLED'}
 
-    CustomOpenTargetWebPageOperator.__name__ = f"BBPL_OT_{idname_suffix}_OpenTargetWebPage"
+    CustomOpenTargetWebPageOperator.__name__ = utils.get_class_name()
     return CustomOpenTargetWebPageOperator
 
 
@@ -65,11 +58,11 @@ classes = (
 )
 
 def register():
-    print("register")
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    register_operator()
+    BBPL_OT_OpenTargetWebPage = create_operator_class()
+    bpy.utils.register_class(BBPL_OT_OpenTargetWebPage)
 
 
 

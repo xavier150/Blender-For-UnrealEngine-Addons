@@ -25,9 +25,6 @@ from .. import bfu_utils
 from .. import bfu_ui
 from .. import bbpl
 from .. import languages
-from ..bbpl.blender_layout.layout_expend_section.types import (
-        BBPL_UI_ExpendSection,
-        )
 
 
 def get_preset_values():
@@ -100,8 +97,7 @@ class BFU_OT_CopySelectedCamerasOperator(bpy.types.Operator):
             self.report({'WARNING'}, result[2])
         return {'FINISHED'}
 
-class BFU_UI_CamerasExpendSection(BBPL_UI_ExpendSection):
-    pass
+
 
 # -------------------------------------------------------------------
 #   Register & Unregister
@@ -109,8 +105,7 @@ class BFU_UI_CamerasExpendSection(BBPL_UI_ExpendSection):
 
 classes = (
     BFU_OT_CopyActiveCameraOperator,
-    BFU_OT_CopySelectedCamerasOperator,
-    BFU_UI_CamerasExpendSection
+    BFU_OT_CopySelectedCamerasOperator
 )
 
 
@@ -118,8 +113,8 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     
-    bpy.types.Scene.bfu_camera_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_CamerasExpendSection, name="Camera Properties")
-    bpy.types.Scene.bfu_camera_tools_expanded = bpy.props.PointerProperty(type=BFU_UI_CamerasExpendSection, name="Camera")
+    bpy.types.Scene.bfu_camera_properties_expanded = bbpl.blender_layout.layout_expend_section.add_ui_accordion(name="Camera Properties")
+    bpy.types.Scene.bfu_camera_tools_expanded = bbpl.blender_layout.layout_expend_section.add_ui_accordion(name="Camera")
 
     bpy.types.Object.bfu_export_fbx_camera = bpy.props.BoolProperty(
         name=(languages.ti('export_camera_as_fbx_name')),

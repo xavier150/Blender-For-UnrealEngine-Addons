@@ -23,12 +23,7 @@
 # ----------------------------------------------
 
 import bpy
-from ... import __internal__
+from . import types
 
-def get_class_name():
-    package_name = __internal__.utils.get_package_name()
-    return f"BBPL_OT_{package_name}_OpenTargetWebPage"
-
-def get_operator_name():
-    package_name = __internal__.utils.get_package_name()
-    return f"object.bbpl_{package_name}_open_target_web_page"
+def add_ui_accordion(name: str=""):
+    return bpy.props.PointerProperty(type=types.get_expend_section_class(), name=name)
