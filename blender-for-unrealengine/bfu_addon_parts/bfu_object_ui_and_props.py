@@ -31,7 +31,7 @@ from ..export import bfu_export_get_info
 from .. import bfu_ui
 from .. import languages
 from .. import bfu_custom_property
-
+from .. import bfu_camera
 
 
 class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
@@ -92,21 +92,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         subtype='FILE_NAME'
         )
 
-    bpy.types.Object.bfu_export_fbx_camera = bpy.props.BoolProperty(
-        name=(languages.ti('export_camera_as_fbx_name')),
-        description=(languages.tt('export_camera_as_fbx_desc')),
-        override={'LIBRARY_OVERRIDABLE'},
-        default=False,
-        )
 
-    bpy.types.Object.bfu_fix_axis_flippings = bpy.props.BoolProperty(
-        name="Fix camera axis flippings",
-        description=(
-            'Disable only if you use extrem camera animation in one frame.'
-            ),
-        override={'LIBRARY_OVERRIDABLE'},
-        default=True,
-        )
 
     bpy.types.Object.bfu_export_as_alembic = bpy.props.BoolProperty(
         name="Export as Alembic animation",
@@ -1069,8 +1055,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 'obj.bfu_export_type',
                 'obj.bfu_export_folder_name',
                 'col.bfu_export_folder_name',
-                'obj.bfu_export_fbx_camera',
-                'obj.bfu_fix_axis_flippings',
                 'obj.bfu_export_as_alembic',
                 'obj.bfu_export_as_lod_mesh',
                 'obj.bfu_export_skeletal_mesh_as_static_mesh',
@@ -1141,6 +1125,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             preset_values += bfu_modular_skeletal_specified_parts_meshs.get_preset_values()
             preset_values += bfu_unreal_engine_refs_props.get_preset_values()
             preset_values += bfu_custom_property.bfu_custom_property_props.get_preset_values()
+            preset_values += bfu_camera.bfu_camera_ui_and_props.get_preset_values()
             return preset_values
 
         # Common variable used for all preset values
@@ -1295,10 +1280,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     ExportType = layout.column()
                     ExportType.prop(obj, 'bfu_export_type')
 
-                    if obj.type == "CAMERA":
-                        CameraProp = layout.column()
-                        CameraProp.operator("object.copy_regular_camera_command", icon="COPYDOWN")
-                        CameraProp.operator("object.copy_cine_camera_command", icon="COPYDOWN")
 
                     if obj.bfu_export_type == "export_recursive":
 
@@ -1310,8 +1291,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             )
 
                         if obj.type == "CAMERA":
-                            CameraProp.prop(obj, 'bfu_export_fbx_camera')
-                            CameraProp.prop(obj, 'bfu_fix_axis_flippings')
                             bfu_export_procedure.bfu_export_procedure_ui.draw_object_export_procedure(layout, obj)
 
                         else:
@@ -1365,6 +1344,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 exportCustomNameText.prop(obj, "bfu_custom_export_name")
                                 exportCustomNameText.enabled = useCustomName
 
+            bfu_camera.bfu_camera_ui_and_props.draw_ui_object_camera(layout, obj)
             scene.bfu_object_advanced_properties_expanded.draw(layout)
             if scene.bfu_object_advanced_properties_expanded.is_expend():
                 if obj is not None:

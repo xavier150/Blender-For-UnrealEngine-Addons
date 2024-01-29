@@ -23,7 +23,45 @@ from . import bfu_camera_utils
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui
+from .. import bbpl
+from .. import languages
+from ..bbpl.blender_layout.layout_expend_section.types import (
+        BBPL_UI_ExpendSection,
+        )
 
+def get_preset_values():
+    preset_values = [
+        'obj.bfu_export_fbx_camera',
+        'obj.bfu_fix_axis_flippings'
+        ]
+    return preset_values
+
+def draw_ui_object_camera(layout: bpy.types.UILayout, obj: bpy.types.Object):
+    scene = bpy.context.scene   
+
+    if obj is None:
+        return
+    
+    if obj.type != "CAMERA":
+        return
+
+    camera_ui = layout.column()
+    scene.bfu_export_filter_properties_expanded.draw(camera_ui)
+    if scene.bfu_export_filter_properties_expanded.is_expend():
+        if obj.type == "CAMERA":
+
+            camera_ui_pop = camera_ui.column()
+            camera_ui_pop.prop(obj, 'bfu_export_fbx_camera')
+            camera_ui_pop.prop(obj, 'bfu_fix_axis_flippings')
+            camera_ui_pop.enabled = obj.bfu_export_type == "export_recursive"
+            
+            camera_ui.operator("object.copy_regular_camera_command", icon="COPYDOWN")
+            camera_ui.operator("object.copy_cine_camera_command", icon="COPYDOWN")
+
+
+def draw_ui_scene_camera(layout: bpy.types.UILayout, obj: bpy.types.Object):
+    return
+    
 
 # Object button
 class BFU_OT_CopyRegularCameraButton(bpy.types.Operator):
@@ -87,6 +125,8 @@ class BFU_OT_CopyCineCamerasButton(bpy.types.Operator):
             self.report({'WARNING'}, result[2])
         return {'FINISHED'}
 
+class BFU_UI_CamerasExpendSection(BBPL_UI_ExpendSection):
+    pass
 
 # -------------------------------------------------------------------
 #   Register & Unregister
@@ -97,14 +137,34 @@ classes = (
     BFU_OT_CopyCineCameraButton,
     BFU_OT_CopyRegularCamerasButton,
     BFU_OT_CopyCineCamerasButton,
+    BFU_UI_CamerasExpendSection
 )
 
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
-
+    
+    bpy.types.Scene.bfu_export_filter_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_CamerasExpendSection, name="Camera Properties")
+    bpy.types.Object.bfu_export_fbx_camera = bpy.props.BoolProperty(
+        name=(languages.ti('export_camera_as_fbx_name')),
+        description=(languages.tt('export_camera_as_fbx_desc')),
+        override={'LIBRARY_OVERRIDABLE'},
+        default=False,
+        )
+    bpy.types.Object.bfu_fix_axis_flippings = bpy.props.BoolProperty(
+        name="Fix camera axis flippings",
+        description=(
+            'Disable only if you use extrem camera animation in one frame.'
+            ),
+        override={'LIBRARY_OVERRIDABLE'},
+        default=True,
+        )
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
+
+    del bpy.types.Object.bfu_fix_axis_flippings
+    del bpy.types.Object.bfu_export_fbx_camera
+    del bpy.types.Scene.bfu_export_filter_properties_expanded
