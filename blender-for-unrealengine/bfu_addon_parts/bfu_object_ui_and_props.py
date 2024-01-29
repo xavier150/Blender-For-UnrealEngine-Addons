@@ -1400,7 +1400,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 # Concaténez la clé et la valeur dans la chaîne de caractères
                                 var_lines.label(text=f"{key} -> {value}\n")
                         export_data = layout.column()
-                        bfu_custom_property.bfu_custom_property_utils.draw_custom_property_prop(export_data, obj)
+                        bfu_custom_property.bfu_custom_property_utils.draw_ui_custom_property(export_data, obj)
                         export_data.prop(obj, "bfu_export_with_meta_data")
 
                             

@@ -1,6 +1,6 @@
 import bpy
 
-def draw_custom_property_prop(layout: bpy.types.UILayout, obj: bpy.types.Object):
+def draw_ui_custom_property(layout: bpy.types.UILayout, obj: bpy.types.Object):
     layout.prop(obj, "bfu_export_with_custom_props")
     custom_props_layout = layout.column()
     custom_props_layout.enabled = obj.bfu_export_with_custom_props
