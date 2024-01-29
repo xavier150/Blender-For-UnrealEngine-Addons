@@ -26,17 +26,17 @@ import bpy
 from . import utils
 from ... import __internal__
 
-current_class = None
+layout_accordion_class = None
 
-def get_expend_section_class():
-    global current_class
-    return current_class
+def get_layout_accordion_class():
+    global layout_accordion_class
+    return layout_accordion_class
 
 
 def create_ui_accordion_class():
     # Create an custom class ussing addon name for avoid name collision.
 
-    class CustomUIExpendSectionPropertyGroup(bpy.types.PropertyGroup):
+    class CustomAccordionUI_PropertyGroup(bpy.types.PropertyGroup):
         expend: bpy.props.BoolProperty(
             name="Use",
             description="Click to expand / collapse",
@@ -62,20 +62,20 @@ def create_ui_accordion_class():
         def is_expend(self):
             return self.expend
         
-    CustomUIExpendSectionPropertyGroup.__name__ = utils.get_class_name()
-    return CustomUIExpendSectionPropertyGroup
+    CustomAccordionUI_PropertyGroup.__name__ = utils.get_class_name()
+    return CustomAccordionUI_PropertyGroup
 
 classes = (
 )
 
 def register():
-    global current_class
+    global layout_accordion_class
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    BBPL_UI_ExpendSection = create_ui_accordion_class()
-    current_class = BBPL_UI_ExpendSection
-    bpy.utils.register_class(BBPL_UI_ExpendSection)
+    BBPL_UI_Accordion = create_ui_accordion_class()
+    layout_accordion_class = BBPL_UI_Accordion
+    bpy.utils.register_class(BBPL_UI_Accordion)
 
 
 

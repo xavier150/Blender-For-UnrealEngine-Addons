@@ -113,8 +113,8 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     
-    bpy.types.Scene.bfu_camera_properties_expanded = bbpl.blender_layout.layout_expend_section.add_ui_accordion(name="Camera Properties")
-    bpy.types.Scene.bfu_camera_tools_expanded = bbpl.blender_layout.layout_expend_section.add_ui_accordion(name="Camera")
+    bpy.types.Scene.bfu_camera_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Camera Properties")
+    bpy.types.Scene.bfu_camera_tools_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Camera")
 
     bpy.types.Object.bfu_export_fbx_camera = bpy.props.BoolProperty(
         name=(languages.ti('export_camera_as_fbx_name')),

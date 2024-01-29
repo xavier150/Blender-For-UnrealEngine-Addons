@@ -23,7 +23,10 @@
 # ----------------------------------------------
 
 import bpy
-from . import types
 
-def add_ui_accordion(name: str=""):
-    return bpy.props.PointerProperty(type=types.get_expend_section_class(), name=name)
+from ... import __internal__
+
+def get_class_name():
+    package_name = __internal__.utils.get_package_name()
+    return f"BBPL_UI_{package_name}_Accordion"
+
