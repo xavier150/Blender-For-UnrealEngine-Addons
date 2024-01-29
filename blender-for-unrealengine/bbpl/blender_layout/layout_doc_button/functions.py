@@ -23,37 +23,37 @@
 # ----------------------------------------------
 
 import bpy
-import importlib
-from . import layout_expend_section
-from . import layout_template_list
-from . import layout_doc_button
+from . import utils
 
-if "layout_expend_section" in locals():
-    importlib.reload(layout_expend_section)
-if "layout_template_list" in locals():
-    importlib.reload(layout_template_list)
-if "layout_doc_button" in locals():
-    importlib.reload(layout_doc_button)
-
+def add_doc_page_operator(layout: bpy.types.UILayout, url: str="", text: str="", icon="HELP"):
+    doc_operator = layout.operator(
+        utils.get_operator_name(),
+        icon=icon,
+        text=text
+        )
+    doc_operator.url = url
+    return layout
 
 
-classes = (
-)
+def add_left_doc_page_operator(layout: bpy.types.UILayout, url: str="", text: str="", icon="HELP"):
+    new_row = layout.row()
+    doc_operator = new_row.operator(
+        utils.get_operator_name(),
+        icon=icon,
+        text=""
+        )
+    doc_operator.url = url
+    new_row.label(text=text)
+    return new_row
 
+def add_right_doc_page_operator(layout: bpy.types.UILayout, url: str="", text: str="", icon="HELP"):
+    new_row = layout.row()
+    new_row.label(text=text)
+    doc_operator = new_row.operator(
+        utils.get_operator_name(),
+        icon=icon,
+        text=""
+        )
+    doc_operator.url = url
+    return new_row
 
-
-def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
-
-    layout_expend_section.register()
-    layout_template_list.register()
-    layout_doc_button.register()
-
-def unregister():
-    for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
-
-    layout_doc_button.unregister()
-    layout_template_list.unregister()
-    layout_expend_section.unregister()

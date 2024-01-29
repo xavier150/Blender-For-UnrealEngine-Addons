@@ -23,37 +23,13 @@
 # ----------------------------------------------
 
 import bpy
-import importlib
-from . import layout_expend_section
-from . import layout_template_list
-from . import layout_doc_button
 
-if "layout_expend_section" in locals():
-    importlib.reload(layout_expend_section)
-if "layout_template_list" in locals():
-    importlib.reload(layout_template_list)
-if "layout_doc_button" in locals():
-    importlib.reload(layout_doc_button)
+def get_package_name():
+    package_name = __package__
+    package_name = package_name.split(".")[0]
+    package_name = package_name.lower().replace("-", "")
+    return package_name
 
-
-
-classes = (
-)
-
-
-
-def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
-
-    layout_expend_section.register()
-    layout_template_list.register()
-    layout_doc_button.register()
-
-def unregister():
-    for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
-
-    layout_doc_button.unregister()
-    layout_template_list.unregister()
-    layout_expend_section.unregister()
+def get_operator_name():
+    package_name = get_package_name()
+    return f"object.bbpl_{package_name}_open_target_web_page"
