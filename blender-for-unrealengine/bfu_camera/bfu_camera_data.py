@@ -85,7 +85,7 @@ class BFU_CameraTracks():
         self.transform_track = {}
         self.near_clipping_plane = {}
         self.far_clipping_plane = {}
-        self.fov = {}
+        self.field_of_view = {}
         self.angle = {}
         self.lens = {}
         self.sensor_width = {}
@@ -105,6 +105,7 @@ class BFU_CameraTracks():
         array_rotation = array_transform[1]
         array_scale = array_transform[2]
 
+
         # Fix axis flippings
         if camera.bfu_fix_axis_flippings:
             if frame-1 in self.transform_track:  # Previous frame
@@ -119,15 +120,15 @@ class BFU_CameraTracks():
                 array_rotation[2] = array_rotation[2] - diff
 
         transform = {}
-        transform["location_x"] = array_location.x
-        transform["location_y"] = array_location.y
-        transform["location_z"] = array_location.z
-        transform["rotation_x"] = array_rotation[0]
-        transform["rotation_y"] = array_rotation[1]
-        transform["rotation_z"] = array_rotation[2]
-        transform["scale_x"] = array_scale.x
-        transform["scale_y"] = array_scale.y
-        transform["scale_z"] = array_scale.z
+        transform["location_x"] = round(array_location.x, 8)
+        transform["location_y"] = round(array_location.y, 8)
+        transform["location_z"] = round(array_location.z, 8)
+        transform["rotation_x"] = round(array_rotation[0], 8)
+        transform["rotation_y"] = round(array_rotation[1], 8)
+        transform["rotation_z"] = round(array_rotation[2], 8)
+        transform["scale_x"] = round(array_scale.x, 6)
+        transform["scale_y"] = round(array_scale.y, 6)
+        transform["scale_z"] = round(array_scale.z, 6)
         self.transform_track[frame] = transform
 
         # Get FOV FocalLength SensorWidth SensorHeight
@@ -135,7 +136,7 @@ class BFU_CameraTracks():
         self.lens[frame] = getOneKeysByFcurves(camera, "lens", camera.data.lens, frame)
         self.sensor_width[frame] = getOneKeysByFcurves(camera, "sensor_width", camera.data.sensor_width, frame)
         self.sensor_height[frame] = getOneKeysByFcurves(camera, "sensor_height", camera.data.sensor_height, frame)
-        self.fov[frame] = math.degrees(self.angle[frame])
+        self.field_of_view[frame] = round(math.degrees(self.angle[frame]), 8)
 
         # Get Clip
         self.near_clipping_plane[frame] = getOneKeysByFcurves(camera, "clip_start", camera.data.clip_start, frame) * 100 * unit_scale
@@ -162,6 +163,7 @@ class BFU_CameraTracks():
         render_engine = scene.render.engine
         if render_engine == "BLENDER_EEVEE" or render_engine == "CYCLES" or render_engine == "BLENDER_WORKBENCH":
             key = getOneKeysByFcurves(camera, "dof.aperture_fstop", camera.data.dof.aperture_fstop, frame)
+            key = round(key, 8) # Avoid microscopic offsets.
             if addon_prefs.scale_camera_fstop_with_unit_scale:
                 self.aperture_fstop[frame] = key / unit_scale
             else:

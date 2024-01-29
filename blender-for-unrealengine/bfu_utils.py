@@ -492,10 +492,6 @@ def EvaluateCameraPositionForUnreal(camera, previous_euler=mathutils.Euler()):
     array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]  # Roll Pith Yaw XYZ
     array_transform = [loc, array_rotation, s]
 
-    # array_location = [loc[0], loc[1]*-1, loc[2]]
-    # r = mathutils.Euler([math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1], r.order)  # Roll Pith Yaw XYZ
-    # array_transform = [array_location, r, s]
-
     return array_transform
 
 

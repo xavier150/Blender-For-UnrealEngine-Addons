@@ -53,7 +53,7 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
     data['Camera transform'] = camera_tracks.transform_track
     data["Camera NearClippingPlane"] = camera_tracks.near_clipping_plane
     data["Camera FarClippingPlane"] = camera_tracks.far_clipping_plane
-    data["Camera FieldOfView"] = camera_tracks.fov
+    data["Camera FieldOfView"] = camera_tracks.field_of_view
     data["Camera FocalAngle"] = camera_tracks.angle
     data['Camera FocalLength'] = camera_tracks.lens
     data['Camera SensorWidth'] = camera_tracks.sensor_width
