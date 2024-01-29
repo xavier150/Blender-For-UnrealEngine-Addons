@@ -97,6 +97,7 @@ class BFU_CameraTracks():
     def evaluate_track_at_frame(self, camera, frame):
         scene = bpy.context.scene
         addon_prefs = bfu_basics.GetAddonPrefs()
+        unit_scale = bfu_utils.get_scene_unit_scale()
         set_current_frame(frame)
 
         array_transform = bfu_utils.EvaluateCameraPositionForUnreal(camera)
@@ -137,22 +138,20 @@ class BFU_CameraTracks():
         self.fov[frame] = math.degrees(self.angle[frame])
 
         # Get Clip
-        self.near_clipping_plane[frame] = getOneKeysByFcurves(camera, "clip_start", camera.data.clip_start, frame) * 100 * bpy.context.scene.unit_settings.scale_length
-        self.far_clipping_plane[frame] = getOneKeysByFcurves(camera, "clip_end", camera.data.clip_end, frame) * 100 * bpy.context.scene.unit_settings.scale_length
+        self.near_clipping_plane[frame] = getOneKeysByFcurves(camera, "clip_start", camera.data.clip_start, frame) * 100 * unit_scale
+        self.far_clipping_plane[frame] = getOneKeysByFcurves(camera, "clip_end", camera.data.clip_end, frame) * 100 * unit_scale
 
         # Get FocusDistance
-        scale_length = bpy.context.scene.unit_settings.scale_length
-
         if camera.data.dof.focus_object is not None:
             key = getCameraFocusDistance(camera, camera.data.dof.focus_object)
-            key = key * 100 * scale_length
+            key = key * 100 * unit_scale
 
         else:
             key = getOneKeysByFcurves(camera, "dof.focus_distance", camera.data.dof.focus_distance, frame)
-            key = key * 100 * scale_length
+            key = key * 100 * unit_scale
 
         if key > 0:
-            self.focus_distance[frame] = key / scale_length
+            self.focus_distance[frame] = key / unit_scale
         else:
             self.focus_distance[frame] = 100000  # 100000 is default value in Unreal Engine
 
@@ -161,7 +160,7 @@ class BFU_CameraTracks():
         if render_engine == "BLENDER_EEVEE" or render_engine == "CYCLES" or render_engine == "BLENDER_WORKBENCH":
             key = getOneKeysByFcurves(camera, "dof.aperture_fstop", camera.data.dof.aperture_fstop, frame)
             if addon_prefs.scale_camera_fstop_with_unit_scale:
-                self.aperture_fstop[frame] = key / scale_length
+                self.aperture_fstop[frame] = key / unit_scale
             else:
                 self.aperture_fstop[frame] = key
         else:

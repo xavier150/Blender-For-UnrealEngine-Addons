@@ -45,7 +45,7 @@ def WriteImportAssetScript():
     for asset in scene.UnrealExportedAssetsList:
         asset: bfu_export_logs.BFU_OT_UnrealExportedAsset
         asset_data = {}
-        asset_data["scene_unit_scale"] = round(scene.unit_settings.scale_length, 8) #Have to round for avoid microscopic offset
+        asset_data["scene_unit_scale"] = bfu_utils.get_scene_unit_scale()
 
         asset_data["asset_name"] = asset.asset_name
         asset_data["asset_global_scale"] = asset.asset_global_scale

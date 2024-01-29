@@ -403,7 +403,7 @@ class ShapeKeysCurveScale():
     def __init__(self, rescale_rig_factor, is_a_proxy=False):
         self.export_as_proxy = is_a_proxy
         self.rescale_rig_factor = rescale_rig_factor  # rigRescaleFactor
-        self.default_unit_length = bpy.context.scene.unit_settings.scale_length
+        self.default_unit_length = get_scene_unit_scale()
         self.proxy_drivers = self.ShapeKeysDriverRefs()  # Save driver data as proxy
 
     class DriverProxyData():
@@ -479,13 +479,14 @@ def GetAllCollisionObj():
 
 def EvaluateCameraPositionForUnreal(camera, previous_euler=mathutils.Euler()):
     # Get Transfrom
+    unit_scale = get_scene_unit_scale()
     matrix_y = mathutils.Matrix.Rotation(math.radians(90.0), 4, 'Y')
     matrix_x = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'X')
     matrix = camera.matrix_world @ matrix_y @ matrix_x
-    loc = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
+    loc = matrix.to_translation() * 100 * unit_scale
     loc += camera.bfu_additional_location_for_export
     r = matrix.to_euler("XYZ", previous_euler)
-    s = matrix.to_scale() * bpy.context.scene.unit_settings.scale_length
+    s = matrix.to_scale() * unit_scale
 
     loc *= mathutils.Vector([1, -1, 1])
     array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]  # Roll Pith Yaw XYZ
@@ -637,7 +638,7 @@ def GetCompuntedLightMap(obj):
             area *= objScale
 
         # Computed light map equal light map scale for a plane vvv
-        area *= bpy.context.scene.unit_settings.scale_length
+        area *= get_scene_unit_scale()
         area *= obj.bfu_static_mesh_light_map_surface_scale/2
         if obj.bfu_static_mesh_light_map_round_power_of_two:
 
@@ -971,7 +972,7 @@ def ApplyExportTransform(obj, use_type="Object"):
 class SceneUnitSettings():
     def __init__(self, scene):
         self.scene = scene
-        self.default_scale_length = scene.unit_settings.scale_length
+        self.default_scale_length = get_scene_unit_scale()
 
     def SetUnitForUnrealEngineExport(self):
         self.scene.unit_settings.scale_length = 0.01  # *= 1/rrf
@@ -1104,7 +1105,7 @@ class ActionCurveScale():
 
     def __init__(self, rescale_factor):
         self.rescale_factor = rescale_factor  # rigRescaleFactor
-        self.default_unit_length = bpy.context.scene.unit_settings.scale_length
+        self.default_unit_length = get_scene_unit_scale()
 
     def ResacleForUnrealEngine(self):
         rf = self.rescale_factor
@@ -1613,3 +1614,13 @@ def ClearAllBFUTempVars(obj):
     ClearVarOnObject(obj, "BFU_ExportAsProxy")
     ClearVarOnObject(obj, "BFU_ExportProxyChild")
 
+def get_scene_unit_scale():
+    #Have to round for avoid microscopic offsets.
+    scene = bpy.context.scene
+    return round(scene.unit_settings.scale_length, 8)
+
+def get_scene_unit_scale_is_close(value: float):
+    #Check if value is close to scene unit class.
+    scene = bpy.context.scene
+    unit_scale = round(scene.unit_settings.scale_length, 8)
+    return math.isclose(unit_scale, value, rel_tol=1e-5)

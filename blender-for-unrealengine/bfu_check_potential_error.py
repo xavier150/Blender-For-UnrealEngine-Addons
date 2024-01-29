@@ -148,21 +148,14 @@ def UpdateUnrealPotentialError():
     def CheckUnitScale():
         # Check if the unit scale is equal to 0.01.
         if addon_prefs.notifyUnitScalePotentialError:
-            if not math.isclose(
-                    bpy.context.scene.unit_settings.scale_length,
-                    0.01,
-                    rel_tol=1e-5):
+            unit_scale = bfu_utils.get_scene_unit_scale()
+            if not bfu_utils.get_scene_unit_scale_is_close(0.01):
                 MyError = PotentialErrors.add()
                 MyError.name = bpy.context.scene.name
                 MyError.type = 1
-                MyError.text = (
-                    'Scene "'+bpy.context.scene.name +
-                    '" has a UnitScale egal to ' +
-                    str(bpy.context.scene.unit_settings.scale_length))
-                MyError.text += (
-                    '\nFor Unreal unit scale equal to 0.01 is recommended.')
-                MyError.text += (
-                    '\n(You can disable this potential error in addon_prefs)')
+                MyError.text = ('Scene "'+bpy.context.scene.name + '" has a UnitScale egal to ' + str(unit_scale))
+                MyError.text += ('\nFor Unreal unit scale equal to 0.01 is recommended.')
+                MyError.text += ('\n(You can disable this potential error in addon_prefs)')
                 MyError.object = None
                 MyError.correctRef = "SetUnrealUnit"
                 MyError.correctlabel = 'Set Unreal Unit'
