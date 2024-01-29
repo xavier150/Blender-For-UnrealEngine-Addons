@@ -186,7 +186,7 @@ class BFU_CameraTracks():
 
 
         for frame in range(frame_start, frame_end+1):
-            if len(slms.marker_sequences) > 0 and addon_prefs.bakeOnlyKeyVisibleInCut:
+            if len(slms.marker_sequences) > 0 and addon_prefs.bake_only_key_visible_in_cut:
                 # Bake only frames visible in cut
                 marker_sequence = slms.GetMarkerSequenceAtFrame(frame)
                 if marker_sequence:
@@ -254,7 +254,7 @@ class BFU_MultiCameraTracks():
             for camera in self.cameras_to_evaluate:
                 evaluate = self.evaluate_cameras[camera.name]
                 
-                if len(slms.marker_sequences) > 0 and addon_prefs.bakeOnlyKeyVisibleInCut and ignore_marker_sequences is False:
+                if len(slms.marker_sequences) > 0 and addon_prefs.bake_only_key_visible_in_cut and ignore_marker_sequences is False:
                     # Bake only frames visible in cuts
                     optimizated_evaluate_track_at_frame(evaluate)
 
