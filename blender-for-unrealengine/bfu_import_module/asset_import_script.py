@@ -32,9 +32,7 @@ def load_module(import_module_path):
         sys.path.append(module_dir)
 
     imported_module = importlib.import_module(module_name)
-    
-    if "bfu_import_module" in locals():
-        importlib.reload(imported_module)
+    importlib.reload(imported_module)
 
     # Assuming the module has a main function to run
     if hasattr(imported_module, 'main'):
@@ -62,7 +60,6 @@ def RunImportScriptWithJsonData():
     imported_module, module_name = load_module(import_module_path)
     imported_module.run_asset_import(import_assets_data, False)
     unload_module(module_name)
-
 
 if __name__ == "__main__":
     RunImportScriptWithJsonData()

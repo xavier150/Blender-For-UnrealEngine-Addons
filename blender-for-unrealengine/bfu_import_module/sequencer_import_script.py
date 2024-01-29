@@ -32,9 +32,7 @@ def load_module(import_module_path):
         sys.path.append(module_dir)
 
     imported_module = importlib.import_module(module_name)
-    
-    if "bfu_import_module" in locals():
-        importlib.reload(imported_module)
+    importlib.reload(imported_module)
 
     # Assuming the module has a main function to run
     if hasattr(imported_module, 'main'):
