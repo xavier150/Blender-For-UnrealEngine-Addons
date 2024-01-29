@@ -222,7 +222,7 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
         transform_section = transform_track.add_section()
         transform_section.set_end_frame_bounded(False)
         transform_section.set_start_frame_bounded(False)
-        AddSequencerSectionTransformKeysByIniFile(transform_section, camera_tracks['Camera transform'])
+        AddSequencerSectionTransformKeysByIniFile(transform_section, camera_tracks['Camera Transform'])
 
         # Set property binding
         if spawnable_camera:

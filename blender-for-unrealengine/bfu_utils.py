@@ -476,6 +476,13 @@ def GetAllCollisionObj():
         fnmatch.fnmatchcase(obj.name, "UCX*"))]
     return colObjs
 
+def EvaluateCameraPosition(camera):
+    # Get Transfrom
+    loc = camera.matrix_world.to_translation()
+    r = camera.matrix_world.to_euler("XYZ")
+    s = camera.matrix_world.to_scale()
+    array_transform = [loc, r, s]
+    return array_transform
 
 def EvaluateCameraPositionForUnreal(camera, previous_euler=mathutils.Euler()):
     # Get Transfrom

@@ -1,6 +1,6 @@
 import bpy
 import math
-from typing import Dict
+from typing import Dict, Any
 from .. import bps
 from .. import bbpl
 from .. import languages
@@ -82,6 +82,7 @@ def getAllKeysByFcurves(obj, DataPath, DataValue, frame_start, frame_end, IsData
 class BFU_CameraTracks():
 
     def __init__(self):
+        # Blender Camera Data
         self.transform_track = {}
         self.near_clipping_plane = {}
         self.far_clipping_plane = {}
@@ -94,30 +95,50 @@ class BFU_CameraTracks():
         self.aperture_fstop = {}
         self.hide_viewport = {}
 
-    def evaluate_track_at_frame(self, camera, frame):
-        scene = bpy.context.scene
-        addon_prefs = bfu_basics.GetAddonPrefs()
-        unit_scale = bfu_utils.get_scene_unit_scale()
-        set_current_frame(frame)
+        # Formated data for Unreal Engine
+        self.ue_transform_track = {}
+        self.ue_sensor_width = {}
+        self.ue_sensor_height = {}
 
-        array_transform = bfu_utils.EvaluateCameraPositionForUnreal(camera)
-        array_location = array_transform[0]
-        array_rotation = array_transform[1]
-        array_scale = array_transform[2]
+    def get_values_as_dict(self) -> Dict[str, Any]:
+        data = {}
+        data['Camera Transform'] = self.transform_track
+        data['UE Camera Transform'] = self.ue_transform_track
+        data["Camera NearClippingPlane"] = self.near_clipping_plane
+        data["Camera FarClippingPlane"] = self.far_clipping_plane
+        data["Camera FieldOfView"] = self.field_of_view
+        data["Camera FocalAngle"] = self.angle
+        data['Camera FocalLength'] = self.lens
+        data['Camera SensorWidth'] = self.sensor_width
+        data['Camera SensorHeight'] = self.sensor_height
+        data['UE Camera SensorWidth'] = self.ue_sensor_width
+        data['UE Camera SensorHeight'] = self.ue_sensor_height
+        data['Camera FocusDistance'] = self.focus_distance
+        data['Camera Aperture'] = self.aperture_fstop
+        data['Camera Spawned'] = self.hide_viewport
+        return data
 
+    def fix_transform_axis_flippings(self, array_rotation, frame: int):
+        if frame-1 in self.transform_track:  # Previous frame
+            previous_rotation_x = self.transform_track[frame-1]["rotation_x"]
+            previous_rotation_y = self.transform_track[frame-1]["rotation_y"]
+            previous_rotation_z = self.transform_track[frame-1]["rotation_z"]
+            diff = round((array_rotation[0] - previous_rotation_x) / 180.0) * 180.0
+            array_rotation[0] = array_rotation[0] - diff
+            diff = round((array_rotation[1] - previous_rotation_y) / 180.0) * 180.0
+            array_rotation[1] = array_rotation[1] - diff
+            diff = round((array_rotation[2] - previous_rotation_z) / 180.0) * 180.0
+            array_rotation[2] = array_rotation[2] - diff
+
+    def evaluate_camera_transform(self, camera: bpy.types.Object, frame: int):
+        camera_transform = bfu_utils.EvaluateCameraPosition(camera)
+        array_location = camera_transform[0]
+        array_rotation = camera_transform[1]
+        array_scale = camera_transform[2]
 
         # Fix axis flippings
         if camera.bfu_fix_axis_flippings:
-            if frame-1 in self.transform_track:  # Previous frame
-                previous_rotation_x = self.transform_track[frame-1]["rotation_x"]
-                previous_rotation_y = self.transform_track[frame-1]["rotation_y"]
-                previous_rotation_z = self.transform_track[frame-1]["rotation_z"]
-                diff = round((array_rotation[0] - previous_rotation_x) / 180.0) * 180.0
-                array_rotation[0] = array_rotation[0] - diff
-                diff = round((array_rotation[1] - previous_rotation_y) / 180.0) * 180.0
-                array_rotation[1] = array_rotation[1] - diff
-                diff = round((array_rotation[2] - previous_rotation_z) / 180.0) * 180.0
-                array_rotation[2] = array_rotation[2] - diff
+            self.fix_transform_axis_flippings(array_rotation, frame)
 
         transform = {}
         transform["location_x"] = round(array_location.x, 8)
@@ -126,10 +147,41 @@ class BFU_CameraTracks():
         transform["rotation_x"] = round(array_rotation[0], 8)
         transform["rotation_y"] = round(array_rotation[1], 8)
         transform["rotation_z"] = round(array_rotation[2], 8)
-        transform["scale_x"] = round(array_scale.x, 6)
-        transform["scale_y"] = round(array_scale.y, 6)
-        transform["scale_z"] = round(array_scale.z, 6)
-        self.transform_track[frame] = transform
+        transform["scale_x"] = round(array_scale.x, 4)
+        transform["scale_y"] = round(array_scale.y, 4)
+        transform["scale_z"] = round(array_scale.z, 4)
+        return transform
+
+    def evaluate_ue_camera_transform(self, camera: bpy.types.Object, frame: int):
+        ue_camera_transform = bfu_utils.EvaluateCameraPositionForUnreal(camera)
+        array_location = ue_camera_transform[0]
+        array_rotation = ue_camera_transform[1]
+        array_scale = ue_camera_transform[2]
+
+        # Fix axis flippings
+        if camera.bfu_fix_axis_flippings:
+            self.fix_transform_axis_flippings(array_rotation, frame)
+
+        transform = {}
+        transform["location_x"] = round(array_location.x, 8)
+        transform["location_y"] = round(array_location.y, 8)
+        transform["location_z"] = round(array_location.z, 8)
+        transform["rotation_x"] = round(array_rotation[0], 8)
+        transform["rotation_y"] = round(array_rotation[1], 8)
+        transform["rotation_z"] = round(array_rotation[2], 8)
+        transform["scale_x"] = round(array_scale.x, 4)
+        transform["scale_y"] = round(array_scale.y, 4)
+        transform["scale_z"] = round(array_scale.z, 4)
+        return transform
+
+    def evaluate_track_at_frame(self, camera: bpy.types.Object, frame: int):
+        scene = bpy.context.scene
+        addon_prefs = bfu_basics.GetAddonPrefs()
+        unit_scale = bfu_utils.get_scene_unit_scale()
+        set_current_frame(frame)
+
+        self.transform_track[frame] = self.evaluate_camera_transform(camera, frame)
+        self.ue_transform_track[frame] = self.evaluate_ue_camera_transform(camera, frame)
 
         # Get FOV FocalLength SensorWidth SensorHeight
         self.angle[frame] = getOneKeysByFcurves(camera, "angle", camera.data.angle, frame)
@@ -271,3 +323,6 @@ class BFU_MultiCameraTracks():
 
     def get_evaluate_camera_data(self, obj: bpy.types.Object):
         return self.evaluate_cameras[obj.name]
+    
+    def get_evaluate_camera_data_as_dict(self, obj: bpy.types.Object) -> Dict[str, Any]:
+        return self.evaluate_cameras[obj.name].get_values_as_dict()

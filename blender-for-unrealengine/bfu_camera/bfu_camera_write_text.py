@@ -42,25 +42,15 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
 
  
     if pre_bake_camera:
-        camera_tracks = pre_bake_camera
+        camera_tracks = pre_bake_camera.get_values_as_dict()
     else:
         multi_camera_tracks = bfu_camera_data.BFU_MultiCameraTracks()
         multi_camera_tracks.add_camera_to_evaluate(obj)
         multi_camera_tracks.set_start_end_frames(target_frame_start, target_frame_end)
         multi_camera_tracks.evaluate_all_cameras(True)
-        camera_tracks = multi_camera_tracks.get_evaluate_camera_data(obj)
+        camera_tracks = multi_camera_tracks.get_evaluate_camera_data_as_dict(obj)
 
-    data['Camera transform'] = camera_tracks.transform_track
-    data["Camera NearClippingPlane"] = camera_tracks.near_clipping_plane
-    data["Camera FarClippingPlane"] = camera_tracks.far_clipping_plane
-    data["Camera FieldOfView"] = camera_tracks.field_of_view
-    data["Camera FocalAngle"] = camera_tracks.angle
-    data['Camera FocalLength'] = camera_tracks.lens
-    data['Camera SensorWidth'] = camera_tracks.sensor_width
-    data['Camera SensorHeight'] = camera_tracks.sensor_height
-    data['Camera FocusDistance'] = camera_tracks.focus_distance
-    data['Camera Aperture'] = camera_tracks.aperture_fstop
-    data['Camera Spawned'] = camera_tracks.hide_viewport
+    data.update(camera_tracks)
 
     return data
 
