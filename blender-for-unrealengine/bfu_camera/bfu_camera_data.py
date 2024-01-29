@@ -151,7 +151,7 @@ class BFU_CameraTracks():
             key = key * 100 * scale_length
 
         if key > 0:
-            self.focus_distance[frame] = key
+            self.focus_distance[frame] = key / scale_length
         else:
             self.focus_distance[frame] = 100000  # 100000 is default value in ue4
 
@@ -159,7 +159,7 @@ class BFU_CameraTracks():
         render_engine = scene.render.engine
         if render_engine == "BLENDER_EEVEE" or render_engine == "CYCLES" or render_engine == "BLENDER_WORKBENCH":
             key = getOneKeysByFcurves(camera, "dof.aperture_fstop", camera.data.dof.aperture_fstop, frame)
-            self.aperture_fstop[frame] = key / scale_length
+            self.aperture_fstop[frame] = key
         else:
             self.aperture_fstop[frame] = 2.8  # 2.8 is default value in ue4
 

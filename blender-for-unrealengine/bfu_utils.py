@@ -484,7 +484,7 @@ def EvaluateCameraPositionForUnreal(camera, previous_euler=mathutils.Euler()):
     loc = matrix.to_translation() * 100 * bpy.context.scene.unit_settings.scale_length
     loc += camera.bfu_additional_location_for_export
     r = matrix.to_euler("XYZ", previous_euler)
-    s = matrix.to_scale()
+    s = matrix.to_scale() * bpy.context.scene.unit_settings.scale_length
 
     loc *= mathutils.Vector([1, -1, 1])
     array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]  # Roll Pith Yaw XYZ
