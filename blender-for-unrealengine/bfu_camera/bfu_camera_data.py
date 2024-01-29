@@ -1,6 +1,6 @@
 import bpy
 import math
-
+from typing import Dict
 from .. import bps
 from .. import bbpl
 from .. import languages
@@ -206,7 +206,7 @@ class BFU_MultiCameraTracks():
         self.cameras_to_evaluate = []
         self.frame_start = 0
         self.frame_end = 1
-        self.evaluate_cameras = {}
+        self.evaluate_cameras: Dict[str, BFU_CameraTracks] = {}
 
     def add_camera_to_evaluate(self, obj: bpy.types.Object):
         self.cameras_to_evaluate.append(obj)
@@ -215,14 +215,22 @@ class BFU_MultiCameraTracks():
         self.frame_start = frame_start
         self.frame_end = frame_end
 
-    def evaluate_all_cameras(self):
+    def evaluate_all_cameras(self, ignore_marker_sequences = False):
         # Evalutate all cameras at same time will avoid frames switch
+
+        def optimizated_evaluate_track_at_frame(evaluate: BFU_CameraTracks):
+            marker_sequence = slms.GetMarkerSequenceAtFrame(frame)
+            if marker_sequence:
+                marker = marker_sequence.marker
+                if marker.camera == camera:
+                    evaluate.evaluate_track_at_frame(camera, frame)
+
+
 
         frame_start = self.frame_start
         frame_end = self.frame_end
         scene = bpy.context.scene
         addon_prefs = bfu_basics.GetAddonPrefs()
-
 
         counter = bps.utils.CounterTimer()
 
@@ -235,21 +243,16 @@ class BFU_MultiCameraTracks():
 
         for camera in self.cameras_to_evaluate:
             camera_tracks = BFU_CameraTracks()
-            self.evaluate_cameras[camera] = camera_tracks
+            self.evaluate_cameras[camera.name] = camera_tracks
 
         print("Start evaluate " + str(len(self.cameras_to_evaluate)) + " camera(s) " + str(frame_start) + " to " + str(frame_end))
-
         for frame in range(frame_start, frame_end):
             for camera in self.cameras_to_evaluate:
-                evaluate = self.get_evaluate_camera_data(camera)
-                if len(slms.marker_sequences) > 0 and addon_prefs.bakeOnlyKeyVisibleInCut:
+                evaluate = self.evaluate_cameras[camera.name]
+                
+                if len(slms.marker_sequences) > 0 and addon_prefs.bakeOnlyKeyVisibleInCut and ignore_marker_sequences is False:
                     # Bake only frames visible in cuts
-                    marker_sequence = slms.GetMarkerSequenceAtFrame(frame)
-                    if marker_sequence:
-                        marker = marker_sequence.marker
-                        if marker.camera == camera:
-                            
-                            evaluate.evaluate_track_at_frame(camera, frame)
+                    optimizated_evaluate_track_at_frame(evaluate)
 
                 else:
                     # Bake all frames
@@ -258,4 +261,4 @@ class BFU_MultiCameraTracks():
         bpy.context.scene.render.use_simplify = save_use_simplify
 
     def get_evaluate_camera_data(self, obj: bpy.types.Object):
-        return self.evaluate_cameras[obj]
+        return self.evaluate_cameras[obj.name]

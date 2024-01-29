@@ -47,10 +47,11 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
         multi_camera_tracks = bfu_camera_data.BFU_MultiCameraTracks()
         multi_camera_tracks.add_camera_to_evaluate(obj)
         multi_camera_tracks.set_start_end_frames(target_frame_start, target_frame_end)
-        multi_camera_tracks.evaluate_all_cameras()
+        multi_camera_tracks.evaluate_all_cameras(True)
         camera_tracks = multi_camera_tracks.get_evaluate_camera_data(obj)
 
     data['Camera transform'] = camera_tracks.transform_track
+    print(data['Camera transform'])
     data["Camera NearClippingPlane"] = camera_tracks.near_clipping_plane
     data["Camera FarClippingPlane"] = camera_tracks.far_clipping_plane
     data["Camera FieldOfView"] = camera_tracks.fov

@@ -26,6 +26,7 @@ import math
 import os
 import math
 import addon_utils
+from typing import List
 from . import bbpl
 from . import bps
 from . import bfu_basics
@@ -69,7 +70,7 @@ class TimelineMarkerSequence():
     def __init__(self):
         scene = bpy.context.scene
         timeline = scene.timeline_markers
-        self.marker_sequences = self.GetMarkerSequences(timeline)
+        self.marker_sequences: List[MarkerSequence] = self.GetMarkerSequences(timeline)
 
     def GetMarkerSequences(self, timeline_markers):
         if len(timeline_markers) == 0:
