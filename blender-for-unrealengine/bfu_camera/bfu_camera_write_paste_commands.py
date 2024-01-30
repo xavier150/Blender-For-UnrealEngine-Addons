@@ -2,7 +2,7 @@ import bpy
 
 from . import bfu_camera_data
 from . import bfu_camera_unreal_utils
-from .. import bfu_write_text
+from . import bfu_camera_write_text
 
 
 
@@ -17,7 +17,7 @@ def AddCameraToCommand(camera: bpy.types.Object, pre_bake_camera: bfu_camera_dat
 
         # First I get the camera data.
         # This is a very bad way to do this. I need do a new python file specific to camera with class to get data.
-        data = bfu_write_text.WriteOneFrameCameraAnimationTracks(camera, frame_current, pre_bake_camera)
+        data = bfu_camera_write_text.WriteOneFrameCameraAnimationTracks(camera, frame_current, pre_bake_camera)
         transform_track = data["ue_camera_transform"][frame_current]
         location_x = transform_track["location_x"]
         location_y = transform_track["location_y"]
@@ -90,6 +90,7 @@ def AddCameraToCommand(camera: bpy.types.Object, pre_bake_camera: bfu_camera_dat
             shift_y = pre_bake_camera.arch_shift_y[frame_current]
             t += "            " + f"ProjectionOffset=(X={shift_x}, Y={shift_y})" + "\n"
             t += "            " + f"FinalProjectionOffset=(X={shift_x}, Y={shift_y})" + "\n"
+            t += "            " + "bCorrectPerspective=False" + "\n"
         t += "            " + "Filmback=(SensorWidth="+str(SensorWidth)+",SensorHeight="+str(SensorHeight)+", SensorAspectRatio="+str(AspectRatio)+")" + "\n"
         t += "            " + "LensSettings=(MinFStop="+str(MinFStop)+",MaxFStop="+str(MaxFStop)+")" + "\n"
         t += "            " + "FocusSettings=(ManualFocusDistance="+str(FocusDistance)+")" + "\n"
