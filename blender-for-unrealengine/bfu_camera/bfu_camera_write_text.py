@@ -27,22 +27,12 @@ def WriteCameraAnimationTracks(obj, target_frame_start=None, target_frame_end=No
 
     bfu_write_utils.add_generated_json_meta_data(data)
 
-    data["resolution_x"] = scene.render.resolution_x
-    data["resolution_y"] = scene.render.resolution_y
-    data["desired_screen_ratio"] = scene.render.resolution_x / scene.render.resolution_y
     data["frame_start"] = target_frame_start
     data["frame_end"] = target_frame_end
 
-    # Frames is old, need to update and remove.
-    data['Frames'] = []
-    data['Frames'].append({
-        'frame_start': target_frame_start,
-        'frame_end': target_frame_end,
-    })
-
  
     if pre_bake_camera:
-        camera_tracks = pre_bake_camera.get_values_as_dict()
+        camera_tracks = pre_bake_camera.get_animated_values_as_dict()
     else:
         multi_camera_tracks = bfu_camera_data.BFU_MultiCameraTracks()
         multi_camera_tracks.add_camera_to_evaluate(obj)

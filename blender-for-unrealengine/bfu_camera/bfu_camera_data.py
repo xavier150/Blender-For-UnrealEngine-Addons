@@ -107,8 +107,15 @@ class BFU_CameraTracks():
         self.ue_lens_max_fstop = 22.0 #Default value in Unreal Engine
 
 
-    def get_values_as_dict(self) -> Dict[str, Any]:
+    def get_animated_values_as_dict(self) -> Dict[str, Any]:
         data = {}
+        # Static data
+        data["resolution_x"] = self.resolution_x
+        data["resolution_y"] = self.resolution_y
+        data["desired_screen_ratio"] = self.resolution_x / self.resolution_y
+        data['UE Lens MinFStop'] = self.ue_lens_min_fstop
+        data['UE Lens MaxFStop'] = self.ue_lens_max_fstop
+        # Tracks
         data['Camera Transform'] = self.transform_track
         data['UE Camera Transform'] = self.ue_transform_track
         data["Camera NearClippingPlane"] = self.near_clipping_plane
@@ -122,10 +129,10 @@ class BFU_CameraTracks():
         data['UE Camera SensorHeight'] = self.ue_sensor_height
         data['Camera FocusDistance'] = self.focus_distance
         data['Camera Aperture'] = self.aperture_fstop
-        data['UE Lens MinFStop'] = self.ue_lens_min_fstop
-        data['UE Lens MaxFStop'] = self.ue_lens_max_fstop
         data['Camera Spawned'] = self.hide_viewport
         return data
+    
+
 
     def fix_transform_axis_flippings(self,array_rotation, frame: int, target_use: str):
         if target_use == "Blender":
@@ -338,4 +345,7 @@ class BFU_MultiCameraTracks():
         return self.evaluate_cameras[obj.name]
     
     def get_evaluate_camera_data_as_dict(self, obj: bpy.types.Object) -> Dict[str, Any]:
-        return self.evaluate_cameras[obj.name].get_values_as_dict()
+        data = {}
+        data.update(self.evaluate_cameras[obj.name].get_animated_values_as_dict())
+        data.update(self.evaluate_cameras[obj.name].get_animated_values_as_dict())
+        return data

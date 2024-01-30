@@ -234,8 +234,8 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
         current_cine_camera_actor.set_actor_label(camera_data["name"])
         camera_component = cine_camera_actor.camera_component
         camera_component.aspect_ratio = render_resolution_x/render_resolution_y
-        camera_component.lens_settings.min_f_stop = 0
-        camera_component.lens_settings.max_f_stop = 1000
+        camera_component.lens_settings.min_f_stop = camera_tracks['UE Lens MinFStop']
+        camera_component.lens_settings.max_f_stop = camera_tracks['UE Lens MaxFStop']
 
         # Clean the created assets
         if spawnable_camera:
