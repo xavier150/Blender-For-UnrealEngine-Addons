@@ -8,8 +8,11 @@ def get_enum_cameras_list():
     camera_types = [
         ("REGULAR", "Regular", "Regular camera, for standard gameplay views."),
         ("CINEMATIC", "Cinematic", "The Cine Camera Actor is a specialized Camera Actor with additional settings that replicate real-world film camera behavior. You can use the Filmback, Lens, and Focus settings to create realistic scenes, while adhering to industry standards."),
+        ("ARCHVIS", "ArchVis", "Support for ArchVis Tools Cameras."),
     ]
     return camera_types
+
+
 
 def get_enum_cameras_default():
     return "CINEMATIC"
@@ -49,26 +52,47 @@ def AddCameraToCommand(camera: bpy.types.Object, pre_bake_camera: bfu_camera_dat
         AspectRatio = data["desired_screen_ratio"]
         CameraName = camera.name
 
+        # Engin ref:
+        regular_camera_actor = "/Script/Engine.CameraActor"
+        cinematic_camera_actor = "/Script/CinematicCamera.CineCameraActor"
+        archvis_camera_actor = "/Script/ArchVisTools.ArchVisCineCameraActor"
+
+        regular_camera_actor_Default = "/Script/Engine.Default__CameraActor"
+        cinematic_camera_actor_Default = "/Script/CinematicCamera.Default__CineCameraActor"
+        archvis_camera_actor_Default = "/Script/ArchVisTools.Default__ArchVisCineCameraActor"
+
+        regular_camera_Component = "/Script/Engine.CameraComponent"
+        cinematic_camera_Component = "/Script/CinematicCamera.CineCameraComponent"
+        archvis_camera_Component = "/Script/ArchVisTools.ArchVisCineCameraComponent"
+
         # Actor
-        if camera_type == "CINEMATIC":
-            t += "      " + "Begin Actor Class=/Script/CinematicCamera.CineCameraActor Name="+CameraName+" Archetype=/Script/CinematicCamera.CineCameraActor'/Script/CinematicCamera.Default__CineCameraActor'" + "\n"
-        elif camera_type == "REGULAR":
-            t += "      " + "Begin Actor Class=/Script/Engine.CameraActor Name="+CameraName+" Archetype=/Script/Engine.CameraActor'/Script/Engine.Default__CameraActor'" + "\n"
+        if camera_type == "REGULAR":
+            t += "      " + f"Begin Actor Class={regular_camera_actor} Name={CameraName} Archetype={regular_camera_actor}'/{regular_camera_actor_Default}'" + "\n"
+        elif camera_type == "CINEMATIC":
+            t += "      " + f"Begin Actor Class={cinematic_camera_actor} Name={CameraName} Archetype={cinematic_camera_actor}'{cinematic_camera_actor_Default}'" + "\n"
+        elif camera_type == "ARCHVIS":
+            t += "      " + f"Begin Actor Class={archvis_camera_actor} Name={CameraName} Archetype={archvis_camera_actor}'{archvis_camera_actor_Default}'" + "\n"
 
         # Init SceneComponent
-        if camera_type == "CINEMATIC":
-            t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=/Script/Engine.SceneComponent'/Script/CinematicCamera.Default__CineCameraActor:SceneComponent'" + "\n"
+        if camera_type == "REGULAR":
+            t += "         " + f"Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=/Script/Engine.SceneComponent'{regular_camera_actor_Default}:SceneComponent'" + "\n"
             t += "         " + "End Object" + "\n"
-        elif camera_type == "REGULAR":
-            t += "         " + "Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=/Script/Engine.SceneComponent'/Script/Engine.Default__CameraActor:SceneComponent'" + "\n"
+        elif camera_type == "CINEMATIC":
+            t += "         " + f"Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=/Script/Engine.SceneComponent'{cinematic_camera_actor_Default}:SceneComponent'" + "\n"
+            t += "         " + "End Object" + "\n"
+        elif camera_type == "ARCHVIS":
+            t += "         " + f"Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=/Script/Engine.SceneComponent'{archvis_camera_actor_Default}:SceneComponent'" + "\n"
             t += "         " + "End Object" + "\n"
 
         # Init CameraComponent
-        if camera_type == "CINEMATIC":
-            t += "         " + "Begin Object Class=/Script/CinematicCamera.CineCameraComponent Name=\"CameraComponent\" Archetype=/Script/CinematicCamera.CineCameraComponent'/Script/CinematicCamera.Default__CineCameraActor:CameraComponent'" + "\n"
+        if camera_type == "REGULAR":
+            t += "         " + f"Begin Object Class={regular_camera_Component} Name=\"CameraComponent\" Archetype={regular_camera_Component}'{regular_camera_actor_Default}:CameraComponent'" + "\n"
             t += "         " + "End Object" + "\n"
-        elif camera_type == "REGULAR":
-            t += "         " + "Begin Object Class=/Script/Engine.CameraComponent Name=\"CameraComponent\" Archetype=/Script/Engine.CameraComponent'/Script/Engine.Default__CameraActor:CameraComponent'" + "\n"
+        elif camera_type == "CINEMATIC":
+            t += "         " + f"Begin Object Class={cinematic_camera_Component} Name=\"CameraComponent\" Archetype={cinematic_camera_Component}'{cinematic_camera_actor_Default}:CameraComponent'" + "\n"
+            t += "         " + "End Object" + "\n"
+        elif camera_type == "ARCHVIS":
+            t += "         " + f"Begin Object Class={archvis_camera_Component} Name=\"CameraComponent\" Archetype={archvis_camera_Component}'{archvis_camera_actor_Default}:CameraComponent'" + "\n"
             t += "         " + "End Object" + "\n"
 
         # SceneComponent
@@ -80,6 +104,11 @@ def AddCameraToCommand(camera: bpy.types.Object, pre_bake_camera: bfu_camera_dat
 
         # CameraComponent
         t += "         " + "Begin Object Name=\"CameraComponent\"" + "\n"
+        if camera_type == "ARCHVIS":
+            shift_x = pre_bake_camera.arch_shift_x[frame_current]
+            shift_y = pre_bake_camera.arch_shift_y[frame_current]
+            t += "            " + f"ProjectionOffset=(X={shift_x}, Y={shift_y})" + "\n"
+            t += "            " + f"FinalProjectionOffset=(X={shift_x}, Y={shift_y})" + "\n"
         t += "            " + "Filmback=(SensorWidth="+str(SensorWidth)+",SensorHeight="+str(SensorHeight)+", SensorAspectRatio="+str(AspectRatio)+")" + "\n"
         t += "            " + "LensSettings=(MinFStop="+str(MinFStop)+",MaxFStop="+str(MaxFStop)+")" + "\n"
         t += "            " + "FocusSettings=(ManualFocusDistance="+str(FocusDistance)+")" + "\n"

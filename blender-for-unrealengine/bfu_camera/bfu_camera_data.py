@@ -95,6 +95,8 @@ class BFU_CameraTracks():
         self.lens = {}
         self.sensor_width = {}
         self.sensor_height = {}
+        self.shift_x = {}
+        self.shift_y = {}
         self.focus_distance = {}
         self.aperture_fstop = {}
         self.hide_viewport = {}
@@ -105,6 +107,10 @@ class BFU_CameraTracks():
         self.ue_sensor_height = {}
         self.ue_lens_min_fstop = 1.2 #Default value in Unreal Engine
         self.ue_lens_max_fstop = 22.0 #Default value in Unreal Engine
+
+        # Formated data for ArchVis Tools in Unreal Engine
+        self.arch_shift_x = {}
+        self.arch_shift_y = {}
 
 
     def get_animated_values_as_dict(self) -> Dict[str, Any]:
@@ -125,6 +131,10 @@ class BFU_CameraTracks():
         data['Camera FocalLength'] = self.lens
         data['Camera SensorWidth'] = self.sensor_width
         data['Camera SensorHeight'] = self.sensor_height
+        data['Camera ShiftX'] = self.shift_x
+        data['Camera ShiftY'] = self.shift_y
+        data['ArchVis Camera ShiftX'] = self.arch_shift_x
+        data['ArchVis Camera ShiftY'] = self.arch_shift_y
         data['UE Camera SensorWidth'] = self.ue_sensor_width
         data['UE Camera SensorHeight'] = self.ue_sensor_height
         data['Camera FocusDistance'] = self.focus_distance
@@ -205,7 +215,17 @@ class BFU_CameraTracks():
         self.ue_sensor_width[frame] = sensor_width 
         self.ue_sensor_height[frame] = self.get_ue_crop_sensor_height(sensor_width, sensor_height)
 
+        # Camera shift
+        shift_x = getOneKeysByFcurves(camera, "shift_x", camera.data.shift_x, frame)
+        shift_y = getOneKeysByFcurves(camera, "shift_y", camera.data.shift_y, frame)
 
+        self.shift_x[frame] = shift_x
+        self.shift_y[frame] = shift_y
+
+        self.arch_shift_x[frame] = shift_x * 2
+        self.arch_shift_y[frame] = shift_y * 2
+
+        #FOV
         self.field_of_view[frame] = round(math.degrees(self.angle[frame]), 8)
 
         # Get Clip
