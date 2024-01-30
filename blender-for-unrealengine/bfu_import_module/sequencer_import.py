@@ -152,7 +152,7 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
         sectionFocalLength = TrackFocalLength.add_section()
         sectionFocalLength.set_end_frame_bounded(False)
         sectionFocalLength.set_start_frame_bounded(False)
-        AddSequencerSectionFloatKeysByIniFile(sectionFocalLength, camera_tracks['Camera FocalLength'])
+        AddSequencerSectionFloatKeysByIniFile(sectionFocalLength, camera_tracks['camera_focal_length'])
 
         TrackSensorWidth = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)
         TrackSensorWidth.set_property_name_and_path('Filmback.SensorWidth', 'Filmback.SensorWidth')
@@ -160,7 +160,7 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
         sectionSensorWidth = TrackSensorWidth.add_section()
         sectionSensorWidth.set_end_frame_bounded(False)
         sectionSensorWidth.set_start_frame_bounded(False)
-        AddSequencerSectionFloatKeysByIniFile(sectionSensorWidth, camera_tracks['UE Camera SensorWidth'])
+        AddSequencerSectionFloatKeysByIniFile(sectionSensorWidth, camera_tracks['ue_camera_sensor_width'])
 
         TrackSensorHeight = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)
         TrackSensorHeight.set_property_name_and_path('Filmback.SensorHeight', 'Filmback.SensorHeight')
@@ -168,7 +168,7 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
         sectionSensorHeight = TrackSensorHeight.add_section()
         sectionSensorHeight.set_end_frame_bounded(False)
         sectionSensorHeight.set_start_frame_bounded(False)
-        AddSequencerSectionFloatKeysByIniFile(sectionSensorHeight, camera_tracks['UE Camera SensorHeight'])
+        AddSequencerSectionFloatKeysByIniFile(sectionSensorHeight, camera_tracks['ue_camera_sensor_height'])
 
         TrackFocusDistance = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)
 
@@ -182,7 +182,7 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
         sectionFocusDistance = TrackFocusDistance.add_section()
         sectionFocusDistance.set_end_frame_bounded(False)
         sectionFocusDistance.set_start_frame_bounded(False)
-        AddSequencerSectionFloatKeysByIniFile(sectionFocusDistance, camera_tracks['Camera FocusDistance'])
+        AddSequencerSectionFloatKeysByIniFile(sectionFocusDistance, camera_tracks['camera_focus_distance'])
 
         TracknAperture = camera_component_binding.add_track(unreal.MovieSceneFloatTrack)
         TracknAperture.set_property_name_and_path('CurrentAperture', 'CurrentAperture')
@@ -190,7 +190,7 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
         sectionAperture = TracknAperture.add_section()
         sectionAperture.set_end_frame_bounded(False)
         sectionAperture.set_start_frame_bounded(False)
-        AddSequencerSectionFloatKeysByIniFile(sectionAperture, camera_tracks['Camera Aperture'])
+        AddSequencerSectionFloatKeysByIniFile(sectionAperture, camera_tracks['camera_aperture'])
 
         # add a binding for the camera
         camera_binding = seq.add_possessable(cine_camera_actor)
@@ -208,7 +208,7 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
         transform_section = transform_track.add_section()
         transform_section.set_end_frame_bounded(False)
         transform_section.set_start_frame_bounded(False)
-        AddSequencerSectionTransformKeysByIniFile(transform_section, camera_tracks['UE Camera Transform'])
+        AddSequencerSectionTransformKeysByIniFile(transform_section, camera_tracks['ue_camera_transform'])
 
         # Set property binding
         if spawnable_camera:
@@ -223,7 +223,7 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
         tracksSpawned = current_camera_binding.find_tracks_by_exact_type(unreal.MovieSceneSpawnTrack)
         if len(tracksSpawned) > 0:
             sectionSpawned = tracksSpawned[0].get_sections()[0]
-            AddSequencerSectionBoolKeysByIniFile(sectionSpawned, camera_tracks['Camera Spawned'])
+            AddSequencerSectionBoolKeysByIniFile(sectionSpawned, camera_tracks['camera_spawned'])
 
         # Set property actor
         if spawnable_camera:
@@ -234,8 +234,8 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
         current_cine_camera_actor.set_actor_label(camera_data["name"])
         camera_component = cine_camera_actor.camera_component
         camera_component.aspect_ratio = render_resolution_x/render_resolution_y
-        camera_component.lens_settings.min_f_stop = camera_tracks['UE Lens MinFStop']
-        camera_component.lens_settings.max_f_stop = camera_tracks['UE Lens MaxFStop']
+        camera_component.lens_settings.min_f_stop = camera_tracks['ue_lens_minfstop']
+        camera_component.lens_settings.max_f_stop = camera_tracks['ue_lens_maxfstop']
 
         # Clean the created assets
         if spawnable_camera:

@@ -20,6 +20,7 @@
 
 import bpy
 from . import bfu_camera_utils
+from . import bfu_camera_write_text
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui
@@ -50,6 +51,10 @@ def draw_ui_object_camera(layout: bpy.types.UILayout, obj: bpy.types.Object):
         if obj.type == "CAMERA":
             camera_ui_pop = camera_ui.column()
             camera_ui_pop.prop(obj, 'bfu_desired_camera_type')
+            if obj.bfu_desired_camera_type == "CUSTOM":
+                camera_ui_pop.prop(obj, 'bfu_custom_camera_actor')
+                camera_ui_pop.prop(obj, 'bfu_custom_camera_default_actor')
+                camera_ui_pop.prop(obj, 'bfu_custom_camera_component')
             camera_ui_pop.prop(obj, 'bfu_export_fbx_camera')
             camera_ui_pop.prop(obj, 'bfu_fix_axis_flippings')
             camera_ui_pop.enabled = obj.bfu_export_type == "export_recursive"
@@ -73,7 +78,7 @@ class BFU_OT_CopyActiveCameraOperator(bpy.types.Operator):
 
     def execute(self, context):
         obj = context.object
-        result = bfu_camera_utils.GetImportCameraScriptCommand([obj])
+        result = bfu_camera_write_text.GetImportCameraScriptCommand([obj])
         if result[0]:
             bfu_basics.setWindowsClipboard(result[1])
             self.report({'INFO'}, result[2])
@@ -89,7 +94,7 @@ class BFU_OT_CopySelectedCamerasOperator(bpy.types.Operator):
 
     def execute(self, context):
         objs = context.selected_objects
-        result = bfu_camera_utils.GetImportCameraScriptCommand(objs)
+        result = bfu_camera_write_text.GetImportCameraScriptCommand(objs)
         if result[0]:
             bfu_basics.setWindowsClipboard(result[1])
             self.report({'INFO'}, result[2])
@@ -124,13 +129,10 @@ def register():
         )
     bpy.types.Object.bfu_fix_axis_flippings = bpy.props.BoolProperty(
         name="Fix camera axis flippings",
-        description=(
-            'Disable only if you use extrem camera animation in one frame.'
-            ),
+        description=('Disable only if you use extrem camera animation in one frame.'),
         override={'LIBRARY_OVERRIDABLE'},
         default=True,
         )
-    
     bpy.types.Object.bfu_desired_camera_type = bpy.props.EnumProperty(
         name="Camera Type",
         description="Choose the type of camera",
@@ -138,11 +140,37 @@ def register():
         default=bfu_camera_utils.get_enum_cameras_default()
     )
 
+    bpy.types.Object.bfu_custom_camera_actor = bpy.props.StringProperty(
+        name="Custom Camera Actor",
+        description=('Ref adress for an custom camera actor'),
+        override={'LIBRARY_OVERRIDABLE'},
+        default="/Script/MyModule.MyCameraActor",
+        )
+    bpy.types.Object.bfu_custom_camera_default_actor = bpy.props.StringProperty(
+        name="Custom Camera Actor(default)",
+        description=('Ref adress for an custom camera actor (default)'),
+        override={'LIBRARY_OVERRIDABLE'},
+        default="/Script/MyModule.Default__MyCameraActor",
+        )
+    bpy.types.Object.bfu_custom_camera_component = bpy.props.StringProperty(
+        name="Custom Camera Component",
+        description=('Ref adress for an custom camera component'),
+        override={'LIBRARY_OVERRIDABLE'},
+        default="/Script/MyModule.MyCameraComponent",
+        )
+
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
+    del bpy.types.Object.bfu_custom_camera_component
+    del bpy.types.Object.bfu_custom_camera_default_actor
+    del bpy.types.Object.bfu_custom_camera_actor
     del bpy.types.Object.bfu_desired_camera_type
     del bpy.types.Object.bfu_fix_axis_flippings
     del bpy.types.Object.bfu_export_fbx_camera
-    del bpy.types.Scene.bfu_export_filter_properties_expanded
+    del bpy.types.Scene.bfu_camera_tools_expanded
+    del bpy.types.Scene.bfu_camera_properties_expanded
+
+
+

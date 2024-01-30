@@ -1,6 +1,7 @@
 import bpy
 import math
 from typing import Dict, Any
+from . import bfu_camera_utils
 from .. import bps
 from .. import bbpl
 from .. import languages
@@ -78,13 +79,16 @@ def getAllKeysByFcurves(obj, DataPath, DataValue, frame_start, frame_end, IsData
 
 class BFU_CameraTracks():
 
-    def __init__(self):
+    def __init__(self, camera: bpy.types.Object):
         # Context stats
         scene = bpy.context.scene
         self.resolution_x = scene.render.resolution_x
         self.resolution_y = scene.render.resolution_y
         self.pixel_aspect_x = bpy.context.scene.render.pixel_aspect_x
         self.pixel_aspect_y = bpy.context.scene.render.pixel_aspect_y
+        
+        self.camera_name = camera.name
+        self.camera_type = camera.bfu_desired_camera_type
 
         # Blender Camera Data
         self.transform_track = {}
@@ -116,30 +120,33 @@ class BFU_CameraTracks():
     def get_animated_values_as_dict(self) -> Dict[str, Any]:
         data = {}
         # Static data
+        data["camera_name"] = self.camera_name
+        data["camera_yype"] = self.camera_type
         data["resolution_x"] = self.resolution_x
         data["resolution_y"] = self.resolution_y
         data["desired_screen_ratio"] = self.resolution_x / self.resolution_y
-        data['UE Lens MinFStop'] = self.ue_lens_min_fstop
-        data['UE Lens MaxFStop'] = self.ue_lens_max_fstop
-        # Tracks
-        data['Camera Transform'] = self.transform_track
-        data['UE Camera Transform'] = self.ue_transform_track
-        data["Camera NearClippingPlane"] = self.near_clipping_plane
-        data["Camera FarClippingPlane"] = self.far_clipping_plane
-        data["Camera FieldOfView"] = self.field_of_view
-        data["Camera FocalAngle"] = self.angle
-        data['Camera FocalLength'] = self.lens
-        data['Camera SensorWidth'] = self.sensor_width
-        data['Camera SensorHeight'] = self.sensor_height
-        data['Camera ShiftX'] = self.shift_x
-        data['Camera ShiftY'] = self.shift_y
-        data['ArchVis Camera ShiftX'] = self.arch_shift_x
-        data['ArchVis Camera ShiftY'] = self.arch_shift_y
-        data['UE Camera SensorWidth'] = self.ue_sensor_width
-        data['UE Camera SensorHeight'] = self.ue_sensor_height
-        data['Camera FocusDistance'] = self.focus_distance
-        data['Camera Aperture'] = self.aperture_fstop
-        data['Camera Spawned'] = self.hide_viewport
+        data['ue_lens_minfstop'] = self.ue_lens_min_fstop
+        data['ue_lens_maxfstop'] = self.ue_lens_max_fstop
+
+        # Animated Tracks
+        data['camera_transform'] = self.transform_track
+        data['ue_camera_transform'] = self.ue_transform_track
+        data["camera_near_clipping_plane"] = self.near_clipping_plane
+        data["camera_far_clipping_plane"] = self.far_clipping_plane
+        data["camera_field_of_view"] = self.field_of_view
+        data["camera_focal_angle"] = self.angle
+        data['camera_focal_length'] = self.lens
+        data['camera_sensor_width'] = self.sensor_width
+        data['camera_sensor_height'] = self.sensor_height
+        data['camera_shift_x'] = self.shift_x
+        data['camera_shift_y'] = self.shift_y
+        data['archvis_camera_shift_x'] = self.arch_shift_x
+        data['ArchVis_camera_shift_y'] = self.arch_shift_y
+        data['ue_camera_sensor_width'] = self.ue_sensor_width
+        data['ue_camera_sensor_height'] = self.ue_sensor_height
+        data['camera_focus_distance'] = self.focus_distance
+        data['camera_aperture'] = self.aperture_fstop
+        data['camera_spawned'] = self.hide_viewport
         return data
     
 
@@ -281,7 +288,6 @@ class BFU_CameraTracks():
         save_current_frame = scene.frame_current
         save_use_simplify = bpy.context.scene.render.use_simplify
 
-
         for frame in range(frame_start, frame_end+1):
             if len(slms.marker_sequences) > 0 and addon_prefs.bake_only_key_visible_in_cut:
                 # Bake only frames visible in cut
@@ -343,8 +349,7 @@ class BFU_MultiCameraTracks():
         bpy.context.scene.render.use_simplify = True
 
         for camera in self.cameras_to_evaluate:
-            camera_tracks = BFU_CameraTracks()
-            self.evaluate_cameras[camera.name] = camera_tracks
+            self.evaluate_cameras[camera.name] = BFU_CameraTracks(camera)
 
         print(f"Start evaluate {str(len(self.cameras_to_evaluate))} camera(s). Frames:({str(frame_start)}-{str(frame_end)})")
         for frame in range(frame_start, frame_end):
