@@ -233,23 +233,24 @@ class BFU_CameraTracks():
         self.far_clipping_plane[frame] = getOneKeysByFcurves(camera, "clip_end", camera.data.clip_end, frame) * 100 * unit_scale
 
         # Get FocusDistance
-        if camera.data.dof.focus_object is not None:
-            key = getCameraFocusDistance(camera, camera.data.dof.focus_object)
+        if camera.data.dof.use_dof:
+            if camera.data.dof.focus_object is not None:
+                key = getCameraFocusDistance(camera, camera.data.dof.focus_object)
 
-        else:
-            key = getOneKeysByFcurves(camera, "dof.focus_distance", camera.data.dof.focus_distance, frame)
+            else:
+                key = getOneKeysByFcurves(camera, "dof.focus_distance", camera.data.dof.focus_distance, frame)
 
-        if key > 0:
             if addon_prefs.scale_camera_focus_distance_with_unit_scale:
                 self.focus_distance[frame] = key * 100 * unit_scale
             else:
                 self.focus_distance[frame] = key * 100
+
         else:
             self.focus_distance[frame] = 100000  # 100000 is default value in Unreal Engine
 
         # Write Aperture (Depth of Field) keys
         render_engine = scene.render.engine
-        if render_engine == "BLENDER_EEVEE" or render_engine == "CYCLES" or render_engine == "BLENDER_WORKBENCH":
+        if render_engine in ["BLENDER_EEVEE", "CYCLES", "BLENDER_WORKBENCH"]:
             key = getOneKeysByFcurves(camera, "dof.aperture_fstop", camera.data.dof.aperture_fstop, frame)
             key = round(key, 8) # Avoid microscopic offsets.
             if addon_prefs.scale_camera_fstop_with_unit_scale:
