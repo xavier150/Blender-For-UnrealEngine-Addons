@@ -46,13 +46,14 @@ def ready_for_sequence_import():
 
 def CreateSequencer(sequence_data, show_finished_popup=True):
 
+    
     spawnable_camera = sequence_data['spawnable_camera']
-    startFrame = sequence_data['startFrame']
-    endFrame = sequence_data['endFrame']+1
+    sequencer_frame_start = sequence_data['sequencer_frame_start']
+    sequencer_frame_end = sequence_data['sequencer_frame_end']+1
     render_resolution_x = sequence_data['render_resolution_x']
     render_resolution_y = sequence_data['render_resolution_y']
-    frameRateDenominator = sequence_data['frameRateDenominator']
-    frameRateNumerator = sequence_data['frameRateNumerator']
+    sequencer_frame_rate_denominator = sequence_data['sequencer_frame_rate_denominator']
+    sequencer_frame_rate_numerator = sequence_data['sequencer_frame_rate_numerator']
     secureCrop = sequence_data['secureCrop']  # add end crop for avoid section overlay
     bfu_unreal_import_location = sequence_data['bfu_unreal_import_location']
     ImportedCamera = []  # (CameraName, CameraGuid)
@@ -115,13 +116,13 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
 
     # Set frame rate
     myFFrameRate = unreal.FrameRate()
-    myFFrameRate.denominator = frameRateDenominator
-    myFFrameRate.numerator = frameRateNumerator
+    myFFrameRate.denominator = sequencer_frame_rate_denominator
+    myFFrameRate.numerator = sequencer_frame_rate_numerator
     seq.set_display_rate(myFFrameRate)
 
     # Set playback range
-    seq.set_playback_end_seconds((endFrame-secureCrop)/float(frameRateNumerator))
-    seq.set_playback_start_seconds(startFrame/float(frameRateNumerator))  # set_playback_end_seconds
+    seq.set_playback_end_seconds((sequencer_frame_end-secureCrop)/float(sequencer_frame_rate_numerator))
+    seq.set_playback_start_seconds(sequencer_frame_start/float(sequencer_frame_rate_numerator))  # set_playback_end_seconds
     if import_module_unreal_utils.is_unreal_version_greater_or_equal(5,2):
         camera_cut_track = seq.add_track(unreal.MovieSceneCameraCutTrack)
     else:
@@ -139,8 +140,16 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
         # Import camera tracks transform
         camera_tracks = import_module_utils.JsonLoadFile(camera_data["additional_tracks_path"])
 
+        #Get camera actor type
+        camera_target_class_ref = camera_tracks["camera_actor"]
+        camera_target_class = unreal.load_class(None, camera_target_class_ref)
+        if camera_target_class is None:
+            message = f'WARNING: The camera class {camera_target_class_ref} was not found!' + "\n"
+            message += 'Verify that the class exists or that you have activated the necessary plugins.'
+            import_module_unreal_utils.show_warning_message("Failed to find camera class.", message)
+
         # Create spawnable camera and add camera in sequencer
-        cine_camera_actor = unreal.EditorLevelLibrary().spawn_actor_from_class(unreal.CineCameraActor, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
+        cine_camera_actor = unreal.EditorLevelLibrary().spawn_actor_from_class(camera_target_class, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
 
         # Import additional tracks (camera_component)
         camera_component_binding = seq.add_possessable(cine_camera_actor.get_cine_camera_component())
@@ -197,7 +206,7 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
 
         if spawnable_camera:
             # Transfer to spawnable camera
-            camera_spawnable = seq.add_spawnable_from_class(unreal.CineCameraActor)  # Add camera in sequencer
+            camera_spawnable = seq.add_spawnable_from_class(camera_target_class)  # Add camera in sequencer
             camera_component_binding.set_parent(camera_spawnable)
 
         # Import transform tracks
@@ -265,8 +274,8 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
                         camera_binding_id = seq.make_binding_id(camera[1])
                     camera_cut_section.set_camera_binding_id(camera_binding_id)
 
-        camera_cut_section.set_end_frame_seconds((section["end_time"]-secureCrop)/float(frameRateNumerator))
-        camera_cut_section.set_start_frame_seconds(section["start_time"]/float(frameRateNumerator))
+        camera_cut_section.set_end_frame_seconds((section["end_time"]-secureCrop)/float(sequencer_frame_rate_numerator))
+        camera_cut_section.set_start_frame_seconds(section["start_time"]/float(sequencer_frame_rate_numerator))
     # Import result
 
     print('========================= Imports completed ! =========================')

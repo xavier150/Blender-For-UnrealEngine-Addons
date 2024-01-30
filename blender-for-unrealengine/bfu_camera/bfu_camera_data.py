@@ -1,7 +1,7 @@
 import bpy
 import math
 from typing import Dict, Any
-from . import bfu_camera_utils
+from . import bfu_camera_unreal_utils
 from .. import bps
 from .. import bbpl
 from .. import languages
@@ -89,6 +89,7 @@ class BFU_CameraTracks():
         
         self.camera_name = camera.name
         self.camera_type = camera.bfu_desired_camera_type
+        self.ue_camera_actor = bfu_camera_unreal_utils.get_camera_unreal_actor(camera)
 
         # Blender Camera Data
         self.transform_track = {}
@@ -121,7 +122,8 @@ class BFU_CameraTracks():
         data = {}
         # Static data
         data["camera_name"] = self.camera_name
-        data["camera_yype"] = self.camera_type
+        data["camera_type"] = self.camera_type
+        data["camera_actor"] = self.ue_camera_actor
         data["resolution_x"] = self.resolution_x
         data["resolution_y"] = self.resolution_y
         data["desired_screen_ratio"] = self.resolution_x / self.resolution_y
