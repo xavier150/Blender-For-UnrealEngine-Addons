@@ -106,6 +106,9 @@ class BFU_CameraTracks():
         self.ue_transform_track = {}
         self.ue_sensor_width = {}
         self.ue_sensor_height = {}
+        self.ue_lens_min_fstop = 1.2 #Default value in Unreal Engine
+        self.ue_lens_max_fstop = 22.0 #Default value in Unreal Engine
+
 
     def get_values_as_dict(self) -> Dict[str, Any]:
         data = {}
@@ -122,6 +125,8 @@ class BFU_CameraTracks():
         data['UE Camera SensorHeight'] = self.ue_sensor_height
         data['Camera FocusDistance'] = self.focus_distance
         data['Camera Aperture'] = self.aperture_fstop
+        data['UE Lens MinFStop'] = self.ue_lens_min_fstop
+        data['UE Lens MaxFStop'] = self.ue_lens_max_fstop
         data['Camera Spawned'] = self.hide_viewport
         return data
 
@@ -229,6 +234,10 @@ class BFU_CameraTracks():
                 self.aperture_fstop[frame] = key
         else:
             self.aperture_fstop[frame] = 2.8  # 2.8 is default value in Unreal Engine
+
+        #Update min and max lens FStop
+        self.ue_lens_min_fstop = min(self.ue_lens_min_fstop, self.aperture_fstop[frame])
+        self.ue_lens_max_fstop = max(self.ue_lens_max_fstop, self.aperture_fstop[frame])
 
         boolKey = getOneKeysByFcurves(camera, "hide_viewport", camera.hide_viewport, frame, False)
         self.hide_viewport[frame] = (boolKey < 1)  # Inversed for convert hide to spawn

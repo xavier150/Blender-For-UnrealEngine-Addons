@@ -42,6 +42,8 @@ def AddCameraToCommand(camera: bpy.types.Object, pre_bake_camera: bfu_camera_dat
         FocalLength = data["Camera FocalLength"][frame_current]
         SensorWidth = data["UE Camera SensorWidth"][frame_current]
         SensorHeight = data["UE Camera SensorHeight"][frame_current]
+        MinFStop = data["UE Lens MinFStop"]
+        MaxFStop = data["UE Lens MaxFStop"]
         FocusDistance = data["Camera FocusDistance"][frame_current]
         Aperture = data["Camera Aperture"][frame_current]
         AspectRatio = data["desired_screen_ratio"]
@@ -79,6 +81,7 @@ def AddCameraToCommand(camera: bpy.types.Object, pre_bake_camera: bfu_camera_dat
         # CameraComponent
         t += "         " + "Begin Object Name=\"CameraComponent\"" + "\n"
         t += "            " + "Filmback=(SensorWidth="+str(SensorWidth)+",SensorHeight="+str(SensorHeight)+", SensorAspectRatio="+str(AspectRatio)+")" + "\n"
+        t += "            " + "LensSettings=(MinFStop="+str(MinFStop)+",MaxFStop="+str(MaxFStop)+")" + "\n"
         t += "            " + "FocusSettings=(ManualFocusDistance="+str(FocusDistance)+")" + "\n"
         t += "            " + "CurrentFocalLength="+str(FocalLength)+")" + "\n"
         t += "            " + "CurrentAperture="+str(Aperture)+")" + "\n"
