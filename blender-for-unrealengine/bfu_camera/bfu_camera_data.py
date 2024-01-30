@@ -13,13 +13,10 @@ def set_current_frame(new_frame):
 
 
 def getCameraFocusDistance(Camera, Target):
-    transA = Camera.matrix_world.copy()
-    transB = Target.matrix_world.copy()
-    transA.invert()
-    distance = (transA @ transB).translation.z  # Z is the Fosrward
-    if distance < 0:
-        distance *= -1
-    return distance
+    global_loc_obj1 = Camera.matrix_world.translation
+    global_loc_obj2 = Target.matrix_world.translation
+    diff = global_loc_obj2 - global_loc_obj1
+    return diff.length
 
 def getAllCamDistKeys(Camera, Target, frame_start, frame_end):
     scene = bpy.context.scene
