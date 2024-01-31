@@ -23,20 +23,37 @@
 # ----------------------------------------------
 
 import bpy
-import importlib
-from . import types
+from . import utils
 
-if "types" in locals():
-    importlib.reload(types)
-
-classes = (
-)
-
-def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
+def add_doc_page_operator(layout: bpy.types.UILayout, url: str="", text: str="", icon="HELP"):
+    doc_operator = layout.operator(
+        utils.get_operator_name(),
+        icon=icon,
+        text=text
+        )
+    doc_operator.url = url
+    return layout
 
 
-def unregister():
-    for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
+def add_left_doc_page_operator(layout: bpy.types.UILayout, url: str="", text: str="", icon="HELP"):
+    new_row = layout.row()
+    doc_operator = new_row.operator(
+        utils.get_operator_name(),
+        icon=icon,
+        text=""
+        )
+    doc_operator.url = url
+    new_row.label(text=text)
+    return new_row
+
+def add_right_doc_page_operator(layout: bpy.types.UILayout, url: str="", text: str="", icon="HELP"):
+    new_row = layout.row()
+    new_row.label(text=text)
+    doc_operator = new_row.operator(
+        utils.get_operator_name(),
+        icon=icon,
+        text=""
+        )
+    doc_operator.url = url
+    return new_row
+

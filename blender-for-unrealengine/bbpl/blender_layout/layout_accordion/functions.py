@@ -17,26 +17,13 @@
 # ======================= END GPL LICENSE BLOCK =============================
 
 # ----------------------------------------------
-#  BPS -> BleuRaven Python Script
+#  BBPL -> BleuRaven Blender Python Library
 #  BleuRaven.fr
 #  XavierLoux.com
 # ----------------------------------------------
 
-import importlib
+import bpy
+from . import types
 
-from . import advprint
-from . import console_utils
-from . import utils
-from . import math
-from . import color_set
-
-if "advprint" in locals():
-    importlib.reload(advprint)
-if "console_utils" in locals():
-    importlib.reload(console_utils)
-if "utils" in locals():
-    importlib.reload(utils)
-if "math" in locals():
-    importlib.reload(math)
-if "math" in locals():
-    importlib.reload(color_set)
+def add_ui_accordion(name: str=""):
+    return bpy.props.PointerProperty(type=types.get_layout_accordion_class(), name=name)

@@ -462,6 +462,10 @@ It is now possible to force the duration of an animation according to the scene 
 - New: Selection filter "Only selected" and "Only selected and active action" now filter only visible objects.
 - New: Modular export (Export several skeletal meshs with the same skeleton)
 - New: You can enable skeletal mesh per poly collision.
+- New: Camera values Min and Max FStop is updated with Aperture.
+- New: Support for ArchVis cameras (Use of shift)
+- New: Support for custom cameras (Example Blueprints)
+- Faster camera export.
 - Fixed: Blender 3.5 may crash during NLA Export. (Interacting with an NlaStripFCurves not linked to an object could lead to a crash in Blender 3.5.)
 - Fixed: Applying skeletal export scale with Proxy and Unit Scale not set to 0.01 could result in a script error.
 - Fixed: Using "Convert Attribute to UV" can swap UV Indices in the exported mesh.

@@ -45,7 +45,7 @@ def WriteImportAssetScript():
     for asset in scene.UnrealExportedAssetsList:
         asset: bfu_export_logs.BFU_OT_UnrealExportedAsset
         asset_data = {}
-        asset_data["scene_unit_scale"] = round(scene.unit_settings.scale_length, 8) #Have to round for avoid microscopic offset
+        asset_data["scene_unit_scale"] = bfu_utils.get_scene_unit_scale()
 
         asset_data["asset_name"] = asset.asset_name
         asset_data["asset_global_scale"] = asset.asset_global_scale
@@ -55,7 +55,7 @@ def WriteImportAssetScript():
             asset_data["asset_type"] = "StaticMesh"
         else:
             asset_data["asset_type"] = asset.asset_type
-        if asset.asset_type == "StaticMesh" or asset.asset_type == "SkeletalMesh":
+        if asset.asset_type in ["StaticMesh", "SkeletalMesh"]:
             if asset.object.bfu_export_as_lod_mesh:
                 asset_data["lod"] = 1
             else:
@@ -132,20 +132,29 @@ def WriteImportAssetScript():
             asset_data["animation_end_frame"] = asset.animation_end_frame    
 
         if asset.object:
-            asset_data["create_physics_asset"] = asset.object.bfu_create_physics_asset
-            asset_data["material_search_location"] = asset.object.bfu_material_search_location
+            if asset.asset_type in ["StaticMesh"]:
+                asset_data["auto_generate_collision"] = asset.object.bfu_auto_generate_collision
+                if (asset.object.bfu_use_static_mesh_lod_group):
+                    asset_data["static_mesh_lod_group"] = asset.object.bfu_static_mesh_lod_group
+                else:
+                    asset_data["static_mesh_lod_group"] = None
+                
+                asset_data["generate_lightmap_u_vs"] = asset.object.bfu_generate_light_map_uvs
+                asset_data["use_custom_light_map_resolution"] = bfu_utils.GetUseCustomLightMapResolution(asset.object)
+                asset_data["light_map_resolution"] = bfu_utils.GetCompuntedLightMap(asset.object)
+            
+                asset_data["collision_trace_flag"] = asset.object.bfu_collision_trace_flag
 
-            asset_data["auto_generate_collision"] = asset.object.bfu_auto_generate_collision
-            if (asset.object.bfu_use_static_mesh_lod_group):
-                asset_data["static_mesh_lod_group"] = asset.object.bfu_static_mesh_lod_group
-            else:
-                asset_data["static_mesh_lod_group"] = None
-            asset_data["generate_lightmap_u_vs"] = asset.object.bfu_generate_light_map_uvs
+            if asset.asset_type in ["SkeletalMesh"]:
+                asset_data["create_physics_asset"] = asset.object.bfu_create_physics_asset
+                asset_data["enable_skeletal_mesh_per_poly_collision"] = asset.object.bfu_enable_skeletal_mesh_per_poly_collision
 
-            asset_data["use_custom_light_map_resolution"] = bfu_utils.GetUseCustomLightMapResolution(asset.object)
-            asset_data["light_map_resolution"] = bfu_utils.GetCompuntedLightMap(asset.object)
-            asset_data["collision_trace_flag"] = asset.object.bfu_collision_trace_flag
-            asset_data["enable_skeletal_mesh_per_poly_collision"] = asset.object.bfu_enable_skeletal_mesh_per_poly_collision
+            if asset.asset_type in ["StaticMesh", "SkeletalMesh"]:
+                asset_data["material_search_location"] = asset.object.bfu_material_search_location
+
+            if bfu_utils.GetIsAnimation(asset.asset_type):
+                asset_data["do_not_import_curve_with_zero"] = asset.object.bfu_do_not_import_curve_with_zero
+
 
         data['assets'].append(asset_data)
 

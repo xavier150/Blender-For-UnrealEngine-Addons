@@ -19,10 +19,10 @@
 import os
 import bpy
 
+from . import bbpl
 from . import bfu_ui
 from . import languages
-
-
+from .bbpl.blender_layout import layout_doc_button
 
 class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
     # this must match the addon name, use '__package__'
@@ -115,12 +115,6 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         default=1,
         )
 
-    bakeOnlyKeyVisibleInCut: bpy.props.BoolProperty(
-        name=(languages.ti('bake_only_key_visible_in_cut_name')),
-        description=(languages.tt('bake_only_key_visible_in_cut_desc')),
-        default=True,
-        )
-
     ignoreNLAForAction: bpy.props.BoolProperty(
         name=(languages.ti('ignore_nla_for_action_name')),
         description=(languages.tt('ignore_nla_for_action_desc')),
@@ -156,7 +150,27 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
             ),
         default=True,
         )
+    
+    #CAMERA
 
+    bake_only_key_visible_in_cut: bpy.props.BoolProperty(
+        name=(languages.ti('bake_only_key_visible_in_cut_name')),
+        description=(languages.tt('bake_only_key_visible_in_cut_desc')),
+        default=True,
+        )
+    
+    scale_camera_fstop_with_unit_scale: bpy.props.BoolProperty(
+        name="Scale F-Stop by Unit Scale",
+        description="Scale camera F-Stop with Unit Scale.",
+        default=True,
+        )
+    
+    scale_camera_focus_distance_with_unit_scale: bpy.props.BoolProperty(
+        name="Scale focus distance by Unit Scale",
+        description="Scale camera focus distance with Unit Scale.",
+        default=True,
+        )
+    
     class BFU_OT_NewReleaseInfo(bpy.types.Operator):
         """Open last release page"""
         bl_label = "Open last release page"
@@ -171,7 +185,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
             return {'FINISHED'}
 
     def draw(self, context):
-        layout = self.layout
+        layout: bpy.types.UILayout = self.layout
 
         boxColumn = layout.column().split(
             factor=0.5
@@ -181,11 +195,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 
         rootBone = ColumnLeft.box()
 
-        bfu_ui.bfu_ui_utils.LabelWithDocButton(
-            rootBone,
-            "SKELETON & ROOT BONE",
-            "skeleton--root-bone"
-            )
+        layout_doc_button.add_right_doc_page_operator(rootBone, text="SKELETON & ROOT BONE", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Skeleton-&-Root-bone")
         rootBone.prop(self, "add_skeleton_root_bone")
         rootBoneName = rootBone.column()
         rootBoneName.enabled = self.add_skeleton_root_bone
@@ -206,8 +216,11 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         socketRescale.prop(self, "skeletalSocketsImportedSize")
 
         camera = ColumnLeft.box()
-        camera.label(text='CAMERA')
-        camera.prop(self, "bakeOnlyKeyVisibleInCut")
+        layout_doc_button.add_right_doc_page_operator(camera, text="CAMERA", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Cameras")
+        camera.prop(self, "bake_only_key_visible_in_cut")
+        layout_doc_button.add_right_doc_page_operator(camera, text="About depth of Field -> ", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Camera-Depth-of-Field")
+        camera.prop(self, "scale_camera_fstop_with_unit_scale")
+        camera.prop(self, "scale_camera_focus_distance_with_unit_scale")
 
         data = ColumnRight.box()
         data.label(text='DATA')

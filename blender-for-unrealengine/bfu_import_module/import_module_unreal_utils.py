@@ -23,6 +23,10 @@ try:
 except ImportError:
     import unreal_engine as unreal
 
+def get_selected_level_actors():
+    selected_actors = unreal.EditorLevelLibrary.get_selected_level_actors()
+    return selected_actors
+
 def get_unreal_version():
     version_info = unreal.SystemLibrary.get_engine_version().split('-')[0]
     version_numbers = version_info.split('.')

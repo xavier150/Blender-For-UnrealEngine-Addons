@@ -394,8 +394,10 @@ def mode_set_on_target(target_object=None, target_mode='OBJECT'):
         bpy.context.view_layer.objects.active = target_object
 
     # Enter new mode
-    bpy.ops.object.mode_set(mode=target_mode)
-    return True
+    if bpy.context.active_object:
+        bpy.ops.object.mode_set(mode=target_mode)
+        return True
+    return False
 
 
 def safe_mode_set(target_mode='OBJECT', obj=None):

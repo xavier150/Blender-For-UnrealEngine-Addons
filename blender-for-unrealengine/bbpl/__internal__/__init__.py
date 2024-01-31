@@ -23,31 +23,9 @@
 # ----------------------------------------------
 
 import bpy
+import importlib
+from . import utils
 
-class BBPL_UI_ExpendSection(bpy.types.PropertyGroup):
-
-    expend: bpy.props.BoolProperty(
-        name="Use",
-        description="Click to expand / collapse",
-        default=False
-    )
-    
-    def get_name(self):
-        if bpy.app.version >= (3, 0, 0):
-            prop_rna = self.id_data.bl_rna.properties[self.id_properties_ensure().name]
-            return prop_rna.name
-        else:
-            prop_rna = self.id_data.bl_rna.properties[self.path_from_id()]
-            return prop_rna.name
-
-
-    def draw(self, layout: bpy.types.UILayout):
-        tria_icon = "TRIA_DOWN" if self.expend else "TRIA_RIGHT"
-        description = "Click to collapse" if self.expend else "Click to expand"
-        layout.row().prop(self, "expend", icon=tria_icon, icon_only=True, text=self.get_name(), emboss=False, toggle=True, expand=True)
-        if self.expend:
-            pass
-
-    def is_expend(self):
-        return self.expend
+if "utils" in locals():
+    importlib.reload(utils)
 

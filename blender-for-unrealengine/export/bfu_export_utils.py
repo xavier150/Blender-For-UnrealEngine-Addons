@@ -570,12 +570,8 @@ def GetShouldRescaleRig(obj):
 
     addon_prefs = bfu_basics.GetAddonPrefs()
     if addon_prefs.rescaleFullRigAtExport == "auto":
-        if math.isclose(
-            bpy.context.scene.unit_settings.scale_length,
-                0.01,
-                rel_tol=1e-5,
-                ):
 
+        if bfu_utils.get_scene_unit_scale_is_close(0.01):
             return False  # False because that useless to rescale at 1 :v
         else:
             return True
@@ -591,7 +587,7 @@ def GetRescaleRigFactor():
 
     addon_prefs = bfu_basics.GetAddonPrefs()
     if addon_prefs.rescaleFullRigAtExport == "auto":
-        return 100 * bpy.context.scene.unit_settings.scale_length
+        return 100 * bfu_utils.get_scene_unit_scale()
     else:
         return addon_prefs.newRigScale  # rigRescaleFactor
 
@@ -617,7 +613,7 @@ def GetRescaleSocketFactor():
 
     addon_prefs = bfu_basics.GetAddonPrefs()
     if addon_prefs.rescaleSocketsAtExport == "auto":
-        return 1/(100*bpy.context.scene.unit_settings.scale_length)
+        return 1/(100*bfu_utils.get_scene_unit_scale())
     else:
         return addon_prefs.staticSocketsImportedSize
 

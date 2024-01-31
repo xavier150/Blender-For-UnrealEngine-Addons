@@ -30,7 +30,8 @@ from .. import bfu_cached_asset_list
 from ..export import bfu_export_get_info
 from .. import bfu_ui
 from .. import languages
-
+from .. import bfu_custom_property
+from .. import bfu_camera
 
 
 class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
@@ -91,21 +92,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         subtype='FILE_NAME'
         )
 
-    bpy.types.Object.bfu_export_fbx_camera = bpy.props.BoolProperty(
-        name=(languages.ti('export_camera_as_fbx_name')),
-        description=(languages.tt('export_camera_as_fbx_desc')),
-        override={'LIBRARY_OVERRIDABLE'},
-        default=False,
-        )
 
-    bpy.types.Object.bfu_fix_axis_flippings = bpy.props.BoolProperty(
-        name="Fix camera axis flippings",
-        description=(
-            'Disable only if you use extrem camera animation in one frame.'
-            ),
-        override={'LIBRARY_OVERRIDABLE'},
-        default=True,
-        )
 
     bpy.types.Object.bfu_export_as_alembic = bpy.props.BoolProperty(
         name="Export as Alembic animation",
@@ -1068,8 +1055,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 'obj.bfu_export_type',
                 'obj.bfu_export_folder_name',
                 'col.bfu_export_folder_name',
-                'obj.bfu_export_fbx_camera',
-                'obj.bfu_fix_axis_flippings',
                 'obj.bfu_export_as_alembic',
                 'obj.bfu_export_as_lod_mesh',
                 'obj.bfu_export_skeletal_mesh_as_static_mesh',
@@ -1119,7 +1104,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 'obj.bfu_anim_naming_custom',
                 'obj.bfu_export_global_scale',
                 'obj.bfu_override_procedure_preset',
-                'obj.bfu_export_with_custom_props',
                 'obj.bfu_export_with_meta_data',
                 'obj.bfu_export_axis_forward',
                 'obj.bfu_export_axis_up',
@@ -1140,6 +1124,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 ]
             preset_values += bfu_modular_skeletal_specified_parts_meshs.get_preset_values()
             preset_values += bfu_unreal_engine_refs_props.get_preset_values()
+            preset_values += bfu_custom_property.bfu_custom_property_props.get_preset_values()
+            preset_values += bfu_camera.bfu_camera_ui_and_props.get_preset_values()
             return preset_values
 
         # Common variable used for all preset values
@@ -1294,10 +1280,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     ExportType = layout.column()
                     ExportType.prop(obj, 'bfu_export_type')
 
-                    if obj.type == "CAMERA":
-                        CameraProp = layout.column()
-                        CameraProp.operator("object.copy_regular_camera_command", icon="COPYDOWN")
-                        CameraProp.operator("object.copy_cine_camera_command", icon="COPYDOWN")
 
                     if obj.bfu_export_type == "export_recursive":
 
@@ -1309,8 +1291,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             )
 
                         if obj.type == "CAMERA":
-                            CameraProp.prop(obj, 'bfu_export_fbx_camera')
-                            CameraProp.prop(obj, 'bfu_fix_axis_flippings')
                             bfu_export_procedure.bfu_export_procedure_ui.draw_object_export_procedure(layout, obj)
 
                         else:
@@ -1364,6 +1344,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 exportCustomNameText.prop(obj, "bfu_custom_export_name")
                                 exportCustomNameText.enabled = useCustomName
 
+            bfu_camera.bfu_camera_ui_and_props.draw_ui_object_camera(layout, obj)
             scene.bfu_object_advanced_properties_expanded.draw(layout)
             if scene.bfu_object_advanced_properties_expanded.is_expend():
                 if obj is not None:
@@ -1399,7 +1380,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 # Concaténez la clé et la valeur dans la chaîne de caractères
                                 var_lines.label(text=f"{key} -> {value}\n")
                         export_data = layout.column()
-                        export_data.prop(obj, "bfu_export_with_custom_props")
+                        bfu_custom_property.bfu_custom_property_utils.draw_ui_custom_property(export_data, obj)
                         export_data.prop(obj, "bfu_export_with_meta_data")
 
                             
@@ -1737,7 +1718,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     bfu_convert_geometry_node_attribute_to_uv = layout.column()
                     convert_geometry_node_attribute_to_uv_use = bfu_convert_geometry_node_attribute_to_uv.row()
                     convert_geometry_node_attribute_to_uv_use.prop(obj, 'bfu_convert_geometry_node_attribute_to_uv')
-                    bfu_ui.bfu_ui_utils.DocPageButton(convert_geometry_node_attribute_to_uv_use, "wiki/UV-Maps", "Geometry Node UV")
+                    bbpl.blender_layout.layout_doc_button.add_doc_page_operator(convert_geometry_node_attribute_to_uv_use, url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/UV-Maps#geometry-node-uv")
                     bfu_convert_geometry_node_attribute_to_uv_name = bfu_convert_geometry_node_attribute_to_uv.row()
                     bfu_convert_geometry_node_attribute_to_uv_name.prop(obj, 'bfu_convert_geometry_node_attribute_to_uv_name')
                     bfu_convert_geometry_node_attribute_to_uv_name.enabled = obj.bfu_convert_geometry_node_attribute_to_uv
@@ -1745,7 +1726,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     # Extreme UV Scale
                     bfu_correct_extrem_uv_scale = layout.row()
                     bfu_correct_extrem_uv_scale.prop(obj, 'bfu_correct_extrem_uv_scale')
-                    bfu_ui.bfu_ui_utils.DocPageButton(bfu_correct_extrem_uv_scale, "wiki/UV-Maps", "Extreme UV Scale")
+                    bbpl.blender_layout.layout_doc_button.add_doc_page_operator(bfu_correct_extrem_uv_scale, url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/UV-Maps#extreme-uv-scale")
 
         if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("SCENE", "GENERAL"):
 
@@ -1849,13 +1830,6 @@ def register():
         default=0
         )
     
-    bpy.types.Object.bfu_export_with_custom_props = bpy.props.BoolProperty(
-        name=(languages.ti('export_with_custom_props_name')),
-        description=(languages.tt('export_with_custom_props_desc')),
-        override={'LIBRARY_OVERRIDABLE'},
-        default=False,
-        )
-
     bpy.types.Object.bfu_export_with_meta_data = bpy.props.BoolProperty(
         name=(languages.ti('export_with_meta_data_name')),
         description=(languages.tt('export_with_meta_data_desc')),

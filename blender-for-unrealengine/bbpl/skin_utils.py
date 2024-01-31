@@ -97,7 +97,7 @@ def copy_rig_group(obj, source):
     bpy.ops.object.modifier_apply(modifier=mod_name)
 
 
-def apply_auto_rig_parent(armature, target, parent_type='ARMATURE_AUTO', use_only_bone_white_list=False, white_list_bones=None, black_list_bones=None):
+def apply_auto_rig_parent(armature, target_objects, parent_type='ARMATURE_AUTO', use_only_bone_white_list=False, white_list_bones=None, black_list_bones=None):
     """
     Apply an automatic rig parent to the target object using the armature.
     Optionally, specify a white list or black list of bones to control the deform flag.
@@ -107,11 +107,14 @@ def apply_auto_rig_parent(armature, target, parent_type='ARMATURE_AUTO', use_onl
     if black_list_bones is None:
         black_list_bones = []
 
-    bpy.ops.object.mode_set(mode='OBJECT')
-    bpy.ops.object.select_all(action='DESELECT')
-    armature.select_set(state=True)
-    target.select_set(state=True)
-    bpy.context.view_layer.objects.active = armature
+    # Exit current mode
+    #if bpy.ops.object.mode_set.poll():
+    #    bpy.ops.object.mode_set(mode='OBJECT')
+
+    #bpy.ops.object.select_all(action='DESELECT')
+    #armature.select_set(state=True)
+    #target.select_set(state=True)
+    #bpy.context.view_layer.objects.active = armature
 
     if len(white_list_bones) > 0 or len(black_list_bones) > 0:
         save_defom = save_defoms_bones(armature)
@@ -122,12 +125,26 @@ def apply_auto_rig_parent(armature, target, parent_type='ARMATURE_AUTO', use_onl
         set_bones_deforms(armature, white_list_bones, True)
         set_bones_deforms(armature, black_list_bones, False)
 
-    for modifier in target.modifiers:
-        if modifier.type == "ARMATURE":
-            target.modifiers.remove(modifier)
+    for obj in target_objects:
+        for modifier in obj.modifiers:
+            if modifier.type == "ARMATURE":
+                obj.modifiers.remove(modifier)
+        remove_vertex_groups(obj)
+    
+    all_objs = []
+    all_objs.append(armature)
+    all_objs.extend(target_objects)
+    if bpy.app.version >= (4, 0, 0):
+        with bpy.context.temp_override(active_object=armature, object=armature, selected_objects=all_objs, selected_editable_objects=all_objs):
+            bpy.ops.object.parent_set(type=parent_type)
 
-    remove_vertex_groups(target)
-    bpy.ops.object.parent_set(type=parent_type)
+    else:
+        override_context = bpy.context.copy()
+        override_context['active_object'] = armature
+        override_context['object'] = armature
+        override_context['selected_objects'] = all_objs
+        bpy.ops.object.parent_set(override_context, type=parent_type)
+
 
     if len(white_list_bones) > 0 or len(black_list_bones) > 0:
         reset_deform_bones(armature, save_defom)

@@ -34,10 +34,10 @@ def WriteImportSequencerTracks():
     bfu_write_utils.add_generated_json_meta_data(data)
 
     data['spawnable_camera'] = True  # Default but open for change
-    data['startFrame'] = scene.frame_start
-    data['endFrame'] = scene.frame_end
-    data['frameRateDenominator'] = scene.render.fps_base
-    data['frameRateNumerator'] = scene.render.fps
+    data['sequencer_frame_start'] = scene.frame_start
+    data['sequencer_frame_end'] = scene.frame_end
+    data['sequencer_frame_rate_denominator'] = scene.render.fps_base
+    data['sequencer_frame_rate_numerator'] = scene.render.fps
     data['pixel_aspect_x'] = bpy.context.scene.render.pixel_aspect_x
     data['pixel_aspect_y'] = bpy.context.scene.render.pixel_aspect_y
     data['render_resolution_x'] = bpy.context.scene.render.resolution_x

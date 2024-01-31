@@ -20,7 +20,7 @@
         "export_camera_as_fbx_name": "Export camera as FBX",
         "bake_only_key_visible_in_cut_name": "Bake Only Visible Cuts",
         "ignore_nla_for_action_name": "Ignore NLA for Actions",
-        "export_with_custom_props_name": "Export custom properties",
+        "export_with_custom_props_name": "Export Custom Properties",
         "export_with_custom_curves_name": "Export custom curve values",
         "export_with_meta_data_name": "Export meta data",
         "revert_export_path_name": "Revert all export path at each export.",

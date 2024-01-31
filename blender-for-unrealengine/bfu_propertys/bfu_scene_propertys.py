@@ -18,16 +18,8 @@
 
 import bpy
 from .. import bbpl
-from ..bbpl.blender_layout.layout_expend_section.types import (
-        BBPL_UI_ExpendSection,
-        )
-
-class BFU_UI_ExpendSection(BBPL_UI_ExpendSection):
-    pass
-
 
 classes = (
-    BFU_UI_ExpendSection,
 )
 
 
@@ -36,33 +28,32 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bpy.types.Scene.bfu_object_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Object Properties")
-    bpy.types.Scene.bfu_object_lod_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Lod")
-    bpy.types.Scene.bfu_object_collision_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Collision")
-    bpy.types.Scene.bfu_object_material_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Material")
-    bpy.types.Scene.bfu_object_vertex_color_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Vertex color")
-    bpy.types.Scene.bfu_object_light_map_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Light map")
-    bpy.types.Scene.bfu_object_uv_map_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="UV map")
+    bpy.types.Scene.bfu_object_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Object Properties")
+    bpy.types.Scene.bfu_object_lod_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Lod")
+    bpy.types.Scene.bfu_object_collision_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Collision")
+    bpy.types.Scene.bfu_object_material_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Material")
+    bpy.types.Scene.bfu_object_vertex_color_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Vertex color")
+    bpy.types.Scene.bfu_object_light_map_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Light map")
+    bpy.types.Scene.bfu_object_uv_map_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="UV map")
 
-    bpy.types.Scene.bfu_animation_action_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Actions Properties")
-    bpy.types.Scene.bfu_animation_action_advanced_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Actions Advanced Properties")
-    bpy.types.Scene.bfu_animation_nla_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="NLA Properties")
-    bpy.types.Scene.bfu_animation_nla_advanced_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="NLA Advanced Properties")
-    bpy.types.Scene.bfu_animation_advanced_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Animation Advanced Properties")
+    bpy.types.Scene.bfu_animation_action_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Actions Properties")
+    bpy.types.Scene.bfu_animation_action_advanced_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Actions Advanced Properties")
+    bpy.types.Scene.bfu_animation_nla_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="NLA Properties")
+    bpy.types.Scene.bfu_animation_nla_advanced_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="NLA Advanced Properties")
+    bpy.types.Scene.bfu_animation_advanced_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Animation Advanced Properties")
 
-    bpy.types.Scene.bfu_skeleton_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Skeleton")
-    bpy.types.Scene.bfu_engine_ref_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Engine Refs")
-    bpy.types.Scene.bfu_modular_skeletal_mesh_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Modular Skeletal Mesh")
+    bpy.types.Scene.bfu_skeleton_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Skeleton")
+    bpy.types.Scene.bfu_engine_ref_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Engine Refs")
+    bpy.types.Scene.bfu_modular_skeletal_mesh_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Modular Skeletal Mesh")
 
-    bpy.types.Scene.bfu_collection_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Collection Properties")
-    bpy.types.Scene.bfu_object_advanced_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Object advanced Properties")
-    bpy.types.Scene.bfu_camera_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Camera")
-    bpy.types.Scene.bfu_collision_socket_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Collision and Socket")
-    bpy.types.Scene.bfu_lightmap_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Light Map")
-    bpy.types.Scene.bfu_nomenclature_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Nomenclature")
-    bpy.types.Scene.bfu_export_filter_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Export filters")
-    bpy.types.Scene.bfu_export_process_properties_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Export process")
-    bpy.types.Scene.bfu_script_tool_expanded = bpy.props.PointerProperty(type=BFU_UI_ExpendSection, name="Copy Import Script")
+    bpy.types.Scene.bfu_collection_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Collection Properties")
+    bpy.types.Scene.bfu_object_advanced_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Object advanced Properties")
+    bpy.types.Scene.bfu_collision_socket_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Collision and Socket")
+    bpy.types.Scene.bfu_lightmap_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Light Map")
+    bpy.types.Scene.bfu_nomenclature_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Nomenclature")
+    bpy.types.Scene.bfu_export_filter_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Export filters")
+    bpy.types.Scene.bfu_export_process_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Export process")
+    bpy.types.Scene.bfu_script_tool_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Copy Import Script")
 
     bpy.types.Scene.bfu_active_tab = bpy.props.EnumProperty(
         items=(

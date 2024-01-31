@@ -20,19 +20,25 @@ import bpy
 import importlib
 
 from . import bfu_camera_utils
+from . import bfu_camera_unreal_utils
 from . import bfu_camera_data
 from . import bfu_camera_export_utils
 from . import bfu_camera_write_text
+from . import bfu_camera_write_paste_commands
 from . import bfu_camera_ui_and_props
 
-if "bfu_camera_data" in locals():
-    importlib.reload(bfu_camera_utils)
 if "bfu_camera_utils" in locals():
+    importlib.reload(bfu_camera_utils)
+if "bfu_camera_unreal_utils" in locals():
+    importlib.reload(bfu_camera_unreal_utils)
+if "bfu_camera_data" in locals():
     importlib.reload(bfu_camera_data)
 if "bfu_camera_export_utils" in locals():
     importlib.reload(bfu_camera_export_utils)
 if "bfu_camera_write_text" in locals():
     importlib.reload(bfu_camera_write_text)
+if "bfu_camera_write_paste_commands" in locals():
+    importlib.reload(bfu_camera_write_paste_commands)
 if "bfu_camera_ui_and_props" in locals():
     importlib.reload(bfu_camera_ui_and_props)
 

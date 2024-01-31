@@ -64,71 +64,8 @@ def DisplayPropertyFilter(active_tab, active_sub_tab):
     return False
 
 
-def LabelWithDocButton(tagetlayout, name, docOcticon):  # OLD
-    newRow = tagetlayout.row()
-    newRow.label(text=name)
-    docOperator = newRow.operator(
-        "object.open_documentation_target_page",
-        icon="HELP",
-        text=""
-        )
-    docOperator.octicon = docOcticon
-
-
-def DocPageButton(layout, doc_page, doc_octicon=""):
-    docOperator = layout.operator(
-        "object.open_documentation_target_page",
-        icon="HELP",
-        text=""
-        )
-    
-    docOperator.page = doc_page
-    docOperator.octicon = doc_octicon
-
-
-def PropWithDocButton(self, tagetlayout, name, doc_octicon):  # OLD
-    newRow = tagetlayout.row()
-    newRow.prop(self, name)
-    docOperator = newRow.operator(
-        "object.open_documentation_target_export_page",
-        icon="HELP",
-        text=""
-        )
-    docOperator.octicon = doc_octicon
-
-
-class BFU_OT_OpenDocumentationTargetPage(bpy.types.Operator):
-    bl_label = "Documentation"
-    bl_idname = "object.open_documentation_target_page"
-    bl_description = "Click for open documentation page on GitHub"
-    page: bpy.props.StringProperty(default="")
-    octicon: bpy.props.StringProperty(default="")
-
-    def execute(self, context):
-        os.system(
-            "start \"\" " +
-            "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/" + self.page + "#" + self.octicon
-            )
-        return {'FINISHED'}
-
-class BFU_OT_OpenDocumentationTargetExportPage(bpy.types.Operator):
-    bl_label = "Documentation"
-    bl_idname = "object.open_documentation_target_export_page"
-    bl_description = "Click for open documentation page on GitHub"
-    octicon: bpy.props.StringProperty(default="")
-
-    def execute(self, context):
-        os.system(
-            "start \"\" " +
-            "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/How-export-assets" +
-            "#"+self.octicon
-            )
-        return {'FINISHED'}
-
 
 classes = (
-    BFU_OT_OpenDocumentationTargetPage,
-    BFU_OT_OpenDocumentationTargetExportPage
 )
 
 

@@ -135,18 +135,20 @@ def no_num(name):
         return name[:-4]
     return name
 
-def add_bone_to_collection(arm, bone_name, collection_name):
+def add_bone_to_collection(arm, bone_name, collection_name) -> bpy.types.BoneCollection:
     #Add bone to collection and create if not exist
+
     if collection_name in arm.data.collections:
         col = arm.data.collections[collection_name]
     else:
         col = arm.data.collections.new(name=collection_name)
 
+
     bone = arm.data.edit_bones[bone_name]
     col.assign(bone)
     return col
 
-def remove_bone_from_collection(arm, bone_name, collection_name):
+def remove_bone_from_collection(arm, bone_name, collection_name) -> bpy.types.BoneCollection:
     #Remove bone from collection.
     if collection_name in arm.data.collections:
         col = arm.data.collections[collection_name]
