@@ -24,6 +24,7 @@ from . import import_module_unreal_utils
 from . import import_module_post_treatment
 from . import asset_import
 from . import sequencer_import
+from . import sequencer_utils
 
 if "bps" in locals():
     importlib.reload(bps)
@@ -37,6 +38,8 @@ if "asset_import" in locals():
     importlib.reload(asset_import)
 if "sequencer_import" in locals():
     importlib.reload(sequencer_import)
+if "sequencer_utils" in locals():
+    importlib.reload(sequencer_utils)
 
 def run_asset_import(assets_data, show_finished_popup=True):
     if asset_import.ready_for_asset_import():

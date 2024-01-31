@@ -86,8 +86,9 @@ def AddCameraToCommand(camera: bpy.types.Object, pre_bake_camera: bfu_camera_dat
         # CameraComponent
         t += "         " + "Begin Object Name=\"CameraComponent\"" + "\n"
         if camera_type == "ARCHVIS":
-            shift_x = pre_bake_camera.arch_shift_x[frame_current]
-            shift_y = pre_bake_camera.arch_shift_y[frame_current]
+            arch_projection_shift = pre_bake_camera.arch_projection_shift[frame_current]
+            shift_x = arch_projection_shift["x"]
+            shift_y = arch_projection_shift["y"]
             t += "            " + f"ProjectionOffset=(X={shift_x}, Y={shift_y})" + "\n"
             t += "            " + f"FinalProjectionOffset=(X={shift_x}, Y={shift_y})" + "\n"
             t += "            " + "bCorrectPerspective=False" + "\n"

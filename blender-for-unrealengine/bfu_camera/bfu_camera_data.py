@@ -100,8 +100,7 @@ class BFU_CameraTracks():
         self.lens = {}
         self.sensor_width = {}
         self.sensor_height = {}
-        self.shift_x = {}
-        self.shift_y = {}
+        self.projection_shift = {}
         self.focus_distance = {}
         self.aperture_fstop = {}
         self.hide_viewport = {}
@@ -114,8 +113,7 @@ class BFU_CameraTracks():
         self.ue_lens_max_fstop = 22.0 #Default value in Unreal Engine
 
         # Formated data for ArchVis Tools in Unreal Engine
-        self.arch_shift_x = {}
-        self.arch_shift_y = {}
+        self.arch_projection_shift = {}
 
 
     def get_animated_values_as_dict(self) -> Dict[str, Any]:
@@ -124,8 +122,7 @@ class BFU_CameraTracks():
         data["camera_name"] = self.camera_name
         data["camera_type"] = self.camera_type
         data["camera_actor"] = self.ue_camera_actor
-        data["resolution_x"] = self.resolution_x
-        data["resolution_y"] = self.resolution_y
+        data["resolution"] = {"x": self.resolution_x, "y": self.resolution_y}
         data["desired_screen_ratio"] = self.resolution_x / self.resolution_y
         data['ue_lens_minfstop'] = self.ue_lens_min_fstop
         data['ue_lens_maxfstop'] = self.ue_lens_max_fstop
@@ -140,10 +137,8 @@ class BFU_CameraTracks():
         data['camera_focal_length'] = self.lens
         data['camera_sensor_width'] = self.sensor_width
         data['camera_sensor_height'] = self.sensor_height
-        data['camera_shift_x'] = self.shift_x
-        data['camera_shift_y'] = self.shift_y
-        data['archvis_camera_shift_x'] = self.arch_shift_x
-        data['ArchVis_camera_shift_y'] = self.arch_shift_y
+        data['camera_shift'] = self.projection_shift
+        data['archvis_camera_shift'] = self.arch_projection_shift
         data['ue_camera_sensor_width'] = self.ue_sensor_width
         data['ue_camera_sensor_height'] = self.ue_sensor_height
         data['camera_focus_distance'] = self.focus_distance
@@ -227,12 +222,11 @@ class BFU_CameraTracks():
         # Camera shift
         shift_x = getOneKeysByFcurves(camera, "shift_x", camera.data.shift_x, frame)
         shift_y = getOneKeysByFcurves(camera, "shift_y", camera.data.shift_y, frame)
+        self.projection_shift[frame] = {"x": shift_x, "y": shift_y}
 
-        self.shift_x[frame] = shift_x
-        self.shift_y[frame] = shift_y
-
-        self.arch_shift_x[frame] = shift_x * 2
-        self.arch_shift_y[frame] = shift_y * 2
+        arch_shift_x = shift_x * 2 # x2
+        arch_shift_y = shift_y * 2 * (self.resolution_x / self.resolution_y) # Use screen ratio.
+        self.arch_projection_shift[frame] = {"x": arch_shift_x, "y": arch_shift_y}
 
         #FOV
         self.field_of_view[frame] = round(math.degrees(self.angle[frame]), 8)
