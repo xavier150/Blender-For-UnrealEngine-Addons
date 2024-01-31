@@ -454,6 +454,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Export using AutoProRig fail.
 
 == Rev 0.4.2 ==
+
 - New: The addon now include a modified version of the Blender standard fbx I/O api, instead of using the original one. (Thanks SAM-tak!)
 - New: Exported models and animations now use Unreal bones coordinate by default. (Thanks SAM-tak!)
 - New: Supports exporting models and animations with the Unreal Mannequin bone structure from Blender. (Thanks SAM-tak!)
@@ -474,3 +475,10 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Skeletons imported with skeletal meshes use incorrect names.
 - Fixed: Collection.exclude is not recovery after export when using multi view layers.
 - Fixed: Camera import script doesn’t work in Unreal Engine 5.3
+- Fixed: Export collections product ui script fail.
+- Fixed: Camera FBX are not exported when bfu_export_fbx_camera == True.
+- Fixed: Show Asset To Export Button do product script fail.
+- Fixed: Curve mesh is duplicate durring export.
+- Fixed: Script fail in Blender 4.0 when switch to global view.
+- Fixed: UI script fail in Blender 2.9.
+- Fixed: Camera scale impact the focus distance.
