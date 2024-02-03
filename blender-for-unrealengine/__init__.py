@@ -36,6 +36,7 @@ from . import bps
 from . import bbpl
 from . import bfu_propertys
 from . import bfu_camera
+from . import bfu_spline
 from . import bfu_collision
 from . import bfu_custom_property
 from . import bfu_addon_parts
@@ -65,6 +66,8 @@ if "bfu_propertys" in locals():
     importlib.reload(bfu_propertys)
 if "bfu_camera" in locals():
     importlib.reload(bfu_camera)
+if "bfu_spline" in locals():
+    importlib.reload(bfu_spline)
 if "bfu_collision" in locals():
     importlib.reload(bfu_collision)
 if "bfu_custom_property" in locals():
@@ -136,6 +139,7 @@ def register():
     bbpl.register()
     bfu_propertys.register()
     bfu_camera.register()
+    bfu_spline.register()
     bfu_collision.register()
     bfu_custom_property.register()
     bfu_addon_parts.register()
@@ -159,6 +163,7 @@ def unregister():
     bfu_addon_pref.unregister()
     bfu_export_procedure.unregister()
     bfu_addon_parts.unregister()
+    bfu_spline.unregister()
     bfu_camera.unregister()
     bfu_custom_property.unregister()
     bfu_collision.unregister()

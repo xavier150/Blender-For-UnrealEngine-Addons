@@ -32,6 +32,7 @@ from .. import bfu_ui
 from .. import languages
 from .. import bfu_custom_property
 from .. import bfu_camera
+from .. import bfu_spline
 
 
 class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
@@ -1126,6 +1127,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             preset_values += bfu_unreal_engine_refs_props.get_preset_values()
             preset_values += bfu_custom_property.bfu_custom_property_props.get_preset_values()
             preset_values += bfu_camera.bfu_camera_ui_and_props.get_preset_values()
+            preset_values += bfu_spline.bfu_spline_ui_and_props.get_preset_values()
             return preset_values
 
         # Common variable used for all preset values
@@ -1345,6 +1347,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 exportCustomNameText.enabled = useCustomName
 
             bfu_camera.bfu_camera_ui_and_props.draw_ui_object_camera(layout, obj)
+            bfu_spline.bfu_spline_ui_and_props.draw_ui_object_spline(layout, obj)
+
             scene.bfu_object_advanced_properties_expanded.draw(layout)
             if scene.bfu_object_advanced_properties_expanded.is_expend():
                 if obj is not None:

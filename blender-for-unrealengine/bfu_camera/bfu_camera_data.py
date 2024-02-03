@@ -282,7 +282,6 @@ class BFU_CameraTracks():
         
         # Save scene data
         save_current_frame = scene.frame_current
-        save_use_simplify = bpy.context.scene.render.use_simplify
 
         for frame in range(frame_start, frame_end+1):
             if len(slms.marker_sequences) > 0 and addon_prefs.bake_only_key_visible_in_cut:

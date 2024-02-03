@@ -3,6 +3,7 @@ from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui
 from .. import bfu_camera
+from .. import bfu_spline
 
 
 class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
@@ -149,8 +150,8 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         ready_for_convert_collider = False
         ready_for_convert_socket = False
 
-
         bfu_camera.bfu_camera_ui_and_props.draw_ui_scene_camera(layout)
+        bfu_spline.bfu_spline_ui_and_props.draw_ui_scene_spline(layout)
 
         scene.bfu_collision_socket_expanded.draw(layout)
         if scene.bfu_collision_socket_expanded.is_expend():
