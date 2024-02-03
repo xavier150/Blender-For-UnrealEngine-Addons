@@ -18,7 +18,7 @@
 
 
 import bpy
-
+from .. import bbpl
 
 
 class VertexColorExportData:
@@ -63,7 +63,7 @@ class VertexColorExportData:
 
         if obj:
             if obj.data:
-                vertex_colors = utils.get_vertex_colors(obj)
+                vertex_colors = bbpl.utils.get_vertex_colors(obj)
                 if len(vertex_colors) > 0:
 
                     if bfu_vertex_color_to_use == "FirstIndex":
@@ -73,7 +73,7 @@ class VertexColorExportData:
                         return len(vertex_colors)-1
 
                     if bfu_vertex_color_to_use == "ActiveIndex":
-                        return utils.get_vertex_colors_render_color_index(obj)
+                        return bbpl.utils.get_vertex_colors_render_color_index(obj)
 
                     if bfu_vertex_color_to_use == "CustomIndex":
                         if bfu_vertex_color_index_to_use < len(vertex_colors):
@@ -90,7 +90,7 @@ class VertexColorExportData:
         if obj:
             if obj.type == "MESH":
                 if obj.data:
-                    vertex_colors = utils.get_vertex_colors(obj)
+                    vertex_colors = bbpl.utils.get_vertex_colors(obj)
                     if obj.bfu_vertex_color_index_to_use < len(vertex_colors):
                         return vertex_colors[index].name
 
