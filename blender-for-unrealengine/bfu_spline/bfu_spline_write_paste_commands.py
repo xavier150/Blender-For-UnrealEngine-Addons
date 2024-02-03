@@ -6,7 +6,7 @@ from . import bfu_spline_write_text
 
 
 
-def AddSplineToCommand(spline: bpy.types.Object, pre_bake_spline: bfu_spline_data.BFU_SplineTracks = None):
+def AddSplineToCommand(spline: bpy.types.Object, pre_bake_spline: bfu_spline_data.BFU_SplinesList = None):
     if spline.type == "CURVE":
         spline_type = spline.bfu_desired_spline_type
 
@@ -16,20 +16,28 @@ def AddSplineToCommand(spline: bpy.types.Object, pre_bake_spline: bfu_spline_dat
 
         # First I get the spline data.
         # This is a very bad way to do this. I need do a new python file specific to spline with class to get data.
-        data = bfu_spline_write_text.WriteSplineAnimationTracks(spline, pre_bake_spline)
-        SplineName = spline.name
+        data = bfu_spline_write_text.WriteSplinePointsData(spline, pre_bake_spline)
 
         # Engin ref:
         target_spline_component = bfu_spline_unreal_utils.get_spline_unreal_component(spline)
+        ue_format_spline_list = pre_bake_spline.get_ue_format_spline_list()
 
-        # Component 
-        t += "" + f"Begin Object Class={target_spline_component} Name={SplineName} ExportPath={target_spline_component}" + "\n"
+        for x, spline_key in enumerate(data["simple_splines"]):
+            simple_spline = data["simple_splines"][spline_key]
+            if x == 0:
+                spline_name = spline.name
+            else:
+                spline_name = spline.name+str(x)
 
-        # Init SplineCurves
-        t += "    " + data["SplineCurves"] + "\n"
+    
+            # Component 
+            t += "" + f"Begin Object Class={target_spline_component} Name={spline_name} ExportPath={target_spline_component}" + "\n"
 
-        # Close
-        t += "" + "End Object" + "\n"
+            # Init SplineCurves
+            t += "   " + ue_format_spline_list[x] + "\n"
+
+            # Close
+            t += "" + "End Object" + "\n"
         return t
     return None
 
@@ -66,6 +74,7 @@ def GetImportSplineScriptCommand(objs):
             add_spline_num += 1
 
     success = True
+    command = t
     report = str(add_spline_num) + " Spline(s) copied. Paste in Unreal Engine scene for import the spline. (Use CTRL+V in Unreal viewport)"
 
     return (success, command, report)

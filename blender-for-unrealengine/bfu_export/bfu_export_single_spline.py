@@ -43,7 +43,7 @@ if "bpy" in locals():
         importlib.reload(export_fbx_bin)
 
 
-def ProcessSplineExport(op, obj, pre_bake_spline: bfu_spline.bfu_spline_data.BFU_SplineTracks = None):
+def ProcessSplineExport(op, obj, pre_bake_spline: bfu_spline.bfu_spline_data.BFU_SplinesList = None):
     addon_prefs = bfu_basics.GetAddonPrefs()
     counter = bps.utils.CounterTimer()
     dirpath = bfu_utils.GetObjExportDir(obj)
