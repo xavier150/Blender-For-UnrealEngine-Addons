@@ -29,7 +29,9 @@ from .. import languages
 def get_preset_values():
     preset_values = [
         'obj.bfu_export_fbx_spline',
-        'obj.bfu_fix_axis_flippings'
+        'obj.bfu_desired_spline_type',
+        'obj.bfu_custom_spline_component',
+        'obj.bfu_export_spline_as_static_mesh'
         ]
     return preset_values
 
@@ -48,12 +50,14 @@ def draw_ui_object_spline(layout: bpy.types.UILayout, obj: bpy.types.Object):
     if scene.bfu_spline_properties_expanded.is_expend():
         if obj.type == "CURVE":
             spline_ui_pop = spline_ui.column()
-            spline_ui_pop.prop(obj, 'bfu_desired_spline_type')
-            if obj.bfu_desired_spline_type == "CUSTOM":
-                spline_ui_pop.prop(obj, 'bfu_custom_spline_component')
-            spline_ui_pop.prop(obj, 'bfu_export_fbx_spline')
-            spline_ui_pop.enabled = obj.bfu_export_type == "export_recursive"
-            spline_ui.operator("object.bfu_copy_active_spline_data", icon="COPYDOWN")
+            spline_ui_pop.prop(obj, 'bfu_export_spline_as_static_mesh')
+            if obj.bfu_export_spline_as_static_mesh is False:
+                spline_ui_pop.prop(obj, 'bfu_desired_spline_type')
+                if obj.bfu_desired_spline_type == "CUSTOM":
+                    spline_ui_pop.prop(obj, 'bfu_custom_spline_component')
+                spline_ui_pop.prop(obj, 'bfu_export_fbx_spline')
+                spline_ui_pop.enabled = obj.bfu_export_type == "export_recursive"
+                spline_ui.operator("object.bfu_copy_active_spline_data", icon="COPYDOWN")
 
 
 def draw_ui_scene_spline(layout: bpy.types.UILayout):
@@ -124,7 +128,7 @@ def register():
         )
 
     bpy.types.Object.bfu_desired_spline_type = bpy.props.EnumProperty(
-        name="spline Type",
+        name="Spline Type",
         description="Choose the type of spline",
         items=bfu_spline_utils.get_enum_splines_list(),
         default=bfu_spline_utils.get_enum_splines_default()
@@ -136,11 +140,19 @@ def register():
         override={'LIBRARY_OVERRIDABLE'},
         default="/Script/Engine.MySplineComponent",
         )
+    
+    bpy.types.Object.bfu_export_spline_as_static_mesh = bpy.props.BoolProperty(
+        name="Force staticMesh",
+        description="Force export asset like a StaticMesh if is ARMATURE type",
+        override={'LIBRARY_OVERRIDABLE'},
+        default=False
+        )
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
+    del bpy.types.Object.bfu_export_spline_as_static_mesh
     del bpy.types.Object.bfu_custom_spline_component
     del bpy.types.Object.bfu_desired_spline_type
     del bpy.types.Object.bfu_export_fbx_spline

@@ -27,12 +27,13 @@ from .. import bfu_export_procedure
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_cached_asset_list
-from ..export import bfu_export_get_info
+from .. import bfu_export
 from .. import bfu_ui
 from .. import languages
 from .. import bfu_custom_property
 from .. import bfu_camera
 from .. import bfu_spline
+from .. import bfu_vertex_color
 
 
 class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
@@ -1292,7 +1293,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             icon='FILE_FOLDER'
                             )
 
-                        if obj.type == "CAMERA":
+                        if bfu_utils.GetAssetType(obj) == "Caùera":
+                            bfu_export_procedure.bfu_export_procedure_ui.draw_object_export_procedure(layout, obj)
+                        if bfu_utils.GetAssetType(obj) == "Spline":
                             bfu_export_procedure.bfu_export_procedure_ui.draw_object_export_procedure(layout, obj)
 
                         else:
@@ -1676,7 +1679,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
                             StaticMeshVertexColorFeedback = StaticMeshVertexColorImportOption.row()
                             if obj.type == "MESH":
-                                vced = bfu_export_get_info.VertexColorExportData(obj)
+                                vced = bfu_vertex_color.bfu_vertex_color_utils.VertexColorExportData(obj)
                                 if vced.export_type == "REPLACE":
                                     my_text = 'Vertex color nammed "' + vced.name + '" will be used.'
                                     StaticMeshVertexColorFeedback.label(text=my_text, icon='INFO')

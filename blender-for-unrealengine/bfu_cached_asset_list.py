@@ -300,6 +300,12 @@ class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
                     obj,
                     None,
                     "Camera"))
+                
+            if bfu_utils.GetAssetType(obj) == "Spline" and scene.spline_export:
+                TargetAssetToExport.append(AssetToExport(
+                    obj,
+                    None,
+                    "Spline"))
 
             # StaticMesh
             if bfu_utils.GetAssetType(obj) == "StaticMesh" and scene.static_export:

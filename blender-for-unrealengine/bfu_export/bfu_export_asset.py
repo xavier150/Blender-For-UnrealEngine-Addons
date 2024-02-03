@@ -21,6 +21,7 @@ import bpy
 from . import bfu_export_single_alembic_animation
 from . import bfu_export_single_fbx_action
 from . import bfu_export_single_camera
+from . import bfu_export_single_spline
 from . import bfu_export_single_fbx_nla_anim
 from . import bfu_export_single_skeletal_mesh
 from . import bfu_export_single_static_mesh
@@ -31,33 +32,8 @@ from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_camera
+from .. import bfu_spline
 
-if "bpy" in locals():
-    import importlib
-    if "bfu_export_single_alembic_animation" in locals():
-        importlib.reload(bfu_export_single_alembic_animation)
-    if "bfu_export_single_fbx_action" in locals():
-        importlib.reload(bfu_export_single_fbx_action)
-    if "bfu_export_single_camera" in locals():
-        importlib.reload(bfu_export_single_camera)
-    if "bfu_export_single_fbx_nla_anim" in locals():
-        importlib.reload(bfu_export_single_fbx_nla_anim)
-    if "bfu_export_single_skeletal_mesh" in locals():
-        importlib.reload(bfu_export_single_skeletal_mesh)
-    if "bfu_export_single_static_mesh" in locals():
-        importlib.reload(bfu_export_single_static_mesh)
-    if "bfu_export_single_static_mesh_collection" in locals():
-        importlib.reload(bfu_export_single_static_mesh_collection)
-    if "bfu_cached_asset_list" in locals():
-        importlib.reload(bfu_cached_asset_list)
-    if "bps" in locals():
-        importlib.reload(bps)
-    if "bbpl" in locals():
-        importlib.reload(bbpl)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
 
 
 def IsValidActionForExport(scene, obj, animType):
@@ -97,6 +73,10 @@ def IsValidObjectForExport(scene, obj):
 
     if objType == "Camera":
         return scene.camera_export
+    if objType == "Spline":
+        return scene.spline_export
+    if objType == "Spline":
+        return scene.spline_export
     if objType == "StaticMesh":
         return scene.static_export
     if objType == "SkeletalMesh":
@@ -164,6 +144,7 @@ def process_export(op):
         bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_skeletal_file_path))
         bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_alembic_file_path))
         bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_camera_file_path))
+        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_spline_file_path))
         bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_other_file_path))
 
     obj_list = []  # Do a simple list of Objects to export
@@ -201,6 +182,7 @@ def process_export(op):
 def export_all_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToExport):
     export_collection_from_asset_list(op, asset_list)
     export_camera_from_asset_list(op, asset_list)
+    export_spline_from_asset_list(op, asset_list)
     export_static_mesh_from_asset_list(op, asset_list)
     export_skeletal_mesh_from_asset_list(op, asset_list)
     export_alembic_from_asset_list(op, asset_list)
@@ -268,6 +250,40 @@ def export_camera_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToE
         scene.frame_start = UserStartFrame
         scene.frame_end = UserEndFrame
         #UpdateExportProgress()
+
+def export_spline_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToExport):
+    scene = bpy.context.scene
+    addon_prefs = bfu_basics.GetAddonPrefs()
+    print("Start Export spline(s)")
+
+    spline_list = []
+
+    use_spline_evaluate = (scene.text_AdditionalData and addon_prefs.useGeneratedScripts)
+    if use_spline_evaluate:
+        multi_spline_tracks = bfu_spline.bfu_spline_data.BFU_MultiSplineTracks()
+    
+    # Preparre asset to export
+    for asset in asset_list:
+        asset: bfu_cached_asset_list.AssetToExport
+        if asset.asset_type == "Spline":
+            obj = asset.obj
+            if obj.bfu_export_type == "export_recursive":
+                if bfu_utils.GetAssetType(obj) == "Spline" and IsValidObjectForExport(scene, obj):                    
+                    spline_list.append(obj)
+                    multi_spline_tracks.add_spline_to_evaluate(obj)
+
+    if use_spline_evaluate:
+        multi_spline_tracks.evaluate_all_splines()
+
+    #Start export
+    for obj in spline_list:
+
+        if use_spline_evaluate:
+            spline_tracks = multi_spline_tracks.get_evaluate_spline_data(obj)
+        else:
+            spline_tracks = None
+        bfu_export_single_spline.ProcessSplineExport(op, obj, spline_tracks)
+
 
 def export_static_mesh_from_asset_list(op, asset_list: [bfu_cached_asset_list.AssetToExport]):
     scene = bpy.context.scene

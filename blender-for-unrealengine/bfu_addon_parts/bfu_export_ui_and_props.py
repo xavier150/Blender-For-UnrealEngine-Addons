@@ -1,6 +1,6 @@
 import os
 import bpy
-from ..export import bfu_export_asset
+from .. import bfu_export
 from .. import bfu_write_text
 from .. import bfu_basics
 from .. import bfu_utils
@@ -63,6 +63,12 @@ class BFU_PT_Export(bpy.types.Panel):
         description="Prefix of camera animations",
         maxlen=32,
         default="Cam_")
+    
+    bpy.types.Scene.bfu_spline_prefix_export_name = bpy.props.StringProperty(
+        name="Spline anim Prefix",
+        description="Prefix of spline animations",
+        maxlen=32,
+        default="Spline_")
 
     # Sub folder
     bpy.types.Scene.bfu_anim_subfolder_name = bpy.props.StringProperty(
@@ -100,6 +106,13 @@ class BFU_PT_Export(bpy.types.Panel):
         description="Choose a directory to export Camera(s)",
         maxlen=512,
         default=os.path.join("//", "ExportedFbx", "Sequencer"),
+        subtype='DIR_PATH')
+    
+    bpy.types.Scene.bfu_export_spline_file_path = bpy.props.StringProperty(
+        name="Spline export file path",
+        description="Choose a directory to export Spline(s)",
+        maxlen=512,
+        default=os.path.join("//", "ExportedFbx", "Spline"),
         subtype='DIR_PATH')
 
     bpy.types.Scene.bfu_export_other_file_path = bpy.props.StringProperty(
@@ -169,11 +182,13 @@ class BFU_PT_Export(bpy.types.Panel):
                             'scene.bfu_anim_prefix_export_name',
                             'scene.bfu_pose_prefix_export_name',
                             'scene.bfu_camera_prefix_export_name',
+                            'scene.bfu_spline_prefix_export_name',
                             'scene.bfu_anim_subfolder_name',
                             'scene.bfu_export_static_file_path',
                             'scene.bfu_export_skeletal_file_path',
                             'scene.bfu_export_alembic_file_path',
                             'scene.bfu_export_camera_file_path',
+                            'scene.bfu_export_spline_file_path',
                             'scene.bfu_export_other_file_path',
                             'scene.bfu_file_export_log_name',
                             'scene.bfu_file_import_asset_script_name',
@@ -423,7 +438,8 @@ class BFU_PT_Export(bpy.types.Panel):
                             or scene.skeletal_export
                             or scene.anin_export
                             or scene.alembic_export
-                            or scene.camera_export):
+                            or scene.camera_export
+                            or scene.spline_export):
                         return True
                     else:
                         return False
@@ -474,7 +490,7 @@ class BFU_PT_Export(bpy.types.Panel):
             scene.UnrealExportedAssetsList.clear()
             counter = bps.utils.CounterTimer()
             bfu_check_potential_error.UpdateNameHierarchy()
-            bfu_export_asset.process_export(self)
+            bfu_export.bfu_export_asset.process_export(self)
             bfu_write_text.WriteAllTextFiles()
 
             self.report(
@@ -560,6 +576,12 @@ class BFU_PT_Export(bpy.types.Panel):
         description="Check mark to export Camera(s)",
         default=True
         )
+    
+    bpy.types.Scene.spline_export = bpy.props.BoolProperty(
+        name="Spline(s)",
+        description="Check mark to export Spline(s)",
+        default=True
+        )
 
     # Additional file
     bpy.types.Scene.text_ExportLog = bpy.props.BoolProperty(
@@ -632,6 +654,7 @@ class BFU_PT_Export(bpy.types.Panel):
             propsPrefix.prop(scene, 'bfu_anim_prefix_export_name', icon='OBJECT_DATA')
             propsPrefix.prop(scene, 'bfu_pose_prefix_export_name', icon='OBJECT_DATA')
             propsPrefix.prop(scene, 'bfu_camera_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'bfu_spline_prefix_export_name', icon='OBJECT_DATA')
 
             # Sub folder
             propsSub = self.layout.row()
@@ -657,6 +680,7 @@ class BFU_PT_Export(bpy.types.Panel):
             filePath.prop(scene, 'bfu_export_skeletal_file_path')
             filePath.prop(scene, 'bfu_export_alembic_file_path')
             filePath.prop(scene, 'bfu_export_camera_file_path')
+            filePath.prop(scene, 'bfu_export_spline_file_path')
             filePath.prop(scene, 'bfu_export_other_file_path')
 
             # File name
@@ -686,6 +710,7 @@ class BFU_PT_Export(bpy.types.Panel):
             AssetsCol.prop(scene, 'anin_export')
             AssetsCol.prop(scene, 'alembic_export')
             AssetsCol.prop(scene, 'camera_export')
+            AssetsCol.prop(scene, 'spline_export')
             layout.separator()
 
             # Additional file

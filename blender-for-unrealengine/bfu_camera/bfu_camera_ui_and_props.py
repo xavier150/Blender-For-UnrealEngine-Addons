@@ -29,7 +29,11 @@ from .. import languages
 def get_preset_values():
     preset_values = [
         'obj.bfu_export_fbx_camera',
-        'obj.bfu_fix_axis_flippings'
+        'obj.bfu_fix_axis_flippings',
+        'obj.bfu_desired_camera_type',
+        'obj.bfu_custom_camera_actor',
+        'obj.bfu_custom_camera_default_actor',
+        'obj.bfu_custom_camera_component'
         ]
     return preset_values
 
@@ -137,7 +141,6 @@ def register():
         items=bfu_camera_utils.get_enum_cameras_list(),
         default=bfu_camera_utils.get_enum_cameras_default()
     )
-
     bpy.types.Object.bfu_custom_camera_actor = bpy.props.StringProperty(
         name="Custom Camera Actor",
         description=('Ref adress for an custom camera actor'),
@@ -156,6 +159,7 @@ def register():
         override={'LIBRARY_OVERRIDABLE'},
         default="/Script/MyModule.MyCameraComponent",
         )
+
 
 def unregister():
     for cls in reversed(classes):

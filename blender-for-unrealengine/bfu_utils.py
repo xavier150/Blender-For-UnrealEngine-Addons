@@ -681,6 +681,9 @@ def GetAssetType(obj):
 
     if obj.type == "ARMATURE" and not obj.bfu_export_skeletal_mesh_as_static_mesh:
         return "SkeletalMesh"
+    
+    if obj.type == "CURVE" and not obj.bfu_export_spline_as_static_mesh:
+        return "Spline"
 
     return "StaticMesh"
 
@@ -1220,6 +1223,10 @@ def GetObjExportDir(obj, abspath=False):
     if GetAssetType(obj) == "Camera":
         dirpath = os.path.join(
             scene.bfu_export_camera_file_path,
+            folder_name)
+    if GetAssetType(obj) == "Spline":
+        dirpath = os.path.join(
+            scene.bfu_export_spline_file_path,
             folder_name)
     if abspath:
         return bpy.path.abspath(dirpath)
