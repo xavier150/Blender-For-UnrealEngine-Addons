@@ -50,14 +50,17 @@ def draw_ui_object_spline(layout: bpy.types.UILayout, obj: bpy.types.Object):
     if scene.bfu_spline_properties_expanded.is_expend():
         if obj.type == "CURVE":
             spline_ui_pop = spline_ui.column()
-            spline_ui_pop.prop(obj, 'bfu_export_spline_as_static_mesh')
-            if obj.bfu_export_spline_as_static_mesh is False:
-                spline_ui_pop.prop(obj, 'bfu_desired_spline_type')
-                if obj.bfu_desired_spline_type == "CUSTOM":
-                    spline_ui_pop.prop(obj, 'bfu_custom_spline_component')
-                spline_ui_pop.prop(obj, 'bfu_export_fbx_spline')
-                spline_ui_pop.enabled = obj.bfu_export_type == "export_recursive"
-                spline_ui.operator("object.bfu_copy_active_spline_data", icon="COPYDOWN")
+            spline_ui_as_static_mesh = spline_ui_pop.column()
+            spline_ui_as_static_mesh.prop(obj, 'bfu_export_spline_as_static_mesh')
+            spline_ui_as_static_mesh.prop(obj, 'bfu_export_fbx_spline')
+            spline_ui_as_static_mesh.enabled = obj.bfu_export_type == "export_recursive"
+            
+            spline_ui_spline_type = spline_ui_pop.column()
+            spline_ui_spline_type.prop(obj, 'bfu_desired_spline_type')
+            if obj.bfu_desired_spline_type == "CUSTOM":
+                spline_ui_spline_type.prop(obj, 'bfu_custom_spline_component')
+            spline_ui_spline_type.enabled = obj.bfu_export_spline_as_static_mesh is False
+            spline_ui.operator("object.bfu_copy_active_spline_data", icon="COPYDOWN")
 
 
 def draw_ui_scene_spline(layout: bpy.types.UILayout):

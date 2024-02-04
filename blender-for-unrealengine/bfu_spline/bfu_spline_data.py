@@ -1,5 +1,6 @@
 import bpy
 import math
+import mathutils
 from typing import Dict, Any
 from . import bfu_spline_utils
 from . import bfu_spline_unreal_utils
@@ -9,6 +10,12 @@ from .. import languages
 from .. import bfu_basics
 from .. import bfu_utils
 
+def vector_as_ue_dict(vector_data: mathutils.Vector):
+    vector = {}
+    vector["X"] = "{:.6f}".format(vector_data.x) 
+    vector["Y"] = "{:.6f}".format(vector_data.y)
+    vector["Z"] = "{:.6f}".format(vector_data.z)
+    return vector
 
 class BFU_SimpleSplinePoint():
     
@@ -16,7 +23,13 @@ class BFU_SimpleSplinePoint():
         # Context stats
         scene = bpy.context.scene
 
-        self.position = {}
+        self.position = mathutils.Vector((0,0,0))
+        self.handle_left = mathutils.Vector((0,0,0))
+        self.handle_left_type = "FREE"
+        self.handle_right = mathutils.Vector((0,0,0))
+        self.handle_right_type = "FREE"  
+        
+        self.point_type = point_type
 
         if point_type in ["BEZIER"]:
             self.set_point_from_bezier(point_data)
@@ -26,26 +39,52 @@ class BFU_SimpleSplinePoint():
             self.set_point_from_poly(point_data)
 
     def set_point_from_bezier(self, point_data: bpy.types.BezierSplinePoint):
-        position = {}
-        position["x"] = round(point_data.co.x, 8)
-        position["y"] = round(point_data.co.y, 8)
-        position["z"] = round(point_data.co.z, 8)
-        self.position = position
-
+        self.handle_left = "VECTOR"
+        self.handle_right = "VECTOR"
+        self.position = point_data.co.copy()
+        self.handle_left = point_data.handle_left.copy()
+        self.handle_right = point_data.handle_right.copy()
 
     def set_point_from_nurbs(self, point_data: bpy.types.SplinePoint):
-        pass
+        self.handle_left = "FREE"
+        self.handle_right = "FREE"
+        self.position = point_data.co.copy()
 
     def set_point_from_poly(self, point_data: bpy.types.SplinePoint):
-        pass
+        self.handle_left = "VECTOR"
+        self.handle_right = "VECTOR"
+        self.position = point_data.co.copy()
 
+    def get_ue_position(self):
+        ue_position = self.position.copy()
+        ue_position *= mathutils.Vector((1,-1,1))
+        return ue_position
+    
+    def get_ue_handle_left(self):
+        ue_handle_left = self.handle_left.copy()
+        ue_handle_left -= self.position
+        ue_handle_left *= mathutils.Vector((3,3,3))
+        return ue_handle_left
+    
+    def get_ue_handle_right(self):
+        ue_handle_right = self.handle_right.copy()
+        ue_handle_right -= self.position
+        ue_handle_right *= mathutils.Vector((3,-3,3))
+        return ue_handle_right
 
-
+    def get_ue_interp_curve_mode(self):
+        if self.point_type in ["BEZIER"]:
+            return "CIM_CurveUser"
+        elif self.point_type in ["NURBS"]:
+            return "CIM_CurveAuto"
+        elif self.point_type in ["POLY"]:
+            return "CIM_Linear" 
 
     def get_spline_point_as_dict(self) -> Dict[str, Any]:
         data = {}
         # Static data
-        data["position"] = self.position
+        data["position"] = vector_as_ue_dict(self.position)
+        data["point_type"] = self.point_type
         return data
 
 
@@ -79,10 +118,8 @@ class BFU_SimpleSpline():
 
         return data
     
+    
     def get_ue_format_spline(self):
-
-
-
 
         Position = {}
         Rotation = {}
@@ -94,30 +131,31 @@ class BFU_SimpleSpline():
         ReparamTable["Points"] = []
 
         for x, spline_point in enumerate(self.spline_points):
+            spline_point: BFU_SimpleSplinePoint
             point_location = {}
             point_rotation = {}
             point_scale = {}
             reparam_table = {}
 
-            if x > 0:
-                point_location["InVal"] = x
-                point_rotation["InVal"] = x
-                point_scale["InVal"] = x
 
-            point_location["OutVal"] = spline_point.position
-            point_location["ArriveTangent"] = spline_point.position
-            point_location["LeaveTangent"] = spline_point.position
-            point_location["InterpMode"] = "CIM_CurveAuto"
 
+            point_location["InVal"] = x
+            point_location["OutVal"] = vector_as_ue_dict(spline_point.get_ue_position())
+            point_location["ArriveTangent"] = vector_as_ue_dict(spline_point.get_ue_handle_left())
+            point_location["LeaveTangent"] = vector_as_ue_dict(spline_point.get_ue_handle_right())
+            point_location["InterpMode"] = spline_point.get_ue_interp_curve_mode()
+
+            point_location["InVal"] = x
             point_rotation["OutVal"] = "(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000)"
             point_rotation["ArriveTangent"] = "(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000)"
             point_rotation["LeaveTangent"] = "(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000)"
-            point_rotation["InterpMode"] = "CIM_CurveAuto"
+            point_rotation["InterpMode"] = spline_point.get_ue_interp_curve_mode()
 
+            point_location["InVal"] = x
             point_scale["OutVal"] = "(X=1.000000,Y=1.000000,Z=1.000000)"
             point_scale["ArriveTangent"] = "(X=1.000000,Y=1.000000,Z=1.000000)"
             point_scale["LeaveTangent"] = "(X=1.000000,Y=1.000000,Z=1.000000)"
-            point_scale["InterpMode"] = "CIM_CurveAuto"
+            point_scale["InterpMode"] = spline_point.get_ue_interp_curve_mode()
 
             reparam_table["InVal"] = 1
             reparam_table["OutVal"] = x / 10
@@ -134,6 +172,7 @@ class BFU_SimpleSpline():
         data["SplineCurves"]["Position"] = Position
         data["SplineCurves"]["Rotation"] = Rotation
         data["SplineCurves"]["Scale"] = Scale
+        data["SplineCurves"]["ReparamTable"] = ReparamTable
         str_data = bfu_spline_utils.json_to_ue_format(data)
         return str_data
     

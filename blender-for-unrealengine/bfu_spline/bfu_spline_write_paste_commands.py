@@ -31,7 +31,7 @@ def AddSplineToCommand(spline: bpy.types.Object, pre_bake_spline: bfu_spline_dat
 
     
             # Component 
-            t += "" + f"Begin Object Class={target_spline_component} Name={spline_name} ExportPath={target_spline_component}" + "\n"
+            t += "" + f"Begin Object Class={target_spline_component} Name=\"{spline_name}_GEN_VARIABLE\" ExportPath={target_spline_component}'/Engine/Transient.{spline_name}_GEN_VARIABLE" + "\n"
 
             # Init SplineCurves
             t += "   " + ue_format_spline_list[x] + "\n"
