@@ -63,7 +63,7 @@ class BFU_SimpleSplinePoint():
     def get_ue_handle_left(self):
         ue_handle_left = self.handle_left.copy()
         ue_handle_left -= self.position
-        ue_handle_left *= mathutils.Vector((3,3,3))
+        ue_handle_left *= mathutils.Vector((-3,3,-3))
         return ue_handle_left
     
     def get_ue_handle_right(self):
@@ -120,6 +120,8 @@ class BFU_SimpleSpline():
     
     
     def get_ue_format_spline(self):
+        # handle right is leave Tangent in UE
+        # handle left is arive Tangent in UE
 
         Position = {}
         Rotation = {}
