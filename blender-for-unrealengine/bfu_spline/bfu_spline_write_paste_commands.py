@@ -1,10 +1,8 @@
 import bpy
-
 from . import bfu_spline_data
 from . import bfu_spline_unreal_utils
 from . import bfu_spline_write_text
-
-
+from .. import bbpl
 
 def AddSplineToCommand(spline: bpy.types.Object, pre_bake_spline: bfu_spline_data.BFU_SplinesList = None):
     if spline.type == "CURVE":
@@ -47,7 +45,8 @@ def AddSplineToCommand(spline: bpy.types.Object, pre_bake_spline: bfu_spline_dat
 def GetImportSplineScriptCommand(objs):
     # Return (success, command)
     scene = bpy.context.scene
-    frame_current = scene.frame_current
+    save_select = bbpl.utils.UserSelectSave()
+    save_select.save_current_select()
 
     success = False
     command = ""
@@ -79,5 +78,5 @@ def GetImportSplineScriptCommand(objs):
     success = True
     command = t
     report = str(add_spline_num) + " Spline(s) copied. Paste in Unreal Engine scene for import the spline. (Use CTRL+V in Unreal viewport)"
-
+    save_select.reset_select_by_name()
     return (success, command, report)
