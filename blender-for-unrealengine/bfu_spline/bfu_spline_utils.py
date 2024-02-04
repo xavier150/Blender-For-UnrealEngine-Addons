@@ -45,22 +45,21 @@ def convert_select_curves_to_bezier(curve_resolution=12):
         convert_curve_to_bezier(obj, curve_resolution)
 
 def convert_curve_to_bezier(obj: bpy.types.Object, curve_resolution=12):
-    context = bpy.context
     if obj.type == 'CURVE':
-        # Définir la résolution_u pour la courbe
+        # Set curve resolution_u
         for spline in obj.data.splines:
             spline.resolution_u = curve_resolution
         
-        # Sélectionner l'objet pour la conversion
+        # Select object for conversion
         bbpl.utils.select_specific_object(obj)
         
-        # Convertir en Mesh
+        # Convert to Mesh
         bpy.ops.object.convert(target='MESH')
 
-        # Convertir à nouveau en Curve
+        # Convert back to Curve
         bpy.ops.object.convert(target='CURVE')
         
-        # Définir le type de spline en 'BEZIER'
+        # Set spline type to 'BEZIER'
         bbpl.utils.select_specific_object(obj)
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.curve.select_all(action='SELECT')
@@ -69,16 +68,16 @@ def convert_curve_to_bezier(obj: bpy.types.Object, curve_resolution=12):
         bpy.ops.object.mode_set(mode='OBJECT')
 
 def create_resampled_spline(spline_data: bpy.types.Spline, curve_resolution=12):
-    # Créer un nouveau bloc de données courbe
+    # Create a new curve data block
     new_curve_data = bpy.data.curves.new(name="ResampledCurve", type='CURVE')
     new_curve_data.dimensions = '3D'
     
-    # Ajouter une nouvelle spline au bloc de données courbe en fonction du type de la spline source
+    # Add a new spline to the curve data block based on source spline type
     if spline_data.type == 'BEZIER':
         new_spline = new_curve_data.splines.new(type='BEZIER')
-        new_spline.bezier_points.add(len(spline_data.bezier_points) - 1)  # Ajuster le nombre de points
+        new_spline.bezier_points.add(len(spline_data.bezier_points) - 1)  # Adjust number of points
         
-        # Copier les points de la spline Bézier source
+        # Copy source Bezier spline points
         for i, bp in enumerate(spline_data.bezier_points):
             new_bp = new_spline.bezier_points[i]
             new_bp.co = bp.co
@@ -95,12 +94,12 @@ def create_resampled_spline(spline_data: bpy.types.Spline, curve_resolution=12):
 
     elif spline_data.type == 'NURBS':
         new_spline = new_curve_data.splines.new(type='NURBS')
-        new_spline.points.add(len(spline_data.points) - 1)  # Ajuster le nombre de points
+        new_spline.points.add(len(spline_data.points) - 1)  # Adjust number of points
         
-        # Copier les points de la spline NURBS source
+        # Copy source NURBS spline points
         for i, point in enumerate(spline_data.points):
             new_point = new_spline.points[i]
-            new_point.co = point.co  # copie les coordonnées et le poids (w)
+            new_point.co = point.co  # copy coordinates and weight (w)
             new_point.weight = point.weight
             
         new_spline.use_cyclic_u = spline_data.use_cyclic_u
@@ -111,14 +110,14 @@ def create_resampled_spline(spline_data: bpy.types.Spline, curve_resolution=12):
         new_spline.use_smooth = spline_data.use_smooth
             
     else:
-        # Ajouter une gestion pour d'autres types si nécessaire
-        print(f"Le type de spline {spline_data.type} n'est pas supporté.")
+        # Add handling for other types if necessary
+        print(f"Spline type {spline_data.type} is not supported.")
         return
     
-    # Créer un nouvel objet courbe avec ce bloc de données courbe
+    # Create a new curve object with this curve data block
     new_curve_obj = bpy.data.objects.new("ResampledCurveObject", new_curve_data)
     
-    # Ajouter l'objet à la scène active
+    # Add object to the active scene
     bpy.context.collection.objects.link(new_curve_obj)
     convert_curve_to_bezier(new_curve_obj, curve_resolution)
     return new_curve_obj
