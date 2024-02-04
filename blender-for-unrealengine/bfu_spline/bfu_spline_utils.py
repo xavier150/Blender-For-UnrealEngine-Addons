@@ -25,6 +25,7 @@ def transform_point_data(points):
         transformed_points.append(f"({','.join(point_parts)})")
     return f"({','.join(transformed_points)})"
 
+
 def json_to_ue_format(json_data):
     result_parts = []
     for spline, data in json_data.items():  # SplineCurves, ReparamTable, etc.
@@ -32,7 +33,18 @@ def json_to_ue_format(json_data):
             spline_parts = []
             for key, value in data.items():  # Position, Rotation, Scale
                 points = transform_point_data(value["Points"])
-                spline_parts.append(f"{key}=(Points={points})")
+                points_data = ""
+                points_data = f"Points={points}"
+
+                loop_data = ""
+                if "bIsLooped" in value and "LoopKeyOffset" in value:
+                    bIsLooped = value["bIsLooped"]
+                    LoopKeyOffset = value["LoopKeyOffset"]
+                    loop_data = f"bIsLooped={bIsLooped}, LoopKeyOffset={LoopKeyOffset}"
+
+                spline_parts.append(f"{key}=({points_data}, {loop_data})")
+
+
             result_parts.append(f"SplineCurves=({', '.join(spline_parts)})")
         else:  # Pour ReparamTable ou autres éléments similaires
             points = transform_point_data(data["Points"])

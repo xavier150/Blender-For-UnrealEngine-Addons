@@ -161,8 +161,14 @@ class BFU_SimpleSpline():
 
             
             Position["Points"].append(point_location)
+            Position["bIsLooped"] = self.closed_loop
+            Position["LoopKeyOffset"] = 1.0
             Rotation["Points"].append(point_rotation)
+            Rotation["bIsLooped"] = self.closed_loop
+            Rotation["LoopKeyOffset"] = 3.0
             Scale["Points"].append(point_scale)
+            Scale["bIsLooped"] = self.closed_loop
+            Scale["LoopKeyOffset"] = 3.0
             ReparamTable["Points"].append(reparam_table)
 
 

@@ -36,6 +36,7 @@ def AddSplineToCommand(spline: bpy.types.Object, pre_bake_spline: bfu_spline_dat
             # Init SplineCurves
             t += "   " + ue_format_spline_list[x] + "\n"
             t += "   " + f"bClosedLoop={simple_spline['closed_loop']}" + "\n"
+            t += "   " + f"CreationMethod=Instance" + "\n"
 
             # Close
             t += "" + "End Object" + "\n"
