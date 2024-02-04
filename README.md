@@ -35,6 +35,7 @@ By using Blender For Unreal Engine you can generate python scripts to import the
 - [Cameras](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Cameras)
 - [Camera Depth of Field](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Camera-Depth-of-Field)
 - [Camera Shift](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Camera-Shift)
+- [Curves and Splines](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Curve-and-Spline)
 - [Animations](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Animations)
 - [Materials](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Material)
 - [Vertex Colors](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Vertex-Color)
