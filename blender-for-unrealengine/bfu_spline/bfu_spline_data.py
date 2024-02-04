@@ -48,10 +48,17 @@ class BFU_SimpleSplinePoint():
     def set_point_from_poly(self, point_data: bpy.types.SplinePoint):
         self.handle_left = "VECTOR"
         self.handle_right = "VECTOR"
-        self.position = point_data.co.copy()
+        real_position = mathutils.Vector((0,0,0))
+        real_position.x = point_data.co.x
+        real_position.y = point_data.co.y
+        real_position.z = point_data.co.z
+        self.position = real_position
+        self.handle_left = real_position
+        self.handle_right = real_position
 
     def get_ue_position(self):
         ue_position = self.position.copy()
+        print(ue_position)
         ue_position *= mathutils.Vector((1,-1,1))
         return ue_position
     
