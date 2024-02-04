@@ -34,7 +34,7 @@ class BFU_SimpleSplinePoint():
         if point_type in ["BEZIER"]:
             self.set_point_from_bezier(point_data)
         elif point_type in ["NURBS"]:
-            self.set_point_from_nurbs(point_data)
+            print("NURBS curves need to be resampled!")
         elif point_type in ["POLY"]:
             self.set_point_from_poly(point_data)
 
@@ -44,11 +44,6 @@ class BFU_SimpleSplinePoint():
         self.position = point_data.co.copy()
         self.handle_left = point_data.handle_left.copy()
         self.handle_right = point_data.handle_right.copy()
-
-    def set_point_from_nurbs(self, point_data: bpy.types.SplinePoint):
-        self.handle_left = "FREE"
-        self.handle_right = "FREE"
-        self.position = point_data.co.copy()
 
     def set_point_from_poly(self, point_data: bpy.types.SplinePoint):
         self.handle_left = "VECTOR"
@@ -189,10 +184,27 @@ class BFU_SimpleSpline():
         print(f"Start evaluate spline_data index {str(index)}")
         counter = bps.utils.CounterTimer()
         
-        if spline_data.type in ["POLY", "NURBS"]:
+        if spline_data.type in ["POLY"]:
             for point in spline_data.points:
                 point: bpy.types.SplinePoint
                 self.spline_points.append(BFU_SimpleSplinePoint(point, spline_data.type))
+
+        if spline_data.type in ["NURBS"]:
+            
+            # Duplicate and resample spline
+            resampled_spline_obj = bfu_spline_utils.create_resampled_spline(spline_data)
+            new_spline_data = resampled_spline_obj.data.splines[0]
+            print(len(new_spline_data.bezier_points))
+            for point in new_spline_data.bezier_points:
+                point: bpy.types.BezierSplinePoint
+                self.spline_points.append(BFU_SimpleSplinePoint(point, new_spline_data.type))
+            
+            # Clear
+            objects_to_remove = [resampled_spline_obj]
+            data_to_remove = [resampled_spline_obj.data]
+            bpy.data.batch_remove(objects_to_remove)
+            bpy.data.batch_remove(data_to_remove)
+            
 
         elif spline_data.type in ["BEZIER"]:
             for bezier_point in spline_data.bezier_points:

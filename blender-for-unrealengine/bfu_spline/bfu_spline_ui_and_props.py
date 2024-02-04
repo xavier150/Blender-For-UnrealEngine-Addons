@@ -110,7 +110,7 @@ class BFU_OT_ConvertAnyCurveToBezier(bpy.types.Operator):
     bl_idname = "object.bfu_convert_any_curve_to_bezier"
     bl_description = "Convert selected curves to Bezier for Unreal Engine export."
     bl_options = {'REGISTER', 'UNDO'}  # Ajoutez 'UNDO' pour permettre l'annulation de l'opération
-
+    
     resolution: bpy.props.IntProperty(
         name="Resolution",
         description="Number of computed points in the U direction between every pair of control points.",
