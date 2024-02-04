@@ -23,11 +23,13 @@ def AddSplineToCommand(spline: bpy.types.Object, pre_bake_spline: bfu_spline_dat
         ue_format_spline_list = pre_bake_spline.get_ue_format_spline_list()
 
         for x, spline_key in enumerate(data["simple_splines"]):
+            simple_spline: bfu_spline_data.BFU_SimpleSpline
             simple_spline = data["simple_splines"][spline_key]
             if x == 0:
                 spline_name = spline.name
             else:
                 spline_name = spline.name+str(x)
+                
 
     
             # Component 
@@ -35,6 +37,7 @@ def AddSplineToCommand(spline: bpy.types.Object, pre_bake_spline: bfu_spline_dat
 
             # Init SplineCurves
             t += "   " + ue_format_spline_list[x] + "\n"
+            t += "   " + f"bClosedLoop={simple_spline['closed_loop']}" + "\n"
 
             # Close
             t += "" + "End Object" + "\n"

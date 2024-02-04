@@ -96,6 +96,7 @@ class BFU_SimpleSpline():
         scene = bpy.context.scene
 
         self.spline_type = spline_data.type
+        self.closed_loop = spline_data.use_cyclic_u
         self.spline_points = []
 
         # Blender Spline Data
@@ -112,6 +113,7 @@ class BFU_SimpleSpline():
         data = {}
         # Static data
         data["spline_type"] = self.spline_type
+        data["closed_loop"] = self.closed_loop
         data["points"] = []
         for spline_point in self.spline_points:
             data["points"].append(spline_point.get_spline_point_as_dict())
