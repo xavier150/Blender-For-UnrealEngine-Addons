@@ -37,3 +37,31 @@ def json_to_ue_format(json_data):
             points = transform_point_data(data["Points"])
             result_parts.append(f"{spline}=(Points={points})")
     return ", ".join(result_parts)
+
+def convert_select_curves_to_bezier(curve_resolution=12):
+    context = bpy.context
+    for obj in context.selected_objects:
+        if obj.type == 'CURVE':
+            # Définir la résolution_u pour la courbe
+            for spline in obj.data.splines:
+                spline.resolution_u = curve_resolution
+            
+            # Sélectionner l'objet pour la conversion
+            context.view_layer.objects.active = obj
+            obj.select_set(True)
+            
+            # Convertir en Mesh
+            bpy.ops.object.convert(target='MESH')
+            
+            # Convertir à nouveau en Curve
+            bpy.ops.object.convert(target='CURVE')
+            
+            # Définir le type de spline en 'BEZIER'
+            bpy.ops.object.select_all(action='DESELECT')  # Désélectionner tout pour éviter les conflits
+            obj.select_set(True)
+            context.view_layer.objects.active = obj
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.curve.select_all(action='SELECT')
+            bpy.ops.curve.spline_type_set(tygpe='BEZIER')
+            bpy.ops.curve.handle_type_set(type='AUTOMATIC')
+            bpy.ops.object.mode_set(mode='OBJECT')

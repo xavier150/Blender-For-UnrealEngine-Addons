@@ -104,7 +104,33 @@ class BFU_OT_CopySelectedsplinesOperator(bpy.types.Operator):
             self.report({'WARNING'}, result[2])
         return {'FINISHED'}
 
+class BFU_OT_ConvertAnyCurveToBezier(bpy.types.Operator):
+    """Convert selected curves to Bezier for Unreal Engine export."""
+    bl_label = "Convert selected curves to Bezier for Unreal"
+    bl_idname = "object.bfu_convert_any_curve_to_bezier"
+    bl_description = "Convert selected curves to Bezier for Unreal Engine export."
+    bl_options = {'REGISTER', 'UNDO'}  # Ajoutez 'UNDO' pour permettre l'annulation de l'opération
 
+    resolution: bpy.props.IntProperty(
+        name="Resolution",
+        description="Number of computed points in the U direction between every pair of control points.",
+        default=12,
+        min=1,
+        max=64
+    )
+
+    def execute(self, context):
+        print(f"Resolution set to: {self.resolution}")
+        # Votre logique de conversion ici
+        bfu_spline_utils.convert_select_curves_to_bezier(self.resolution)
+        return {'FINISHED'}
+    
+
+    def invoke(self, context, event):
+        # Cela appelle la boîte de dialogue permettant à l'utilisateur de modifier les propriétés avant l'exécution
+        return context.window_manager.invoke_props_dialog(self)
+
+        return {'FINISHED'}
 
 # -------------------------------------------------------------------
 #   Register & Unregister
@@ -112,7 +138,8 @@ class BFU_OT_CopySelectedsplinesOperator(bpy.types.Operator):
 
 classes = (
     BFU_OT_CopyActivesplineOperator,
-    BFU_OT_CopySelectedsplinesOperator
+    BFU_OT_CopySelectedsplinesOperator,
+    BFU_OT_ConvertAnyCurveToBezier
 )
 
 
