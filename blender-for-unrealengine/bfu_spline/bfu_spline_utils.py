@@ -40,9 +40,9 @@ def json_to_ue_format(json_data):
                 if "bIsLooped" in value and "LoopKeyOffset" in value:
                     bIsLooped = value["bIsLooped"]
                     LoopKeyOffset = value["LoopKeyOffset"]
-                    loop_data = f"bIsLooped={bIsLooped}, LoopKeyOffset={LoopKeyOffset}"
+                    loop_data = f"bIsLooped={bIsLooped},LoopKeyOffset={LoopKeyOffset}"
 
-                spline_parts.append(f"{key}=({points_data}, {loop_data})")
+                spline_parts.append(f"{key}=({points_data},{loop_data})")
 
 
             result_parts.append(f"SplineCurves=({', '.join(spline_parts)})")

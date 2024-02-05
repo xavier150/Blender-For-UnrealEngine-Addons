@@ -10,9 +10,12 @@ from .. import languages
 from .. import bfu_basics
 from .. import bfu_utils
 
-def vector_as_ue_dict(vector_data: mathutils.Vector):
+def float_as_ue(float: float):
+    return "{:.6f}".format(float)
+
+def vector_as_ue(vector_data: mathutils.Vector):
     vector = {}
-    vector["X"] = "{:.6f}".format(vector_data.x) 
+    vector["X"] = "{:.6f}".format(vector_data.x)
     vector["Y"] = "{:.6f}".format(vector_data.y)
     vector["Z"] = "{:.6f}".format(vector_data.z)
     return vector
@@ -58,7 +61,6 @@ class BFU_SimpleSplinePoint():
 
     def get_ue_position(self):
         ue_position = self.position.copy()
-        print(ue_position)
         ue_position *= mathutils.Vector((1,-1,1))
         return ue_position
     
@@ -85,7 +87,7 @@ class BFU_SimpleSplinePoint():
     def get_spline_point_as_dict(self) -> Dict[str, Any]:
         data = {}
         # Static data
-        data["position"] = vector_as_ue_dict(self.position)
+        data["position"] = vector_as_ue(self.position)
         data["point_type"] = self.point_type
         return data
 
@@ -99,6 +101,7 @@ class BFU_SimpleSpline():
 
         self.spline_type = spline_data.type
         self.closed_loop = spline_data.use_cyclic_u
+        self.spline_length = spline_data.calc_length()
         self.spline_points = []
 
         # Blender Spline Data
@@ -109,7 +112,6 @@ class BFU_SimpleSpline():
 
         # Formated data for ArchVis Tools in Unreal Engine
         # ...
-
 
     def get_simple_spline_values_as_dict(self) -> Dict[str, Any]:
         data = {}
@@ -122,7 +124,7 @@ class BFU_SimpleSpline():
 
         return data
     
-    
+
     def get_ue_format_spline(self):
         # handle right is leave Tangent in UE
         # handle left is arive Tangent in UE
@@ -135,48 +137,55 @@ class BFU_SimpleSpline():
         Rotation["Points"] = []
         Scale["Points"] = []
         ReparamTable["Points"] = []
+        reparam_table_sample = 10
+
+        spline_num = len(self.spline_points)
+        spline_length = self.spline_length
 
         for x, spline_point in enumerate(self.spline_points):
             spline_point: BFU_SimpleSplinePoint
             point_location = {}
             point_rotation = {}
             point_scale = {}
-            reparam_table = {}
 
-
-
-            point_location["InVal"] = x
-            point_location["OutVal"] = vector_as_ue_dict(spline_point.get_ue_position())
-            point_location["ArriveTangent"] = vector_as_ue_dict(spline_point.get_ue_handle_left())
-            point_location["LeaveTangent"] = vector_as_ue_dict(spline_point.get_ue_handle_right())
+            point_location["InVal"] = "{:.6f}".format(x)
+            point_location["OutVal"] = vector_as_ue(spline_point.get_ue_position())
+            point_location["ArriveTangent"] = vector_as_ue(spline_point.get_ue_handle_left())
+            point_location["LeaveTangent"] = vector_as_ue(spline_point.get_ue_handle_right())
             point_location["InterpMode"] = spline_point.get_ue_interp_curve_mode()
 
-            point_location["InVal"] = x
+            point_location["InVal"] = float_as_ue(x)
             point_rotation["OutVal"] = "(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000)"
             point_rotation["ArriveTangent"] = "(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000)"
             point_rotation["LeaveTangent"] = "(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000)"
             point_rotation["InterpMode"] = spline_point.get_ue_interp_curve_mode()
 
-            point_location["InVal"] = x
+            point_location["InVal"] = float_as_ue(x)
             point_scale["OutVal"] = "(X=1.000000,Y=1.000000,Z=1.000000)"
             point_scale["ArriveTangent"] = "(X=1.000000,Y=1.000000,Z=1.000000)"
             point_scale["LeaveTangent"] = "(X=1.000000,Y=1.000000,Z=1.000000)"
             point_scale["InterpMode"] = spline_point.get_ue_interp_curve_mode()
-
-            reparam_table["InVal"] = 1
-            reparam_table["OutVal"] = x / 10
-
-            
+           
             Position["Points"].append(point_location)
             Position["bIsLooped"] = self.closed_loop
-            Position["LoopKeyOffset"] = 1.0
+            Position["LoopKeyOffset"] = float_as_ue(1)
             Rotation["Points"].append(point_rotation)
             Rotation["bIsLooped"] = self.closed_loop
-            Rotation["LoopKeyOffset"] = 3.0
+            Rotation["LoopKeyOffset"] = float_as_ue(spline_num)
             Scale["Points"].append(point_scale)
             Scale["bIsLooped"] = self.closed_loop
-            Scale["LoopKeyOffset"] = 3.0
-            ReparamTable["Points"].append(reparam_table)
+            Scale["LoopKeyOffset"] = float_as_ue(spline_num)
+
+            for reparam_index in range(0, reparam_table_sample):
+                reparam_table = {}
+                spline_position_at_time = (reparam_index + reparam_table_sample*x + 1)/reparam_table_sample
+                spline_length_at_time = spline_length*(reparam_index + reparam_table_sample*x + 1)/(reparam_table_sample*spline_num)
+                InVal = spline_length_at_time
+                OutVal = spline_position_at_time
+                #print(float_as_ue(InVal), "->", float_as_ue(OutVal))
+                reparam_table["InVal"] = float_as_ue(InVal)
+                reparam_table["OutVal"] = float_as_ue(OutVal)
+                ReparamTable["Points"].append(reparam_table)
 
 
         data = {}
@@ -194,7 +203,7 @@ class BFU_SimpleSpline():
         scene = bpy.context.scene
         addon_prefs = bfu_basics.GetAddonPrefs()
 
-        print(f"Start evaluate spline_data index {str(index)}")
+        #print(f"Start evaluate spline_data index {str(index)}")
         counter = bps.utils.CounterTimer()
         
         if spline_data.type in ["POLY"]:
@@ -207,7 +216,6 @@ class BFU_SimpleSpline():
             # Duplicate and resample spline
             resampled_spline_obj = bfu_spline_utils.create_resampled_spline(spline_data)
             new_spline_data = resampled_spline_obj.data.splines[0]
-            print(len(new_spline_data.bezier_points))
             for point in new_spline_data.bezier_points:
                 point: bpy.types.BezierSplinePoint
                 self.spline_points.append(BFU_SimpleSplinePoint(point, new_spline_data.type))
@@ -218,14 +226,13 @@ class BFU_SimpleSpline():
             bpy.data.batch_remove(objects_to_remove)
             bpy.data.batch_remove(data_to_remove)
             
-
         elif spline_data.type in ["BEZIER"]:
             for bezier_point in spline_data.bezier_points:
                 bezier_point: bpy.types.BezierSplinePoint
                 self.spline_points.append(BFU_SimpleSplinePoint(bezier_point, spline_data.type))
 
-        print("Evaluate index " + str(index) + " finished in " + counter.get_str_time())
-        print("-----")
+        #print("Evaluate index " + str(index) + " finished in " + counter.get_str_time())
+        #print("-----")
         return
 
 class BFU_SplinesList():
@@ -266,16 +273,25 @@ class BFU_SplinesList():
         scene = bpy.context.scene
         addon_prefs = bfu_basics.GetAddonPrefs()
 
-        print(f"Start evaluate spline {spline_obj.name}")
+        #print(f"Start evaluate spline {spline_obj.name}")
         counter = bps.utils.CounterTimer()
         
+        # Set Resolution U to have an correct length result
+        save_resolution_u = spline_obj.data.resolution_u
+        save_render_resolution_u = spline_obj.data.render_resolution_u
+        spline_obj.data.resolution_u = 512
+        spline_obj.data.render_resolution_u = 512
+
         for x, spline_data in enumerate(spline_obj.data.splines):
             simple_spline = self.simple_splines[x] = BFU_SimpleSpline(spline_data)
             simple_spline.evaluate_spline_data(spline_data, x)
 
+        # Reset Resolution U
+        spline_obj.data.resolution_u = save_resolution_u
+        spline_obj.data.render_resolution_u = save_render_resolution_u
 
-        print("Evaluate " + spline_obj.name + " finished in " + counter.get_str_time())
-        print("-----")
+        #print("Evaluate " + spline_obj.name + " finished in " + counter.get_str_time())
+        #print("-----")
         return
 
  
