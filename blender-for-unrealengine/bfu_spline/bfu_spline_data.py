@@ -101,7 +101,7 @@ class BFU_SimpleSpline():
 
         self.spline_type = spline_data.type
         self.closed_loop = spline_data.use_cyclic_u
-        self.spline_length = spline_data.calc_length()
+        self.spline_length = spline_data.calc_length(resolution=512) #512 is the res used in UE5 to calculate length.
         self.spline_points = []
 
         # Blender Spline Data
@@ -276,19 +276,9 @@ class BFU_SplinesList():
         #print(f"Start evaluate spline {spline_obj.name}")
         counter = bps.utils.CounterTimer()
         
-        # Set Resolution U to have an correct length result
-        save_resolution_u = spline_obj.data.resolution_u
-        save_render_resolution_u = spline_obj.data.render_resolution_u
-        spline_obj.data.resolution_u = 512
-        spline_obj.data.render_resolution_u = 512
-
         for x, spline_data in enumerate(spline_obj.data.splines):
             simple_spline = self.simple_splines[x] = BFU_SimpleSpline(spline_data)
             simple_spline.evaluate_spline_data(spline_data, x)
-
-        # Reset Resolution U
-        spline_obj.data.resolution_u = save_resolution_u
-        spline_obj.data.render_resolution_u = save_render_resolution_u
 
         #print("Evaluate " + spline_obj.name + " finished in " + counter.get_str_time())
         #print("-----")
