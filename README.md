@@ -1,22 +1,36 @@
 # Blender For Unreal Engine
 
-This Add-on allows you to export content created with Blender to Unreal Engine. StaticMeshs, SkeletalMeshs, Animations (NLA and Actions), Collisions and Sockets, Alembic animations, Camera and sequencer...
+This add-on allows you to export content created with Blender to Unreal Engine, including:
 
-It works with Blender 3.5 and older to 2.8 and work for UE4, UE5!
+- Static Meshes
+- Skeletal Meshes
+- Animations (NLA and Actions)
+- Alembic files
+- Collisions / Sockets
+- Splines
+- Cameras
+- Sequencer content
+- And more...
 
-## Discord
+It is compatible with Blender versions 2.8 through 4.0 and works with Unreal Engine 4 and 5!  
+The add-on is open-source and can be easily adapted to any production.  
+Every part is documented, and you can contact me on Discord if you have any issues.  
+Discord -> [BleuRaven side projects](https://discord.gg/XuYeGCFtxa)
 
-If you need help or you want see my sides project you can join the discord!
-
-- [BleuRaven side projects](https://discord.gg/XuYeGCFtxa)
 
 ## How it works
 
-Working on object packs for Unreal Engine can be tedious with Blender. That's why I created the Add-on: "Blender for UnrealEngine". it simplified the export process from Blender to Unreal Engine by allowing you to export all the assets of a scene at the same time. It even automatically distributes them in a proper tree structure in correlation with the Unreal Engine pipeline!
+Working on object packs for Unreal Engine with Blender can be tedious. That's why I created the add-on: "Blender for Unreal Engine." It simplifies the export process from Blender to Unreal Engine by enabling you to export all assets of a scene simultaneously (Batch Export).  
+The add-on automatically organizes them into a proper tree structure in line with the Unreal Engine pipeline.
 
-Sockets and collision shapes are created directly in Blender, you can precisely choose which animations need to be exported. Blender For Unreal Engine also includes a error checker to prevent the all potential problems. You have an explanation of the problem and how to solve it. In addition to the possibility in certain cases of correcting the problem automatically.
+Sockets and collision shapes are created directly in Blender, allowing you to precisely select which animations to export. "Blender For Unreal Engine" also includes an error checker to identify and prevent potential problems.  
+It provides explanations of the problems and solutions, including, in some cases, the ability to correct the issue automatically.
 
-By using Blender For Unreal Engine you can generate python scripts to import the all exported assets directly in Unreal Engine. That work too for the cameras in a Level Sequence with the all cuts and camera ratio.
+By using "Blender For Unreal Engine," you can generate Python scripts to import all the exported assets directly into Unreal Engine.  
+This also works for cameras in a Level Sequence, including all cuts and camera data such as aspect ratio, focal distance, lens shift, and more.
+
+Additionally, the add-on can export data to the clipboard. 
+You simply need to paste it into Unreal Engine, for example, the cameras, splines, or sockets.
 
 # Wiki
 - [Home](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki)
