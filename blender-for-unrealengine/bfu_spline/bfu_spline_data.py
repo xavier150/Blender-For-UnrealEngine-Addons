@@ -198,7 +198,7 @@ class BFU_SimpleSpline():
         return str_data
     
 
-    def evaluate_spline_data(self, spline_data: bpy.types.Spline, index=0):
+    def evaluate_spline_data(self, spline_obj: bpy.types.Object, spline_data: bpy.types.Spline, index=0):
         
         scene = bpy.context.scene
         addon_prefs = bfu_basics.GetAddonPrefs()
@@ -214,7 +214,7 @@ class BFU_SimpleSpline():
         if spline_data.type in ["NURBS"]:
             
             # Duplicate and resample spline
-            resampled_spline_obj = bfu_spline_utils.create_resampled_spline(spline_data)
+            resampled_spline_obj = bfu_spline_utils.create_resampled_spline(spline_data, spline_obj.bfu_spline_resample_resolution)
             new_spline_data = resampled_spline_obj.data.splines[0]
             for point in new_spline_data.bezier_points:
                 point: bpy.types.BezierSplinePoint
@@ -278,7 +278,7 @@ class BFU_SplinesList():
         
         for x, spline_data in enumerate(spline_obj.data.splines):
             simple_spline = self.simple_splines[x] = BFU_SimpleSpline(spline_data)
-            simple_spline.evaluate_spline_data(spline_data, x)
+            simple_spline.evaluate_spline_data(spline_obj, spline_data, x)
 
         #print("Evaluate " + spline_obj.name + " finished in " + counter.get_str_time())
         #print("-----")

@@ -24,7 +24,7 @@ from . import bfu_spline_write_paste_commands
 from .. import bfu_basics
 from .. import bbpl
 from .. import languages
-
+from ..bbpl.blender_layout import layout_doc_button
 
 def get_preset_values():
     preset_values = [
@@ -59,6 +59,10 @@ def draw_ui_object_spline(layout: bpy.types.UILayout, obj: bpy.types.Object):
             spline_ui_spline_type.prop(obj, 'bfu_desired_spline_type')
             if obj.bfu_desired_spline_type == "CUSTOM":
                 spline_ui_spline_type.prop(obj, 'bfu_custom_spline_component')
+            if bfu_spline_utils.contain_nurbs_spline(obj):
+                resample_resolution = spline_ui_spline_type.row()
+                resample_resolution.prop(obj, 'bfu_spline_resample_resolution')
+                layout_doc_button.add_doc_page_operator(resample_resolution, text="", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Curve-and-Spline#notes")
             spline_ui_spline_type.enabled = obj.bfu_export_spline_as_static_mesh is False
             spline_ui.operator("object.bfu_copy_active_spline_data", icon="COPYDOWN")
 
@@ -164,6 +168,14 @@ def register():
         default=bfu_spline_utils.get_enum_splines_default()
     )
 
+    bpy.types.Object.bfu_spline_resample_resolution = bpy.props.IntProperty(
+        name="Resample resolution",
+        description="NURBS curves must be resampled. You can choose the resampling resolution. 12 It's nice to keep the same quality but consume a lot of performance in Unreal Engine.",
+        max=64,
+        min=0,
+        default=12,
+    )
+
     bpy.types.Object.bfu_custom_spline_component = bpy.props.StringProperty(
         name="Custom spline Component",
         description=('Ref adress for an custom spline component'),
@@ -184,6 +196,7 @@ def unregister():
 
     del bpy.types.Object.bfu_export_spline_as_static_mesh
     del bpy.types.Object.bfu_custom_spline_component
+    del bpy.types.Object.bfu_spline_resample_resolution
     del bpy.types.Object.bfu_desired_spline_type
     del bpy.types.Object.bfu_export_fbx_spline
     del bpy.types.Scene.bfu_spline_tools_expanded

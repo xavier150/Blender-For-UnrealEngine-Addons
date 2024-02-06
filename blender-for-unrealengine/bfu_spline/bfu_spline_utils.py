@@ -133,3 +133,10 @@ def create_resampled_spline(spline_data: bpy.types.Spline, curve_resolution=12):
     bpy.context.collection.objects.link(new_curve_obj)
     convert_curve_to_bezier(new_curve_obj, curve_resolution)
     return new_curve_obj
+
+def contain_nurbs_spline(obj: bpy.types.Object):
+    if obj.type == "CURVE":
+        for spline in obj.data.splines:
+            if spline.type == "NURBS":
+                return True
+    return False
