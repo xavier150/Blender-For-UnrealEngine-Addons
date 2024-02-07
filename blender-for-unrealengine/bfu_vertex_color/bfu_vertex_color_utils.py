@@ -30,21 +30,24 @@ class VertexColorExportData:
         self.color = (1.0, 1.0, 1.0)
         self.index = -1
 
-        if self.GetPropertyOwner():
-            if self.GetPropertyOwner().bfu_vertex_color_import_option == "IGNORE":
+        owner = self.GetPropertyOwner()
+        if owner:
+            if owner.bfu_vertex_color_import_option == "IGNORE":
                 self.export_type = "IGNORE"
 
-            elif self.GetPropertyOwner().bfu_vertex_color_import_option == "OVERRIDE":
-                self.color = self.GetPropertyOwner().bfu_vertex_color_override_color
+            elif owner.bfu_vertex_color_import_option == "OVERRIDE":
+                self.color = owner.bfu_vertex_color_override_color
                 self.export_type = "OVERRIDE"
 
-            elif self.GetPropertyOwner().bfu_vertex_color_import_option == "REPLACE":
+            elif owner.bfu_vertex_color_import_option == "REPLACE":
                 index = self.GetChosenVertexIndex()
-                # print(index)
                 if index != -1:
                     self.index = index
                     self.name = self.GetChosenVertexName()
                     self.export_type = "REPLACE"
+            else:
+                print("export type", self.export_type, "not found!")
+
 
     def GetPropertyOwner(self):
         # Return the object to use for the property or return self if none
@@ -53,31 +56,36 @@ class VertexColorExportData:
         return self.obj
 
     def GetChosenVertexIndex(self):
-
         obj = self.obj
+
         if obj.type != "MESH":
-            return -1
+            if obj.type == "ARMATURE":
+                return 0
+            else:
+                return -1
 
-        bfu_vertex_color_to_use = self.GetPropertyOwner().bfu_vertex_color_to_use
-        bfu_vertex_color_index_to_use = self.GetPropertyOwner().bfu_vertex_color_index_to_use
+        owner = self.GetPropertyOwner()
+        if owner:
+            bfu_vertex_color_to_use = owner.bfu_vertex_color_to_use
+            bfu_vertex_color_index_to_use = owner.bfu_vertex_color_index_to_use
+            if obj:
+                if obj.data:
+                    vertex_colors = bbpl.utils.get_vertex_colors(obj)
+                    if len(vertex_colors) > 0:
 
-        if obj:
-            if obj.data:
-                vertex_colors = bbpl.utils.get_vertex_colors(obj)
-                if len(vertex_colors) > 0:
+                        if bfu_vertex_color_to_use == "FirstIndex":
+                            return 0
 
-                    if bfu_vertex_color_to_use == "FirstIndex":
-                        return 0
+                        if bfu_vertex_color_to_use == "LastIndex":
+                            return len(vertex_colors)-1
 
-                    if bfu_vertex_color_to_use == "LastIndex":
-                        return len(vertex_colors)-1
+                        if bfu_vertex_color_to_use == "ActiveIndex":
+                            obj.data.color_attributes.render_color_index
+                            return bbpl.utils.get_vertex_colors_render_color_index(obj)
 
-                    if bfu_vertex_color_to_use == "ActiveIndex":
-                        return bbpl.utils.get_vertex_colors_render_color_index(obj)
-
-                    if bfu_vertex_color_to_use == "CustomIndex":
-                        if bfu_vertex_color_index_to_use < len(vertex_colors):
-                            return bfu_vertex_color_index_to_use
+                        if bfu_vertex_color_to_use == "CustomIndex":
+                            if bfu_vertex_color_index_to_use < len(vertex_colors):
+                                return bfu_vertex_color_index_to_use
         return -1
 
     def GetChosenVertexName(self):
