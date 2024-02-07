@@ -127,7 +127,7 @@ def GetImportCameraScriptCommand(objs):
 
 
     for camera in cameras:
-        add_command = AddCameraToCommand(camera, pre_bake_camera.get_evaluate_camera_data(obj))
+        add_command = AddCameraToCommand(camera, pre_bake_camera.get_evaluate_camera_data(camera))
         if add_command:
             t += add_command
             add_camera_num += 1
