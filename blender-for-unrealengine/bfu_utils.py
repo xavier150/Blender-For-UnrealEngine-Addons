@@ -261,6 +261,8 @@ def GetSocketDesiredChild(targetObj):
 def GetSkeletalMeshSockets(obj):
     if obj is None:
         return
+    if obj.type != "ARMATURE":
+        return
 
     addon_prefs = bfu_basics.GetAddonPrefs()
     data = {}
@@ -279,6 +281,13 @@ def GetSkeletalMeshSockets(obj):
         if IsASocket(socket):
             SocketName = socket.name[7:]
 
+        if socket.parent is None:
+            print("Socket ", socket.name, " parent is None!")
+            break
+        if socket.parent.type != "ARMATURE":
+            print("Socket parent", socket.parent.name, " parent is not and Armature!")
+            break
+
         if socket.parent.bfu_export_deform_only:
             b = bfu_basics.getFirstDeformBoneParent(socket.parent.data.bones[socket.parent_bone])
         else:
@@ -295,9 +304,14 @@ def GetSkeletalMeshSockets(obj):
         s = socket.scale*addon_prefs.skeletalSocketsImportedSize
 
         # Convet to array for Json and convert value for Unreal
-        array_location = [t[0], t[1]*-1, t[2]]
-        array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]
-        array_scale = [s[0], s[1], s[2]]
+        if obj.bfu_skeleton_export_procedure == 'ue-standard':
+            array_location = [t[0], t[1]*-1, t[2]]
+            array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]
+            array_scale = [s[0], s[1], s[2]]
+        else:
+            array_location = [t[0], t[1]*-1, t[2]]
+            array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]
+            array_scale = [s[0], s[1], s[2]]
 
         MySocket = {}
         MySocket["SocketName"] = SocketName
