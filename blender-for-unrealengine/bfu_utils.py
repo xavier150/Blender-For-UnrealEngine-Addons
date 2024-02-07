@@ -257,6 +257,13 @@ def GetSocketDesiredChild(targetObj):
 
     return sockets
 
+def GetSocketsExportName(socket):
+    '''
+    Get the current socket custom name
+    '''
+    if socket.bfu_use_socket_custom_Name:
+        return socket.bfu_socket_custom_Name
+    return socket.name[7:]
 
 def GetSkeletalMeshSockets(obj):
     if obj is None:
@@ -279,7 +286,7 @@ def GetSkeletalMeshSockets(obj):
 
     for socket in sockets:
         if IsASocket(socket):
-            SocketName = socket.name[7:]
+            SocketName = GetSocketsExportName(socket)
 
         if socket.parent is None:
             print("Socket ", socket.name, " parent is None!")
