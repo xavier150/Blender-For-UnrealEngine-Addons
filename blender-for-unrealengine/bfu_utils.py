@@ -1439,20 +1439,22 @@ def Ue4SubObj_set(SubType):
             # StaticMesh Socket
             if obj.type == 'EMPTY' and SubType == "ST_Socket":
                 if ownerObj.type == 'MESH':
-                    if not IsASocket(obj):
+                    if IsASocket(obj):
+                        obj.name = GenerateUe4Name(obj.name)
+                    else:
                         obj.name = GenerateUe4Name("SOCKET_"+obj.name)
-                    bpy.ops.object.parent_set(
-                        type='OBJECT',
-                        keep_transform=True)
+                    bpy.ops.object.parent_set(type='OBJECT',keep_transform=True)
                     ConvertedObjs.append(obj)
 
             # SkeletalMesh Socket
-            if obj.type == 'EMPTY' and SubType == "SK_Socket":
+            if obj.type == 'EMPTY' and SubType == "SKM_Socket":
                 if ownerObj.type == 'ARMATURE':
 
-                    if not IsASocket(obj):
+                    if IsASocket(obj):
+                        obj.name = GenerateUe4Name(obj.name)
+                    else:
                         obj.name = GenerateUe4Name("SOCKET_"+obj.name)
-                    bpy.ops.object.parent_set(type='BONE')
+                    bpy.ops.object.parent_set(type='BONE',keep_transform=True)
                     ConvertedObjs.append(obj)
 
     DeselectAllWithoutActive()
@@ -1495,7 +1497,7 @@ def UpdateUe4Name(SubType, objList):
                             obj.name = GenerateUe4Name("SOCKET_"+obj.name)
 
                 # SkeletalMesh Socket
-                if obj.type == 'EMPTY' and SubType == "SK_Socket":
+                if obj.type == 'EMPTY' and SubType == "SKM_Socket":
                     if ownerObj.type == 'ARMATURE':
                         if not IsASocket(obj):
                             obj.name = GenerateUe4Name("SOCKET_"+obj.name)

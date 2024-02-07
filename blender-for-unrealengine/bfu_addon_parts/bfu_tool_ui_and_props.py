@@ -38,16 +38,9 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         def execute(self, context):
             ConvertedObj = bfu_utils.Ue4SubObj_set("ST_Socket")
             if len(ConvertedObj) > 0:
-                self.report(
-                    {'INFO'},
-                    str(len(ConvertedObj)) +
-                    " object(s) of the selection have be" +
-                    " converted to UE4 Socket. (Static)")
+                self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE Socket. (Static)")
             else:
-                self.report(
-                    {'WARNING'},
-                    "Please select two objects." +
-                    " (Active object is the owner of the socket)")
+                self.report({'WARNING'}, "Please select two objects. (Active mesh object is the owner of the socket)")
             return {'FINISHED'}
 
     class BFU_OT_ConvertToSkeletalSocketButton(bpy.types.Operator):
@@ -60,16 +53,9 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         def execute(self, context):
             ConvertedObj = bfu_utils.Ue4SubObj_set("SKM_Socket")
             if len(ConvertedObj) > 0:
-                self.report(
-                    {'INFO'},
-                    str(len(ConvertedObj)) +
-                    " object(s) of the selection have" +
-                    " be converted to UE4 Socket. (Skeletal)")
+                self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE Socket. (Skeletal)")
             else:
-                self.report(
-                    {'WARNING'},
-                    "Please select two objects. " +
-                    "(Active object is the owner of the socket)")
+                self.report({'WARNING'}, "Please select two objects. (Active armature object is the owner of the socket)")
             return {'FINISHED'}
 
     class BFU_OT_CopySkeletalSocketButton(bpy.types.Operator):
