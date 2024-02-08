@@ -306,6 +306,10 @@ def GetSkeletalMeshSockets(obj):
         am = socket.parent.matrix_world  # Armature
         em = socket.matrix_world  # Socket
         RelativeMatrix = (bml.inverted() @ am.inverted() @ em)
+        
+        if obj.bfu_skeleton_export_procedure == 'ue-standard':
+            RelativeMatrix = mathutils.Matrix.Rotation(math.radians(90), 4, 'Y') @ RelativeMatrix
+            RelativeMatrix = mathutils.Matrix.Rotation(math.radians(-90), 4, 'Z') @ RelativeMatrix
         t = RelativeMatrix.to_translation()
         r = RelativeMatrix.to_euler()
         s = socket.scale*addon_prefs.skeletalSocketsImportedSize
@@ -315,6 +319,7 @@ def GetSkeletalMeshSockets(obj):
             array_location = [t[0], t[1]*-1, t[2]]
             array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]
             array_scale = [s[0], s[1], s[2]]
+
         else:
             array_location = [t[0], t[1]*-1, t[2]]
             array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]
@@ -799,7 +804,7 @@ def SelectParentAndSpecificChilds(active, objects):
         if obj.name in bpy.context.view_layer.objects:
             if GetAssetType(active) == "SkeletalMesh":
                 # With skeletal mesh the socket must be not exported,
-                # ue4 read it like a bone
+                # UE read it like a bone
                 if not fnmatch.fnmatchcase(obj.name, "SOCKET*"):
                     obj.select_set(True)
                     selectedObjs.append(obj)

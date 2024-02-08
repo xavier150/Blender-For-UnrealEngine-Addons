@@ -284,6 +284,7 @@ def ImportAsset(asset_data):
     if asset_data["asset_type"] == "Animation":
         # For animation remove the extra mesh
         if type(asset) is not unreal.AnimSequence:
+            p = task.imported_object_paths[0]
             animAssetName = p.split('.')[0]+'_anim.'+p.split('.')[1]+'_anim'
             animAssetNameDesiredPath = p.split('.')[0]+'.'+p.split('.')[1]
             animAsset = unreal.find_asset(animAssetName)
