@@ -40,10 +40,6 @@ You simply need to paste it into Unreal Engine, for example, the cameras, spline
 - [Download And Installation (Dev Branch)](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Download-And-Installation-From-Dev-Branch)
 - [Static Meshs ‐ Quick Start](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Static-Meshs-‐-Quick-Start)
 - [Skeletal Meshs ‐ Quick Start](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Skeletal-Meshs-‐-Quick-Start)
-### Videos
-- How Import Blender assets to Unreal Engine -> https://youtu.be/2ehb2Ih3Nbg
-- How Import Blender camera to Unreal Sequencer -> https://youtu.be/Xx_9MQu2EkM
-- Old Teaser -> https://youtu.be/YLOZZIlhgaM
 ### Overview Pages
 - [Transform And Pivot Point](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Transform-And-Pivot-Point)
 - [Level of details](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Level-of-details)
@@ -67,8 +63,12 @@ You simply need to paste it into Unreal Engine, for example, the cameras, spline
 - [Modular Skeletal Meshs](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Modular-skeletal-mesh)
 - [Skeleton & Root bone](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Skeleton-&-Root-bone)
 - [UE Bone Structure and UE Mannequin](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/UE-Bone-Structure-and-UE-Mannequin)
+### Videos
+- How Import Blender assets to Unreal Engine -> https://youtu.be/2ehb2Ih3Nbg
+- How Import Blender camera to Unreal Sequencer -> https://youtu.be/Xx_9MQu2EkM
+- Old Teaser -> https://youtu.be/YLOZZIlhgaM
 ### Community videos
-- Camera Tracking From Blender To Unreal Engine -> https://youtu.be/Ta0am2wC-SI?si=2TNyqYHmnDpf20u8
+- Camera Tracking From Blender To Unreal Engine -> https://www.youtube.com/watch?v=Ta0am2wC-SI
 ### Additional Information
 - [API](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/API)
 - [Nomenclature](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Nomenclature)
