@@ -20,14 +20,14 @@ Discord -> [BleuRaven side projects](https://discord.gg/XuYeGCFtxa)
 
 ## How it works
 
-Working on object packs for Unreal Engine with Blender can be tedious. That's why I created the add-on: "Blender for Unreal Engine."  
+Working on object packs for Unreal Engine with Blender can be tedious. That's why I created the add-on: "Blender for Unreal Engine"  
 It simplifies the export process from Blender to Unreal Engine by enabling you to export all assets of a scene simultaneously (Batch Export).  
 The add-on automatically organizes them into a proper tree structure in line with the Unreal Engine pipeline.
 
 Sockets and collision shapes are created directly in Blender, allowing you to precisely select which animations to export. "Blender For Unreal Engine" also includes an error checker to identify and prevent potential problems.  
 It provides explanations of the problems and solutions, including, in some cases, the ability to correct the issue automatically.
 
-By using "Blender For Unreal Engine," you can generate Python scripts to import all the exported assets directly into Unreal Engine.  
+By using "Blender For Unreal Engine" you can generate Python scripts to import all the exported assets directly into Unreal Engine.  
 This also works for cameras in a Level Sequence, including all cuts and camera data such as aspect ratio, focal distance, lens shift, and more.
 
 Additionally, the add-on can export data to the clipboard. 
