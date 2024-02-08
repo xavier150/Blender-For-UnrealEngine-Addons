@@ -466,6 +466,7 @@ It is now possible to force the duration of an animation according to the scene 
 - New: Camera values Min and Max FStop is updated with Aperture.
 - New: Support for ArchVis cameras (Use of shift)
 - New: Support for custom cameras (Example Blueprints)
+- New: Support for Spline and Curves export/import.
 - Faster camera export.
 - Fixed: Blender 3.5 may crash during NLA Export. (Interacting with an NlaStripFCurves not linked to an object could lead to a crash in Blender 3.5.)
 - Fixed: Applying skeletal export scale with Proxy and Unit Scale not set to 0.01 could result in a script error.
