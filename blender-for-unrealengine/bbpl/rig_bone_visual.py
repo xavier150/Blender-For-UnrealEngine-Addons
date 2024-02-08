@@ -245,54 +245,54 @@ def generate_bone_shape_from_prop(
 
     return new_shape
 
+if bpy.app.version <= (3, 6, 0):
+    def create_bone_group(armature, name, theme="DEFAULT"):
+        """
+        Deprecated in Blender 4.0
+        Creates a bone group in the armature with the specified name and color theme.
 
-def create_bone_group(armature, name, theme="DEFAULT"):
-    """
-    Deprecated in Blender 4.0
-    Creates a bone group in the armature with the specified name and color theme.
+        Args:
+            armature (bpy.types.Object): The armature object.
+            name (str): The name of the bone group.
+            theme (str, optional): The color theme of the bone group. Defaults to "DEFAULT".
 
-    Args:
-        armature (bpy.types.Object): The armature object.
-        name (str): The name of the bone group.
-        theme (str, optional): The color theme of the bone group. Defaults to "DEFAULT".
+        Returns:
+            bpy.types.PoseBoneGroup: The created bone group.
+        """
+        if name in armature.pose.bone_groups:
+            group = armature.pose.bone_groups[name]
+        else:
+            group = armature.pose.bone_groups.new(name=name)
 
-    Returns:
-        bpy.types.PoseBoneGroup: The created bone group.
-    """
-    if name in armature.pose.bone_groups:
-        group = armature.pose.bone_groups[name]
-    else:
-        group = armature.pose.bone_groups.new(name=name)
+        if theme == "DEFAULT":
+            group.color_set = "DEFAULT"
+        else:
+            colors = get_theme_colors(theme)
+            group.color_set = 'CUSTOM'
+            group.colors.normal = colors[0]
+            group.colors.select = colors[1]
+            group.colors.active = colors[2]
 
-    if theme == "DEFAULT":
-        group.color_set = "DEFAULT"
-    else:
-        colors = get_theme_colors(theme)
-        group.color_set = 'CUSTOM'
-        group.colors.normal = colors[0]
-        group.colors.select = colors[1]
-        group.colors.active = colors[2]
-
-    return group
+        return group
 
 
-def direct_add_to_bone_group(armature, bones, group_name):
-    """
-    Deprecated in Blender 4.0
-    Adds the specified bones to a bone group in the armature.
+    def direct_add_to_bone_group(armature, bones, group_name):
+        """
+        Deprecated in Blender 4.0
+        Adds the specified bones to a bone group in the armature.
 
-    Args:
-        armature (bpy.types.Object): The armature object.
-        bones (str or list): The name(s) of the bone(s) to add to the bone group.
-        group_name (str): The name of the bone group.
+        Args:
+            armature (bpy.types.Object): The armature object.
+            bones (str or list): The name(s) of the bone(s) to add to the bone group.
+            group_name (str): The name of the bone group.
 
-    Returns:
-        None
-    """
+        Returns:
+            None
+        """
 
-    if isinstance(bones, list):
-        for bone_name in bones:
+        if isinstance(bones, list):
+            for bone_name in bones:
+                armature.pose.bones[bone_name].bone_group = armature.pose.bone_groups[group_name]
+        else:
+            bone_name = bones
             armature.pose.bones[bone_name].bone_group = armature.pose.bone_groups[group_name]
-    else:
-        bone_name = bones
-        armature.pose.bones[bone_name].bone_group = armature.pose.bone_groups[group_name]

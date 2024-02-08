@@ -49,7 +49,7 @@ def ImportAsset(asset_data):
     if asset_data["asset_type"] == "StaticMesh" or asset_data["asset_type"] == "SkeletalMesh":
         if "lod" in asset_data:
             if asset_data["lod"] > 0:  # Lod should not be imported here so return if lod is not 0.
-                return
+                return "FAIL", None
 
     if asset_data["asset_type"] == "Alembic":
         FileType = "ABC"
@@ -111,7 +111,6 @@ def ImportAsset(asset_data):
             return GetStaticMeshImportData()
         if asset_data["asset_type"] == "SkeletalMesh":
             return GetSkeletalMeshImportData()
-
         return None
 
     if asset_data["asset_type"] == "Alembic":
@@ -175,7 +174,7 @@ def ImportAsset(asset_data):
             else:
                 if asset_data["asset_type"] == "Animation":
                     fail_reason = 'Skeleton ' + asset_data["target_skeleton_ref"] + ' Not found for ' + asset_data["asset_name"] + ' asset.'
-                    return fail_reason, None, None
+                    return fail_reason, None
                 else:
                     print("Skeleton is not set, a new skeleton asset will be created...")
 
@@ -280,11 +279,12 @@ def ImportAsset(asset_data):
 
     if asset is None:
         fail_reason = 'Error zero imported object for: ' + asset_data["asset_name"]
-        return fail_reason, None, None
+        return fail_reason, None
 
     if asset_data["asset_type"] == "Animation":
         # For animation remove the extra mesh
         if type(asset) is not unreal.AnimSequence:
+            p = task.imported_object_paths[0]
             animAssetName = p.split('.')[0]+'_anim.'+p.split('.')[1]+'_anim'
             animAssetNameDesiredPath = p.split('.')[0]+'.'+p.split('.')[1]
             animAsset = unreal.find_asset(animAssetName)
@@ -294,7 +294,7 @@ def ImportAsset(asset_data):
                 asset = animAsset
             else:
                 fail_reason = 'animAsset ' + asset_data["asset_name"] + ' not found for after inport: ' + animAssetName
-                return fail_reason, None, None
+                return fail_reason, None
 
     # ###############[ Post treatment ]################
     asset_import_data = asset.get_editor_property('asset_import_data')
@@ -387,7 +387,7 @@ def ImportAsset(asset_data):
     # #################################[EndChange]
     if asset_data["asset_type"] == "StaticMesh" or asset_data["asset_type"] == "SkeletalMesh":
         unreal.EditorAssetLibrary.save_loaded_asset(asset)
-    return "SUCCESS", asset, asset_data["asset_type"]
+    return "SUCCESS", asset
 
 
 
@@ -406,7 +406,7 @@ def ImportAllAssets(assets_data, show_finished_popup=True):
         counter = str(len(ImportedList)+1) + "/" + str(len(assets_data["assets"]))
         print("Import asset " + counter + ": ", asset_data["asset_name"])
         
-        result, asset, asset_type = ImportAsset(asset_data)
+        result, asset = ImportAsset(asset_data)
         if result == "SUCCESS":
             ImportedList.append([asset, asset_data["asset_type"]])
         else:

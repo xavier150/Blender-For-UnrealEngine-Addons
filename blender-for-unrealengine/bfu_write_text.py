@@ -30,7 +30,7 @@ from . import bfu_naming
 from . import bfu_export_logs
 from . import bfu_write_import_asset_script
 from . import bfu_write_import_sequencer_script
-from .export import bfu_export_get_info
+from . import bfu_vertex_color
 
 
 def ExportSingleText(text, dirpath, filename):
@@ -76,6 +76,7 @@ def WriteExportLog():
     AlembicNum = 0
     AnimNum = 0
     CameraNum = 0
+    SplineNum = 0
 
     # Get number per asset type
     for assets in scene.UnrealExportedAssetsList:
@@ -89,9 +90,11 @@ def WriteExportLog():
             AnimNum += 1
         if assets.asset_type == "Camera":
             CameraNum += 1
+        if assets.asset_type == "Spline":
+            SplineNum += 1
 
     asset_number = len(scene.UnrealExportedAssetsList)
-    exported_assets = StaticNum+SkeletalNum+AlembicNum+AnimNum+CameraNum
+    exported_assets = StaticNum+SkeletalNum+AlembicNum+AnimNum+CameraNum+SplineNum
 
     OtherNum = asset_number - exported_assets
 
@@ -101,6 +104,7 @@ def WriteExportLog():
     AssetNumberByType += str(AlembicNum)+" Alembic(s) | "
     AssetNumberByType += str(AnimNum)+" Animation(s) | "
     AssetNumberByType += str(CameraNum)+" Camera(s) | "
+    AssetNumberByType += str(CameraNum)+" Spline(s) | "
     AssetNumberByType += str(OtherNum)+" Other(s)" + "\n"
 
     ExportLog = ""
@@ -186,7 +190,7 @@ def WriteSingleMeshAdditionalParameter(unreal_exported_asset):
     # Vertex Color
     if obj:
         if bfu_utils.GetAssetType(obj) == "SkeletalMesh" or bfu_utils.GetAssetType(obj) == "StaticMesh":
-            vced = bfu_export_get_info.VertexColorExportData(obj)
+            vced = bfu_vertex_color.bfu_vertex_color_utils.VertexColorExportData(obj)
             data["vertex_color_import_option"] = vced.export_type
             vertex_override_color = (
                 vced.color[0],  # R

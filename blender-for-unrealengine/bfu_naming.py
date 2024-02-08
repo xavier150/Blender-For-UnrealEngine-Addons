@@ -45,6 +45,13 @@ def get_camera_file_name(camera, desired_name="", fileType=".fbx"):
     if desired_name:
         return bfu_basics.ValidFilename(scene.bfu_camera_prefix_export_name+desired_name+fileType)
     return bfu_basics.ValidFilename(scene.bfu_camera_prefix_export_name+camera.name+fileType)
+
+def get_spline_file_name(spline, desired_name="", fileType=".fbx"):
+    # Generate assset file name for skeletal mesh
+    scene = bpy.context.scene
+    if desired_name:
+        return bfu_basics.ValidFilename(scene.bfu_spline_prefix_export_name+desired_name+fileType)
+    return bfu_basics.ValidFilename(scene.bfu_spline_prefix_export_name+spline.name+fileType)
     
 def get_static_mesh_file_name(object, desired_name="", fileType=".fbx"):
     # Generate assset file name for skeletal mesh

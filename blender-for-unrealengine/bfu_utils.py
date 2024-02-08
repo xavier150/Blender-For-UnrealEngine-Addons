@@ -257,9 +257,18 @@ def GetSocketDesiredChild(targetObj):
 
     return sockets
 
+def GetSocketsExportName(socket):
+    '''
+    Get the current socket custom name
+    '''
+    if socket.bfu_use_socket_custom_Name:
+        return socket.bfu_socket_custom_Name
+    return socket.name[7:]
 
 def GetSkeletalMeshSockets(obj):
     if obj is None:
+        return
+    if obj.type != "ARMATURE":
         return
 
     addon_prefs = bfu_basics.GetAddonPrefs()
@@ -277,7 +286,14 @@ def GetSkeletalMeshSockets(obj):
 
     for socket in sockets:
         if IsASocket(socket):
-            SocketName = socket.name[7:]
+            SocketName = GetSocketsExportName(socket)
+
+        if socket.parent is None:
+            print("Socket ", socket.name, " parent is None!")
+            break
+        if socket.parent.type != "ARMATURE":
+            print("Socket parent", socket.parent.name, " parent is not and Armature!")
+            break
 
         if socket.parent.bfu_export_deform_only:
             b = bfu_basics.getFirstDeformBoneParent(socket.parent.data.bones[socket.parent_bone])
@@ -290,14 +306,24 @@ def GetSkeletalMeshSockets(obj):
         am = socket.parent.matrix_world  # Armature
         em = socket.matrix_world  # Socket
         RelativeMatrix = (bml.inverted() @ am.inverted() @ em)
+        
+        if obj.bfu_skeleton_export_procedure == 'ue-standard':
+            RelativeMatrix = mathutils.Matrix.Rotation(math.radians(90), 4, 'Y') @ RelativeMatrix
+            RelativeMatrix = mathutils.Matrix.Rotation(math.radians(-90), 4, 'Z') @ RelativeMatrix
         t = RelativeMatrix.to_translation()
         r = RelativeMatrix.to_euler()
         s = socket.scale*addon_prefs.skeletalSocketsImportedSize
 
         # Convet to array for Json and convert value for Unreal
-        array_location = [t[0], t[1]*-1, t[2]]
-        array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]
-        array_scale = [s[0], s[1], s[2]]
+        if obj.bfu_skeleton_export_procedure == 'ue-standard':
+            array_location = [t[0], t[1]*-1, t[2]]
+            array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]
+            array_scale = [s[0], s[1], s[2]]
+
+        else:
+            array_location = [t[0], t[1]*-1, t[2]]
+            array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]
+            array_scale = [s[0], s[1], s[2]]
 
         MySocket = {}
         MySocket["SocketName"] = SocketName
@@ -681,6 +707,9 @@ def GetAssetType(obj):
 
     if obj.type == "ARMATURE" and not obj.bfu_export_skeletal_mesh_as_static_mesh:
         return "SkeletalMesh"
+    
+    if obj.type == "CURVE" and not obj.bfu_export_spline_as_static_mesh:
+        return "Spline"
 
     return "StaticMesh"
 
@@ -775,7 +804,7 @@ def SelectParentAndSpecificChilds(active, objects):
         if obj.name in bpy.context.view_layer.objects:
             if GetAssetType(active) == "SkeletalMesh":
                 # With skeletal mesh the socket must be not exported,
-                # ue4 read it like a bone
+                # UE read it like a bone
                 if not fnmatch.fnmatchcase(obj.name, "SOCKET*"):
                     obj.select_set(True)
                     selectedObjs.append(obj)
@@ -1221,6 +1250,10 @@ def GetObjExportDir(obj, abspath=False):
         dirpath = os.path.join(
             scene.bfu_export_camera_file_path,
             folder_name)
+    if GetAssetType(obj) == "Spline":
+        dirpath = os.path.join(
+            scene.bfu_export_spline_file_path,
+            folder_name)
     if abspath:
         return bpy.path.abspath(dirpath)
 
@@ -1418,20 +1451,22 @@ def Ue4SubObj_set(SubType):
             # StaticMesh Socket
             if obj.type == 'EMPTY' and SubType == "ST_Socket":
                 if ownerObj.type == 'MESH':
-                    if not IsASocket(obj):
+                    if IsASocket(obj):
+                        obj.name = GenerateUe4Name(obj.name)
+                    else:
                         obj.name = GenerateUe4Name("SOCKET_"+obj.name)
-                    bpy.ops.object.parent_set(
-                        type='OBJECT',
-                        keep_transform=True)
+                    bpy.ops.object.parent_set(type='OBJECT',keep_transform=True)
                     ConvertedObjs.append(obj)
 
             # SkeletalMesh Socket
-            if obj.type == 'EMPTY' and SubType == "SK_Socket":
+            if obj.type == 'EMPTY' and SubType == "SKM_Socket":
                 if ownerObj.type == 'ARMATURE':
 
-                    if not IsASocket(obj):
+                    if IsASocket(obj):
+                        obj.name = GenerateUe4Name(obj.name)
+                    else:
                         obj.name = GenerateUe4Name("SOCKET_"+obj.name)
-                    bpy.ops.object.parent_set(type='BONE')
+                    bpy.ops.object.parent_set(type='BONE',keep_transform=True)
                     ConvertedObjs.append(obj)
 
     DeselectAllWithoutActive()
@@ -1474,7 +1509,7 @@ def UpdateUe4Name(SubType, objList):
                             obj.name = GenerateUe4Name("SOCKET_"+obj.name)
 
                 # SkeletalMesh Socket
-                if obj.type == 'EMPTY' and SubType == "SK_Socket":
+                if obj.type == 'EMPTY' and SubType == "SKM_Socket":
                     if ownerObj.type == 'ARMATURE':
                         if not IsASocket(obj):
                             obj.name = GenerateUe4Name("SOCKET_"+obj.name)

@@ -47,34 +47,15 @@ def AddCameraToCommand(camera: bpy.types.Object, pre_bake_camera: bfu_camera_dat
         target_camera_component = bfu_camera_unreal_utils.get_camera_unreal_component(camera)
 
         # Actor
-        if camera_type == "REGULAR":
-            t += "      " + f"Begin Actor Class={target_camera_actor} Name={CameraName} Archetype={target_camera_actor}'/{target_camera_actor_default}'" + "\n"
-        elif camera_type == "CINEMATIC":
-            t += "      " + f"Begin Actor Class={target_camera_actor} Name={CameraName} Archetype={target_camera_actor}'{target_camera_actor_default}'" + "\n"
-        elif camera_type == "ARCHVIS":
-            t += "      " + f"Begin Actor Class={target_camera_actor} Name={CameraName} Archetype={target_camera_actor}'{target_camera_actor_default}'" + "\n"
+        t += "      " + f"Begin Actor Class={target_camera_actor} Name={CameraName} Archetype={target_camera_actor}'{target_camera_actor_default}'" + "\n"
 
         # Init SceneComponent
-        if camera_type == "REGULAR":
-            t += "         " + f"Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=/Script/Engine.SceneComponent'{target_camera_actor_default}:SceneComponent'" + "\n"
-            t += "         " + "End Object" + "\n"
-        elif camera_type == "CINEMATIC":
-            t += "         " + f"Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=/Script/Engine.SceneComponent'{target_camera_actor_default}:SceneComponent'" + "\n"
-            t += "         " + "End Object" + "\n"
-        elif camera_type == "ARCHVIS":
-            t += "         " + f"Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=/Script/Engine.SceneComponent'{target_camera_actor_default}:SceneComponent'" + "\n"
-            t += "         " + "End Object" + "\n"
+        t += "         " + f"Begin Object Class=/Script/Engine.SceneComponent Name=\"SceneComponent\" Archetype=/Script/Engine.SceneComponent'{target_camera_actor_default}:SceneComponent'" + "\n"
+        t += "         " + "End Object" + "\n"
 
         # Init CameraComponent
-        if camera_type == "REGULAR":
-            t += "         " + f"Begin Object Class={target_camera_component} Name=\"CameraComponent\" Archetype={target_camera_component}'{target_camera_actor_default}:CameraComponent'" + "\n"
-            t += "         " + "End Object" + "\n"
-        elif camera_type == "CINEMATIC":
-            t += "         " + f"Begin Object Class={target_camera_component} Name=\"CameraComponent\" Archetype={target_camera_component}'{target_camera_actor_default}:CameraComponent'" + "\n"
-            t += "         " + "End Object" + "\n"
-        elif camera_type == "ARCHVIS":
-            t += "         " + f"Begin Object Class={target_camera_component} Name=\"CameraComponent\" Archetype={target_camera_component}'{target_camera_actor_default}:CameraComponent'" + "\n"
-            t += "         " + "End Object" + "\n"
+        t += "         " + f"Begin Object Class={target_camera_component} Name=\"CameraComponent\" Archetype={target_camera_component}'{target_camera_actor_default}:CameraComponent'" + "\n"
+        t += "         " + "End Object" + "\n"
 
         # SceneComponent
         t += "         " + "Begin Object Name=\"SceneComponent\"" + "\n"
@@ -146,7 +127,7 @@ def GetImportCameraScriptCommand(objs):
 
 
     for camera in cameras:
-        add_command = AddCameraToCommand(camera, pre_bake_camera.get_evaluate_camera_data(obj))
+        add_command = AddCameraToCommand(camera, pre_bake_camera.get_evaluate_camera_data(camera))
         if add_command:
             t += add_command
             add_camera_num += 1

@@ -18,6 +18,7 @@
         "static_sockets_imported_size_name": "StaticMesh sockets import size",
         "skeletal_sockets_imported_size_name": "SkeletalMesh sockets import size",
         "export_camera_as_fbx_name": "Export camera as FBX",
+        "export_spline_as_fbx_name": "Export spline as FBX",
         "bake_only_key_visible_in_cut_name": "Bake Only Visible Cuts",
         "ignore_nla_for_action_name": "Ignore NLA for Actions",
         "export_with_custom_props_name": "Export Custom Properties",
@@ -29,6 +30,7 @@
         "notify_unit_scale_potential_error_name": "Notify UnitScale in potential error check",
         "write_text_additional_track_start": "This file was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons",
         "write_text_additional_track_end": "The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python",
+        "write_text_additional_track_spline": "This file contains additional Spline data informations that is not supported with .fbx files",
         "write_text_additional_track_camera": "This file contains additional Camera animation informations that is not supported with .fbx files",
         "write_text_additional_track_all": "It used for import into Unreal Engine all the assets of type StaticMesh, SkeletalMesh, Animation, Pose, Camera, [...]",
         "end": "end"
@@ -51,6 +53,7 @@
         "static_sockets_imported_size_desc": "ize of the socket when imported in Unreal Engine.",
         "skeletal_sockets_imported_size_desc": "Size of the socket when imported in Unreal Engine. AUTO: 1 ([New scale} = 100 / [Unit scale])",
         "export_camera_as_fbx_desc": "You can Uncheck this for better export time when you export additional data (Export -> Export filter) and use sequencer import script.",
+        "export_spline_as_fbx_desc": "Export spline as FBX File",
         "bake_only_key_visible_in_cut_desc": "Bake camera only when visible in camera cuts.",
         "ignore_nla_for_action_desc": "This will export the action and ignore the all layer in Nonlinear Animation.",
         "export_with_custom_props_desc": "Process export with custom properties (Can be used for Metadata).",

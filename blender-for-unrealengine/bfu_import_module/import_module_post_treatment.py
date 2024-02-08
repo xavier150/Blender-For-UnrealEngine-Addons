@@ -16,6 +16,7 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
+import os
 from . import import_module_unreal_utils
 
 try:

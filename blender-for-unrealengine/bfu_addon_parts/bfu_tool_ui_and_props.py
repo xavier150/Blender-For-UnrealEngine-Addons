@@ -3,6 +3,7 @@ from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui
 from .. import bfu_camera
+from .. import bfu_spline
 
 
 class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
@@ -37,16 +38,9 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         def execute(self, context):
             ConvertedObj = bfu_utils.Ue4SubObj_set("ST_Socket")
             if len(ConvertedObj) > 0:
-                self.report(
-                    {'INFO'},
-                    str(len(ConvertedObj)) +
-                    " object(s) of the selection have be" +
-                    " converted to UE4 Socket. (Static)")
+                self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE Socket. (Static)")
             else:
-                self.report(
-                    {'WARNING'},
-                    "Please select two objects." +
-                    " (Active object is the owner of the socket)")
+                self.report({'WARNING'}, "Please select two objects. (Active mesh object is the owner of the socket)")
             return {'FINISHED'}
 
     class BFU_OT_ConvertToSkeletalSocketButton(bpy.types.Operator):
@@ -59,16 +53,9 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         def execute(self, context):
             ConvertedObj = bfu_utils.Ue4SubObj_set("SKM_Socket")
             if len(ConvertedObj) > 0:
-                self.report(
-                    {'INFO'},
-                    str(len(ConvertedObj)) +
-                    " object(s) of the selection have" +
-                    " be converted to UE4 Socket. (Skeletal)")
+                self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE Socket. (Skeletal)")
             else:
-                self.report(
-                    {'WARNING'},
-                    "Please select two objects. " +
-                    "(Active object is the owner of the socket)")
+                self.report({'WARNING'}, "Please select two objects. (Active armature object is the owner of the socket)")
             return {'FINISHED'}
 
     class BFU_OT_CopySkeletalSocketButton(bpy.types.Operator):
@@ -149,8 +136,8 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         ready_for_convert_collider = False
         ready_for_convert_socket = False
 
-
         bfu_camera.bfu_camera_ui_and_props.draw_ui_scene_camera(layout)
+        bfu_spline.bfu_spline_ui_and_props.draw_ui_scene_spline(layout)
 
         scene.bfu_collision_socket_expanded.draw(layout)
         if scene.bfu_collision_socket_expanded.is_expend():
