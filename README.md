@@ -38,7 +38,8 @@ You simply need to paste it into Unreal Engine, for example, the cameras, spline
 ### Quick Start
 - [Download And Installation](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Download-And-Installation)
 - [Download And Installation From Dev Branch](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Download-And-Installation-From-Dev-Branch)
-- [Blender For Unreal Engine - Quick Start](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Blender-For-Unreal-Engine-Quick-Start)
+- [Blender For Unreal Engine: Quick Start (Static Meshs)](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Blender-For-Unreal-Engine:-Quick-Start-(Static-Meshs))
+- [Blender For Unreal Engine: Quick Start (Static Meshs)](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Blender-For-Unreal-Engine:-Quick-Start-(Skeletal-Meshs))
 ### Videos
 - How Import Blender assets to Unreal Engine -> https://youtu.be/2ehb2Ih3Nbg
 - How Import Blender camera to Unreal Sequencer -> https://youtu.be/Xx_9MQu2EkM
