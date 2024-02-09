@@ -40,7 +40,8 @@ def create_ui_accordion_class():
         expend: bpy.props.BoolProperty(
             name="Use",
             description="Click to expand / collapse",
-            default=False
+            default=False,
+            options={"HIDDEN", "SKIP_SAVE"}
         )
         
         def get_name(self):

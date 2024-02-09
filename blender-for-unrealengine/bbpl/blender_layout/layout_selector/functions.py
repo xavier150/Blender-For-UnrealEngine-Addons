@@ -23,42 +23,24 @@
 # ----------------------------------------------
 
 import bpy
-import importlib
-from . import layout_accordion
-from . import layout_template_list
-from . import layout_doc_button
-from . import layout_selector
-
-if "layout_accordion" in locals():
-    importlib.reload(layout_accordion)
-if "layout_template_list" in locals():
-    importlib.reload(layout_template_list)
-if "layout_doc_button" in locals():
-    importlib.reload(layout_doc_button)
-if "layout_selector" in locals():
-    importlib.reload(layout_selector)
+from typing import List
+from . import types
 
 
 
-classes = (
-)
 
 
+def add_string_selector(property_name, property_selector_name, default: str="", name: str="", description: str="", items=[]) -> types.StringSelector:
+    my_string_selector = types.StringSelector(property_name, property_selector_name)
+    my_string_selector.name = name
+    my_string_selector.default = default
+    my_string_selector.description = description
+    my_string_selector.items = items
+    my_string_selector.create_propertys()
+    return my_string_selector
 
-def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
-
-    layout_accordion.register()
-    layout_template_list.register()
-    layout_doc_button.register()
-    layout_selector.register()
-
-def unregister():
-    for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
-
-    layout_selector.unregister()
-    layout_doc_button.unregister()
-    layout_template_list.unregister()
-    layout_accordion.unregister()
+def draw_string_selector(owner, layout: bpy.types.UILayout, prop_name = "my_prop_id", selector_prop_name = "my_porp_id_selector", icon = "PREFERENCES"):
+    row = layout.row(align=True)
+    row.prop(owner, prop_name)
+    row.prop(owner, selector_prop_name, text="", icon=icon, icon_only=True)
+    return row
