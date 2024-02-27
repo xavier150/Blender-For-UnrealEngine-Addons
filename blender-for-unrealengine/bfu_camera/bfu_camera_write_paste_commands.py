@@ -39,6 +39,8 @@ def AddCameraToCommand(camera: bpy.types.Object, pre_bake_camera: bfu_camera_dat
         FocusDistance = data["camera_focus_distance"][frame_current]
         Aperture = data["camera_aperture"][frame_current]
         AspectRatio = data["desired_screen_ratio"]
+        ProjectionMode = data["ue_projection_mode"]
+        OrthoWidth = data["ortho_scale"]
         CameraName = camera.name
 
         # Engin ref:
@@ -83,6 +85,8 @@ def AddCameraToCommand(camera: bpy.types.Object, pre_bake_camera: bfu_camera_dat
         t += "            " + "CustomFarClippingPlane="+str(FarClippingPlane)+")" + "\n"
         t += "            " + "FieldOfView="+str(FieldOfView)+")" + "\n"
         t += "            " + "AspectRatio="+str(AspectRatio)+")" + "\n"
+        t += "            " + "ProjectionMode="+str(ProjectionMode)+")" + "\n"
+        t += "            " + "OrthoWidth="+str(OrthoWidth)+")" + "\n"
         t += "         " + "End Object" + "\n"
 
         # Attach

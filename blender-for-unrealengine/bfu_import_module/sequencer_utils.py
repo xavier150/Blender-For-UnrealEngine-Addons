@@ -241,5 +241,10 @@ def update_sequencer_camera_tracks(seq: unreal.LevelSequence, camera_binding: Mo
 
     # @TODO Need found a way to set this values...
     #camera_component.set_editor_property('aspect_ratio', camera_tracks['desired_screen_ratio'])
+    
+    #Projection mode supported since UE 4.26.
+    #camera_component.set_editor_property('projection_mode', camera_tracks['projection_mode'])
+    #camera_component.set_editor_property('ortho_width', camera_tracks['ortho_scale'])
+        
     #camera_component.lens_settings.set_editor_property('min_f_stop', camera_tracks['ue_lens_minfstop'])
     #camera_component.lens_settings.set_editor_property('max_f_stop', camera_tracks['ue_lens_maxfstop'])
