@@ -25,6 +25,33 @@ from . import import_module_unreal_utils
 
 from typing import Dict, Any
 
+def get_sequencer_framerate(denominator = 1, numerator = 24) -> unreal.FrameRate:
+    """
+    Adjusts the given frame rate to be compatible with Unreal Engine Sequencer.
+
+    Ensures the denominator and numerator are integers over zero and warns if the input values are adjusted.
+
+    Parameters:
+    - denominator (float): The original denominator value.
+    - numerator (float): The original numerator value.
+
+    Returns:
+    - unreal.FrameRate: The adjusted frame rate object.
+    """
+    # Ensure denominator and numerator are at least 1 and int 32
+    new_denominator = max(round(denominator), 1)
+    new_numerator = max(round(numerator), 1)
+    myFFrameRate = unreal.FrameRate(numerator=new_numerator, denominator=new_denominator)
+
+    if denominator != new_denominator or numerator != new_numerator:
+        message = ('WARNING: Frame rate denominator and numerator must be an int32 over zero.\n'
+                   'Float denominator and numerator is not supported in Unreal Engine Sequencer.\n\n'
+                   f'- Before: Denominator: {denominator}, Numerator: {numerator}\n'
+                   f'- After: Denominator: {new_denominator}, Numerator: {new_numerator}')
+        import_module_unreal_utils.show_warning_message("Frame Rate Adjustment Warning", message)
+
+    return myFFrameRate
+
 def get_section_all_channel(section: unreal.MovieSceneSection): 
     if import_module_unreal_utils.is_unreal_version_greater_or_equal(5,0):
         return section.get_all_channels()

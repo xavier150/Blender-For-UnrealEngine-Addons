@@ -68,9 +68,10 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
     print("========================= Import started ! =========================")
 
     # Set frame rate
-    myFFrameRate = unreal.FrameRate()
-    myFFrameRate.denominator = sequencer_frame_rate_denominator
-    myFFrameRate.numerator = sequencer_frame_rate_numerator
+    myFFrameRate = sequencer_utils.get_sequencer_framerate(
+        denominator = sequencer_frame_rate_denominator, 
+        numerator = sequencer_frame_rate_numerator
+        )
     seq.set_display_rate(myFFrameRate)
 
     # Set playback range

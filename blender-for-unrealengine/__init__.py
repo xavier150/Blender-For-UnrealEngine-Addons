@@ -113,7 +113,7 @@ if "bfu_cached_asset_list" in locals():
 bl_info = {
     'name': 'Blender for UnrealEngine',
     'author': 'Loux Xavier (BleuRaven)',
-    'version': (0, 4, 2),
+    'version': (0, 4, 3),
     'blender': (2, 80, 0),
     'location': 'View3D > UI > Unreal Engine',
     'description': "This add-ons allows to easily export several "
