@@ -23,6 +23,11 @@ except ImportError:
 from . import import_module_utils
 from . import import_module_unreal_utils
 
+if import_module_unreal_utils.is_unreal_version_greater_or_equal(5,1):
+    MovieSceneBindingProxy = unreal.MovieSceneBindingProxy
+else:
+    MovieSceneBindingProxy = unreal.SequencerBindingProxy
+
 from typing import Dict, Any
 
 def get_sequencer_framerate(denominator = 1, numerator = 24) -> unreal.FrameRate:
@@ -106,7 +111,7 @@ def create_new_sequence():
         return 'ERROR: level sequencer factory_create fail'
     return seq
 
-def Sequencer_add_new_camera(seq: unreal.LevelSequence, camera_target_class = unreal.CineCameraActor, camera_name = "MyCamera", is_spawnable_camera = False) -> unreal.MovieSceneBindingProxy:
+def Sequencer_add_new_camera(seq: unreal.LevelSequence, camera_target_class = unreal.CineCameraActor, camera_name = "MyCamera", is_spawnable_camera = False) -> MovieSceneBindingProxy:
 
 
 
@@ -125,10 +130,14 @@ def Sequencer_add_new_camera(seq: unreal.LevelSequence, camera_target_class = un
         '''
         temp_camera_actor = unreal.EditorLevelLibrary().spawn_actor_from_class(camera_target_class, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
 
-
-
         temp_camera_binding = seq.add_possessable(temp_camera_actor)
-        camera_component_binding = seq.add_possessable(temp_camera_actor.get_cine_camera_component())
+        if isinstance(temp_camera_actor, unreal.CineCameraActor):
+            camera_component_binding = seq.add_possessable(temp_camera_actor.get_cine_camera_component())
+        elif isinstance(temp_camera_actor, unreal.CameraActor):
+            camera_component_binding = seq.add_possessable(temp_camera_actor.camera_component)
+        else:
+            camera_component_binding = seq.add_possessable(temp_camera_actor.get_component_by_class(unreal.CameraComponent)) 
+
         camera_component_binding.set_parent(camera_binding)
         temp_camera_binding.remove()
         temp_camera_actor.destroy_actor()
@@ -149,7 +158,7 @@ def Sequencer_add_new_camera(seq: unreal.LevelSequence, camera_target_class = un
 
 
 
-def update_sequencer_camera_tracks(seq: unreal.LevelSequence, camera_binding: unreal.MovieSceneBindingProxy, camera_component_binding: unreal.MovieSceneBindingProxy, camera_tracks:  Dict[str, Any]):
+def update_sequencer_camera_tracks(seq: unreal.LevelSequence, camera_binding: MovieSceneBindingProxy, camera_component_binding: MovieSceneBindingProxy, camera_tracks:  Dict[str, Any]):
 
 
     # Transform
@@ -203,14 +212,17 @@ def update_sequencer_camera_tracks(seq: unreal.LevelSequence, camera_binding: un
     AddSequencerSectionFloatKeysByIniFile(sectionAperture, camera_tracks['camera_aperture'])
 
     if camera_tracks['camera_type'] == "ARCHVIS":
-        # Camera Shift X/Y
-        TrackArchVisShift = camera_component_binding.add_track(unreal.MovieSceneDoubleVectorTrack)
-        TrackArchVisShift.set_property_name_and_path('Manual Correction (Shift)', 'ProjectionOffset')
-        TrackArchVisShift.set_num_channels_used(2)
-        SectionArchVisShift = TrackArchVisShift.add_section()
-        SectionArchVisShift.set_end_frame_bounded(False)
-        SectionArchVisShift.set_start_frame_bounded(False)
-        AddSequencerSectionDoubleVectorKeysByIniFile(SectionArchVisShift, camera_tracks['archvis_camera_shift'])
+
+        # MovieSceneDoubleVectorTrack not supported in Unreal Engine 5.0 and older
+        if import_module_unreal_utils.is_unreal_version_greater_or_equal(5,0):
+            # Camera Shift X/Y
+            TrackArchVisShift = camera_component_binding.add_track(unreal.MovieSceneDoubleVectorTrack)
+            TrackArchVisShift.set_property_name_and_path('Manual Correction (Shift)', 'ProjectionOffset')
+            TrackArchVisShift.set_num_channels_used(2)
+            SectionArchVisShift = TrackArchVisShift.add_section()
+            SectionArchVisShift.set_end_frame_bounded(False)
+            SectionArchVisShift.set_start_frame_bounded(False)
+            AddSequencerSectionDoubleVectorKeysByIniFile(SectionArchVisShift, camera_tracks['archvis_camera_shift'])
 
         # Disable auto correct perspective
         TrackArchVisCorrectPersp = camera_component_binding.add_track(unreal.MovieSceneBoolTrack)

@@ -103,6 +103,7 @@ def CreateSequencer(sequence_data, show_finished_popup=True):
             message = f'WARNING: The camera class {camera_target_class_ref} was not found!' + "\n"
             message += 'Verify that the class exists or that you have activated the necessary plugins.'
             import_module_unreal_utils.show_warning_message("Failed to find camera class.", message)
+            camera_target_class = unreal.CineCameraActor
 
         camera_binding, camera_component_binding = sequencer_utils.Sequencer_add_new_camera(seq, camera_target_class, camera_name, is_spawnable_camera)
         sequencer_utils.update_sequencer_camera_tracks(seq, camera_binding, camera_component_binding, camera_tracks)
