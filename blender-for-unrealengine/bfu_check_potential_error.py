@@ -160,6 +160,29 @@ def UpdateUnrealPotentialError():
                 MyError.correctRef = "SetUnrealUnit"
                 MyError.correctlabel = 'Set Unreal Unit'
 
+    def CheckSceneFrameRate():
+        # Check Scene Frame Rate.
+        scene = bpy.context.scene
+        denominator = scene.render.fps_base
+        numerator = scene.render.fps
+
+        # Ensure denominator and numerator are at least 1 and int 32
+        new_denominator = max(round(denominator), 1)
+        new_numerator = max(round(numerator), 1)
+
+        if denominator != new_denominator or numerator != new_numerator:
+            message = ('Frame rate denominator and numerator must be an int32 over zero.\n'
+                    'Float denominator and numerator is not supported in Unreal Engine Sequencer.\n'
+                    f'- Denominator: {denominator} -> {new_denominator}\n'
+                    f'- Numerator: {numerator} -> {new_numerator}')
+
+            MyError = PotentialErrors.add()
+            MyError.name = bpy.context.scene.name
+            MyError.type = 2
+            MyError.text = (message)
+            MyError.docsOcticon = 'scene-frame-rate'
+
+
     def CheckObjType():
         # Check if objects use a non-recommended type
         for obj in objToCheck:
@@ -523,6 +546,7 @@ def UpdateUnrealPotentialError():
                                         'This is invalid in Unreal.')
 
     CheckUnitScale()
+    CheckSceneFrameRate()
     CheckObjType()
     CheckShapeKeys()
     CheckUVMaps()

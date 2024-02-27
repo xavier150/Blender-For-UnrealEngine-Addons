@@ -485,3 +485,5 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Camera scale impact the focus distance.
 
 == Rev 0.4.3 ==
+
+- New potential error and auto fix frame rate denominator and numerator.
