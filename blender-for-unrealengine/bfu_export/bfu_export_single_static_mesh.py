@@ -133,6 +133,9 @@ def ExportSingleStaticMesh(
     asset_name.SetExportName()
     static_export_procedure = obj.bfu_static_export_procedure
 
+    save_use_simplify = bbpl.utils.SaveUserRenderSimplify()
+    scene.render.use_simplify = False
+
     if (static_export_procedure == "ue-standard"):
         export_fbx_bin.save(
             operator=op,
@@ -190,6 +193,7 @@ def ExportSingleStaticMesh(
             bake_space_transform=False
             )
 
+    save_use_simplify.LoadUserRenderSimplify()
     asset_name.ResetNames()
 
     bfu_export_utils.ClearVertexColorForUnrealExport(active)

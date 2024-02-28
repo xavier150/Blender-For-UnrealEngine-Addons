@@ -487,6 +487,7 @@ It is now possible to force the duration of an animation according to the scene 
 == Rev 0.4.3 ==
 
 - New: Orthographic camera support for copy/paste cameras.
+- New: Disable render simplify durring export to not loose subdivises and mesh optimisation.
 - New potential error and auto fix frame rate denominator and numerator.
 - Fixed: Import sequencer script fail for unreal 5.0 and older version (SequencerBindingProxy rename to MovieSceneBindingProxy)
 - Fixed: Import sequencer script fail if camera is not and an cinmetaic camera.

@@ -159,6 +159,8 @@ def ExportSingleSkeletalMesh(
 
     asset_name.SetExportName()
 
+    save_use_simplify = bbpl.utils.SaveUserRenderSimplify()
+    scene.render.use_simplify = False
 
     if (skeleton_export_procedure == "ue-standard"):
         export_fbx_bin.save(
@@ -245,8 +247,8 @@ def ExportSingleSkeletalMesh(
         # Reset Curve an unit
         my_scene_unit_settings.ResetUnit()
 
+    save_use_simplify.LoadUserRenderSimplify()
     asset_name.ResetNames()
-
     bfu_export_utils.ClearVertexColorForUnrealExport(active)
     bfu_export_utils.ResetArmatureConstraintToModifiers(active)
     bfu_export_utils.ResetSocketsExportName(active)

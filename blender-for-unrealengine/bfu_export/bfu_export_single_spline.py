@@ -118,6 +118,9 @@ def ExportSingleFbxSpline(
     export_fbx_spline = obj.bfu_export_fbx_spline
     spline_export_procedure = obj.bfu_spline_export_procedure
 
+    save_use_simplify = bbpl.utils.SaveUserRenderSimplify()
+    scene.render.use_simplify = False
+
     if (spline_export_procedure == "ue-standard") and export_fbx_spline:
         export_fbx_bin.save(
             op,
@@ -182,6 +185,8 @@ def ExportSingleFbxSpline(
             axis_up=bfu_export_utils.get_export_axis_up(obj),
             bake_space_transform=False
             )
+
+    save_use_simplify.LoadUserRenderSimplify()
 
     # Reset spline scale
     obj.delta_scale *= 100

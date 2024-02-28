@@ -120,6 +120,9 @@ def ExportSingleStaticMeshCollection(
     
     static_export_procedure = col.bfu_collection_export_procedure
 
+    save_use_simplify = bbpl.utils.SaveUserRenderSimplify()
+    scene.render.use_simplify = False
+
     if (static_export_procedure == "ue-standard"):
         export_fbx_bin.save(
             operator=op,
@@ -161,6 +164,7 @@ def ExportSingleStaticMeshCollection(
             bake_space_transform=False
             )
     
+    save_use_simplify.LoadUserRenderSimplify()
     for obj in bpy.context.selected_objects:
         bfu_export_utils.ClearVertexColorForUnrealExport(obj)
         bfu_export_utils.ResetSocketsExportName(obj)
