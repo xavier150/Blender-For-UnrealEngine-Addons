@@ -151,6 +151,7 @@ def ExportSingleFbxAction(
         bbpl.anim_utils.reset_armature_pose(active)
         my_rig_consraints_scale = bfu_utils.RigConsraintScale(active, rrf)
         my_rig_consraints_scale.RescaleRigConsraintForUnrealEngine()
+        bbpl.anim_utils.copy_drivers(obj, active)
 
     # animation_data.action is ReadOnly with tweakmode in 2.8
     if (scene.is_nla_tweakmode):
