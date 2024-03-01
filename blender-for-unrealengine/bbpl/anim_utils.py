@@ -263,12 +263,9 @@ def copy_drivers(src, dst):
                 copy_attributes(v1, v2)
                 for i in range(len(v1.targets)):
                     copy_attributes(v1.targets[i], v2.targets[i])
-                    # Switch metarig targets to rig targets
+                    # Switch self reference targets to new self
                     if v2.targets[i].id == src:
                         v2.targets[i].id = dst
-
-                    # Mark targets that may need to be altered after rig generation
-                    target = v2.targets[i]
 
             # Copy key frames
             try:
