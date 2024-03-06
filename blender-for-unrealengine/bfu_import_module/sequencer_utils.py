@@ -117,20 +117,19 @@ def Sequencer_add_new_camera(seq: unreal.LevelSequence, camera_target_class = un
 
     #Create bindings
     if is_spawnable_camera:
-        # Create spawnable camera
-        camera_binding = seq.add_spawnable_from_class(camera_target_class)
-        camera_binding.get_object_template().set_actor_label(camera_name)
+        '''
+        I preffer create an level camera an convert to spawnable than use seq.add_spawnable_from_class()
+        Because with seq.add_spawnable_from_class() it not possible to change actor name an add create camera_component_binding.
+        Need more control in the API.
+        '''
 
-        '''
-        @TODO Je ne suis pas sûr que ce soit la meilleure méthode… 
-        Depuis camera_binding si j'utilise add_spawnable_from_class() pour ajouter mon spawnable il est impossible de récupérer le camera component.
-        Et donc impossible de cree ma track camera_component_binding via add_possessable().
-        Du coup je crée une caméra temporaire me permettant de crée ma track camera_component_binding,
-        Ensuite je supprime ma caméra temporaire et reparent la track sur le spawnable…
-        '''
+        # Create camera
         temp_camera_actor = unreal.EditorLevelLibrary().spawn_actor_from_class(camera_target_class, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
+        temp_camera_actor.set_actor_label(camera_name)
 
+        # Add camera to sequencer
         temp_camera_binding = seq.add_possessable(temp_camera_actor)
+
         if isinstance(temp_camera_actor, unreal.CineCameraActor):
             camera_component_binding = seq.add_possessable(temp_camera_actor.get_cine_camera_component())
         elif isinstance(temp_camera_actor, unreal.CameraActor):
@@ -138,9 +137,16 @@ def Sequencer_add_new_camera(seq: unreal.LevelSequence, camera_target_class = un
         else:
             camera_component_binding = seq.add_possessable(temp_camera_actor.get_component_by_class(unreal.CameraComponent)) 
 
+
+        # Convert to spawnable
+        camera_binding = seq.add_spawnable_from_instance(temp_camera_actor)
         camera_component_binding.set_parent(camera_binding)
         temp_camera_binding.remove()
+
+        #Clean old camera
         temp_camera_actor.destroy_actor()
+
+
 
     else:
         # Create possessable camera

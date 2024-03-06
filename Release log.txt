@@ -492,3 +492,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Import sequencer script fail for unreal 5.0 and older version (SequencerBindingProxy rename to MovieSceneBindingProxy)
 - Fixed: Import sequencer script fail if camera is not and an cinmetaic camera.
 - Fixed: Import sequencer script fail if custom camera class is not found.
+- Fixed: Imported camera sequencer do not have the same name in level scene.
