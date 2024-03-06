@@ -674,16 +674,30 @@ def make_override_library_object(obj):
     select_specific_object(obj)
     bpy.ops.object.make_override_library()
 
-def recursive_delete_collection(collection):
-    # Supprimer d'abord les objets dans la collection
-    for obj in collection.objects:
-        bpy.data.objects.remove(obj)
+def recursive_delete_collection(collection: bpy.types.Collection):
+    """
+    Recursively deletes a Blender collection and its contents, including objects and their data,
+    as well as any child collections.
+
+    Parameters:
+    - collection (bpy.types.Collection): The Blender collection to be deleted.
+
+    Returns:
+    None
+    """
+    # First, prepare a list of objects and their data to remove from the collection
+    objects_to_remove = [obj for obj in collection.objects]
+    data_to_remove = [obj.data for obj in collection.objects if obj.data is not None]
+
+    # Use Blender's batch_remove to efficiently delete objects and their data
+    bpy.data.batch_remove(objects_to_remove)
+    bpy.data.batch_remove(data_to_remove)
     
-    # Récursivement supprimer les sous-collections
+    # Recursively delete any child collections
     for sub_collection in collection.children:
         recursive_delete_collection(sub_collection)
     
-    # Enfin, supprimer la collection elle-même
+    # Finally, delete the collection itself
     bpy.data.collections.remove(collection)
 
 class SaveUserRenderSimplify():
