@@ -33,7 +33,7 @@ class SavedObject():
     Saved data from a blender object.
     """
 
-    def __init__(self, obj):
+    def __init__(self, obj: bpy.types.Object):
         if obj:
             self.ref = obj
             self.name = obj.name
@@ -163,7 +163,7 @@ class UserSelectSave():
         if self.user_mode:
             safe_mode_set(self.user_mode, bpy.ops.object)
 
-def select_specific_object(obj):
+def select_specific_object(obj: bpy.types.Object):
     """
     Selects a specific object in Blender.
 
@@ -664,10 +664,14 @@ def get_mirror_object_name(original_objects):
 
 
 class SaveTransformObject():
-    def __init__(self, obj):
+    def __init__(self, obj: bpy.types.Object):
+        self.init_object = obj
         self.transform_matrix = obj.matrix_world.copy()
 
-    def LoadObjectTransform(self, obj):
+    def reset_object_transform(self):
+        self.init_object.matrix_world = self.transform_matrix
+
+    def apply_object_transform(self, obj):
         obj.matrix_world = self.transform_matrix
 
 def make_override_library_object(obj):
