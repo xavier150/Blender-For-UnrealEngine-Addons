@@ -122,14 +122,18 @@ def SetCollectionUse(collection):
         print(collection.name, " not found in view_layer.layer_collection")
 
 
-def GetRecursiveChilds(obj):
+def GetRecursiveChilds(obj, include_self = False):
     # Get all recursive childs of a object
+    # include_self is True obj is index 0
 
     saveObjs = []
 
     def tryAppend(obj):
         if obj.name in bpy.context.scene.objects:
             saveObjs.append(obj)
+
+    if include_self:
+        tryAppend(obj)
 
     for newobj in GetChilds(obj):
         for childs in GetRecursiveChilds(newobj):
