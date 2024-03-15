@@ -241,7 +241,7 @@ def GetExportDesiredChilds(obj):
     # Get only all child objects that must be exported with parent object
 
     DesiredObj = []
-    for child in bfu_basics.GetRecursiveChilds(obj):
+    for child in bbpl.basics.get_recursive_obj_childs(obj):
         if child.bfu_export_type != "dont_export":
             if child.name in bpy.context.window.view_layer.objects:
                 DesiredObj.append(child)
@@ -1022,7 +1022,7 @@ class SkeletalExportScale():
 
         # Save childs location
         self.childs = []
-        for child in bfu_basics.GetChilds(armature):
+        for child in bbpl.basics.get_obj_childs(armature):
             self.childs.append(self.SkeletalChilds(child))
 
     class SkeletalChilds():

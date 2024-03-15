@@ -701,7 +701,7 @@ class SaveTransformObjects():
     def __init__(self, obj: bpy.types.Object):
 
         self.saved_transform_objects = []
-        obj_recursive_childs = bfu_basics.GetRecursiveChilds(obj, True)
+        obj_recursive_childs = bbpl.basics.get_recursive_obj_childs(obj, True)
         for obj in obj_recursive_childs:
             self.saved_transform_objects.append(bbpl.utils.SaveTransformObject(obj))
 
