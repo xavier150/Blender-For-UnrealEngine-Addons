@@ -102,7 +102,7 @@ def ExportSingleFbxNLAAnim(
         bfu_export_utils.ConvertSelectedCurveToMesh()
         bfu_export_utils.MakeSelectVisualReal()
 
-    BaseTransform = obj.matrix_world.copy()
+    saved_base_transforms = bfu_export_utils.SaveTransformObjects(obj)
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
 
@@ -228,9 +228,6 @@ def ExportSingleFbxNLAAnim(
 
     bbpl.anim_utils.reset_armature_pose(obj)
 
-    # Reset Transform
-    obj.matrix_world = BaseTransform
-
     # This will rescale the rig and unit scale to get a root bone egal to 1
     if ShouldRescaleRig:
         my_rig_consraints_scale.ResetScaleAfterExport()
@@ -238,6 +235,9 @@ def ExportSingleFbxNLAAnim(
         my_scene_unit_settings.ResetUnit()
         my_action_curve_scale.ResetScaleAfterExport()
         my_shape_keys_curve_scale.ResetScaleAfterExport()
+
+    # Reset Transform
+    saved_base_transforms.reset_object_transforms()
 
     if export_as_proxy is False:
         bfu_utils.CleanDeleteObjects(bpy.context.selected_objects)

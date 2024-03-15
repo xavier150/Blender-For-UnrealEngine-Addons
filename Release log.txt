@@ -493,3 +493,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Import sequencer script fail if camera is not and an cinmetaic camera.
 - Fixed: Import sequencer script fail if custom camera class is not found.
 - Fixed: Imported camera sequencer do not have the same name in level scene.
+- Fixed: Armature child objects with inverse parent lost their transforms position if rescale during export.

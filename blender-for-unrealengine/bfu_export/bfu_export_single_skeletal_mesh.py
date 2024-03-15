@@ -123,6 +123,7 @@ def ExportSingleSkeletalMesh(
         bfu_export_utils.SetSocketsExportTransform(armature)
         bfu_export_utils.SetSocketsExportName(armature)
 
+    saved_base_transforms = bfu_export_utils.SaveTransformObjects(armature)
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
 
@@ -246,6 +247,9 @@ def ExportSingleSkeletalMesh(
     if ShouldRescaleRig:
         # Reset Curve an unit
         my_scene_unit_settings.ResetUnit()
+
+    # Reset Transform
+    saved_base_transforms.reset_object_transforms()
 
     save_use_simplify.LoadUserRenderSimplify()
     asset_name.ResetNames()
