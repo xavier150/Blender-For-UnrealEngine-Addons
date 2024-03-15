@@ -696,3 +696,18 @@ def get_export_axis_up(obj):
         return obj.bfu_export_axis_up
     else:
         return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["axis_up"]
+    
+class SaveTransformObjects():
+    def __init__(self, obj: bpy.types.Object):
+
+        self.saved_transform_objects = []
+        obj_recursive_childs = bfu_basics.GetRecursiveChilds(obj, True)
+        for obj in obj_recursive_childs:
+            self.saved_transform_objects.append(bbpl.utils.SaveTransformObject(obj))
+
+    def reset_object_transforms(self):
+        for saved_transform_object in self.saved_transform_objects:
+            saved_transform_object: bbpl.utils.SaveTransformObject
+            if saved_transform_object.init_object:
+                saved_transform_object.reset_object_transform()
+
