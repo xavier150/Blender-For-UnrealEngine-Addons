@@ -433,7 +433,8 @@ class ShapeKeysCurveScale():
         self.proxy_drivers = self.ShapeKeysDriverRefs()  # Save driver data as proxy
 
     class DriverProxyData():
-        def __init__(self, driver):
+        def __init__(self, obj, driver):
+            self.obj = obj
             self.driver = driver
             self.keyframe_points = []
             self.modifiers = []
@@ -478,16 +479,37 @@ class ShapeKeysCurveScale():
                     mod.coefficients[0] = proxy_driver.modifiers[x].scale  # coef: +
                     mod.coefficients[1] = proxy_driver.modifiers[x].scale  # coef: x
 
+    def get_driver_key_block(self, proxy_drivers: DriverProxyData):
+        pass
+        #driver_split = driver.data_path.split('"')
+        #if len(driver_split) >= 2:
+        #    driver_name = driver_split[1]
+        #    if driver_name in 
+        #    bpy.context.selected_objects[0].data.shape_keys.key_blocks[1]
+
     def ShapeKeysDriverRefs(self):
         drivers = []
+        obj_list = bpy.context.selected_objects
         if self.export_as_proxy is False:
-            for obj in bpy.context.selected_objects:
+            for obj in obj_list:
                 if obj.type == "MESH":
                     if obj.data.shape_keys is not None:
                         if obj.data.shape_keys.animation_data is not None:
                             if obj.data.shape_keys.animation_data.drivers is not None:
-                                for driver in obj.data.shape_keys.animation_data.drivers:
-                                    drivers.append(self.DriverProxyData(driver))
+                                for driver_curve in obj.data.shape_keys.animation_data.drivers:
+                                    # Check if has location context.
+                                    need_rescale_curve = False
+                                    driver = driver_curve.driver
+                                    for variable in driver.variables:
+                                        if variable.type == "TRANSFORMS":
+                                            for target in variable.targets:
+                                                if "LOC" in target.transform_type:
+                                                    need_rescale_curve = True
+                                        elif variable.type == "LOC_DIFF":
+                                            need_rescale_curve = True
+                                    
+                                    if need_rescale_curve:
+                                        drivers.append(self.DriverProxyData(obj, driver_curve))
         return drivers
 
 
