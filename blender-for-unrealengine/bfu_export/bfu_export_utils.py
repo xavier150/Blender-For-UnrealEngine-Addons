@@ -685,24 +685,41 @@ def get_final_export_secondary_bone_axis(obj):
     else:
         return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["secondary_bone_axis"]
 
-def get_export_use_space_transform(obj):
-    return True
+def get_skeleton_export_use_space_transform(obj):
+    if obj.bfu_override_procedure_preset:
+        return obj.bfu_export_use_space_transform
+    else:
+        return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["use_space_transform"]
+
+def get_skeleton_export_axis_forward(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_axis_forward
     else:
         return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["axis_forward"]
 
-def get_export_axis_forward(obj):
-    if obj.bfu_override_procedure_preset:
-        return obj.bfu_export_axis_forward
-    else:
-        return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["axis_forward"]
-
-def get_export_axis_up(obj):
+def get_skeleton_export_axis_up(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_axis_up
     else:
         return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["axis_up"]
+    
+def get_static_export_use_space_transform(obj):
+    if obj.bfu_override_procedure_preset:
+        return obj.bfu_export_use_space_transform
+    else:
+        return bfu_export_procedure.bfu_static_export_procedure.get_obj_static_procedure_preset(obj)["use_space_transform"]
+
+def get_static_export_axis_forward(obj):
+    if obj.bfu_override_procedure_preset:
+        return obj.bfu_export_axis_forward
+    else:
+        return bfu_export_procedure.bfu_static_export_procedure.get_obj_static_procedure_preset(obj)["axis_forward"]
+
+def get_static_export_axis_up(obj):
+    if obj.bfu_override_procedure_preset:
+        return obj.bfu_export_axis_up
+    else:
+        return bfu_export_procedure.bfu_static_export_procedure.get_obj_static_procedure_preset(obj)["axis_up"]
     
 class SaveTransformObjects():
     def __init__(self, obj: bpy.types.Object):

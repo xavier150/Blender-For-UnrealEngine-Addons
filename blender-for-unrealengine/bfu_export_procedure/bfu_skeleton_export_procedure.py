@@ -29,18 +29,21 @@ def get_obj_skeleton_procedure_preset(obj: bpy.types.Object):
 def get_skeleton_procedure_preset(procedure: str): # Object.bfu_skeleton_export_procedure
     preset = {}
     if procedure == "ue-standard":
+        preset["use_space_transform"]=True
         preset["axis_forward"]='-Z'
         preset["axis_up"]='Y'
         preset["primary_bone_axis"]='X' 
         preset["secondary_bone_axis"]='-Z'
 
     if procedure == "blender-standard":
+        preset["use_space_transform"]=True
         preset["axis_forward"]='-Z'
         preset["axis_up"]='Y'
         preset["primary_bone_axis"]='Y'
         preset["secondary_bone_axis"]='X'
 
     if procedure == "auto-rig-pro":
+        preset["use_space_transform"]=True
         preset["axis_forward"]='-Z'
         preset["axis_up"]='Y'
         preset["primary_bone_axis"]='Y'

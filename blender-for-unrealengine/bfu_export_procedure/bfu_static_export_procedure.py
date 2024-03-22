@@ -18,8 +18,21 @@ def get_static_export_procedure_enum_property_list():
 def get_default_static_export_procedure():
     return "blender-standard"
 
+def get_obj_static_procedure_preset(obj: bpy.types.Object):
+    return get_static_procedure_preset(obj.bfu_static_export_procedure)
+
 def get_static_procedure_preset(procedure: str): # Object.bfu_static_export_procedure
     preset = {}
+    if procedure == "ue-standard":
+        preset["use_space_transform"]=True
+        preset["axis_forward"]='-Z'
+        preset["axis_up"]='Y'
+
+    if procedure == "blender-standard":
+        preset["use_space_transform"]=True
+        preset["axis_forward"]='-Z'
+        preset["axis_up"]='Y'
+
     return preset
 
 

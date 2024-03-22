@@ -152,9 +152,9 @@ def ExportSingleFbxSpline(
             mirror_symmetry_right_side_bones=obj.bfu_mirror_symmetry_right_side_bones,
             use_ue_mannequin_bone_alignment=obj.bfu_use_ue_mannequin_bone_alignment,
             disable_free_scale_animation=obj.bfu_disable_free_scale_animation,
-            use_space_transform=bfu_export_utils.get_export_use_space_transform(obj),
-            axis_forward=bfu_export_utils.get_export_axis_forward(obj),
-            axis_up=bfu_export_utils.get_export_axis_up(obj),
+            use_space_transform=bfu_export_utils.get_static_export_use_space_transform(obj),
+            axis_forward=bfu_export_utils.get_static_export_axis_forward(obj),
+            axis_up=bfu_export_utils.get_static_export_axis_up(obj),
             bake_space_transform=False
             )
     elif (spline_export_procedure == "blender-standard") and export_fbx_spline:
@@ -182,9 +182,9 @@ def ExportSingleFbxSpline(
             use_metadata=obj.bfu_export_with_meta_data,
             primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
             secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
-            use_space_transform=bfu_export_utils.get_export_use_space_transform(obj),
-            axis_forward=bfu_export_utils.get_export_axis_forward(obj),
-            axis_up=bfu_export_utils.get_export_axis_up(obj),
+            use_space_transform=bfu_export_utils.get_static_export_use_space_transform(obj),
+            axis_forward=bfu_export_utils.get_static_export_axis_forward(obj),
+            axis_up=bfu_export_utils.get_static_export_axis_up(obj),
             bake_space_transform=False
             )
 
