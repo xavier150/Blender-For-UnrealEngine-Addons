@@ -1374,6 +1374,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         if obj.bfu_override_procedure_preset:
                             AxisProperty.prop(obj, 'bfu_export_axis_forward')
                             AxisProperty.prop(obj, 'bfu_export_axis_up')
+                            bbpl.blender_layout.layout_doc_button.add_doc_page_operator(AxisProperty, text="About axis Transforms", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Axis-Transforms")
                             if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
                                 BoneAxisProperty = layout.column()
                                 BoneAxisProperty.prop(obj, 'bfu_export_primary_bone_axis')
