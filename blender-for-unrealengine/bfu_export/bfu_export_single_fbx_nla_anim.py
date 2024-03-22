@@ -139,7 +139,7 @@ def ExportSingleFbxNLAAnim(
         bbpl.anim_utils.reset_armature_pose(active)
         my_rig_consraints_scale = bfu_utils.RigConsraintScale(active, rrf)
         my_rig_consraints_scale.RescaleRigConsraintForUnrealEngine()
-        bbpl.anim_utils.copy_drivers(obj, active)
+        bbpl.anim_utils.copy_drivers(armature, active)
 
     scene.frame_start = bfu_utils.GetDesiredNLAStartEndTime(active)[0]
     scene.frame_end = bfu_utils.GetDesiredNLAStartEndTime(active)[1]
