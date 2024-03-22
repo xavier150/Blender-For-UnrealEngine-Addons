@@ -23,6 +23,7 @@ import addon_utils
 from . import bfu_modular_skeletal_specified_parts_meshs
 from . import bfu_unreal_engine_refs_props
 from .. import bbpl
+from .. import bps
 from .. import bfu_export_procedure
 from .. import bfu_basics
 from .. import bfu_utils
@@ -1392,10 +1393,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                             else:
                                 preset = bfu_export_procedure.bfu_static_export_procedure.get_obj_static_procedure_preset(obj)
                             var_lines = box.column()
-                            # Utilisez une boucle pour itérer sur les éléments du dictionnaire
                             for key, value in preset.items():
-                                # Concaténez la clé et la valeur dans la chaîne de caractères
-                                var_lines.label(text=f"{key} -> {value}\n")
+                                display_key = bps.utils.format_property_name(key)
+                                var_lines.label(text=f"{display_key}: {value}\n")
                         export_data = layout.column()
                         bfu_custom_property.bfu_custom_property_utils.draw_ui_custom_property(export_data, obj)
                         export_data.prop(obj, "bfu_export_with_meta_data")
