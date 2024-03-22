@@ -535,13 +535,15 @@ def EvaluateCameraPosition(camera):
 def EvaluateCameraPositionForUnreal(camera, previous_euler=mathutils.Euler()):
     # Get Transfrom
     unit_scale = get_scene_unit_scale()
+    display_size = camera.data.display_size
+
     matrix_y = mathutils.Matrix.Rotation(math.radians(90.0), 4, 'Y')
     matrix_x = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'X')
     matrix = camera.matrix_world @ matrix_y @ matrix_x
     loc = matrix.to_translation() * 100 * unit_scale
     loc += camera.bfu_additional_location_for_export
     r = matrix.to_euler("XYZ", previous_euler)
-    s = matrix.to_scale() * unit_scale
+    s = matrix.to_scale() * unit_scale * display_size
 
     loc *= mathutils.Vector([1, -1, 1])
     array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]  # Roll Pith Yaw XYZ
