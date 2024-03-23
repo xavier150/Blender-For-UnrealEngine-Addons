@@ -710,3 +710,40 @@ class SaveUserRenderSimplify():
 
     def LoadUserRenderSimplify(self):
         bpy.context.scene.render.use_simplify = self.use_simplify
+
+def active_mode_is(targetMode):
+    # Return True is active obj mode == targetMode
+    obj = bpy.context.active_object
+    if obj is not None:
+        if obj.mode == targetMode:
+            return True
+    return False
+
+def active_type_is(targetType):
+    # Return True is active obj type == targetType
+    obj = bpy.context.active_object
+    if obj is not None:
+        if obj.type == targetType:
+            return True
+    return False
+
+def active_type_is_not(targetType):
+    # Return True is active obj type != targetType
+    obj = bpy.context.active_object
+    if obj is not None:
+        if obj.type != targetType:
+            return True
+    return False
+
+def found_type_in_selection(targetType, include_active=True):
+    # Return True if a specific type is found in current user selection
+    select = bpy.context.selected_objects
+    if not include_active:
+        if bpy.context.active_object:
+            if bpy.context.active_object in select:
+                select.remove(bpy.context.active_object)
+
+    for obj in select:
+        if obj.type == targetType:
+            return True
+    return False
