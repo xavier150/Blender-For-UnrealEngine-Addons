@@ -6,6 +6,7 @@ from .. import bfu_camera
 from .. import bfu_spline
 from .. import bfu_collision
 from .. import bfu_socket
+from .. import bbpl
 
 
 class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
@@ -53,6 +54,26 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
 
         bfu_collision.bfu_collision_ui_and_props.draw_ui_scene_collision(layout)
         bfu_socket.bfu_socket_ui_and_props.draw_ui_scene_socket(layout)
+
+        scene.bfu_uvmap_expanded.draw(layout)
+        if scene.bfu_uvmap_expanded.is_expend():
+            ready_for_correct_extrem_uv_scale = False
+            obj = bpy.context.object
+            if obj and obj.type == "MESH":
+                if bbpl.utils.active_mode_is("EDIT"):
+                    ready_for_correct_extrem_uv_scale = True
+                else:
+                    layout.label(text="Switch to Edit Mode.", icon='INFO')
+            else:
+                layout.label(text="Select an mesh object", icon='INFO')
+
+
+             # Draw buttons (correct_extrem_uv)
+            Buttons_correct_extrem_uv_scale = layout.row()
+            Button_correct_extrem_uv_scale = Buttons_correct_extrem_uv_scale.column()
+            Button_correct_extrem_uv_scale.enabled = ready_for_correct_extrem_uv_scale
+            Button_correct_extrem_uv_scale.operator("object.correct_extrem_uv", icon='UV')
+            bbpl.blender_layout.layout_doc_button.add_doc_page_operator(Buttons_correct_extrem_uv_scale, url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/UV-Maps#extreme-uv-scale")
 
         scene.bfu_lightmap_expanded.draw(layout)
         if scene.bfu_lightmap_expanded.is_expend():

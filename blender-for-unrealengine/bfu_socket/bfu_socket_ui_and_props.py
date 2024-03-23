@@ -124,9 +124,7 @@ def draw_ui_scene_socket(layout: bpy.types.UILayout):
             convertButtons = layout.row().split(factor=0.80)
             convertSkeletalSocketButtons = convertButtons.column()
             convertSkeletalSocketButtons.enabled = ready_for_convert_skeletal_socket
-            convertSkeletalSocketButtons.operator(
-                "object.converttoskeletalsocket",
-                icon='OUTLINER_DATA_EMPTY')
+            convertSkeletalSocketButtons.operator("object.converttoskeletalsocket",icon='OUTLINER_DATA_EMPTY')
             
         obj = bpy.context.object
         if obj is not None:

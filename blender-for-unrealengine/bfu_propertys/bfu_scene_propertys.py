@@ -50,6 +50,7 @@ def register():
     bpy.types.Scene.bfu_object_advanced_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Object advanced Properties")
     bpy.types.Scene.bfu_collision_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Collision")
     bpy.types.Scene.bfu_socket_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Socket")
+    bpy.types.Scene.bfu_uvmap_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="UV Map")
     bpy.types.Scene.bfu_lightmap_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Light Map")
     bpy.types.Scene.bfu_nomenclature_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Nomenclature")
     bpy.types.Scene.bfu_export_filter_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Export filters")
@@ -105,6 +106,7 @@ def unregister():
     del bpy.types.Scene.bfu_collection_properties_expanded
     del bpy.types.Scene.bfu_object_advanced_properties_expanded
     del bpy.types.Scene.bfu_collision_expanded
+    del bpy.types.Scene.bfu_uvmap_expanded
     del bpy.types.Scene.bfu_socket_expanded
     del bpy.types.Scene.bfu_lightmap_expanded
     del bpy.types.Scene.bfu_nomenclature_properties_expanded
