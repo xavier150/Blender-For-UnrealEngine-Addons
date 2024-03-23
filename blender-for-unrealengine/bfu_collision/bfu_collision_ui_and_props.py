@@ -111,6 +111,21 @@ class BFU_OT_ConvertToCollisionButtonConvex(bpy.types.Operator):
                 "Please select two objects." +
                 " (Active object is the owner of the collision)")
         return {'FINISHED'}
+    
+class BFU_OT_ToggleCollisionVisibility(bpy.types.Operator):
+    bl_label = "Toggle Collision Visibility"
+    bl_idname = "object.toggle_collision_visibility"
+    bl_description = "Toggle the visibility of all collision objects in the scene"
+
+    def execute(self, context):
+        visibility_states = [obj.hide_viewport for obj in bpy.context.scene.objects if obj.name.startswith(("UCX_", "UBX_", "USP_", "UCP_"))]
+        new_visibility = not all(visibility_states) if visibility_states else True
+
+        for obj in bpy.context.scene.objects:
+            if obj.name.startswith(("UCX_", "UBX_", "USP_", "UCP_")):
+                obj.hide_viewport = new_visibility
+
+        return {'FINISHED'}
 
 def draw_ui_scene_collision(layout: bpy.types.UILayout):
     scene = bpy.context.scene
@@ -139,6 +154,7 @@ def draw_ui_scene_collision(layout: bpy.types.UILayout):
         convertStaticCollisionButtons.operator("object.converttoconvexcollision", icon='MESH_ICOSPHERE')
         convertStaticCollisionButtons.operator("object.converttocapsulecollision", icon='MESH_CAPSULE')
         convertStaticCollisionButtons.operator("object.converttospherecollision", icon='MESH_UVSPHERE')
+        layout.operator("object.toggle_collision_visibility", text="Toggle Collision Visibility", icon='HIDE_OFF')
 
 
 # -------------------------------------------------------------------
@@ -150,6 +166,7 @@ classes = (
     BFU_OT_ConvertToCollisionButtonCapsule,
     BFU_OT_ConvertToCollisionButtonSphere,
     BFU_OT_ConvertToCollisionButtonConvex,
+    BFU_OT_ToggleCollisionVisibility,
 )
 
 
