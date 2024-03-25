@@ -18,6 +18,7 @@
 
 
 import bpy
+from . import bfu_socket_utils
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui
@@ -31,7 +32,7 @@ class BFU_OT_ConvertToStaticSocketButton(bpy.types.Operator):
         " ready for export (StaticMesh)")
 
     def execute(self, context):
-        ConvertedObj = bfu_utils.Ue4SubObj_set("ST_Socket")
+        ConvertedObj = bfu_socket_utils.Ue4SubObj_set("ST_Socket")
         if len(ConvertedObj) > 0:
             self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE Socket. (Static)")
         else:
@@ -46,7 +47,7 @@ class BFU_OT_ConvertToSkeletalSocketButton(bpy.types.Operator):
         " to Unreal sockets ready for export (SkeletalMesh)")
 
     def execute(self, context):
-        ConvertedObj = bfu_utils.Ue4SubObj_set("SKM_Socket")
+        ConvertedObj = bfu_socket_utils.Ue4SubObj_set("SKM_Socket")
         if len(ConvertedObj) > 0:
             self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE Socket. (Skeletal)")
         else:
@@ -62,7 +63,7 @@ class BFU_OT_CopySkeletalSocketButton(bpy.types.Operator):
         obj = context.object
         if obj:
             if obj.type == "ARMATURE":
-                bfu_basics.setWindowsClipboard(bfu_utils.GetImportSkeletalMeshSocketScriptCommand(obj))
+                bfu_basics.setWindowsClipboard(bfu_socket_utils.GetImportSkeletalMeshSocketScriptCommand(obj))
                 self.report(
                     {'INFO'},
                     "Skeletal sockets copied. Paste in Unreal Engine Skeletal Mesh assets for import sockets. (Ctrl+V)")

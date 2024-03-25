@@ -126,10 +126,6 @@ def ExportSingleStaticMesh(
 
     meshType = bfu_utils.GetAssetType(active)
 
-    bfu_check_potential_error.UpdateNameHierarchy(
-        bfu_utils.GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
-        )
-
     asset_name.SetExportName()
     static_export_procedure = obj.bfu_static_export_procedure
 

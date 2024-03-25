@@ -20,9 +20,12 @@ import bpy
 import importlib
 
 from . import bfu_collision_ui_and_props
+from . import bfu_collision_utils
 
 if "bfu_collision_ui_and_props" in locals():
     importlib.reload(bfu_collision_ui_and_props)
+if "bfu_collision_utils" in locals():
+    importlib.reload(bfu_collision_utils)
 
 classes = (
 )

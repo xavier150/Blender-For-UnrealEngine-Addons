@@ -148,11 +148,6 @@ def ExportSingleSkeletalMesh(
     meshType = bfu_utils.GetAssetType(active)
 
     # Set rename temporarily the Armature as "Armature"
-
-    bfu_check_potential_error.UpdateNameHierarchy(
-        bfu_utils.GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
-        )
-
     bfu_utils.RemoveAllConsraints(active)
     bpy.context.object.data.pose_position = 'REST'
 

@@ -26,49 +26,27 @@ from . import bfu_basics
 from . import bfu_utils
 from . import bfu_cached_asset_list
 
-
-def CorrectBadProperty(list=None):
-    # Corrects bad properties
-
-    if list is not None:
-        objs = list
-    else:
-        objs = bfu_utils.GetAllCollisionAndSocketsObj()
-
-    UpdatedProp = 0
-    for obj in objs:
-        if obj.bfu_export_type == "export_recursive":
-            obj.bfu_export_type = "auto"
-            UpdatedProp += 1
-    return UpdatedProp
+from . import bfu_collision
+from . import bfu_socket
 
 
-def UpdateNameHierarchy(list=None):
-    # Updates hierarchy names
 
-    if list is not None:
-        objs = list
-    else:
-        objs = bfu_utils.GetAllCollisionAndSocketsObj()
+def process_general_fix():
+    fixed_collisions = bfu_collision.bfu_collision_utils.fix_export_type_on_collision()
+    fixed_collision_names = bfu_collision.bfu_collision_utils.fix_name_on_collision()
+    fixed_sockets = bfu_socket.bfu_socket_utils.fix_export_type_on_socket()
+    fixed_socket_names = bfu_socket.bfu_socket_utils.fix_name_on_socket()
 
-    UpdatedHierarchy = 0
-    for obj in objs:
-        if fnmatch.fnmatchcase(obj.name, "UBX*"):
-            bfu_utils.UpdateUe4Name("Box", [obj])
-            UpdatedHierarchy += 1
-        if fnmatch.fnmatchcase(obj.name, "UCP*"):
-            bfu_utils.UpdateUe4Name("Capsule", [obj])
-            UpdatedHierarchy += 1
-        if fnmatch.fnmatchcase(obj.name, "USP*"):
-            bfu_utils.UpdateUe4Name("Sphere", [obj])
-            UpdatedHierarchy += 1
-        if fnmatch.fnmatchcase(obj.name, "UCX*"):
-            bfu_utils.UpdateUe4Name("Convex", [obj])
-            UpdatedHierarchy += 1
-        if fnmatch.fnmatchcase(obj.name, "SOCKET*"):
-            bfu_utils.UpdateUe4Name("Socket", [obj])
-            UpdatedHierarchy += 1
-        return UpdatedHierarchy
+    fix_info = {
+        "Fixed Collision(s)": fixed_collisions,
+        "Fixed Collision Names(s)": fixed_collision_names,
+        "Fixed Socket(s)": fixed_sockets,
+        "Fixed Socket Names(s)": fixed_socket_names,
+    }
+
+    return fix_info
+    
+
 
 
 def GetVertexWithZeroWeight(Armature, Mesh):

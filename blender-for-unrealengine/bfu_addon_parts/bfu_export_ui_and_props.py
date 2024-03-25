@@ -9,6 +9,8 @@ from .. import bfu_cached_asset_list
 from .. import bfu_ui
 from .. import bbpl
 from .. import bps
+from .. import bfu_collision
+from .. import bfu_socket
 
 
 
@@ -260,23 +262,33 @@ class BFU_PT_Export(bpy.types.Panel):
             return {'FINISHED'}
 
     class BFU_OT_CheckPotentialErrorPopup(bpy.types.Operator):
-        bl_label = "Check potential errors"
+        bl_label = "Check Potential Errors"
         bl_idname = "object.checkpotentialerror"
-        bl_description = "Check potential errors"
+        bl_description = "Check potential errors."
         text = "none"
 
         def execute(self, context):
-            correctedProperty = bfu_check_potential_error.CorrectBadProperty()
-            bfu_check_potential_error.UpdateNameHierarchy()
+            fix_info = bfu_check_potential_error.process_general_fix()
+            invoke_info = ""
+            for x, fix_info_key in enumerate(fix_info):
+                fix_info_data = fix_info[fix_info_key]
+                invoke_info += fix_info_key + ": " + str(fix_info_data) 
+                if x < len(fix_info)-1:
+                    invoke_info += "\n"
+  
+            
             bfu_check_potential_error.UpdateUnrealPotentialError()
-            bpy.ops.object.openpotentialerror("INVOKE_DEFAULT", correctedProperty=correctedProperty)
+            bpy.ops.object.openpotentialerror(
+                "INVOKE_DEFAULT", 
+                invoke_info=invoke_info,
+                )
             return {'FINISHED'}
 
     class BFU_OT_OpenPotentialErrorPopup(bpy.types.Operator):
         bl_label = "Open potential errors"
         bl_idname = "object.openpotentialerror"
         bl_description = "Open potential errors"
-        correctedProperty: bpy.props.IntProperty(default=0)
+        invoke_info: bpy.props.StringProperty(default="...")
 
         class BFU_OT_FixitTarget(bpy.types.Operator):
             bl_label = "Fix it !"
@@ -352,16 +364,12 @@ class BFU_PT_Export(bpy.types.Panel):
             else:
                 popup_title = "No potential error to correct!"
 
-            if self.correctedProperty > 0:
-                potentialErrorInfo = (
-                    str(self.correctedProperty) +
-                    "- properties corrected.")
-            else:
-                potentialErrorInfo = "- No properties to correct."
 
             layout.label(text=popup_title)
-            layout.label(text="- Hierarchy names updated")
-            layout.label(text=potentialErrorInfo)
+            invoke_info_lines = self.invoke_info.split("\n")
+            for invoke_info_line in invoke_info_lines:
+                layout.label(text="- "+invoke_info_line)
+            
             layout.separator()
             row = layout.row()
             col = row.column()
@@ -489,7 +497,7 @@ class BFU_PT_Export(bpy.types.Panel):
 
             scene.UnrealExportedAssetsList.clear()
             counter = bps.utils.CounterTimer()
-            bfu_check_potential_error.UpdateNameHierarchy()
+            bfu_check_potential_error.process_general_fix()
             bfu_export.bfu_export_asset.process_export(self)
             bfu_write_text.WriteAllTextFiles()
 

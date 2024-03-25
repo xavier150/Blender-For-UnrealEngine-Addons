@@ -499,3 +499,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: With Unit Scale not at 0.01, shape keys that not location context is rescale.
 - Fixed: When rescaling the rig at export, all the drivers that were set were gone.
 - Fixed: Camera scale do not use display size in camera data.
+- Fixed: Check Potential Errors do not fix Hierarchy names with Sockets and Collisions

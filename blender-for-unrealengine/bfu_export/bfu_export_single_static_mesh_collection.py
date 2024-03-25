@@ -114,10 +114,6 @@ def ExportSingleStaticMeshCollection(
         bfu_export_utils.SetSocketsExportTransform(obj)
         bfu_export_utils.SetSocketsExportName(obj)
 
-    bfu_check_potential_error.UpdateNameHierarchy(
-        bfu_utils.GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
-        )
-    
     static_export_procedure = col.bfu_collection_export_procedure
 
     save_use_simplify = bbpl.utils.SaveUserRenderSimplify()
