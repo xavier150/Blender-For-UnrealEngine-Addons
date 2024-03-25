@@ -30,6 +30,8 @@ from .. import bfu_addon_parts
 from .. import bfu_camera
 from .. import bfu_vertex_color
 from .. import bfu_export_procedure
+from .. import bfu_collision
+from .. import bfu_socket
 
 dup_temp_name = "BFU_Temp"  # DuplicateTemporarilyNameForUe4Export
 Export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
@@ -270,7 +272,7 @@ def SetSocketsExportName(obj):
     '''
 
     scene = bpy.context.scene
-    for socket in bfu_utils.GetSocketDesiredChild(obj):
+    for socket in bfu_socket.bfu_socket_utils.get_socket_desired_child(obj):
         if socket.bfu_use_socket_custom_Name:
             if socket.bfu_socket_custom_Name not in scene.objects:
 
@@ -290,7 +292,7 @@ def SetSocketsExportTransform(obj):
     # Set socket Transform for Unreal
 
     addon_prefs = bfu_basics.GetAddonPrefs()
-    for socket in bfu_utils.GetSocketDesiredChild(obj):
+    for socket in bfu_socket.bfu_socket_utils.get_socket_desired_child(obj):
         socket["BFU_PreviousSocketScale"] = socket.scale
         socket["BFU_PreviousSocketLocation"] = socket.location
         socket["BFU_PreviousSocketRotationEuler"] = socket.rotation_euler
@@ -311,7 +313,7 @@ def SetSocketsExportTransform(obj):
 def ResetSocketsExportName(obj):
     # Reset socket Name
 
-    for socket in bfu_utils.GetSocketDesiredChild(obj):
+    for socket in bfu_socket.bfu_socket_utils.get_socket_desired_child(obj):
         if "BFU_PreviousSocketName" in socket:
             socket.name = socket["BFU_PreviousSocketName"]
             del socket["BFU_PreviousSocketName"]
@@ -320,7 +322,7 @@ def ResetSocketsExportName(obj):
 def ResetSocketsTransform(obj):
     # Reset socket Transform
 
-    for socket in bfu_utils.GetSocketDesiredChild(obj):
+    for socket in bfu_socket.bfu_socket_utils.get_socket_desired_child(obj):
         if "BFU_PreviousSocketScale" in socket:
             socket.scale = socket["BFU_PreviousSocketScale"]
             del socket["BFU_PreviousSocketScale"]

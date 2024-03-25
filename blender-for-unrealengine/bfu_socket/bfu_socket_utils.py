@@ -39,7 +39,7 @@ def IsASocket(obj):
 
     return False
 
-def GetSocketDesiredChild(targetObj):
+def get_socket_desired_child(targetObj):
     sockets = []
     for obj in bfu_utils.GetExportDesiredChilds(targetObj):
         if IsASocket(obj):
@@ -55,7 +55,7 @@ def GetSocketsExportName(socket):
         return socket.bfu_socket_custom_Name
     return socket.name[7:]
 
-def GetSkeletalMeshSockets(obj):
+def get_skeletal_mesh_sockets(obj):
     if obj is None:
         return
     if obj.type != "ARMATURE":
@@ -65,7 +65,7 @@ def GetSkeletalMeshSockets(obj):
     data = {}
     sockets = []
 
-    for socket in GetSocketDesiredChild(obj):
+    for socket in get_socket_desired_child(obj):
         sockets.append(socket)
 
     if bfu_utils.GetAssetType(obj) != "SkeletalMesh":
@@ -252,7 +252,7 @@ def GetImportSkeletalMeshSocketScriptCommand(obj):
 
     if obj:
         if obj.type == "ARMATURE":
-            sockets = GetSkeletalMeshSockets(obj)
+            sockets = get_skeletal_mesh_sockets(obj)
             t = "SocketCopyPasteBuffer" + "\n"
             t += "NumSockets=" + str(len(sockets)) + "\n"
             t += "IsOnSkeleton=1" + "\n"

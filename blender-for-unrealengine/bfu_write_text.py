@@ -31,6 +31,8 @@ from . import bfu_export_logs
 from . import bfu_write_import_asset_script
 from . import bfu_write_import_sequencer_script
 from . import bfu_vertex_color
+from . import bfu_collision
+from . import bfu_socket
 
 
 def ExportSingleText(text, dirpath, filename):
@@ -185,7 +187,7 @@ def WriteSingleMeshAdditionalParameter(unreal_exported_asset):
 
     # Sockets
     if obj:
-        data['Sockets'] = bfu_utils.GetSkeletalMeshSockets(obj)
+        data['Sockets'] = bfu_socket.bfu_socket_utils.get_skeletal_mesh_sockets(obj)
 
     # Vertex Color
     if obj:
