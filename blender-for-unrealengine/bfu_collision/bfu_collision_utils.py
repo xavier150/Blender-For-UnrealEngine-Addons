@@ -43,21 +43,20 @@ def IsACollision(obj):
     return False
 
 def get_all_collision_objs(objs_list=None):
-    # Get any object that can be understood
-    # as a collision or a socket by unreal
+    # Get any collision objects from bpy.context.scene.objects or list if valid.
 
     if objs_list is not None:
         objs = objs_list
     else:
         objs = bpy.context.scene.objects
 
-    colObjs = [obj for obj in objs if (
+    collision_objs = [obj for obj in objs if (
         fnmatch.fnmatchcase(obj.name, "UBX*") or
         fnmatch.fnmatchcase(obj.name, "UCP*") or
         fnmatch.fnmatchcase(obj.name, "USP*") or
         fnmatch.fnmatchcase(obj.name, "UCX*")
         )]
-    return colObjs
+    return collision_objs
 
 def fix_export_type_on_collision(list=None):
     # Corrects bad properties
@@ -84,21 +83,21 @@ def fix_name_on_collision(list=None):
     fixed_collision_names = 0
     for obj in objs:
         if fnmatch.fnmatchcase(obj.name, "UBX*"):
-            update_length = UpdateUe4Name("Box", [obj])
+            update_length = update_collision_names("Box", [obj])
             fixed_collision_names += update_length
         if fnmatch.fnmatchcase(obj.name, "UCP*"):
-            update_length = UpdateUe4Name("Capsule", [obj])
+            update_length = update_collision_names("Capsule", [obj])
             fixed_collision_names += update_length
         if fnmatch.fnmatchcase(obj.name, "USP*"):
-            update_length = UpdateUe4Name("Sphere", [obj])
+            update_length = update_collision_names("Sphere", [obj])
             fixed_collision_names += update_length
         if fnmatch.fnmatchcase(obj.name, "UCX*"):
-            update_length = UpdateUe4Name("Convex", [obj])
+            update_length = update_collision_names("Convex", [obj])
             fixed_collision_names += update_length
     return fixed_collision_names
     
-def UpdateUe4Name(SubType, objList):
-    # Convect obj to ue4 sub objects (Collisions Shapes or Socket)
+def update_collision_names(SubType, objList):
+    # Update collision names for Unreal Engine.
     
     update_length = 0
     for obj in objList:

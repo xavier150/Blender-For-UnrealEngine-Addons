@@ -126,18 +126,17 @@ def GetSkeletalMeshSockets(obj):
     return data['Sockets']
 
 def get_all_socket_objs(objs_list=None):
-    # Get any object that can be understood
-    # as a collision or a socket by unreal
+    # Get any socket objects from bpy.context.scene.objects or list if valid.
 
     if objs_list is not None:
         objs = objs_list
     else:
         objs = bpy.context.scene.objects
 
-    colObjs = [obj for obj in objs if (
+    socket_objs = [obj for obj in objs if (
         fnmatch.fnmatchcase(obj.name, "SOCKET*")
         )]
-    return colObjs
+    return socket_objs
 
 def fix_export_type_on_socket(list=None):
     # Corrects bad properties
@@ -165,16 +164,16 @@ def fix_name_on_socket(list=None):
     for obj in objs:
         if fnmatch.fnmatchcase(obj.name, "SOCKET*"):
             if obj.type == 'MESH':
-                update_length = UpdateUe4Name("ST_Socket", [obj])
+                update_length = update_socket_names("ST_Socket", [obj])
                 fixed_socket_names += update_length
         if fnmatch.fnmatchcase(obj.name, "SOCKET*"):
             if obj.type == 'ARMATURE':
-                update_length = UpdateUe4Name("SKM_Socket", [obj])
+                update_length = update_socket_names("SKM_Socket", [obj])
                 fixed_socket_names += update_length
     return fixed_socket_names
     
-def UpdateUe4Name(SubType, objList):
-    # Convect obj to ue4 sub objects (Collisions Shapes or Socket)
+def update_socket_names(SubType, objList):
+    # Update socket names for Unreal Engine.
 
     update_length = 0
     for obj in objList:
