@@ -711,6 +711,53 @@ class SaveUserRenderSimplify():
     def LoadUserRenderSimplify(self):
         bpy.context.scene.render.use_simplify = self.use_simplify
 
+
+class SaveObjectReferanceUser():
+    """
+    This class is used to save and update references to an object in constraints 
+    across all bones in all armatures within a Blender scene.
+    """
+
+    def __init__(self):
+        """
+        Initializes the instance with an empty list to store constraints using the specified object.
+        """
+        self.using_constraints = []
+
+    def save_refs_from_object(self, obj: bpy.types.Object):
+        """
+        Scans all objects in the Blender scene to find and save constraints in armature bones
+        that reference the specified object.
+
+        :param obj: The target bpy.types.Object to find references to.
+        """
+        for objet in bpy.data.objects:
+            if objet.type == 'ARMATURE':
+                for bone in objet.pose.bones:
+                    for contrainte in bone.constraints:
+                        if hasattr(contrainte, 'target') and contrainte.target and contrainte.target.name == obj.name:
+                            constraint_info = {
+                                'armature_object': objet.name,
+                                'bone': bone.name,
+                                'constraint': contrainte.name
+                            }
+                            self.using_constraints.append(constraint_info)
+    
+    def update_refs_with_object(self, obj: bpy.types.Object):
+        """
+        Updates all previously found constraints to reference a new object.
+
+        :param obj: The new bpy.types.Object to be used as the target for the saved constraints.
+        """
+        for info in self.using_constraints:
+            if info['armature_object'] in bpy.data.objects:
+                armature_object = bpy.data.objects[info['armature_object']]
+                if info['bone'] in armature_object.pose.bones:
+                    bone = armature_object.pose.bones[info['bone']]
+                    if info['constraint'] in bone.constraints:
+                        constraint = bone.constraints[info['constraint']]
+                        constraint.target = obj
+
 def active_mode_is(targetMode):
     # Return True is active obj mode == targetMode
     obj = bpy.context.active_object
