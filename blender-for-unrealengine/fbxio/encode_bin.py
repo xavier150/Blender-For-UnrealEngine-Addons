@@ -4,10 +4,13 @@
 
 try:
     from . import data_types
+    from .fbx_utils_threading import MultiThreadedTaskConsumer
 except:
     import data_types
+    from fbx_utils_threading import MultiThreadedTaskConsumer
 
 from struct import pack
+from contextlib import contextmanager
 import array
 import numpy as np
 import zlib
@@ -50,6 +53,57 @@ class FBXElem:
         self.elems = []
         self._end_offset = -1
         self._props_length = -1
+
+    @classmethod
+    @contextmanager
+    def enable_multithreading_cm(cls):
+        """Temporarily enable multithreaded array compression.
+
+        The context manager handles starting up and shutting down the threads.
+
+        Only exits once all the threads are done (either all tasks were completed or an error occurred and the threads
+        were stopped prematurely).
+
+        Writing to a file is temporarily disabled as a safeguard."""
+        # __enter__()
+        orig_func = cls._add_compressed_array_helper
+        orig_write = cls._write
+
+        def insert_compressed_array(props, insert_at, data, length):
+            # zlib.compress releases the GIL, so can be multithreaded.
+            data = zlib.compress(data, 1)
+            comp_len = len(data)
+
+            encoding = 1
+            data = pack('<3I', length, encoding, comp_len) + data
+            props[insert_at] = data
+
+        with MultiThreadedTaskConsumer.new_cpu_bound_cm(insert_compressed_array) as wrapped_func:
+            try:
+                def _add_compressed_array_helper_multi(self, data, length):
+                    # Append a dummy value that will be replaced with the compressed array data later.
+                    self.props.append(...)
+                    # The index to insert the compressed array into.
+                    insert_at = len(self.props) - 1
+                    # Schedule the array to be compressed on a separate thread and then inserted into the hierarchy at
+                    # `insert_at`.
+                    wrapped_func(self.props, insert_at, data, length)
+
+                # As an extra safeguard, temporarily replace the `_write` function to raise an error if called.
+                def temp_write(*_args, **_kwargs):
+                    raise RuntimeError("Writing is not allowed until multithreaded array compression has been disabled")
+
+                cls._add_compressed_array_helper = _add_compressed_array_helper_multi
+                cls._write = temp_write
+
+                # Return control back to the caller of __enter__().
+                yield
+            finally:
+                # __exit__()
+                # Restore the original functions.
+                cls._add_compressed_array_helper = orig_func
+                cls._write = orig_write
+            # Exiting the MultiThreadedTaskConsumer context manager will wait for all scheduled tasks to complete.
 
     def add_bool(self, data):
         assert(isinstance(data, bool))
@@ -130,21 +184,26 @@ class FBXElem:
         self.props_type.append(data_types.STRING)
         self.props.append(data)
 
+    def _add_compressed_array_helper(self, data, length):
+        """Note: This function may be swapped out by enable_multithreading_cm with an equivalent that supports
+        multithreading."""
+        data = zlib.compress(data, 1)
+        comp_len = len(data)
+
+        encoding = 1
+        data = pack('<3I', length, encoding, comp_len) + data
+        self.props.append(data)
+
     def _add_array_helper(self, data, prop_type, length):
+        self.props_type.append(prop_type)
         # mimic behavior of fbxconverter (also common sense)
         # we could make this configurable.
         encoding = 0 if len(data) <= 128 else 1
         if encoding == 0:
-            pass
+            data = pack('<3I', length, encoding, len(data)) + data
+            self.props.append(data)
         elif encoding == 1:
-            data = zlib.compress(data, 1)
-
-        comp_len = len(data)
-
-        data = pack('<3I', length, encoding, comp_len) + data
-
-        self.props_type.append(prop_type)
-        self.props.append(data)
+            self._add_compressed_array_helper(data, length)
 
     def _add_parray_helper(self, data, array_type, prop_type):
         assert (isinstance(data, array.array))
