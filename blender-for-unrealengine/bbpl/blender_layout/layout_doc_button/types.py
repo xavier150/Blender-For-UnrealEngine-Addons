@@ -26,7 +26,6 @@ import bpy
 import os
 import webbrowser
 from . import utils
-from ... import __internal__
 
 
 def create_operator_class():

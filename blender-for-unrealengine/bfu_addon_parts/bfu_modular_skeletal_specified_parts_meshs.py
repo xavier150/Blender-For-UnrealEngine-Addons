@@ -18,11 +18,7 @@
 
 import bpy
 from .. import bbpl
-from ..bbpl.blender_layout.layout_template_list.types import (
-        BBPL_UI_TemplateItem,
-        BBPL_UI_TemplateItemDraw,
-        BBPL_UI_TemplateList,
-        )
+
 
 def get_preset_values():
     preset_values = [
@@ -31,6 +27,10 @@ def get_preset_values():
         'obj.bfu_modular_skeletal_specified_parts_meshs_template'
         ]
     return preset_values
+
+BBPL_UI_TemplateItem = bbpl.blender_layout.layout_template_list.types.create_template_item_class()
+BBPL_UI_TemplateItemDraw = bbpl.blender_layout.layout_template_list.types.create_template_item_draw_class()
+BBPL_UI_TemplateList = bbpl.blender_layout.layout_template_list.types.create_template_list_class(BBPL_UI_TemplateItem, BBPL_UI_TemplateItemDraw)
 
 class BFU_UL_ModularSkeletalSpecifiedPartsTargetItem(BBPL_UI_TemplateItem):
     enabled: bpy.props.BoolProperty(

@@ -23,27 +23,12 @@
 # ----------------------------------------------
 
 import bpy
-import importlib
-from . import types
-from . import utils
+from ... import __internal__
 
-if "types" in locals():
-    importlib.reload(types)
-if "utils" in locals():
-    importlib.reload(utils)
+def get_class_name(name):
+    package_name = __internal__.utils.get_package_name()
+    return f"BBPL_OT_{package_name}_{name}"
 
-classes = (
-)
-
-def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
-
-    types.register()
-
-
-def unregister():
-    for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
-
-    types.unregister()
+def get_operator_name(name):
+    package_name = __internal__.utils.get_package_name()
+    return f"object.bbpl_{package_name}_{name}"
