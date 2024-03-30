@@ -180,4 +180,4 @@ def unregister():
         bpy.utils.unregister_class(cls)
 
     del bpy.types.Object.bfu_socket_custom_Name
-    del bpy.types.Object.bfu_custom_camera_component
+    del bpy.types.Object.bfu_use_socket_custom_Name
