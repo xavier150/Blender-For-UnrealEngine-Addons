@@ -23,11 +23,12 @@
 # ----------------------------------------------
 
 import bpy
-from . import utils
+from ... import __internal__
 
 # Définissez un dictionnaire global pour stocker des références aux instances de PropertyGroup
 
 def send_template_data_on_button(button, template):
+    return
 
     if isinstance(template.id_data, bpy.types.Scene):
         data_type = "Scene"
@@ -71,7 +72,7 @@ def create_template_item_class():
             default="MyGroup",
             )
         
-    BBPL_UI_TemplateItem.__name__ = utils.get_class_name("TemplateItem")
+    BBPL_UI_TemplateItem.__name__ = __internal__.utils.get_operator_class_name("TemplateItem")
     return BBPL_UI_TemplateItem
 
 def create_template_item_draw_class():
@@ -97,7 +98,7 @@ def create_template_item_draw_class():
             prop_data.prop(item, "name", text="")
             prop_data.enabled = item.use
 
-    BBPL_UI_TemplateItemDraw.__name__ = utils.get_class_name("TemplateItemDraw")
+    BBPL_UI_TemplateItemDraw.__name__ = __internal__.utils.get_operator_class_name("TemplateItemDraw")
     return BBPL_UI_TemplateItemDraw
 
 def create_template_list_class(TemplateItem, TemplateItemDraw):
@@ -172,7 +173,7 @@ def create_template_list_class(TemplateItem, TemplateItemDraw):
             button_duplicate = template_column.operator("data.template_button_duplicate", icon='ADD', text="")
             send_template_data_on_button(button_duplicate, self)
             return template_row
-    BBPL_UI_TemplateList.__name__ = utils.get_class_name("TemplateList")
+    BBPL_UI_TemplateList.__name__ = __internal__.utils.get_operator_class_name("TemplateList")
     return BBPL_UI_TemplateList
 
 def create_template_button_base_class():
@@ -184,7 +185,7 @@ def create_template_button_base_class():
         target_id_data_name: bpy.props.StringProperty()
         target_id_data_type: bpy.props.StringProperty()
         target_variable_name: bpy.props.StringProperty()
-    BBPL_OT_TemplateButtonBase.__name__ = utils.get_class_name("template_button_base")
+    BBPL_OT_TemplateButtonBase.__name__ = __internal__.utils.get_operator_class_name("template_button_base")
     return BBPL_OT_TemplateButtonBase
 
 def create_template_button_duplicate_class(TemplateButtonBase):
@@ -201,7 +202,7 @@ def create_template_button_duplicate_class(TemplateButtonBase):
             last_index = len(template.template_collection)-1
             template.active_template_property = last_index
             return {"FINISHED"}
-    BBPL_OT_TemplateButtonDuplicate.__name__ = utils.get_class_name("template_button_duplicate")
+    BBPL_OT_TemplateButtonDuplicate.__name__ = __internal__.utils.get_operator_class_name("template_button_duplicate")
     return BBPL_OT_TemplateButtonDuplicate
 
 def create_template_button_add_class(TemplateButtonBase):
@@ -219,7 +220,7 @@ def create_template_button_add_class(TemplateButtonBase):
                 )
             template.active_template_property = last_index
             return {"FINISHED"}
-    BBPL_OT_TemplateButtonAdd.__name__ = utils.get_class_name("template_button_add")
+    BBPL_OT_TemplateButtonAdd.__name__ = __internal__.utils.get_operator_class_name("template_button_add")
     return BBPL_OT_TemplateButtonAdd
 
 def create_template_button_remove_class(TemplateButtonBase):
@@ -234,7 +235,7 @@ def create_template_button_remove_class(TemplateButtonBase):
             if template.active_template_property < 0:
                 template.active_template_property = 0
             return {"FINISHED"}
-    BBPL_OT_TemplateButtonRemove.__name__ = utils.get_class_name("template_button_remove")
+    BBPL_OT_TemplateButtonRemove.__name__ = __internal__.utils.get_operator_class_name("template_button_remove")
     return BBPL_OT_TemplateButtonRemove
 
 def create_template_button_moveup_class(TemplateButtonBase):
@@ -251,7 +252,7 @@ def create_template_button_moveup_class(TemplateButtonBase):
             if template.active_template_property > 0:
                 template.active_template_property -= 1
             return {"FINISHED"}
-    BBPL_OT_TemplateButtonMoveUp.__name__ = utils.get_class_name("template_button_moveup")
+    BBPL_OT_TemplateButtonMoveUp.__name__ = __internal__.utils.get_operator_class_name("template_button_moveup")
     return BBPL_OT_TemplateButtonMoveUp
 
 def create_template_button_movedown_class(TemplateButtonBase):
@@ -268,10 +269,23 @@ def create_template_button_movedown_class(TemplateButtonBase):
             if template.active_template_property < len(template.template_collection)-1:
                 template.active_template_property += 1
             return {"FINISHED"}
-    BBPL_OT_TemplateButtonMoveDown.__name__ = utils.get_class_name("template_button_movedown")
+    BBPL_OT_TemplateButtonMoveDown.__name__ = __internal__.utils.get_operator_class_name("template_button_movedown")
     return BBPL_OT_TemplateButtonMoveDown
 
+template_button_base = create_template_button_base_class()
+BBPL_OT_TemplateButtonDuplicate = create_template_button_duplicate_class(template_button_base)
+BBPL_OT_TemplateButtonAdd = create_template_button_add_class(template_button_base)
+BBPL_OT_TemplateButtonRemove = create_template_button_remove_class(template_button_base)
+BBPL_OT_TemplateButtonMoveUp = create_template_button_moveup_class(template_button_base)
+BBPL_OT_TemplateButtonMoveDown = create_template_button_movedown_class(template_button_base)
 
+custom_classes = [
+    BBPL_OT_TemplateButtonDuplicate,
+    BBPL_OT_TemplateButtonAdd,
+    BBPL_OT_TemplateButtonRemove,
+    BBPL_OT_TemplateButtonMoveUp,
+    BBPL_OT_TemplateButtonMoveDown,
+]
 
 classes = (
     #BBPL_OT_TemplateButtonDuplicate,
@@ -285,15 +299,13 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-        template_button_base = create_template_button_base_class()
-        template_button_duplicate = create_template_button_duplicate_class(template_button_base)
-        template_button_add = create_template_button_add_class(template_button_base)
-        template_button_remove = create_template_button_remove_class(template_button_base)
-        template_button_moveup = create_template_button_moveup_class(template_button_base)
-        template_button_movedown = create_template_button_movedown_class(template_button_base)
+    for cls in custom_classes:
+        bpy.utils.register_class(cls)
 
 
 def unregister():
     for cls in reversed(classes):
-        print("->", cls)
+        bpy.utils.unregister_class(cls)
+
+    for cls in reversed(custom_classes):
         bpy.utils.unregister_class(cls)

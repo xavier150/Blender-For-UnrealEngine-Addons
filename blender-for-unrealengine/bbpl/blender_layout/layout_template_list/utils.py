@@ -23,12 +23,3 @@
 # ----------------------------------------------
 
 import bpy
-from ... import __internal__
-
-def get_class_name(name):
-    package_name = __internal__.utils.get_package_name()
-    return f"BBPL_OT_{package_name}_{name}"
-
-def get_operator_name(name):
-    package_name = __internal__.utils.get_package_name()
-    return f"object.bbpl_{package_name}_{name}"

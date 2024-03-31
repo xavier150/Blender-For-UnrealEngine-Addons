@@ -31,3 +31,14 @@ def get_package_name():
     return package_name
 
 
+def get_operator_class_name(name):
+    package_name = get_package_name()
+    return f"BBPL_OT_{package_name}_{name}"
+
+def get_object_operator_idname(name):
+    package_name = get_package_name()
+    return f"object.bbpl_{package_name}_{name}"
+
+def get_scene_operator_idname(name):
+    package_name = get_package_name()
+    return f"scene.bbpl_{package_name}_{name}"
