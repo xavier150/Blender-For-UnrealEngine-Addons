@@ -19,11 +19,14 @@
 import bpy
 import importlib
 
-from . import bfu_material_ui_and_props
+from . import bfu_material_props
+from . import bfu_material_ui
 from . import bfu_material_utils
 
-if "bfu_material_ui_and_props" in locals():
-    importlib.reload(bfu_material_ui_and_props)
+if "bfu_material_props" in locals():
+    importlib.reload(bfu_material_props)
+if "bfu_material_ui" in locals():
+    importlib.reload(bfu_material_ui)
 if "bfu_material_utils" in locals():
     importlib.reload(bfu_material_utils)
 
@@ -35,10 +38,10 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bfu_material_ui_and_props.register()
+    bfu_material_props.register()
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
-    bfu_material_ui_and_props.unregister()
+    bfu_material_props.unregister()

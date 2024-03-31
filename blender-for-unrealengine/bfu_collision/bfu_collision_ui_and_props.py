@@ -24,7 +24,7 @@ from .. import bfu_utils
 from .. import bfu_ui
 from .. import bbpl
 
-
+#@TODO Move in bfu_collision_types.py
 class BFU_OT_ConvertToCollisionButtonBox(bpy.types.Operator):
     bl_label = "Convert to box (UBX)"
     bl_idname = "object.converttoboxcollision"
@@ -47,6 +47,7 @@ class BFU_OT_ConvertToCollisionButtonBox(bpy.types.Operator):
                 " (Active object is the owner of the collision)")
         return {'FINISHED'}
 
+#@TODO Move in bfu_collision_types.py
 class BFU_OT_ConvertToCollisionButtonCapsule(bpy.types.Operator):
     bl_label = "Convert to capsule (UCP)"
     bl_idname = "object.converttocapsulecollision"
@@ -69,6 +70,7 @@ class BFU_OT_ConvertToCollisionButtonCapsule(bpy.types.Operator):
                 " (Active object is the owner of the collision)")
         return {'FINISHED'}
 
+#@TODO Move in bfu_collision_types.py
 class BFU_OT_ConvertToCollisionButtonSphere(bpy.types.Operator):
     bl_label = "Convert to sphere (USP)"
     bl_idname = "object.converttospherecollision"
@@ -91,6 +93,7 @@ class BFU_OT_ConvertToCollisionButtonSphere(bpy.types.Operator):
                 " (Active object is the owner of the collision)")
         return {'FINISHED'}
 
+#@TODO Move in bfu_collision_types.py
 class BFU_OT_ConvertToCollisionButtonConvex(bpy.types.Operator):
     bl_label = "Convert to convex shape (UCX)"
     bl_idname = "object.converttoconvexcollision"
@@ -113,6 +116,7 @@ class BFU_OT_ConvertToCollisionButtonConvex(bpy.types.Operator):
                 " (Active object is the owner of the collision)")
         return {'FINISHED'}
     
+#@TODO Move in bfu_collision_types.py
 class BFU_OT_ToggleCollisionVisibility(bpy.types.Operator):
     bl_label = "Toggle Collision Visibility"
     bl_idname = "object.toggle_collision_visibility"
@@ -129,6 +133,7 @@ class BFU_OT_ToggleCollisionVisibility(bpy.types.Operator):
         return {'FINISHED'}
 
 def draw_ui_scene_collision(layout: bpy.types.UILayout):
+    #@TODO Move in bfu_collision_ui.py
     scene = bpy.context.scene
     scene.bfu_collision_expanded.draw(layout)
     if scene.bfu_collision_expanded.is_expend():
@@ -157,6 +162,10 @@ def draw_ui_scene_collision(layout: bpy.types.UILayout):
         convertStaticCollisionButtons.operator("object.converttospherecollision", icon='MESH_UVSPHERE')
         layout.operator("object.toggle_collision_visibility", text="Toggle Collision Visibility", icon='HIDE_OFF')
 
+def draw_ui_object_collision(layout: bpy.types.UILayout):
+    #@TODO Move in bfu_collision_ui.py
+    pass
+    # Move collision content from bfu_object_ui_and_property.py
 
 # -------------------------------------------------------------------
 #   Register & Unregister

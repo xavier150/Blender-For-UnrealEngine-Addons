@@ -32,6 +32,7 @@ from .. import bfu_export
 from .. import bfu_ui
 from .. import languages
 from .. import bfu_custom_property
+from .. import bfu_material
 from .. import bfu_camera
 from .. import bfu_spline
 from .. import bfu_vertex_color
@@ -327,42 +328,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=True,
         )
 
-    # SkeletalMeshImportData:
-    # https://api.unrealengine.com/INT/API/Editor/UnrealEd/Factories/UFbxSkeletalMeshImportData/index.html
-
-    # UFbxTextureImportData:
-    # https://api.unrealengine.com/INT/API/Editor/UnrealEd/Factories/UFbxTextureImportData/index.html
-
-    bpy.types.Object.bfu_material_search_location = bpy.props.EnumProperty(
-        name="Material search location",
-        description=(
-            "Specify where we should search" +
-            " for matching materials when importing"
-            ),
-        override={'LIBRARY_OVERRIDABLE'},
-        # Vania python:
-        # https://docs.unrealengine.com/en-US/PythonAPI/class/MaterialSearchLocation.html?highlight=materialsearchlocation
-        # C++ API:
-        # http://api.unrealengine.com/INT/API/Editor/UnrealEd/Factories/EMaterialSearchLocation/index.html
-        items=[
-            ("Local",
-                "Local",
-                "Search for matching material in local import folder only.",
-                1),
-            ("UnderParent",
-                "Under parent",
-                "Search for matching material recursively from parent folder.",
-                2),
-            ("UnderRoot",
-                "Under root",
-                "Search for matching material recursively from root folder.",
-                3),
-            ("AllAssets",
-                "All assets",
-                "Search for matching material in all assets folders.",
-                4)
-            ]
-        )
 
     bpy.types.Object.bfu_collision_trace_flag = bpy.props.EnumProperty(
         name="Collision Complexity",
@@ -1085,7 +1050,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 'obj.bfu_convert_geometry_node_attribute_to_uv_name',
                 'obj.bfu_correct_extrem_uv_scale',
                 'obj.bfu_auto_generate_collision',
-                'obj.bfu_material_search_location',
                 'obj.bfu_collision_trace_flag',
                 'obj.bfu_enable_skeletal_mesh_per_poly_collision',
                 'obj.bfu_vertex_color_import_option',
@@ -1136,6 +1100,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             preset_values += bfu_modular_skeletal_specified_parts_meshs.get_preset_values()
             preset_values += bfu_unreal_engine_refs_props.get_preset_values()
             preset_values += bfu_custom_property.bfu_custom_property_props.get_preset_values()
+            preset_values += bfu_material.bfu_material_props.get_preset_values()
             preset_values += bfu_camera.bfu_camera_ui_and_props.get_preset_values()
             preset_values += bfu_spline.bfu_spline_ui_and_props.get_preset_values()
             return preset_values
@@ -1274,6 +1239,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             layout.row().prop(scene, "bfu_active_object_tab", expand=True)
         if scene.bfu_active_tab == "SCENE":
             layout.row().prop(scene, "bfu_active_scene_tab", expand=True)
+
+        bfu_material.bfu_material_ui.draw_ui_object_collision(layout)
 
         if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
             
@@ -1656,21 +1623,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 create_physics_asset.prop(obj, "bfu_create_physics_asset")
                                 enable_skeletal_mesh_per_poly_collision = layout.row()
                                 enable_skeletal_mesh_per_poly_collision.prop(obj, 'bfu_enable_skeletal_mesh_per_poly_collision')
-
-            scene.bfu_object_material_properties_expanded.draw(layout)
-            if scene.bfu_object_material_properties_expanded.is_expend():
-                if addon_prefs.useGeneratedScripts and obj is not None:
-                    if obj.bfu_export_type == "export_recursive":
-
-                        # bfu_material_search_location
-                        if not obj.bfu_export_as_lod_mesh:
-                            if (bfu_utils.GetAssetType(obj) == "StaticMesh" or
-                                    bfu_utils.GetAssetType(obj) == "SkeletalMesh" or
-                                    bfu_utils.GetAssetType(obj) == "Alembic"):
-                                bfu_material_search_location = layout.row()
-                                bfu_material_search_location.prop(
-                                    obj, 'bfu_material_search_location')
-
 
             scene.bfu_object_vertex_color_properties_expanded.draw(layout)
             if scene.bfu_object_vertex_color_properties_expanded.is_expend():
