@@ -22,4 +22,11 @@ from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_unreal_utils
+from .. import bfu_export_logs
 
+def get_material_asset_data(asset: bfu_export_logs.BFU_OT_UnrealExportedAsset):
+    asset_data = {}
+    if asset.object:
+        if asset.asset_type in ["StaticMesh", "SkeletalMesh"]:
+            asset_data["material_search_location"] = asset.object.bfu_material_search_location
+    return asset_data
