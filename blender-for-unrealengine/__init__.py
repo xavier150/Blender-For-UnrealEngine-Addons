@@ -39,6 +39,7 @@ from . import bfu_camera
 from . import bfu_spline
 from . import bfu_collision
 from . import bfu_socket
+from . import bfu_material
 from . import bfu_vertex_color
 from . import bfu_custom_property
 from . import bfu_addon_parts
@@ -74,6 +75,8 @@ if "bfu_collision" in locals():
     importlib.reload(bfu_collision)
 if "bfu_socket" in locals():
     importlib.reload(bfu_socket)
+if "bfu_material" in locals():
+    importlib.reload(bfu_material)
 if "bfu_vertex_color" in locals():
     importlib.reload(bfu_vertex_color)
 if "bfu_custom_property" in locals():
@@ -148,6 +151,7 @@ def register():
     bfu_spline.register()
     bfu_collision.register()
     bfu_socket.register()
+    bfu_material.register()
     bfu_vertex_color.register()
     bfu_custom_property.register()
     bfu_addon_parts.register()
@@ -173,6 +177,7 @@ def unregister():
     bfu_addon_parts.unregister()
     bfu_custom_property.unregister()
     bfu_vertex_color.unregister()
+    bfu_material.unregister()
     bfu_socket.unregister()
     bfu_collision.unregister()
     bfu_spline.unregister()
