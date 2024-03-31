@@ -206,7 +206,7 @@ def ImportAsset(asset_data):
 
         # unreal.FbxMeshImportData
 
-        if asset_data["asset_type"] == "StaticMesh" or asset_data["asset_type"] == "SkeletalMesh":
+        if asset_data["asset_type"] in ["StaticMesh", "SkeletalMesh"]:
             if "material_search_location" in asset_data:
                 # unreal.FbxTextureImportData
                 if asset_data["material_search_location"] == "Local":

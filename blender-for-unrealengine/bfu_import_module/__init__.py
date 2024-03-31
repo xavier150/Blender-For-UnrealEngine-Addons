@@ -23,8 +23,11 @@ from . import import_module_utils
 from . import import_module_unreal_utils
 from . import import_module_post_treatment
 from . import asset_import
+from . import asset_import
 from . import sequencer_import
 from . import sequencer_utils
+from . import bfu_import_materials
+from . import bfu_import_sequencer
 
 if "bps" in locals():
     importlib.reload(bps)
@@ -40,6 +43,10 @@ if "sequencer_import" in locals():
     importlib.reload(sequencer_import)
 if "sequencer_utils" in locals():
     importlib.reload(sequencer_utils)
+if "bfu_import_materials" in locals():
+    importlib.reload(bfu_import_materials)
+if "bfu_import_sequencer" in locals():
+    importlib.reload(bfu_import_sequencer)
 
 def run_asset_import(assets_data, show_finished_popup=True):
     if asset_import.ready_for_asset_import():
