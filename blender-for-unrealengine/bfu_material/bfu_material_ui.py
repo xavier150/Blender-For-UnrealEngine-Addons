@@ -37,14 +37,16 @@ def draw_ui_object_collision(layout: bpy.types.UILayout):
             if addon_prefs.useGeneratedScripts and obj is not None:
                 if obj.bfu_export_type == "export_recursive":
 
-                    # bfu_material_search_location
                     if not obj.bfu_export_as_lod_mesh:
-                        if (bfu_utils.GetAssetType(obj) == "StaticMesh" or
-                                bfu_utils.GetAssetType(obj) == "SkeletalMesh" or
-                                bfu_utils.GetAssetType(obj) == "Alembic"):
-                            bfu_material_search_location = layout.row()
-                            bfu_material_search_location.prop(
-                                obj, 'bfu_material_search_location')
-                                
+                        if (bfu_utils.GetAssetType(obj) in ["StaticMesh", "SkeletalMesh", "Alembic"]):
+                            bfu_material_search_location = layout.column()
+                            bbpl.blender_layout.layout_doc_button.add_doc_page_operator(bfu_material_search_location, text="About Materials", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Material")
+                            bfu_material_search_location.prop(obj, 'bfu_material_search_location')
+                            bfu_material_search_location.prop(obj, 'bfu_import_materials')
+                            bfu_material_search_location.prop(obj, 'bfu_import_textures')
+                            bfu_material_search_location.prop(obj, 'bfu_invert_normal_maps')
+                            bfu_material_search_location.prop(obj, 'bfu_reorder_material_to_fbx_order')
+                            
+
 def draw_ui_scene_collision(layout: bpy.types.UILayout):
     pass

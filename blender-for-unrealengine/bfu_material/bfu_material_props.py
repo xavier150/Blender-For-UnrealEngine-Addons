@@ -43,12 +43,41 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    # SkeletalMeshImportData:
-    # https://api.unrealengine.com/INT/API/Editor/UnrealEd/Factories/UFbxSkeletalMeshImportData/index.html
+    
+    # Used for set import_materials in FbxImportUI
+    # https://docs.unrealengine.com/5.3/en-US/PythonAPI/class/FbxImportUI.html
+    bpy.types.Object.bfu_import_materials = bpy.props.BoolProperty(
+        name="Import Materials",
+        description="Whether to import materials from the FBX file.",
+        default=True  # Modifier selon le comportement par défaut souhaité
+    )
 
-    # UFbxTextureImportData:
-    # https://api.unrealengine.com/INT/API/Editor/UnrealEd/Factories/UFbxTextureImportData/index.html
+    # Used for set import_textures in FbxImportUI
+    # https://docs.unrealengine.com/5.3/en-US/PythonAPI/class/FbxImportUI.html
+    bpy.types.Object.bfu_import_textures = bpy.props.BoolProperty(
+        name="Import Textures",
+        description="Whether to import textures from the FBX file.",
+        default=False
+    )
 
+    # Used for set invert_normal_maps in FbxTextureImportData
+    # https://docs.unrealengine.com/5.3/en-US/PythonAPI/class/FbxTextureImportData.html
+    bpy.types.Object.bfu_invert_normal_maps = bpy.props.BoolProperty(
+        name="Invert Normal Maps",
+        description="This option will cause normal map Y (Green) values to be inverted.",
+        default=False
+    )
+
+    # Used for set reorder_material_to_fbx_order in FbxMeshImportData
+    # https://docs.unrealengine.com/5.3/en-US/PythonAPI/class/FbxMeshImportData.html
+    bpy.types.Object.bfu_reorder_material_to_fbx_order = bpy.props.BoolProperty(
+        name="Reorder Materials to FBX Order",
+        description="If checked, The material list will be reorder to the same order has the FBX file.",
+        default=True
+    )
+
+    # Used for set material_search_location in FbxTextureImportData
+    # https://docs.unrealengine.com/5.3/en-US/PythonAPI/class/FbxTextureImportData.html
     bpy.types.Object.bfu_material_search_location = bpy.props.EnumProperty(
         name="Material search location",
         description=(
@@ -56,9 +85,8 @@ def register():
             " for matching materials when importing"
             ),
         override={'LIBRARY_OVERRIDABLE'},
-        # Vania python:
+        # Item list:
         # https://docs.unrealengine.com/en-US/PythonAPI/class/MaterialSearchLocation.html?highlight=materialsearchlocation
-        # C++ API:
         # http://api.unrealengine.com/INT/API/Editor/UnrealEd/Factories/EMaterialSearchLocation/index.html
         items=[
             ("Local",
@@ -79,6 +107,8 @@ def register():
                 4)
             ]
         )
+    
+    bpy.types.Scene.bfu_object_material_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Material")
 
 
 def unregister():
@@ -86,3 +116,9 @@ def unregister():
         bpy.utils.unregister_class(cls)
 
     del bpy.types.Object.bfu_material_search_location
+    del bpy.types.Object.bfu_reorder_material_to_fbx_order
+    del bpy.types.Object.bfu_invert_normal_maps
+    del bpy.types.Object.bfu_import_textures
+    del bpy.types.Object.bfu_import_materials
+    
+    del bpy.types.Scene.bfu_object_material_properties_expanded
