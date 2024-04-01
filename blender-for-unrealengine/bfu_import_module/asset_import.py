@@ -22,6 +22,7 @@ from . import bps
 from . import import_module_utils
 from . import import_module_unreal_utils
 from . import import_module_post_treatment
+from . import bfu_import_materials
 
 try:
     import unreal
@@ -206,17 +207,8 @@ def ImportAsset(asset_data):
 
         # unreal.FbxMeshImportData
 
-        if asset_data["asset_type"] in ["StaticMesh", "SkeletalMesh"]:
-            if "material_search_location" in asset_data:
-                # unreal.FbxTextureImportData
-                if asset_data["material_search_location"] == "Local":
-                    task.get_editor_property('options').texture_import_data.set_editor_property('material_search_location', unreal.MaterialSearchLocation.LOCAL)
-                if asset_data["material_search_location"] == "UnderParent":
-                    task.get_editor_property('options').texture_import_data.set_editor_property('material_search_location', unreal.MaterialSearchLocation.UNDER_PARENT)
-                if asset_data["material_search_location"] == "UnderRoot":
-                    task.get_editor_property('options').texture_import_data.set_editor_property('material_search_location', unreal.MaterialSearchLocation.UNDER_ROOT)
-                if asset_data["material_search_location"] == "AllAssets":
-                    task.get_editor_property('options').texture_import_data.set_editor_property('material_search_location', unreal.MaterialSearchLocation.ALL_ASSETS)
+        bfu_import_materials.bfu_import_materials_utils.update_task_with_material_data(task, asset_data)
+
 
         if asset_data["asset_type"] == "StaticMesh":
             # unreal.FbxStaticMeshImportData
