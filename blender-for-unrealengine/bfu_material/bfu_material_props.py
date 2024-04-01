@@ -79,7 +79,7 @@ def register():
     # Used for set material_search_location in FbxTextureImportData
     # https://docs.unrealengine.com/5.3/en-US/PythonAPI/class/FbxTextureImportData.html
     bpy.types.Object.bfu_material_search_location = bpy.props.EnumProperty(
-        name="Material search location",
+        name="Material Search Location",
         description=(
             "Specify where we should search" +
             " for matching materials when importing"
