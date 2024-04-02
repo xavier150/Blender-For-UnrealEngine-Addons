@@ -86,42 +86,42 @@ class BFU_PT_Export(bpy.types.Panel):
         name="StaticMesh export file path",
         description="Choose a directory to export StaticMesh(s)",
         maxlen=512,
-        default=os.path.join("//", "ExportedFbx", "StaticMesh"),
+        default="//" + os.path.join("ExportedFbx", "StaticMesh"),
         subtype='DIR_PATH')
 
     bpy.types.Scene.bfu_export_skeletal_file_path = bpy.props.StringProperty(
         name="SkeletalMesh export file path",
         description="Choose a directory to export SkeletalMesh(s)",
         maxlen=512,
-        default=os.path.join("//", "ExportedFbx", "SkeletalMesh"),
+        default="//" + os.path.join("ExportedFbx", "SkeletalMesh"),
         subtype='DIR_PATH')
 
     bpy.types.Scene.bfu_export_alembic_file_path = bpy.props.StringProperty(
         name="Alembic export file path",
         description="Choose a directory to export Alembic(s)",
         maxlen=512,
-        default=os.path.join("//", "ExportedFbx", "Alembic"),
+        default="//" + os.path.join("ExportedFbx", "Alembic"),
         subtype='DIR_PATH')
 
     bpy.types.Scene.bfu_export_camera_file_path = bpy.props.StringProperty(
         name="Camera export file path",
         description="Choose a directory to export Camera(s)",
         maxlen=512,
-        default=os.path.join("//", "ExportedFbx", "Sequencer"),
+        default="//" + os.path.join("ExportedFbx", "Sequencer"),
         subtype='DIR_PATH')
     
     bpy.types.Scene.bfu_export_spline_file_path = bpy.props.StringProperty(
         name="Spline export file path",
         description="Choose a directory to export Spline(s)",
         maxlen=512,
-        default=os.path.join("//", "ExportedFbx", "Spline"),
+        default="//" + os.path.join("ExportedFbx", "Spline"),
         subtype='DIR_PATH')
 
     bpy.types.Scene.bfu_export_other_file_path = bpy.props.StringProperty(
         name="Other export file path",
         description="Choose a directory to export text file and other",
         maxlen=512,
-        default=os.path.join("//", "ExportedFbx"),
+        default="//" + os.path.join("ExportedFbx"),
         subtype='DIR_PATH')
 
     # File name
