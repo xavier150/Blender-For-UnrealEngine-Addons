@@ -986,19 +986,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     Frames = bfu_utils.GetDesiredActionStartEndTime(obj, action)
                     frame_start = str(Frames[0])
                     frame_end = str(Frames[1])
-                    addAnimRow(
-                        action.name,
-                        bfu_utils.GetActionType(action),
-                        frame_start,
-                        frame_end)
+                    addAnimRow(action.name, bfu_utils.GetActionType(action), frame_start, frame_end)
                 if obj.bfu_anim_nla_use:
                     scene = context.scene
-                    addAnimRow(
-                        obj.bfu_anim_nla_export_name,
-                        "NlAnim",
-                        str(scene.frame_start),
-                        str(scene.frame_end)
-                        )
+                    addAnimRow(obj.bfu_anim_nla_export_name, "NlAnim", str(scene.frame_start), str(scene.frame_end))
 
             bpy.context.window_manager.popup_menu(
                 draw,
