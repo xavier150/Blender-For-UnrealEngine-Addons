@@ -25,8 +25,8 @@
 import bpy
 from ... import __internal__
 
-def get_object_operator_idname():
+def get_open_target_web_page_idname():
     return __internal__.utils.get_object_operator_idname("open_target_web_page")
 
-def get_operator_class_name():
+def get_open_target_web_page_class_name():
     return __internal__.utils.get_operator_class_name("OpenTargetWebPage")

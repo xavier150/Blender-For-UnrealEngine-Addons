@@ -24,17 +24,17 @@
 
 import bpy
 import importlib
-from . import types
 from . import functions
 from . import utils
+from . import types
 from .functions import *
 
-if "types" in locals():
-    importlib.reload(types)
 if "functions" in locals():
     importlib.reload(functions)
 if "utils" in locals():
     importlib.reload(utils)
+if "types" in locals():
+    importlib.reload(types)
 
 classes = (
 )

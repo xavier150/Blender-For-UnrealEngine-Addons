@@ -23,3 +23,13 @@
 # ----------------------------------------------
 
 import bpy
+from ... import __internal__
+
+def get_template_button_idname(name):
+    return __internal__.utils.get_data_operator_idname("tpl_btn_" + name)
+
+def get_template_button_class_name(name):
+    return __internal__.utils.get_operator_class_name("tpl_btn_" + name)
+
+def get_operator_class_name(name):
+    return __internal__.utils.get_operator_class_name(name)

@@ -33,7 +33,7 @@ def create_operator_class():
     
     class CustomOpenTargetWebPage_Operator(bpy.types.Operator):
         bl_label = "Documentation"
-        bl_idname = utils.get_object_operator_idname()
+        bl_idname = utils.get_open_target_web_page_idname()
         bl_description = "Click for open URL."
         url: bpy.props.StringProperty(default="https://github.com/xavier150/BleuRavenBlenderPythonLibrary")
 
@@ -46,7 +46,7 @@ def create_operator_class():
                 self.report({'WARNING'}, "Invalid URL. Only HTTP and HTTPS URLs are allowed.")
                 return {'CANCELLED'}
 
-    CustomOpenTargetWebPage_Operator.__name__ = utils.get_operator_class_name()
+    CustomOpenTargetWebPage_Operator.__name__ = utils.get_open_target_web_page_class_name()
     return CustomOpenTargetWebPage_Operator
 
 

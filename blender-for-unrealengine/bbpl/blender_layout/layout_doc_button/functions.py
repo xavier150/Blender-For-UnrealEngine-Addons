@@ -28,7 +28,7 @@ from ... import __internal__
 
 def add_doc_page_operator(layout: bpy.types.UILayout, url: str="", text: str="", icon="HELP"):
     doc_operator = layout.operator(
-        utils.get_object_operator_idname(),
+        utils.get_open_target_web_page_idname(),
         icon=icon,
         text=text
         )
@@ -39,7 +39,7 @@ def add_doc_page_operator(layout: bpy.types.UILayout, url: str="", text: str="",
 def add_left_doc_page_operator(layout: bpy.types.UILayout, url: str="", text: str="", icon="HELP"):
     new_row = layout.row()
     doc_operator = new_row.operator(
-        utils.get_object_operator_idname(),
+        utils.get_open_target_web_page_idname(),
         icon=icon,
         text=""
         )
@@ -51,7 +51,7 @@ def add_right_doc_page_operator(layout: bpy.types.UILayout, url: str="", text: s
     new_row = layout.row()
     new_row.label(text=text)
     doc_operator = new_row.operator(
-        utils.get_object_operator_idname(),
+        utils.get_open_target_web_page_idname(),
         icon=icon,
         text=""
         )
