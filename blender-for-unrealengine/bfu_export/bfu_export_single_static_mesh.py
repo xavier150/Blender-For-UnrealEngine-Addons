@@ -112,12 +112,14 @@ def ExportSingleStaticMesh(
     bfu_export_utils.MakeSelectVisualReal()
 
     bfu_utils.ApplyNeededModifierToSelect()
-    for obj in bpy.context.selected_objects:
-        bfu_export_utils.SetVertexColorForUnrealExport(obj)
-        bfu_export_utils.ConvertGeometryNodeAttributeToUV(obj)
-        bfu_export_utils.CorrectExtremUVAtExport(obj)
-        bfu_export_utils.SetSocketsExportTransform(obj)
-        bfu_export_utils.SetSocketsExportName(obj)
+    for selected_obj in bpy.context.selected_objects:
+        if obj.bfu_convert_geometry_node_attribute_to_uv:
+            attrib_name = obj.bfu_convert_geometry_node_attribute_to_uv_name
+            bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
+        bfu_export_utils.SetVertexColorForUnrealExport(selected_obj)
+        bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
+        bfu_export_utils.SetSocketsExportTransform(selected_obj)
+        bfu_export_utils.SetSocketsExportName(selected_obj)
 
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active

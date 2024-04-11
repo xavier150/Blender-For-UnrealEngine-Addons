@@ -493,6 +493,7 @@ It is now possible to force the duration of an animation according to the scene 
 - New: Option for set use_space_transform at export.
 - New: Button for fix extreme UV scales in Tools > UV Map.
 - New: New Materials option for the Import FBX for Import in Unreal.
+- Change: "Convert Attribute To UV" is False by default.
 - Fixed: Import sequencer script fail for unreal 5.0 and older version (SequencerBindingProxy rename to MovieSceneBindingProxy)
 - Fixed: Import sequencer script fail if camera is not and an cinmetaic camera.
 - Fixed: Import sequencer script fail if custom camera class is not found.
@@ -503,3 +504,4 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Camera scale do not use display size in camera data.
 - Fixed: Check Potential Errors do not fix Hierarchy names with Sockets and Collisions
 - Fixed: Default export file_paths is wrong.
+- Fixed: Addon export check "Convert Attribute To UV" and his "Attribute name" on the wrong object.

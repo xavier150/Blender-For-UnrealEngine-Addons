@@ -299,7 +299,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "convert target geometry node attribute to UV when found."
             ),
         override={'LIBRARY_OVERRIDABLE'},
-        default=True,
+        default=False,
         )
 
     bpy.types.Object.bfu_convert_geometry_node_attribute_to_uv_name = bpy.props.StringProperty(

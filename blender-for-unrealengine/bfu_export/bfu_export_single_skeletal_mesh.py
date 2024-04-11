@@ -116,12 +116,14 @@ def ExportSingleSkeletalMesh(
     bfu_export_utils.MakeSelectVisualReal()
 
     bfu_utils.ApplyNeededModifierToSelect()
-    for armature in bpy.context.selected_objects:
-        bfu_export_utils.ConvertGeometryNodeAttributeToUV(armature)
-        bfu_export_utils.CorrectExtremUVAtExport(armature)
-        bfu_export_utils.SetVertexColorForUnrealExport(armature)
-        bfu_export_utils.SetSocketsExportTransform(armature)
-        bfu_export_utils.SetSocketsExportName(armature)
+    for selected_obj in bpy.context.selected_objects:
+        if armature.bfu_convert_geometry_node_attribute_to_uv:
+            attrib_name = armature.bfu_convert_geometry_node_attribute_to_uv_name
+            bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
+        bfu_export_utils.SetVertexColorForUnrealExport(selected_obj)
+        bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
+        bfu_export_utils.SetSocketsExportTransform(selected_obj)
+        bfu_export_utils.SetSocketsExportName(selected_obj)
 
     saved_base_transforms = bfu_export_utils.SaveTransformObjects(armature)
     active = bpy.context.view_layer.objects.active

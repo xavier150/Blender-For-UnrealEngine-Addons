@@ -384,86 +384,82 @@ class PrepareExportName():
 # UVs
 
 
-def ConvertGeometryNodeAttributeToUV(obj):
-    # obj = bpy.context.active_object  # Debug
-    if obj.bfu_convert_geometry_node_attribute_to_uv:
-        attrib_name = obj.bfu_convert_geometry_node_attribute_to_uv_name
+def ConvertGeometryNodeAttributeToUV(obj, attrib_name):
+    # I need apply the geometry modifier for get the data.
+    # So this work only when I do export of the duplicate object.
+    
+    if hasattr(obj.data, "attributes"):  # Cuves has not attributes.
+        if attrib_name in obj.data.attributes:
 
-        # I need apply the geometry modifier for get the data.
-        # So this work only when I do export of the duplicate object.
+            # TO DO: Bad why to do this. Need found a way to convert without using ops.
+            obj.data.attributes.active = obj.data.attributes[attrib_name]
 
-        if hasattr(obj.data, "attributes"):  # Cuves has not attributes.
-            if attrib_name in obj.data.attributes:
+            # Because a bug Blender set the wrong attribute as active in 3.5.
+            if obj.data.attributes.active != obj.data.attributes[attrib_name]:
+                for x, attribute in enumerate(obj.data.attributes):
+                    if attribute.name == attrib_name:
+                        obj.data.attributes.active_index = x
 
-                # TO DO: Bad why to do this. Need found a way to convert without using ops.
-                obj.data.attributes.active = obj.data.attributes[attrib_name]
+            SavedSelect = bbpl.utils.UserSelectSave()
+            SavedSelect.save_current_select()
+            bbpl.utils.select_specific_object(obj)
+            if bpy.app.version >= (3, 5, 0):
+                if obj.data.attributes.active:
+                    bpy.ops.geometry.attribute_convert(mode='GENERIC', domain='CORNER', data_type='FLOAT2')
+            else:
+                if obj.data.attributes.active:
+                    bpy.ops.geometry.attribute_convert(mode='UV_MAP', domain='CORNER', data_type='FLOAT2')
+            SavedSelect.reset_select_by_ref()
 
-                # Because a bug Blender set the wrong attribute as active in 3.5.
-                if obj.data.attributes.active != obj.data.attributes[attrib_name]:
-                    for x, attribute in enumerate(obj.data.attributes):
-                        if attribute.name == attrib_name:
-                            obj.data.attributes.active_index = x
+            # Because it not possible to move UV index I need recreate all UV for place new UV Map at start...
+            if len(obj.data.uv_layers) < 8:  # Blender Cannot add more than 8 UV maps.
 
-                SavedSelect = bbpl.utils.UserSelectSave()
-                SavedSelect.save_current_select()
-                bbpl.utils.select_specific_object(obj)
-                if bpy.app.version >= (3, 5, 0):
-                    if obj.data.attributes.active:
-                        bpy.ops.geometry.attribute_convert(mode='GENERIC', domain='CORNER', data_type='FLOAT2')
-                else:
-                    if obj.data.attributes.active:
-                        bpy.ops.geometry.attribute_convert(mode='UV_MAP', domain='CORNER', data_type='FLOAT2')
-                SavedSelect.reset_select_by_ref()
+                uv_names = []  # Cache uv names
+                for old_uv in obj.data.uv_layers:
+                    uv_names.append(old_uv.name)
 
-                # Because it not possible to move UV index I need recreate all UV for place new UV Map at start...
-                if len(obj.data.uv_layers) < 8:  # Blender Cannot add more than 8 UV maps.
+                for name in uv_names:
+                    old_uv = obj.data.uv_layers[name]
+                    if name != attrib_name:
+                        # Vars
+                        new_uv_name = old_uv.name
+                        old_uv_name = old_uv.name + "_OLDUVEXPORT"
+                        # Rename and recreate new UV
+                        old_uv.name += "_OLDUVEXPORT"
+                        obj.data.uv_layers.active = old_uv
+                        new_uv = obj.data.uv_layers.new(name=new_uv_name, do_init=True)
+                        obj.data.uv_layers.active = new_uv
+                        # Remove old one
+                        obj.data.uv_layers.remove(obj.data.uv_layers[old_uv_name])
 
-                    uv_names = []  # Cache uv names
-                    for old_uv in obj.data.uv_layers:
-                        uv_names.append(old_uv.name)
+            return
 
-                    for name in uv_names:
-                        old_uv = obj.data.uv_layers[name]
-                        if name != attrib_name:
-                            # Vars
-                            new_uv_name = old_uv.name
-                            old_uv_name = old_uv.name + "_OLDUVEXPORT"
-                            # Rename and recreate new UV
-                            old_uv.name += "_OLDUVEXPORT"
-                            obj.data.uv_layers.active = old_uv
-                            new_uv = obj.data.uv_layers.new(name=new_uv_name, do_init=True)
-                            obj.data.uv_layers.active = new_uv
-                            # Remove old one
-                            obj.data.uv_layers.remove(obj.data.uv_layers[old_uv_name])
+            attrib = obj.data.attributes[attrib_name]
 
-                return
+            new_uv = obj.data.uv_layers.new(name=attrib_name)
+            uv_coords = []
 
-                attrib = obj.data.attributes[attrib_name]
+            attrib.data  # TO DO: I don't understand why attrib.data is egal at zero just after a duplicate.
+            print('XXXXXXXXXXXX')
+            print(type(attrib.data))
+            print('XXXXXXXXXXXX')
+            print(dir(attrib.data))
+            print('XXXXXXXXXXXX')
+            print(attrib.data.values())
+            print('XXXXXXXXXXXX')
+            attrib_data = []
+            attrib.data.foreach_get('vector', attrib_data)
+            print(attrib_data)
 
-                new_uv = obj.data.uv_layers.new(name=attrib_name)
-                uv_coords = []
+            for fv_attrib in attrib.data:  # FloatVectorAttributeValue
+                uv_coords.append(fv_attrib.vector)
+            uv_coords.append(attrib.data[0])
 
-                attrib.data  # TO DO: I don't understand why attrib.data is egal at zero just after a duplicate.
-                print('XXXXXXXXXXXX')
-                print(type(attrib.data))
-                print('XXXXXXXXXXXX')
-                print(dir(attrib.data))
-                print('XXXXXXXXXXXX')
-                print(attrib.data.values())
-                print('XXXXXXXXXXXX')
-                attrib_data = []
-                attrib.data.foreach_get('vector', attrib_data)
-                print(attrib_data)
+            for loop in obj.data.loops:
+                new_uv.data[loop.index].uv[0] = uv_coords[loop.index][0]
+                new_uv.data[loop.index].uv[1] = uv_coords[loop.index][1]
 
-                for fv_attrib in attrib.data:  # FloatVectorAttributeValue
-                    uv_coords.append(fv_attrib.vector)
-                uv_coords.append(attrib.data[0])
-
-                for loop in obj.data.loops:
-                    new_uv.data[loop.index].uv[0] = uv_coords[loop.index][0]
-                    new_uv.data[loop.index].uv[1] = uv_coords[loop.index][1]
-
-                obj.data.attributes.remove(attrib_name)
+            obj.data.attributes.remove(attrib_name)
 
 
 def CorrectExtremUVAtExport(obj):
