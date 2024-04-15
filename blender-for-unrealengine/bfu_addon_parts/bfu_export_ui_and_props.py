@@ -18,7 +18,7 @@ class BFU_PT_Export(bpy.types.Panel):
     # Is Export panel
 
     bl_idname = "BFU_PT_Export"
-    bl_label = "Export"
+    bl_label = "BFU Export"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "Unreal Engine"

@@ -13,7 +13,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
     # Tool panel
 
     bl_idname = "BFU_PT_BlenderForUnrealTool"
-    bl_label = "Tool"
+    bl_label = "BFU Tool"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "Unreal Engine"
