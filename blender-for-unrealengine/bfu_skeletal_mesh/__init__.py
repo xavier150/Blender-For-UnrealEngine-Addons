@@ -23,11 +23,11 @@ from . import bfu_skeletal_mesh_props
 from . import bfu_skeletal_mesh_ui
 from . import bfu_skeletal_mesh_utils
 
-if "bfu_material_props" in locals():
+if "bfu_skeletal_mesh_props" in locals():
     importlib.reload(bfu_skeletal_mesh_props)
-if "bfu_material_ui" in locals():
+if "bfu_skeletal_mesh_ui" in locals():
     importlib.reload(bfu_skeletal_mesh_ui)
-if "bfu_material_utils" in locals():
+if "bfu_skeletal_mesh_utils" in locals():
     importlib.reload(bfu_skeletal_mesh_utils)
 
 classes = (

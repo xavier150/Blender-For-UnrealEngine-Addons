@@ -18,33 +18,31 @@
 
 
 import bpy
-from . import bfu_static_mesh_utils
+from . import bfu_lod_utils
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui
 from .. import bbpl
 
-def get_preset_values():
-    preset_values = [
-        ]
-    return preset_values
 
+def draw_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
 
-# -------------------------------------------------------------------
-#   Register & Unregister
-# -------------------------------------------------------------------
+    if obj is None:
+        return
+    
+    scene = bpy.context.scene 
+    addon_prefs = bfu_basics.GetAddonPrefs()
 
-classes = (
-)
+    if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):            
+        scene.bfu_lod_properties_expanded.draw(layout)
+        if scene.bfu_lod_properties_expanded.is_expend():
+            if obj.bfu_export_type == "export_recursive":
+                if not bfu_utils.GetExportAsProxy(obj):
+                    if addon_prefs.useGeneratedScripts:
+                        # Unreal python no longer support Skeletal mesh LODS import.
+                        if bfu_utils.GetAssetType(obj) in ["StaticMesh"]:
+                            LodProp = layout.column()
+                            LodProp.prop(obj, 'bfu_export_as_lod_mesh')
 
-
-def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
-
-
-
-
-def unregister():
-    for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
+def draw_ui_scene(layout: bpy.types.UILayout):
+    pass

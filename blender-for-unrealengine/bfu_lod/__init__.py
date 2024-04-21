@@ -19,16 +19,16 @@
 import bpy
 import importlib
 
-from . import bfu_static_mesh_props
-from . import bfu_static_mesh_ui
-from . import bfu_static_mesh_utils
+from . import bfu_lod_props
+from . import bfu_lod_ui
+from . import bfu_lod_utils
 
-if "bfu_static_mesh_props" in locals():
-    importlib.reload(bfu_static_mesh_props)
-if "bfu_static_mesh_ui" in locals():
-    importlib.reload(bfu_static_mesh_ui)
-if "bfu_static_mesh_utils" in locals():
-    importlib.reload(bfu_static_mesh_utils)
+if "bfu_lod_props" in locals():
+    importlib.reload(bfu_lod_props)
+if "bfu_lod_ui" in locals():
+    importlib.reload(bfu_lod_ui)
+if "bfu_lod_utils" in locals():
+    importlib.reload(bfu_lod_utils)
 
 classes = (
 )
@@ -38,10 +38,10 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bfu_static_mesh_props.register()
+    bfu_lod_props.register()
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
-    bfu_static_mesh_props.unregister()
+    bfu_lod_props.unregister()

@@ -16,19 +16,20 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
+
 import bpy
-import importlib
+from . import bfu_lod_utils
+from .. import bfu_basics
+from .. import bfu_utils
+from .. import bfu_ui
+from .. import bbpl
 
-from . import bfu_static_mesh_props
-from . import bfu_static_mesh_ui
-from . import bfu_static_mesh_utils
 
-if "bfu_static_mesh_props" in locals():
-    importlib.reload(bfu_static_mesh_props)
-if "bfu_static_mesh_ui" in locals():
-    importlib.reload(bfu_static_mesh_ui)
-if "bfu_static_mesh_utils" in locals():
-    importlib.reload(bfu_static_mesh_utils)
+
+
+# -------------------------------------------------------------------
+#   Register & Unregister
+# -------------------------------------------------------------------
 
 classes = (
 )
@@ -38,10 +39,11 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bfu_static_mesh_props.register()
+    bpy.types.Scene.bfu_lod_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Lod")
+
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
-    bfu_static_mesh_props.unregister()
+    del bpy.types.Scene.bfu_lod_properties_expanded

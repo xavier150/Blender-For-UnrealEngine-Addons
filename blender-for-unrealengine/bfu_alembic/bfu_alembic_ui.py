@@ -18,29 +18,41 @@
 
 
 import bpy
-from . import bfu_static_mesh_utils
+from . import bfu_alembic_utils
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui
 from .. import bbpl
 
 
-def draw_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
-
+def draw_general_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
     if obj is None:
         return
     
     scene = bpy.context.scene 
+    addon_prefs = bfu_basics.GetAddonPrefs()
     if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
         if scene.bfu_object_properties_expanded.is_expend():
             if obj.bfu_export_type == "export_recursive":
-                pass
+                if bfu_utils.GetAssetType(obj) in ["SkeletalMesh", "StaticMesh", "Alembic"]:
+                    if not bfu_utils.GetExportAsProxy(obj):
+                        AlembicProp = layout.column()
+                        AlembicProp.prop(obj, 'bfu_export_as_alembic')
 
+def draw_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
+    if obj is None:
+        return
+    
+    if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):            
+        scene = bpy.context.scene 
+        scene.bfu_alembic_properties_expanded.draw(layout)
+        if scene.bfu_alembic_properties_expanded.is_expend():
+            if bfu_utils.GetAssetType(obj) in ["Alembic"]:
+                AlembicProp = layout.column()
+                AlembicProp.label(text="(Alembic animation are exported with scene position.)")
+                AlembicProp.label(text="(Use import script for use the origin position.)")
+                AlembicProp.prop(obj, 'bfu_create_sub_folder_with_alembic_name')
 
-    if scene.bfu_object_advanced_properties_expanded.is_expend():
-        if obj.bfu_export_type == "export_recursive":
-            pass
-            
 
 def draw_ui_scene(layout: bpy.types.UILayout):
     pass

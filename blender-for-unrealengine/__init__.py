@@ -37,12 +37,14 @@ from . import bbpl
 from . import bfu_propertys
 from . import bfu_static_mesh
 from . import bfu_skeletal_mesh
+from . import bfu_alembic
 from . import bfu_camera
 from . import bfu_spline
 from . import bfu_collision
 from . import bfu_socket
 from . import bfu_material
 from . import bfu_vertex_color
+from . import bfu_lod
 from . import bfu_custom_property
 from . import bfu_addon_parts
 from . import bfu_export_procedure
@@ -73,6 +75,8 @@ if "bfu_static_mesh" in locals():
     importlib.reload(bfu_static_mesh)
 if "bfu_skeletal_mesh" in locals():
     importlib.reload(bfu_skeletal_mesh)
+if "bfu_alembic" in locals():
+    importlib.reload(bfu_alembic)
 if "bfu_camera" in locals():
     importlib.reload(bfu_camera)
 if "bfu_spline" in locals():
@@ -85,6 +89,8 @@ if "bfu_material" in locals():
     importlib.reload(bfu_material)
 if "bfu_vertex_color" in locals():
     importlib.reload(bfu_vertex_color)
+if "bfu_lod" in locals():
+    importlib.reload(bfu_lod)
 if "bfu_custom_property" in locals():
     importlib.reload(bfu_custom_property)
 if "bfu_addon_parts" in locals():
@@ -155,12 +161,14 @@ def register():
     bfu_propertys.register()
     bfu_static_mesh.register()
     bfu_skeletal_mesh.register()
+    bfu_alembic.register()
     bfu_camera.register()
     bfu_spline.register()
     bfu_collision.register()
     bfu_socket.register()
     bfu_material.register()
     bfu_vertex_color.register()
+    bfu_lod.register()
     bfu_custom_property.register()
     bfu_addon_parts.register()
     bfu_export_procedure.register()
@@ -184,12 +192,14 @@ def unregister():
     bfu_export_procedure.unregister()
     bfu_addon_parts.unregister()
     bfu_custom_property.unregister()
+    bfu_lod.unregister()
     bfu_vertex_color.unregister()
     bfu_material.unregister()
     bfu_socket.unregister()
     bfu_collision.unregister()
     bfu_spline.unregister()
     bfu_camera.unregister()
+    bfu_alembic.unregister()
     bfu_skeletal_mesh.unregister()
     bfu_static_mesh.unregister()
     bfu_propertys.unregister()

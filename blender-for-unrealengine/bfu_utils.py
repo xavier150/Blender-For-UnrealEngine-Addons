@@ -1164,27 +1164,21 @@ def GetObjExportDir(obj, abspath=False):
 
     scene = bpy.context.scene
     if GetAssetType(obj) == "SkeletalMesh":
-        dirpath = os.path.join(
-            scene.bfu_export_skeletal_file_path,
-            folder_name,
-            GetObjExportName(obj))
+        if obj.bfu_create_sub_folder_with_skeletal_mesh_name:
+            dirpath = os.path.join(scene.bfu_export_skeletal_file_path, folder_name, GetObjExportName(obj))
+        else:
+            dirpath = os.path.join(scene.bfu_export_skeletal_file_path, folder_name)
     if GetAssetType(obj) == "Alembic":
-        dirpath = os.path.join(
-            scene.bfu_export_alembic_file_path,
-            folder_name,
-            obj_name)
+        if obj.bfu_create_sub_folder_with_alembic_name:
+            dirpath = os.path.join(scene.bfu_export_alembic_file_path, folder_name, GetObjExportName(obj))
+        else:
+            dirpath = os.path.join(scene.bfu_export_alembic_file_path, folder_name)
     if GetAssetType(obj) == "StaticMesh":
-        dirpath = os.path.join(
-            scene.bfu_export_static_file_path,
-            folder_name)
+        dirpath = os.path.join(scene.bfu_export_static_file_path, folder_name)
     if GetAssetType(obj) == "Camera":
-        dirpath = os.path.join(
-            scene.bfu_export_camera_file_path,
-            folder_name)
+        dirpath = os.path.join(scene.bfu_export_camera_file_path, folder_name)
     if GetAssetType(obj) == "Spline":
-        dirpath = os.path.join(
-            scene.bfu_export_spline_file_path,
-            folder_name)
+        dirpath = os.path.join(scene.bfu_export_spline_file_path, folder_name)
     if abspath:
         return bpy.path.abspath(dirpath)
 
