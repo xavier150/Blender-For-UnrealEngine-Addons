@@ -45,9 +45,9 @@ def draw_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
     
     if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):            
         scene = bpy.context.scene 
-        scene.bfu_alembic_properties_expanded.draw(layout)
-        if scene.bfu_alembic_properties_expanded.is_expend():
-            if bfu_utils.GetAssetType(obj) in ["Alembic"]:
+        if bfu_utils.GetAssetType(obj) in ["Alembic"]:
+            scene.bfu_alembic_properties_expanded.draw(layout)
+            if scene.bfu_alembic_properties_expanded.is_expend():
                 AlembicProp = layout.column()
                 AlembicProp.label(text="(Alembic animation are exported with scene position.)")
                 AlembicProp.label(text="(Use import script for use the origin position.)")
