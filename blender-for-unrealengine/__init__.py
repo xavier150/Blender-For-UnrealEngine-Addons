@@ -35,6 +35,8 @@ import importlib
 from . import bps
 from . import bbpl
 from . import bfu_propertys
+from . import bfu_static_mesh
+from . import bfu_skeletal_mesh
 from . import bfu_camera
 from . import bfu_spline
 from . import bfu_collision
@@ -67,6 +69,10 @@ if "bbpl" in locals():
     importlib.reload(bbpl)
 if "bfu_propertys" in locals():
     importlib.reload(bfu_propertys)
+if "bfu_static_mesh" in locals():
+    importlib.reload(bfu_static_mesh)
+if "bfu_skeletal_mesh" in locals():
+    importlib.reload(bfu_skeletal_mesh)
 if "bfu_camera" in locals():
     importlib.reload(bfu_camera)
 if "bfu_spline" in locals():
@@ -147,6 +153,8 @@ def register():
 
     bbpl.register()
     bfu_propertys.register()
+    bfu_static_mesh.register()
+    bfu_skeletal_mesh.register()
     bfu_camera.register()
     bfu_spline.register()
     bfu_collision.register()
@@ -182,5 +190,7 @@ def unregister():
     bfu_collision.unregister()
     bfu_spline.unregister()
     bfu_camera.unregister()
+    bfu_skeletal_mesh.unregister()
+    bfu_static_mesh.unregister()
     bfu_propertys.unregister()
     bbpl.unregister()
