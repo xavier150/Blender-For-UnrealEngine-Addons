@@ -122,9 +122,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
     bpy.types.Object.bfu_use_custom_export_name = bpy.props.BoolProperty(
         name="Export with custom name",
-        description=(
-            "Specify a custom name for the exported file"
-            ),
+        description=("Specify a custom name for the exported file"),
         override={'LIBRARY_OVERRIDABLE'},
         default=False
         )
