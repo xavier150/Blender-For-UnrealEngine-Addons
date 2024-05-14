@@ -25,11 +25,7 @@
 import bpy
 from . import utils
 
-# Définissez un dictionnaire global pour stocker des références aux instances de PropertyGroup
-
 def send_template_data_on_button(button, template):
-    return
-
     if isinstance(template.id_data, bpy.types.Scene):
         data_type = "Scene"
     elif isinstance(template.id_data, bpy.types.Object):
@@ -43,8 +39,6 @@ def send_template_data_on_button(button, template):
     button.target_variable_name = template.get_name()
 
 def get_template_from_button(button):
-
-    
 
     if button.target_id_data_type == "Scene":
         scene = bpy.data.scenes[button.target_id_data_name]
@@ -162,15 +156,15 @@ def create_template_list_class(TemplateItem, TemplateItemDraw):
 
 
             template_column = template_row.column(align=True)
-            button_add = template_column.operator(utils.get_template_button_class_name("add"), icon='ADD', text="")
+            button_add = template_column.operator(utils.get_template_button_idname("add"), icon='ADD', text="")
             send_template_data_on_button(button_add, self)
-            button_remove = template_column.operator(utils.get_template_button_class_name("remove"), icon='REMOVE', text="")
+            button_remove = template_column.operator(utils.get_template_button_idname("remove"), icon='REMOVE', text="")
             send_template_data_on_button(button_remove, self)
-            button_moveup = template_column.operator(utils.get_template_button_class_name("moveup"), icon='TRIA_UP', text="")
+            button_moveup = template_column.operator(utils.get_template_button_idname("moveup"), icon='TRIA_UP', text="")
             send_template_data_on_button(button_moveup, self)
-            button_movedown = template_column.operator(utils.get_template_button_class_name("movedown"), icon='TRIA_DOWN', text="")
+            button_movedown = template_column.operator(utils.get_template_button_idname("movedown"), icon='TRIA_DOWN', text="")
             send_template_data_on_button(button_movedown, self)
-            button_duplicate = template_column.operator(utils.get_template_button_class_name("duplicate"), icon='ADD', text="")
+            button_duplicate = template_column.operator(utils.get_template_button_idname("duplicate"), icon='ADD', text="")
             send_template_data_on_button(button_duplicate, self)
             return template_row
     BBPL_UI_TemplateList.__name__ = utils.get_operator_class_name("TemplateList")
@@ -222,6 +216,7 @@ def create_template_button_add_class(TemplateButtonBase):
             template.active_template_property = last_index
             return {"FINISHED"}
     BBPL_OT_TemplateButtonAdd.__name__ = utils.get_template_button_class_name("add")
+    print("Create and rename:", BBPL_OT_TemplateButtonAdd.__name__)
     return BBPL_OT_TemplateButtonAdd
 
 def create_template_button_remove_class(TemplateButtonBase):
@@ -296,6 +291,7 @@ def register():
         bpy.utils.register_class(cls)
 
     for cls in custom_classes:
+        print("Add", cls),
         bpy.utils.register_class(cls)
 
 
