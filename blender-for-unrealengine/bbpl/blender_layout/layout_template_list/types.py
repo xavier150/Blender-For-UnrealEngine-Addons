@@ -216,7 +216,6 @@ def create_template_button_add_class(TemplateButtonBase):
             template.active_template_property = last_index
             return {"FINISHED"}
     BBPL_OT_TemplateButtonAdd.__name__ = utils.get_template_button_class_name("add")
-    print("Create and rename:", BBPL_OT_TemplateButtonAdd.__name__)
     return BBPL_OT_TemplateButtonAdd
 
 def create_template_button_remove_class(TemplateButtonBase):
@@ -291,7 +290,6 @@ def register():
         bpy.utils.register_class(cls)
 
     for cls in custom_classes:
-        print("Add", cls),
         bpy.utils.register_class(cls)
 
 
