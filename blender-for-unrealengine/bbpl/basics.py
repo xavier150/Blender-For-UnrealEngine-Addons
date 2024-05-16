@@ -167,7 +167,7 @@ def set_collection_use(collection):
         print(collection.name, "not found in view_layer.layer_collection")
 
 
-def get_recursive_childs(obj):
+def get_recursive_childs(target_obj):
     """
     Retrieves all recursive children of an object.
 
@@ -177,18 +177,19 @@ def get_recursive_childs(obj):
     Returns:
         list: A list of recursive children objects.
     """
+    def get_recursive_parent(parent, start_obj):
+        if start_obj.parent:
+            if start_obj.parent == parent:
+                return True
+            else:
+                if get_recursive_parent(parent, start_obj.parent):
+                    return True
+        return False
 
     save_objs = []
-
-    def try_append(obj):
-        if obj.name in bpy.context.scene.objects:
+    for obj in bpy.data.objects:
+        if get_recursive_parent(target_obj, obj):
             save_objs.append(obj)
-
-    for new_obj in get_childs(obj):
-        for child in get_recursive_childs(new_obj):
-            try_append(child)
-        try_append(new_obj)
-
     return save_objs
 
 
