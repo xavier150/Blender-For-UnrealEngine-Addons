@@ -23,6 +23,8 @@ from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui
 from .. import bbpl
+from .. import bfu_assets_manager
+
 
 
 def draw_ui_object_collision(layout: bpy.types.UILayout):
@@ -36,9 +38,9 @@ def draw_ui_object_collision(layout: bpy.types.UILayout):
             obj = bpy.context.object
             if addon_prefs.useGeneratedScripts and obj is not None:
                 if obj.bfu_export_type == "export_recursive":
-
                     if not obj.bfu_export_as_lod_mesh:
-                        if (bfu_utils.GetAssetType(obj) in ["StaticMesh", "SkeletalMesh", "Alembic"]):
+                        asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
+                        if asset_class and asset_class.use_materials == True:
                             bfu_material_search_location = layout.column()
                             bbpl.blender_layout.layout_doc_button.add_doc_page_operator(bfu_material_search_location, text="About Materials", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Material")
                             bfu_material_search_location.prop(obj, 'bfu_material_search_location')

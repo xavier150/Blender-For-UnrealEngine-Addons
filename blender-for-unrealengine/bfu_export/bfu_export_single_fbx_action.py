@@ -25,6 +25,8 @@ from .. import bfu_utils
 from .. import bfu_naming
 from .. import bfu_export_logs
 from .. import bbpl
+from .. import bfu_skeletal_mesh
+from .. import bfu_assets_manager
 from ..fbxio import export_fbx_bin
 
 if "bpy" in locals():
@@ -43,8 +45,9 @@ if "bpy" in locals():
 
 def ProcessActionExport(op, obj, action, action_curve_scale):
     scene = bpy.context.scene
-    addon_prefs = bfu_basics.GetAddonPrefs()
-    dirpath = os.path.join(bfu_utils.GetObjExportDir(obj), scene.bfu_anim_subfolder_name)
+
+    asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
+    dirpath = asset_class.get_obj_export_directory_path(obj)
 
     MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
@@ -101,6 +104,8 @@ def ExportSingleFbxAction(
     bbpl.utils.safe_mode_set('OBJECT')
 
     bfu_utils.SelectParentAndDesiredChilds(armature)
+    bfu_skeletal_mesh.bfu_skeletal_mesh_utils.deselect_socket(armature) 
+
     asset_name = bfu_export_utils.PrepareExportName(armature, True)
     if export_as_proxy is False:
         duplicate_data = bfu_export_utils.DuplicateSelectForExport()

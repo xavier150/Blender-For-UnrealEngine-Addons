@@ -21,35 +21,6 @@ import os
 import bpy
 from .. import bfu_utils
 
-def display_asset_type_filter(obj, filter):
-    """
-    Check if the asset type of an object matches a given filter.
-
-    Args:
-        obj (bpy.types.Object): The object to check.
-        filter (str or list of str): The filter to apply. Can be a string or a list of strings.
-
-    Returns:
-        bool: True if the asset type matches the filter, False otherwise.
-
-    Raises:
-        ValueError: If the filter is neither a string nor a list of strings.
-    """
-    filter_list = []
-    
-    if isinstance(filter, str):  # If it's a single string
-        filter_list = [filter]
-    elif isinstance(filter, list) and all(isinstance(item, str) for item in filter):  # If it's a list of strings
-        filter_list = filter
-    else:
-        raise ValueError("Filter must be a string or a list of strings")
-
-    if obj:
-        asset_type = bfu_utils.GetAssetType(obj)
-        if asset_type in filter_list:
-            return True
-    return False
-
 def DisplayPropertyFilter(active_tab, active_sub_tab):
     # Define more easily the options which must be displayed or not
 

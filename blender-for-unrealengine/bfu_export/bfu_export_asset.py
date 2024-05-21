@@ -26,13 +26,20 @@ from . import bfu_export_single_fbx_nla_anim
 from . import bfu_export_single_skeletal_mesh
 from . import bfu_export_single_static_mesh
 from . import bfu_export_single_static_mesh_collection
+from . import bfu_export_single_groom_simulation
 from .. import bfu_cached_asset_list
 from .. import bps
 from .. import bbpl
+from .. import bfu_assets_manager
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_camera
 from .. import bfu_spline
+from .. import bfu_static_mesh
+from .. import bfu_skeletal_mesh
+from .. import bfu_alembic_animation
+from .. import bfu_groom
+
 
 
 
@@ -69,29 +76,8 @@ def IsValidActionForExport(scene, obj, animType):
 
 
 def IsValidObjectForExport(scene, obj):
-    objType = bfu_utils.GetAssetType(obj)
-
-    if objType == "Camera":
-        return scene.camera_export
-    if objType == "Spline":
-        return scene.spline_export
-    if objType == "Spline":
-        return scene.spline_export
-    if objType == "StaticMesh":
-        return scene.static_export
-    if objType == "SkeletalMesh":
-        if scene.skeletal_export:
-            if obj.bfu_skeleton_export_procedure == 'auto-rig-pro':
-                if bfu_basics.CheckPluginIsActivated('auto_rig_pro-master'):
-                    return True
-            else:
-                return True
-        else:
-            False
-    if objType == "Alembic":
-        return scene.alembic_export
-
-    return False
+    asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
+    return asset_class.can_export_obj_asset(obj)
 
 def PrepareSceneForExport():
     for obj in bpy.data.objects:
@@ -143,6 +129,7 @@ def process_export(op):
         bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_static_file_path))
         bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_skeletal_file_path))
         bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_alembic_file_path))
+        bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_groom_file_path))
         bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_camera_file_path))
         bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_spline_file_path))
         bfu_basics.RemoveFolderTree(bpy.path.abspath(scene.bfu_export_other_file_path))
@@ -186,6 +173,7 @@ def export_all_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToExpo
     export_static_mesh_from_asset_list(op, asset_list)
     export_skeletal_mesh_from_asset_list(op, asset_list)
     export_alembic_from_asset_list(op, asset_list)
+    export_groom_from_asset_list(op, asset_list)
     export_animation_from_asset_list(op, asset_list)
     export_nonlinear_animation_from_asset_list(op, asset_list)
 
@@ -224,10 +212,10 @@ def export_camera_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToE
     # Preparre asset to export
     for asset in asset_list:
         asset: bfu_cached_asset_list.AssetToExport
-        if asset.asset_type == "Camera":
+        if asset.asset_type == bfu_camera.bfu_camera_config.asset_type_name:
             obj = asset.obj
             if obj.bfu_export_type == "export_recursive":
-                if bfu_utils.GetAssetType(obj) == "Camera" and IsValidObjectForExport(scene, obj):                    
+                if bfu_camera.bfu_camera_utils.is_camera() and IsValidObjectForExport(scene, obj):                    
                     camera_list.append(obj)
                     multi_camera_tracks.add_camera_to_evaluate(obj)
 
@@ -265,10 +253,10 @@ def export_spline_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToE
     # Preparre asset to export
     for asset in asset_list:
         asset: bfu_cached_asset_list.AssetToExport
-        if asset.asset_type == "Spline":
+        if asset.asset_type == bfu_spline.bfu_spline_config.asset_type_name:
             obj = asset.obj
             if obj.bfu_export_type == "export_recursive":
-                if bfu_utils.GetAssetType(obj) == "Spline" and IsValidObjectForExport(scene, obj):                    
+                if bfu_spline.bfu_spline_utils.is_spline(obj) and IsValidObjectForExport(scene, obj):                    
                     spline_list.append(obj)
                     multi_spline_tracks.add_spline_to_evaluate(obj)
 
@@ -291,10 +279,10 @@ def export_static_mesh_from_asset_list(op, asset_list: [bfu_cached_asset_list.As
     print("Start Export StaticMesh(s)")
     for asset in asset_list:
         asset: bfu_cached_asset_list.AssetToExport
-        if asset.asset_type == "StaticMesh":
+        if asset.asset_type == bfu_static_mesh.bfu_static_mesh_config.asset_type_name:
             obj = asset.obj
             if obj.bfu_export_type == "export_recursive":
-                if bfu_utils.GetAssetType(obj) == "StaticMesh" and IsValidObjectForExport(scene, obj):
+                if bfu_static_mesh.bfu_static_mesh_utils.is_static_mesh(obj) and IsValidObjectForExport(scene, obj):
 
                     # Save current start/end frame
                     UserStartFrame = scene.frame_start
@@ -312,12 +300,12 @@ def export_skeletal_mesh_from_asset_list(op, asset_list: bfu_cached_asset_list.A
     print("Start Export SkeletalMesh(s)")
     for asset in asset_list:
         asset: bfu_cached_asset_list.AssetToExport
-        if asset.asset_type == "SkeletalMesh":
+        if asset.asset_type == bfu_skeletal_mesh.bfu_skeletal_mesh_config.asset_type_name:
             armature = asset.obj
             mesh_parts = asset.obj_list
             desired_name = asset.name
             if armature.bfu_export_type == "export_recursive":
-                if bfu_utils.GetAssetType(armature) == "SkeletalMesh" and IsValidObjectForExport(scene, armature):
+                if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(armature) and IsValidObjectForExport(scene, armature):
                     # Save current start/end frame
                     UserStartFrame = scene.frame_start
                     UserEndFrame = scene.frame_end
@@ -331,17 +319,38 @@ def export_skeletal_mesh_from_asset_list(op, asset_list: bfu_cached_asset_list.A
 def export_alembic_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToExport):
     scene = bpy.context.scene
 
-    print("Start Export Alembic(s)")
+    print("Start Export Alembic Animation(s)")
+    
     for asset in asset_list:
         asset: bfu_cached_asset_list.AssetToExport
-        if asset.asset_type == "Alembic":
+        if asset.asset_type == bfu_alembic_animation.bfu_alembic_animation_config.asset_type_name:
             obj = asset.obj
             if obj.bfu_export_type == "export_recursive":        
-                if bfu_utils.GetAssetType(obj) == "Alembic" and IsValidObjectForExport(scene, obj):
+                if bfu_alembic_animation.bfu_alembic_animation_utils.is_alembic_animation(obj) and IsValidObjectForExport(scene, obj):
                     # Save current start/end frame
                     UserStartFrame = scene.frame_start
                     UserEndFrame = scene.frame_end
-                    bfu_export_single_alembic_animation.ProcessAlembicExport(obj)
+                    bfu_export_single_alembic_animation.ProcessAlembicAnimationExport(obj)
+
+                    # Resets previous start/end frame
+                    scene.frame_start = UserStartFrame
+                    scene.frame_end = UserEndFrame
+                    #UpdateExportProgress()
+
+def export_groom_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToExport):
+    scene = bpy.context.scene
+
+    print("Start Export Groom Simulation(s)")
+    for asset in asset_list:
+        asset: bfu_cached_asset_list.AssetToExport
+        if asset.asset_type == bfu_groom.bfu_groom_config.asset_type_name:
+            obj = asset.obj
+            if obj.bfu_export_type == "export_recursive":        
+                if bfu_groom.bfu_groom_utils.is_groom(obj) and IsValidObjectForExport(scene, obj):
+                    # Save current start/end frame
+                    UserStartFrame = scene.frame_start
+                    UserEndFrame = scene.frame_end
+                    bfu_export_single_groom_simulation.ProcessGroomSimulationExport(obj)
 
                     # Resets previous start/end frame
                     scene.frame_start = UserStartFrame
@@ -356,7 +365,7 @@ def export_animation_from_asset_list(op, asset_list: bfu_cached_asset_list.Asset
         if asset.asset_type == "Action" or asset.asset_type == "Pose":
             obj = asset.obj
             if obj.bfu_export_type == "export_recursive":    
-                if bfu_utils.GetAssetType(obj) == "SkeletalMesh" and obj.visible_get():
+                if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj) and obj.visible_get():
                     # Action animation
                     print("Start Export Action(s)")
                     action_curve_scale = None
@@ -389,7 +398,7 @@ def export_nonlinear_animation_from_asset_list(op, asset_list: bfu_cached_asset_
         if asset.asset_type == "NlAnim":
             obj = asset.obj
             if obj.bfu_export_type == "export_recursive":    
-                if bfu_utils.GetAssetType(obj) == "SkeletalMesh" and obj.visible_get():
+                if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj) and obj.visible_get():
                     # NLA animation
                     print("Start Export NLA(s)")
                     if IsValidActionForExport(scene, obj, "NLA"):

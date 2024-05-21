@@ -26,6 +26,8 @@ from . import bfu_spline_export_utils
 from . import bfu_spline_write_text
 from . import bfu_spline_write_paste_commands
 from . import bfu_spline_ui_and_props
+from . import bfu_spline_type
+from . import bfu_spline_config
 
 if "bfu_spline_utils" in locals():
     importlib.reload(bfu_spline_utils)
@@ -41,6 +43,10 @@ if "bfu_spline_write_paste_commands" in locals():
     importlib.reload(bfu_spline_write_paste_commands)
 if "bfu_spline_ui_and_props" in locals():
     importlib.reload(bfu_spline_ui_and_props)
+if "bfu_spline_type" in locals():
+    importlib.reload(bfu_spline_type)
+if "bfu_spline_config" in locals():
+    importlib.reload(bfu_spline_config)
 
 classes = (
 )
@@ -51,9 +57,11 @@ def register():
         bpy.utils.register_class(cls)
 
     bfu_spline_ui_and_props.register()
+    bfu_spline_type.register()
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
+    bfu_spline_type.unregister()
     bfu_spline_ui_and_props.unregister()

@@ -1,6 +1,7 @@
 import bpy
 
 from .. import bfu_utils
+from .. import bfu_assets_manager
 
 class BFU_PT_BlenderForUnrealDebug(bpy.types.Panel):
     # Debug panel for get dev info and test
@@ -31,9 +32,22 @@ class BFU_PT_BlenderForUnrealDebug(bpy.types.Panel):
         
         if obj:
             layout.label(text="Full path name as Static Mesh:")
-            layout.label(text="GetObjExportDir(local):" + bfu_utils.GetObjExportDir(obj, False))
-            layout.label(text="GetObjExportDir:" + bfu_utils.GetObjExportDir(obj, True))
-            layout.label(text="GetObjExportName:" + bfu_utils.GetObjExportName(obj))
+            asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
+            if asset_class:
+                obj_export_name = asset_class.get_obj_export_name()
+                obj_export_dir = asset_class.get_obj_export_directory_path()
+                obj_export_abs_dir = asset_class.get_obj_export_abs_directory_path()
+
+            else:
+                obj_export_name = "XXX"
+                obj_export_dir = "XXX"
+                obj_export_abs_dir = "XXX"
+
+            layout.label(text="Obj Export Name:" + obj_export_name)
+            layout.label(text="Obj Export Dir" + obj_export_dir)
+            layout.label(text="Obj Export Abs Dir:" + obj_export_abs_dir)
+
+
             if obj.type == "CAMERA":
                 layout.label(text="CameraPositionForUnreal (Loc):" + str(bfu_utils.EvaluateCameraPositionForUnreal(obj)[0]))
                 layout.label(text="CameraPositionForUnreal (Rot):" + str(bfu_utils.EvaluateCameraPositionForUnreal(obj)[1]))

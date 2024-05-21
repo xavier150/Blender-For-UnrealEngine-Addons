@@ -38,56 +38,6 @@ def get_collection_file_name(collection, desired_name="", fileType=".fbx"):
     if desired_name:
         return bfu_basics.ValidFilename(scene.bfu_static_mesh_prefix_export_name+desired_name+fileType)
     return bfu_basics.ValidFilename(scene.bfu_static_mesh_prefix_export_name+collection.name+fileType)
-    
-def get_camera_file_name(camera, desired_name="", fileType=".fbx"):
-    # Generate assset file name for skeletal mesh
-    scene = bpy.context.scene
-    if camera.bfu_use_custom_export_name:
-        if camera.bfu_custom_export_name:
-            return camera.bfu_custom_export_name
-    if desired_name:
-        return bfu_basics.ValidFilename(scene.bfu_camera_prefix_export_name+desired_name+fileType)
-    return bfu_basics.ValidFilename(scene.bfu_camera_prefix_export_name+camera.name+fileType)
-
-def get_spline_file_name(spline, desired_name="", fileType=".fbx"):
-    # Generate assset file name for skeletal mesh
-    scene = bpy.context.scene
-    if spline.bfu_use_custom_export_name:
-        if spline.bfu_custom_export_name:
-            return spline.bfu_custom_export_name
-    if desired_name:
-        return bfu_basics.ValidFilename(scene.bfu_spline_prefix_export_name+desired_name+fileType)
-    return bfu_basics.ValidFilename(scene.bfu_spline_prefix_export_name+spline.name+fileType)
-    
-def get_static_mesh_file_name(object, desired_name="", fileType=".fbx"):
-    # Generate assset file name for skeletal mesh
-    scene = bpy.context.scene
-    if object.bfu_use_custom_export_name:
-        if object.bfu_custom_export_name:
-            return object.bfu_custom_export_name
-    if desired_name:
-        return bfu_basics.ValidFilename(scene.bfu_static_mesh_prefix_export_name+desired_name+fileType)
-    return bfu_basics.ValidFilename(scene.bfu_static_mesh_prefix_export_name+object.name+fileType)
-
-def get_skeletal_mesh_file_name(armature, desired_name="", fileType=".fbx"):
-    # Generate assset file name for skeletal mesh
-    scene = bpy.context.scene
-    if armature.bfu_use_custom_export_name:
-        if armature.bfu_custom_export_name:
-            return armature.bfu_custom_export_name
-    if desired_name:
-        return bfu_basics.ValidFilename(scene.bfu_skeletal_mesh_prefix_export_name+desired_name+fileType)
-    return bfu_basics.ValidFilename(scene.bfu_skeletal_mesh_prefix_export_name+armature.name+fileType)
-
-def get_alembic_file_name(object, desired_name="", fileType=".abc"):
-    # Generate assset file name for skeletal mesh
-    scene = bpy.context.scene
-    if object.bfu_use_custom_export_name:
-        if object.bfu_custom_export_name:
-            return object.bfu_custom_export_name
-    if desired_name:
-        return bfu_basics.ValidFilename(scene.bfu_alembic_prefix_export_name+desired_name+fileType)
-    return bfu_basics.ValidFilename(scene.bfu_alembic_prefix_export_name+object.name+fileType)
 
 def get_animation_file_name(obj, action, fileType=".fbx"):
     # Generate action file name
@@ -110,7 +60,6 @@ def get_animation_file_name(obj, action, fileType=".fbx"):
 
     else:
         return None
-
 
 def get_nonlinear_animation_file_name(obj, fileType=".fbx"):
     # Generate action file name

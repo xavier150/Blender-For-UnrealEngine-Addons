@@ -68,9 +68,6 @@ def get_skeletal_mesh_sockets(obj):
     for socket in get_socket_desired_child(obj):
         sockets.append(socket)
 
-    if bfu_utils.GetAssetType(obj) != "SkeletalMesh":
-        return
-
     data['Sockets'] = []
     # config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
 

@@ -38,7 +38,7 @@ def draw_general_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
     if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
         if scene.bfu_object_properties_expanded.is_expend():
             if obj.bfu_export_type == "export_recursive":
-                if not obj.bfu_export_as_alembic:
+                if not obj.bfu_export_as_alembic_animation:
                     AssetType2 = layout.column()
                     # Show asset type
                     AssetType2.prop(obj, "bfu_export_skeletal_mesh_as_static_mesh")
@@ -56,7 +56,7 @@ def draw_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
     if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
         if scene.bfu_object_properties_expanded.is_expend():
 
-            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+            if bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                 scene.bfu_skeleton_properties_expanded.draw(layout)
                 if scene.bfu_skeleton_properties_expanded.is_expend():
                     if addon_prefs.useGeneratedScripts and obj is not None:
@@ -65,6 +65,10 @@ def draw_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
                             # SkeletalMesh prop
                             if not obj.bfu_export_as_lod_mesh:
                                 AssetType2 = layout.column()
+
+                                export_procedure_prop = AssetType2.column()
+                                export_procedure_prop.prop(obj, 'bfu_skeleton_export_procedure')
+
                                 AssetType2.prop(obj, 'bfu_create_sub_folder_with_skeletal_mesh_name')
                                 AssetType2.prop(obj, 'bfu_export_deform_only')
                                 ue_standard_skeleton = layout.column()

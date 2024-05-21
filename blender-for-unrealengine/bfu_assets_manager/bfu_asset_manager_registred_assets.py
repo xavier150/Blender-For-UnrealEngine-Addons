@@ -16,32 +16,10 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-import bpy
-import importlib
+registred_asset_class = []
 
-from . import bfu_alembic_props
-from . import bfu_alembic_ui
-from . import bfu_alembic_utils
+def register_asset_class(asset):
+    registred_asset_class.append(asset)
 
-if "bfu_alembic_props" in locals():
-    importlib.reload(bfu_alembic_props)
-if "bfu_alembic_ui" in locals():
-    importlib.reload(bfu_alembic_ui)
-if "bfu_alembic_utils" in locals():
-    importlib.reload(bfu_alembic_utils)
-
-classes = (
-)
-
-
-def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
-
-    bfu_alembic_props.register()
-
-def unregister():
-    for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
-
-    bfu_alembic_props.unregister()
+def get_registred_asset_class():
+    return registred_asset_class

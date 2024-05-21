@@ -18,11 +18,15 @@
 
 
 import bpy
-from . import bfu_alembic_utils
+from . import bfu_alembic_animation_utils
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui
 from .. import bbpl
+
+from .. import bfu_static_mesh
+from .. import bfu_skeletal_mesh
+
 
 
 def draw_general_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
@@ -34,10 +38,10 @@ def draw_general_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
     if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
         if scene.bfu_object_properties_expanded.is_expend():
             if obj.bfu_export_type == "export_recursive":
-                if bfu_utils.GetAssetType(obj) in ["SkeletalMesh", "StaticMesh", "Alembic"]:
+                if bfu_alembic_animation_utils.is_alembic_animation(obj) or bfu_static_mesh.bfu_static_mesh_utils.is_static_mesh(obj) or bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                     if not bfu_utils.GetExportAsProxy(obj):
                         AlembicProp = layout.column()
-                        AlembicProp.prop(obj, 'bfu_export_as_alembic')
+                        AlembicProp.prop(obj, 'bfu_export_as_alembic_animation')
 
 def draw_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
     if obj is None:
@@ -45,10 +49,14 @@ def draw_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
     
     if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):            
         scene = bpy.context.scene 
-        if bfu_utils.GetAssetType(obj) in ["Alembic"]:
+        if bfu_alembic_animation_utils.is_alembic_animation(obj):
             scene.bfu_alembic_properties_expanded.draw(layout)
             if scene.bfu_alembic_properties_expanded.is_expend():
                 AlembicProp = layout.column()
+
+                export_procedure_prop = AlembicProp.column()
+                export_procedure_prop.prop(obj, 'bfu_alembic_export_procedure')
+
                 AlembicProp.label(text="(Alembic animation are exported with scene position.)")
                 AlembicProp.label(text="(Use import script for use the origin position.)")
                 AlembicProp.prop(obj, 'bfu_create_sub_folder_with_alembic_name')

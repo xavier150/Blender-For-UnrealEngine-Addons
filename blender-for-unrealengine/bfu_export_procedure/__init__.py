@@ -22,6 +22,7 @@ import importlib
 from . import bfu_skeleton_export_procedure
 from . import bfu_static_export_procedure
 from . import bfu_alembic_export_procedure
+from . import bfu_groom_export_procedure
 from . import bfu_camera_export_procedure
 from . import bfu_collection_export_procedure
 from . import bfu_export_procedure_ui
@@ -33,6 +34,8 @@ if "bfu_static_export_procedure" in locals():
     importlib.reload(bfu_static_export_procedure)
 if "bfu_alembic_export_procedure" in locals():
     importlib.reload(bfu_alembic_export_procedure)
+if "bfu_groom_export_procedure" in locals():
+    importlib.reload(bfu_groom_export_procedure)
 if "bfu_camera_export_procedure" in locals():
     importlib.reload(bfu_camera_export_procedure)
 if "bfu_collection_export_procedure" in locals():
@@ -52,6 +55,7 @@ def register():
     bfu_skeleton_export_procedure.register()
     bfu_static_export_procedure.register()
     bfu_alembic_export_procedure.register()
+    bfu_groom_export_procedure.register()
     bfu_camera_export_procedure.register()
     bfu_collection_export_procedure.register()
     bfu_export_procedure_ui.register()
@@ -63,6 +67,7 @@ def unregister():
     bfu_export_procedure_ui.unregister()
     bfu_collection_export_procedure.unregister()
     bfu_camera_export_procedure.unregister()
-    bfu_alembic_export_procedure.unregister()
+    bfu_groom_export_procedure.unregister()
+    bfu_alembic_export_procedure.register()
     bfu_static_export_procedure.unregister()
     bfu_skeleton_export_procedure.unregister()

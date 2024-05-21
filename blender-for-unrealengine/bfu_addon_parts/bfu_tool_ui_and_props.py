@@ -23,21 +23,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
 
 
 
-    class BFU_OT_ComputAllLightMap(bpy.types.Operator):
-        bl_label = "Calculate all surface area"
-        bl_idname = "object.computalllightmap"
-        bl_description = (
-            "Click to calculate the surface of the all object in the scene"
-            )
 
-        def execute(self, context):
-            updated = bfu_utils.UpdateAreaLightMapList()
-            self.report(
-                {'INFO'},
-                "The light maps of " + str(updated) +
-                " object(s) have been updated."
-                )
-            return {'FINISHED'}
 
     def draw(self, context):
 
@@ -86,7 +72,6 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
 
 classes = (
     BFU_PT_BlenderForUnrealTool,
-    BFU_PT_BlenderForUnrealTool.BFU_OT_ComputAllLightMap,
 )
 
 

@@ -34,10 +34,12 @@ import bpy
 import importlib
 from . import bps
 from . import bbpl
+from . import bfu_assets_manager
 from . import bfu_propertys
 from . import bfu_static_mesh
 from . import bfu_skeletal_mesh
-from . import bfu_alembic
+from . import bfu_alembic_animation
+from . import bfu_groom
 from . import bfu_camera
 from . import bfu_spline
 from . import bfu_collision
@@ -69,14 +71,18 @@ if "bps" in locals():
     importlib.reload(bps)
 if "bbpl" in locals():
     importlib.reload(bbpl)
+if "bfu_assets_manager" in locals():
+    importlib.reload(bfu_assets_manager)
 if "bfu_propertys" in locals():
     importlib.reload(bfu_propertys)
 if "bfu_static_mesh" in locals():
     importlib.reload(bfu_static_mesh)
 if "bfu_skeletal_mesh" in locals():
     importlib.reload(bfu_skeletal_mesh)
-if "bfu_alembic" in locals():
-    importlib.reload(bfu_alembic)
+if "bfu_alembic_animation" in locals():
+    importlib.reload(bfu_alembic_animation)
+if "bfu_groom" in locals():
+    importlib.reload(bfu_groom)
 if "bfu_camera" in locals():
     importlib.reload(bfu_camera)
 if "bfu_spline" in locals():
@@ -158,10 +164,12 @@ def register():
         bpy.utils.register_class(cls)
 
     bbpl.register()
+    bfu_assets_manager.register()
     bfu_propertys.register()
     bfu_static_mesh.register()
     bfu_skeletal_mesh.register()
-    bfu_alembic.register()
+    bfu_alembic_animation.register()
+    bfu_groom.register()
     bfu_camera.register()
     bfu_spline.register()
     bfu_collision.register()
@@ -199,8 +207,10 @@ def unregister():
     bfu_collision.unregister()
     bfu_spline.unregister()
     bfu_camera.unregister()
-    bfu_alembic.unregister()
+    bfu_alembic_animation.unregister()
+    bfu_groom.unregister()
     bfu_skeletal_mesh.unregister()
     bfu_static_mesh.unregister()
     bfu_propertys.unregister()
+    bfu_assets_manager.unregister()
     bbpl.unregister()

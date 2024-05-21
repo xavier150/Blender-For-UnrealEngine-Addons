@@ -27,6 +27,7 @@ from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_naming
 from .. import bfu_export_logs
+from .. import bfu_assets_manager
 from ..fbxio import export_fbx_bin
 
 if "bpy" in locals():
@@ -44,25 +45,28 @@ if "bpy" in locals():
 
 
 def ProcessSplineExport(op, obj, pre_bake_spline: bfu_spline.bfu_spline_data.BFU_SplinesList = None):
-    addon_prefs = bfu_basics.GetAddonPrefs()
-    counter = bps.utils.CounterTimer()
-    dirpath = bfu_utils.GetObjExportDir(obj)
-    absdirpath = bpy.path.abspath(dirpath)
     scene = bpy.context.scene
+    addon_prefs = bfu_basics.GetAddonPrefs()
+
+    asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
+    asset_type = asset_class.get_asset_type_name(obj)
+    dirpath = asset_class.get_obj_export_directory_path(obj)
+    file_name = asset_class.get_obj_file_name(obj, obj.name, "")
+    file_name_at = asset_class.get_obj_file_name(obj, obj.name+"_AdditionalTrack", "") 
 
     MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
     MyAsset.asset_name = obj.name
     MyAsset.asset_global_scale = obj.bfu_export_global_scale
     MyAsset.folder_name = obj.bfu_export_folder_name
-    MyAsset.asset_type = bfu_utils.GetAssetType(obj)
+    MyAsset.asset_type = asset_type
     MyAsset.animation_start_frame = scene.frame_start
     MyAsset.animation_end_frame = scene.frame_end+1
     MyAsset.StartAssetExport()
 
     if obj.bfu_export_fbx_spline:
         file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
-        file.file_name = bfu_naming.get_spline_file_name(obj, obj.name, "")
+        file.file_name = file_name
         file.file_extension = "fbx"
         file.file_path = dirpath
         file.file_type = "FBX"
@@ -72,7 +76,7 @@ def ProcessSplineExport(op, obj, pre_bake_spline: bfu_spline.bfu_spline_data.BFU
     if scene.text_AdditionalData and addon_prefs.useGeneratedScripts:
 
         file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
-        file.file_name = bfu_naming.get_spline_file_name(obj, obj.name+"_AdditionalTrack", "")
+        file.file_name = file_name_at
         file.file_extension = "json"
         file.file_path = dirpath
         file.file_type = "AdditionalTrack"

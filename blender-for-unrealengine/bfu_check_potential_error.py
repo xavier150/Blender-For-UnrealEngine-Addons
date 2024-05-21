@@ -23,11 +23,19 @@ import math
 
 from . import bbpl
 from . import bfu_basics
+from . import bfu_assets_manager
 from . import bfu_utils
 from . import bfu_cached_asset_list
 
 from . import bfu_collision
 from . import bfu_socket
+from . import bfu_camera
+from . import bfu_alembic_animation
+from . import bfu_groom
+from . import bfu_spline
+from . import bfu_skeletal_mesh
+from . import bfu_static_mesh
+
 
 
 
@@ -83,10 +91,9 @@ def ContainsArmatureModifier(obj):
             return True
     return False
 
-
 def GetSkeletonMeshs(obj):
     meshs = []
-    if bfu_utils.GetAssetType(obj) == "SkeletalMesh":  # Skeleton /  Armature
+    if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
         childs = bfu_utils.GetExportDesiredChilds(obj)
         for child in childs:
             if child.type == "MESH":
@@ -270,7 +277,7 @@ def UpdateUnrealPotentialError():
     def CheckArmatureScale():
         # Check if the ARMATURE use the same value on all scale axes
         for obj in objToCheck:
-            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+            if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                 if obj.scale.z != obj.scale.y or obj.scale.z != obj.scale.x:
                     MyError = PotentialErrors.add()
                     MyError.name = obj.name
@@ -353,7 +360,7 @@ def UpdateUnrealPotentialError():
     def CheckArmatureBoneData():
         # check the parameter of the ARMATURE bones
         for obj in objToCheck:
-            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+            if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                 for bone in obj.data.bones:
                     if (not obj.bfu_export_deform_only or
                             (bone.use_deform and obj.bfu_export_deform_only)):
@@ -384,7 +391,7 @@ def UpdateUnrealPotentialError():
 
         for obj in objToCheck:
             export_as_proxy = bfu_utils.GetExportAsProxy(obj)
-            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+            if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                 childs = bfu_utils.GetExportDesiredChilds(obj)
                 validChild = 0
                 for child in childs:
@@ -406,7 +413,7 @@ def UpdateUnrealPotentialError():
     def CheckArmatureChildWithBoneParent():
         # If you use Parent Bone to parent your mesh to your armature the import will fail.
         for obj in objToCheck:
-            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+            if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                 childs = bfu_utils.GetExportDesiredChilds(obj)
                 for child in childs:
                     if child.type == "MESH":
@@ -424,7 +431,7 @@ def UpdateUnrealPotentialError():
     def CheckArmatureMultipleRoots():
         # Check that skeleton have multiples roots
         for obj in objToCheck:
-            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+            if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                 rootBones = bfu_utils.GetArmatureRootBones(obj)
 
                 if len(rootBones) > 1:
@@ -445,7 +452,7 @@ def UpdateUnrealPotentialError():
     def CheckArmatureNoDeformBone():
         # Check that skeleton have at less one deform bone
         for obj in objToCheck:
-            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+            if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                 if obj.bfu_export_deform_only:
                     for bone in obj.data.bones:
                         if bone.use_deform:
@@ -503,7 +510,7 @@ def UpdateUnrealPotentialError():
     def CheckZeroScaleKeyframe():
         # Check that animations do not use a invalid value
         for obj in objToCheck:
-            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+            if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                 animation_asset_cache = bfu_cached_asset_list.GetAnimationAssetCache(obj)
                 animation_to_export = animation_asset_cache.GetAnimationAssetList()
                 for action in animation_to_export:

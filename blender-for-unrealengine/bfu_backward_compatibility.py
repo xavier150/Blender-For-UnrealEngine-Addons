@@ -51,7 +51,6 @@ def update_old_variables():
         update_variable(obj, ["bfu_export_procedure"], "bfu_skeleton_export_procedure", enum_callback)
         update_variable(obj, ["ExportEnum"], "bfu_export_type", enum_callback)
         update_variable(obj, ["exportFolderName"], "bfu_export_folder_name")
-        update_variable(obj, ["ExportAsAlembic"], "bfu_export_as_alembic")
         update_variable(obj, ["ExportAsLod"], "bfu_export_as_lod_mesh")
         update_variable(obj, ["ForceStaticMesh"], "bfu_export_skeletal_mesh_as_static_mesh")
         update_variable(obj, ["exportDeformOnly"], "bfu_export_deform_only")
@@ -103,6 +102,10 @@ def update_old_variables():
         update_variable(obj, ["exportActionList"], "bfu_animation_asset_list")
         update_variable(obj, ["active_ObjectAction"], "bfu_active_animation_asset_list")
 
+        update_variable(obj, ["ExportAsAlembic, bfu_export_as_alembic"], "bfu_export_as_alembic_animation")
+
+        
+
 
     for col in bpy.data.collections:
         update_variable(col, ["exportFolderName"], "bfu_export_folder_name")
@@ -111,7 +114,7 @@ def update_old_variables():
         update_variable(scene, ["static_mesh_prefix_export_name"], "bfu_static_mesh_prefix_export_name")
         update_variable(scene, ["skeletal_mesh_prefix_export_name"], "bfu_skeletal_mesh_prefix_export_name")
         update_variable(scene, ["skeleton_prefix_export_name"], "bfu_skeleton_prefix_export_name")
-        update_variable(scene, ["alembic_prefix_export_name"], "bfu_alembic_prefix_export_name")
+        update_variable(scene, ["alembic_prefix_export_name", "bfu_alembic_prefix_export_name"], "bfu_alembic_animation_prefix_export_name")
         update_variable(scene, ["anim_prefix_export_name"], "bfu_anim_prefix_export_name")
         update_variable(scene, ["pose_prefix_export_name"], "bfu_pose_prefix_export_name")
         update_variable(scene, ["camera_prefix_export_name"], "bfu_camera_prefix_export_name")

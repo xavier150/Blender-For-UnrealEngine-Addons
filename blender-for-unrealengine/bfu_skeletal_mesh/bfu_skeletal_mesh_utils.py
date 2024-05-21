@@ -18,8 +18,34 @@
 
 import bpy
 import fnmatch
+from . import bfu_skeletal_mesh_config
 from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_unreal_utils
+from .. import bfu_assets_manager
 
+def get_socket_in_desired_childs(obj):
+    socket_objs = []
+    for obj in bfu_utils.GetExportDesiredChilds(obj):
+        if fnmatch.fnmatchcase(obj.name, "SOCKET*"):
+            socket_objs.append(obj)
+    return socket_objs
+
+def deselect_socket(obj):
+    # With skeletal mesh the Socket musts be not exported,
+    # Because Unreal Engine will import it as bones.
+    socket_objs = get_socket_in_desired_childs(obj)
+    for obj in socket_objs:
+        obj.select_set(False)
+
+
+def is_skeletal_mesh(obj):
+    asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
+    if asset_class:
+        if asset_class.get_asset_type_name(obj) == bfu_skeletal_mesh_config.asset_type_name:
+            return True
+    return False
+
+def is_not_skeletal_mesh(obj):
+    return not is_skeletal_mesh(obj)

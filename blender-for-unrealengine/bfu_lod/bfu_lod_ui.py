@@ -23,6 +23,7 @@ from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui
 from .. import bbpl
+from .. import bfu_assets_manager
 
 
 def draw_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
@@ -40,7 +41,8 @@ def draw_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
                 if not bfu_utils.GetExportAsProxy(obj):
                     if addon_prefs.useGeneratedScripts:
                         # Unreal python no longer support Skeletal mesh LODS import.
-                        if bfu_utils.GetAssetType(obj) in ["StaticMesh"]:
+                        asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
+                        if asset_class and asset_class.use_lods == True:
                             LodProp = layout.column()
                             LodProp.prop(obj, 'bfu_export_as_lod_mesh')
 

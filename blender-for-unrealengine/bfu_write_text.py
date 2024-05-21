@@ -33,6 +33,9 @@ from . import bfu_write_import_sequencer_script
 from . import bfu_vertex_color
 from . import bfu_collision
 from . import bfu_socket
+from . import bfu_assets_manager
+from . import bfu_static_mesh
+from . import bfu_skeletal_mesh
 
 
 def ExportSingleText(text, dirpath, filename):
@@ -163,27 +166,25 @@ def WriteSingleMeshAdditionalParameter(unreal_exported_asset):
 
     # Level of detail
     if obj:
-        assetType = bfu_utils.GetAssetType(obj)
         data['LevelOfDetail'] = {}
 
-        def GetLodPath(lod_obj, naming_function):
-            return os.path.join(bfu_utils.GetObjExportDir(lod_obj, True), naming_function(lod_obj))
-
-        if assetType == "StaticMesh":
-            naming_function = bfu_naming.get_static_mesh_file_name
-        if assetType == "SkeletalMesh":
-            naming_function = bfu_naming.get_skeletal_mesh_file_name
+        def GetLodPath(lod_obj):
+            asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(lod_obj)
+            if asset_class:
+                directory_path = asset_class.get_obj_export_abs_directory_path(lod_obj)
+                file_name = asset_class.get_obj_file_name(lod_obj)
+            return os.path.join(directory_path, file_name)
 
         if obj.bfu_lod_target1 is not None:
-            data['LevelOfDetail']['lod_1'] = GetLodPath(obj.bfu_lod_target1, naming_function)
+            data['LevelOfDetail']['lod_1'] = GetLodPath(obj.bfu_lod_target1)
         if obj.bfu_lod_target2 is not None:
-            data['LevelOfDetail']['lod_2'] = GetLodPath(obj.bfu_lod_target2, naming_function)
+            data['LevelOfDetail']['lod_2'] = GetLodPath(obj.bfu_lod_target2)
         if obj.bfu_lod_target3 is not None:
-            data['LevelOfDetail']['lod_3'] = GetLodPath(obj.bfu_lod_target3, naming_function)
+            data['LevelOfDetail']['lod_3'] = GetLodPath(obj.bfu_lod_target3)
         if obj.bfu_lod_target4 is not None:
-            data['LevelOfDetail']['lod_4'] = GetLodPath(obj.bfu_lod_target4, naming_function)
+            data['LevelOfDetail']['lod_4'] = GetLodPath(obj.bfu_lod_target4)
         if obj.bfu_lod_target5 is not None:
-            data['LevelOfDetail']['lod_5'] = GetLodPath(obj.bfu_lod_target5, naming_function)
+            data['LevelOfDetail']['lod_5'] = GetLodPath(obj.bfu_lod_target5)
 
     # Sockets
     if obj:
@@ -191,7 +192,7 @@ def WriteSingleMeshAdditionalParameter(unreal_exported_asset):
 
     # Vertex Color
     if obj:
-        if bfu_utils.GetAssetType(obj) == "SkeletalMesh" or bfu_utils.GetAssetType(obj) == "StaticMesh":
+        if bfu_static_mesh.bfu_static_mesh_utils.is_static_mesh(obj) or bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
             vced = bfu_vertex_color.bfu_vertex_color_utils.VertexColorExportData(obj)
             data["vertex_color_import_option"] = vced.export_type
             vertex_override_color = (

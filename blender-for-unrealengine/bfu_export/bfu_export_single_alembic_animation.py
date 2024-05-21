@@ -23,13 +23,17 @@ from .. import bbpl
 from .. import bfu_utils
 from .. import bfu_naming
 from .. import bfu_export_logs
+from .. import bfu_assets_manager
 
 
 
 
-def ProcessAlembicExport(obj):
+def ProcessAlembicAnimationExport(obj):
     scene = bpy.context.scene
-    dirpath = bfu_utils.GetObjExportDir(obj)
+    
+    asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
+    dirpath = asset_class.get_obj_export_directory_path(obj)
+    file_name = asset_class.get_obj_file_name(obj, obj.name, "")
 
     MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
@@ -41,7 +45,7 @@ def ProcessAlembicExport(obj):
     MyAsset.animation_end_frame = scene.frame_end + obj.bfu_anim_action_end_frame_offset
 
     file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
-    file.file_name = bfu_naming.get_alembic_file_name(obj, obj.name, "")
+    file.file_name = file_name
     file.file_extension = "abc"
     file.file_path = dirpath
     file.file_type = "ABC"
@@ -74,10 +78,10 @@ def ExportSingleAlembicAnimation(
     scene.frame_start += obj.bfu_anim_action_start_frame_offset
     scene.frame_end += obj.bfu_anim_action_end_frame_offset
 
-    alembic_export_procedure = obj.bfu_alembic_export_procedure
+    alembic_animation_export_procedure = obj.bfu_alembic_export_procedure
 
     # Export
-    if (alembic_export_procedure == "blender-standard"):
+    if (alembic_animation_export_procedure == "blender-standard"):
         bpy.ops.wm.alembic_export(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,

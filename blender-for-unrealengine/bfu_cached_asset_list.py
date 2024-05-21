@@ -22,6 +22,14 @@ import fnmatch
 from . import bbpl
 from . import bfu_basics
 from . import bfu_utils
+from . import bfu_camera
+from . import bfu_alembic_animation
+from . import bfu_groom
+from . import bfu_spline
+from . import bfu_skeletal_mesh
+from . import bfu_static_mesh
+from . import bfu_assets_manager
+
 
 class CachedAction():
 
@@ -223,21 +231,12 @@ class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
         for collection in collectionList:
             # Collection
             if scene.static_collection_export:
-                TargetAssetToExport.append(AssetToExport(
-                    collection,
-                    None,
-                    "Collection StaticMesh"))
+                TargetAssetToExport.append(AssetToExport(collection, None, "Collection StaticMesh"))
 
         for obj in objList:
-            if bfu_utils.GetAssetType(obj) == "Alembic":
-                # Alembic
-                if scene.alembic_export:
-                    TargetAssetToExport.append(AssetToExport(
-                        obj,
-                        None,
-                        "Alembic"))
 
-            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+
+            if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
 
                 # Skeletal Mesh
                 if scene.skeletal_export:
@@ -273,10 +272,8 @@ class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
                 # NLA
                 if scene.anin_export:
                     if obj.bfu_anim_nla_use:
-                        TargetAssetToExport.append(AssetToExport(
-                            obj,
-                            obj.animation_data,
-                            "NlAnim"))
+                        TargetAssetToExport.append(AssetToExport(obj, obj.animation_data, "NlAnim"))
+
                 animation_asset_cache = GetAnimationAssetCache(obj)
                 animation_to_export = animation_asset_cache.GetAnimationAssetList()
                 for action in animation_to_export:
@@ -294,25 +291,12 @@ class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
                         if scene.anin_export:
                             if bfu_utils.GetActionType(action) == "Pose":
                                 TargetAssetToExport.append(AssetToExport(obj, action, "Pose"))
-            # Camera
-            if bfu_utils.GetAssetType(obj) == "Camera" and scene.camera_export:
-                TargetAssetToExport.append(AssetToExport(
-                    obj,
-                    None,
-                    "Camera"))
-                
-            if bfu_utils.GetAssetType(obj) == "Spline" and scene.spline_export:
-                TargetAssetToExport.append(AssetToExport(
-                    obj,
-                    None,
-                    "Spline"))
+            # Others
+            else:
+                asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
+                if asset_class and asset_class.can_export_obj_asset(obj):
+                    TargetAssetToExport.append(AssetToExport(obj, None, asset_class.get_asset_type_name(obj)))
 
-            # StaticMesh
-            if bfu_utils.GetAssetType(obj) == "StaticMesh" and scene.static_export:
-                TargetAssetToExport.append(AssetToExport(
-                    obj,
-                    None,
-                    "StaticMesh"))
 
         return TargetAssetToExport
 

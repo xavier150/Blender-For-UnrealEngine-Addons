@@ -30,6 +30,7 @@ from typing import List
 from . import bbpl
 from . import bps
 from . import bfu_basics
+from . import bfu_assets_manager
 
 class SavedBones():
 
@@ -534,76 +535,6 @@ def GetUseCustomLightMapResolution(obj):
     return True
 
 
-def GetExportRealSurfaceArea(obj):
-
-    local_view_areas = bbpl.scene_utils.move_to_global_view()
-    bbpl.utils.safe_mode_set('OBJECT')
-
-    SavedSelect = bbpl.utils.UserSelectSave()
-    SavedSelect.save_current_select()
-    SelectParentAndDesiredChilds(obj)
-
-    bpy.ops.object.duplicate()
-    bpy.ops.object.duplicates_make_real(
-        use_base_parent=True,
-        use_hierarchy=True
-        )
-
-    ApplyNeededModifierToSelect()
-    bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
-    for selectObj in bpy.context.selected_objects:
-        # Remove unable to convert mesh
-        if selectObj.type == "EMPTY" or selectObj.type == "CURVE":
-            CleanDeleteObjects([selectObj])
-
-    for selectObj in bpy.context.selected_objects:
-        # Remove collision box
-        if CheckIsCollision(selectObj):
-            CleanDeleteObjects([selectObj])
-
-    if bpy.context.view_layer.objects.active is None:
-        # When the active id a empty
-        bpy.context.view_layer.objects.active = bpy.context.selected_objects[0]
-    bpy.ops.object.convert(target='MESH')
-
-    active = bpy.context.view_layer.objects.active
-
-    CleanJoinSelect()
-    active = bpy.context.view_layer.objects.active
-    area = bfu_basics.GetSurfaceArea(active)
-    CleanDeleteObjects(bpy.context.selected_objects)
-    SavedSelect.reset_select_by_ref()
-    bbpl.scene_utils.move_to_local_view(local_view_areas)
-    return area
-
-
-def GetCompuntedLightMap(obj):
-    if obj.bfu_static_mesh_light_map_mode == "Default":
-        return -1
-
-    if obj.bfu_static_mesh_light_map_mode == "CustomMap":
-        return obj.bfu_static_mesh_custom_light_map_res
-
-    if obj.bfu_static_mesh_light_map_mode == "SurfaceArea":
-        # Get the area
-        area = obj.computedStaticMeshLightMapRes
-        area **= 0.5  # Adapte for light map
-
-        if obj.bfu_use_static_mesh_light_map_world_scale:
-            # Turn area at world scale
-            x = max(obj.scale.x, obj.scale.x*-1)
-            y = max(obj.scale.y, obj.scale.y*-1)
-            z = max(obj.scale.z, obj.scale.z*-1)
-            objScale = (x + y + z)/3
-            area *= objScale
-
-        # Computed light map equal light map scale for a plane vvv
-        area *= get_scene_unit_scale()
-        area *= obj.bfu_static_mesh_light_map_surface_scale/2
-        if obj.bfu_static_mesh_light_map_round_power_of_two:
-
-            return bps.math.nearest_power_of_two(int(round(area)))
-        return int(round(area))
 
 
 def GetActionType(action):
@@ -627,22 +558,7 @@ def GetIsAnimation(animation_type):
     return False
 
 
-def GetAssetType(obj):
-    # Return asset type of a object
 
-    if obj.type == "CAMERA":
-        return "Camera"
-
-    if obj.bfu_export_as_alembic:
-        return "Alembic"
-
-    if obj.type == "ARMATURE" and not obj.bfu_export_skeletal_mesh_as_static_mesh:
-        return "SkeletalMesh"
-    
-    if obj.type == "CURVE" and not obj.bfu_export_spline_as_static_mesh:
-        return "Spline"
-
-    return "StaticMesh"
 
 
 def CheckIsCollision(target):
@@ -703,15 +619,8 @@ def SelectParentAndDesiredChilds(obj):
     bpy.ops.object.select_all(action='DESELECT')
     for selectObj in GetExportDesiredChilds(obj):
         if selectObj.name in bpy.context.view_layer.objects:
-            if GetAssetType(obj) == "SkeletalMesh":
-                # With skeletal mesh the socket must be not exported,
-                # ue4 read it like a bone
-                if not fnmatch.fnmatchcase(selectObj.name, "SOCKET*"):
-                    selectObj.select_set(True)
-                    selectedObjs.append(selectObj)
-            else:
-                selectObj.select_set(True)
-                selectedObjs.append(selectObj)
+            selectObj.select_set(True)
+            selectedObjs.append(selectObj)
 
     if obj.name in bpy.context.view_layer.objects:
         obj.select_set(True)
@@ -733,15 +642,8 @@ def SelectParentAndSpecificChilds(active, objects):
     bpy.ops.object.select_all(action='DESELECT')
     for obj in objects:
         if obj.name in bpy.context.view_layer.objects:
-            if GetAssetType(active) == "SkeletalMesh":
-                # With skeletal mesh the socket must be not exported,
-                # UE read it like a bone
-                if not fnmatch.fnmatchcase(obj.name, "SOCKET*"):
-                    obj.select_set(True)
-                    selectedObjs.append(obj)
-            else:
-                obj.select_set(True)
-                selectedObjs.append(obj)
+            obj.select_set(True)
+            selectedObjs.append(obj)
 
     if active.name in bpy.context.view_layer.objects:
         active.select_set(True)
@@ -1146,45 +1048,9 @@ def GetCollectionExportDir(col, abspath=False):
     else:
         return dirpath
 
-
-def GetObjExportName(obj):
-    # Return Proxy Name for Proxy and Object Name for other
-    if GetAssetType(obj) == "SkeletalMesh":
-        if GetExportAsProxy(obj):
-            proxy_child = GetExportProxyChild(obj)
-            if proxy_child is not None:
-                return proxy_child.name
-    return bfu_basics.ValidFilename(obj.name)
-
-
-def GetObjExportDir(obj, abspath=False):
-    # Generate assset folder path
+def get_export_folder_name(obj):
     folder_name = bfu_basics.ValidDirName(obj.bfu_export_folder_name)
-    obj_name = bfu_basics.ValidDirName(obj.name)  # Fix obj name
-
-    scene = bpy.context.scene
-    if GetAssetType(obj) == "SkeletalMesh":
-        if obj.bfu_create_sub_folder_with_skeletal_mesh_name:
-            dirpath = os.path.join(scene.bfu_export_skeletal_file_path, folder_name, GetObjExportName(obj))
-        else:
-            dirpath = os.path.join(scene.bfu_export_skeletal_file_path, folder_name)
-    if GetAssetType(obj) == "Alembic":
-        if obj.bfu_create_sub_folder_with_alembic_name:
-            dirpath = os.path.join(scene.bfu_export_alembic_file_path, folder_name, GetObjExportName(obj))
-        else:
-            dirpath = os.path.join(scene.bfu_export_alembic_file_path, folder_name)
-    if GetAssetType(obj) == "StaticMesh":
-        dirpath = os.path.join(scene.bfu_export_static_file_path, folder_name)
-    if GetAssetType(obj) == "Camera":
-        dirpath = os.path.join(scene.bfu_export_camera_file_path, folder_name)
-    if GetAssetType(obj) == "Spline":
-        dirpath = os.path.join(scene.bfu_export_spline_file_path, folder_name)
-    if abspath:
-        return bpy.path.abspath(dirpath)
-
-    else:
-        return dirpath
-
+    return folder_name
 
 def GetImportAssetScriptCommand():
     scene = bpy.context.scene
@@ -1210,7 +1076,7 @@ def GetAnimSample(obj):
 
 def GetArmatureRootBones(obj):
     rootBones = []
-    if GetAssetType(obj) == "SkeletalMesh":
+    if obj.type == "ARMATURE":
 
         if not obj.bfu_export_deform_only:
             for bone in obj.data.bones:
@@ -1240,29 +1106,7 @@ def GetObjExportScale(obj):
 
 
 
-def UpdateAreaLightMapList(objects_to_update=None):
-    # Updates area LightMap
 
-    if objects_to_update is not None:
-        objs = objects_to_update
-    else:
-        objs = []
-        exportObjs = GetAllobjectsByExportType("export_recursive")
-        for exportObj in exportObjs:
-            if GetAssetType(exportObj) == "StaticMesh":
-                objs.append(exportObj)
-
-    UpdatedRes = 0
-
-    counter = bps.utils.CounterTimer()
-    for obj in objs:
-        obj.computedStaticMeshLightMapRes = GetExportRealSurfaceArea(obj)
-        UpdatedRes += 1
-        UpdateProgress(
-            "Update LightMap",
-            (UpdatedRes/len(objs)),
-            counter.get_time())
-    return UpdatedRes
 
 
 def AddFrontEachLine(ImportScript, text="\t"):

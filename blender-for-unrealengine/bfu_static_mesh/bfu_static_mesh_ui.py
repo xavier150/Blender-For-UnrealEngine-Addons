@@ -33,8 +33,12 @@ def draw_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
     scene = bpy.context.scene 
     if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
         if scene.bfu_object_properties_expanded.is_expend():
-            if obj.bfu_export_type == "export_recursive":
-                pass
+            if bfu_static_mesh_utils.is_static_mesh(obj):
+                if obj.bfu_export_type == "export_recursive":
+
+                    StaticMeshUI = layout.column()
+                    export_procedure_prop = StaticMeshUI.column()
+                    export_procedure_prop.prop(obj, 'bfu_static_export_procedure')
 
 
     if scene.bfu_object_advanced_properties_expanded.is_expend():

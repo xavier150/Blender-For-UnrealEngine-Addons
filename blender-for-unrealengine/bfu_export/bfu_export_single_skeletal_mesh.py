@@ -26,6 +26,8 @@ from .. import bfu_utils
 from .. import bfu_naming
 from .. import bfu_check_potential_error
 from .. import bfu_export_logs
+from .. import bfu_skeletal_mesh
+from .. import bfu_assets_manager
 from ..fbxio import export_fbx_bin
 
 if "bpy" in locals():
@@ -44,14 +46,21 @@ if "bpy" in locals():
         importlib.reload(export_fbx_bin)
 
 def ProcessSkeletalMeshExport(op, armature, mesh_parts, desired_name=""):
-    addon_prefs = bfu_basics.GetAddonPrefs()
-    dirpath = bfu_utils.GetObjExportDir(armature)
-    absdirpath = bpy.path.abspath(dirpath)
     scene = bpy.context.scene
+    addon_prefs = bfu_basics.GetAddonPrefs()
+
+    asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(armature)
+    asset_type = asset_class.get_asset_type_name(armature)
+    dirpath = asset_class.get_obj_export_directory_path(armature)
+    absdirpath = asset_class.get_obj_export_abs_directory_path(armature)
+
     if desired_name:
         final_name = desired_name
     else:
         final_name = armature.name
+
+    file_name = asset_class.get_obj_file_name(armature, final_name, "")
+    file_name_at = asset_class.get_obj_file_name(armature, final_name+"_AdditionalTrack", "") 
 
     MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = armature
@@ -59,10 +68,10 @@ def ProcessSkeletalMeshExport(op, armature, mesh_parts, desired_name=""):
     MyAsset.asset_name = armature.name
     MyAsset.asset_global_scale = armature.bfu_export_global_scale
     MyAsset.folder_name = armature.bfu_export_folder_name
-    MyAsset.asset_type = bfu_utils.GetAssetType(armature)
+    MyAsset.asset_type = asset_type
 
     file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
-    file.file_name = bfu_naming.get_skeletal_mesh_file_name(armature, final_name, "")
+    file.file_name = file_name
     file.file_extension = "fbx"
     file.file_path = dirpath
     file.file_type = "FBX"
@@ -74,7 +83,7 @@ def ProcessSkeletalMeshExport(op, armature, mesh_parts, desired_name=""):
         if (scene.text_AdditionalData and addon_prefs.useGeneratedScripts):
         
             file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
-            file.file_name = bfu_naming.get_skeletal_mesh_file_name(armature, final_name+"_AdditionalTrack", "")
+            file.file_name = file_name_at
             file.file_extension = "json"
             file.file_path = dirpath
             file.file_type = "AdditionalTrack"
@@ -108,6 +117,8 @@ def ExportSingleSkeletalMesh(
     bbpl.utils.safe_mode_set('OBJECT')
 
     bfu_utils.SelectParentAndSpecificChilds(armature, mesh_parts)
+    bfu_skeletal_mesh.bfu_skeletal_mesh_utils.deselect_socket(armature) 
+
     asset_name = bfu_export_utils.PrepareExportName(armature, True)
     duplicate_data = bfu_export_utils.DuplicateSelectForExport()
     bfu_export_utils.SetDuplicateNameForExport(duplicate_data)
@@ -146,8 +157,6 @@ def ExportSingleSkeletalMesh(
         my_scene_unit_settings.SetUnitForUnrealEngineExport()
         my_skeletal_export_scale = bfu_utils.SkeletalExportScale(active)
         my_skeletal_export_scale.ApplySkeletalExportScale(rrf, is_a_proxy=export_as_proxy)
-
-    meshType = bfu_utils.GetAssetType(active)
 
     # Set rename temporarily the Armature as "Armature"
     bfu_utils.RemoveAllConsraints(active)

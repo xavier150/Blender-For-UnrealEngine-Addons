@@ -7,6 +7,7 @@ from . import bfu_export_single_skeletal_mesh
 from . import bfu_export_single_fbx_action
 from . import bfu_export_single_fbx_nla_anim
 from . import bfu_export_single_alembic_animation
+from . import bfu_export_single_groom_simulation
 from . import bfu_export_single_camera
 from . import bfu_export_single_spline
 from . import bfu_export_utils
@@ -30,6 +31,8 @@ if "bpy" in locals():
         importlib.reload(bfu_export_single_fbx_nla_anim)
     if "bfu_export_single_alembic_animation" in locals():
         importlib.reload(bfu_export_single_alembic_animation)
+    if "bfu_export_single_groom_simulation" in locals():
+        importlib.reload(bfu_export_single_groom_simulation)
     if "bfu_export_single_camera" in locals():
         importlib.reload(bfu_export_single_camera)
     if "bfu_export_single_spline" in locals():
