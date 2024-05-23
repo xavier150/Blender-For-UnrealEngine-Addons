@@ -34,9 +34,9 @@ class BFU_PT_BlenderForUnrealDebug(bpy.types.Panel):
             layout.label(text="Full path name as Static Mesh:")
             asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
             if asset_class:
-                obj_export_name = asset_class.get_obj_export_name()
-                obj_export_dir = asset_class.get_obj_export_directory_path()
-                obj_export_abs_dir = asset_class.get_obj_export_abs_directory_path()
+                obj_export_name = asset_class.get_obj_export_name(obj)
+                obj_export_dir = asset_class.get_obj_export_directory_path(obj)
+                obj_export_abs_dir = asset_class.get_obj_export_abs_directory_path(obj)
 
             else:
                 obj_export_name = "XXX"
