@@ -25,6 +25,7 @@ from . import bfu_utils
 from . import bfu_write_utils
 from . import bfu_unreal_utils
 from . import bfu_material
+from . import bfu_light_map
 
 def WriteImportAssetScript():
     # Generate a script for import assets in Ue4
@@ -142,7 +143,7 @@ def WriteImportAssetScript():
                 
                 asset_data["generate_lightmap_u_vs"] = asset.object.bfu_generate_light_map_uvs
                 asset_data["use_custom_light_map_resolution"] = bfu_utils.GetUseCustomLightMapResolution(asset.object)
-                asset_data["light_map_resolution"] = bfu_utils.GetCompuntedLightMap(asset.object)
+                asset_data["light_map_resolution"] = bfu_light_map.bfu_light_map_utils.GetCompuntedLightMap(asset.object)
             
                 asset_data["collision_trace_flag"] = asset.object.bfu_collision_trace_flag
 

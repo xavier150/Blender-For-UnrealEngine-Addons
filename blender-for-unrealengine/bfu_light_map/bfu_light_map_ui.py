@@ -18,7 +18,6 @@
 
 
 import bpy
-from . import bfu_lod_utils
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui

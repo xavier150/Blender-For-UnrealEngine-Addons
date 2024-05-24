@@ -18,11 +18,12 @@
 
 
 import bpy
-from . import bfu_lod_utils
+from . import bfu_light_map_utils
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_ui
 from .. import bbpl
+
 
 
 
@@ -37,7 +38,7 @@ class BFU_OT_ComputLightMap(bpy.types.Operator):
         self.report(
             {'INFO'},
             "Light map area updated to " + str(round(obj.computedStaticMeshLightMapRes)) + ". " +
-            "Compunted Light map: " + str(bfu_utils.GetCompuntedLightMap(obj)))
+            "Compunted Light map: " + str(bfu_light_map_utils.GetCompuntedLightMap(obj)))
         return {'FINISHED'}
 
 class BFU_OT_ComputAllLightMap(bpy.types.Operator):

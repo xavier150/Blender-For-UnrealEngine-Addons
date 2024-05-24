@@ -42,6 +42,7 @@ from .. import bfu_lod
 from .. import bfu_alembic_animation
 from .. import bfu_groom
 from .. import bfu_assets_manager
+from .. import bfu_light_map
 
 
 class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
@@ -1596,7 +1597,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 SurfaceAreaLightMap.prop(obj, 'bfu_static_mesh_light_map_surface_scale')
                                 SurfaceAreaLightMap.prop(obj, 'bfu_static_mesh_light_map_round_power_of_two')
                             if obj.bfu_static_mesh_light_map_mode != "Default":
-                                CompuntedLightMap = str(bfu_utils.GetCompuntedLightMap(obj))
+                                CompuntedLightMap = str(bfu_light_map.bfu_light_map_utils.GetCompuntedLightMap(obj))
                                 StaticMeshLightMapRes.label(text='Compunted light map: ' + CompuntedLightMap)
                             bfu_generate_light_map_uvs = layout.row()
                             bfu_generate_light_map_uvs.prop(obj, 'bfu_generate_light_map_uvs')
