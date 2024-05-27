@@ -28,18 +28,6 @@ from .. import bfu_check_potential_error
 from .. import bfu_export_logs
 from ..fbxio import export_fbx_bin
 
-if "bpy" in locals():
-    import importlib
-    if "bfu_export_utils" in locals():
-        importlib.reload(bfu_export_utils)
-    if "bbpl" in locals():
-        importlib.reload(bbpl)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-    if "bfu_check_potential_error" in locals():
-        importlib.reload(bfu_check_potential_error)
 
 def ProcessCollectionExport(op, col):
 

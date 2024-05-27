@@ -29,17 +29,6 @@ from .. import bfu_skeletal_mesh
 from .. import bfu_assets_manager
 from ..fbxio import export_fbx_bin
 
-if "bpy" in locals():
-    import importlib
-    if "bfu_export_utils" in locals():
-        importlib.reload(bfu_export_utils)
-    if "bbpl" in locals():
-        importlib.reload(bbpl)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-
 
 def ProcessActionExport(op, obj, action, action_curve_scale):
     scene = bpy.context.scene

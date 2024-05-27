@@ -22,11 +22,3 @@ from .. import bfu_utils
 
 from ..bbpl import utils
 
-import importlib
-if "bfu_write_text" in locals():
-    importlib.reload(bfu_write_text)
-if "bfu_basics" in locals():
-    importlib.reload(bfu_basics)
-if "bfu_utils" in locals():
-    importlib.reload(bfu_utils)
-

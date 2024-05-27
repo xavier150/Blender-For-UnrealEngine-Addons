@@ -30,16 +30,6 @@ from .. import bfu_export_logs
 from .. import bfu_assets_manager
 from ..fbxio import export_fbx_bin
 
-if "bpy" in locals():
-    import importlib
-    if "bfu_export_utils" in locals():
-        importlib.reload(bfu_export_utils)
-    if "bbpl" in locals():
-        importlib.reload(bbpl)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
 
 
 def ProcessCameraExport(op, obj, pre_bake_camera: bfu_camera.bfu_camera_data.BFU_CameraTracks = None):
