@@ -1,4 +1,4 @@
-﻿== Rev 0.1.3 ==
+== Rev 0.1.3 ==
 
 Initial release.
 
@@ -494,6 +494,7 @@ It is now possible to force the duration of an animation according to the scene 
 - New: Button for fix extreme UV scales in Tools > UV Map.
 - New: New Materials option for the Import FBX for Import in Unreal.
 - New: New options for to create sub folders with the object name for Alambic and SkeletalMesh (Used for avoid asset conflicts during the export)
+- New: Better FBX management for older versions.
 - Change: "Convert Attribute To UV" is False by default.
 - Change: Updated panel names to avoid confusion with other add-on panels in the Unreal Engine tab.
 - Fixed: Import sequencer script fail for unreal 5.0 and older version (SequencerBindingProxy rename to MovieSceneBindingProxy)

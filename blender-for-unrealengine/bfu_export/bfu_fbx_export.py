@@ -22,7 +22,7 @@
 
 import bpy
 from . import bfu_export_utils
-from ..fbxio import export_fbx_bin
+from .. import fbxio
 from mathutils import Vector, Matrix, Quaternion
 
 
@@ -96,7 +96,7 @@ def export_scene_fbx_with_custom_fbx_io(operator, context, filepath='', check_ex
 
 
     # Call the FBX export operator with the appropriate parameters
-    export_fbx_bin.save(**params)
+    fbxio.export_fbx_bin.save(**params)
 
 
 def export_scene_fbx(filepath='', check_existing=True, filter_glob='*.fbx', use_selection=False, use_visible=False, use_active_collection=False, global_scale=1.0, apply_unit_scale=True, apply_scale_options='FBX_SCALE_NONE', use_space_transform=True, bake_space_transform=False, object_types={'ARMATURE', 'CAMERA', 'EMPTY', 'LIGHT', 'MESH', 'OTHER'}, use_mesh_modifiers=True, use_mesh_modifiers_render=True, mesh_smooth_type='OFF', colors_type='SRGB', prioritize_active_color=False, use_subsurf=False, use_mesh_edges=False, use_tspace=False, use_triangles=False, use_custom_props=False, add_leaf_bones=True, primary_bone_axis='Y', secondary_bone_axis='X', use_armature_deform_only=False, armature_nodetype='NULL', bake_anim=True, bake_anim_use_all_bones=True, bake_anim_use_nla_strips=True, bake_anim_use_all_actions=True, bake_anim_force_startend_keying=True, bake_anim_step=1.0, bake_anim_simplify_factor=1.0, path_mode='AUTO', embed_textures=False, batch_mode='OFF', use_batch_own_dir=True, use_metadata=True, axis_forward='-Z', axis_up='Y'):

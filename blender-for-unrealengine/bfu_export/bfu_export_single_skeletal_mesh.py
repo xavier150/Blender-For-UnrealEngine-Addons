@@ -42,8 +42,6 @@ if "bpy" in locals():
         importlib.reload(bfu_utils)
     if "bfu_check_potential_error" in locals():
         importlib.reload(bfu_check_potential_error)
-    if "export_fbx_bin" in locals():
-        importlib.reload(export_fbx_bin)
 
 def ProcessSkeletalMeshExport(op, armature, mesh_parts, desired_name=""):
     scene = bpy.context.scene

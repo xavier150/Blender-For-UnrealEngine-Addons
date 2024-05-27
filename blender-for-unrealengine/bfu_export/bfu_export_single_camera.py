@@ -40,8 +40,6 @@ if "bpy" in locals():
         importlib.reload(bfu_basics)
     if "bfu_utils" in locals():
         importlib.reload(bfu_utils)
-    if "export_fbx_bin" in locals():
-        importlib.reload(export_fbx_bin)
 
 
 def ProcessCameraExport(op, obj, pre_bake_camera: bfu_camera.bfu_camera_data.BFU_CameraTracks = None):

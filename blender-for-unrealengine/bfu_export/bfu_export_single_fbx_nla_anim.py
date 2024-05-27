@@ -39,8 +39,6 @@ if "bpy" in locals():
         importlib.reload(bfu_basics)
     if "bfu_utils" in locals():
         importlib.reload(bfu_utils)
-    if "export_fbx_bin" in locals():
-        importlib.reload(export_fbx_bin)
 
 
 def ProcessNLAAnimExport(op, obj):
