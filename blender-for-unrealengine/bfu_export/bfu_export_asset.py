@@ -215,7 +215,7 @@ def export_camera_from_asset_list(op, asset_list: bfu_cached_asset_list.AssetToE
         if asset.asset_type == bfu_camera.bfu_camera_config.asset_type_name:
             obj = asset.obj
             if obj.bfu_export_type == "export_recursive":
-                if bfu_camera.bfu_camera_utils.is_camera() and IsValidObjectForExport(scene, obj):                    
+                if bfu_camera.bfu_camera_utils.is_camera(obj) and IsValidObjectForExport(scene, obj):                    
                     camera_list.append(obj)
                     multi_camera_tracks.add_camera_to_evaluate(obj)
 
