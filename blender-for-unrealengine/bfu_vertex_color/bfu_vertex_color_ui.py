@@ -7,11 +7,11 @@
 #
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with this program.	 If not, see <http://www.gnu.org/licenses/>.
+#  along with this program. If not, see <http://www.gnu.org/licenses/>.
 #  All rights reserved.
 #
 # ======================= END GPL LICENSE BLOCK =============================
@@ -40,29 +40,30 @@ def draw_ui_object_collision(layout: bpy.types.UILayout):
                     if not obj.bfu_export_as_lod_mesh:
 
                         # Vertex color
-                        StaticMeshVertexColorImportOption = layout.column()
-                        StaticMeshVertexColorImportOption.prop(obj, 'bfu_vertex_color_import_option')
+                        bfu_vertex_color_settings = layout.column()
+                        bbpl.blender_layout.layout_doc_button.add_doc_page_operator(bfu_vertex_color_settings, text="About Vertex Color", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Vertex-Color")
+                        bfu_vertex_color_settings.prop(obj, 'bfu_vertex_color_import_option')
                         if obj.bfu_vertex_color_import_option == "OVERRIDE":
-                            StaticMeshVertexColorImportOptionColor = StaticMeshVertexColorImportOption.row()
+                            StaticMeshVertexColorImportOptionColor = bfu_vertex_color_settings.row()
                             StaticMeshVertexColorImportOptionColor.prop(obj, 'bfu_vertex_color_override_color')
                         if obj.bfu_vertex_color_import_option == "REPLACE":
-                            StaticMeshVertexColorImportOptionIndex = StaticMeshVertexColorImportOption.row()
+                            StaticMeshVertexColorImportOptionIndex = bfu_vertex_color_settings.row()
                             StaticMeshVertexColorImportOptionIndex.prop(obj, 'bfu_vertex_color_to_use')
                             if obj.bfu_vertex_color_to_use == "CustomIndex":
-                                StaticMeshVertexColorImportOptionIndexCustom = StaticMeshVertexColorImportOption.row()
+                                StaticMeshVertexColorImportOptionIndexCustom = bfu_vertex_color_settings.row()
                                 StaticMeshVertexColorImportOptionIndexCustom.prop(obj, 'bfu_vertex_color_index_to_use')
 
-                            StaticMeshVertexColorFeedback = StaticMeshVertexColorImportOption.row()
+                            StaticMeshVertexColorFeedback = bfu_vertex_color_settings.row()
                             if obj.type == "MESH":
                                 vced = bfu_vertex_color_utils.VertexColorExportData(obj)
                                 if vced.export_type == "REPLACE":
-                                    my_text = 'Vertex color nammed "' + vced.name + '" will be used.'
+                                    my_text = f'Vertex color named {vced.name} will be used.'
                                     StaticMeshVertexColorFeedback.label(text=my_text, icon='INFO')
                                 else:
                                     my_text = 'No vertex color found at this index.'
                                     StaticMeshVertexColorFeedback.label(text=my_text, icon='ERROR')
                             else:
-                                my_text = 'Vertex color property will be apply on the childrens.'
+                                my_text = 'Vertex color property will be applied on the children.'
                                 StaticMeshVertexColorFeedback.label(text=my_text, icon='INFO')
                             
 
