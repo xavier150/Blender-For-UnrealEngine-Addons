@@ -529,36 +529,7 @@ def ResetArmatureConstraintToModifiers(armature):
                 # Enable back constraint
                 const.enabled = True
 
-# Vertex Color
 
-
-def SetVertexColorForUnrealExport(parent):
-
-    objs = bfu_utils.GetExportDesiredChilds(parent)
-    objs.append(parent)
-
-    for obj in objs:
-        if obj.type == "MESH":
-            vced = bfu_vertex_color.bfu_vertex_color_utils.VertexColorExportData(obj, parent)
-            if vced.export_type == "REPLACE":
-
-                vertex_colors = bbpl.utils.get_vertex_colors(obj)
-
-                # Save the previous target
-                obj.data["BFU_PreviousTargetIndex"] = vertex_colors.active_index
-
-                # Ser the vertex color for export
-                vertex_colors.active_index = vced.index
-
-
-def ClearVertexColorForUnrealExport(parent):
-
-    objs = bfu_utils.GetExportDesiredChilds(parent)
-    objs.append(parent)
-    for obj in objs:
-        if obj.type == "MESH":
-            if "BFU_PreviousTargetIndex" in obj.data:
-                del obj.data["BFU_PreviousTargetIndex"]
 
 
 def GetShouldRescaleRig(obj):

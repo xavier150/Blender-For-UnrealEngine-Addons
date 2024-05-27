@@ -28,6 +28,7 @@ from .. import bfu_naming
 from .. import bfu_check_potential_error
 from .. import bfu_export_logs
 from .. import bfu_skeletal_mesh
+from .. import bfu_vertex_color
 from .. import bfu_assets_manager
 
 
@@ -117,7 +118,7 @@ def ExportSingleSkeletalMesh(
         if armature.bfu_convert_geometry_node_attribute_to_uv:
             attrib_name = armature.bfu_convert_geometry_node_attribute_to_uv_name
             bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
-        bfu_export_utils.SetVertexColorForUnrealExport(selected_obj)
+        bfu_vertex_color.bfu_vertex_color_utils.SetVertexColorForUnrealExport(selected_obj)
         bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
         bfu_export_utils.SetSocketsExportTransform(selected_obj)
         bfu_export_utils.SetSocketsExportName(selected_obj)
@@ -247,7 +248,7 @@ def ExportSingleSkeletalMesh(
 
     save_use_simplify.LoadUserRenderSimplify()
     asset_name.ResetNames()
-    bfu_export_utils.ClearVertexColorForUnrealExport(active)
+    bfu_vertex_color.bfu_vertex_color_utils.ClearVertexColorForUnrealExport(active)
     bfu_export_utils.ResetArmatureConstraintToModifiers(active)
     bfu_export_utils.ResetSocketsExportName(active)
     bfu_export_utils.ResetSocketsTransform(active)

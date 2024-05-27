@@ -18,8 +18,9 @@
 
 
 import bpy
+from . import bfu_vertex_color_utils
 from .. import bbpl
-
+from .. import bfu_utils
 
 class VertexColorExportData:
     def __init__(self, obj, parent=None):
@@ -106,3 +107,33 @@ class VertexColorExportData:
 
     def GetVertexByIndex(self, index):
         self.obj
+
+
+# Vertex Color
+def SetVertexColorForUnrealExport(parent):
+
+    objs = bfu_utils.GetExportDesiredChilds(parent)
+    objs.append(parent)
+
+    for obj in objs:
+        if obj.type == "MESH":
+            vced = bfu_vertex_color_utils.VertexColorExportData(obj, parent)
+            if vced.export_type == "REPLACE":
+
+                vertex_colors = bbpl.utils.get_vertex_colors(obj)
+
+                # Save the previous target
+                obj.data["BFU_PreviousTargetIndex"] = vertex_colors.active_index
+
+                # Ser the vertex color for export
+                vertex_colors.active_index = vced.index
+
+
+def ClearVertexColorForUnrealExport(parent):
+
+    objs = bfu_utils.GetExportDesiredChilds(parent)
+    objs.append(parent)
+    for obj in objs:
+        if obj.type == "MESH":
+            if "BFU_PreviousTargetIndex" in obj.data:
+                del obj.data["BFU_PreviousTargetIndex"]

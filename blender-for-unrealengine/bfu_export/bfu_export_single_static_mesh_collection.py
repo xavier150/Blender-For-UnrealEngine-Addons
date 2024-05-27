@@ -25,6 +25,7 @@ from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_naming
+from .. import bfu_vertex_color
 from .. import bfu_check_potential_error
 from .. import bfu_export_logs
 
@@ -97,7 +98,7 @@ def ExportSingleStaticMeshCollection(
         if obj.bfu_convert_geometry_node_attribute_to_uv:
             attrib_name = obj.bfu_convert_geometry_node_attribute_to_uv_name
             bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
-        bfu_export_utils.SetVertexColorForUnrealExport(selected_obj)
+        bfu_vertex_color.bfu_vertex_color_utils.SetVertexColorForUnrealExport(selected_obj)
         bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
         bfu_export_utils.SetSocketsExportTransform(selected_obj)
         bfu_export_utils.SetSocketsExportName(selected_obj)
@@ -152,7 +153,7 @@ def ExportSingleStaticMeshCollection(
     
     save_use_simplify.LoadUserRenderSimplify()
     for obj in bpy.context.selected_objects:
-        bfu_export_utils.ClearVertexColorForUnrealExport(obj)
+        bfu_vertex_color.bfu_vertex_color_utils.ClearVertexColorForUnrealExport(obj)
         bfu_export_utils.ResetSocketsExportName(obj)
         bfu_export_utils.ResetSocketsTransform(obj)
 
