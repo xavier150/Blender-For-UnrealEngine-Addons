@@ -113,7 +113,7 @@ def unregister():
         bpy.utils.unregister_class(cls)
 
     del bpy.types.Scene.bfu_object_vertex_color_properties_expanded
-    del bpy.types.Scene.bfu_vertex_color_index_to_use
-    del bpy.types.Scene.bfu_vertex_color_to_use
-    del bpy.types.Scene.bfu_vertex_color_override_color
-    del bpy.types.Scene.bfu_vertex_color_import_option
+    del bpy.types.Object.bfu_vertex_color_index_to_use
+    del bpy.types.Object.bfu_vertex_color_to_use
+    del bpy.types.Object.bfu_vertex_color_override_color
+    del bpy.types.Object.bfu_vertex_color_import_option
