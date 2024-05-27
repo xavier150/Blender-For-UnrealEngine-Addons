@@ -44,8 +44,9 @@ def draw_ui_object_collision(layout: bpy.types.UILayout):
                         bbpl.blender_layout.layout_doc_button.add_doc_page_operator(bfu_vertex_color_settings, text="About Vertex Color", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Vertex-Color")
                         bfu_vertex_color_settings.prop(obj, 'bfu_vertex_color_import_option')
                         if obj.bfu_vertex_color_import_option == "OVERRIDE":
-                            StaticMeshVertexColorImportOptionColor = bfu_vertex_color_settings.row()
-                            StaticMeshVertexColorImportOptionColor.prop(obj, 'bfu_vertex_color_override_color')
+                            bfu_vertex_color_settings_color = bfu_vertex_color_settings.row()
+                            bfu_vertex_color_settings_color.prop(obj, 'bfu_vertex_color_override_color')
+                        
                         if obj.bfu_vertex_color_import_option == "REPLACE":
                             StaticMeshVertexColorImportOptionIndex = bfu_vertex_color_settings.row()
                             StaticMeshVertexColorImportOptionIndex.prop(obj, 'bfu_vertex_color_to_use')
@@ -65,6 +66,8 @@ def draw_ui_object_collision(layout: bpy.types.UILayout):
                             else:
                                 my_text = 'Vertex color property will be applied on the children.'
                                 StaticMeshVertexColorFeedback.label(text=my_text, icon='INFO')
+
+                            bfu_vertex_color_settings.prop(obj, 'bfu_vertex_color_type')
                             
 
 def draw_ui_scene_collision(layout: bpy.types.UILayout):

@@ -105,6 +105,17 @@ def register():
         default=0
     )
 
+    bpy.types.Object.bfu_vertex_color_type = bpy.props.EnumProperty(
+        name="Vertex Color to use",
+        description="Target color space",
+        override={'LIBRARY_OVERRIDABLE'},
+        items=[
+            ("SRGB", "sRGB", "Export colors in sRGB color space.", 0),
+            ("LINEAR", "Linear", "Export colors in linear color space.", 1)
+            ],
+        default="SRGB"
+        )
+
     bpy.types.Scene.bfu_object_vertex_color_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Vertex color")
 
 
@@ -113,6 +124,7 @@ def unregister():
         bpy.utils.unregister_class(cls)
 
     del bpy.types.Scene.bfu_object_vertex_color_properties_expanded
+    del bpy.types.Object.bfu_vertex_color_type
     del bpy.types.Object.bfu_vertex_color_index_to_use
     del bpy.types.Object.bfu_vertex_color_to_use
     del bpy.types.Object.bfu_vertex_color_override_color
