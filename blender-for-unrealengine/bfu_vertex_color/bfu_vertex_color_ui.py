@@ -66,8 +66,11 @@ def draw_ui_object_collision(layout: bpy.types.UILayout):
                             else:
                                 my_text = 'Vertex color property will be applied on the children.'
                                 StaticMeshVertexColorFeedback.label(text=my_text, icon='INFO')
-
-                        bfu_vertex_color_settings.prop(obj, 'bfu_vertex_color_type')
+                        
+                        # Add 'colors_type' parameter if Blender version is 3.4 or above
+                        blender_version = bpy.app.version
+                        if blender_version >= (3, 4, 0):
+                            bfu_vertex_color_settings.prop(obj, 'bfu_vertex_color_type')
                             
 
 def draw_ui_scene_collision(layout: bpy.types.UILayout):
