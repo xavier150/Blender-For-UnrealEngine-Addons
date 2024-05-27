@@ -42,6 +42,7 @@ You simply need to paste it into Unreal Engine, for example, the cameras, spline
 - [Skeletal Meshs ‐ Quick Start](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Skeletal-Meshs-‐-Quick-Start)
 ### Overview Pages
 - [Transform And Pivot Point](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Transform-And-Pivot-Point)
+- [Axis Transforms](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Axis-Transforms)
 - [Level of details](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Level-of-details)
 - [Collisions](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Collisions)
 - [Sockets](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Sockets)
@@ -56,6 +57,7 @@ You simply need to paste it into Unreal Engine, for example, the cameras, spline
 - [Light Maps](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Light-Maps)
 - [Generate UV Light Maps](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Generate-UV-Light-Maps)
 - [Alembic animations](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Alembic)
+- [Groom Simulation](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Groom)
 - [Custom Properties Animation to Curves UE](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Custom-Properties-Animation-to-Curves-UE)
 - [Export Collection like a StaticMesh](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Export-collection-like-a-StaticMesh)
 - [Import Exported Assets to UE](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/How-import-assets)
