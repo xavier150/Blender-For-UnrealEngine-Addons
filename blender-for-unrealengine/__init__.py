@@ -62,6 +62,7 @@ from . import bfu_basics
 from . import bfu_utils
 from . import bfu_unreal_utils
 from . import bfu_naming
+from . import fbxio
 from . import bfu_export
 from . import bfu_backward_compatibility
 from . import bfu_cached_asset_list
@@ -127,6 +128,8 @@ if "bfu_unreal_utils" in locals():
     importlib.reload(bfu_unreal_utils)
 if "bfu_naming" in locals():
     importlib.reload(bfu_naming)
+if "fbxio" in locals():
+    importlib.reload(fbxio)
 if "bfu_export" in locals():
     importlib.reload(bfu_export)
 if "bfu_backward_compatibility" in locals():
