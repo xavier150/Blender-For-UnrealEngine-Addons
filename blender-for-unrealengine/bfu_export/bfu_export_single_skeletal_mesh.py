@@ -19,6 +19,7 @@
 
 import bpy
 from bpy_extras.io_utils import axis_conversion
+from . import bfu_fbx_export
 from . import bfu_export_utils
 from .. import bbpl
 from .. import bfu_basics
@@ -28,7 +29,6 @@ from .. import bfu_check_potential_error
 from .. import bfu_export_logs
 from .. import bfu_skeletal_mesh
 from .. import bfu_assets_manager
-from ..fbxio import export_fbx_bin
 
 
 def ProcessSkeletalMeshExport(op, armature, mesh_parts, desired_name=""):
@@ -156,7 +156,7 @@ def ExportSingleSkeletalMesh(
     scene.render.use_simplify = False
 
     if (skeleton_export_procedure == "ue-standard"):
-        export_fbx_bin.save(
+        bfu_fbx_export.export_scene_fbx_with_custom_fbx_io(
             operator=op,
             context=bpy.context,
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
@@ -196,7 +196,7 @@ def ExportSingleSkeletalMesh(
             bake_space_transform=False
             )
     elif (skeleton_export_procedure == "blender-standard"):
-        bpy.ops.export_scene.fbx(
+        bfu_fbx_export.export_scene_fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
@@ -230,7 +230,7 @@ def ExportSingleSkeletalMesh(
             bake_space_transform=False
             )
     elif (skeleton_export_procedure == "auto-rig-pro"):
-        bpy.ops.export_scene.fbx(
+        bfu_fbx_export.export_scene_fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=False,

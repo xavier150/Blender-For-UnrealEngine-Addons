@@ -19,6 +19,7 @@
 
 import bpy
 from bpy_extras.io_utils import axis_conversion
+from . import bfu_fbx_export
 from . import bfu_export_utils
 from .. import bfu_spline
 from .. import bps
@@ -28,7 +29,6 @@ from .. import bfu_utils
 from .. import bfu_naming
 from .. import bfu_export_logs
 from .. import bfu_assets_manager
-from ..fbxio import export_fbx_bin
 
 
 
@@ -115,7 +115,7 @@ def ExportSingleFbxSpline(
     scene.render.use_simplify = False
 
     if (spline_export_procedure == "ue-standard") and export_fbx_spline:
-        export_fbx_bin.save(
+        bfu_fbx_export.export_scene_fbx_with_custom_fbx_io(
             op,
             bpy.context,
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
@@ -151,7 +151,7 @@ def ExportSingleFbxSpline(
             bake_space_transform=False
             )
     elif (spline_export_procedure == "blender-standard") and export_fbx_spline:
-        bpy.ops.export_scene.fbx(
+        bfu_fbx_export.export_scene_fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
