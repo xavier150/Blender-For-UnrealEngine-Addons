@@ -17,9 +17,7 @@
 # ======================= END GPL LICENSE BLOCK =============================
 
 
-import os
 import bpy
-from .. import bfu_utils
 
 def DisplayPropertyFilter(active_tab, active_sub_tab):
     # Define more easily the options which must be displayed or not
