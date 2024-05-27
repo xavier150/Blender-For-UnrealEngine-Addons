@@ -110,7 +110,7 @@ class VertexColorExportData:
 
 
 # Vertex Color
-def SetVertexColorForUnrealExport(parent):
+def SetVertexColorForUnrealExport(parent: bpy.types.Object):
 
     objs = bfu_utils.GetExportDesiredChilds(parent)
     objs.append(parent)
@@ -129,7 +129,7 @@ def SetVertexColorForUnrealExport(parent):
                 vertex_colors.active_index = vced.index
 
 
-def ClearVertexColorForUnrealExport(parent):
+def ClearVertexColorForUnrealExport(parent: bpy.types.Object):
 
     objs = bfu_utils.GetExportDesiredChilds(parent)
     objs.append(parent)
@@ -137,3 +137,8 @@ def ClearVertexColorForUnrealExport(parent):
         if obj.type == "MESH":
             if "BFU_PreviousTargetIndex" in obj.data:
                 del obj.data["BFU_PreviousTargetIndex"]
+
+def get_export_colors_type(obj: bpy.types.Object):
+    if obj.bfu_vertex_color_import_option in ["REPLACE", "OVERRIDE"]:
+        return obj.bfu_vertex_color_type
+    return "NONE"
