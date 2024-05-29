@@ -55,8 +55,8 @@ class BFU_StaticMesh(bfu_assets_manager.bfu_asset_manager_type.BFU_BaseAssetClas
             if obj.bfu_custom_export_name:
                 return obj.bfu_custom_export_name
         if desired_name:
-            return bfu_basics.ValidFilename(scene.bfu_spline_prefix_export_name+desired_name+fileType)
-        return bfu_basics.ValidFilename(scene.bfu_spline_prefix_export_name+obj.name+fileType)
+            return bfu_basics.ValidFilename(scene.bfu_static_mesh_prefix_export_name+desired_name+fileType)
+        return bfu_basics.ValidFilename(scene.bfu_static_mesh_prefix_export_name+obj.name+fileType)
     
     def get_obj_export_directory_path(self, obj):
         folder_name = bfu_utils.get_export_folder_name(obj)
