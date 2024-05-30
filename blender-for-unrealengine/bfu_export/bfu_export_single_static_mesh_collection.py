@@ -95,8 +95,8 @@ def ExportSingleStaticMeshCollection(
 
     bfu_utils.ApplyNeededModifierToSelect()
     for selected_obj in bpy.context.selected_objects:
-        if obj.bfu_convert_geometry_node_attribute_to_uv:
-            attrib_name = obj.bfu_convert_geometry_node_attribute_to_uv_name
+        if selected_obj.bfu_convert_geometry_node_attribute_to_uv:
+            attrib_name = selected_obj.bfu_convert_geometry_node_attribute_to_uv_name
             bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
         bfu_vertex_color.bfu_vertex_color_utils.SetVertexColorForUnrealExport(selected_obj)
         bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
@@ -138,13 +138,13 @@ def ExportSingleStaticMeshCollection(
             use_selection=True,
             global_scale=1,
             object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
-            colors_type=bfu_vertex_color.bfu_vertex_color_utils.get_export_colors_type(obj),
-            use_custom_props=obj.bfu_export_with_custom_props,
+            #colors_type=bfu_vertex_color.bfu_vertex_color_utils.get_export_colors_type(obj), @TODO
+            #use_custom_props=obj.bfu_export_with_custom_props, @TODO
             mesh_smooth_type="FACE",
             add_leaf_bones=False,
             # use_armature_deform_only=active.bfu_export_deform_only,
             bake_anim=False,
-            use_metadata=obj.bfu_export_with_meta_data,
+            #use_metadata=obj.bfu_export_with_meta_data, @TODO
             # primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
             # secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
             # use_space_transform=bfu_export_utils.get_export_use_space_transform(obj),
