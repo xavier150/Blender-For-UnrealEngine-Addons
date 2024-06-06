@@ -1,6 +1,8 @@
 import os
 import shutil
 from . import edit_files
+from . import edit_fbx_utils
+from . import edit_export_fbx_bin
 
 blender_install_folder = "C:\\Program Files\\Blender Foundation"
 io_fbx = "scripts\\addons\\io_scene_fbx"
@@ -45,9 +47,9 @@ class FBXExporterGenerate:
         for new_file in new_files:
             edit_files.add_header_to_file(new_file)
             if new_file.endswith('export_fbx_bin.py'):
-                edit_files.update_export_fbx_bin(new_file)
+                edit_export_fbx_bin.update_export_fbx_bin(new_file)
             if new_file.endswith('fbx_utils.py'):
-                edit_files.update_fbx_utils(new_file)
+                edit_fbx_utils.update_fbx_utils(new_file)
         return version_as_module
 
     def copy_export_files(self, dest_folder):
@@ -101,7 +103,6 @@ def run_all_generate():
 
     generate_4_1 = FBXExporterGenerate("4.1", "Blender 4.1", export_fbx_files_with_threading)
     generated.append(generate_4_1.run_generate())
-    '''
 
     generate_4_0 = FBXExporterGenerate("4.0", "Blender 4.0", export_fbx_files)
     generated.append(generate_4_0.run_generate())
@@ -129,7 +130,6 @@ def run_all_generate():
 
     generate_2_83 = FBXExporterGenerate("2.83", "Blender 2.83", export_fbx_files)
     generated.append(generate_2_83.run_generate())
-    '''
 
     root_init_file = create_root_init_file(generated)
     edit_files.add_header_to_file(root_init_file)

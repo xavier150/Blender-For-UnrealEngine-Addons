@@ -1,3 +1,6 @@
+def print_edit_error(text):
+    print(f"\033[91m{text}\033[0m")
+
 def add_header_to_file(file_path):
     header = (
         "# --------------------------------------------- \n"
@@ -15,10 +18,44 @@ def add_header_to_file(file_path):
         content = f.read()
         f.seek(0, 0)
         f.write(header + content)
-    print(f"Added header to {file_path}")
+    ##print(f"Added header to {file_path}")
 
-def update_export_fbx_bin(new_file):
-    pass
+def lines_exist(file_path, search_string):
+    with open(file_path, 'r+', encoding='utf-8') as f:
+        content = f.read()
 
-def update_fbx_utils(new_file):
-    pass
+        # Remplacer "time" par "TESTUE" dans le contenu
+        if search_string in content:
+            return True
+
+    return False
+
+def replace_after_lines(file_path, search_string, content_to_add):
+    with open(file_path, 'r+', encoding='utf-8') as f:
+        content = f.read()
+
+        # Remplacer "time" par "TESTUE" dans le contenu
+        if search_string in content:
+            content = content.replace(search_string, content_to_add)
+        else:
+            print_edit_error(f"String {search_string} not found in {file_path}")
+
+        # Write back the modified content
+        f.seek(0)
+        f.write(content)
+        f.truncate()
+
+def add_after_lines(file_path, search_string, content_to_add):
+    with open(file_path, 'r+', encoding='utf-8') as f:
+        content = f.read()
+
+        # Remplacer "time" par "TESTUE" dans le contenu
+        if search_string in content:
+            content = content.replace(search_string, search_string+content_to_add)
+        else:
+            print_edit_error(f"String {search_string} not found in {file_path}")
+
+        # Write back the modified content
+        f.seek(0)
+        f.write(content)
+        f.truncate()
