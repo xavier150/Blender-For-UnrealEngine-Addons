@@ -2,6 +2,7 @@ from . import edit_files
 
 def update_export_fbx_bin(file_path):
     add_new_import(file_path)
+    edit_files.add_quaternion_import(file_path)
 
 def add_new_import(file_path):
     # 4.1 and older
@@ -27,10 +28,4 @@ from .. import __package__ as parent_package
         edit_files.print_edit_error(f"Neither set of search lines were found in {file_path}")
 
 
-    mathutils_content = '''from mathutils import Vector, Matrix
-'''
-    new_mathutils_content = '''from mathutils import Vector, Matrix, Quaternion
-'''
-
-    edit_files.replace_after_lines(file_path, mathutils_content, new_mathutils_content)
 

@@ -30,7 +30,7 @@ def lines_exist(file_path, search_string):
 
     return False
 
-def replace_after_lines(file_path, search_string, content_to_add):
+def replace_lines(file_path, search_string, content_to_add):
     with open(file_path, 'r+', encoding='utf-8') as f:
         content = f.read()
 
@@ -59,3 +59,23 @@ def add_after_lines(file_path, search_string, content_to_add):
         f.seek(0)
         f.write(content)
         f.truncate()
+
+def add_before_lines(file_path, search_string, content_to_add):
+    with open(file_path, 'r+', encoding='utf-8') as f:
+        content = f.read()
+
+        # Remplacer "time" par "TESTUE" dans le contenu
+        if search_string in content:
+            content = content.replace(search_string, content_to_add+search_string)
+        else:
+            print_edit_error(f"String {search_string} not found in {file_path}")
+
+        # Write back the modified content
+        f.seek(0)
+        f.write(content)
+        f.truncate()
+
+def add_quaternion_import(file_path):
+    mathutils_content = '''from mathutils import Vector, Matrix'''
+    new_mathutils_content = ''', Quaternion'''
+    add_after_lines(file_path, mathutils_content, new_mathutils_content)
