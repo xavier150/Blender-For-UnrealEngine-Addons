@@ -16,3 +16,9 @@ def add_header_to_file(file_path):
         f.seek(0, 0)
         f.write(header + content)
     print(f"Added header to {file_path}")
+
+def update_export_fbx_bin(new_file):
+    pass
+
+def update_fbx_utils(new_file):
+    pass

@@ -44,6 +44,10 @@ class FBXExporterGenerate:
 
         for new_file in new_files:
             edit_files.add_header_to_file(new_file)
+            if new_file.endswith('export_fbx_bin.py'):
+                edit_files.update_export_fbx_bin(new_file)
+            if new_file.endswith('fbx_utils.py'):
+                edit_files.update_fbx_utils(new_file)
         return version_as_module
 
     def copy_export_files(self, dest_folder):
