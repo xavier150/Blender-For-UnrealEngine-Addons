@@ -39,13 +39,16 @@ class FBXExporterGenerate:
         if not os.path.exists(dest_folder):
             os.makedirs(dest_folder)
 
-        self.copy_export_files(dest_folder)
-        self.create_init_file(dest_folder)
+        new_files = self.copy_export_files(dest_folder)
+        new_files.append(self.create_init_file(dest_folder))
+
+        for new_file in new_files:
+            edit_files.add_header_to_file(new_file)
         return version_as_module
 
     def copy_export_files(self, dest_folder):
         addon_folder = os.path.join(blender_install_folder, self.folder, self.version, io_fbx)
-
+        new_files = []
         # Verify if the source folder exists
         if not os.path.exists(addon_folder):
             print(f"Source folder does not exist: {addon_folder}")
@@ -57,11 +60,12 @@ class FBXExporterGenerate:
             destination_file = os.path.join(dest_folder, file_name)
             if os.path.exists(source_file):
                 shutil.copy2(source_file, destination_file)
-                edit_files.add_header_to_file(destination_file)
+                new_files.append(destination_file)
             else:
                 print(f"File does not exist: {source_file}")
 
         print(f"Copied specified FBX exporter files for Blender {self.version} to {dest_folder}")
+        return new_files
 
 
     def create_init_file(self, dest_folder):
@@ -82,6 +86,7 @@ class FBXExporterGenerate:
                 init_file.write(f"\timportlib.reload({module_name})\n")
 
         print(f"Created __init__.py in {dest_folder}")
+        return init_file_path
 
 def run_all_generate():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -122,7 +127,8 @@ def run_all_generate():
     generated.append(generate_2_83.run_generate())
     '''
 
-    create_root_init_file(generated)
+    root_init_file = create_root_init_file(generated)
+    edit_files.add_header_to_file(root_init_file)
 
     
 def create_root_init_file(generated):
@@ -147,6 +153,7 @@ def create_root_init_file(generated):
         init_file.write(f"    importlib.reload(current_fbxio)\n")
 
     print(f"Created root __init__.py in {parent_directory}")
+    return init_file_path
 
 def clean_previous_exports():
     for item in os.listdir(parent_directory):
