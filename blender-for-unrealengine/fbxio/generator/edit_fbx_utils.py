@@ -15,7 +15,7 @@ has_valid_parent_function = '''
         return False
 '''
 
-def update_fbx_utils(file_path):
+def update_fbx_utils(file_path, version):
     add_re_import(file_path)
     edit_files.add_quaternion_import(file_path)
     add_support_for_custom_kind(file_path)

@@ -34,9 +34,15 @@ class FBXExporterGenerate:
         self.folder = folder
         self.files = files
 
+    def get_str_version(self):
+        return str(self.version[0])+"_"+str(self.version[1])
+    
+    def get_folder_str_version(self):
+        return str(self.version[0])+"."+str(self.version[1])
+        
     def run_generate(self):
         # Create the destination folder in the parent directory
-        version_as_module = self.version.replace(".", "_")
+        version_as_module = self.get_str_version()
         dest_folder = os.path.join(parent_directory, io_scene_fbx_prefix+version_as_module)
         if not os.path.exists(dest_folder):
             os.makedirs(dest_folder)
@@ -47,13 +53,13 @@ class FBXExporterGenerate:
         for new_file in new_files:
             edit_files.add_header_to_file(new_file)
             if new_file.endswith('export_fbx_bin.py'):
-                edit_export_fbx_bin.update_export_fbx_bin(new_file)
+                edit_export_fbx_bin.update_export_fbx_bin(new_file, self.version)
             if new_file.endswith('fbx_utils.py'):
-                edit_fbx_utils.update_fbx_utils(new_file)
+                edit_fbx_utils.update_fbx_utils(new_file, self.version)
         return version_as_module
 
     def copy_export_files(self, dest_folder):
-        addon_folder = os.path.join(blender_install_folder, self.folder, self.version, io_fbx)
+        addon_folder = os.path.join(blender_install_folder, self.folder, self.get_folder_str_version(), io_fbx)
         new_files = []
         # Verify if the source folder exists
         if not os.path.exists(addon_folder):
@@ -101,34 +107,34 @@ def run_all_generate():
     # generated var needs to be ordered from new to older.
     generated = [] 
 
-    generate_4_1 = FBXExporterGenerate("4.1", "Blender 4.1", export_fbx_files_with_threading)
+    generate_4_1 = FBXExporterGenerate((4, 1, 0), "Blender 4.1", export_fbx_files_with_threading)
     generated.append(generate_4_1.run_generate())
 
-    generate_4_0 = FBXExporterGenerate("4.0", "Blender 4.0", export_fbx_files)
+    generate_4_0 = FBXExporterGenerate((4, 0, 0), "Blender 4.0", export_fbx_files)
     generated.append(generate_4_0.run_generate())
 
-    generate_3_6 = FBXExporterGenerate("3.6", "Blender 3.6", export_fbx_files)
+    generate_3_6 = FBXExporterGenerate((3, 6, 0), "Blender 3.6", export_fbx_files)
     generated.append(generate_3_6.run_generate())
 
-    generate_3_5 = FBXExporterGenerate("3.5", "Blender 3.5", export_fbx_files)
+    generate_3_5 = FBXExporterGenerate((3, 5, 0), "Blender 3.5", export_fbx_files)
     generated.append(generate_3_5.run_generate())
 
-    generate_3_4 = FBXExporterGenerate("3.4", "Blender 3.4", export_fbx_files)
+    generate_3_4 = FBXExporterGenerate((3, 4, 0), "Blender 3.4", export_fbx_files)
     generated.append(generate_3_4.run_generate())
 
-    generate_3_3 = FBXExporterGenerate("3.3", "Blender 3.3", export_fbx_files)
+    generate_3_3 = FBXExporterGenerate((3, 3, 0), "Blender 3.3", export_fbx_files)
     generated.append(generate_3_3.run_generate())
 
-    generate_3_2 = FBXExporterGenerate("3.2", "Blender 3.2", export_fbx_files)
+    generate_3_2 = FBXExporterGenerate((3, 2, 0), "Blender 3.2", export_fbx_files)
     generated.append(generate_3_2.run_generate())
 
-    generate_3_1 = FBXExporterGenerate("3.1", "Blender 3.1", export_fbx_files)
+    generate_3_1 = FBXExporterGenerate((3, 1, 0), "Blender 3.1", export_fbx_files)
     generated.append(generate_3_1.run_generate())
 
-    generate_2_93 = FBXExporterGenerate("2.93", "Blender 2.93", export_fbx_files)
+    generate_2_93 = FBXExporterGenerate((2, 93, 0), "Blender 2.93", export_fbx_files)
     generated.append(generate_2_93.run_generate())
 
-    generate_2_83 = FBXExporterGenerate("2.83", "Blender 2.83", export_fbx_files)
+    generate_2_83 = FBXExporterGenerate((2, 83, 0), "Blender 2.83", export_fbx_files)
     generated.append(generate_2_83.run_generate())
 
     root_init_file = create_root_init_file(generated)
