@@ -89,6 +89,7 @@ def run_all_generate():
 
     generate_4_1 = FBXExporterGenerate("4.1", "Blender 4.1", export_fbx_files_with_threading)
     generated.append(generate_4_1.run_generate())
+    '''
 
     generate_4_0 = FBXExporterGenerate("4.0", "Blender 4.0", export_fbx_files)
     generated.append(generate_4_0.run_generate())
@@ -116,6 +117,7 @@ def run_all_generate():
 
     generate_2_83 = FBXExporterGenerate("2.83", "Blender 2.83", export_fbx_files)
     generated.append(generate_2_83.run_generate())
+    '''
 
     create_root_init_file(generated)
 
