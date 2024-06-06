@@ -1,5 +1,6 @@
 import os
 import shutil
+from . import edit_files
 
 blender_install_folder = "C:\\Program Files\\Blender Foundation"
 io_fbx = "scripts\\addons\\io_scene_fbx"
@@ -56,10 +57,12 @@ class FBXExporterGenerate:
             destination_file = os.path.join(dest_folder, file_name)
             if os.path.exists(source_file):
                 shutil.copy2(source_file, destination_file)
+                edit_files.add_header_to_file(destination_file)
             else:
                 print(f"File does not exist: {source_file}")
 
         print(f"Copied specified FBX exporter files for Blender {self.version} to {dest_folder}")
+
 
     def create_init_file(self, dest_folder):
         files = self.files
@@ -154,6 +157,3 @@ def clean_previous_exports():
                 print(f"Deleted folder: {folder_path}")
 
 
-
-if __name__ == "__main__":
-    run_all_generate()
