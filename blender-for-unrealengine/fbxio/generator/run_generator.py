@@ -133,14 +133,13 @@ def create_root_init_file(generated):
                 init_file.write(f"if blender_version >= ({generate.replace('.', ',')}, 0):\n")
             else:
                 init_file.write(f"elif blender_version >= ({generate.replace('.', ',')}, 0):\n")
-            init_file.write(f"    from .{io_scene_fbx_prefix}{generate} import *\n")
+            init_file.write(f"    from . import {io_scene_fbx_prefix}{generate} as current_fbxio \n")
 
         init_file.write("\n")
         
         # Write reloads
-        for generate in generated:
-            init_file.write(f"if \"{io_scene_fbx_prefix}{generate}\" in locals():\n")
-            init_file.write(f"    importlib.reload({io_scene_fbx_prefix}{generate})\n")
+        init_file.write(f"if \"current_fbxio\" in locals():\n")
+        init_file.write(f"    importlib.reload(current_fbxio)\n")
 
     print(f"Created root __init__.py in {parent_directory}")
 
