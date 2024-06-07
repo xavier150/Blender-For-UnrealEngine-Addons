@@ -1,5 +1,6 @@
 import os
 import shutil
+import re
 from . import edit_files
 from . import edit_fbx_utils
 from . import edit_export_fbx_bin
@@ -33,15 +34,20 @@ class FBXExporterGenerate:
         self.version = version
         self.folder = folder
         self.files = files
+        self.fbx_addon_version = None
 
     def get_str_version(self):
         return str(self.version[0])+"_"+str(self.version[1])
     
     def get_folder_str_version(self):
         return str(self.version[0])+"."+str(self.version[1])
+    
+    def get_addon_folder(self):
+        return os.path.join(blender_install_folder, self.folder, self.get_folder_str_version(), io_fbx)
         
     def run_generate(self):
         # Create the destination folder in the parent directory
+        self.update_fbx_addon_version()
         version_as_module = self.get_str_version()
         dest_folder = os.path.join(parent_directory, io_scene_fbx_prefix+version_as_module)
         if not os.path.exists(dest_folder):
@@ -53,13 +59,34 @@ class FBXExporterGenerate:
         for new_file in new_files:
             edit_files.add_header_to_file(new_file)
             if new_file.endswith('export_fbx_bin.py'):
-                edit_export_fbx_bin.update_export_fbx_bin(new_file, self.version)
+                edit_export_fbx_bin.update_export_fbx_bin(new_file, self.version, self.fbx_addon_version)
             if new_file.endswith('fbx_utils.py'):
                 edit_fbx_utils.update_fbx_utils(new_file, self.version)
-        return version_as_module
+        return [self.version, version_as_module]
+    
+    def update_fbx_addon_version(self):
+        source_file = os.path.join(self.get_addon_folder(), "__init__.py")
+
+        with open(source_file, 'r') as file:
+            file_content = file.read()
+            
+            # Utiliser les expressions régulières pour trouver bl_info et la version
+            bl_info_match = re.search(r'bl_info\s*=\s*\{([^}]*)\}', file_content, re.DOTALL)
+            bl_info_lines = bl_info_match.group(1).split('\n')
+            
+            # Analyser chaque ligne pour trouver la version
+            for line in bl_info_lines:
+                if 'version' in line:
+                    match = re.search(r'\(([^)]+)\)', line)
+                    elements = match.group(1).replace(' ', '').split(',')
+                    self.fbx_addon_version = tuple(map(int, elements))
+
+            else:
+                print("bl_info not found in the file.")
+
 
     def copy_export_files(self, dest_folder):
-        addon_folder = os.path.join(blender_install_folder, self.folder, self.get_folder_str_version(), io_fbx)
+        addon_folder = self.get_addon_folder()
         new_files = []
         # Verify if the source folder exists
         if not os.path.exists(addon_folder):
@@ -150,11 +177,16 @@ def create_root_init_file(generated):
 
         # Write conditional imports
         for x, generate in enumerate(generated):
+            version = generate[0]
+            str_version = generate[1]
             if x == 0:
-                init_file.write(f"if blender_version >= ({generate.replace('.', ',')}, 0):\n")
+                init_file.write(f"if blender_version >= {version}:\n")
             else:
-                init_file.write(f"elif blender_version >= ({generate.replace('.', ',')}, 0):\n")
-            init_file.write(f"    from . import {io_scene_fbx_prefix}{generate} as current_fbxio \n")
+                init_file.write(f"elif blender_version >= {version}:\n")
+            init_file.write(f"    from . import {io_scene_fbx_prefix}{str_version} as current_fbxio \n")
+            
+        init_file.write(f"else:\n")
+        init_file.write(f"    print('ERROR, no fbx exporter found for this version of Blender!') \n")
 
         init_file.write("\n")
         

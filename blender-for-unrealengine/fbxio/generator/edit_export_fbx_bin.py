@@ -1,14 +1,16 @@
 from . import edit_files
 
-def update_export_fbx_bin(file_path, version):
+def update_export_fbx_bin(file_path, version, fbx_addon_version):
     add_new_import(file_path)
     edit_files.add_quaternion_import(file_path)
     set_app_name(file_path)
-    set_addon_version_name(file_path)
+    set_addon_version_name(file_path, fbx_addon_version)
     add_animdata_custom_curves(file_path)
     if version > (3,6,0):
         add_num_custom_curve_values(file_path) #Not supported in Blender 3.6 <- and older
     add_set_custom_curve_for_ue(file_path)
+    add_bone_correction_matrix(file_path)
+    add_animation_only(file_path)
 
 def add_new_import(file_path):
     # 4.1 and older
@@ -45,7 +47,7 @@ def set_app_name(file_path):
     else:
         edit_files.print_edit_error(f"Neither set of search lines were found in {file_path}")
 
-def set_addon_version_name(file_path):
+def set_addon_version_name(file_path, fbx_addon_version):
 
     search_line = '''
     from . import bl_info
@@ -57,8 +59,7 @@ def set_addon_version_name(file_path):
     import sys
     addon_ver = addon_utils.module_bl_info(sys.modules[__package__])['version']'''
     
-    new_line = '''
-    addon_ver = (1.0.0)''' #TO DO! Need read value in bl_info in __init__.py
+    new_line = f'    addon_ver = {fbx_addon_version} # Blender-For-UnrealEngine edited version.' #TO DO! Need read value in bl_info in __init__.py
 
     if edit_files.lines_exist(file_path, search_line):
         edit_files.replace_lines(file_path, search_line, new_line)
@@ -214,3 +215,84 @@ def add_set_custom_curve_for_ue(file_path):
 
     edit_files.add_before_lines(file_path, search_lines_animations_in_fbx_animations_do, num_custom_curve_values)
 
+def add_bone_correction_matrix(file_path):
+
+    search_lines_FBXExportSettings_before = '''        add_leaf_bones, bone_correction_matrix, bone_correction_matrix_inv,'''
+        
+
+    new_fbx_bone_vars = '''
+        reverse_direction_bone_correction_matrix, reverse_direction_bone_correction_matrix_inv,
+        use_ue_mannequin_bone_alignment, bone_align_matrix_dict, disable_free_scale_animation,'''
+
+    edit_files.add_after_lines(file_path, search_lines_FBXExportSettings_before, new_fbx_bone_vars)
+
+    search_lines_save_single = '''                secondary_bone_axis='X','''
+
+    num_vars_in_save_single = '''
+                mirror_symmetry_right_side_bones=False,
+                use_ue_mannequin_bone_alignment=False,
+                disable_free_scale_animation=False,'''
+
+    edit_files.add_after_lines(file_path, search_lines_save_single, num_vars_in_save_single)
+
+    
+    search_lines_animations_in_fbx_animations_do = '''
+
+
+    media_settings = FBXExportSettingsMedia('''
+        
+
+    num_custom_curve_values = '''
+    
+    # Calculate reverse direction bone correction matrix for UE Mannequin
+    reverse_direction_bone_correction_matrix = None  # Default is None = no change
+    reverse_direction_bone_correction_matrix_inv = None
+    bone_align_matrix_dict = None
+    if mirror_symmetry_right_side_bones:
+        reverse_direction_bone_correction_matrix = Matrix.Rotation(-math.pi if secondary_bone_axis[0] == '-' else math.pi, 4, secondary_bone_axis[-1])
+        if use_ue_mannequin_bone_alignment:
+            import re
+            PELVIS_OR_FOOT_NAME_PATTERN = re.compile(r'^(pelvis$|foot[_\.$]|ik_foot_[lr]$)', re.IGNORECASE)
+            for arm_obj in [arm_obj for arm_obj in scene.objects if arm_obj.type == 'ARMATURE']:
+                map = {}
+                for bone in [bone for bone in arm_obj.data.bones if PELVIS_OR_FOOT_NAME_PATTERN.match(bone.name) != None]:
+                    target_rot = Quaternion((1.0, 0.0, 0.0), math.radians(90.0))
+                    lowerbonename = bone.name.lower()
+                    if lowerbonename.startswith('foot'):
+                        # To mitigate the instability caused by singularities during XYZ Euler angle transformations of the foot bones,
+                        # an offset upward vector is used.
+                        if lowerbonename[-1] == 'l':
+                            target_rot = Quaternion((1.0, 0.0, 0.0), math.radians(90.0))
+                        else:
+                            target_rot = Quaternion((1.0, 0.0, 0.0), math.radians(90.0))
+                    rot_mat = bone.matrix_local.to_quaternion().rotation_difference(target_rot).to_matrix().to_4x4()
+                    map[bone.name] = (rot_mat, rot_mat.inverted_safe())
+                if len(map) > 0:
+                    if bone_align_matrix_dict == None:
+                        bone_align_matrix_dict = {}
+                    bone_align_matrix_dict[arm_obj.name] = map
+        if bone_correction_matrix:
+            reverse_direction_bone_correction_matrix = bone_correction_matrix @ reverse_direction_bone_correction_matrix
+        reverse_direction_bone_correction_matrix_inv = reverse_direction_bone_correction_matrix.inverted()'''
+
+    edit_files.add_before_lines(file_path, search_lines_animations_in_fbx_animations_do, num_custom_curve_values)
+
+def add_animation_only(file_path):
+
+    search_lines_use_batch_in_save = '''         use_batch_own_dir=False,'''
+
+    animation_only = '''
+         animation_only=False,'''
+
+    edit_files.add_after_lines(file_path, search_lines_use_batch_in_save, animation_only)
+
+
+    search_lines_use_visible_in_save = '''
+        if use_visible:
+            ctx_objects = tuple(obj for obj in ctx_objects if obj.visible_get())'''
+
+    animation_only = '''
+        if animation_only:
+            ctx_objects = tuple(obj for obj in ctx_objects if not obj.type in BLENDER_OBJECT_TYPES_MESHLIKE)'''
+
+    edit_files.add_after_lines(file_path, search_lines_use_visible_in_save, animation_only)
