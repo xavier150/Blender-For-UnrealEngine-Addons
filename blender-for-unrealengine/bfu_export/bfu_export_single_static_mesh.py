@@ -180,8 +180,6 @@ def ExportSingleStaticMesh(
             batch_mode='OFF',
             use_batch_own_dir=True,
             use_metadata=obj.bfu_export_with_meta_data,
-            primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(active),
-            secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(active),
             use_space_transform=bfu_export_utils.get_static_export_use_space_transform(active),
             axis_forward=bfu_export_utils.get_static_export_axis_forward(active),
             axis_up=bfu_export_utils.get_static_export_axis_up(active),

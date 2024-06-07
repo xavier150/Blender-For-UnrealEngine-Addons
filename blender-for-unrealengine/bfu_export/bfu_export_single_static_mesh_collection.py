@@ -144,8 +144,6 @@ def ExportSingleStaticMeshCollection(
             # use_armature_deform_only=active.bfu_export_deform_only,
             bake_anim=False,
             #use_metadata=obj.bfu_export_with_meta_data, @TODO
-            # primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
-            # secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
             # use_space_transform=bfu_export_utils.get_export_use_space_transform(obj),
             # axis_forward=bfu_export_utils.get_export_axis_forward(obj),
             # axis_up=bfu_export_utils.get_export_axis_up(obj),

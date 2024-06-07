@@ -135,8 +135,6 @@ def ExportSingleFbxCamera(
             batch_mode='OFF',
             use_batch_own_dir=True,
             use_metadata=obj.bfu_export_with_meta_data,
-            primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
-            secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
             mirror_symmetry_right_side_bones=obj.bfu_mirror_symmetry_right_side_bones,
             use_ue_mannequin_bone_alignment=obj.bfu_use_ue_mannequin_bone_alignment,
             disable_free_scale_animation=obj.bfu_disable_free_scale_animation,
