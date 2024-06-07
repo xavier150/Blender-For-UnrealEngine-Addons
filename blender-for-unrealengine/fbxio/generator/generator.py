@@ -24,6 +24,33 @@ export_fbx_files_with_threading = [
     'fbx_utils.py',
 ]
 
+all_export_fbx_files = [
+    'data_types.py',
+    'encode_bin.py',
+    'export_fbx_bin.py',
+    'fbx_utils_threading.py',
+    'fbx_utils.py',
+    'fbx2json.py',
+    'import_fbx.py',
+    'json2fbx.py',
+    'parse_fbx.py',
+]
+
+all_export_fbx_files_with_init = [
+    '__init__.py',
+    'data_types.py',
+    'encode_bin.py',
+    'export_fbx_bin.py',
+    'fbx_utils_threading.py',
+    'fbx_utils.py',
+    'fbx2json.py',
+    'import_fbx.py',
+    'json2fbx.py',
+    'parse_fbx.py',
+]
+
+
+
 # Get the directory of the current script
 current_script_directory = os.path.dirname(os.path.abspath(__file__))
 # Define the parent directory (one level up from the current script directory)
@@ -80,9 +107,8 @@ class FBXExporterGenerate:
                     match = re.search(r'\(([^)]+)\)', line)
                     elements = match.group(1).replace(' ', '').split(',')
                     self.fbx_addon_version = tuple(map(int, elements))
+                    return
 
-            else:
-                print("bl_info not found in the file.")
 
 
     def copy_export_files(self, dest_folder):
@@ -116,13 +142,21 @@ class FBXExporterGenerate:
                 module_name, _ = os.path.splitext(file_name)
                 init_file.write(f"from . import {module_name}\n")
             
-            init_file.write("\nimport importlib\n")
+            
+            init_file.write('\nif "bpy" in locals():\n')
+            init_file.write("\timport importlib\n")
             
             # Write reloads
             for file_name in files:
                 module_name, _ = os.path.splitext(file_name)
-                init_file.write(f"if \"{module_name}\" in locals():\n")
-                init_file.write(f"\timportlib.reload({module_name})\n")
+                if module_name in ["import_fbx", "fbx_utils"]:
+                    
+                    init_file.write(f"# import_fbx and fbx_utils should not be reload or the export will produce StructRNA errors. \n")
+                    init_file.write(f"#\tif \"{module_name}\" in locals():\n")
+                    init_file.write(f"#\t\timportlib.reload({module_name})\n")
+                else:
+                    init_file.write(f"\tif \"{module_name}\" in locals():\n")
+                    init_file.write(f"\t\timportlib.reload({module_name})\n")
 
         print(f"Created __init__.py in {dest_folder}")
         return init_file_path
