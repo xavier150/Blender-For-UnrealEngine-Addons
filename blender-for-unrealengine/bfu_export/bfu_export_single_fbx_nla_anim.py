@@ -147,7 +147,7 @@ def ExportSingleFbxNLAAnim(
             check_existing=False,
             use_selection=True,
             animation_only=active.bfu_export_animation_without_mesh,
-            global_matrix=bfu_export_utils.get_obj_axis_conversion(active),
+            global_matrix=bfu_export_utils.get_skeleton_axis_conversion(active),
             apply_unit_scale=True,
             global_scale=bfu_utils.GetObjExportScale(active),
             apply_scale_options='FBX_SCALE_NONE',

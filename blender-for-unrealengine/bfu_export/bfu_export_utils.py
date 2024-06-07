@@ -706,9 +706,22 @@ class SaveTransformObjects():
             if saved_transform_object.init_object:
                 saved_transform_object.reset_object_transform()
 
-def get_obj_axis_conversion(obj):
+def get_skeleton_axis_conversion(obj):
+    axis_forward = get_skeleton_export_axis_forward(obj),
+    axis_up = get_skeleton_export_axis_up(obj),
+
     try:
-        return axis_conversion(to_forward=obj.bfu_export_axis_forward, to_up=obj.bfu_export_axis_up).to_4x4()
+        return axis_conversion(to_forward=axis_forward, to_up=axis_up).to_4x4()
+    except Exception as e:
+        print(f"For asset \"{obj.name}\" : {e}")
+        return axis_conversion("-Z", "Y").to_4x4()
+    
+def get_static_axis_conversion(obj):
+    axis_forward = get_static_export_axis_forward(obj),
+    axis_up = get_static_export_axis_up(obj),
+
+    try:
+        return axis_conversion(to_forward=axis_forward, to_up=axis_up).to_4x4()
     except Exception as e:
         print(f"For asset \"{obj.name}\" : {e}")
         return axis_conversion("-Z", "Y").to_4x4()

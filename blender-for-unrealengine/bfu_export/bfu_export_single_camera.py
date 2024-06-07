@@ -116,7 +116,7 @@ def ExportSingleFbxCamera(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
-            global_matrix=bfu_export_utils.get_obj_axis_conversion(obj),
+            global_matrix=bfu_export_utils.get_skeleton_axis_conversion(obj),
             apply_unit_scale=True,
             global_scale=bfu_utils.GetObjExportScale(obj),
             apply_scale_options='FBX_SCALE_NONE',

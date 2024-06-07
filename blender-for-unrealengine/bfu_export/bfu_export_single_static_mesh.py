@@ -133,7 +133,7 @@ def ExportSingleStaticMesh(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
-            global_matrix=bfu_export_utils.get_obj_axis_conversion(active),
+            global_matrix=bfu_export_utils.get_static_axis_conversion(active),
             apply_unit_scale=True,
             global_scale=bfu_utils.GetObjExportScale(active),
             apply_scale_options='FBX_SCALE_NONE',
