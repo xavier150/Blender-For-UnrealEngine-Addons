@@ -18,7 +18,6 @@
 
 import os
 import bpy
-from bpy_extras.io_utils import axis_conversion
 from . import bfu_fbx_export
 from . import bfu_export_utils
 from .. import bfu_basics
@@ -164,7 +163,7 @@ def ExportSingleFbxAction(
             check_existing=False,
             use_selection=True,
             animation_only=active.bfu_export_animation_without_mesh,
-            global_matrix=axis_conversion(to_forward=active.bfu_export_axis_forward, to_up=active.bfu_export_axis_up).to_4x4(),
+            global_matrix=bfu_export_utils.get_obj_axis_conversion(active),
             apply_unit_scale=True,
             global_scale=bfu_utils.GetObjExportScale(active),
             apply_scale_options='FBX_SCALE_NONE',

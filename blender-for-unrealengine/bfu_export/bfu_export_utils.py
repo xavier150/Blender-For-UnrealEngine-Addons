@@ -21,6 +21,7 @@ import bpy
 import math
 import os
 import mathutils
+from bpy_extras.io_utils import axis_conversion
 from . import bfu_export_get_info
 from .. import bfu_write_text
 from .. import bfu_basics
@@ -32,6 +33,7 @@ from .. import bfu_vertex_color
 from .. import bfu_export_procedure
 from .. import bfu_collision
 from .. import bfu_socket
+
 
 dup_temp_name = "BFU_Temp"  # DuplicateTemporarilyNameForUe4Export
 Export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
@@ -704,3 +706,9 @@ class SaveTransformObjects():
             if saved_transform_object.init_object:
                 saved_transform_object.reset_object_transform()
 
+def get_obj_axis_conversion(obj):
+    try:
+        return axis_conversion(to_forward=obj.bfu_export_axis_forward, to_up=obj.bfu_export_axis_up).to_4x4()
+    except Exception as e:
+        print(f"For asset \"{obj.name}\" : {e}")
+        return axis_conversion("-Z", "Y").to_4x4()

@@ -18,7 +18,6 @@
 
 
 import bpy
-from bpy_extras.io_utils import axis_conversion
 from . import bfu_fbx_export
 from . import bfu_export_utils
 from .. import bbpl
