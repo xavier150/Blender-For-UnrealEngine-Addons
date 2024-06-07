@@ -23,6 +23,7 @@
 import traceback
 import sys
 import bpy
+from mathutils import Vector, Matrix, Quaternion
 from .. import fbxio
 
 
