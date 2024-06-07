@@ -290,9 +290,20 @@ def add_animation_only(file_path):
     search_lines_use_visible_in_save = '''
         if use_visible:
             ctx_objects = tuple(obj for obj in ctx_objects if obj.visible_get())'''
+    
+    search_lines_ctx_objects_in_save = '''
+            else:
+                ctx_objects = context.view_layer.objects'''
 
     animation_only = '''
         if animation_only:
             ctx_objects = tuple(obj for obj in ctx_objects if not obj.type in BLENDER_OBJECT_TYPES_MESHLIKE)'''
 
-    edit_files.add_after_lines(file_path, search_lines_use_visible_in_save, animation_only)
+    
+
+    if edit_files.lines_exist(file_path, search_lines_use_visible_in_save):
+        edit_files.add_after_lines(file_path, search_lines_use_visible_in_save, animation_only)
+    elif edit_files.lines_exist(file_path, search_lines_ctx_objects_in_save):
+        edit_files.add_after_lines(file_path, search_lines_ctx_objects_in_save, animation_only)
+    else:
+        edit_files.print_edit_error(f"Neither set of search lines were found in {file_path}")

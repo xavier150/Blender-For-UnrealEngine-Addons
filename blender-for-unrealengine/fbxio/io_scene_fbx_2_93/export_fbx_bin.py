@@ -3280,6 +3280,8 @@ def save(operator, context,
                 ctx_objects = context.selected_objects
             else:
                 ctx_objects = context.view_layer.objects
+        if animation_only:
+            ctx_objects = tuple(obj for obj in ctx_objects if not obj.type in BLENDER_OBJECT_TYPES_MESHLIKE)
         kwargs_mod["context_objects"] = ctx_objects
 
         depsgraph = context.evaluated_depsgraph_get()
