@@ -707,8 +707,8 @@ class SaveTransformObjects():
                 saved_transform_object.reset_object_transform()
 
 def get_skeleton_axis_conversion(obj):
-    axis_forward = get_skeleton_export_axis_forward(obj),
-    axis_up = get_skeleton_export_axis_up(obj),
+    axis_forward = get_skeleton_export_axis_forward(obj)
+    axis_up = get_skeleton_export_axis_up(obj)
 
     try:
         return axis_conversion(to_forward=axis_forward, to_up=axis_up).to_4x4()
@@ -717,8 +717,8 @@ def get_skeleton_axis_conversion(obj):
         return axis_conversion("-Z", "Y").to_4x4()
     
 def get_static_axis_conversion(obj):
-    axis_forward = get_static_export_axis_forward(obj),
-    axis_up = get_static_export_axis_up(obj),
+    axis_forward = get_static_export_axis_forward(obj)
+    axis_up = get_static_export_axis_up(obj)
 
     try:
         return axis_conversion(to_forward=axis_forward, to_up=axis_up).to_4x4()
