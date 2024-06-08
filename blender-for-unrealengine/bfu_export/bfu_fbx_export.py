@@ -23,8 +23,11 @@
 import traceback
 import sys
 import bpy
-from mathutils import Vector, Matrix, Quaternion
+from mathutils import Matrix
 from .. import fbxio
+
+
+debug_show_arguments = False
 
 
 
@@ -97,8 +100,9 @@ def export_scene_fbx_with_custom_fbx_io(operator, context, filepath='', check_ex
 
     try:
         # Call the FBX export operator with the appropriate parameters
+        if (debug_show_arguments):
+            print("(Custom) EXPORT PARMS:", params)
         fbxio.current_fbxio.export_fbx_bin.save(**params)
-        print("#######################################")
     except Exception as e:
         # Capture and print the detailed error information
         exc_type, exc_value, exc_tb = sys.exc_info()
@@ -166,6 +170,8 @@ def export_scene_fbx(filepath='', check_existing=True, filter_glob='*.fbx', use_
 
     try:
         # Call the FBX export operator with the appropriate parameters
+        if (debug_show_arguments):
+            print("(Blender) EXPORT PARMS:", params)
         bpy.ops.export_scene.fbx(**params)
     except Exception as e:
         # Capture and print the detailed error information
