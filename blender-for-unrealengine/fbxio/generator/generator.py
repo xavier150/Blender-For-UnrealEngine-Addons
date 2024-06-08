@@ -6,7 +6,6 @@ from . import edit_fbx_utils
 from . import edit_export_fbx_bin
 
 blender_install_folder = "C:\\Program Files\\Blender Foundation"
-io_fbx = "scripts\\addons\\io_scene_fbx"
 io_scene_fbx_prefix = "io_scene_fbx_"
 
 export_fbx_files = [
@@ -57,11 +56,15 @@ current_script_directory = os.path.dirname(os.path.abspath(__file__))
 parent_directory = os.path.dirname(current_script_directory)
 
 class FBXExporterGenerate:
-    def __init__(self, version, folder, files):
+    def __init__(self, version, folder, files, new_io_fbx = None):
         self.version = version
         self.folder = folder
         self.files = files
         self.fbx_addon_version = None
+        if new_io_fbx:
+            self.io_fbx = new_io_fbx
+        else:
+            self.io_fbx = "scripts\\addons\\io_scene_fbx"
 
     def get_str_version(self):
         return str(self.version[0])+"_"+str(self.version[1])
@@ -70,7 +73,7 @@ class FBXExporterGenerate:
         return str(self.version[0])+"."+str(self.version[1])
     
     def get_addon_folder(self):
-        return os.path.join(blender_install_folder, self.folder, self.get_folder_str_version(), io_fbx)
+        return os.path.join(blender_install_folder, self.folder, self.get_folder_str_version(), self.io_fbx)
         
     def run_generate(self):
         # Create the destination folder in the parent directory
@@ -168,6 +171,12 @@ def run_all_generate():
     # generated var needs to be ordered from new to older.
     generated = [] 
 
+    generate_4_3 = FBXExporterGenerate((4, 3, 0), "Blender 4.3", export_fbx_files_with_threading, "scripts\\addons_core\\io_scene_fbx")
+    generated.append(generate_4_3.run_generate())
+
+    generate_4_2 = FBXExporterGenerate((4, 2, 0), "Blender 4.2", export_fbx_files_with_threading, "scripts\\addons_core\\io_scene_fbx")
+    generated.append(generate_4_2.run_generate())
+    
     generate_4_1 = FBXExporterGenerate((4, 1, 0), "Blender 4.1", export_fbx_files_with_threading)
     generated.append(generate_4_1.run_generate())
 

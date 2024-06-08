@@ -236,14 +236,10 @@ def add_bone_correction_matrix(file_path):
     edit_files.add_after_lines(file_path, search_lines_save_single, num_vars_in_save_single)
 
     
-    search_lines_animations_in_fbx_animations_do = '''
-
-
-    media_settings = FBXExportSettingsMedia('''
+    search_lines_animations_in_fbx_animations_do = '''    media_settings = FBXExportSettingsMedia('''
         
 
     num_custom_curve_values = '''
-    
     # Calculate reverse direction bone correction matrix for UE Mannequin
     reverse_direction_bone_correction_matrix = None  # Default is None = no change
     reverse_direction_bone_correction_matrix_inv = None
@@ -273,7 +269,8 @@ def add_bone_correction_matrix(file_path):
                     bone_align_matrix_dict[arm_obj.name] = map
         if bone_correction_matrix:
             reverse_direction_bone_correction_matrix = bone_correction_matrix @ reverse_direction_bone_correction_matrix
-        reverse_direction_bone_correction_matrix_inv = reverse_direction_bone_correction_matrix.inverted()'''
+        reverse_direction_bone_correction_matrix_inv = reverse_direction_bone_correction_matrix.inverted()
+'''
 
     edit_files.add_before_lines(file_path, search_lines_animations_in_fbx_animations_do, num_custom_curve_values)
 

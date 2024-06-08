@@ -3150,7 +3150,9 @@ def save_single(operator, scene, depsgraph, filepath="",
                                                  to_up='Y',
                                                  ).to_4x4()
         bone_correction_matrix_inv = bone_correction_matrix.inverted()
-    
+
+
+
     # Calculate reverse direction bone correction matrix for UE Mannequin
     reverse_direction_bone_correction_matrix = None  # Default is None = no change
     reverse_direction_bone_correction_matrix_inv = None
@@ -3181,8 +3183,6 @@ def save_single(operator, scene, depsgraph, filepath="",
         if bone_correction_matrix:
             reverse_direction_bone_correction_matrix = bone_correction_matrix @ reverse_direction_bone_correction_matrix
         reverse_direction_bone_correction_matrix_inv = reverse_direction_bone_correction_matrix.inverted()
-
-
     media_settings = FBXExportSettingsMedia(
         path_mode,
         os.path.dirname(bpy.data.filepath),  # base_src
