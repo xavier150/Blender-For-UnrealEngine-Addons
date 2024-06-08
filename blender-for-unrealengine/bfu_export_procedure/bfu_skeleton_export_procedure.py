@@ -35,6 +35,7 @@ def get_skeleton_procedure_preset(procedure: str): # Object.bfu_skeleton_export_
         preset["primary_bone_axis"]='X' 
         preset["secondary_bone_axis"]='-Z'
 
+    # Use Default FBX values
     if procedure == "blender-standard":
         preset["use_space_transform"]=True
         preset["axis_forward"]='-Z'
