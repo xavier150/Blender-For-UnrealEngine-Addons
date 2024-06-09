@@ -143,8 +143,7 @@ bl_info = {
     'version': (0, 4, 3),
     'blender': (2, 80, 0),
     'location': 'View3D > UI > Unreal Engine',
-    'description': "This add-ons allows to easily export several "
-    "objects at the same time for use in Unreal Engine.",
+    'description': "This add-ons allows to easily export several objects at the same time and import in Unreal Engine.",
     'warning': '',
     "wiki_url": "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki",
     'tracker_url': 'https://github.com/xavier150/Blender-For-UnrealEngine-Addons/issues',
