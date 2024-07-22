@@ -486,28 +486,28 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.4.3 ==
 
-- New: Update For Blender 4.1
+- New: Update for Blender 4.1.
 - New: Orthographic camera support for copy/paste cameras.
-- New: Disable render simplify durring export to not loose subdivises and mesh optimisation.
-- New potential error and auto fix frame rate denominator and numerator.
-- New: Option for set use_space_transform at export.
-- New: Button for fix extreme UV scales in Tools > UV Map.
-- New: New Materials option for the Import FBX for Import in Unreal.
-- New: New options for to create sub folders with the object name for Alambic and SkeletalMesh (Used for avoid asset conflicts during the export)
-- New: Support colors type for Vertex Colors export.
-- New: FBX Addon generator (For custom edit on the FBX Addon)
+- New: Disable render simplify during export to not lose subdivisions and mesh optimizations.
+- New: Potential error and auto-fix for frame rate denominator and numerator.
+- New: Option to set use_space_transform at export.
+- New: Button to fix extreme UV scales in Tools > UV Map.
+- New: New materials option for importing FBX files into Unreal.
+- New: New options to create subfolders with the object name for Alembic and SkeletalMesh (Used to avoid asset conflicts during export).
+- New: Support for color types in Vertex Colors export.
+- New: FBX Addon generator (for custom edits on the FBX Addon).
 - New: Better FBX management for older versions.
-- Change: "Convert Attribute To UV" is False by default.
+- Change: "Convert Attribute to UV" is False by default.
 - Change: Updated panel names to avoid confusion with other add-on panels in the Unreal Engine tab.
-- Fixed: Import sequencer script fail for unreal 5.0 and older version (SequencerBindingProxy rename to MovieSceneBindingProxy)
-- Fixed: Import sequencer script fail if camera is not and an cinmetaic camera.
-- Fixed: Import sequencer script fail if custom camera class is not found.
-- Fixed: Imported camera sequencer do not have the same name in level scene.
-- Fixed: Armature child objects with inverse parent lost their transforms position if rescale during export.
-- Fixed: With Unit Scale not at 0.01, shape keys that not location context is rescale.
+- Fixed: Import sequencer script fails for Unreal 5.0 and older versions (SequencerBindingProxy renamed to MovieSceneBindingProxy).
+- Fixed: Import sequencer script fails if the camera is not a cinematic camera.
+- Fixed: Import sequencer script fails if custom camera class is not found.
+- Fixed: Imported camera sequencer does not have the same name in the level scene.
+- Fixed: Armature child objects with inverse parent lost their transform positions if rescaled during export.
+- Fixed: With Unit Scale not at 0.01, shape keys that are not location context are rescaled.
 - Fixed: When rescaling the rig at export, all the drivers that were set were gone.
-- Fixed: Camera scale do not use display size in camera data.
-- Fixed: Check Potential Errors do not fix Hierarchy names with Sockets and Collisions
-- Fixed: Default export file_paths is wrong.
-- Fixed: Addon export check "Convert Attribute To UV" and his "Attribute name" on the wrong object.
-- Fixed: custom_export_name option don't work
+- Fixed: Camera scale does not use display size in camera data.
+- Fixed: Check Potential Errors does not fix Hierarchy names with Sockets and Collisions.
+- Fixed: Default export file paths are wrong.
+- Fixed: Addon export checks "Convert Attribute to UV" and its "Attribute name" on the wrong object.
+- Fixed: custom_export_name option does not work.
