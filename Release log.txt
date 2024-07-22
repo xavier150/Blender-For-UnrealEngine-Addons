@@ -486,7 +486,7 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.4.3 ==
 
-- New: Update for Blender 4.1.
+- New: Update for Blender 4.2.
 - New: Orthographic camera support for copy/paste cameras.
 - New: Disable render simplify during export to not lose subdivisions and mesh optimizations.
 - New: Potential error and auto-fix for frame rate denominator and numerator.
