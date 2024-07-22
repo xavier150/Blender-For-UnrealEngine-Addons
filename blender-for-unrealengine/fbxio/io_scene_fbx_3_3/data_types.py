@@ -1,11 +1,19 @@
-# SPDX-FileCopyrightText: 2006-2012 assimp team
-# SPDX-FileCopyrightText: 2013 Blender Foundation
-#
+# --------------------------------------------- 
+# This file is a modified copy of Blender io_scene_fbx from Blender for the addon Blender-For-UnrealEngine.
+# Do not modify directly this file!
+# If you want to make modifications, you need: 
+# 1. Do the changes in generator.py and edit_files.py
+# 2. Run the file run_generator.py
+# 
+# More info: https://github.com/xavier150/Blender-For-UnrealEngine-Addons
+# --------------------------------------------- 
+
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-BOOL = b'B'[0]
-CHAR = b'C'[0]
-INT8 = b'Z'[0]
+# Script copyright (C) 2006-2012, assimp team
+# Script copyright (C) 2013 Blender Foundation
+
+BOOL = b'C'[0]
 INT16 = b'Y'[0]
 INT32 = b'I'[0]
 INT64 = b'L'[0]

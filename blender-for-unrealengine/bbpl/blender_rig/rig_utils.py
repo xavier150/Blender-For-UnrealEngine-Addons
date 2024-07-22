@@ -139,10 +139,17 @@ if bpy.app.version >= (4, 0, 0):
     def add_bone_to_collection(arm, bone_name, collection_name) -> bpy.types.BoneCollection:
         #Add bone to collection and create if not exist
 
-        if collection_name in arm.data.collections:
-            col = arm.data.collections[collection_name]
+        if bpy.app.version >= (4, 1, 0):
+            # Need to use collections_all for include all collections childs.
+            if collection_name in arm.data.collections_all:
+                col = arm.data.collections_all[collection_name]
+            else:
+                col = arm.data.collections.new(name=collection_name)
         else:
-            col = arm.data.collections.new(name=collection_name)
+            if collection_name in arm.data.collections:
+                col = arm.data.collections[collection_name]
+            else:
+                col = arm.data.collections.new(name=collection_name)
 
 
         bone = arm.data.edit_bones[bone_name]
@@ -151,11 +158,19 @@ if bpy.app.version >= (4, 0, 0):
 
     def remove_bone_from_collection(arm, bone_name, collection_name) -> bpy.types.BoneCollection:
         #Remove bone from collection.
-        if collection_name in arm.data.collections:
-            col = arm.data.collections[collection_name]
-            bone = arm.data.edit_bones[bone_name]
-            col.unassign(bone)
-            return col
+        if bpy.app.version >= (4, 1, 0):
+            # Need to use collections_all for include all collections childs.
+            if collection_name in arm.data.collections_all:
+                col = arm.data.collections_all[collection_name]
+                bone = arm.data.edit_bones[bone_name]
+                col.unassign(bone)
+                return col
+        else:
+            if collection_name in arm.data.collections:
+                col = arm.data.collections[collection_name]
+                bone = arm.data.edit_bones[bone_name]
+                col.unassign(bone)
+                return col
 
 def change_current_layer(layer, source):
     """
@@ -492,7 +507,11 @@ def duplicate_bone(arm, bone_name, new_name=None):
     new_bone.inherit_scale = edit_bone.inherit_scale
 
     new_bone.parent = edit_bone.parent
-    if bpy.app.version >= (4, 0, 0):
+    if bpy.app.version >= (4, 1, 0):
+        for bone_col in edit_bone.collections:
+            col = arm.data.collections_all[bone_col.name]
+            col.assign(new_bone)
+    elif bpy.app.version >= (4, 0, 0):
         for bone_col in edit_bone.collections:
             col = arm.data.collections[bone_col.name]
             col.assign(new_bone)

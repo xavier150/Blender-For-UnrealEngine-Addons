@@ -24,8 +24,11 @@
 
 import bpy
 import importlib
+from . import utils
 from . import types
 
+if "utils" in locals():
+    importlib.reload(utils)
 if "types" in locals():
     importlib.reload(types)
 

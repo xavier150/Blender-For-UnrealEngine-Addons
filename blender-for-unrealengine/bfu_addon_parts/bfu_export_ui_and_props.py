@@ -9,6 +9,9 @@ from .. import bfu_cached_asset_list
 from .. import bfu_ui
 from .. import bbpl
 from .. import bps
+from .. import bfu_collision
+from .. import bfu_socket
+from .. import bfu_assets_manager
 
 
 
@@ -16,7 +19,7 @@ class BFU_PT_Export(bpy.types.Panel):
     # Is Export panel
 
     bl_idname = "BFU_PT_Export"
-    bl_label = "Export"
+    bl_label = "BFU Export"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "Unreal Engine"
@@ -40,11 +43,19 @@ class BFU_PT_Export(bpy.types.Panel):
         maxlen=32,
         default="SK_")
 
-    bpy.types.Scene.bfu_alembic_prefix_export_name = bpy.props.StringProperty(
+    bpy.types.Scene.bfu_alembic_animation_prefix_export_name = bpy.props.StringProperty(
         name="Alembic Prefix ",
         description="Prefix of Alembic (SkeletalMesh in unreal)",
         maxlen=32,
         default="SKM_")
+    
+    bpy.types.Scene.bfu_groom_simulation_prefix_export_name = bpy.props.StringProperty(
+        name="Groom Prefix ",
+        description="Prefix of Groom Simulation",
+        maxlen=32,
+        default="GS_")
+    
+    
 
     bpy.types.Scene.bfu_anim_prefix_export_name = bpy.props.StringProperty(
         name="AnimationSequence Prefix",
@@ -81,45 +92,52 @@ class BFU_PT_Export(bpy.types.Panel):
 
     # File path
     bpy.types.Scene.bfu_export_static_file_path = bpy.props.StringProperty(
-        name="StaticMesh export file path",
+        name="StaticMesh Export Path",
         description="Choose a directory to export StaticMesh(s)",
         maxlen=512,
-        default=os.path.join("//", "ExportedFbx", "StaticMesh"),
+        default="//" + os.path.join("ExportedFbx", "StaticMesh"),
         subtype='DIR_PATH')
 
     bpy.types.Scene.bfu_export_skeletal_file_path = bpy.props.StringProperty(
-        name="SkeletalMesh export file path",
+        name="SkeletalMesh Export Path",
         description="Choose a directory to export SkeletalMesh(s)",
         maxlen=512,
-        default=os.path.join("//", "ExportedFbx", "SkeletalMesh"),
+        default="//" + os.path.join("ExportedFbx", "SkeletalMesh"),
         subtype='DIR_PATH')
 
     bpy.types.Scene.bfu_export_alembic_file_path = bpy.props.StringProperty(
-        name="Alembic export file path",
-        description="Choose a directory to export Alembic(s)",
+        name="Alembic Export Path",
+        description="Choose a directory to export Alembic animation(s)",
         maxlen=512,
-        default=os.path.join("//", "ExportedFbx", "Alembic"),
+        default="//" + os.path.join("ExportedFbx", "Alembic"),
+        subtype='DIR_PATH')
+    
+    bpy.types.Scene.bfu_export_groom_file_path = bpy.props.StringProperty(
+        name="Groom Export Path",
+        description="Choose a directory to export Groom simulation(s)",
+        maxlen=512,
+        default="//" + os.path.join("ExportedFbx", "Groom"),
         subtype='DIR_PATH')
 
     bpy.types.Scene.bfu_export_camera_file_path = bpy.props.StringProperty(
-        name="Camera export file path",
+        name="Camera Export Path",
         description="Choose a directory to export Camera(s)",
         maxlen=512,
-        default=os.path.join("//", "ExportedFbx", "Sequencer"),
+        default="//" + os.path.join("ExportedFbx", "Sequencer"),
         subtype='DIR_PATH')
     
     bpy.types.Scene.bfu_export_spline_file_path = bpy.props.StringProperty(
-        name="Spline export file path",
+        name="Spline Export Path",
         description="Choose a directory to export Spline(s)",
         maxlen=512,
-        default=os.path.join("//", "ExportedFbx", "Spline"),
+        default="//" + os.path.join("ExportedFbx", "Spline"),
         subtype='DIR_PATH')
 
     bpy.types.Scene.bfu_export_other_file_path = bpy.props.StringProperty(
-        name="Other export file path",
+        name="Other Export Path",
         description="Choose a directory to export text file and other",
         maxlen=512,
-        default=os.path.join("//", "ExportedFbx"),
+        default="//" + os.path.join("ExportedFbx"),
         subtype='DIR_PATH')
 
     # File name
@@ -178,7 +196,8 @@ class BFU_PT_Export(bpy.types.Panel):
                             'scene.bfu_static_mesh_prefix_export_name',
                             'scene.bfu_skeletal_mesh_prefix_export_name',
                             'scene.bfu_skeleton_prefix_export_name',
-                            'scene.bfu_alembic_prefix_export_name',
+                            'scene.bfu_alembic_animation_prefix_export_name',
+                            'scene.bfu_groom_simulation_prefix_export_name',
                             'scene.bfu_anim_prefix_export_name',
                             'scene.bfu_pose_prefix_export_name',
                             'scene.bfu_camera_prefix_export_name',
@@ -187,6 +206,7 @@ class BFU_PT_Export(bpy.types.Panel):
                             'scene.bfu_export_static_file_path',
                             'scene.bfu_export_skeletal_file_path',
                             'scene.bfu_export_alembic_file_path',
+                            'scene.bfu_export_groom_file_path',
                             'scene.bfu_export_camera_file_path',
                             'scene.bfu_export_spline_file_path',
                             'scene.bfu_export_other_file_path',
@@ -260,23 +280,33 @@ class BFU_PT_Export(bpy.types.Panel):
             return {'FINISHED'}
 
     class BFU_OT_CheckPotentialErrorPopup(bpy.types.Operator):
-        bl_label = "Check potential errors"
+        bl_label = "Check Potential Errors"
         bl_idname = "object.checkpotentialerror"
-        bl_description = "Check potential errors"
+        bl_description = "Check potential errors."
         text = "none"
 
         def execute(self, context):
-            correctedProperty = bfu_check_potential_error.CorrectBadProperty()
-            bfu_check_potential_error.UpdateNameHierarchy()
+            fix_info = bfu_check_potential_error.process_general_fix()
+            invoke_info = ""
+            for x, fix_info_key in enumerate(fix_info):
+                fix_info_data = fix_info[fix_info_key]
+                invoke_info += fix_info_key + ": " + str(fix_info_data) 
+                if x < len(fix_info)-1:
+                    invoke_info += "\n"
+  
+            
             bfu_check_potential_error.UpdateUnrealPotentialError()
-            bpy.ops.object.openpotentialerror("INVOKE_DEFAULT", correctedProperty=correctedProperty)
+            bpy.ops.object.openpotentialerror(
+                "INVOKE_DEFAULT", 
+                invoke_info=invoke_info,
+                )
             return {'FINISHED'}
 
     class BFU_OT_OpenPotentialErrorPopup(bpy.types.Operator):
         bl_label = "Open potential errors"
         bl_idname = "object.openpotentialerror"
         bl_description = "Open potential errors"
-        correctedProperty: bpy.props.IntProperty(default=0)
+        invoke_info: bpy.props.StringProperty(default="...")
 
         class BFU_OT_FixitTarget(bpy.types.Operator):
             bl_label = "Fix it !"
@@ -352,16 +382,12 @@ class BFU_PT_Export(bpy.types.Panel):
             else:
                 popup_title = "No potential error to correct!"
 
-            if self.correctedProperty > 0:
-                potentialErrorInfo = (
-                    str(self.correctedProperty) +
-                    "- properties corrected.")
-            else:
-                potentialErrorInfo = "- No properties to correct."
 
             layout.label(text=popup_title)
-            layout.label(text="- Hierarchy names updated")
-            layout.label(text=potentialErrorInfo)
+            invoke_info_lines = self.invoke_info.split("\n")
+            for invoke_info_line in invoke_info_lines:
+                layout.label(text="- "+invoke_info_line)
+            
             layout.separator()
             row = layout.row()
             col = row.column()
@@ -433,13 +459,14 @@ class BFU_PT_Export(bpy.types.Panel):
             def isReadyForExport():
 
                 def GetIfOneTypeCheck():
-                    if (scene.static_export
-                            or scene.static_collection_export
-                            or scene.skeletal_export
-                            or scene.anin_export
-                            or scene.alembic_export
-                            or scene.camera_export
-                            or scene.spline_export):
+                    all_assets = bfu_assets_manager.bfu_asset_manager_utils.get_all_asset_class()
+                    for assets in all_assets:
+                        assets: bfu_assets_manager.bfu_asset_manager_type.BFU_BaseAssetClass
+                        if assets.can_export_asset():
+                            return True
+
+                    if (scene.static_collection_export
+                            or scene.anin_export):
                         return True
                     else:
                         return False
@@ -489,7 +516,7 @@ class BFU_PT_Export(bpy.types.Panel):
 
             scene.UnrealExportedAssetsList.clear()
             counter = bps.utils.CounterTimer()
-            bfu_check_potential_error.UpdateNameHierarchy()
+            bfu_check_potential_error.process_general_fix()
             bfu_export.bfu_export_asset.process_export(self)
             bfu_write_text.WriteAllTextFiles()
 
@@ -566,7 +593,13 @@ class BFU_PT_Export(bpy.types.Panel):
         )
 
     bpy.types.Scene.alembic_export = bpy.props.BoolProperty(
-        name="Alembic animation(s)",
+        name="Alembic Animation(s)",
+        description="Check mark to export Alembic animation(s)",
+        default=True
+        )
+    
+    bpy.types.Scene.groom_simulation_export = bpy.props.BoolProperty(
+        name="Groom Simulation(s)",
         description="Check mark to export Alembic animation(s)",
         default=True
         )
@@ -650,7 +683,8 @@ class BFU_PT_Export(bpy.types.Panel):
             propsPrefix.prop(scene, 'bfu_static_mesh_prefix_export_name', icon='OBJECT_DATA')
             propsPrefix.prop(scene, 'bfu_skeletal_mesh_prefix_export_name', icon='OBJECT_DATA')
             propsPrefix.prop(scene, 'bfu_skeleton_prefix_export_name', icon='OBJECT_DATA')
-            propsPrefix.prop(scene, 'bfu_alembic_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'bfu_alembic_animation_prefix_export_name', icon='OBJECT_DATA')
+            propsPrefix.prop(scene, 'bfu_groom_simulation_prefix_export_name', icon='OBJECT_DATA')
             propsPrefix.prop(scene, 'bfu_anim_prefix_export_name', icon='OBJECT_DATA')
             propsPrefix.prop(scene, 'bfu_pose_prefix_export_name', icon='OBJECT_DATA')
             propsPrefix.prop(scene, 'bfu_camera_prefix_export_name', icon='OBJECT_DATA')
@@ -679,6 +713,7 @@ class BFU_PT_Export(bpy.types.Panel):
             filePath.prop(scene, 'bfu_export_static_file_path')
             filePath.prop(scene, 'bfu_export_skeletal_file_path')
             filePath.prop(scene, 'bfu_export_alembic_file_path')
+            filePath.prop(scene, 'bfu_export_groom_file_path')
             filePath.prop(scene, 'bfu_export_camera_file_path')
             filePath.prop(scene, 'bfu_export_spline_file_path')
             filePath.prop(scene, 'bfu_export_other_file_path')
@@ -709,6 +744,7 @@ class BFU_PT_Export(bpy.types.Panel):
             AssetsCol.prop(scene, 'skeletal_export')
             AssetsCol.prop(scene, 'anin_export')
             AssetsCol.prop(scene, 'alembic_export')
+            AssetsCol.prop(scene, 'groom_simulation_export')
             AssetsCol.prop(scene, 'camera_export')
             AssetsCol.prop(scene, 'spline_export')
             layout.separator()

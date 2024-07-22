@@ -26,6 +26,8 @@ from . import bfu_camera_export_utils
 from . import bfu_camera_write_text
 from . import bfu_camera_write_paste_commands
 from . import bfu_camera_ui_and_props
+from . import bfu_camera_type
+from . import bfu_camera_config
 
 if "bfu_camera_utils" in locals():
     importlib.reload(bfu_camera_utils)
@@ -41,6 +43,11 @@ if "bfu_camera_write_paste_commands" in locals():
     importlib.reload(bfu_camera_write_paste_commands)
 if "bfu_camera_ui_and_props" in locals():
     importlib.reload(bfu_camera_ui_and_props)
+if "bfu_camera_type" in locals():
+    importlib.reload(bfu_camera_type)
+if "bfu_camera_config" in locals():
+    importlib.reload(bfu_camera_config)
+
 
 classes = (
 )
@@ -51,9 +58,11 @@ def register():
         bpy.utils.register_class(cls)
 
     bfu_camera_ui_and_props.register()
+    bfu_camera_type.register()
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
+    bfu_camera_type.unregister()
     bfu_camera_ui_and_props.unregister()

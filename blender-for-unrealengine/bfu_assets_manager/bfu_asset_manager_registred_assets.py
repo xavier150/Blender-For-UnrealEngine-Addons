@@ -16,29 +16,10 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
+registred_asset_class = []
 
-import bpy
-from .. import bfu_basics
-from .. import bfu_utils
-from .. import bfu_ui
+def register_asset_class(asset):
+    registred_asset_class.append(asset)
 
-
-
-
-# -------------------------------------------------------------------
-#   Register & Unregister
-# -------------------------------------------------------------------
-
-classes = (
-
-)
-
-
-def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
-
-
-def unregister():
-    for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
+def get_registred_asset_class():
+    return registred_asset_class

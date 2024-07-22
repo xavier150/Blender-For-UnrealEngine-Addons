@@ -18,33 +18,24 @@
 
 import os
 import bpy
-from bpy_extras.io_utils import axis_conversion
+from . import bfu_fbx_export
 from . import bfu_export_utils
 from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_naming
 from .. import bfu_export_logs
-from ..fbxio import export_fbx_bin
+from .. import bfu_skeletal_mesh
+from .. import bfu_assets_manager
 
-if "bpy" in locals():
-    import importlib
-    if "bfu_export_utils" in locals():
-        importlib.reload(bfu_export_utils)
-    if "bbpl" in locals():
-        importlib.reload(bbpl)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-    if "export_fbx_bin" in locals():
-        importlib.reload(export_fbx_bin)
+
 
 
 def ProcessNLAAnimExport(op, obj):
     scene = bpy.context.scene
-    addon_prefs = bfu_basics.GetAddonPrefs()
-    dirpath = os.path.join(bfu_utils.GetObjExportDir(obj), scene.bfu_anim_subfolder_name)
+
+    asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
+    dirpath = asset_class.get_obj_export_directory_path(obj)
 
     scene.frame_end += 1  # Why ?
 
@@ -75,7 +66,7 @@ def ExportSingleFbxNLAAnim(
         op,
         dirpath,
         filename,
-        obj
+        armature
         ):
 
     '''
@@ -87,13 +78,15 @@ def ExportSingleFbxNLAAnim(
 
     scene = bpy.context.scene
     addon_prefs = bfu_basics.GetAddonPrefs()
-    export_as_proxy = bfu_utils.GetExportAsProxy(obj)
-    export_proxy_child = bfu_utils.GetExportProxyChild(obj)
+    export_as_proxy = bfu_utils.GetExportAsProxy(armature)
+    export_proxy_child = bfu_utils.GetExportProxyChild(armature)
 
     bbpl.utils.safe_mode_set('OBJECT')
 
-    bfu_utils.SelectParentAndDesiredChilds(obj)
-    asset_name = bfu_export_utils.PrepareExportName(obj, True)
+    bfu_utils.SelectParentAndDesiredChilds(armature)
+    bfu_skeletal_mesh.bfu_skeletal_mesh_utils.deselect_socket(armature) 
+
+    asset_name = bfu_export_utils.PrepareExportName(armature, True)
     if export_as_proxy is False:
         duplicate_data = bfu_export_utils.DuplicateSelectForExport()
         bfu_export_utils.SetDuplicateNameForExport(duplicate_data)
@@ -102,14 +95,14 @@ def ExportSingleFbxNLAAnim(
         bfu_export_utils.ConvertSelectedCurveToMesh()
         bfu_export_utils.MakeSelectVisualReal()
 
-    BaseTransform = obj.matrix_world.copy()
+    saved_base_transforms = bfu_export_utils.SaveTransformObjects(armature)
     active = bpy.context.view_layer.objects.active
     asset_name.target_object = active
 
     skeleton_export_procedure = active.bfu_skeleton_export_procedure
 
     animation_data = bbpl.anim_utils.AnimationManagment()
-    animation_data.save_animation_data(obj)
+    animation_data.save_animation_data(armature)
     animation_data.set_animation_data(active, True)
 
     if export_as_proxy:
@@ -139,6 +132,7 @@ def ExportSingleFbxNLAAnim(
         bbpl.anim_utils.reset_armature_pose(active)
         my_rig_consraints_scale = bfu_utils.RigConsraintScale(active, rrf)
         my_rig_consraints_scale.RescaleRigConsraintForUnrealEngine()
+        bbpl.anim_utils.copy_drivers(armature, active)
 
     scene.frame_start = bfu_utils.GetDesiredNLAStartEndTime(active)[0]
     scene.frame_end = bfu_utils.GetDesiredNLAStartEndTime(active)[1]
@@ -146,19 +140,19 @@ def ExportSingleFbxNLAAnim(
     asset_name.SetExportName()
 
     if (skeleton_export_procedure == "ue-standard"):
-        export_fbx_bin.save(
+        bfu_fbx_export.export_scene_fbx_with_custom_fbx_io(
             operator=op,
             context=bpy.context,
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
             animation_only=active.bfu_export_animation_without_mesh,
-            global_matrix=axis_conversion(to_forward=active.bfu_export_axis_forward, to_up=active.bfu_export_axis_up).to_4x4(),
+            global_matrix=bfu_export_utils.get_skeleton_axis_conversion(active),
             apply_unit_scale=True,
             global_scale=bfu_utils.GetObjExportScale(active),
             apply_scale_options='FBX_SCALE_NONE',
             object_types={'ARMATURE', 'EMPTY', 'MESH'},
-            use_custom_props=obj.bfu_export_with_custom_props,
+            use_custom_props=armature.bfu_export_with_custom_props,
             add_leaf_bones=False,
             use_armature_deform_only=active.bfu_export_deform_only,
             bake_anim=True,
@@ -171,18 +165,19 @@ def ExportSingleFbxNLAAnim(
             embed_textures=False,
             batch_mode='OFF',
             use_batch_own_dir=True,
-            use_metadata=obj.bfu_export_with_meta_data,
-            primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
-            secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
+            use_metadata=armature.bfu_export_with_meta_data,
+            primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(armature),
+            secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(armature),
             mirror_symmetry_right_side_bones=active.bfu_mirror_symmetry_right_side_bones,
             use_ue_mannequin_bone_alignment=active.bfu_use_ue_mannequin_bone_alignment,
             disable_free_scale_animation=active.bfu_disable_free_scale_animation,
-            axis_forward=bfu_export_utils.get_export_axis_forward(obj),
-            axis_up=bfu_export_utils.get_export_axis_up(obj),
+            use_space_transform=bfu_export_utils.get_skeleton_export_use_space_transform(armature),
+            axis_forward=bfu_export_utils.get_skeleton_export_axis_forward(armature),
+            axis_up=bfu_export_utils.get_skeleton_export_axis_up(armature),
             bake_space_transform=False
             )
     elif (skeleton_export_procedure == "blender-standard"):
-        bpy.ops.export_scene.fbx(
+        bfu_fbx_export.export_scene_fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
@@ -190,7 +185,7 @@ def ExportSingleFbxNLAAnim(
             global_scale=bfu_utils.GetObjExportScale(active),
             apply_scale_options='FBX_SCALE_NONE',
             object_types={'ARMATURE', 'EMPTY', 'MESH'},
-            use_custom_props=obj.bfu_export_with_custom_props,
+            use_custom_props=armature.bfu_export_with_custom_props,
             add_leaf_bones=False,
             use_armature_deform_only=active.bfu_export_deform_only,
             bake_anim=True,
@@ -203,15 +198,16 @@ def ExportSingleFbxNLAAnim(
             embed_textures=False,
             batch_mode='OFF',
             use_batch_own_dir=True,
-            use_metadata=obj.bfu_export_with_meta_data,
-            primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
-            secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
-            axis_forward=bfu_export_utils.get_export_axis_forward(obj),
-            axis_up=bfu_export_utils.get_export_axis_up(obj),
+            use_metadata=armature.bfu_export_with_meta_data,
+            primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(armature),
+            secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(armature),
+            use_space_transform=bfu_export_utils.get_skeleton_export_use_space_transform(armature),
+            axis_forward=bfu_export_utils.get_skeleton_export_axis_forward(armature),
+            axis_up=bfu_export_utils.get_skeleton_export_axis_up(armature),
             bake_space_transform=False
             )
     elif (skeleton_export_procedure == "auto-rig-pro"):
-        bpy.ops.export_scene.fbx(
+        bfu_fbx_export.export_scene_fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             # export_rig_name=GetDesiredExportArmatureName(active),
             bake_anim=True,
@@ -226,10 +222,7 @@ def ExportSingleFbxNLAAnim(
 
     asset_name.ResetNames()
 
-    bbpl.anim_utils.reset_armature_pose(obj)
-
-    # Reset Transform
-    obj.matrix_world = BaseTransform
+    bbpl.anim_utils.reset_armature_pose(armature)
 
     # This will rescale the rig and unit scale to get a root bone egal to 1
     if ShouldRescaleRig:
@@ -239,6 +232,9 @@ def ExportSingleFbxNLAAnim(
         my_action_curve_scale.ResetScaleAfterExport()
         my_shape_keys_curve_scale.ResetScaleAfterExport()
 
+    # Reset Transform
+    saved_base_transforms.reset_object_transforms()
+
     if export_as_proxy is False:
         bfu_utils.CleanDeleteObjects(bpy.context.selected_objects)
         for data in duplicate_data.data_to_remove:
@@ -246,5 +242,5 @@ def ExportSingleFbxNLAAnim(
 
         bfu_export_utils.ResetDuplicateNameAfterExport(duplicate_data)
 
-    for obj in scene.objects:
-        bfu_utils.ClearAllBFUTempVars(obj)
+    for armature in scene.objects:
+        bfu_utils.ClearAllBFUTempVars(armature)

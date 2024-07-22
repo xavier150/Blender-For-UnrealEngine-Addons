@@ -1,0 +1,34 @@
+schema_version = "1.0.0"
+
+id = "blender_for_unrealengine"
+version = "1.0.0"
+name = "Blender for UnrealEngine"
+tagline = "This add-ons allows to batch export and import in Unreal Engine"
+maintainer = "Loux Xavier (BleuRaven)"
+type = "add-on"
+
+# permissions = ["files", "network"]
+
+website = "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/"
+
+tags = [
+    "Import-Export"
+]
+
+blender_version_min = "2.80.0"
+
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
+
+copyright = [
+  "Copyright 2024, Xavier Loux. All rights reserved.",
+]
+
+platforms = [
+    "windows-amd64", 
+    "macos-arm64", 
+    "linux-x86_64", 
+    "windows-arm64", 
+    "macos-x86_64"
+]

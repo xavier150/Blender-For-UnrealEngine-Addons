@@ -284,15 +284,15 @@ It is now possible to force the duration of an animation according to the scene 
 == Rev 0.2.7.3 ==
 
 - Fixed: Export fail if an object library have the same name of a real object.
-- Fixed: With Unit Scale not at 0.01 if you export an skeletalMesh and an animation in same time the animation can be wrong.
-- Fixed: With Unit Scale not at 0.01 some consraints can make the animation wrong.
-- Fixed: With Unit Scale not at 0.01 ShapeKeys are 100 times too big.
+- Fixed: With Unit Scale not at 0.01, if you export an skeletalMesh and an animation in same time the animation can be wrong.
+- Fixed: With Unit Scale not at 0.01, some consraints can make the animation wrong.
+- Fixed: With Unit Scale not at 0.01, ShapeKeys are 100 times too big.
 - Fixed: Bake Armature animation bake only the current scene start to end frames.
 
 == Rev 0.2.7.4 ==
 
 - Fixed: Animation created with mixamo are not detected in auto.
-- Fixed: With Unit Scale not at 0.01 if and the armature scale is not egal to 1 the animation is wrong.
+- Fixed: With Unit Scale not at 0.01, if and the armature scale is not egal to 1 the animation is wrong.
 - Fixed: Animation bake don't work on all constraints.
 - Change: New potential error: Check if the ARMATURE use the same value on all scale axes.
 
@@ -337,7 +337,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Create PhysicsAsset option in skeletalMesh alway create PhysicsAsset.
 - Fixed: Useless data created by the export are not removed
 - Fixed: Potential error (multiple roots bones) Doesn't count bones correctly
-- Fixed: With Unit Scale not at 0.01 F-Curve modifier are 100 times too small.
+- Fixed: With Unit Scale not at 0.01, F-Curve modifier are 100 times too small.
 - Fixed: Focal length in additional tracks are not updated
 - Fixed: Sequencer import script error with 4.26, ConfigParser import changed to configparser.
 - Fixed: Assets import script error with 4.26, ConfigParser import changed to configparser.
@@ -372,10 +372,10 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Button "Show Asset(s)" make script fail when the selected actor is not a SkeletalMesh.
 - Fixed: Animation file with space can do error durring import
 - Fixed: Vertex color updated only in import option when reimport.
-- Fixed: With Unit Scale not at 0.01 SkeletalMesh have a wrong scale.
+- Fixed: With Unit Scale not at 0.01, SkeletalMesh have a wrong scale.
 - Fixed: Import NLA animation with script don't work.
-- Fixed: With Unit Scale not at 0.01 NLA animation will not export.
-- Fixed: With Unit Scale not at 0.01 Blender 2.9.1 can crash with SkeletalMesh.
+- Fixed: With Unit Scale not at 0.01, NLA animation will not export.
+- Fixed: With Unit Scale not at 0.01, Blender 2.9.1 can crash with SkeletalMesh.
 - Fixed: Apply Wrong Bool Modifier do script error.
 - Fixed: Mesh with disabled Modifier do script error.
 - Fixed: Additional location in advanced properties don't work for the cameras.
@@ -413,8 +413,8 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: GetObjExportDir remove ":" in path.
 - Fixed: GetExportFullpath remove ":" in path.
 - Fixed: Remove the active object if an exported collection contain a single object.
-- Fixed: With Unit Scale not at 0.01 and Proxy use animation export will fail.
-- Fixed: With Unit Scale not at 0.01 and Proxy ShapeKeysCurve scale is wrong.
+- Fixed: With Unit Scale not at 0.01, and Proxy use animation export will fail.
+- Fixed: With Unit Scale not at 0.01, and Proxy ShapeKeysCurve scale is wrong.
 - Fixed: Export camera can do axis flipping.
 - Fixed: NLA export fail when use inter frame.
 - Fixed: NLA export ignore animated influence on actions.
@@ -483,3 +483,31 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Script fail in Blender 4.0 when switch to global view.
 - Fixed: UI script fail in Blender 2.9.
 - Fixed: Camera scale impact the focus distance.
+
+== Rev 0.4.3 ==
+
+- New: Update for Blender 4.1.
+- New: Orthographic camera support for copy/paste cameras.
+- New: Disable render simplify during export to not lose subdivisions and mesh optimizations.
+- New: Potential error and auto-fix for frame rate denominator and numerator.
+- New: Option to set use_space_transform at export.
+- New: Button to fix extreme UV scales in Tools > UV Map.
+- New: New materials option for importing FBX files into Unreal.
+- New: New options to create subfolders with the object name for Alembic and SkeletalMesh (Used to avoid asset conflicts during export).
+- New: Support for color types in Vertex Colors export.
+- New: FBX Addon generator (for custom edits on the FBX Addon).
+- New: Better FBX management for older versions.
+- Change: "Convert Attribute to UV" is False by default.
+- Change: Updated panel names to avoid confusion with other add-on panels in the Unreal Engine tab.
+- Fixed: Import sequencer script fails for Unreal 5.0 and older versions (SequencerBindingProxy renamed to MovieSceneBindingProxy).
+- Fixed: Import sequencer script fails if the camera is not a cinematic camera.
+- Fixed: Import sequencer script fails if custom camera class is not found.
+- Fixed: Imported camera sequencer does not have the same name in the level scene.
+- Fixed: Armature child objects with inverse parent lost their transform positions if rescaled during export.
+- Fixed: With Unit Scale not at 0.01, shape keys that are not location context are rescaled.
+- Fixed: When rescaling the rig at export, all the drivers that were set were gone.
+- Fixed: Camera scale does not use display size in camera data.
+- Fixed: Check Potential Errors does not fix Hierarchy names with Sockets and Collisions.
+- Fixed: Default export file paths are wrong.
+- Fixed: Addon export checks "Convert Attribute to UV" and its "Attribute name" on the wrong object.
+- Fixed: custom_export_name option does not work.

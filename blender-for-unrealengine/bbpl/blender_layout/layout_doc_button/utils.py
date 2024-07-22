@@ -25,10 +25,8 @@
 import bpy
 from ... import __internal__
 
-def get_class_name():
-    package_name = __internal__.utils.get_package_name()
-    return f"BBPL_OT_{package_name}_OpenTargetWebPage"
+def get_open_target_web_page_idname():
+    return __internal__.utils.get_object_operator_idname("open_target_web_page")
 
-def get_operator_name():
-    package_name = __internal__.utils.get_package_name()
-    return f"object.bbpl_{package_name}_open_target_web_page"
+def get_open_target_web_page_class_name():
+    return __internal__.utils.get_operator_class_name("OpenTargetWebPage")

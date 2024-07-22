@@ -26,7 +26,6 @@ import bpy
 import os
 import webbrowser
 from . import utils
-from ... import __internal__
 
 
 def create_operator_class():
@@ -34,7 +33,7 @@ def create_operator_class():
     
     class CustomOpenTargetWebPage_Operator(bpy.types.Operator):
         bl_label = "Documentation"
-        bl_idname = utils.get_operator_name()
+        bl_idname = utils.get_open_target_web_page_idname()
         bl_description = "Click for open URL."
         url: bpy.props.StringProperty(default="https://github.com/xavier150/BleuRavenBlenderPythonLibrary")
 
@@ -47,25 +46,31 @@ def create_operator_class():
                 self.report({'WARNING'}, "Invalid URL. Only HTTP and HTTPS URLs are allowed.")
                 return {'CANCELLED'}
 
-    CustomOpenTargetWebPage_Operator.__name__ = utils.get_class_name()
+    CustomOpenTargetWebPage_Operator.__name__ = utils.get_open_target_web_page_class_name()
     return CustomOpenTargetWebPage_Operator
 
 
-
-
+BBPL_OT_OpenTargetWebPage = create_operator_class()
 
 classes = (
 )
+
+custom_classes = [
+    BBPL_OT_OpenTargetWebPage
+]
+
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    BBPL_OT_OpenTargetWebPage = create_operator_class()
-    bpy.utils.register_class(BBPL_OT_OpenTargetWebPage)
-
+    for cls in custom_classes:
+        bpy.utils.register_class(cls)
 
 
 def unregister():
     for cls in reversed(classes):
+        bpy.utils.unregister_class(cls)
+
+    for cls in reversed(custom_classes):
         bpy.utils.unregister_class(cls)

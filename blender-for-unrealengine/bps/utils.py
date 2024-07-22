@@ -67,3 +67,17 @@ class CounterTimer():
             hours, remainder = divmod(elapsed_time, 3600)
             minutes, seconds = divmod(remainder, 60)
             return f"{int(hours)} heures, {int(minutes)} minutes et {seconds:.2f} secondes"
+        
+def format_property_name(name):
+    """
+    Formats a property name from snake_case to Title Case and replaces underscores with spaces.
+    
+    Parameters:
+    name (str): The property name in snake_case.
+    
+    Returns:
+    str: The formatted property name in Title Case with spaces.
+    """
+    # Split the name at underscores, capitalize each part, and join them with spaces
+    formatted_name = ' '.join(word.capitalize() for word in name.split('_'))
+    return formatted_name

@@ -221,6 +221,63 @@ class ProxyCopy_FCurve():
     def paste_data_on(self, fcurve: bpy.types.FCurve):
         pass
 
+
+def copy_attributes(a, b):
+    keys = dir(a)
+    for key in keys:
+        if not key.startswith("_") \
+        and not key.startswith("error_") \
+        and key != "group" \
+        and key != "strips" \
+        and key != "is_valid" \
+        and key != "rna_type" \
+        and key != "bl_rna":
+            try:
+                setattr(b, key, getattr(a, key))
+            except AttributeError:
+                pass
+
+
+def copy_drivers(src, dst):
+    # Copy drivers
+    if src.animation_data:
+        for d1 in src.animation_data.drivers:
+            d2 = dst.driver_add(d1.data_path)
+            copy_attributes(d1, d2)
+            copy_attributes(d1.driver, d2.driver)
+
+            # Remove default modifiers, variables, etc.
+            for m in d2.modifiers:
+                d2.modifiers.remove(m)
+            for v in d2.driver.variables:
+                d2.driver.variables.remove(v)
+
+            # Copy modifiers
+            for m1 in d1.modifiers:
+                m2 = d2.modifiers.new(type=m1.type)
+                copy_attributes(m1, m2)
+
+            # Copy variables
+            for v1 in d1.driver.variables:
+                v2 = d2.driver.variables.new()
+                copy_attributes(v1, v2)
+                for i in range(len(v1.targets)):
+                    copy_attributes(v1.targets[i], v2.targets[i])
+                    # Switch self reference targets to new self
+                    if v2.targets[i].id == src:
+                        v2.targets[i].id = dst
+
+            # Copy key frames
+            try:
+                for i in range(len(d1.keyframe_points)):
+                    d2.keyframe_points.add()
+                    k1 = d1.keyframe_points[i]
+                    k2 = d2.keyframe_points[i]
+                    copy_attributes(k1, k2)
+            except TypeError:
+                pass
+
+
 class AnimationManagment():
     """
     Helper class for managing animation data in Blender.

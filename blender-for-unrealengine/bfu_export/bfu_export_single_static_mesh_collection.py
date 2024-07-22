@@ -18,30 +18,16 @@
 
 
 import bpy
-from bpy_extras.io_utils import axis_conversion
+from . import bfu_fbx_export
 from . import bfu_export_utils
 from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_naming
+from .. import bfu_vertex_color
 from .. import bfu_check_potential_error
 from .. import bfu_export_logs
-from ..fbxio import export_fbx_bin
 
-if "bpy" in locals():
-    import importlib
-    if "bfu_export_utils" in locals():
-        importlib.reload(bfu_export_utils)
-    if "bbpl" in locals():
-        importlib.reload(bbpl)
-    if "bfu_basics" in locals():
-        importlib.reload(bfu_basics)
-    if "bfu_utils" in locals():
-        importlib.reload(bfu_utils)
-    if "bfu_check_potential_error" in locals():
-        importlib.reload(bfu_check_potential_error)
-    if "export_fbx_bin" in locals():
-        importlib.reload(export_fbx_bin)
 
 def ProcessCollectionExport(op, col):
 
@@ -107,21 +93,21 @@ def ExportSingleStaticMeshCollection(
     bfu_export_utils.MakeSelectVisualReal()
 
     bfu_utils.ApplyNeededModifierToSelect()
-    for obj in bpy.context.selected_objects:
-        bfu_export_utils.SetVertexColorForUnrealExport(obj)
-        bfu_export_utils.ConvertGeometryNodeAttributeToUV(obj)
-        bfu_export_utils.CorrectExtremUVAtExport(obj)
-        bfu_export_utils.SetSocketsExportTransform(obj)
-        bfu_export_utils.SetSocketsExportName(obj)
+    for selected_obj in bpy.context.selected_objects:
+        if selected_obj.bfu_convert_geometry_node_attribute_to_uv:
+            attrib_name = selected_obj.bfu_convert_geometry_node_attribute_to_uv_name
+            bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
+        bfu_vertex_color.bfu_vertex_color_utils.SetVertexColorForUnrealExport(selected_obj)
+        bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
+        bfu_export_utils.SetSocketsExportTransform(selected_obj)
+        bfu_export_utils.SetSocketsExportName(selected_obj)
 
-    bfu_check_potential_error.UpdateNameHierarchy(
-        bfu_utils.GetAllCollisionAndSocketsObj(bpy.context.selected_objects)
-        )
-    
     static_export_procedure = col.bfu_collection_export_procedure
 
+    save_use_simplify = bbpl.utils.SaveUserRenderSimplify()
+    scene.render.use_simplify = False
     if (static_export_procedure == "ue-standard"):
-        export_fbx_bin.save(
+        bfu_fbx_export.export_scene_fbx_with_custom_fbx_io(
             operator=op,
             context=bpy.context,
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
@@ -129,6 +115,7 @@ def ExportSingleStaticMeshCollection(
             use_selection=True,
             global_scale=1,
             object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
+            colors_type=bfu_vertex_color.bfu_vertex_color_utils.get_export_colors_type(obj),
             use_custom_props=obj.bfu_export_with_custom_props,
             mesh_smooth_type="FACE",
             add_leaf_bones=False,
@@ -137,32 +124,35 @@ def ExportSingleStaticMeshCollection(
             use_metadata=obj.bfu_export_with_meta_data,
             # primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
             # secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
+            # use_space_transform=bfu_export_utils.get_export_use_space_transform(obj),
             # axis_forward=bfu_export_utils.get_export_axis_forward(obj),
             # axis_up=bfu_export_utils.get_export_axis_up(obj),
             bake_space_transform=False
             )
+        
     elif (static_export_procedure == "blender-standard"):
-        bpy.ops.export_scene.fbx(
+        bfu_fbx_export.export_scene_fbx(
             filepath=bfu_export_utils.GetExportFullpath(dirpath, filename),
             check_existing=False,
             use_selection=True,
             global_scale=1,
             object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
-            use_custom_props=obj.bfu_export_with_custom_props,
+            #colors_type=bfu_vertex_color.bfu_vertex_color_utils.get_export_colors_type(obj), @TODO
+            #use_custom_props=obj.bfu_export_with_custom_props, @TODO
             mesh_smooth_type="FACE",
             add_leaf_bones=False,
             # use_armature_deform_only=active.bfu_export_deform_only,
             bake_anim=False,
-            use_metadata=obj.bfu_export_with_meta_data,
-            # primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(obj),
-            # secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(obj),
+            #use_metadata=obj.bfu_export_with_meta_data, @TODO
+            # use_space_transform=bfu_export_utils.get_export_use_space_transform(obj),
             # axis_forward=bfu_export_utils.get_export_axis_forward(obj),
             # axis_up=bfu_export_utils.get_export_axis_up(obj),
             bake_space_transform=False
             )
     
+    save_use_simplify.LoadUserRenderSimplify()
     for obj in bpy.context.selected_objects:
-        bfu_export_utils.ClearVertexColorForUnrealExport(obj)
+        bfu_vertex_color.bfu_vertex_color_utils.ClearVertexColorForUnrealExport(obj)
         bfu_export_utils.ResetSocketsExportName(obj)
         bfu_export_utils.ResetSocketsTransform(obj)
 

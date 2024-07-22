@@ -4,223 +4,62 @@ from .. import bfu_utils
 from .. import bfu_ui
 from .. import bfu_camera
 from .. import bfu_spline
+from .. import bfu_collision
+from .. import bfu_socket
+from .. import bbpl
 
 
 class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
-    # Tool panel with Collisions And Sockets
+    # Tool panel
 
     bl_idname = "BFU_PT_BlenderForUnrealTool"
-    bl_label = "Tool"
+    bl_label = "BFU Tool"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "Unreal Engine"
 
-    bpy.types.Object.bfu_use_socket_custom_Name = bpy.props.BoolProperty(
-        name="Socket custom name",
-        description='Use a custom name in Unreal Engine for this socket?',
-        default=False
-        )
-
-    bpy.types.Object.bfu_socket_custom_Name = bpy.props.StringProperty(
-        name="",
-        description='',
-        default="MySocket"
-        )
 
 
-    class BFU_OT_ConvertToStaticSocketButton(bpy.types.Operator):
-        bl_label = "Convert to StaticMesh socket"
-        bl_idname = "object.converttostaticsocket"
-        bl_description = (
-            "Convert selected Empty(s) to Unreal sockets" +
-            " ready for export (StaticMesh)")
 
-        def execute(self, context):
-            ConvertedObj = bfu_utils.Ue4SubObj_set("ST_Socket")
-            if len(ConvertedObj) > 0:
-                self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE Socket. (Static)")
-            else:
-                self.report({'WARNING'}, "Please select two objects. (Active mesh object is the owner of the socket)")
-            return {'FINISHED'}
 
-    class BFU_OT_ConvertToSkeletalSocketButton(bpy.types.Operator):
-        bl_label = "Convert to SkeletalMesh socket"
-        bl_idname = "object.converttoskeletalsocket"
-        bl_description = (
-            "Convert selected Empty(s)" +
-            " to Unreal sockets ready for export (SkeletalMesh)")
 
-        def execute(self, context):
-            ConvertedObj = bfu_utils.Ue4SubObj_set("SKM_Socket")
-            if len(ConvertedObj) > 0:
-                self.report({'INFO'}, str(len(ConvertedObj)) + " object(s) of the selection have be converted to UE Socket. (Skeletal)")
-            else:
-                self.report({'WARNING'}, "Please select two objects. (Active armature object is the owner of the socket)")
-            return {'FINISHED'}
 
-    class BFU_OT_CopySkeletalSocketButton(bpy.types.Operator):
-        bl_label = "Copy Skeletal Mesh socket for Unreal"
-        bl_idname = "object.copy_skeletalsocket_command"
-        bl_description = "Copy Skeletal Socket Script command"
-
-        def execute(self, context):
-            obj = context.object
-            if obj:
-                if obj.type == "ARMATURE":
-                    bfu_basics.setWindowsClipboard(bfu_utils.GetImportSkeletalMeshSocketScriptCommand(obj))
-                    self.report(
-                        {'INFO'},
-                        "Skeletal sockets copied. Paste in Unreal Engine Skeletal Mesh assets for import sockets. (Ctrl+V)")
-            return {'FINISHED'}
-
-    class BFU_OT_ComputAllLightMap(bpy.types.Operator):
-        bl_label = "Calculate all surface area"
-        bl_idname = "object.computalllightmap"
-        bl_description = (
-            "Click to calculate the surface of the all object in the scene"
-            )
-
-        def execute(self, context):
-            updated = bfu_utils.UpdateAreaLightMapList()
-            self.report(
-                {'INFO'},
-                "The light maps of " + str(updated) +
-                " object(s) have been updated."
-                )
-            return {'FINISHED'}
 
     def draw(self, context):
 
-        addon_prefs = bfu_basics.GetAddonPrefs()
+        
         layout = self.layout
         scene = bpy.context.scene
-        obj = context.object
 
-        def ActiveModeIs(targetMode):
-            # Return True is active mode ==
-            obj = bpy.context.active_object
-            if obj is not None:
-                if obj.mode == targetMode:
-                    return True
-            return False
 
-        def ActiveTypeIs(targetType):
-            # Return True is active type ==
-            obj = bpy.context.active_object
-            if obj is not None:
-                if obj.type == targetType:
-                    return True
-            return False
-
-        def ActiveTypeIsNot(targetType):
-            # Return True is active type ==
-            obj = bpy.context.active_object
-            if obj is not None:
-                if obj.type != targetType:
-                    return True
-            return False
-
-        def FoundTypeInSelect(targetType, include_active=True):
-            # Return True if a specific type is found
-            select = bpy.context.selected_objects
-            if not include_active:
-                if bpy.context.active_object:
-                    if bpy.context.active_object in select:
-                        select.remove(bpy.context.active_object)
-
-            for obj in select:
-                if obj.type == targetType:
-                    return True
-            return False
-
-        ready_for_convert_collider = False
-        ready_for_convert_socket = False
+        
+        
 
         bfu_camera.bfu_camera_ui_and_props.draw_ui_scene_camera(layout)
         bfu_spline.bfu_spline_ui_and_props.draw_ui_scene_spline(layout)
 
-        scene.bfu_collision_socket_expanded.draw(layout)
-        if scene.bfu_collision_socket_expanded.is_expend():
-            if not ActiveModeIs("OBJECT"):
-                layout.label(text="Switch to Object Mode.", icon='INFO')
+        bfu_collision.bfu_collision_ui_and_props.draw_ui_scene_collision(layout)
+        bfu_socket.bfu_socket_ui_and_props.draw_ui_scene_socket(layout)
+
+        scene.bfu_uvmap_expanded.draw(layout)
+        if scene.bfu_uvmap_expanded.is_expend():
+            ready_for_correct_extrem_uv_scale = False
+            obj = bpy.context.object
+            if obj and obj.type == "MESH":
+                if bbpl.utils.active_mode_is("EDIT"):
+                    ready_for_correct_extrem_uv_scale = True
+                else:
+                    layout.label(text="Switch to Edit Mode.", icon='INFO')
             else:
-                if FoundTypeInSelect("MESH", False):
-                    if ActiveTypeIsNot("ARMATURE") and len(bpy.context.selected_objects) > 1:
-                        layout.label(text="Click on button for convert to collider.", icon='INFO')
-                        ready_for_convert_collider = True
-                    else:
-                        layout.label(text="Select with [SHIFT] the collider owner.", icon='INFO')
+                layout.label(text="Select an mesh object", icon='INFO')
 
-                elif FoundTypeInSelect("EMPTY", False):
-                    if ActiveTypeIsNot("ARMATURE") and len(bpy.context.selected_objects) > 1:
-                        layout.label(text="Click on button for convert to Socket.", icon='INFO')
-                        ready_for_convert_socket = True
-                    else:
-                        layout.label(text="Select with [SHIFT] the socket owner.", icon='INFO')
-                else:
-                    layout.label(text="Select your collider Object(s) or socket Empty(s).", icon='INFO')
 
-            convertButtons = layout.row().split(factor=0.80)
-            convertStaticCollisionButtons = convertButtons.column()
-            convertStaticCollisionButtons.enabled = ready_for_convert_collider
-            convertStaticCollisionButtons.operator("object.converttoboxcollision", icon='MESH_CUBE')
-            convertStaticCollisionButtons.operator("object.converttoconvexcollision", icon='MESH_ICOSPHERE')
-            convertStaticCollisionButtons.operator("object.converttocapsulecollision", icon='MESH_CAPSULE')
-            convertStaticCollisionButtons.operator("object.converttospherecollision", icon='MESH_UVSPHERE')
-
-            convertButtons = layout.row().split(factor=0.80)
-            convertStaticSocketButtons = convertButtons.column()
-            convertStaticSocketButtons.enabled = ready_for_convert_socket
-            convertStaticSocketButtons.operator(
-                "object.converttostaticsocket",
-                icon='OUTLINER_DATA_EMPTY')
-
-            if addon_prefs.useGeneratedScripts:
-
-                ready_for_convert_skeletal_socket = False
-                if not ActiveModeIs("OBJECT"):
-                    if not ActiveTypeIs("ARMATURE"):
-                        if not FoundTypeInSelect("EMPTY"):
-                            layout.label(text="Switch to Object Mode.", icon='INFO')
-                else:
-                    if FoundTypeInSelect("EMPTY"):
-                        if ActiveTypeIs("ARMATURE") and len(bpy.context.selected_objects) > 1:
-                            layout.label(text="Switch to Pose Mode.", icon='INFO')
-                        else:
-                            layout.label(text="Select with [SHIFT] the socket owner. (Armature)", icon='INFO')
-                    else:
-                        layout.label(text="Select your socket Empty(s).", icon='INFO')
-
-                if ActiveModeIs("POSE") and ActiveTypeIs("ARMATURE") and FoundTypeInSelect("EMPTY"):
-                    if len(bpy.context.selected_pose_bones) > 0:
-                        layout.label(text="Click on button for convert to Socket.", icon='INFO')
-                        ready_for_convert_skeletal_socket = True
-                    else:
-                        layout.label(text="Select the owner bone.", icon='INFO')
-
-                convertButtons = self.layout.row().split(factor=0.80)
-                convertSkeletalSocketButtons = convertButtons.column()
-                convertSkeletalSocketButtons.enabled = ready_for_convert_skeletal_socket
-                convertSkeletalSocketButtons.operator(
-                    "object.converttoskeletalsocket",
-                    icon='OUTLINER_DATA_EMPTY')
-
-            if obj is not None:
-                if obj.type == "EMPTY":
-                    socketName = layout.column()
-                    socketName.prop(obj, "bfu_use_socket_custom_Name")
-                    socketNameText = socketName.column()
-                    socketNameText.enabled = obj.bfu_use_socket_custom_Name
-                    socketNameText.prop(obj, "bfu_socket_custom_Name")
-
-            copy_skeletalsocket_buttons = layout.column()
-            copy_skeletalsocket_buttons.enabled = False
-            copy_skeletalsocket_buttons.operator(
-                "object.copy_skeletalsocket_command",
-                icon='COPYDOWN')
-            if obj is not None:
-                if obj.type == "ARMATURE":
-                    copy_skeletalsocket_buttons.enabled = True
+             # Draw buttons (correct_extrem_uv)
+            Buttons_correct_extrem_uv_scale = layout.row()
+            Button_correct_extrem_uv_scale = Buttons_correct_extrem_uv_scale.column()
+            Button_correct_extrem_uv_scale.enabled = ready_for_correct_extrem_uv_scale
+            Button_correct_extrem_uv_scale.operator("object.correct_extrem_uv", icon='UV')
+            bbpl.blender_layout.layout_doc_button.add_doc_page_operator(Buttons_correct_extrem_uv_scale, url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/UV-Maps#extreme-uv-scale")
 
         scene.bfu_lightmap_expanded.draw(layout)
         if scene.bfu_lightmap_expanded.is_expend():
@@ -233,10 +72,6 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
 
 classes = (
     BFU_PT_BlenderForUnrealTool,
-    BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToStaticSocketButton,
-    BFU_PT_BlenderForUnrealTool.BFU_OT_ConvertToSkeletalSocketButton,
-    BFU_PT_BlenderForUnrealTool.BFU_OT_CopySkeletalSocketButton,
-    BFU_PT_BlenderForUnrealTool.BFU_OT_ComputAllLightMap,
 )
 
 

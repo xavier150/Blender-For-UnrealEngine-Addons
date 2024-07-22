@@ -5,7 +5,7 @@ from . import bfu_camera_data
 from .. import bfu_basics
 from .. import bfu_write_text
 
-def ExportSingleAdditionalTrackCamera(dirpath, filename, obj, pre_bake_camera: bfu_camera_data.BFU_CameraTracks = None):
+def ExportSingleAdditionalTrackCamera(dirpath, filename, obj: bpy.types.Object, pre_bake_camera: bfu_camera_data.BFU_CameraTracks = None):
     # Export additional camera track for Unreal Engine
     # FocalLength
     # FocusDistance
@@ -19,3 +19,4 @@ def ExportSingleAdditionalTrackCamera(dirpath, filename, obj, pre_bake_camera: b
         absdirpath,
         filename
         )
+

@@ -24,6 +24,8 @@ from . import languages
 from . import bfu_utils
 from . import bfu_write_utils
 from . import bfu_unreal_utils
+from . import bfu_material
+from . import bfu_light_map
 
 def WriteImportAssetScript():
     # Generate a script for import assets in Ue4
@@ -141,7 +143,7 @@ def WriteImportAssetScript():
                 
                 asset_data["generate_lightmap_u_vs"] = asset.object.bfu_generate_light_map_uvs
                 asset_data["use_custom_light_map_resolution"] = bfu_utils.GetUseCustomLightMapResolution(asset.object)
-                asset_data["light_map_resolution"] = bfu_utils.GetCompuntedLightMap(asset.object)
+                asset_data["light_map_resolution"] = bfu_light_map.bfu_light_map_utils.GetCompuntedLightMap(asset.object)
             
                 asset_data["collision_trace_flag"] = asset.object.bfu_collision_trace_flag
 
@@ -149,13 +151,10 @@ def WriteImportAssetScript():
                 asset_data["create_physics_asset"] = asset.object.bfu_create_physics_asset
                 asset_data["enable_skeletal_mesh_per_poly_collision"] = asset.object.bfu_enable_skeletal_mesh_per_poly_collision
 
-            if asset.asset_type in ["StaticMesh", "SkeletalMesh"]:
-                asset_data["material_search_location"] = asset.object.bfu_material_search_location
-
             if bfu_utils.GetIsAnimation(asset.asset_type):
                 asset_data["do_not_import_curve_with_zero"] = asset.object.bfu_do_not_import_curve_with_zero
 
-
+        asset_data.update(bfu_material.bfu_material_utils.get_material_asset_data(asset))
         data['assets'].append(asset_data)
 
     return data

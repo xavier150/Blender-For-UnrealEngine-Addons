@@ -23,6 +23,7 @@ import addon_utils
 from . import bfu_modular_skeletal_specified_parts_meshs
 from . import bfu_unreal_engine_refs_props
 from .. import bbpl
+from .. import bps
 from .. import bfu_export_procedure
 from .. import bfu_basics
 from .. import bfu_utils
@@ -31,9 +32,17 @@ from .. import bfu_export
 from .. import bfu_ui
 from .. import languages
 from .. import bfu_custom_property
+from .. import bfu_material
 from .. import bfu_camera
 from .. import bfu_spline
 from .. import bfu_vertex_color
+from .. import bfu_static_mesh
+from .. import bfu_skeletal_mesh
+from .. import bfu_lod
+from .. import bfu_alembic_animation
+from .. import bfu_groom
+from .. import bfu_assets_manager
+from .. import bfu_light_map
 
 
 class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
@@ -94,30 +103,12 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         subtype='FILE_NAME'
         )
 
-
-
-    bpy.types.Object.bfu_export_as_alembic = bpy.props.BoolProperty(
-        name="Export as Alembic animation",
-        description=(
-            "If true this mesh will be exported as a Alembic animation"
-            ),
-        override={'LIBRARY_OVERRIDABLE'},
-        default=False
-        )
-
     bpy.types.Object.bfu_export_as_lod_mesh = bpy.props.BoolProperty(
         name="Export as lod?",
         description=(
             "If true this mesh will be exported" +
             " as a level of detail for another mesh"
             ),
-        override={'LIBRARY_OVERRIDABLE'},
-        default=False
-        )
-
-    bpy.types.Object.bfu_export_skeletal_mesh_as_static_mesh = bpy.props.BoolProperty(
-        name="Force staticMesh",
-        description="Force export asset like a StaticMesh if is ARMATURE type",
         override={'LIBRARY_OVERRIDABLE'},
         default=False
         )
@@ -134,9 +125,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
     bpy.types.Object.bfu_use_custom_export_name = bpy.props.BoolProperty(
         name="Export with custom name",
-        description=(
-            "Specify a custom name for the exported file"
-            ),
+        description=("Specify a custom name for the exported file"),
         override={'LIBRARY_OVERRIDABLE'},
         default=False
         )
@@ -297,7 +286,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             "convert target geometry node attribute to UV when found."
             ),
         override={'LIBRARY_OVERRIDABLE'},
-        default=True,
+        default=False,
         )
 
     bpy.types.Object.bfu_convert_geometry_node_attribute_to_uv_name = bpy.props.StringProperty(
@@ -326,42 +315,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=True,
         )
 
-    # SkeletalMeshImportData:
-    # https://api.unrealengine.com/INT/API/Editor/UnrealEd/Factories/UFbxSkeletalMeshImportData/index.html
-
-    # UFbxTextureImportData:
-    # https://api.unrealengine.com/INT/API/Editor/UnrealEd/Factories/UFbxTextureImportData/index.html
-
-    bpy.types.Object.bfu_material_search_location = bpy.props.EnumProperty(
-        name="Material search location",
-        description=(
-            "Specify where we should search" +
-            " for matching materials when importing"
-            ),
-        override={'LIBRARY_OVERRIDABLE'},
-        # Vania python:
-        # https://docs.unrealengine.com/en-US/PythonAPI/class/MaterialSearchLocation.html?highlight=materialsearchlocation
-        # C++ API:
-        # http://api.unrealengine.com/INT/API/Editor/UnrealEd/Factories/EMaterialSearchLocation/index.html
-        items=[
-            ("Local",
-                "Local",
-                "Search for matching material in local import folder only.",
-                1),
-            ("UnderParent",
-                "Under parent",
-                "Search for matching material recursively from parent folder.",
-                2),
-            ("UnderRoot",
-                "Under root",
-                "Search for matching material recursively from root folder.",
-                3),
-            ("AllAssets",
-                "All assets",
-                "Search for matching material in all assets folders.",
-                4)
-            ]
-        )
 
     bpy.types.Object.bfu_collision_trace_flag = bpy.props.EnumProperty(
         name="Collision Complexity",
@@ -408,60 +361,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=False
     )
 
-    bpy.types.Object.bfu_vertex_color_import_option = bpy.props.EnumProperty(
-        name="Vertex Color Import Option",
-        description="Specify how vertex colors should be imported",
-        override={'LIBRARY_OVERRIDABLE'},
-        # Vania python
-        # https://docs.unrealengine.com/en-US/PythonAPI/class/VertexColorImportOption.html
-        # C++ API
-        # https://docs.unrealengine.com/en-US/API/Editor/UnrealEd/Factories/EVertexColorImportOption__Type/index.html
-        items=[
-            ("IGNORE", "Ignore",
-                "Ignore vertex colors, and keep the existing mesh vertex colors.", 1),
-            ("OVERRIDE", "Override",
-                "Override all vertex colors with the specified color.", 2),
-            ("REPLACE", "Replace",
-                "Import the static mesh using the target vertex colors.", 0)
-            ],
-        default="REPLACE"
-        )
 
-    bpy.types.Object.bfu_vertex_color_override_color = bpy.props.FloatVectorProperty(
-            name="Vertex Override Color",
-            subtype='COLOR',
-            description="Specify override color in the case that bfu_vertex_color_import_option is set to Override",
-            override={'LIBRARY_OVERRIDABLE'},
-            default=(1.0, 1.0, 1.0),
-            min=0.0,
-            max=1.0
-            # Vania python
-            # https://docs.unrealengine.com/en-US/PythonAPI/class/FbxSkeletalMeshImportData.html
-        )
-
-    bpy.types.Object.bfu_vertex_color_to_use = bpy.props.EnumProperty(
-        name="Vertex Color to use",
-        description="Specify which vertex colors should be imported",
-        override={'LIBRARY_OVERRIDABLE'},
-        items=[
-            ("FirstIndex", "First Index",
-                "Use the the first index in Object Data -> Vertex Color.", 0),
-            ("LastIndex", "Last Index",
-                "Use the the last index in Object Data -> Vertex Color.", 1),
-            ("ActiveIndex", "Active Render",
-                "Use the the active index in Object Data -> Vertex Color.", 2),
-            ("CustomIndex", "CustomIndex",
-                "Use a specific Vertex Color in Object Data -> Vertex Color.", 3)
-            ],
-        default="ActiveIndex"
-        )
-
-    bpy.types.Object.bfu_vertex_color_index_to_use = bpy.props.IntProperty(
-        name="Vertex color index",
-        description="Vertex Color index to use.",
-        override={'LIBRARY_OVERRIDABLE'},
-        default=0
-    )
 
     bpy.types.Object.bfu_anim_action_export_enum = bpy.props.EnumProperty(
         name="Action to export",
@@ -705,6 +605,11 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default=False,
         )
 
+    bpy.types.Object.bfu_export_use_space_transform = bpy.props.BoolProperty(
+        name="Use Space Transform",
+        default=True,
+        )
+
     bpy.types.Object.bfu_export_axis_forward = bpy.props.EnumProperty(
         name="Axis Forward",
         override={'LIBRARY_OVERRIDABLE'},
@@ -895,19 +800,6 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 )
             return {'FINISHED'}
 
-    class BFU_OT_ComputLightMap(bpy.types.Operator):
-        bl_label = "Calculate surface area"
-        bl_idname = "object.computlightmap"
-        bl_description = "Click to calculate the surface of the object"
-
-        def execute(self, context):
-            obj = context.object
-            obj.computedStaticMeshLightMapRes = bfu_utils.GetExportRealSurfaceArea(obj)
-            self.report(
-                {'INFO'},
-                "Light map area updated to " + str(round(obj.computedStaticMeshLightMapRes)) + ". " +
-                "Compunted Light map: " + str(bfu_utils.GetCompuntedLightMap(obj)))
-            return {'FINISHED'}
 
 
     # Animation :
@@ -1015,19 +907,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     Frames = bfu_utils.GetDesiredActionStartEndTime(obj, action)
                     frame_start = str(Frames[0])
                     frame_end = str(Frames[1])
-                    addAnimRow(
-                        action.name,
-                        bfu_utils.GetActionType(action),
-                        frame_start,
-                        frame_end)
+                    addAnimRow(action.name, bfu_utils.GetActionType(action), frame_start, frame_end)
                 if obj.bfu_anim_nla_use:
                     scene = context.scene
-                    addAnimRow(
-                        obj.bfu_anim_nla_export_name,
-                        "NlAnim",
-                        str(scene.frame_start),
-                        str(scene.frame_end)
-                        )
+                    addAnimRow(obj.bfu_anim_nla_export_name, "NlAnim", str(scene.frame_start), str(scene.frame_end))
 
             bpy.context.window_manager.popup_menu(
                 draw,
@@ -1057,9 +940,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 'obj.bfu_export_type',
                 'obj.bfu_export_folder_name',
                 'col.bfu_export_folder_name',
-                'obj.bfu_export_as_alembic',
                 'obj.bfu_export_as_lod_mesh',
-                'obj.bfu_export_skeletal_mesh_as_static_mesh',
                 'obj.bfu_export_deform_only',
                 'obj.bfu_lod_target1',
                 'obj.bfu_lod_target2',
@@ -1079,13 +960,8 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 'obj.bfu_convert_geometry_node_attribute_to_uv_name',
                 'obj.bfu_correct_extrem_uv_scale',
                 'obj.bfu_auto_generate_collision',
-                'obj.bfu_material_search_location',
                 'obj.bfu_collision_trace_flag',
                 'obj.bfu_enable_skeletal_mesh_per_poly_collision',
-                'obj.bfu_vertex_color_import_option',
-                'obj.bfu_vertex_color_override_color',
-                'obj.bfu_vertex_color_to_use',
-                'obj.bfu_vertex_color_index_to_use',
                 'obj.bfu_anim_action_export_enum',
                 'obj.bfu_prefix_name_to_export',
                 'obj.bfu_anim_action_start_end_time_enum',
@@ -1106,6 +982,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 'obj.bfu_anim_naming_custom',
                 'obj.bfu_export_global_scale',
                 'obj.bfu_override_procedure_preset',
+                'obj.bfu_export_use_space_transform',
+                'obj.bfu_export_axis_forward',
+                'obj.bfu_export_axis_up',
                 'obj.bfu_export_with_meta_data',
                 'obj.bfu_export_axis_forward',
                 'obj.bfu_export_axis_up',
@@ -1127,8 +1006,13 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             preset_values += bfu_modular_skeletal_specified_parts_meshs.get_preset_values()
             preset_values += bfu_unreal_engine_refs_props.get_preset_values()
             preset_values += bfu_custom_property.bfu_custom_property_props.get_preset_values()
+            preset_values += bfu_material.bfu_material_props.get_preset_values()
             preset_values += bfu_camera.bfu_camera_ui_and_props.get_preset_values()
             preset_values += bfu_spline.bfu_spline_ui_and_props.get_preset_values()
+            preset_values += bfu_static_mesh.bfu_static_mesh_props.get_preset_values()
+            preset_values += bfu_skeletal_mesh.bfu_skeletal_mesh_props.get_preset_values()
+            preset_values += bfu_alembic_animation.bfu_alembic_animation_props.get_preset_values()
+            preset_values += bfu_vertex_color.bfu_vertex_color_props.get_preset_values()
             return preset_values
 
         # Common variable used for all preset values
@@ -1266,6 +1150,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         if scene.bfu_active_tab == "SCENE":
             layout.row().prop(scene, "bfu_active_scene_tab", expand=True)
 
+        bfu_material.bfu_material_ui.draw_ui_object_collision(layout)
+        bfu_vertex_color.bfu_vertex_color_ui.draw_ui_object_collision(layout)
+
         if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
             
             scene.bfu_object_properties_expanded.draw(layout)
@@ -1278,7 +1165,13 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     AssetType = layout.row()
                     AssetType.prop(obj, 'name', text="", icon='OBJECT_DATA')
                     # Show asset type
-                    AssetType.label(text='('+bfu_utils.GetAssetType(obj)+')')
+                    asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
+                    if asset_class:
+                        asset_type_name = asset_class.get_asset_type_name(obj)
+                    else:
+                        asset_type_name = "Asset type not found."
+
+                    AssetType.label(text='('+asset_type_name+')')
 
                     ExportType = layout.column()
                     ExportType.prop(obj, 'bfu_export_type')
@@ -1287,70 +1180,40 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     if obj.bfu_export_type == "export_recursive":
 
                         folderNameProperty = layout.column()
-                        folderNameProperty.prop(
-                            obj,
-                            'bfu_export_folder_name',
-                            icon='FILE_FOLDER'
-                            )
+                        folderNameProperty.prop(obj, 'bfu_export_folder_name', icon='FILE_FOLDER')
 
-                        if bfu_utils.GetAssetType(obj) == "Caùera":
-                            bfu_export_procedure.bfu_export_procedure_ui.draw_object_export_procedure(layout, obj)
-                        if bfu_utils.GetAssetType(obj) == "Spline":
-                            bfu_export_procedure.bfu_export_procedure_ui.draw_object_export_procedure(layout, obj)
+                        ProxyProp = layout.column()
+                        if bfu_utils.GetExportAsProxy(obj):
+                            ProxyProp.label(text="The Armature was detected as a proxy.")
+                            proxy_child = bfu_utils.GetExportProxyChild(obj)
+                            if proxy_child:
+                                ProxyProp.label(text="Proxy child: " + proxy_child.name)
+                            else:
+                                ProxyProp.label(text="Proxy child not found")
 
-                        else:
-                            ProxyProp = layout.column()
-                            if bfu_utils.GetExportAsProxy(obj):
-                                ProxyProp.label(
-                                        text="The Armature was detected as a proxy."
-                                        )
-                                proxy_child = bfu_utils.GetExportProxyChild(obj)
-                                if proxy_child:
-                                    ProxyProp.label(
-                                            text="Proxy child: " + proxy_child.name
-                                            )
-                                else:
-                                    ProxyProp.label(text="Proxy child not found")
+                        if not bfu_utils.GetExportAsProxy(obj):
+                            # exportCustomName
+                            exportCustomName = layout.row()
+                            exportCustomName.prop(obj, "bfu_use_custom_export_name")
+                            useCustomName = obj.bfu_use_custom_export_name
+                            exportCustomNameText = exportCustomName.column()
+                            exportCustomNameText.prop(obj, "bfu_custom_export_name")
+                            exportCustomNameText.enabled = useCustomName
+                    bfu_alembic_animation.bfu_alembic_animation_ui.draw_general_ui_object(layout, obj)
+                    bfu_groom.bfu_groom_ui.draw_general_ui_object(layout, obj)
+                    bfu_skeletal_mesh.bfu_skeletal_mesh_ui.draw_general_ui_object(layout, obj)
 
-                            bfu_export_procedure.bfu_export_procedure_ui.draw_object_export_procedure(layout, obj)
 
-                            if not bfu_utils.GetExportAsProxy(obj):
-                                AlembicProp = layout.column()
-                                AlembicProp.prop(obj, 'bfu_export_as_alembic')
-                                if obj.bfu_export_as_alembic:
-                                    AlembicProp.label(
-                                        text="(Alembic animation are exported" +
-                                        " with scene position.)"
-                                        )
-                                    AlembicProp.label(
-                                        text="(Use import script for" +
-                                        " use the origin position.)"
-                                        )
-                                else:
-                                    if addon_prefs.useGeneratedScripts:
-                                        # Unreal python no longer support Skeletal mesh LODS import.
-                                        if bfu_utils.GetAssetType(obj) != "SkeletalMesh":
-                                            LodProp = layout.column()
-                                            LodProp.prop(obj, 'bfu_export_as_lod_mesh')
-                            if not obj.bfu_export_as_alembic:
-                                if obj.type == "ARMATURE":
-                                    AssetType2 = layout.column()
-                                    # Show asset type
-                                    AssetType2.prop(obj, "bfu_export_skeletal_mesh_as_static_mesh")
-                                    if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
-                                        AssetType2.prop(obj, 'bfu_export_deform_only')
 
-                            if not bfu_utils.GetExportAsProxy(obj):
-                                # exportCustomName
-                                exportCustomName = layout.row()
-                                exportCustomName.prop(obj, "bfu_use_custom_export_name")
-                                useCustomName = obj.bfu_use_custom_export_name
-                                exportCustomNameText = exportCustomName.column()
-                                exportCustomNameText.prop(obj, "bfu_custom_export_name")
-                                exportCustomNameText.enabled = useCustomName
+
 
             bfu_camera.bfu_camera_ui_and_props.draw_ui_object_camera(layout, obj)
             bfu_spline.bfu_spline_ui_and_props.draw_ui_object_spline(layout, obj)
+            bfu_skeletal_mesh.bfu_skeletal_mesh_ui.draw_ui_object(layout, obj)
+            bfu_static_mesh.bfu_static_mesh_ui.draw_ui_object(layout, obj)
+            bfu_lod.bfu_lod_ui.draw_ui_object(layout, obj)
+            bfu_alembic_animation.bfu_alembic_animation_ui.draw_ui_object(layout, obj)
+            bfu_groom.bfu_groom_ui.draw_ui_object(layout, obj)
 
             scene.bfu_object_advanced_properties_expanded.draw(layout)
             if scene.bfu_object_advanced_properties_expanded.is_expend():
@@ -1358,34 +1221,40 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     if obj.bfu_export_type == "export_recursive":
 
                         transformProp = layout.column()
-                        if bfu_utils.GetAssetType(obj) != "Alembic" and bfu_utils.GetAssetType(obj) != "Camera":
+                        is_not_alembic_animation = not bfu_alembic_animation.bfu_alembic_animation_utils.is_alembic_animation(obj)
+                        is_not_camera = not bfu_camera.bfu_camera_utils.is_camera(obj)
+                        if is_not_alembic_animation and is_not_camera:
                             transformProp.prop(obj, "bfu_move_to_center_for_export")
                             transformProp.prop(obj, "bfu_rotate_to_zero_for_export")
                             transformProp.prop(obj, "bfu_additional_location_for_export")
                             transformProp.prop(obj, "bfu_additional_rotation_for_export")
                             
                         transformProp.prop(obj, 'bfu_export_global_scale')
-                        if bfu_utils.GetAssetType(obj) == "Camera":
+                        if bfu_camera.bfu_camera_utils.is_camera(obj):
                             transformProp.prop(obj, "bfu_additional_location_for_export")
 
                         AxisProperty = layout.column()
                         
                         AxisProperty.prop(obj, 'bfu_override_procedure_preset')
                         if obj.bfu_override_procedure_preset:
+                            AxisProperty.prop(obj, 'bfu_export_use_space_transform')
                             AxisProperty.prop(obj, 'bfu_export_axis_forward')
                             AxisProperty.prop(obj, 'bfu_export_axis_up')
-                            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+                            bbpl.blender_layout.layout_doc_button.add_doc_page_operator(AxisProperty, text="About axis Transforms", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Axis-Transforms")
+                            if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                                 BoneAxisProperty = layout.column()
                                 BoneAxisProperty.prop(obj, 'bfu_export_primary_bone_axis')
                                 BoneAxisProperty.prop(obj, 'bfu_export_secondary_bone_axis')
                         else:
                             box = layout.box()
-                            preset = bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)  # Obtenez le dictionnaire de preset
+                            if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
+                                preset = bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)
+                            else:
+                                preset = bfu_export_procedure.bfu_static_export_procedure.get_obj_static_procedure_preset(obj)
                             var_lines = box.column()
-                            # Utilisez une boucle pour itérer sur les éléments du dictionnaire
                             for key, value in preset.items():
-                                # Concaténez la clé et la valeur dans la chaîne de caractères
-                                var_lines.label(text=f"{key} -> {value}\n")
+                                display_key = bps.utils.format_property_name(key)
+                                var_lines.label(text=f"{display_key}: {value}\n")
                         export_data = layout.column()
                         bfu_custom_property.bfu_custom_property_utils.draw_ui_custom_property(export_data, obj)
                         export_data.prop(obj, "bfu_export_with_meta_data")
@@ -1394,22 +1263,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 else:
                     layout.label(text='(No properties to show.)')
 
-            scene.bfu_skeleton_properties_expanded.draw(layout)
-            if scene.bfu_skeleton_properties_expanded.is_expend():
-                if addon_prefs.useGeneratedScripts and obj is not None:
-                    if obj.bfu_export_type == "export_recursive":
 
-                        # SkeletalMesh prop
-                        if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
-                            if not obj.bfu_export_as_lod_mesh:
-
-                                ue_standard_skeleton = layout.column()
-                                ue_standard_skeleton.enabled = obj.bfu_skeleton_export_procedure == "ue-standard"
-                                ue_standard_skeleton.prop(obj, "bfu_export_animation_without_mesh")
-                                ue_standard_skeleton.prop(obj, "bfu_mirror_symmetry_right_side_bones")
-                                mirror_symmetry_right_side_bones = ue_standard_skeleton.row()
-                                mirror_symmetry_right_side_bones.enabled = obj.bfu_mirror_symmetry_right_side_bones
-                                mirror_symmetry_right_side_bones.prop(obj, "bfu_use_ue_mannequin_bone_alignment")
 
             scene.bfu_engine_ref_properties_expanded.draw(layout)
             if scene.bfu_engine_ref_properties_expanded.is_expend():
@@ -1417,25 +1271,16 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     if obj.bfu_export_type == "export_recursive":
 
                         # SkeletalMesh prop
-                        if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+                        if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                             if not obj.bfu_export_as_lod_mesh:
                                 unreal_engine_refs = layout.column()
                                 bfu_unreal_engine_refs_props.draw_skeleton_prop(unreal_engine_refs, obj)
                                 bfu_unreal_engine_refs_props.draw_skeletal_mesh_prop(unreal_engine_refs, obj)
+                else:
+                    layout.label(text='(No properties to show.)')
 
-            scene.bfu_modular_skeletal_mesh_properties_expanded.draw(layout)
-            if scene.bfu_modular_skeletal_mesh_properties_expanded.is_expend():
-                if obj.bfu_export_type == "export_recursive":
 
-                    # SkeletalMesh prop
-                    if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
-                        if not obj.bfu_export_as_lod_mesh:
-                            modular_skeletal_mesh = layout.column()
-                            modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_mode")
-                            if obj.bfu_modular_skeletal_mesh_mode == "every_meshs":
-                                modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_every_meshs_separate")
-                            if obj.bfu_modular_skeletal_mesh_mode == "specified_parts":
-                                obj.bfu_modular_skeletal_specified_parts_meshs_template.draw(modular_skeletal_mesh)
+
 
         if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "ANIM"):
             if obj is not None:
@@ -1443,11 +1288,11 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
                     scene.bfu_animation_action_properties_expanded.draw(layout)
                     if scene.bfu_animation_action_properties_expanded.is_expend():
-                        if (bfu_utils.GetAssetType(obj) == "SkeletalMesh" or
-                                bfu_utils.GetAssetType(obj) == "Camera" or
-                                bfu_utils.GetAssetType(obj) == "Alembic"):
+                        if (bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj) or
+                                bfu_camera.bfu_camera_utils.is_camera(obj) or
+                                bfu_alembic_animation.bfu_alembic_animation_utils.is_alembic_animation(obj)):
 
-                            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+                            if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                                 # Action list
                                 ActionListProperty = layout.column()
                                 ActionListProperty.prop(obj, 'bfu_anim_action_export_enum')
@@ -1490,7 +1335,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                     )
 
                             # Nomenclature
-                            if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+                            if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                                 export_anim_naming = layout.column()
                                 export_anim_naming.enabled = obj.bfu_anim_action_export_enum != 'dont_export'
                                 export_anim_naming.prop(obj, 'bfu_anim_naming_type')
@@ -1507,7 +1352,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     scene.bfu_animation_action_advanced_properties_expanded.draw(layout)
                     if scene.bfu_animation_action_advanced_properties_expanded.is_expend():
 
-                        if bfu_utils.GetAssetType(obj) != "Alembic":
+                        if bfu_alembic_animation.bfu_alembic_animation_utils.is_not_alembic_animation(obj):
                             transformProp = layout.column()
                             transformProp.enabled = obj.bfu_anim_action_export_enum != 'dont_export'
                             transformProp.prop(obj, "bfu_move_action_to_center_for_export")
@@ -1516,7 +1361,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     scene.bfu_animation_nla_properties_expanded.draw(layout)
                     if scene.bfu_animation_nla_properties_expanded.is_expend():
                         # NLA
-                        if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+                        if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                             NLAAnim = layout.row()
                             NLAAnim.prop(obj, 'bfu_anim_nla_use')
                             NLAAnimChild = NLAAnim.column()
@@ -1543,7 +1388,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
                     scene.bfu_animation_nla_advanced_properties_expanded.draw(layout)
                     if scene.bfu_animation_nla_advanced_properties_expanded.is_expend():
-                        if bfu_utils.GetAssetType(obj) != "Alembic":
+                        if bfu_alembic_animation.bfu_alembic_animation_utils.is_not_alembic_animation(obj):
                             transformProp2 = layout.column()
                             transformProp2.enabled = obj.bfu_anim_nla_use
                             transformProp2.prop(obj, "bfu_move_nla_to_center_for_export")
@@ -1553,7 +1398,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     scene.bfu_animation_advanced_properties_expanded.draw(layout)
                     if scene.bfu_animation_advanced_properties_expanded.is_expend():
                         # Animation fbx properties
-                        if (bfu_utils.GetAssetType(obj) != "Alembic"):
+                        if bfu_alembic_animation.bfu_alembic_animation_utils.is_not_alembic_animation(obj):
                             propsFbx = layout.row()
                             if obj.bfu_skeleton_export_procedure != "auto-rig-pro":
                                 propsFbx.prop(obj, 'bfu_sample_anim_for_export')
@@ -1562,7 +1407,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         propsScaleAnimation.prop(obj, "bfu_disable_free_scale_animation")
 
                     # Armature export action list feedback
-                    if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
+                    if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                         layout.label(
                             text='Note: The Action with only one' +
                             ' frame are exported like Pose.')
@@ -1596,7 +1441,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                         # Lod selection
                         if not obj.bfu_export_as_lod_mesh:
                             # Unreal python no longer support Skeletal mesh LODS import.
-                            if (bfu_utils.GetAssetType(obj) == "StaticMesh"):
+                            if (bfu_static_mesh.bfu_static_mesh_utils.is_static_mesh(obj)):
                                 LodList = layout.column()
                                 LodList.prop(obj, 'bfu_lod_target1')
                                 LodList.prop(obj, 'bfu_lod_target2')
@@ -1605,7 +1450,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 LodList.prop(obj, 'bfu_lod_target5')
 
                         # StaticMesh prop
-                        if bfu_utils.GetAssetType(obj) == "StaticMesh":
+                        if bfu_static_mesh.bfu_static_mesh_utils.is_static_mesh(obj):
                             if not obj.bfu_export_as_lod_mesh:
                                 bfu_static_mesh_lod_group = layout.row()
                                 bfu_static_mesh_lod_group.prop(
@@ -1624,7 +1469,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     if obj.bfu_export_type == "export_recursive":
 
                         # StaticMesh prop
-                        if bfu_ui.bfu_ui_utils.display_asset_type_filter(obj, "StaticMesh"):
+                        if bfu_static_mesh.bfu_static_mesh_utils.is_static_mesh(obj):
                             if not obj.bfu_export_as_lod_mesh:
                                 auto_generate_collision = layout.row()
                                 auto_generate_collision.prop(
@@ -1637,58 +1482,13 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                     'bfu_collision_trace_flag'
                                     )
                         # SkeletalMesh prop
-                        if bfu_ui.bfu_ui_utils.display_asset_type_filter(obj, "SkeletalMesh"):
+                        if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                             if not obj.bfu_export_as_lod_mesh:
                                 create_physics_asset = layout.row()
                                 create_physics_asset.prop(obj, "bfu_create_physics_asset")
                                 enable_skeletal_mesh_per_poly_collision = layout.row()
                                 enable_skeletal_mesh_per_poly_collision.prop(obj, 'bfu_enable_skeletal_mesh_per_poly_collision')
 
-            scene.bfu_object_material_properties_expanded.draw(layout)
-            if scene.bfu_object_material_properties_expanded.is_expend():
-                if addon_prefs.useGeneratedScripts and obj is not None:
-                    if obj.bfu_export_type == "export_recursive":
-
-                        # bfu_material_search_location
-                        if not obj.bfu_export_as_lod_mesh:
-                            if (bfu_utils.GetAssetType(obj) == "StaticMesh" or
-                                    bfu_utils.GetAssetType(obj) == "SkeletalMesh" or
-                                    bfu_utils.GetAssetType(obj) == "Alembic"):
-                                bfu_material_search_location = layout.row()
-                                bfu_material_search_location.prop(
-                                    obj, 'bfu_material_search_location')
-
-
-            scene.bfu_object_vertex_color_properties_expanded.draw(layout)
-            if scene.bfu_object_vertex_color_properties_expanded.is_expend():
-                if addon_prefs.useGeneratedScripts and obj is not None:
-                    if obj.bfu_export_type == "export_recursive":
-
-                        # Vertex color
-                        StaticMeshVertexColorImportOption = layout.column()
-                        StaticMeshVertexColorImportOption.prop(obj, 'bfu_vertex_color_import_option')
-                        if obj.bfu_vertex_color_import_option == "OVERRIDE":
-                            StaticMeshVertexColorImportOptionColor = StaticMeshVertexColorImportOption.row()
-                            StaticMeshVertexColorImportOptionColor.prop(obj, 'bfu_vertex_color_override_color')
-                        if obj.bfu_vertex_color_import_option == "REPLACE":
-                            StaticMeshVertexColorImportOptionIndex = StaticMeshVertexColorImportOption.row()
-                            StaticMeshVertexColorImportOptionIndex.prop(obj, 'bfu_vertex_color_to_use')
-                            if obj.bfu_vertex_color_to_use == "CustomIndex":
-                                StaticMeshVertexColorImportOptionIndexCustom = StaticMeshVertexColorImportOption.row()
-                                StaticMeshVertexColorImportOptionIndexCustom.prop(obj, 'bfu_vertex_color_index_to_use')
-
-                            StaticMeshVertexColorFeedback = StaticMeshVertexColorImportOption.row()
-                            if obj.type == "MESH":
-                                vced = bfu_vertex_color.bfu_vertex_color_utils.VertexColorExportData(obj)
-                                if vced.export_type == "REPLACE":
-                                    my_text = 'Vertex color nammed "' + vced.name + '" will be used.'
-                                    StaticMeshVertexColorFeedback.label(text=my_text, icon='INFO')
-                                else:
-                                    my_text = 'No vertex color found at this index.'
-                                    StaticMeshVertexColorFeedback.label(text=my_text, icon='ERROR')
-                            else:
-                                my_text = 'Vertex color property will be apply on the childrens.'
-                                StaticMeshVertexColorFeedback.label(text=my_text, icon='INFO')
 
 
             scene.bfu_object_light_map_properties_expanded.draw(layout)
@@ -1697,7 +1497,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     if obj.bfu_export_type == "export_recursive":
 
                         # Light map
-                        if bfu_utils.GetAssetType(obj) == "StaticMesh":
+                        if bfu_static_mesh.bfu_static_mesh_utils.is_static_mesh(obj):
                             StaticMeshLightMapRes = layout.box()
                             StaticMeshLightMapRes.prop(obj, 'bfu_static_mesh_light_map_mode')
                             if obj.bfu_static_mesh_light_map_mode == "CustomMap":
@@ -1712,7 +1512,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                                 SurfaceAreaLightMap.prop(obj, 'bfu_static_mesh_light_map_surface_scale')
                                 SurfaceAreaLightMap.prop(obj, 'bfu_static_mesh_light_map_round_power_of_two')
                             if obj.bfu_static_mesh_light_map_mode != "Default":
-                                CompuntedLightMap = str(bfu_utils.GetCompuntedLightMap(obj))
+                                CompuntedLightMap = str(bfu_light_map.bfu_light_map_utils.GetCompuntedLightMap(obj))
                                 StaticMeshLightMapRes.label(text='Compunted light map: ' + CompuntedLightMap)
                             bfu_generate_light_map_uvs = layout.row()
                             bfu_generate_light_map_uvs.prop(obj, 'bfu_generate_light_map_uvs')
@@ -1795,7 +1595,6 @@ classes = (
     BFU_PT_BlenderForUnrealObject.BFU_MT_ObjectGlobalPropertiesPresets,
     BFU_PT_BlenderForUnrealObject.BFU_OT_AddObjectGlobalPropertiesPreset,
     BFU_PT_BlenderForUnrealObject.BFU_OT_OpenDocumentationPage,
-    BFU_PT_BlenderForUnrealObject.BFU_OT_ComputLightMap,
     BFU_PT_BlenderForUnrealObject.BFU_UL_ActionExportTarget,
     BFU_PT_BlenderForUnrealObject.BFU_OT_UpdateObjActionListButton,
     BFU_PT_BlenderForUnrealObject.BFU_OT_ShowActionToExport,

@@ -33,7 +33,7 @@ class SavedObject():
     Saved data from a blender object.
     """
 
-    def __init__(self, obj):
+    def __init__(self, obj: bpy.types.Object):
         if obj:
             self.ref = obj
             self.name = obj.name
@@ -163,8 +163,7 @@ class UserSelectSave():
         if self.user_mode:
             safe_mode_set(self.user_mode, bpy.ops.object)
 
-
-def select_specific_object(obj):
+def select_specific_object(obj: bpy.types.Object):
     """
     Selects a specific object in Blender.
 
@@ -344,7 +343,7 @@ class UserSceneSave():
                             layer_collection.hide_viewport = view_layer_collection.hide_viewport
 
 
-class UserArmatureDataSave:
+class UserArmatureDataSave():
     """
     Manager for saving and resetting an armature.
     """
@@ -380,7 +379,6 @@ class UserArmatureDataSave:
         # Data
         self.armature.data.use_mirror_x = self.use_mirror_x
 
-
 def mode_set_on_target(target_object=None, target_mode='OBJECT'):
     """
     Set the target object to the specified mode.
@@ -399,7 +397,6 @@ def mode_set_on_target(target_object=None, target_mode='OBJECT'):
         return True
     return False
 
-
 def safe_mode_set(target_mode='OBJECT', obj=None):
     """
     Set the mode of the target object to the specified mode if possible.
@@ -415,7 +412,6 @@ def safe_mode_set(target_mode='OBJECT', obj=None):
 
     return False
 
-
 def json_list(string):
     """
     Convert a JSON string to a list of dictionaries.
@@ -426,7 +422,6 @@ def json_list(string):
     jdata = json.loads(string)
     return list(jdata)
 
-
 def clear_driver_var(d):
     """
     Clear all variables from a driver.
@@ -435,13 +430,11 @@ def clear_driver_var(d):
     for var in d.variables:
         d.variables.remove(var)
 
-
 def update_bone_rot_mode(armature, bone_name, rotation_mode):
     """
     Update the rotation mode of a specific bone in an armature.
     """
     armature.pose.bones[bone_name].rotation_mode = rotation_mode
-
 
 def get_visual_bone_pos(obj, bone):
     """
@@ -453,7 +446,6 @@ def get_visual_bone_pos(obj, bone):
     scale = bone.scale
     return loc, rot, scale
 
-
 def get_visual_bones_pos_packed(obj, target_bones):
     """
     Get the visual positions, rotations, and scales of multiple bones in object space and pack them into a list.
@@ -463,7 +455,6 @@ def get_visual_bones_pos_packed(obj, target_bones):
         loc, rot, scale = get_visual_bone_pos(obj, bone)
         position_list.append((bone.name, loc, rot, scale))
     return position_list
-
 
 def apply_real_matrix_world_bones(bone, obj, matrix):
     """
@@ -479,7 +470,6 @@ def apply_real_matrix_world_bones(bone, obj, matrix):
             bone.matrix = obj.matrix_world.inverted() @ (child.inverted() @ parent.inverted() @ matrix)
             return
     bone.matrix = obj.matrix_world.inverted() @ matrix
-
 
 def set_visual_bone_pos(obj, bone, loc, rot, scale, use_loc, use_rot, use_scale):
     """
@@ -509,9 +499,6 @@ def set_visual_bone_pos(obj, bone, loc, rot, scale, use_loc, use_rot, use_scale)
     if not use_scale:
         bone.scale = base_scale
 
-    
-
-
 def find_item_in_list_by_name(item, lst):
     """
     Find an item in a list by its name.
@@ -520,7 +507,6 @@ def find_item_in_list_by_name(item, lst):
         if target_item.name == item:
             return target_item
     return None
-
 
 def set_visual_bones_pos_packed(obj, target_bones, position_list, use_loc, use_rot, use_scale):
     """
@@ -535,7 +521,6 @@ def set_visual_bones_pos_packed(obj, target_bones, position_list, use_loc, use_r
             scale = mathutils.Vector(pl[3])
             set_visual_bone_pos(obj, target_bone, loc, rot, scale, use_loc, use_rot, use_scale)
 
-
 def get_safe_collection(collection_name):
     """
     Get an existing collection with the given name, or create a new one if it doesn't exist.
@@ -545,7 +530,6 @@ def get_safe_collection(collection_name):
     else:
         my_col = bpy.data.collections.new(collection_name)
     return my_col
-
 
 def get_recursive_layer_collection(layer_collection):
     """
@@ -557,7 +541,6 @@ def get_recursive_layer_collection(layer_collection):
         all_childs += get_recursive_layer_collection(child)
     return all_childs
 
-
 def set_collection_exclude(collection, exclude):
     """
     Set the exclude property for a collection in all view layers.
@@ -567,7 +550,6 @@ def set_collection_exclude(collection, exclude):
         for layer in get_recursive_layer_collection(vl.layer_collection):
             if layer.collection == collection:
                 layer.exclude = exclude
-
 
 def get_rig_collection(armature, col_type="RIG"):
     """
@@ -596,7 +578,6 @@ def get_rig_collection(armature, col_type="RIG"):
     else:
         print("In get_rig_collection() " + col_type + " not found!")
 
-
 def get_vertex_colors(obj):
     """
     Get the vertex colors of an object.
@@ -605,7 +586,6 @@ def get_vertex_colors(obj):
         return obj.data.color_attributes
     else:
         return obj.data.vertex_colors
-
 
 def get_vertex_colors_render_color_index(obj):
     """
@@ -618,7 +598,6 @@ def get_vertex_colors_render_color_index(obj):
             if vertex_color.active_render:
                 return index
 
-
 def get_vertex_color_active_color_index(obj):
     """
     Get the active color index of the vertex colors of an object.
@@ -627,7 +606,6 @@ def get_vertex_color_active_color_index(obj):
         return obj.data.color_attributes.active_color_index
     else:
         return obj.data.vertex_colors.active_index
-
 
 def get_layer_collections_recursive(layer_collection):
     """
@@ -684,25 +662,135 @@ def get_mirror_object_name(original_objects):
     else:
         return new_objects
 
-class SaveTransformObject:
-    def __init__(self, obj):
+
+class SaveTransformObject():
+    def __init__(self, obj: bpy.types.Object):
+        self.init_object = obj
         self.transform_matrix = obj.matrix_world.copy()
 
-    def LoadObjectTransform(self, obj):
+    def reset_object_transform(self):
+        self.init_object.matrix_world = self.transform_matrix
+
+    def apply_object_transform(self, obj):
         obj.matrix_world = self.transform_matrix
 
 def make_override_library_object(obj):
     select_specific_object(obj)
     bpy.ops.object.make_override_library()
 
-def recursive_delete_collection(collection):
-    # Supprimer d'abord les objets dans la collection
-    for obj in collection.objects:
-        bpy.data.objects.remove(obj)
+def recursive_delete_collection(collection: bpy.types.Collection):
+    """
+    Recursively deletes a Blender collection and its contents, including objects and their data,
+    as well as any child collections.
+
+    Parameters:
+    - collection (bpy.types.Collection): The Blender collection to be deleted.
+
+    Returns:
+    None
+    """
+    # First, prepare a list of objects and their data to remove from the collection
+    objects_to_remove = [obj for obj in collection.objects]
+    data_to_remove = [obj.data for obj in collection.objects if obj.data is not None]
+
+    # Use Blender's batch_remove to efficiently delete objects and their data
+    bpy.data.batch_remove(objects_to_remove)
+    bpy.data.batch_remove(data_to_remove)
     
-    # Récursivement supprimer les sous-collections
+    # Recursively delete any child collections
     for sub_collection in collection.children:
         recursive_delete_collection(sub_collection)
     
-    # Enfin, supprimer la collection elle-même
+    # Finally, delete the collection itself
     bpy.data.collections.remove(collection)
+
+class SaveUserRenderSimplify():
+    def __init__(self):
+        self.use_simplify = bpy.context.scene.render.use_simplify
+
+    def LoadUserRenderSimplify(self):
+        bpy.context.scene.render.use_simplify = self.use_simplify
+
+
+class SaveObjectReferanceUser():
+    """
+    This class is used to save and update references to an object in constraints 
+    across all bones in all armatures within a Blender scene.
+    """
+
+    def __init__(self):
+        """
+        Initializes the instance with an empty list to store constraints using the specified object.
+        """
+        self.using_constraints = []
+
+    def save_refs_from_object(self, obj: bpy.types.Object):
+        """
+        Scans all objects in the Blender scene to find and save constraints in armature bones
+        that reference the specified object.
+
+        :param obj: The target bpy.types.Object to find references to.
+        """
+        for objet in bpy.data.objects:
+            if objet.type == 'ARMATURE':
+                for bone in objet.pose.bones:
+                    for contrainte in bone.constraints:
+                        if hasattr(contrainte, 'target') and contrainte.target and contrainte.target.name == obj.name:
+                            constraint_info = {
+                                'armature_object': objet.name,
+                                'bone': bone.name,
+                                'constraint': contrainte.name
+                            }
+                            self.using_constraints.append(constraint_info)
+    
+    def update_refs_with_object(self, obj: bpy.types.Object):
+        """
+        Updates all previously found constraints to reference a new object.
+
+        :param obj: The new bpy.types.Object to be used as the target for the saved constraints.
+        """
+        for info in self.using_constraints:
+            if info['armature_object'] in bpy.data.objects:
+                armature_object = bpy.data.objects[info['armature_object']]
+                if info['bone'] in armature_object.pose.bones:
+                    bone = armature_object.pose.bones[info['bone']]
+                    if info['constraint'] in bone.constraints:
+                        constraint = bone.constraints[info['constraint']]
+                        constraint.target = obj
+
+def active_mode_is(targetMode):
+    # Return True is active obj mode == targetMode
+    obj = bpy.context.active_object
+    if obj is not None:
+        if obj.mode == targetMode:
+            return True
+    return False
+
+def active_type_is(targetType):
+    # Return True is active obj type == targetType
+    obj = bpy.context.active_object
+    if obj is not None:
+        if obj.type == targetType:
+            return True
+    return False
+
+def active_type_is_not(targetType):
+    # Return True is active obj type != targetType
+    obj = bpy.context.active_object
+    if obj is not None:
+        if obj.type != targetType:
+            return True
+    return False
+
+def found_type_in_selection(targetType, include_active=True):
+    # Return True if a specific type is found in current user selection
+    select = bpy.context.selected_objects
+    if not include_active:
+        if bpy.context.active_object:
+            if bpy.context.active_object in select:
+                select.remove(bpy.context.active_object)
+
+    for obj in select:
+        if obj.type == targetType:
+            return True
+    return False

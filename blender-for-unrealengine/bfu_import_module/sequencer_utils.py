@@ -23,7 +23,39 @@ except ImportError:
 from . import import_module_utils
 from . import import_module_unreal_utils
 
+if import_module_unreal_utils.is_unreal_version_greater_or_equal(5,1):
+    MovieSceneBindingProxy = unreal.MovieSceneBindingProxy
+else:
+    MovieSceneBindingProxy = unreal.SequencerBindingProxy
+
 from typing import Dict, Any
+
+def get_sequencer_framerate(denominator = 1, numerator = 24) -> unreal.FrameRate:
+    """
+    Adjusts the given frame rate to be compatible with Unreal Engine Sequencer.
+
+    Ensures the denominator and numerator are integers over zero and warns if the input values are adjusted.
+
+    Parameters:
+    - denominator (float): The original denominator value.
+    - numerator (float): The original numerator value.
+
+    Returns:
+    - unreal.FrameRate: The adjusted frame rate object.
+    """
+    # Ensure denominator and numerator are at least 1 and int 32
+    new_denominator = max(round(denominator), 1)
+    new_numerator = max(round(numerator), 1)
+    myFFrameRate = unreal.FrameRate(numerator=new_numerator, denominator=new_denominator)
+
+    if denominator != new_denominator or numerator != new_numerator:
+        message = ('WARNING: Frame rate denominator and numerator must be an int32 over zero.\n'
+                   'Float denominator and numerator is not supported in Unreal Engine Sequencer.\n\n'
+                   f'- Before: Denominator: {denominator}, Numerator: {numerator}\n'
+                   f'- After: Denominator: {new_denominator}, Numerator: {new_numerator}')
+        import_module_unreal_utils.show_warning_message("Frame Rate Adjustment Warning", message)
+
+    return myFFrameRate
 
 def get_section_all_channel(section: unreal.MovieSceneSection): 
     if import_module_unreal_utils.is_unreal_version_greater_or_equal(5,0):
@@ -79,32 +111,42 @@ def create_new_sequence():
         return 'ERROR: level sequencer factory_create fail'
     return seq
 
-def Sequencer_add_new_camera(seq: unreal.LevelSequence, camera_target_class = unreal.CineCameraActor, camera_name = "MyCamera", is_spawnable_camera = False) -> unreal.MovieSceneBindingProxy:
+def Sequencer_add_new_camera(seq: unreal.LevelSequence, camera_target_class = unreal.CineCameraActor, camera_name = "MyCamera", is_spawnable_camera = False) -> MovieSceneBindingProxy:
 
 
 
     #Create bindings
     if is_spawnable_camera:
-        # Create spawnable camera
-        camera_binding = seq.add_spawnable_from_class(camera_target_class)
-        camera_binding.get_object_template().set_actor_label(camera_name)
+        '''
+        I preffer create an level camera an convert to spawnable than use seq.add_spawnable_from_class()
+        Because with seq.add_spawnable_from_class() it not possible to change actor name an add create camera_component_binding.
+        Need more control in the API.
+        '''
 
-        '''
-        @TODO Je ne suis pas sûr que ce soit la meilleure méthode… 
-        Depuis camera_binding si j'utilise add_spawnable_from_class() pour ajouter mon spawnable il est impossible de récupérer le camera component.
-        Et donc impossible de cree ma track camera_component_binding via add_possessable().
-        Du coup je crée une caméra temporaire me permettant de crée ma track camera_component_binding,
-        Ensuite je supprime ma caméra temporaire et reparent la track sur le spawnable…
-        '''
+        # Create camera
         temp_camera_actor = unreal.EditorLevelLibrary().spawn_actor_from_class(camera_target_class, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
+        temp_camera_actor.set_actor_label(camera_name)
 
-
-
+        # Add camera to sequencer
         temp_camera_binding = seq.add_possessable(temp_camera_actor)
-        camera_component_binding = seq.add_possessable(temp_camera_actor.get_cine_camera_component())
+
+        if isinstance(temp_camera_actor, unreal.CineCameraActor):
+            camera_component_binding = seq.add_possessable(temp_camera_actor.get_cine_camera_component())
+        elif isinstance(temp_camera_actor, unreal.CameraActor):
+            camera_component_binding = seq.add_possessable(temp_camera_actor.camera_component)
+        else:
+            camera_component_binding = seq.add_possessable(temp_camera_actor.get_component_by_class(unreal.CameraComponent)) 
+
+
+        # Convert to spawnable
+        camera_binding = seq.add_spawnable_from_instance(temp_camera_actor)
         camera_component_binding.set_parent(camera_binding)
         temp_camera_binding.remove()
+
+        #Clean old camera
         temp_camera_actor.destroy_actor()
+
+
 
     else:
         # Create possessable camera
@@ -122,7 +164,7 @@ def Sequencer_add_new_camera(seq: unreal.LevelSequence, camera_target_class = un
 
 
 
-def update_sequencer_camera_tracks(seq: unreal.LevelSequence, camera_binding: unreal.MovieSceneBindingProxy, camera_component_binding: unreal.MovieSceneBindingProxy, camera_tracks:  Dict[str, Any]):
+def update_sequencer_camera_tracks(seq: unreal.LevelSequence, camera_binding: MovieSceneBindingProxy, camera_component_binding: MovieSceneBindingProxy, camera_tracks:  Dict[str, Any]):
 
 
     # Transform
@@ -176,14 +218,17 @@ def update_sequencer_camera_tracks(seq: unreal.LevelSequence, camera_binding: un
     AddSequencerSectionFloatKeysByIniFile(sectionAperture, camera_tracks['camera_aperture'])
 
     if camera_tracks['camera_type'] == "ARCHVIS":
-        # Camera Shift X/Y
-        TrackArchVisShift = camera_component_binding.add_track(unreal.MovieSceneDoubleVectorTrack)
-        TrackArchVisShift.set_property_name_and_path('Manual Correction (Shift)', 'ProjectionOffset')
-        TrackArchVisShift.set_num_channels_used(2)
-        SectionArchVisShift = TrackArchVisShift.add_section()
-        SectionArchVisShift.set_end_frame_bounded(False)
-        SectionArchVisShift.set_start_frame_bounded(False)
-        AddSequencerSectionDoubleVectorKeysByIniFile(SectionArchVisShift, camera_tracks['archvis_camera_shift'])
+
+        # MovieSceneDoubleVectorTrack not supported in Unreal Engine 5.0 and older
+        if import_module_unreal_utils.is_unreal_version_greater_or_equal(5,0):
+            # Camera Shift X/Y
+            TrackArchVisShift = camera_component_binding.add_track(unreal.MovieSceneDoubleVectorTrack)
+            TrackArchVisShift.set_property_name_and_path('Manual Correction (Shift)', 'ProjectionOffset')
+            TrackArchVisShift.set_num_channels_used(2)
+            SectionArchVisShift = TrackArchVisShift.add_section()
+            SectionArchVisShift.set_end_frame_bounded(False)
+            SectionArchVisShift.set_start_frame_bounded(False)
+            AddSequencerSectionDoubleVectorKeysByIniFile(SectionArchVisShift, camera_tracks['archvis_camera_shift'])
 
         # Disable auto correct perspective
         TrackArchVisCorrectPersp = camera_component_binding.add_track(unreal.MovieSceneBoolTrack)
@@ -202,5 +247,10 @@ def update_sequencer_camera_tracks(seq: unreal.LevelSequence, camera_binding: un
 
     # @TODO Need found a way to set this values...
     #camera_component.set_editor_property('aspect_ratio', camera_tracks['desired_screen_ratio'])
+    
+    #Projection mode supported since UE 4.26.
+    #camera_component.set_editor_property('projection_mode', camera_tracks['projection_mode'])
+    #camera_component.set_editor_property('ortho_width', camera_tracks['ortho_scale'])
+        
     #camera_component.lens_settings.set_editor_property('min_f_stop', camera_tracks['ue_lens_minfstop'])
     #camera_component.lens_settings.set_editor_property('max_f_stop', camera_tracks['ue_lens_maxfstop'])

@@ -82,18 +82,7 @@ def RemoveFolderTree(folder):
         shutil.rmtree(dirpath, ignore_errors=True)
 
 
-def GetChilds(obj):
-    # Get all direct childs of a object
 
-    ChildsObj = []
-    for childObj in bpy.data.objects:
-        if childObj.library is None:
-            pare = childObj.parent
-            if pare is not None:
-                if pare.name == obj.name:
-                    ChildsObj.append(childObj)
-
-    return ChildsObj
 
 
 def getRootBoneParent(bone):
@@ -122,20 +111,6 @@ def SetCollectionUse(collection):
         print(collection.name, " not found in view_layer.layer_collection")
 
 
-def GetRecursiveChilds(obj):
-    # Get all recursive childs of a object
-
-    saveObjs = []
-
-    def tryAppend(obj):
-        if obj.name in bpy.context.scene.objects:
-            saveObjs.append(obj)
-
-    for newobj in GetChilds(obj):
-        for childs in GetRecursiveChilds(newobj):
-            tryAppend(childs)
-        tryAppend(newobj)
-    return saveObjs
 
 
 def ConvertToConvexHull(obj):

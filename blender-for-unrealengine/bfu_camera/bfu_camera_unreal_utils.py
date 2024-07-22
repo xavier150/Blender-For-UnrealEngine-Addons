@@ -36,3 +36,13 @@ def get_camera_unreal_component(camera: bpy.types.Object):
     elif camera_type == "CUSTOM":
         return camera.bfu_custom_camera_component
     
+def get_camera_unreal_projection(camera: bpy.types.Object):
+    # Engin ref:
+    camera_type = camera.data.type
+    if camera_type == "PERSP":
+        return "Perspective"
+    elif camera_type == "ORTHO":
+        return "Orthographic"
+    elif camera_type == "PANO":
+        # Panoramic is not yet supported native in Unreal Engine.
+        return "Perspective"

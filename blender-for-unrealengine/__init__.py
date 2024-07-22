@@ -34,11 +34,19 @@ import bpy
 import importlib
 from . import bps
 from . import bbpl
+from . import bfu_assets_manager
 from . import bfu_propertys
+from . import bfu_static_mesh
+from . import bfu_skeletal_mesh
+from . import bfu_alembic_animation
+from . import bfu_groom
 from . import bfu_camera
 from . import bfu_spline
 from . import bfu_collision
+from . import bfu_socket
+from . import bfu_material
 from . import bfu_vertex_color
+from . import bfu_lod
 from . import bfu_custom_property
 from . import bfu_addon_parts
 from . import bfu_export_procedure
@@ -54,6 +62,7 @@ from . import bfu_basics
 from . import bfu_utils
 from . import bfu_unreal_utils
 from . import bfu_naming
+from . import fbxio
 from . import bfu_export
 from . import bfu_backward_compatibility
 from . import bfu_cached_asset_list
@@ -63,16 +72,32 @@ if "bps" in locals():
     importlib.reload(bps)
 if "bbpl" in locals():
     importlib.reload(bbpl)
+if "bfu_assets_manager" in locals():
+    importlib.reload(bfu_assets_manager)
 if "bfu_propertys" in locals():
     importlib.reload(bfu_propertys)
+if "bfu_static_mesh" in locals():
+    importlib.reload(bfu_static_mesh)
+if "bfu_skeletal_mesh" in locals():
+    importlib.reload(bfu_skeletal_mesh)
+if "bfu_alembic_animation" in locals():
+    importlib.reload(bfu_alembic_animation)
+if "bfu_groom" in locals():
+    importlib.reload(bfu_groom)
 if "bfu_camera" in locals():
     importlib.reload(bfu_camera)
 if "bfu_spline" in locals():
     importlib.reload(bfu_spline)
 if "bfu_collision" in locals():
     importlib.reload(bfu_collision)
+if "bfu_socket" in locals():
+    importlib.reload(bfu_socket)
+if "bfu_material" in locals():
+    importlib.reload(bfu_material)
 if "bfu_vertex_color" in locals():
     importlib.reload(bfu_vertex_color)
+if "bfu_lod" in locals():
+    importlib.reload(bfu_lod)
 if "bfu_custom_property" in locals():
     importlib.reload(bfu_custom_property)
 if "bfu_addon_parts" in locals():
@@ -103,6 +128,8 @@ if "bfu_unreal_utils" in locals():
     importlib.reload(bfu_unreal_utils)
 if "bfu_naming" in locals():
     importlib.reload(bfu_naming)
+if "fbxio" in locals():
+    importlib.reload(fbxio)
 if "bfu_export" in locals():
     importlib.reload(bfu_export)
 if "bfu_backward_compatibility" in locals():
@@ -113,11 +140,10 @@ if "bfu_cached_asset_list" in locals():
 bl_info = {
     'name': 'Blender for UnrealEngine',
     'author': 'Loux Xavier (BleuRaven)',
-    'version': (0, 4, 2),
+    'version': (0, 4, 3),
     'blender': (2, 80, 0),
     'location': 'View3D > UI > Unreal Engine',
-    'description': "This add-ons allows to easily export several "
-    "objects at the same time for use in Unreal Engine.",
+    'description': "This add-ons allows to easily export several objects at the same time and import in Unreal Engine.",
     'warning': '',
     "wiki_url": "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki",
     'tracker_url': 'https://github.com/xavier150/Blender-For-UnrealEngine-Addons/issues',
@@ -140,11 +166,19 @@ def register():
         bpy.utils.register_class(cls)
 
     bbpl.register()
+    bfu_assets_manager.register()
     bfu_propertys.register()
+    bfu_static_mesh.register()
+    bfu_skeletal_mesh.register()
+    bfu_alembic_animation.register()
+    bfu_groom.register()
     bfu_camera.register()
     bfu_spline.register()
     bfu_collision.register()
+    bfu_socket.register()
+    bfu_material.register()
     bfu_vertex_color.register()
+    bfu_lod.register()
     bfu_custom_property.register()
     bfu_addon_parts.register()
     bfu_export_procedure.register()
@@ -168,9 +202,17 @@ def unregister():
     bfu_export_procedure.unregister()
     bfu_addon_parts.unregister()
     bfu_custom_property.unregister()
+    bfu_lod.unregister()
     bfu_vertex_color.unregister()
+    bfu_material.unregister()
+    bfu_socket.unregister()
     bfu_collision.unregister()
     bfu_spline.unregister()
     bfu_camera.unregister()
+    bfu_alembic_animation.unregister()
+    bfu_groom.unregister()
+    bfu_skeletal_mesh.unregister()
+    bfu_static_mesh.unregister()
     bfu_propertys.unregister()
+    bfu_assets_manager.unregister()
     bbpl.unregister()

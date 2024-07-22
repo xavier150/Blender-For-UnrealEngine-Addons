@@ -30,6 +30,7 @@ from typing import List
 from . import bbpl
 from . import bps
 from . import bfu_basics
+from . import bfu_assets_manager
 
 class SavedBones():
 
@@ -241,7 +242,7 @@ def GetExportDesiredChilds(obj):
     # Get only all child objects that must be exported with parent object
 
     DesiredObj = []
-    for child in bfu_basics.GetRecursiveChilds(obj):
+    for child in bbpl.basics.get_recursive_obj_childs(obj):
         if child.bfu_export_type != "dont_export":
             if child.name in bpy.context.window.view_layer.objects:
                 DesiredObj.append(child)
@@ -249,100 +250,7 @@ def GetExportDesiredChilds(obj):
     return DesiredObj
 
 
-def GetSocketDesiredChild(targetObj):
-    sockets = []
-    for obj in GetExportDesiredChilds(targetObj):
-        if IsASocket(obj):
-            sockets.append(obj)
 
-    return sockets
-
-def GetSocketsExportName(socket):
-    '''
-    Get the current socket custom name
-    '''
-    if socket.bfu_use_socket_custom_Name:
-        return socket.bfu_socket_custom_Name
-    return socket.name[7:]
-
-def GetSkeletalMeshSockets(obj):
-    if obj is None:
-        return
-    if obj.type != "ARMATURE":
-        return
-
-    addon_prefs = bfu_basics.GetAddonPrefs()
-    data = {}
-    sockets = []
-
-    for socket in GetSocketDesiredChild(obj):
-        sockets.append(socket)
-
-    if GetAssetType(obj) != "SkeletalMesh":
-        return
-
-    data['Sockets'] = []
-    # config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
-
-    for socket in sockets:
-        if IsASocket(socket):
-            SocketName = GetSocketsExportName(socket)
-
-        if socket.parent is None:
-            print("Socket ", socket.name, " parent is None!")
-            break
-        if socket.parent.type != "ARMATURE":
-            print("Socket parent", socket.parent.name, " parent is not and Armature!")
-            break
-
-        if socket.parent.bfu_export_deform_only:
-            b = bfu_basics.getFirstDeformBoneParent(socket.parent.data.bones[socket.parent_bone])
-        else:
-            b = socket.parent.data.bones[socket.parent_bone]
-
-        bbpl.anim_utils.reset_armature_pose(socket.parent)
-        # GetRelativePostion
-        bml = b.matrix_local  # Bone
-        am = socket.parent.matrix_world  # Armature
-        em = socket.matrix_world  # Socket
-        RelativeMatrix = (bml.inverted() @ am.inverted() @ em)
-        
-        if obj.bfu_skeleton_export_procedure == 'ue-standard':
-            RelativeMatrix = mathutils.Matrix.Rotation(math.radians(90), 4, 'Y') @ RelativeMatrix
-            RelativeMatrix = mathutils.Matrix.Rotation(math.radians(-90), 4, 'Z') @ RelativeMatrix
-        t = RelativeMatrix.to_translation()
-        r = RelativeMatrix.to_euler()
-        s = socket.scale*addon_prefs.skeletalSocketsImportedSize
-
-        # Convet to array for Json and convert value for Unreal
-        if obj.bfu_skeleton_export_procedure == 'ue-standard':
-            array_location = [t[0], t[1]*-1, t[2]]
-            array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]
-            array_scale = [s[0], s[1], s[2]]
-
-        else:
-            array_location = [t[0], t[1]*-1, t[2]]
-            array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]
-            array_scale = [s[0], s[1], s[2]]
-
-        MySocket = {}
-        MySocket["SocketName"] = SocketName
-        MySocket["BoneName"] = b.name.replace('.', '_')
-        MySocket["Location"] = array_location
-        MySocket["Rotation"] = array_rotation
-        MySocket["Scale"] = array_scale
-        data['Sockets'].append(MySocket)
-
-    return data['Sockets']
-
-
-def GetSubObjectDesiredChild(targetObj):
-    sub_objects = []
-    for obj in GetExportDesiredChilds(targetObj):
-        if IsASubObject(obj):
-            sub_objects.append(obj)
-
-    return sub_objects
 
 
 def RemoveAllConsraints(obj):
@@ -433,7 +341,8 @@ class ShapeKeysCurveScale():
         self.proxy_drivers = self.ShapeKeysDriverRefs()  # Save driver data as proxy
 
     class DriverProxyData():
-        def __init__(self, driver):
+        def __init__(self, obj, driver):
+            self.obj = obj
             self.driver = driver
             self.keyframe_points = []
             self.modifiers = []
@@ -478,16 +387,37 @@ class ShapeKeysCurveScale():
                     mod.coefficients[0] = proxy_driver.modifiers[x].scale  # coef: +
                     mod.coefficients[1] = proxy_driver.modifiers[x].scale  # coef: x
 
+    def get_driver_key_block(self, proxy_drivers: DriverProxyData):
+        pass
+        #driver_split = driver.data_path.split('"')
+        #if len(driver_split) >= 2:
+        #    driver_name = driver_split[1]
+        #    if driver_name in 
+        #    bpy.context.selected_objects[0].data.shape_keys.key_blocks[1]
+
     def ShapeKeysDriverRefs(self):
         drivers = []
+        obj_list = bpy.context.selected_objects
         if self.export_as_proxy is False:
-            for obj in bpy.context.selected_objects:
+            for obj in obj_list:
                 if obj.type == "MESH":
                     if obj.data.shape_keys is not None:
                         if obj.data.shape_keys.animation_data is not None:
                             if obj.data.shape_keys.animation_data.drivers is not None:
-                                for driver in obj.data.shape_keys.animation_data.drivers:
-                                    drivers.append(self.DriverProxyData(driver))
+                                for driver_curve in obj.data.shape_keys.animation_data.drivers:
+                                    # Check if has location context.
+                                    need_rescale_curve = False
+                                    driver = driver_curve.driver
+                                    for variable in driver.variables:
+                                        if variable.type == "TRANSFORMS":
+                                            for target in variable.targets:
+                                                if "LOC" in target.transform_type:
+                                                    need_rescale_curve = True
+                                        elif variable.type == "LOC_DIFF":
+                                            need_rescale_curve = True
+                                    
+                                    if need_rescale_curve:
+                                        drivers.append(self.DriverProxyData(obj, driver_curve))
         return drivers
 
 
@@ -513,13 +443,15 @@ def EvaluateCameraPosition(camera):
 def EvaluateCameraPositionForUnreal(camera, previous_euler=mathutils.Euler()):
     # Get Transfrom
     unit_scale = get_scene_unit_scale()
+    display_size = camera.data.display_size
+
     matrix_y = mathutils.Matrix.Rotation(math.radians(90.0), 4, 'Y')
     matrix_x = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'X')
     matrix = camera.matrix_world @ matrix_y @ matrix_x
     loc = matrix.to_translation() * 100 * unit_scale
     loc += camera.bfu_additional_location_for_export
     r = matrix.to_euler("XYZ", previous_euler)
-    s = matrix.to_scale() * unit_scale
+    s = matrix.to_scale() * unit_scale * display_size
 
     loc *= mathutils.Vector([1, -1, 1])
     array_rotation = [math.degrees(r[0]), math.degrees(r[1])*-1, math.degrees(r[2])*-1]  # Roll Pith Yaw XYZ
@@ -603,76 +535,6 @@ def GetUseCustomLightMapResolution(obj):
     return True
 
 
-def GetExportRealSurfaceArea(obj):
-
-    local_view_areas = bbpl.scene_utils.move_to_global_view()
-    bbpl.utils.safe_mode_set('OBJECT')
-
-    SavedSelect = bbpl.utils.UserSelectSave()
-    SavedSelect.save_current_select()
-    SelectParentAndDesiredChilds(obj)
-
-    bpy.ops.object.duplicate()
-    bpy.ops.object.duplicates_make_real(
-        use_base_parent=True,
-        use_hierarchy=True
-        )
-
-    ApplyNeededModifierToSelect()
-    bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
-    for selectObj in bpy.context.selected_objects:
-        # Remove unable to convert mesh
-        if selectObj.type == "EMPTY" or selectObj.type == "CURVE":
-            CleanDeleteObjects([selectObj])
-
-    for selectObj in bpy.context.selected_objects:
-        # Remove collision box
-        if CheckIsCollision(selectObj):
-            CleanDeleteObjects([selectObj])
-
-    if bpy.context.view_layer.objects.active is None:
-        # When the active id a empty
-        bpy.context.view_layer.objects.active = bpy.context.selected_objects[0]
-    bpy.ops.object.convert(target='MESH')
-
-    active = bpy.context.view_layer.objects.active
-
-    CleanJoinSelect()
-    active = bpy.context.view_layer.objects.active
-    area = bfu_basics.GetSurfaceArea(active)
-    CleanDeleteObjects(bpy.context.selected_objects)
-    SavedSelect.reset_select_by_ref()
-    bbpl.scene_utils.move_to_local_view(local_view_areas)
-    return area
-
-
-def GetCompuntedLightMap(obj):
-    if obj.bfu_static_mesh_light_map_mode == "Default":
-        return -1
-
-    if obj.bfu_static_mesh_light_map_mode == "CustomMap":
-        return obj.bfu_static_mesh_custom_light_map_res
-
-    if obj.bfu_static_mesh_light_map_mode == "SurfaceArea":
-        # Get the area
-        area = obj.computedStaticMeshLightMapRes
-        area **= 0.5  # Adapte for light map
-
-        if obj.bfu_use_static_mesh_light_map_world_scale:
-            # Turn area at world scale
-            x = max(obj.scale.x, obj.scale.x*-1)
-            y = max(obj.scale.y, obj.scale.y*-1)
-            z = max(obj.scale.z, obj.scale.z*-1)
-            objScale = (x + y + z)/3
-            area *= objScale
-
-        # Computed light map equal light map scale for a plane vvv
-        area *= get_scene_unit_scale()
-        area *= obj.bfu_static_mesh_light_map_surface_scale/2
-        if obj.bfu_static_mesh_light_map_round_power_of_two:
-
-            return bps.math.nearest_power_of_two(int(round(area)))
-        return int(round(area))
 
 
 def GetActionType(action):
@@ -696,22 +558,7 @@ def GetIsAnimation(animation_type):
     return False
 
 
-def GetAssetType(obj):
-    # Return asset type of a object
 
-    if obj.type == "CAMERA":
-        return "Camera"
-
-    if obj.bfu_export_as_alembic:
-        return "Alembic"
-
-    if obj.type == "ARMATURE" and not obj.bfu_export_skeletal_mesh_as_static_mesh:
-        return "SkeletalMesh"
-    
-    if obj.type == "CURVE" and not obj.bfu_export_spline_as_static_mesh:
-        return "Spline"
-
-    return "StaticMesh"
 
 
 def CheckIsCollision(target):
@@ -772,15 +619,8 @@ def SelectParentAndDesiredChilds(obj):
     bpy.ops.object.select_all(action='DESELECT')
     for selectObj in GetExportDesiredChilds(obj):
         if selectObj.name in bpy.context.view_layer.objects:
-            if GetAssetType(obj) == "SkeletalMesh":
-                # With skeletal mesh the socket must be not exported,
-                # ue4 read it like a bone
-                if not fnmatch.fnmatchcase(selectObj.name, "SOCKET*"):
-                    selectObj.select_set(True)
-                    selectedObjs.append(selectObj)
-            else:
-                selectObj.select_set(True)
-                selectedObjs.append(selectObj)
+            selectObj.select_set(True)
+            selectedObjs.append(selectObj)
 
     if obj.name in bpy.context.view_layer.objects:
         obj.select_set(True)
@@ -802,15 +642,8 @@ def SelectParentAndSpecificChilds(active, objects):
     bpy.ops.object.select_all(action='DESELECT')
     for obj in objects:
         if obj.name in bpy.context.view_layer.objects:
-            if GetAssetType(active) == "SkeletalMesh":
-                # With skeletal mesh the socket must be not exported,
-                # UE read it like a bone
-                if not fnmatch.fnmatchcase(obj.name, "SOCKET*"):
-                    obj.select_set(True)
-                    selectedObjs.append(obj)
-            else:
-                obj.select_set(True)
-                selectedObjs.append(obj)
+            obj.select_set(True)
+            selectedObjs.append(obj)
 
     if active.name in bpy.context.view_layer.objects:
         active.select_set(True)
@@ -1022,7 +855,7 @@ class SkeletalExportScale():
 
         # Save childs location
         self.childs = []
-        for child in bfu_basics.GetChilds(armature):
+        for child in bbpl.basics.get_obj_childs(armature):
             self.childs.append(self.SkeletalChilds(child))
 
     class SkeletalChilds():
@@ -1215,51 +1048,9 @@ def GetCollectionExportDir(col, abspath=False):
     else:
         return dirpath
 
-
-def GetObjExportName(obj):
-    # Return Proxy Name for Proxy and Object Name for other
-    if GetAssetType(obj) == "SkeletalMesh":
-        if GetExportAsProxy(obj):
-            proxy_child = GetExportProxyChild(obj)
-            if proxy_child is not None:
-                return proxy_child.name
-    return bfu_basics.ValidFilename(obj.name)
-
-
-def GetObjExportDir(obj, abspath=False):
-    # Generate assset folder path
+def get_export_folder_name(obj):
     folder_name = bfu_basics.ValidDirName(obj.bfu_export_folder_name)
-    obj_name = bfu_basics.ValidDirName(obj.name)  # Fix obj name
-
-    scene = bpy.context.scene
-    if GetAssetType(obj) == "SkeletalMesh":
-        dirpath = os.path.join(
-            scene.bfu_export_skeletal_file_path,
-            folder_name,
-            GetObjExportName(obj))
-    if GetAssetType(obj) == "Alembic":
-        dirpath = os.path.join(
-            scene.bfu_export_alembic_file_path,
-            folder_name,
-            obj_name)
-    if GetAssetType(obj) == "StaticMesh":
-        dirpath = os.path.join(
-            scene.bfu_export_static_file_path,
-            folder_name)
-    if GetAssetType(obj) == "Camera":
-        dirpath = os.path.join(
-            scene.bfu_export_camera_file_path,
-            folder_name)
-    if GetAssetType(obj) == "Spline":
-        dirpath = os.path.join(
-            scene.bfu_export_spline_file_path,
-            folder_name)
-    if abspath:
-        return bpy.path.abspath(dirpath)
-
-    else:
-        return dirpath
-
+    return folder_name
 
 def GetImportAssetScriptCommand():
     scene = bpy.context.scene
@@ -1267,31 +1058,6 @@ def GetImportAssetScriptCommand():
     absdirpath = bpy.path.abspath(scene.bfu_export_other_file_path)
     fullpath = os.path.join(absdirpath, fileName)
     return 'py "'+fullpath+'"'
-
-
-
-
-def GetImportSkeletalMeshSocketScriptCommand(obj):
-
-    if obj:
-        if obj.type == "ARMATURE":
-            sockets = GetSkeletalMeshSockets(obj)
-            t = "SocketCopyPasteBuffer" + "\n"
-            t += "NumSockets=" + str(len(sockets)) + "\n"
-            t += "IsOnSkeleton=1" + "\n"
-            for socket in sockets:
-                t += "Begin Object Class=/Script/Engine.SkeletalMeshSocket" + "\n"
-                t += "\t" + 'SocketName="' + socket["SocketName"] + '"' + "\n"
-                t += "\t" + 'BoneName="' + socket["BoneName"] + '"' + "\n"
-                loc = socket["Location"]
-                r = socket["Rotation"]
-                s = socket["Scale"]
-                t += "\t" + 'RelativeLocation=' + "(X="+str(loc[0])+",Y="+str(loc[1])+",Z="+str(loc[2])+")" + "\n"
-                t += "\t" + 'RelativeRotation=' + "(Pitch="+str(r[1])+",Yaw="+str(r[2])+",Roll="+str(r[0])+")" + "\n"
-                t += "\t" + 'RelativeScale=' + "(X="+str(s[0])+",Y="+str(s[1])+",Z="+str(s[2])+")" + "\n"
-                t += "End Object" + "\n"
-            return t
-    return "Please select an armature."
 
 
 def GetImportSequencerScriptCommand():
@@ -1310,7 +1076,7 @@ def GetAnimSample(obj):
 
 def GetArmatureRootBones(obj):
     rootBones = []
-    if GetAssetType(obj) == "SkeletalMesh":
+    if obj.type == "ARMATURE":
 
         if not obj.bfu_export_deform_only:
             for bone in obj.data.bones:
@@ -1338,247 +1104,9 @@ def GetObjExportScale(obj):
     return obj.bfu_export_global_scale
 
 
-def GenerateUe4Name(name):
-    # Generate a new name with suffix number
-
-    def IsValidName(testedName):
-        # Checks if objet end with number suffix
-
-        if (testedName.split("_")[-1]).isnumeric():
-            number = int(testedName.split("_")[-1])
-        else:
-            # Last suffix is not a number
-            return False
-
-        # Checks if an object uses this name. (If not is a valid name)
-        for obj in bpy.context.scene.objects:
-            if testedName == obj.name:
-                return False
-
-        return True
-
-    newName = ""
-    if IsValidName(name):
-        return name
-    else:
-        for num in range(0, 1000):
-            newName = name+"_"+str('%02d' % num)  # Min two pad
-            if IsValidName(newName):
-                return newName
-
-    return name
 
 
-def CreateCollisionMaterial():
-    addon_prefs = bfu_basics.GetAddonPrefs()
 
-    mat = bpy.data.materials.get("UE4Collision")
-    if mat is None:
-        mat = bpy.data.materials.new(name="UE4Collision")
-
-    mat.diffuse_color = addon_prefs.collisionColor
-    mat.use_nodes = False
-    if bpy.context.scene.render.engine == 'CYCLES':
-        # sets up the nodes to create a transparent material
-        # with GLSL mat in Cycle
-        mat.use_nodes = True
-        node_tree = mat.node_tree
-        nodes = node_tree.nodes
-        nodes.clear()
-        out = nodes.new('ShaderNodeOutputMaterial')
-        out.location = (0, 0)
-        mix = nodes.new('ShaderNodeMixShader')
-        mix.location = (-200, 000)
-        mix.inputs[0].default_value = (0.95)
-        diff = nodes.new('ShaderNodeBsdfDiffuse')
-        diff.location = (-400, 100)
-        diff.inputs[0].default_value = (0, 0.6, 0, 1)
-        trans = nodes.new('ShaderNodeBsdfTransparent')
-        trans.location = (-400, -100)
-        trans.inputs[0].default_value = (0, 0.6, 0, 1)
-        node_tree.links.new(diff.outputs['BSDF'], mix.inputs[1])
-        node_tree.links.new(trans.outputs['BSDF'], mix.inputs[2])
-        node_tree.links.new(mix.outputs['Shader'], out.inputs[0])
-    return mat
-
-
-def Ue4SubObj_set(SubType):
-    # Convect obj to ue4 sub objects
-    # (Collisions Shapes or Socket)
-
-    def DeselectAllWithoutActive():
-        for obj in bpy.context.selected_objects:
-            if obj != bpy.context.active_object:
-                obj.select_set(False)
-
-    ownerObj = bpy.context.active_object
-    objList = bpy.context.selected_objects
-    if ownerObj is None:
-        return []
-
-    ConvertedObjs = []
-
-    for obj in objList:
-        DeselectAllWithoutActive()
-        obj.select_set(True)
-        if obj != ownerObj:
-
-            # SkeletalMesh Colider
-            if obj.type == 'MESH':
-                bfu_basics.ConvertToConvexHull(obj)
-                obj.modifiers.clear()
-                obj.data.materials.clear()
-                obj.active_material_index = 0
-                obj.data.materials.append(CreateCollisionMaterial())
-
-                # Set the name of the Prefix depending on the
-                # type of collision in agreement with unreal FBX Pipeline
-                if SubType == "Box":
-                    prefixName = "UBX_"
-                elif SubType == "Capsule":
-                    prefixName = "UCP_"
-                elif SubType == "Sphere":
-                    prefixName = "USP_"
-                elif SubType == "Convex":
-                    prefixName = "UCX_"
-
-                obj.name = GenerateUe4Name(prefixName+ownerObj.name)
-                obj.show_wire = True
-                obj.show_transparent = True
-                bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
-                ConvertedObjs.append(obj)
-
-            # StaticMesh Socket
-            if obj.type == 'EMPTY' and SubType == "ST_Socket":
-                if ownerObj.type == 'MESH':
-                    if IsASocket(obj):
-                        obj.name = GenerateUe4Name(obj.name)
-                    else:
-                        obj.name = GenerateUe4Name("SOCKET_"+obj.name)
-                    bpy.ops.object.parent_set(type='OBJECT',keep_transform=True)
-                    ConvertedObjs.append(obj)
-
-            # SkeletalMesh Socket
-            if obj.type == 'EMPTY' and SubType == "SKM_Socket":
-                if ownerObj.type == 'ARMATURE':
-
-                    if IsASocket(obj):
-                        obj.name = GenerateUe4Name(obj.name)
-                    else:
-                        obj.name = GenerateUe4Name("SOCKET_"+obj.name)
-                    bpy.ops.object.parent_set(type='BONE',keep_transform=True)
-                    ConvertedObjs.append(obj)
-
-    DeselectAllWithoutActive()
-    for obj in objList:
-        obj.select_set(True)  # Resets previous selected object
-    return ConvertedObjs
-
-
-def UpdateUe4Name(SubType, objList):
-    # Convect obj to ue4 sub objects (Collisions Shapes or Socket)
-
-    for obj in objList:
-        ownerObj = obj.parent
-
-        if ownerObj is not None:
-            if obj != ownerObj:
-
-                # SkeletalMesh Colider
-                if obj.type == 'MESH':
-
-                    # Set the name of the Prefix depending
-                    # on the type of collision in agreement
-                    # with unreal FBX Pipeline
-
-                    if SubType == "Box":
-                        prefixName = "UBX_"
-                    elif SubType == "Capsule":
-                        prefixName = "UCP_"
-                    elif SubType == "Sphere":
-                        prefixName = "USP_"
-                    elif SubType == "Convex":
-                        prefixName = "UCX_"
-
-                    obj.name = GenerateUe4Name(prefixName+ownerObj.name)
-
-                # StaticMesh Socket
-                if obj.type == 'EMPTY' and SubType == "ST_Socket":
-                    if ownerObj.type == 'MESH':
-                        if not IsASocket(obj):
-                            obj.name = GenerateUe4Name("SOCKET_"+obj.name)
-
-                # SkeletalMesh Socket
-                if obj.type == 'EMPTY' and SubType == "SKM_Socket":
-                    if ownerObj.type == 'ARMATURE':
-                        if not IsASocket(obj):
-                            obj.name = GenerateUe4Name("SOCKET_"+obj.name)
-
-
-def IsASocket(obj):
-    '''
-    Retrun True is object is an Socket.
-    https://docs.unrealengine.com/en-US/WorkingWithContent/Importing/FBX/StaticMeshes/#sockets
-    '''
-    if obj.type == "EMPTY":
-        cap_name = obj.name.upper()
-        if cap_name.startswith("SOCKET_"):
-            return True
-
-    return False
-
-
-def IsACollision(obj):
-    '''
-    Retrun True is object is an Collision.
-    https://docs.unrealengine.com/en-US/WorkingWithContent/Importing/FBX/StaticMeshes/#collision
-    '''
-    if obj.type == "MESH":
-        cap_name = obj.name.upper()
-        if cap_name.startswith("UBX_"):
-            return True
-        elif cap_name.startswith("UCP_"):
-            return True
-        elif cap_name.startswith("USP_"):
-            return True
-        elif cap_name.startswith("UCX_"):
-            return True
-
-    return False
-
-
-def IsASubObject(obj):
-    '''
-    Retrun True is object is an Socket or and Collision.
-    '''
-    if IsASocket(obj) or IsACollision(obj):
-        return True
-    return False
-
-
-def UpdateAreaLightMapList(objects_to_update=None):
-    # Updates area LightMap
-
-    if objects_to_update is not None:
-        objs = objects_to_update
-    else:
-        objs = []
-        exportObjs = GetAllobjectsByExportType("export_recursive")
-        for exportObj in exportObjs:
-            if GetAssetType(exportObj) == "StaticMesh":
-                objs.append(exportObj)
-
-    UpdatedRes = 0
-
-    counter = bps.utils.CounterTimer()
-    for obj in objs:
-        obj.computedStaticMeshLightMapRes = GetExportRealSurfaceArea(obj)
-        UpdatedRes += 1
-        UpdateProgress(
-            "Update LightMap",
-            (UpdatedRes/len(objs)),
-            counter.get_time())
-    return UpdatedRes
 
 
 def AddFrontEachLine(ImportScript, text="\t"):

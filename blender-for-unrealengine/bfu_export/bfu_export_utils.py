@@ -21,6 +21,7 @@ import bpy
 import math
 import os
 import mathutils
+from bpy_extras.io_utils import axis_conversion
 from . import bfu_export_get_info
 from .. import bfu_write_text
 from .. import bfu_basics
@@ -30,6 +31,9 @@ from .. import bfu_addon_parts
 from .. import bfu_camera
 from .. import bfu_vertex_color
 from .. import bfu_export_procedure
+from .. import bfu_collision
+from .. import bfu_socket
+
 
 dup_temp_name = "BFU_Temp"  # DuplicateTemporarilyNameForUe4Export
 Export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
@@ -270,7 +274,7 @@ def SetSocketsExportName(obj):
     '''
 
     scene = bpy.context.scene
-    for socket in bfu_utils.GetSocketDesiredChild(obj):
+    for socket in bfu_socket.bfu_socket_utils.get_socket_desired_child(obj):
         if socket.bfu_use_socket_custom_Name:
             if socket.bfu_socket_custom_Name not in scene.objects:
 
@@ -290,7 +294,7 @@ def SetSocketsExportTransform(obj):
     # Set socket Transform for Unreal
 
     addon_prefs = bfu_basics.GetAddonPrefs()
-    for socket in bfu_utils.GetSocketDesiredChild(obj):
+    for socket in bfu_socket.bfu_socket_utils.get_socket_desired_child(obj):
         socket["BFU_PreviousSocketScale"] = socket.scale
         socket["BFU_PreviousSocketLocation"] = socket.location
         socket["BFU_PreviousSocketRotationEuler"] = socket.rotation_euler
@@ -311,7 +315,7 @@ def SetSocketsExportTransform(obj):
 def ResetSocketsExportName(obj):
     # Reset socket Name
 
-    for socket in bfu_utils.GetSocketDesiredChild(obj):
+    for socket in bfu_socket.bfu_socket_utils.get_socket_desired_child(obj):
         if "BFU_PreviousSocketName" in socket:
             socket.name = socket["BFU_PreviousSocketName"]
             del socket["BFU_PreviousSocketName"]
@@ -320,7 +324,7 @@ def ResetSocketsExportName(obj):
 def ResetSocketsTransform(obj):
     # Reset socket Transform
 
-    for socket in bfu_utils.GetSocketDesiredChild(obj):
+    for socket in bfu_socket.bfu_socket_utils.get_socket_desired_child(obj):
         if "BFU_PreviousSocketScale" in socket:
             socket.scale = socket["BFU_PreviousSocketScale"]
             del socket["BFU_PreviousSocketScale"]
@@ -382,86 +386,82 @@ class PrepareExportName():
 # UVs
 
 
-def ConvertGeometryNodeAttributeToUV(obj):
-    # obj = bpy.context.active_object  # Debug
-    if obj.bfu_convert_geometry_node_attribute_to_uv:
-        attrib_name = obj.bfu_convert_geometry_node_attribute_to_uv_name
+def ConvertGeometryNodeAttributeToUV(obj, attrib_name):
+    # I need apply the geometry modifier for get the data.
+    # So this work only when I do export of the duplicate object.
+    
+    if hasattr(obj.data, "attributes"):  # Cuves has not attributes.
+        if attrib_name in obj.data.attributes:
 
-        # I need apply the geometry modifier for get the data.
-        # So this work only when I do export of the duplicate object.
+            # TO DO: Bad why to do this. Need found a way to convert without using ops.
+            obj.data.attributes.active = obj.data.attributes[attrib_name]
 
-        if hasattr(obj.data, "attributes"):  # Cuves has not attributes.
-            if attrib_name in obj.data.attributes:
+            # Because a bug Blender set the wrong attribute as active in 3.5.
+            if obj.data.attributes.active != obj.data.attributes[attrib_name]:
+                for x, attribute in enumerate(obj.data.attributes):
+                    if attribute.name == attrib_name:
+                        obj.data.attributes.active_index = x
 
-                # TO DO: Bad why to do this. Need found a way to convert without using ops.
-                obj.data.attributes.active = obj.data.attributes[attrib_name]
+            SavedSelect = bbpl.utils.UserSelectSave()
+            SavedSelect.save_current_select()
+            bbpl.utils.select_specific_object(obj)
+            if bpy.app.version >= (3, 5, 0):
+                if obj.data.attributes.active:
+                    bpy.ops.geometry.attribute_convert(mode='GENERIC', domain='CORNER', data_type='FLOAT2')
+            else:
+                if obj.data.attributes.active:
+                    bpy.ops.geometry.attribute_convert(mode='UV_MAP', domain='CORNER', data_type='FLOAT2')
+            SavedSelect.reset_select_by_ref()
 
-                # Because a bug Blender set the wrong attribute as active in 3.5.
-                if obj.data.attributes.active != obj.data.attributes[attrib_name]:
-                    for x, attribute in enumerate(obj.data.attributes):
-                        if attribute.name == attrib_name:
-                            obj.data.attributes.active_index = x
+            # Because it not possible to move UV index I need recreate all UV for place new UV Map at start...
+            if len(obj.data.uv_layers) < 8:  # Blender Cannot add more than 8 UV maps.
 
-                SavedSelect = bbpl.utils.UserSelectSave()
-                SavedSelect.save_current_select()
-                bbpl.utils.select_specific_object(obj)
-                if bpy.app.version >= (3, 5, 0):
-                    if obj.data.attributes.active:
-                        bpy.ops.geometry.attribute_convert(mode='GENERIC', domain='CORNER', data_type='FLOAT2')
-                else:
-                    if obj.data.attributes.active:
-                        bpy.ops.geometry.attribute_convert(mode='UV_MAP', domain='CORNER', data_type='FLOAT2')
-                SavedSelect.reset_select_by_ref()
+                uv_names = []  # Cache uv names
+                for old_uv in obj.data.uv_layers:
+                    uv_names.append(old_uv.name)
 
-                # Because it not possible to move UV index I need recreate all UV for place new UV Map at start...
-                if len(obj.data.uv_layers) < 8:  # Blender Cannot add more than 8 UV maps.
+                for name in uv_names:
+                    old_uv = obj.data.uv_layers[name]
+                    if name != attrib_name:
+                        # Vars
+                        new_uv_name = old_uv.name
+                        old_uv_name = old_uv.name + "_OLDUVEXPORT"
+                        # Rename and recreate new UV
+                        old_uv.name += "_OLDUVEXPORT"
+                        obj.data.uv_layers.active = old_uv
+                        new_uv = obj.data.uv_layers.new(name=new_uv_name, do_init=True)
+                        obj.data.uv_layers.active = new_uv
+                        # Remove old one
+                        obj.data.uv_layers.remove(obj.data.uv_layers[old_uv_name])
 
-                    uv_names = []  # Cache uv names
-                    for old_uv in obj.data.uv_layers:
-                        uv_names.append(old_uv.name)
+            return
 
-                    for name in uv_names:
-                        old_uv = obj.data.uv_layers[name]
-                        if name != attrib_name:
-                            # Vars
-                            new_uv_name = old_uv.name
-                            old_uv_name = old_uv.name + "_OLDUVEXPORT"
-                            # Rename and recreate new UV
-                            old_uv.name += "_OLDUVEXPORT"
-                            obj.data.uv_layers.active = old_uv
-                            new_uv = obj.data.uv_layers.new(name=new_uv_name, do_init=True)
-                            obj.data.uv_layers.active = new_uv
-                            # Remove old one
-                            obj.data.uv_layers.remove(obj.data.uv_layers[old_uv_name])
+            attrib = obj.data.attributes[attrib_name]
 
-                return
+            new_uv = obj.data.uv_layers.new(name=attrib_name)
+            uv_coords = []
 
-                attrib = obj.data.attributes[attrib_name]
+            attrib.data  # TO DO: I don't understand why attrib.data is egal at zero just after a duplicate.
+            print('XXXXXXXXXXXX')
+            print(type(attrib.data))
+            print('XXXXXXXXXXXX')
+            print(dir(attrib.data))
+            print('XXXXXXXXXXXX')
+            print(attrib.data.values())
+            print('XXXXXXXXXXXX')
+            attrib_data = []
+            attrib.data.foreach_get('vector', attrib_data)
+            print(attrib_data)
 
-                new_uv = obj.data.uv_layers.new(name=attrib_name)
-                uv_coords = []
+            for fv_attrib in attrib.data:  # FloatVectorAttributeValue
+                uv_coords.append(fv_attrib.vector)
+            uv_coords.append(attrib.data[0])
 
-                attrib.data  # TO DO: I don't understand why attrib.data is egal at zero just after a duplicate.
-                print('XXXXXXXXXXXX')
-                print(type(attrib.data))
-                print('XXXXXXXXXXXX')
-                print(dir(attrib.data))
-                print('XXXXXXXXXXXX')
-                print(attrib.data.values())
-                print('XXXXXXXXXXXX')
-                attrib_data = []
-                attrib.data.foreach_get('vector', attrib_data)
-                print(attrib_data)
+            for loop in obj.data.loops:
+                new_uv.data[loop.index].uv[0] = uv_coords[loop.index][0]
+                new_uv.data[loop.index].uv[1] = uv_coords[loop.index][1]
 
-                for fv_attrib in attrib.data:  # FloatVectorAttributeValue
-                    uv_coords.append(fv_attrib.vector)
-                uv_coords.append(attrib.data[0])
-
-                for loop in obj.data.loops:
-                    new_uv.data[loop.index].uv[0] = uv_coords[loop.index][0]
-                    new_uv.data[loop.index].uv[1] = uv_coords[loop.index][1]
-
-                obj.data.attributes.remove(attrib_name)
+            obj.data.attributes.remove(attrib_name)
 
 
 def CorrectExtremUVAtExport(obj):
@@ -531,36 +531,7 @@ def ResetArmatureConstraintToModifiers(armature):
                 # Enable back constraint
                 const.enabled = True
 
-# Vertex Color
 
-
-def SetVertexColorForUnrealExport(parent):
-
-    objs = bfu_utils.GetExportDesiredChilds(parent)
-    objs.append(parent)
-
-    for obj in objs:
-        if obj.type == "MESH":
-            vced = bfu_vertex_color.bfu_vertex_color_utils.VertexColorExportData(obj, parent)
-            if vced.export_type == "REPLACE":
-
-                vertex_colors = bbpl.utils.get_vertex_colors(obj)
-
-                # Save the previous target
-                obj.data["BFU_PreviousTargetIndex"] = vertex_colors.active_index
-
-                # Ser the vertex color for export
-                vertex_colors.active_index = vced.index
-
-
-def ClearVertexColorForUnrealExport(parent):
-
-    objs = bfu_utils.GetExportDesiredChilds(parent)
-    objs.append(parent)
-    for obj in objs:
-        if obj.type == "MESH":
-            if "BFU_PreviousTargetIndex" in obj.data:
-                del obj.data["BFU_PreviousTargetIndex"]
 
 
 def GetShouldRescaleRig(obj):
@@ -685,14 +656,72 @@ def get_final_export_secondary_bone_axis(obj):
     else:
         return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["secondary_bone_axis"]
 
-def get_export_axis_forward(obj):
+def get_skeleton_export_use_space_transform(obj):
+    if obj.bfu_override_procedure_preset:
+        return obj.bfu_export_use_space_transform
+    else:
+        return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["use_space_transform"]
+
+def get_skeleton_export_axis_forward(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_axis_forward
     else:
         return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["axis_forward"]
 
-def get_export_axis_up(obj):
+def get_skeleton_export_axis_up(obj):
     if obj.bfu_override_procedure_preset:
         return obj.bfu_export_axis_up
     else:
         return bfu_export_procedure.bfu_skeleton_export_procedure.get_obj_skeleton_procedure_preset(obj)["axis_up"]
+    
+def get_static_export_use_space_transform(obj):
+    if obj.bfu_override_procedure_preset:
+        return obj.bfu_export_use_space_transform
+    else:
+        return bfu_export_procedure.bfu_static_export_procedure.get_obj_static_procedure_preset(obj)["use_space_transform"]
+
+def get_static_export_axis_forward(obj):
+    if obj.bfu_override_procedure_preset:
+        return obj.bfu_export_axis_forward
+    else:
+        return bfu_export_procedure.bfu_static_export_procedure.get_obj_static_procedure_preset(obj)["axis_forward"]
+
+def get_static_export_axis_up(obj):
+    if obj.bfu_override_procedure_preset:
+        return obj.bfu_export_axis_up
+    else:
+        return bfu_export_procedure.bfu_static_export_procedure.get_obj_static_procedure_preset(obj)["axis_up"]
+    
+class SaveTransformObjects():
+    def __init__(self, obj: bpy.types.Object):
+
+        self.saved_transform_objects = []
+        obj_recursive_childs = bbpl.basics.get_recursive_obj_childs(obj, True)
+        for obj in obj_recursive_childs:
+            self.saved_transform_objects.append(bbpl.utils.SaveTransformObject(obj))
+
+    def reset_object_transforms(self):
+        for saved_transform_object in self.saved_transform_objects:
+            saved_transform_object: bbpl.utils.SaveTransformObject
+            if saved_transform_object.init_object:
+                saved_transform_object.reset_object_transform()
+
+def get_skeleton_axis_conversion(obj):
+    axis_forward = get_skeleton_export_axis_forward(obj)
+    axis_up = get_skeleton_export_axis_up(obj)
+
+    try:
+        return axis_conversion(to_forward=axis_forward, to_up=axis_up).to_4x4()
+    except Exception as e:
+        print(f"For asset \"{obj.name}\" : {e}")
+        return axis_conversion("-Z", "Y").to_4x4()
+    
+def get_static_axis_conversion(obj):
+    axis_forward = get_static_export_axis_forward(obj)
+    axis_up = get_static_export_axis_up(obj)
+
+    try:
+        return axis_conversion(to_forward=axis_forward, to_up=axis_up).to_4x4()
+    except Exception as e:
+        print(f"For asset \"{obj.name}\" : {e}")
+        return axis_conversion("-Z", "Y").to_4x4()

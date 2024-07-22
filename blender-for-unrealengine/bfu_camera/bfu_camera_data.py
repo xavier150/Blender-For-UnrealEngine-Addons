@@ -89,6 +89,10 @@ class BFU_CameraTracks():
         
         self.camera_name = camera.name
         self.camera_type = camera.bfu_desired_camera_type
+        self.projection_mode = camera.data.type
+        self.ortho_scale = camera.data.ortho_scale
+        
+        self.ue_projection_mode = bfu_camera_unreal_utils.get_camera_unreal_projection(camera)
         self.ue_camera_actor = bfu_camera_unreal_utils.get_camera_unreal_actor(camera)
 
         # Blender Camera Data
@@ -124,6 +128,9 @@ class BFU_CameraTracks():
         data["camera_actor"] = self.ue_camera_actor
         data["resolution"] = {"x": self.resolution_x, "y": self.resolution_y}
         data["desired_screen_ratio"] = self.resolution_x / self.resolution_y
+        data["projection_mode"] = self.projection_mode
+        data["ue_projection_mode"] = self.ue_projection_mode
+        data["ortho_scale"] = self.ortho_scale
         data['ue_lens_minfstop'] = self.ue_lens_min_fstop
         data['ue_lens_maxfstop'] = self.ue_lens_max_fstop
 

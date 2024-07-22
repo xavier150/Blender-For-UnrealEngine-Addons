@@ -52,6 +52,10 @@ def draw_ui_object_camera(layout: bpy.types.UILayout, obj: bpy.types.Object):
     if scene.bfu_camera_properties_expanded.is_expend():
         if obj.type == "CAMERA":
             camera_ui_pop = camera_ui.column()
+
+            export_procedure_prop = camera_ui_pop.column()
+            export_procedure_prop.prop(obj, 'bfu_camera_export_procedure')
+
             camera_ui_pop.prop(obj, 'bfu_desired_camera_type')
             if obj.bfu_desired_camera_type == "CUSTOM":
                 camera_ui_pop.prop(obj, 'bfu_custom_camera_actor')

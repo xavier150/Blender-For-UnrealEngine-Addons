@@ -19,19 +19,7 @@
 import bpy
 from .. import bfu_utils
 
-def draw_object_export_procedure(layout, obj: bpy.types.Object):
-    if bfu_utils.GetAssetType(obj) == "SkeletalMesh":
-        export_procedure_prop = layout.column()
-        export_procedure_prop.prop(obj, 'bfu_skeleton_export_procedure')
-    elif obj.bfu_export_as_alembic:
-        export_procedure_prop = layout.column()
-        export_procedure_prop.prop(obj, 'bfu_alembic_export_procedure')
-    elif obj.type == "CAMERA":
-        export_procedure_prop = layout.column()
-        export_procedure_prop.prop(obj, 'bfu_camera_export_procedure')
-    else:
-        export_procedure_prop = layout.column()
-        export_procedure_prop.prop(obj, 'bfu_static_export_procedure')
+
 
 def draw_collection_export_procedure(layout, col: bpy.types.Collection):
     export_procedure_prop = layout.column()
