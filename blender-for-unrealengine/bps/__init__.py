@@ -30,6 +30,7 @@ from . import utils
 from . import math
 from . import color_set
 from . import blender_sub_process
+from . import naming
 
 if "advprint" in locals():
     importlib.reload(advprint)
@@ -43,3 +44,5 @@ if "color_set" in locals():
     importlib.reload(color_set)
 if "blender_sub_process" in locals():
     importlib.reload(blender_sub_process)
+if "naming" in locals():
+    importlib.reload(naming)
