@@ -511,3 +511,7 @@ It is now possible to force the duration of an animation according to the scene 
 - Fixed: Default export file paths are wrong.
 - Fixed: Addon export checks "Convert Attribute to UV" and its "Attribute name" on the wrong object.
 - Fixed: custom_export_name option does not work.
+
+== Rev 0.4.3.1 ==
+
+- Fixed: Export apply modifiers with that hidden in viewport
