@@ -683,24 +683,46 @@ def GoToMeshEditMode():
 
 
 def ApplyNeededModifierToSelect():
-
     SavedSelect = bbpl.utils.UserSelectSave()
     SavedSelect.save_current_select()
+
+    # Get selected objects with modifiers.
     for obj in bpy.context.selected_objects:
-        if obj.type == "MESH":
-            bbpl.utils.select_specific_object(obj)
-            for mod in [m for m in obj.modifiers if m.type != 'ARMATURE']:
-                if obj.data.shape_keys is None:
-                    if obj.data.users > 1:
-                        obj.data = obj.data.copy()
-                    if bpy.ops.object.modifier_apply.poll():
-                        try:
-                            bpy.ops.object.modifier_apply(modifier=mod.name)
-                        except RuntimeError as ex:
-                            # print the error incase its important... but continue
-                            print(ex)
+        ApplyObjectModifiers(obj, ['ARMATURE'])
 
     SavedSelect.reset_select_by_ref()
+
+def ApplyObjectModifiers(obj: bpy.types.Object, blacklist_type = []):
+
+    if(obj is None):
+        return
+    if(obj.type == "MESH" and obj.data.shape_keys is not None):
+        # Can't apply modifiers with shape key
+        return
+
+
+    # Get Modifier to Apply
+    mod_to_apply = []
+    for mod in obj.modifiers:
+        if mod.type not in blacklist_type:
+            if mod.show_viewport == True:
+                mod_to_apply.append(mod)
+
+    if len(mod_to_apply) > 0:
+        bbpl.utils.select_specific_object(obj)
+        
+        if obj.data.users > 1:
+            # Make single user.
+            obj.data = obj.data.copy()
+
+        for mod in mod_to_apply:
+            if bpy.ops.object.modifier_apply.poll():
+                try:
+                    bpy.ops.object.modifier_apply(modifier=mod.name)
+                except RuntimeError as ex:
+                    # print the error incase its important... but continue
+                    print(ex)
+    
 
 
 def CorrectExtremeUV(stepScale=2):

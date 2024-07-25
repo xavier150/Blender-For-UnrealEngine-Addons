@@ -17,32 +17,27 @@
 # ======================= END GPL LICENSE BLOCK =============================
 
 # ----------------------------------------------
-#  BPS -> BleuRaven Python Script
+#  BBPL -> BleuRaven Blender Python Library
 #  BleuRaven.fr
 #  XavierLoux.com
 # ----------------------------------------------
 
+import bpy
 import importlib
+from . import extension_utils
 
-from . import advprint
-from . import console_utils
-from . import utils
-from . import math
-from . import color_set
-from . import blender_sub_process
-from . import naming
+if "extension_utils" in locals():
+    importlib.reload(extension_utils)
 
-if "advprint" in locals():
-    importlib.reload(advprint)
-if "console_utils" in locals():
-    importlib.reload(console_utils)
-if "utils" in locals():
-    importlib.reload(utils)
-if "math" in locals():
-    importlib.reload(math)
-if "color_set" in locals():
-    importlib.reload(color_set)
-if "blender_sub_process" in locals():
-    importlib.reload(blender_sub_process)
-if "naming" in locals():
-    importlib.reload(naming)
+classes = (
+)
+
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
+
+def unregister():
+    for cls in reversed(classes):
+        bpy.utils.unregister_class(cls)

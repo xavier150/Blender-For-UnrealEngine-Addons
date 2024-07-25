@@ -17,32 +17,31 @@
 # ======================= END GPL LICENSE BLOCK =============================
 
 # ----------------------------------------------
-#  BPS -> BleuRaven Python Script
+#  BBPL -> BleuRaven Blender Python Library
 #  BleuRaven.fr
 #  XavierLoux.com
 # ----------------------------------------------
 
-import importlib
 
-from . import advprint
-from . import console_utils
-from . import utils
-from . import math
-from . import color_set
-from . import blender_sub_process
-from . import naming
+import os
+import bpy
 
-if "advprint" in locals():
-    importlib.reload(advprint)
-if "console_utils" in locals():
-    importlib.reload(console_utils)
-if "utils" in locals():
-    importlib.reload(utils)
-if "math" in locals():
-    importlib.reload(math)
-if "color_set" in locals():
-    importlib.reload(color_set)
-if "blender_sub_process" in locals():
-    importlib.reload(blender_sub_process)
-if "naming" in locals():
-    importlib.reload(naming)
+
+def get_package_version(pkg_id):
+
+    version = None
+
+    # @TODO this look like a bad way to do this. Need found how use bpy.ops.extensions.
+    file_path = os.path.join(bpy.utils.user_resource('EXTENSIONS'), 'user_default', pkg_id, "blender_manifest.toml")
+    with open(file_path, 'r') as file:
+        for line in file:
+            if line.startswith("version"):
+                # Extraire la partie droite de la ligne après le signe '=' et enlever les espaces et guillemets
+                version = line.split('=')[1].strip().strip('"')
+                break
+
+    return version
+
+def get_package_path(pkg_id):
+    # @TODO this look like a bad way to do this. Need found how use bpy.ops.extensions.
+    return os.path.join(bpy.utils.user_resource('EXTENSIONS'), 'user_default', pkg_id)

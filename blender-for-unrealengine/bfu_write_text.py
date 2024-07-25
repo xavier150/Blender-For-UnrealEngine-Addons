@@ -23,6 +23,7 @@ import bpy
 import math
 
 from . import bps
+from . import bbpl
 from . import languages
 from . import bfu_basics
 from . import bfu_utils
@@ -220,13 +221,15 @@ def WriteAllTextFiles():
             ExportSingleText(Text, scene.bfu_export_other_file_path, Filename)
 
     # Import script
-    bfu_path = os.path.join("addons", "blender-for-unrealengine", "bfu_import_module")
-    bfu_path_ref = os.path.join(bpy.utils.user_resource('SCRIPTS'), bfu_path)
+    if bpy.app.version >= (4, 2, 0):
+        bfu_path = os.path.join(bbpl.blender_extension.extension_utils.get_package_path("blender_for_unrealengine"), "bfu_import_module")
+    else:
+        bfu_path = os.path.join(bbpl.blender_addon.addon_utils.get_addon_path("Blender for UnrealEngine"), "bfu_import_module")
 
     if scene.text_ImportAssetScript:
         json_data = bfu_write_import_asset_script.WriteImportAssetScript()
         ExportSingleJson(json_data, scene.bfu_export_other_file_path, "ImportAssetData.json")
-        source = os.path.join(bfu_path_ref, "asset_import_script.py")
+        source = os.path.join(bfu_path, "asset_import_script.py")
         filename = bfu_basics.ValidFilename(scene.bfu_file_import_asset_script_name)
         destination = bpy.path.abspath(os.path.join(scene.bfu_export_other_file_path, filename))
         copyfile(source, destination)
@@ -234,7 +237,7 @@ def WriteAllTextFiles():
     if scene.text_ImportSequenceScript:
         json_data = bfu_write_import_sequencer_script.WriteImportSequencerTracks()
         ExportSingleJson(json_data, scene.bfu_export_other_file_path, "ImportSequencerData.json")
-        source = os.path.join(bfu_path_ref, "sequencer_import_script.py")
+        source = os.path.join(bfu_path, "sequencer_import_script.py")
         filename = bfu_basics.ValidFilename(scene.bfu_file_import_sequencer_script_name)
         destination = bpy.path.abspath(os.path.join(scene.bfu_export_other_file_path, filename))
         copyfile(source, destination)

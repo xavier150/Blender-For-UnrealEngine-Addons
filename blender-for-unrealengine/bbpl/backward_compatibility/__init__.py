@@ -183,3 +183,46 @@ class RigActionUpdater:
         """
         print(f'{self.update_fcurve} fcurve data_path have been updated.')
         print(f'{self.remove_fcurve} fcurve data_path have been removed.')
+
+class SkinWeightMeshUpdater:
+    """
+    A class to update mesh skin weights by renaming vertex groups.
+    """
+    def __init__(self):
+        self.update_weights = 0
+        self.print_log = False
+
+    def update_mesh_skin_weight(self, obj: bpy.types.Object, old_names, new_name):
+        """
+        Updates the skin weights of a mesh by renaming one or more old vertex groups to a new name.
+        
+        :param obj: The object whose skin weights need to be updated.
+        :param old_names: A list of names of old vertex groups to rename.
+        :param new_name: The new name for the specified vertex groups.
+        """
+        # Check if the object has vertex groups
+        if not obj.vertex_groups:
+            print("The object does not contain any vertex groups.")
+            return
+
+        for old_name in old_names:
+            vg_old = obj.vertex_groups.get(old_name)
+            if not vg_old:
+                print(f"The vertex group '{old_name}' does not exist in the object.")
+                continue
+            
+            # Check if the new vertex group already exists, if not, create it
+            vg_new = obj.vertex_groups.get(new_name)
+            if not vg_new:
+                vg_new = obj.vertex_groups.new(name=new_name)
+
+            # Copy vertex weights from the old group to the new group
+            for vert in obj.data.vertices:
+                for group in vert.groups:
+                    if group.group == vg_old.index:
+                        vg_new.add([vert.index], group.weight, 'REPLACE')
+
+            # Remove the old vertex group
+            obj.vertex_groups.remove(vg_old)
+            print(f"The vertex group '{old_name}' has been renamed to '{new_name}'.")
+            self.update_weights += 1
