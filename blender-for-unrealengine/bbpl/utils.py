@@ -702,7 +702,8 @@ def recursive_delete_collection(collection: bpy.types.Collection):
         recursive_delete_collection(sub_collection)
     
     # Finally, delete the collection itself
-    bpy.data.collections.remove(collection)
+    if collection.name in bpy.data.collections:
+        bpy.data.collections.remove(collection)
 
 class SaveUserRenderSimplify():
     def __init__(self):
