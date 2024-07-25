@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "blender_for_unrealengine"
-version = "1.0.1" 
+version = "4.3.1" 
 name = "Blender for UnrealEngine"
 tagline = "This add-ons allows to batch export and import in Unreal Engine"
 maintainer = "Loux Xavier (BleuRaven)"
