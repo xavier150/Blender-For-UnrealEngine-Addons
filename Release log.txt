@@ -514,4 +514,4 @@ It is now possible to force the duration of an animation according to the scene 
 
 == Rev 0.4.3.1 ==
 
-- Fixed: Export apply modifiers with that hidden in viewport
+- Fixed: Export apply modifiers with that hidden in viewport.
