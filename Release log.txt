@@ -28,6 +28,7 @@ Initial release.
 - Fixed: No Smoothing for skeletal mesh
 
 == Rev 0.1.9b ==
+(Rev 0.1.9b before Semantic Versioning update https://semver.org)
 
 - Update button "check potential error": Largest list of potential problems
 - New button "Update hierarchy names": Allows to automatically replace the name of a collision/socket by the name of its corresponding parent object, so that it will be recognized in UE4. 
@@ -44,6 +45,8 @@ Initial release.
 - Other small changes.
 
 == Rev 0.2.0 ==
+(Rev 0.1.9b before Semantic Versioning update https://semver.org)
+
 
 - New script generator for importing assets into unreal
 - New script generator for importing sequencer into unreal 
@@ -515,3 +518,5 @@ It is now possible to force the duration of an animation according to the scene 
 == Rev 0.4.3.1 ==
 
 - Fixed: Export apply modifiers with that hidden in viewport.
+- Fixed: Addon fail to get path when installed in custom script directories.
+- Fixed: Addon fail to get version and path when installed as extenton. (Default in Blender 4.2)
