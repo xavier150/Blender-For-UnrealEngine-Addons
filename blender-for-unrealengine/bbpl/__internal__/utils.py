@@ -26,20 +26,36 @@ import bpy
 
 def get_package_name():
     package_name = __package__
-    package_name = package_name.split(".")[0]  # Isolating 'addon name'
+
+    # Before 4.2 __package__ will look like that: 
+    # my_blender_addon.bbpl.blender_extension
+
+    # After 4.2 __package__ will look like that: 
+    # bl_ext.user_default.my_blender_addon.bbpl.blender_extension
+
+    if bpy.app.version >= (4, 2, 0):
+        package_name = package_name.split(".")[2]
+    else:
+        package_name = package_name.split(".")[0]
     return package_name
 
 def get_reduced_package_name():
     package_name = get_package_name()
 
-    # From blender-for-unrealengine
-    # To bdfunr
-    parts = package_name.split("-")
+    # blender-for-unrealengine -> bdfunr
+    # unrealengine_assets_exporter -> unrassexp
+
+    separators = ["-", "_", "."]
+    for sep in separators:
+        package_name = package_name.replace(sep, " ")
+    parts = package_name.split()
 
     special_reductions = {
         "blender": "bd",
         "for": "f",
         "to": "t",
+        "assets": "ass",
+        "asset": "as",
     }
 
     reduced_parts = []
@@ -49,7 +65,6 @@ def get_reduced_package_name():
 
     reduced_name = ''.join(reduced_parts).lower()[:12] # Max length is 12
     return reduced_name
-
 
 def get_operator_class_name(name):
     package_name = get_reduced_package_name()

@@ -26,6 +26,7 @@
 import os
 import bpy
 import addon_utils
+from .. import __internal__
 
 
 def get_addon_version(addon_name):

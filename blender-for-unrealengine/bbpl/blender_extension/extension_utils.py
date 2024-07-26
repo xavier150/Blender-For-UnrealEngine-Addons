@@ -25,23 +25,39 @@
 
 import os
 import bpy
+from .. import __internal__
 
+def get_package_version(pkg_id = None):
+    if pkg_id == None:
+        pkg_id = __internal__.utils.get_package_name()
 
-def get_package_version(pkg_id):
-
+    if bpy.app.version < (4, 2, 0):
+        print("Blender extensions are not supported under 4.2. Please use bbpl.blender_addon.addon_utils instead.")
+        return None
+    
     version = None
 
     # @TODO this look like a bad way to do this. Need found how use bpy.ops.extensions.
     file_path = os.path.join(bpy.utils.user_resource('EXTENSIONS'), 'user_default', pkg_id, "blender_manifest.toml")
-    with open(file_path, 'r') as file:
-        for line in file:
-            if line.startswith("version"):
-                # Extraire la partie droite de la ligne après le signe '=' et enlever les espaces et guillemets
-                version = line.split('=')[1].strip().strip('"')
-                break
-
+    
+    if os.path.isfile(file_path):
+        with open(file_path, 'r') as file:
+            for line in file:
+                if line.startswith("version"):
+                    version = line.split('=')[1].strip().strip('"')
+                    break
+    else:
+        print(f"File {file_path} does not exist.")
+    
     return version
 
-def get_package_path(pkg_id):
+def get_package_path(pkg_id = None):
+    if pkg_id == None:
+        pkg_id = __internal__.utils.get_package_name()
+
+    if bpy.app.version < (4, 2, 0):
+        print("Blender extensions are not supported under 4.2. Please use bbpl.blender_addon.addon_utils instead.")
+        return None
+
     # @TODO this look like a bad way to do this. Need found how use bpy.ops.extensions.
     return os.path.join(bpy.utils.user_resource('EXTENSIONS'), 'user_default', pkg_id)
