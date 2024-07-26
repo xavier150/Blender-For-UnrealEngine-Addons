@@ -1,6 +1,6 @@
 {
     "interface": {
-        "intro": "Blender for Unreal Engine by Xavier Loux. (BleuRaven)",
+        "intro": "Unreal Engine Assets Exporter by Xavier Loux. (BleuRaven)",
         "bake_armature_action_name": "Bake Armature animation",
         "correct_extrem_uv_scale_name": "Correct Extrem UV Scale",
         "add_skeleton_root_bone_name": "Add root bone",

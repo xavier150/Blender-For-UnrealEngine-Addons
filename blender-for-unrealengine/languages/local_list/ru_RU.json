@@ -1,6 +1,6 @@
 {
     "interface": {
-        "intro": "Blender for Unreal Engine от Xavier Loux. (BleuRaven)",
+        "intro": "Unreal Engine Assets Exporter от Xavier Loux. (BleuRaven)",
         "bake_armature_action_name": "Запечь анимацию скелета",
         "correct_extrem_uv_scale_name": "Исправить масштаб UV",
         "add_skeleton_root_bone_name": "Добавить корневую кость",

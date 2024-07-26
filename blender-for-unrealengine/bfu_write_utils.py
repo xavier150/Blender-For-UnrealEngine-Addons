@@ -19,6 +19,7 @@
 import os
 import bpy
 import datetime
+
 from . import bbpl
 from . import bfu_basics
 from . import bfu_utils
@@ -70,11 +71,11 @@ def add_generated_json_meta_data(json_data):
     blender_file_path = bpy.data.filepath
 
     if bpy.app.version >= (4, 2, 0):
-        version_str = 'Version '+ bbpl.blender_extension.extension_utils.get_package_version("blender_for_unrealengine")
-        addon_path = bbpl.blender_extension.extension_utils.get_package_path("blender_for_unrealengine")
+        version_str = 'Version '+ bbpl.blender_extension.extension_utils.get_package_version()
+        addon_path = bbpl.blender_extension.extension_utils.get_package_path()
     else:
-        version_str = 'Version '+ bbpl.blender_addon.addon_utils.get_addon_version_str("Blender for UnrealEngine")
-        addon_path = bbpl.blender_addon.addon_utils.get_addon_path("Blender for UnrealEngine")
+        version_str = 'Version '+ bbpl.blender_addon.addon_utils.get_addon_version_str("Unreal Engine Assets Exporter")
+        addon_path = bbpl.blender_addon.addon_utils.get_addon_path("Unreal Engine Assets Exporter")
     import_modiule_path = os.path.join(addon_path, "bfu_import_module")
 
 
