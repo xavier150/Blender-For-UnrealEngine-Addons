@@ -1,19 +1,15 @@
 schema_version = "1.0.0"
 
 id = "blender_for_unrealengine"
-version = "4.3.1" 
+version = "4.3.1"
 name = "Blender for UnrealEngine"
-tagline = "This add-ons allows to batch export and import in Unreal Engine"
-maintainer = "Loux Xavier (BleuRaven)"
+tagline = "Allows to batch export and import in Unreal Engine"
+maintainer = "Loux Xavier (BleuRaven) xavierloux.loux@gmail.com"
 type = "add-on"
-
-# permissions = ["files", "network"]
 
 website = "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/"
 
-tags = [
-    "Import-Export"
-]
+tags = ["Import-Export"]
 
 blender_version_min = "4.2.0"
 
@@ -26,3 +22,6 @@ copyright = [
 ]
 
 platforms = ['windows-x64', 'linux-x64']
+
+[permissions]
+files = "Import/export FBX from/to disk"
