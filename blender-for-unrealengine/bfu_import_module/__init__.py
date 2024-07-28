@@ -48,10 +48,11 @@ if "bfu_import_materials" in locals():
 if "bfu_import_sequencer" in locals():
     importlib.reload(bfu_import_sequencer)
 
-def run_asset_import(assets_data, show_finished_popup=True):
+def run_asset_import(assets_data, show_finished_popup=False):
     if asset_import.ready_for_asset_import():
         return asset_import.ImportAllAssets(assets_data, show_finished_popup)
 
-def run_sequencer_import(sequence_data, show_finished_popup=True):
+def run_sequencer_import(sequence_data, show_finished_popup=False):
     if sequencer_import.ready_for_sequence_import():
         return sequencer_import.CreateSequencer(sequence_data, show_finished_popup)
+    

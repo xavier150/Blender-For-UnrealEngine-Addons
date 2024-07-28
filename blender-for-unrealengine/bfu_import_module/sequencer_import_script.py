@@ -1,7 +1,8 @@
-# This script was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons
-# It will import into Unreal Engine all the assets of type StaticMesh, SkeletalMesh, Animation and Pose
-# The script must be used in Unreal Engine Editor with Python plugins : https://docs.unrealengine.com/en-US/Engine/Editor/ScriptingAndAutomation/Python
-# Use this command in Unreal cmd consol: py "[ScriptLocation]\sequencer_import_script.py"
+# This script was generated with the addons Unreal Engine Assets Exporter.
+# This script should be run in Unreal Engine to import into Unreal Engine 4 and 5 assets.
+# The assets are exported from from Unreal Engine Assets Exporter. More detail here. https://github.com/xavier150/Blender-For-UnrealEngine-Addons
+# Use the following command in Unreal Engine cmd consol to import sequencer: 
+# py "[ScriptLocation]\sequencer_import_script.py"
 
 import importlib
 import sys
@@ -23,43 +24,24 @@ def JsonLoadFile(json_file_path):
         with open(json_file_path, "r", encoding="utf8") as json_file:
             return JsonLoad(json_file)
 
-def load_module(import_module_path):
-    # Import and run the module
-    module_name = os.path.basename(import_module_path).replace('.py', '')
-    module_dir = os.path.dirname(import_module_path)
-
-    if module_dir not in sys.path:
-        sys.path.append(module_dir)
-
-    imported_module = importlib.import_module(module_name)
-    importlib.reload(imported_module)
-
-    # Assuming the module has a main function to run
-    if hasattr(imported_module, 'main'):
-        imported_module.main()
-
-    return imported_module, module_name
-
-def unload_module(module_name):
-    # Vérifier si le module est dans sys.modules
-    if module_name in sys.modules:
-        # Récupérer la référence du module
-        module = sys.modules[module_name]
-        # Supprimer la référence globale
-        del sys.modules[module_name]
-        del module
-
 def RunImportScriptWithJsonData():
     # Prepare process import
     json_data_file = 'ImportSequencerData.json'
     dir_path = os.path.dirname(os.path.realpath(__file__))
-
-    sequence_data = JsonLoadFile(os.path.join(dir_path, json_data_file))
+    import_file_path = os.path.join(dir_path, json_data_file)
+    sequence_data = JsonLoadFile(import_file_path)
     
-    import_module_path = sequence_data["info"]["import_modiule_path"]  # Module to run   
-    imported_module, module_name = load_module(import_module_path)
-    imported_module.run_sequencer_import(sequence_data, False)
-    unload_module(module_name)
+    file_path = os.path.join(sequence_data["info"]["addon_path"],'run_unreal_import_script.py')
+    spec = importlib.util.spec_from_file_location("__main__", file_path)
+    module = importlib.util.module_from_spec(spec)
+
+    # Run script module function
+    # spec.loader.exec_module(module)
+    # module.run_from_sequencer_import_script(import_file_path)
+
+    # Run script using arguments
+    sys.argv = [file_path, '--type', 'sequencer', '--data_filepath', import_file_path]
+    spec.loader.exec_module(module)
 
 if __name__ == "__main__":
     RunImportScriptWithJsonData()
