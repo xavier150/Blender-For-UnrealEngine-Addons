@@ -17,11 +17,9 @@ license = [
   "SPDX:GPL-3.0-or-later",
 ]
 
-copyright = [
-  "Copyright 2024, Xavier Loux. All rights reserved.",
-]
+copyright = ["2024 Xavier Loux. All rights reserved",]
 
-platforms = ['windows-x64', 'linux-x64']
+platforms = ['windows-x64', 'linux-x64', 'macos-x64', 'macos-arm64', 'windows-arm64']
 
 [permissions]
 files = "Import/export FBX from/to disk"
