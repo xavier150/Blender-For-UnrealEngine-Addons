@@ -36,7 +36,7 @@ class BFU_PT_BlenderForUnrealDebug(bpy.types.Panel):
             if asset_class:
                 obj_export_name = asset_class.get_obj_export_name(obj)
                 obj_export_dir = asset_class.get_obj_export_directory_path(obj)
-                obj_export_abs_dir = asset_class.get_obj_export_abs_directory_path(obj)
+                obj_export_abs_dir = asset_class.get_obj_export_directory_path(obj, True)
 
             else:
                 obj_export_name = "XXX"

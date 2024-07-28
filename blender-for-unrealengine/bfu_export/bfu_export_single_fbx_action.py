@@ -33,7 +33,7 @@ def ProcessActionExport(op, obj, action, action_curve_scale):
     scene = bpy.context.scene
 
     asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
-    dirpath = asset_class.get_obj_export_directory_path(obj)
+    absdirpath = asset_class.get_obj_export_directory_path(obj, True)
 
     MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
     MyAsset.object = obj
@@ -48,11 +48,11 @@ def ProcessActionExport(op, obj, action, action_curve_scale):
     file: bfu_export_logs.BFU_OT_FileExport = MyAsset.files.add()
     file.file_name = bfu_naming.get_animation_file_name(obj, action, "")
     file.file_extension = "fbx"
-    file.file_path = dirpath
+    file.file_path = absdirpath
     file.file_type = "FBX"
 
     MyAsset.StartAssetExport()
-    action_curve_scale = ExportSingleFbxAction(op, scene, dirpath, file.GetFileWithExtension(), obj, action, action_curve_scale)
+    action_curve_scale = ExportSingleFbxAction(op, scene, absdirpath, file.GetFileWithExtension(), obj, action, action_curve_scale)
 
     MyAsset.EndAssetExport(True)
     return action_curve_scale

@@ -38,7 +38,7 @@ def ProcessStaticMeshExport(op, obj, desired_name=""):
     asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
     asset_type = asset_class.get_asset_type_name(obj)
     dirpath = asset_class.get_obj_export_directory_path(obj)
-    absdirpath = asset_class.get_obj_export_abs_directory_path(obj)
+    absdirpath = asset_class.get_obj_export_directory_path(obj, True)
 
     if desired_name:
         final_name = desired_name

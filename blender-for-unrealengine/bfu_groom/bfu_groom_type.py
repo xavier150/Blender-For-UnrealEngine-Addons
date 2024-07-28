@@ -48,10 +48,15 @@ class BFU_Groom(bfu_assets_manager.bfu_asset_manager_type.BFU_BaseAssetClass):
             return bfu_basics.ValidFilename(scene.bfu_groom_simulation_prefix_export_name+desired_name+fileType)
         return bfu_basics.ValidFilename(scene.bfu_groom_simulation_prefix_export_name+obj.name+fileType)
     
-    def get_obj_export_directory_path(self, obj):
+    def get_obj_export_directory_path(self, obj, absolute = False):
         folder_name = bfu_utils.get_export_folder_name(obj)
         scene = bpy.context.scene
-        dirpath = os.path.join(scene.bfu_export_groom_file_path, folder_name)
+        if(absolute):
+            root_path = bpy.path.abspath(scene.bfu_export_groom_file_path)
+        else:
+            root_path = scene.bfu_export_groom_file_path
+
+        dirpath = os.path.join(root_path, folder_name)
         return dirpath
     
     def can_export_asset(self):

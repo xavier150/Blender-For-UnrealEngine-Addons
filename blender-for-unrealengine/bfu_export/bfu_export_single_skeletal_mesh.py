@@ -38,7 +38,7 @@ def ProcessSkeletalMeshExport(op, armature, mesh_parts, desired_name=""):
     asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(armature)
     asset_type = asset_class.get_asset_type_name(armature)
     dirpath = asset_class.get_obj_export_directory_path(armature)
-    absdirpath = asset_class.get_obj_export_abs_directory_path(armature)
+    absdirpath = asset_class.get_obj_export_directory_path(armature, True)
 
     if desired_name:
         final_name = desired_name
