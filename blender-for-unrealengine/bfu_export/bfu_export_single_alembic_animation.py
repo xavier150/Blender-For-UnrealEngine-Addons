@@ -32,7 +32,7 @@ def ProcessAlembicAnimationExport(obj):
     scene = bpy.context.scene
     
     asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
-    dirpath = asset_class.get_obj_export_directory_path(obj)
+    dirpath = asset_class.get_obj_export_directory_path(obj, True)
     file_name = asset_class.get_obj_file_name(obj, obj.name, "")
 
     MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()

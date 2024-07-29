@@ -33,7 +33,6 @@ def ProcessCollectionExport(op, col):
 
     addon_prefs = bfu_basics.GetAddonPrefs()
     dirpath = bfu_utils.GetCollectionExportDir(bpy.data.collections[col.name])
-    absdirpath = bpy.path.abspath(dirpath)
     scene = bpy.context.scene
 
     MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()
@@ -59,7 +58,7 @@ def ProcessCollectionExport(op, col):
         file.file_extension = "json"
         file.file_path = dirpath
         file.file_type = "AdditionalTrack"
-        bfu_export_utils.ExportAdditionalParameter(absdirpath, file.GetFileWithExtension(), MyAsset)
+        bfu_export_utils.ExportAdditionalParameter(dirpath, file.GetFileWithExtension(), MyAsset)
 
     MyAsset.EndAssetExport(True)
     return MyAsset

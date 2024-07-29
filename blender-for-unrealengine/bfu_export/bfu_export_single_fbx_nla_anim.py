@@ -35,7 +35,7 @@ def ProcessNLAAnimExport(op, obj):
     scene = bpy.context.scene
 
     asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
-    dirpath = asset_class.get_obj_export_directory_path(obj)
+    dirpath = asset_class.get_obj_export_directory_path(obj, True)
 
     scene.frame_end += 1  # Why ?
 

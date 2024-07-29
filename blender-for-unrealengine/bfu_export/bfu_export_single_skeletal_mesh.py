@@ -37,8 +37,7 @@ def ProcessSkeletalMeshExport(op, armature, mesh_parts, desired_name=""):
 
     asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(armature)
     asset_type = asset_class.get_asset_type_name(armature)
-    dirpath = asset_class.get_obj_export_directory_path(armature)
-    absdirpath = asset_class.get_obj_export_directory_path(armature, True)
+    dirpath = asset_class.get_obj_export_directory_path(armature, True)
 
     if desired_name:
         final_name = desired_name
@@ -73,7 +72,7 @@ def ProcessSkeletalMeshExport(op, armature, mesh_parts, desired_name=""):
             file.file_extension = "json"
             file.file_path = dirpath
             file.file_type = "AdditionalTrack"
-            bfu_export_utils.ExportAdditionalParameter(absdirpath, file.GetFileWithExtension(), MyAsset)
+            bfu_export_utils.ExportAdditionalParameter(dirpath, file.GetFileWithExtension(), MyAsset)
 
     MyAsset.EndAssetExport(True)
     return MyAsset
@@ -87,6 +86,8 @@ def ExportSingleSkeletalMesh(
         armature,
         mesh_parts
         ):
+
+    print("--", dirpath, filename)
 
     '''
     #####################################################

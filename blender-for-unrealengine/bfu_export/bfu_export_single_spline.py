@@ -38,7 +38,7 @@ def ProcessSplineExport(op, obj, pre_bake_spline: bfu_spline.bfu_spline_data.BFU
 
     asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
     asset_type = asset_class.get_asset_type_name(obj)
-    dirpath = asset_class.get_obj_export_directory_path(obj)
+    dirpath = asset_class.get_obj_export_directory_path(obj, True)
     file_name = asset_class.get_obj_file_name(obj, obj.name, "")
     file_name_at = asset_class.get_obj_file_name(obj, obj.name+"_AdditionalTrack", "") 
 

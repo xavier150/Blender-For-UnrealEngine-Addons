@@ -39,7 +39,7 @@ class BFU_BaseAssetClass:
     def get_obj_file_name(self, obj, desired_name="", fileType=".fbx"):
         return ""
     
-    def get_obj_export_directory_path(self, obj, absolute = False):
+    def get_obj_export_directory_path(self, obj, absolute = True):
         return ""
 
     def can_export_asset(self):

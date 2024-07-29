@@ -37,8 +37,7 @@ def ProcessStaticMeshExport(op, obj, desired_name=""):
 
     asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
     asset_type = asset_class.get_asset_type_name(obj)
-    dirpath = asset_class.get_obj_export_directory_path(obj)
-    absdirpath = asset_class.get_obj_export_directory_path(obj, True)
+    dirpath = asset_class.get_obj_export_directory_path(obj, True)
 
     if desired_name:
         final_name = desired_name
@@ -72,7 +71,7 @@ def ProcessStaticMeshExport(op, obj, desired_name=""):
             file.file_extension = "json"
             file.file_path = dirpath
             file.file_type = "AdditionalTrack"
-            bfu_export_utils.ExportAdditionalParameter(absdirpath, file.GetFileWithExtension(), MyAsset)
+            bfu_export_utils.ExportAdditionalParameter(dirpath, file.GetFileWithExtension(), MyAsset)
 
     MyAsset.EndAssetExport(True)
     return MyAsset
@@ -84,6 +83,8 @@ def ExportSingleStaticMesh(
         filename,
         obj
         ):
+    
+    print("--", dirpath, filename)
 
     '''
     #####################################################

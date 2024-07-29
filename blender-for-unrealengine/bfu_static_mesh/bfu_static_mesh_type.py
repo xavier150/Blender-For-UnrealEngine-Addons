@@ -58,15 +58,18 @@ class BFU_StaticMesh(bfu_assets_manager.bfu_asset_manager_type.BFU_BaseAssetClas
             return bfu_basics.ValidFilename(scene.bfu_static_mesh_prefix_export_name+desired_name+fileType)
         return bfu_basics.ValidFilename(scene.bfu_static_mesh_prefix_export_name+obj.name+fileType)
     
-    def get_obj_export_directory_path(self, obj, absolute = False):
+    def get_obj_export_directory_path(self, obj, absolute = True):
+        
         folder_name = bfu_utils.get_export_folder_name(obj)
         scene = bpy.context.scene
+        print("AAAA1 --> ", scene.bfu_export_static_file_path)
         if(absolute):
             root_path = bpy.path.abspath(scene.bfu_export_static_file_path)
         else:
             root_path = scene.bfu_export_static_file_path
-
+        print("AAAA2 --> ", root_path)
         dirpath = os.path.join(root_path, folder_name)
+        print("AAAA3 --> ", dirpath)
         return dirpath
     
     def can_export_asset(self):

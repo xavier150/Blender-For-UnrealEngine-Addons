@@ -55,7 +55,7 @@ class BFU_SkeletalMesh(bfu_assets_manager.bfu_asset_manager_type.BFU_BaseAssetCl
             return bfu_basics.ValidFilename(scene.bfu_skeletal_mesh_prefix_export_name+desired_name+fileType)
         return bfu_basics.ValidFilename(scene.bfu_skeletal_mesh_prefix_export_name+obj.name+fileType)
             
-    def get_obj_export_directory_path(self, obj, absolute = False):
+    def get_obj_export_directory_path(self, obj, absolute = True):
         folder_name = bfu_utils.get_export_folder_name(obj)
         scene = bpy.context.scene
         if(absolute):
