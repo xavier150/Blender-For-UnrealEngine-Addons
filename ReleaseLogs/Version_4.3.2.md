@@ -4,4 +4,3 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
 ### Version 4.3.2
 
 - New: Addon renamed from "Blender For Unreal Engine" To "Unreal Engine Assets Exporter". This was needed to follow [Blender Extensions Terms of Service](https://extensions.blender.org/terms-of-service/) (Branding)
-- Fixed: If export folder is relative empty "//" addons export assets at the disc root.
