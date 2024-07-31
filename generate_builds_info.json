@@ -1,0 +1,40 @@
+{
+    "unrealengine_assets_exporter_4.2": 
+    {
+        "install": true,
+        "use_extension_build_command": true,
+        "naming": "{Name}-{Version}.zip",
+        "module": "blender-for-unrealengine", 
+        "pkg_id": "unrealengine_assets_exporter", 
+        "directory": "P:\\GitHubBlenderAddon\\Blender-For-UnrealEngine-Addons",
+        "exclude_paths": [
+            "fbxio/generator/",
+            "fbxio/run_generator.py",
+            "fbxio/io_scene_fbx_2_83/", 
+            "fbxio/io_scene_fbx_2_93/", 
+            "fbxio/io_scene_fbx_3_1/", 
+            "fbxio/io_scene_fbx_3_2/", 
+            "fbxio/io_scene_fbx_3_3/", 
+            "fbxio/io_scene_fbx_3_4/", 
+            "fbxio/io_scene_fbx_3_5/", 
+            "fbxio/io_scene_fbx_3_6/"
+          ]
+    },
+    "unrealengine_assets_exporter_2.8": 
+    {
+        "install": false,
+        "use_extension_build_command": false,
+        "naming": "{Name}-{Version}-blender2.8-4.1.zip",
+        "module": "blender-for-unrealengine", 
+        "pkg_id": "unrealengine_assets_exporter", 
+        "directory": "P:\\GitHubBlenderAddon\\Blender-For-UnrealEngine-Addons",
+        "exclude_paths": [
+            "fbxio/generator/",
+            "fbxio/run_generator.py",
+            "fbxio/io_scene_fbx_4_0/", 
+            "fbxio/io_scene_fbx_4_1/", 
+            "fbxio/io_scene_fbx_4_2/", 
+            "fbxio/io_scene_fbx_4_3/"
+          ]
+    }
+}
