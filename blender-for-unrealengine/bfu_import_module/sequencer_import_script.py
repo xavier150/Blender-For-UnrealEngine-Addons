@@ -32,16 +32,12 @@ def RunImportScriptWithJsonData():
     sequence_data = JsonLoadFile(import_file_path)
     
     file_path = os.path.join(sequence_data["info"]["addon_path"],'run_unreal_import_script.py')
-    spec = importlib.util.spec_from_file_location("__main__", file_path)
+    spec = importlib.util.spec_from_file_location("__import_sequencer__", file_path)
     module = importlib.util.module_from_spec(spec)
 
     # Run script module function
-    # spec.loader.exec_module(module)
-    # module.run_from_sequencer_import_script(import_file_path)
-
-    # Run script using arguments
-    sys.argv = [file_path, '--type', 'sequencer', '--data_filepath', import_file_path]
     spec.loader.exec_module(module)
+    module.run_from_sequencer_import_script(import_file_path)
 
 if __name__ == "__main__":
     RunImportScriptWithJsonData()
