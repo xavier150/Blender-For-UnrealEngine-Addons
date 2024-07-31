@@ -211,14 +211,15 @@ def WriteAllTextFiles():
 
     scene = bpy.context.scene
     addon_prefs = bfu_basics.GetAddonPrefs()
-
+    
+    root_dirpath = bpy.path.abspath(scene.bfu_export_other_file_path)
     if scene.text_ExportLog:
         Text = languages.ti("write_text_additional_track_start") + "\n"
         Text += "" + "\n"
         Text += WriteExportLog()
         if Text is not None:
             Filename = bfu_basics.ValidFilename(scene.bfu_file_export_log_name)
-            ExportSingleText(Text, scene.bfu_export_other_file_path, Filename)
+            ExportSingleText(Text, root_dirpath, Filename)
 
     # Import script
     if bpy.app.version >= (4, 2, 0):
@@ -228,16 +229,16 @@ def WriteAllTextFiles():
 
     if scene.text_ImportAssetScript:
         json_data = bfu_write_import_asset_script.WriteImportAssetScript()
-        ExportSingleJson(json_data, scene.bfu_export_other_file_path, "ImportAssetData.json")
+        ExportSingleJson(json_data, root_dirpath, "ImportAssetData.json")
         source = os.path.join(bfu_path, "asset_import_script.py")
         filename = bfu_basics.ValidFilename(scene.bfu_file_import_asset_script_name)
-        destination = bpy.path.abspath(os.path.join(scene.bfu_export_other_file_path, filename))
+        destination = os.path.join(root_dirpath, filename)
         copyfile(source, destination)
 
     if scene.text_ImportSequenceScript:
         json_data = bfu_write_import_sequencer_script.WriteImportSequencerTracks()
-        ExportSingleJson(json_data, scene.bfu_export_other_file_path, "ImportSequencerData.json")
+        ExportSingleJson(json_data, root_dirpath, "ImportSequencerData.json")
         source = os.path.join(bfu_path, "sequencer_import_script.py")
         filename = bfu_basics.ValidFilename(scene.bfu_file_import_sequencer_script_name)
-        destination = bpy.path.abspath(os.path.join(scene.bfu_export_other_file_path, filename))
+        destination = os.path.join(root_dirpath, filename)
         copyfile(source, destination)
