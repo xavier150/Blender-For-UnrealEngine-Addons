@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "unrealengine_assets_exporter"
-version = "4.3.3"
+version = "4.3.4"
 name = "Unreal Engine Assets Exporter"
 tagline = "Allows to batch export and import in Unreal Engine"
 maintainer = "Loux Xavier (BleuRaven) xavierloux.loux@gmail.com"
@@ -17,9 +17,22 @@ license = [
   "SPDX:GPL-3.0-or-later",
 ]
 
-copyright = ["2024 Xavier Loux. All rights reserved",]
+copyright = ["2024 Xavier Loux",]
 
-platforms = ['windows-x64', 'linux-x64', 'macos-x64', 'macos-arm64', 'windows-arm64']
+[build]
+paths_exclude_pattern = [
+  "fbxio/generator/",
+  "fbxio/run_generator.py",
+  "fbxio/io_scene_fbx_2_83/", 
+  "fbxio/io_scene_fbx_2_93/", 
+  "fbxio/io_scene_fbx_3_1/", 
+  "fbxio/io_scene_fbx_3_2/", 
+  "fbxio/io_scene_fbx_3_3/", 
+  "fbxio/io_scene_fbx_3_4/", 
+  "fbxio/io_scene_fbx_3_5/", 
+  "fbxio/io_scene_fbx_3_6/"
+]
 
 [permissions]
 files = "Import/export FBX from/to disk"
+

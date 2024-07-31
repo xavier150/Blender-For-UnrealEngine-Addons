@@ -140,7 +140,7 @@ if "bfu_cached_asset_list" in locals():
 bl_info = {
     'name': 'Unreal Engine Assets Exporter',
     'author': 'Loux Xavier (BleuRaven)',
-    'version': (4, 3, 2),
+    'version': (4, 3, 4),
     'blender': (2, 80, 0),
     'location': 'View3D > UI > Unreal Engine',
     'description': "This add-ons allows to easily export several objects at the same time and import in Unreal Engine.",
