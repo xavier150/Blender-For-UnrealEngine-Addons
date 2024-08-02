@@ -4,4 +4,4 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
 ### Version 4.3.5
 
 - Fix copyright.
-- Fix import script fail and python import 'importlib.util'
+- Fix import script fail. (import 'importlib.util' and sys.modules manipulation)
