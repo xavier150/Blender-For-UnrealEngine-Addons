@@ -17,7 +17,13 @@ license = [
   "SPDX:GPL-3.0-or-later",
 ]
 
-copyright = ["2024 Xavier Loux",]
+copyright = [
+  "2024 Xavier Loux",
+  "2013 Blender Foundation",
+  "2006-2012 assimp team",
+  "2013 Campbell Barton",
+  "2014 Bastien Montagne",
+]
 
 [build]
 paths_exclude_pattern = [
