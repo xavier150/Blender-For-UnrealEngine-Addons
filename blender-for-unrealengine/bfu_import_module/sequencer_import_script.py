@@ -5,6 +5,7 @@
 # py "[ScriptLocation]\sequencer_import_script.py"
 
 import importlib
+import importlib.util
 import sys
 import os
 import json
