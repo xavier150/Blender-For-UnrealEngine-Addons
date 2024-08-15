@@ -390,9 +390,9 @@ class DriverPropertyHelper:
             description=self.description,
             overridable=True)
 
-        bone_const = self.bone_const_name
-        constraints = self.constraint_name
-        driver_value = 'pose.bones["' + bone_const + '"].constraints["' + constraints + '"].influence'
+        escaped_bone_const = bpy.utils.escape_identifier(self.bone_const_name)
+        escaped_constraints = bpy.utils.escape_identifier(self.constraint_name)
+        driver_value = f'pose.bones["{escaped_bone_const}"].constraints["{escaped_constraints}"].influence'
         driver = self.armature.driver_add(driver_value).driver
         set_driver(self.armature, driver, bone_name, self.property_name)
 
@@ -412,9 +412,11 @@ def create_bone_custom_property(armature, property_bone_name, property_name, def
         soft_max=value_max,
         description=description
     )
-    property_bone.property_overridable_library_set('["' + property_name + '"]', overridable)
-
-    return 'pose.bones["' + property_bone_name + '"]["' + property_name + '"]'
+    escaped_property_name = bpy.utils.escape_identifier(property_name)
+    escaped_property_bone_name = bpy.utils.escape_identifier(property_bone_name)
+    property_bone.property_overridable_library_set(f'["{escaped_property_name}"]', overridable)
+    data_path = f'pose.bones["{escaped_property_bone_name}"]["{escaped_property_name}"]'
+    return data_path
 
 
 def set_driver(armature, driver, bone_name, driver_name, clean_previous=True):
@@ -423,11 +425,16 @@ def set_driver(armature, driver, bone_name, driver_name, clean_previous=True):
     """
     if clean_previous:
         utils.clear_driver_var(driver)
+
+    # Échapper les noms de bone et driver pour les utiliser en toute sécurité dans data_path
+    escaped_bone_name = bpy.utils.escape_identifier(bone_name)
+    escaped_driver_name = bpy.utils.escape_identifier(driver_name)
+
     v = driver.variables.new()
     v.name = driver_name.replace(" ", "_")
     v.targets[0].id = armature
-    v.targets[0].data_path = 'pose.bones["' + bone_name + '"]["' + driver_name + '"]'
-    driver.expression = driver_name.replace(" ", "_")
+    v.targets[0].data_path = f'pose.bones["{escaped_bone_name}"]["{escaped_driver_name}"]'
+    driver.expression = v.name
     return v
 
 
