@@ -101,51 +101,51 @@ def GetSkeletonMeshs(obj):
     return meshs
 
 
-def UpdateUnrealPotentialError():
+def update_unreal_potential_error():
     # Find and reset list of all potential error in scene
 
     addon_prefs = bfu_basics.GetAddonPrefs()
-    PotentialErrors = bpy.context.scene.potentialErrorList
-    PotentialErrors.clear()
+    potential_errors = bpy.context.scene.potentialErrorList
+    potential_errors.clear()
 
     # prepares the data to avoid unnecessary loops
-    objToCheck = []
+    obj_to_check = []
     final_asset_cache = bfu_cached_asset_list.GetfinalAssetCache()
     final_asset_list_to_export = final_asset_cache.GetFinalAssetList()
     for Asset in final_asset_list_to_export:
         if Asset.obj in bfu_utils.GetAllobjectsByExportType("export_recursive"):
-            if Asset.obj not in objToCheck:
-                objToCheck.append(Asset.obj)
+            if Asset.obj not in obj_to_check:
+                obj_to_check.append(Asset.obj)
             for child in bfu_utils.GetExportDesiredChilds(Asset.obj):
-                if child not in objToCheck:
-                    objToCheck.append(child)
+                if child not in obj_to_check:
+                    obj_to_check.append(child)
 
-    MeshTypeToCheck = []
-    for obj in objToCheck:
+    mesh_type_to_check = []
+    for obj in obj_to_check:
         if obj.type == 'MESH':
-            MeshTypeToCheck.append(obj)
+            mesh_type_to_check.append(obj)
 
-    MeshTypeWithoutCol = []  # is Mesh Type To Check Without Collision
-    for obj in MeshTypeToCheck:
+    mesh_type_without_col = []  # is Mesh Type To Check Without Collision
+    for obj in mesh_type_to_check:
         if not bfu_utils.CheckIsCollision(obj):
-            MeshTypeWithoutCol.append(obj)
+            mesh_type_without_col.append(obj)
 
-    def CheckUnitScale():
+    def check_unit_scale():
         # Check if the unit scale is equal to 0.01.
         if addon_prefs.notifyUnitScalePotentialError:
-            unit_scale = bfu_utils.get_scene_unit_scale()
             if not bfu_utils.get_scene_unit_scale_is_close(0.01):
-                MyError = PotentialErrors.add()
-                MyError.name = bpy.context.scene.name
-                MyError.type = 1
-                MyError.text = ('Scene "'+bpy.context.scene.name + '" has a UnitScale egal to ' + str(unit_scale))
-                MyError.text += ('\nFor Unreal unit scale equal to 0.01 is recommended.')
-                MyError.text += ('\n(You can disable this potential error in addon_prefs)')
-                MyError.object = None
-                MyError.correctRef = "SetUnrealUnit"
-                MyError.correctlabel = 'Set Unreal Unit'
+                str_unit_scale = str(bfu_utils.get_scene_unit_scale())
+                my_po_error = potential_errors.add()
+                my_po_error.name = bpy.context.scene.name
+                my_po_error.type = 1
+                my_po_error.text = (f'Scene "{bpy.context.scene.name}" has a Unit Scale equal to {str_unit_scale}.')
+                my_po_error.text += ('\nFor Unreal, a unit scale equal to 0.01 is recommended.')
+                my_po_error.text += ('\n(You can disable this potential error in the addon preferences.)')
+                my_po_error.object = None
+                my_po_error.correctRef = "SetUnrealUnit"
+                my_po_error.correctlabel = 'Set Unreal Unit'
 
-    def CheckSceneFrameRate():
+    def check_scene_frame_rate():
         # Check Scene Frame Rate.
         scene = bpy.context.scene
         denominator = scene.render.fps_base
@@ -161,398 +161,372 @@ def UpdateUnrealPotentialError():
                     f'- Denominator: {denominator} -> {new_denominator}\n'
                     f'- Numerator: {numerator} -> {new_numerator}')
 
-            MyError = PotentialErrors.add()
-            MyError.name = bpy.context.scene.name
-            MyError.type = 2
-            MyError.text = (message)
-            MyError.docsOcticon = 'scene-frame-rate'
+            my_po_error = potential_errors.add()
+            my_po_error.name = bpy.context.scene.name
+            my_po_error.type = 2
+            my_po_error.text = (message)
+            my_po_error.docsOcticon = 'scene-frame-rate'
 
 
-    def CheckObjType():
+    def check_obj_type():
         # Check if objects use a non-recommended type
-        for obj in objToCheck:
-            if (obj.type == "SURFACE" or
-                    obj.type == "META" or
-                    obj.type == "FONT"):
-                MyError = PotentialErrors.add()
-                MyError.name = obj.name
-                MyError.type = 1
-                MyError.text = (
-                    'Object "'+obj.name +
-                    '" is a '+obj.type +
-                    '. The object of the type SURFACE,' +
-                    ' META and FONT is not recommended.')
-                MyError.object = obj
-                MyError.correctRef = "ConvertToMesh"
-                MyError.correctlabel = 'Convert to mesh'
 
-    def CheckShapeKeys():
-        for obj in MeshTypeToCheck:
-            if obj.data.shape_keys is not None:
+        non_recommended_types = {"SURFACE", "META", "FONT"}
+        for obj in obj_to_check:
+            if obj.type in non_recommended_types:
+                my_po_error = potential_errors.add()
+                my_po_error.name = obj.name
+                my_po_error.type = 1
+                my_po_error.text = (
+                    f'Object "{obj.name}" is a {obj.type}. The object of the type '
+                    'SURFACE, META, and FONT is not recommended.'
+                )
+                my_po_error.object = obj
+                my_po_error.correctRef = "ConvertToMesh"
+                my_po_error.correctlabel = 'Convert to mesh'
+
+    def check_shape_keys():
+        destructive_modifiers = {"ARMATURE"}
+
+        for obj in mesh_type_to_check:
+            shape_keys = obj.data.shape_keys
+            if shape_keys is not None and len(shape_keys.key_blocks) > 0:
                 # Check that no modifiers is destructive for the key shapes
-                if len(obj.data.shape_keys.key_blocks) > 0:
-                    for modif in obj.modifiers:
-                        if modif.type != "ARMATURE":
-                            MyError = PotentialErrors.add()
-                            MyError.name = obj.name
-                            MyError.type = 2
-                            MyError.object = obj
-                            MyError.itemName = modif.name
-                            MyError.text = (
-                                'In object "'+obj.name +
-                                '" the modifier '+modif.type +
-                                ' named "'+modif.name +
-                                '" can destroy shape keys.' +
-                                ' Please use only Armature modifier' +
-                                ' with shape keys.')
-                            MyError.correctRef = "RemoveModfier"
-                            MyError.correctlabel = 'Remove modifier'
+                for modif in obj.modifiers:
+                    if modif.type in destructive_modifiers:
+                        my_po_error = potential_errors.add()
+                        my_po_error.name = obj.name
+                        my_po_error.type = 2
+                        my_po_error.object = obj
+                        my_po_error.itemName = modif.name
+                        my_po_error.text = (
+                            f'In object "{obj.name}", the modifier "{modif.type}" '
+                            f'named "{modif.name}" can destroy shape keys. '
+                            'Please use only the Armature modifier with shape keys.'
+                        )
+                        my_po_error.correctRef = "RemoveModifier"
+                        my_po_error.correctlabel = 'Remove modifier'
 
-                # Check that the key shapes are not out of bounds for Unreal
-                for key in obj.data.shape_keys.key_blocks:
-                    # Min
-                    if key.slider_min < -5:
-                        MyError = PotentialErrors.add()
-                        MyError.name = obj.name
-                        MyError.type = 1
-                        MyError.object = obj
-                        MyError.itemName = key.name
-                        MyError.text = (
-                            'In object "'+obj.name +
-                            '" the shape key "'+key.name +
-                            '" is out of bounds for Unreal.' +
-                            ' The min range of must not be inferior to -5.')
-                        MyError.correctRef = "SetKeyRangeMin"
-                        MyError.correctlabel = 'Set min range to -5'
+                # Check shape key ranges for Unreal Engine compatibility
+                unreal_engine_shape_key_max = 5
+                unreal_engine_shape_key_min = -5
+                for key in shape_keys.key_blocks:
+                    # Min check
+                    if key.slider_min < unreal_engine_shape_key_min:
+                        my_po_error = potential_errors.add()
+                        my_po_error.name = obj.name
+                        my_po_error.type = 1
+                        my_po_error.object = obj
+                        my_po_error.itemName = key.name
+                        my_po_error.text = (
+                            f'In object "{obj.name}", the shape key "{key.name}" '
+                            'is out of bounds for Unreal. The minimum range must not be less than {unreal_engine_shape_key_min}.'
+                        )
+                        my_po_error.correctRef = "SetKeyRangeMin"
+                        my_po_error.correctlabel = f'Set min range to {unreal_engine_shape_key_min}'
 
-                    # Max
-                    if key.slider_max > 5:
-                        MyError = PotentialErrors.add()
-                        MyError.name = obj.name
-                        MyError.type = 1
-                        MyError.object = obj
-                        MyError.itemName = key.name
-                        MyError.text = (
-                            'In object "'+obj.name +
-                            '" the shape key "'+key.name +
-                            '" is out of bounds for Unreal.' +
-                            ' The max range of must not be superior to 5.')
-                        MyError.correctRef = "SetKeyRangeMax"
-                        MyError.correctlabel = 'Set max range to -5'
+                    # Max check
+                    if key.slider_max > unreal_engine_shape_key_max:
+                        my_po_error = potential_errors.add()
+                        my_po_error.name = obj.name
+                        my_po_error.type = 1
+                        my_po_error.object = obj
+                        my_po_error.itemName = key.name
+                        my_po_error.text = (
+                            f'In object "{obj.name}", the shape key "{key.name}" '
+                            'is out of bounds for Unreal. The maximum range must not exceed {unreal_engine_shape_key_max}.'
+                        )
+                        my_po_error.correctRef = "SetKeyRangeMax"
+                        my_po_error.correctlabel = f'Set max range to {unreal_engine_shape_key_max}'
 
-    def CheckUVMaps():
+    def check_uv_maps():
         # Check that the objects have at least one UV map valid
-        for obj in MeshTypeWithoutCol:
+        for obj in mesh_type_without_col:
             if len(obj.data.uv_layers) < 1:
-                MyError = PotentialErrors.add()
-                MyError.name = obj.name
-                MyError.type = 1
-                MyError.text = (
-                    'Object "'+obj.name +
-                    '" does not have any UV Layer.')
-                MyError.object = obj
-                MyError.correctRef = "CreateUV"
-                MyError.correctlabel = 'Create Smart UV Project'
+                my_po_error = potential_errors.add()
+                my_po_error.name = obj.name
+                my_po_error.type = 1
+                my_po_error.text = (f'Object "{obj.name}" does not have any UV Layer.')
+                my_po_error.object = obj
+                my_po_error.correctRef = "CreateUV"
+                my_po_error.correctlabel = 'Create Smart UV Project'
 
-    def CheckBadStaicMeshExportedLikeSkeletalMesh():
+    def check_bad_static_mesh_exported_like_skeletal_mesh():
         # Check if the correct object is defined as exportable
-        for obj in MeshTypeToCheck:
+        for obj in mesh_type_to_check:
             for modif in obj.modifiers:
-                if modif.type == "ARMATURE":
-                    if obj.bfu_export_type == "export_recursive":
-                        MyError = PotentialErrors.add()
-                        MyError.name = obj.name
-                        MyError.type = 1
-                        MyError.text = (
-                            'In object "'+obj.name +
-                            '" the modifier '+modif.type +
-                            ' named "'+modif.name +
-                            '" will not be applied when exported' +
-                            ' with StaticMesh assets.\nNote: with armature' +
-                            ' if you want export objets as skeletal mesh you' +
-                            ' need set only the armature as' +
-                            ' export_recursive not the childs')
-                        MyError.object = obj
+                if modif.type == "ARMATURE" and obj.bfu_export_type == "export_recursive":
+                    my_po_error = potential_errors.add()
+                    my_po_error.name = obj.name
+                    my_po_error.type = 1
+                    my_po_error.text = (
+                        f'In object "{obj.name}", the modifier "{modif.type}" '
+                        f'named "{modif.name}" will not be applied when exported '
+                        'with StaticMesh assets.\nNote: with armature, if you want to export '
+                        'objects as skeletal mesh, you need to set only the armature as '
+                        'export_recursive, not the child objects.'
+                    )
+                    my_po_error.object = obj
 
-    def CheckArmatureScale():
+    def check_armature_scale():
         # Check if the ARMATURE use the same value on all scale axes
-        for obj in objToCheck:
+        for obj in obj_to_check:
             if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                 if obj.scale.z != obj.scale.y or obj.scale.z != obj.scale.x:
-                    MyError = PotentialErrors.add()
-                    MyError.name = obj.name
-                    MyError.type = 2
-                    MyError.text = (
-                        'In object "'+obj.name +
-                        '" do not use the same value on all scale axes ')
-                    MyError.text += (
-                        '\nScale x:' +
-                        str(obj.scale.x)+' y:'+str(obj.scale.y) +
-                        ' z:'+str(obj.scale.z))
-                    MyError.object = obj
+                    my_po_error = potential_errors.add()
+                    my_po_error.name = obj.name
+                    my_po_error.type = 2
+                    my_po_error.text = (
+                        f'In object "{obj.name}", the scale values are not consistent across all axes.'
+                    )
+                    my_po_error.text += (
+                        f'\nScale x: {obj.scale.x}, y: {obj.scale.y}, z: {obj.scale.z}'
+                    )
+                    my_po_error.object = obj
 
-    def CheckArmatureNumber():
-        # check Modifier or Constraint ARMATURE number = 1
-        for obj in objToCheck:
+    def check_armature_number():
+        # Check if the number of ARMATURE modifiers or constraints is exactly 1
+        for obj in obj_to_check:
             meshs = GetSkeletonMeshs(obj)
             for mesh in meshs:
-                # Count
-                armature_modifiers = 0
-                armature_constraint = 0
-                for mod in mesh.modifiers:
-                    if mod.type == "ARMATURE":
-                        armature_modifiers += 1
-                for const in mesh.constraints:
-                    if const.type == "ARMATURE":
-                        armature_constraint += 1
+                # Count the number of ARMATURE modifiers and constraints
+                armature_modifiers = sum(1 for mod in mesh.modifiers if mod.type == "ARMATURE")
+                armature_constraints = sum(1 for const in mesh.constraints if const.type == "ARMATURE")
 
-                # Check result > 1
-                if armature_modifiers + armature_constraint > 1:
-                    MyError = PotentialErrors.add()
-                    MyError.name = mesh.name
-                    MyError.type = 2
-                    MyError.text = (
-                        'In object "'+mesh.name + '" ' +
-                        str(armature_modifiers) + ' Armature modifier(s) and ' +
-                        str(armature_modifiers) + ' Armature constraint(s) was found. ' +
-                        ' Please use only one Armature modifier or one Armature constraint.')
-                    MyError.object = mesh
+                # Check if the total number of ARMATURE modifiers and constraints is greater than 1
+                if armature_modifiers + armature_constraints > 1:
+                    my_po_error = potential_errors.add()
+                    my_po_error.name = mesh.name
+                    my_po_error.type = 2
+                    my_po_error.text = (
+                        f'In object "{mesh.name}", {armature_modifiers} Armature modifier(s) and '
+                        f'{armature_constraints} Armature constraint(s) were found. '
+                        'Please use only one Armature modifier or one Armature constraint.'
+                    )
+                    my_po_error.object = mesh
 
-                # Check result == 0
-                if armature_modifiers + armature_constraint == 0:
-                    MyError = PotentialErrors.add()
-                    MyError.name = mesh.name
-                    MyError.type = 2
-                    MyError.text = (
-                        'In object "'+mesh.name + '" ' +
-                        ' no Armature modifiers or constraints was found. ' +
-                        ' Please use only one Armature modifier or one Armature constraint.')
-                    MyError.object = mesh
+                # Check if no ARMATURE modifiers or constraints are found
+                if armature_modifiers + armature_constraints == 0:
+                    my_po_error = potential_errors.add()
+                    my_po_error.name = mesh.name
+                    my_po_error.type = 2
+                    my_po_error.text = (
+                        f'In object "{mesh.name}", no Armature modifiers or constraints were found. '
+                        'Please use one Armature modifier or one Armature constraint.'
+                    )
+                    my_po_error.object = mesh
 
-    def CheckArmatureModData():
-        # check the parameter of Modifier ARMATURE
-        for obj in MeshTypeToCheck:
+    def check_armature_mod_data():
+        # Check the parameters of ARMATURE modifiers
+        for obj in mesh_type_to_check:
             for mod in obj.modifiers:
                 if mod.type == "ARMATURE":
                     if mod.use_deform_preserve_volume:
-                        MyError = PotentialErrors.add()
-                        MyError.name = obj.name
-                        MyError.type = 2
-                        MyError.text = (
-                            'In object "'+obj.name +
-                            '" the modifier '+mod.type +
-                            ' named "'+mod.name +
-                            '". The parameter Preserve Volume' +
-                            ' must be set to False.')
-                        MyError.object = obj
-                        MyError.itemName = mod.name
-                        MyError.correctRef = "PreserveVolume"
-                        MyError.correctlabel = 'Set Preserve Volume to False'
+                        my_po_error = potential_errors.add()
+                        my_po_error.name = obj.name
+                        my_po_error.type = 2
+                        my_po_error.text = (
+                            f'In object "{obj.name}", the ARMATURE modifier '
+                            f'named "{mod.name}" has the Preserve Volume parameter set to True. '
+                            'This parameter must be set to False.'
+                        )
+                        my_po_error.object = obj
+                        my_po_error.itemName = mod.name
+                        my_po_error.correctRef = "PreserveVolume"
+                        my_po_error.correctlabel = 'Set Preserve Volume to False'
 
-    def CheckArmatureConstData():
-        # check the parameter of constraint ARMATURE
-        for obj in MeshTypeToCheck:
+    def check_armature_const_data():
+        # Check the parameters of ARMATURE constraints
+        for obj in mesh_type_to_check:
             for const in obj.constraints:
                 if const.type == "ARMATURE":
-                    pass
                     # TO DO.
+                    pass  
 
-    def CheckArmatureBoneData():
-        # check the parameter of the ARMATURE bones
-        for obj in objToCheck:
+    def check_armature_bone_data():
+        # Check the parameters of the ARMATURE bones
+        for obj in obj_to_check:
             if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                 for bone in obj.data.bones:
                     if (not obj.bfu_export_deform_only or
                             (bone.use_deform and obj.bfu_export_deform_only)):
 
                         if bone.bbone_segments > 1:
-                            MyError = PotentialErrors.add()
-                            MyError.name = obj.name
-                            MyError.type = 1
-                            MyError.text = (
-                                'In object3 "'+obj.name +
-                                '" the bone named "'+bone.name +
-                                '". The parameter Bendy Bones / Segments' +
-                                ' must be set to 1.')
-                            MyError.text += (
-                                '\nBendy bones are not supported by' +
-                                ' Unreal Engine, so that better to disable' +
-                                ' it if you want the same animation preview' +
-                                ' in Unreal and blender.')
-                            MyError.object = obj
-                            MyError.itemName = bone.name
-                            MyError.selectPoseBoneButton = True
-                            MyError.correctRef = "BoneSegments"
-                            MyError.correctlabel = 'Set Bone Segments to 1'
-                            MyError.docsOcticon = 'bendy-bone'
+                            my_po_error = potential_errors.add()
+                            my_po_error.name = obj.name
+                            my_po_error.type = 1
+                            my_po_error.text = (
+                                f'In object "{obj.name}", the bone named "{bone.name}" '
+                                'has the Bendy Bones / Segments parameter set to more than 1. '
+                                'This parameter must be set to 1.'
+                            )
+                            my_po_error.text += (
+                                '\nBendy bones are not supported by Unreal Engine, '
+                                'so it is better to disable it if you want the same '
+                                'animation preview in Unreal and Blender.'
+                            )
+                            my_po_error.object = obj
+                            my_po_error.itemName = bone.name
+                            my_po_error.selectPoseBoneButton = True
+                            my_po_error.correctRef = "BoneSegments"
+                            my_po_error.correctlabel = 'Set Bone Segments to 1'
+                            my_po_error.docsOcticon = 'bendy-bone'
 
-    def CheckArmatureValidChild():
-        # Check that skeleton also has a mesh to export
-
-        for obj in objToCheck:
+    def check_armature_valid_child():
+        # Check that the skeleton has at least one valid mesh child to export
+        for obj in obj_to_check:
             export_as_proxy = bfu_utils.GetExportAsProxy(obj)
             if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                 childs = bfu_utils.GetExportDesiredChilds(obj)
-                validChild = 0
-                for child in childs:
-                    if child.type == "MESH":
-                        validChild += 1
-                if export_as_proxy:
-                    if bfu_utils.GetExportProxyChild(obj) is not None:
-                        validChild += 1
-                if validChild < 1:
-                    MyError = PotentialErrors.add()
-                    MyError.name = obj.name
-                    MyError.type = 2
-                    MyError.text = (
-                        'Object "'+obj.name +
-                        '" is an Armature and does not have' +
-                        ' any valid children.')
-                    MyError.object = obj
+                valid_child = sum(1 for child in childs if child.type == "MESH")
 
-    def CheckArmatureChildWithBoneParent():
-        # If you use Parent Bone to parent your mesh to your armature the import will fail.
-        for obj in objToCheck:
+                if export_as_proxy and bfu_utils.GetExportProxyChild(obj) is not None:
+                    valid_child += 1
+
+                if valid_child < 1:
+                    my_po_error = potential_errors.add()
+                    my_po_error.name = obj.name
+                    my_po_error.type = 2
+                    my_po_error.text = (
+                        f'Object "{obj.name}" is an Armature and does not have '
+                        'any valid children.'
+                    )
+                    my_po_error.object = obj
+
+    def check_armature_child_with_bone_parent():
+        # Check if a mesh child is parented to a bone, which will cause import issues
+        for obj in obj_to_check:
             if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                 childs = bfu_utils.GetExportDesiredChilds(obj)
                 for child in childs:
-                    if child.type == "MESH":
-                        if child.parent_type == 'BONE':
-                            MyError = PotentialErrors.add()
-                            MyError.name = child.name
-                            MyError.type = 2
-                            MyError.text = (
-                                'Object "'+child.name +
-                                '" use Parent Bone to parent. ' +
-                                '\n If you use Parent Bone to parent your mesh to your armature the import will fail.')
-                            MyError.object = child
-                            MyError.docsOcticon = 'armature-child-with-bone-parent'
+                    if child.type == "MESH" and child.parent_type == 'BONE':
+                        my_po_error = potential_errors.add()
+                        my_po_error.name = child.name
+                        my_po_error.type = 2
+                        my_po_error.text = (
+                            f'Object "{child.name}" uses Parent Bone to parent. '
+                            '\nIf you use Parent Bone to parent your mesh to your armature, the import will fail.'
+                        )
+                        my_po_error.object = child
+                        my_po_error.docsOcticon = 'armature-child-with-bone-parent'
 
-    def CheckArmatureMultipleRoots():
-        # Check that skeleton have multiples roots
-        for obj in objToCheck:
+    def check_armature_multiple_roots():
+        # Check if the skeleton has multiple root bones
+        for obj in obj_to_check:
             if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
-                rootBones = bfu_utils.GetArmatureRootBones(obj)
+                root_bones = bfu_utils.GetArmatureRootBones(obj)
 
-                if len(rootBones) > 1:
-                    MyError = PotentialErrors.add()
-                    MyError.name = obj.name
-                    MyError.type = 1
-                    MyError.text = (
-                        'Object "'+obj.name +
-                        '" have Multiple roots bones.' +
-                        ' Unreal only support single root bone')
-                    MyError.text += '\nA custom root bone will be added at the export.'
-                    MyError.text += ' '+str(len(rootBones))+' root bones found: '
-                    MyError.text += '\n'
-                    for rootBone in rootBones:
-                        MyError.text += rootBone.name+', '
-                    MyError.object = obj
+                if len(root_bones) > 1:
+                    my_po_error = potential_errors.add()
+                    my_po_error.name = obj.name
+                    my_po_error.type = 1
+                    my_po_error.text = (
+                        f'Object "{obj.name}" has multiple root bones. '
+                        'Unreal only supports a single root bone.'
+                    )
+                    my_po_error.text += '\nA custom root bone will be added at export.'
+                    my_po_error.text += f' {len(root_bones)} root bones found: '
+                    my_po_error.text += ', '.join(root_bone.name for root_bone in root_bones)
+                    my_po_error.object = obj
 
-    def CheckArmatureNoDeformBone():
-        # Check that skeleton have at less one deform bone
-        for obj in objToCheck:
+    def check_armature_no_deform_bone():
+        # Check that the skeleton has at least one deform bone
+        for obj in obj_to_check:
             if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                 if obj.bfu_export_deform_only:
-                    for bone in obj.data.bones:
-                        if bone.use_deform:
-                            return
-                    MyError = PotentialErrors.add()
-                    MyError.name = obj.name
-                    MyError.type = 2
-                    MyError.text = (
-                        'Object "'+obj.name +
-                        '" don\'t have any deform bones.' +
-                        ' Unreal will import it like a StaticMesh.')
-                    MyError.object = obj
+                    has_deform_bone = any(bone.use_deform for bone in obj.data.bones)
+                    if not has_deform_bone:
+                        my_po_error = potential_errors.add()
+                        my_po_error.name = obj.name
+                        my_po_error.type = 2
+                        my_po_error.text = (
+                            f'Object "{obj.name}" does not have any deform bones. '
+                            'Unreal will import it as a StaticMesh.'
+                        )
+                        my_po_error.object = obj
 
-    def CheckMarkerOverlay():
-        # Check that there is no overlap with the Marker
-        usedFrame = []
+    def check_marker_overlay():
+        # Check that there is no overlap with the markers in the scene timeline
+        used_frames = []
         for marker in bpy.context.scene.timeline_markers:
-            if marker.frame in usedFrame:
-                MyError = PotentialErrors.add()
-                MyError.type = 2
-                MyError.text = (
-                    'In the scene timeline the frame "' +
-                    str(marker.frame)+'" contains overlaped Markers' +
-                    '\n To avoid camera conflict in the generation' +
-                    ' of sequencer you must use max one marker per frame.')
+            if marker.frame in used_frames:
+                my_po_error = potential_errors.add()
+                my_po_error.type = 2
+                my_po_error.text = (
+                    f'In the scene timeline, the frame "{marker.frame}" contains overlapping markers.'
+                    '\nTo avoid camera conflicts in the generation of the sequencer, '
+                    'you must use a maximum of one marker per frame.'
+                )
             else:
-                usedFrame.append(marker.frame)
+                used_frames.append(marker.frame)
 
-    def CheckVertexGroupWeight():
-        # Check that all vertex have a weight
-        for obj in objToCheck:
-            meshs = GetSkeletonMeshs(obj)
-            for mesh in meshs:
-                if mesh.type == "MESH":
-                    if ContainsArmatureModifier(mesh):
-                        # Result data
-                        VertexWithZeroWeight = GetVertexWithZeroWeight(
-                            obj,
-                            mesh)
-                        if len(VertexWithZeroWeight) > 0:
-                            MyError = PotentialErrors.add()
-                            MyError.name = mesh.name
-                            MyError.type = 1
-                            MyError.text = (
-                                'Object named "'+mesh.name +
-                                '" contains '+str(len(VertexWithZeroWeight)) +
-                                ' vertex with zero cumulative valid weight.')
-                            MyError.text += (
-                                '\nNote: Vertex groups must have' +
-                                ' a bone with the same name to be valid.')
-                            MyError.object = mesh
-                            MyError.selectVertexButton = True
-                            MyError.selectOption = "VertexWithZeroWeight"
+    def check_vertex_group_weight():
+        # Check that all vertices have a weight
+        for obj in obj_to_check:
+            meshes = GetSkeletonMeshs(obj)
+            for mesh in meshes:
+                if mesh.type == "MESH" and ContainsArmatureModifier(mesh):
+                    # Get vertices with zero weight
+                    vertices_with_zero_weight = GetVertexWithZeroWeight(obj, mesh)
+                    if vertices_with_zero_weight:
+                        my_po_error = potential_errors.add()
+                        my_po_error.name = mesh.name
+                        my_po_error.type = 1
+                        my_po_error.text = (
+                            f'Object "{mesh.name}" contains {len(vertices_with_zero_weight)} '
+                            'vertices with zero cumulative valid weight.'
+                        )
+                        my_po_error.text += (
+                            '\nNote: Vertex groups must have a bone with the same name to be valid.'
+                        )
+                        my_po_error.object = mesh
+                        my_po_error.selectVertexButton = True
+                        my_po_error.selectOption = "VertexWithZeroWeight"
 
-    def CheckZeroScaleKeyframe():
-        # Check that animations do not use a invalid value
-        for obj in objToCheck:
+    def check_zero_scale_keyframe():
+        # Check that animations do not use an invalid scale value
+        for obj in obj_to_check:
             if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj):
                 animation_asset_cache = bfu_cached_asset_list.GetAnimationAssetCache(obj)
-                animation_to_export = animation_asset_cache.GetAnimationAssetList()
-                for action in animation_to_export:
+                animations_to_export = animation_asset_cache.GetAnimationAssetList()
+                for action in animations_to_export:
                     for fcurve in action.fcurves:
                         if fcurve.data_path.split(".")[-1] == "scale":
                             for key in fcurve.keyframe_points:
-                                xCurve, yCurve = key.co
-                                if key.co[1] == 0:
-                                    MyError = PotentialErrors.add()
-                                    MyError.type = 2
-                                    MyError.text = (
-                                        'In action "'+action.name +
-                                        '" at frame '+str(key.co[0]) +
-                                        ', the bone named "' +
-                                        fcurve.data_path.split('"')[1] +
-                                        '" has a zero value in scale' +
-                                        ' transform. ' +
-                                        'This is invalid in Unreal.')
+                                x_curve, y_curve = key.co
+                                if y_curve == 0:
+                                    bone_name = fcurve.data_path.split('"')[1]
+                                    my_po_error = potential_errors.add()
+                                    my_po_error.type = 2
+                                    my_po_error.text = (
+                                        f'In action "{action.name}" at frame {x_curve}, '
+                                        f'the bone named "{bone_name}" has a zero value in the scale '
+                                        'transform. This is invalid in Unreal.'
+                                    )
 
-    CheckUnitScale()
-    CheckSceneFrameRate()
-    CheckObjType()
-    CheckShapeKeys()
-    CheckUVMaps()
-    CheckBadStaicMeshExportedLikeSkeletalMesh()
-    CheckArmatureScale()
-    CheckArmatureNumber()
-    CheckArmatureModData()
-    CheckArmatureConstData()
-    CheckArmatureBoneData()
-    CheckArmatureValidChild()
-    CheckArmatureMultipleRoots()
-    CheckArmatureChildWithBoneParent()
-    CheckArmatureNoDeformBone()
-    CheckMarkerOverlay()
-    CheckVertexGroupWeight()
-    CheckZeroScaleKeyframe()
+    check_unit_scale()
+    check_scene_frame_rate()
+    check_obj_type()
+    check_shape_keys()
+    check_uv_maps()
+    check_bad_static_mesh_exported_like_skeletal_mesh()
+    check_armature_scale()
+    check_armature_number()
+    check_armature_mod_data()
+    check_armature_const_data()
+    check_armature_bone_data()
+    check_armature_valid_child()
+    check_armature_multiple_roots()
+    check_armature_child_with_bone_parent()
+    check_armature_no_deform_bone()
+    check_marker_overlay()
+    check_vertex_group_weight()
+    check_zero_scale_keyframe()
 
-    return PotentialErrors
+    return potential_errors
 
 
-def SelectPotentialErrorObject(errorIndex):
+def select_potential_error_object(errorIndex):
     # Select potential error
 
     bbpl.utils.safe_mode_set('OBJECT', bpy.context.active_object)
@@ -577,7 +551,7 @@ def SelectPotentialErrorObject(errorIndex):
 
 def SelectPotentialErrorVertex(errorIndex):
     # Select potential error
-    SelectPotentialErrorObject(errorIndex)
+    select_potential_error_object(errorIndex)
     bbpl.utils.safe_mode_set('EDIT')
 
     scene = bpy.context.scene
@@ -597,7 +571,7 @@ def SelectPotentialErrorVertex(errorIndex):
 
 def SelectPotentialErrorPoseBone(errorIndex):
     # Select potential error
-    SelectPotentialErrorObject(errorIndex)
+    select_potential_error_object(errorIndex)
     bbpl.utils.safe_mode_set('POSE')
 
     scene = bpy.context.scene
