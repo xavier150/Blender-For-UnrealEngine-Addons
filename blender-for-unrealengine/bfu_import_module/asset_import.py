@@ -249,23 +249,21 @@ def ImportAsset(asset_data):
 
     if asset_data["asset_type"] == "Animation":
         # For animation the script will import a skeletal mesh and remove after.
-        # If the skeletal mesh alredy exist try to remove.
+        # If the skeletal mesh already exists, try to remove it.
 
+        asset_name = import_module_unreal_utils.ValidUnrealAssetsName(asset_data["asset_name"])
+        asset_path = f"SkeletalMesh'{asset_data['full_import_path']}/{asset_name}.{asset_name}'"
 
-        AssetName = asset_data["asset_name"]
-        AssetName = import_module_unreal_utils.ValidUnrealAssetsName(AssetName)
-        AssetPath = "SkeletalMesh'"+asset_data["full_import_path"]+"/"+AssetName+"."+AssetName+"'"
-
-        if unreal.EditorAssetLibrary.does_asset_exist(AssetPath):
-            oldAsset = unreal.EditorAssetLibrary.find_asset_data(AssetPath)
-            if oldAsset.asset_class == "SkeletalMesh":
-                unreal.EditorAssetLibrary.delete_asset(AssetPath)
+        if unreal.EditorAssetLibrary.does_asset_exist(asset_path):
+            old_asset = unreal.EditorAssetLibrary.find_asset_data(asset_path)
+            if old_asset.asset_class == "SkeletalMesh":
+                unreal.EditorAssetLibrary.delete_asset(asset_path)
 
     unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
 
     if len(task.imported_object_paths) > 0:
-        asset_path = task.imported_object_paths[0]
-        asset = unreal.find_asset(asset_path)
+        imported_asset_path = task.imported_object_paths[0]
+        asset = unreal.find_asset(imported_asset_path)
     else:
         asset = None
 
