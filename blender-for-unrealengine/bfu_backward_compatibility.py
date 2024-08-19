@@ -71,7 +71,6 @@ def update_old_variables():
         update_variable(obj, ["GenerateLightmapUVs"], "bfu_generate_light_map_uvs")
         update_variable(obj, ["convert_geometry_node_attribute_to_uv"], "bfu_convert_geometry_node_attribute_to_uv")
         update_variable(obj, ["convert_geometry_node_attribute_to_uv_name"], "bfu_convert_geometry_node_attribute_to_uv_name")
-        update_variable(obj, ["correct_extrem_uv_scale"], "bfu_correct_extrem_uv_scale")
         update_variable(obj, ["AutoGenerateCollision"], "bfu_auto_generate_collision")
         update_variable(obj, ["MaterialSearchLocation"], "bfu_material_search_location", enum_callback)
         update_variable(obj, ["CollisionTraceFlag"], "bfu_collision_trace_flag", enum_callback)
@@ -103,6 +102,9 @@ def update_old_variables():
         update_variable(obj, ["active_ObjectAction"], "bfu_active_animation_asset_list")
 
         update_variable(obj, ["ExportAsAlembic, bfu_export_as_alembic"], "bfu_export_as_alembic_animation")
+        
+        update_variable(obj, ["correct_extrem_uv_scale", "bfu_correct_extrem_uv_scale"], "bfu_use_correct_extrem_uv_scale")
+        
 
         
 

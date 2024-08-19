@@ -1,6 +1,7 @@
 import bpy
 
 from .. import bfu_utils
+from .. import languages
 
 class BFU_PT_CorrectAndImprov(bpy.types.Panel):
     # Is Clipboard panel
@@ -12,23 +13,28 @@ class BFU_PT_CorrectAndImprov(bpy.types.Panel):
     bl_category = "Unreal Engine"
 
     class BFU_OT_CorrectExtremUV(bpy.types.Operator):
-        bl_label = "Correct Extrem UV For Unreal"
+        bl_label = (languages.ti('correct_use_extrem_uv_scale_name'))
         bl_idname = "object.correct_extrem_uv"
-        bl_description = (
-            "Correct extrem UV island of the selected object" +
-            " for better use in real time engines"
-            )
+        bl_description = (languages.ti('correct_extrem_uv_scale_operator_desc'))
         bl_options = {'REGISTER', 'UNDO'}
 
-        stepScale: bpy.props.IntProperty(
-            name="Step scale",
+        step_scale: bpy.props.IntProperty(
+            name=(languages.ti('correct_extrem_uv_scale_step_scale_name')),
+            description =(languages.ti('correct_use_extrem_uv_scale_desc')),
             default=2,
             min=1,
-            max=100)
+            max=100,
+            )
+        
+        move_to_absolute: bpy.props.BoolProperty(
+            name=(languages.ti('correct_extrem_uv_scale_use_absolute_name')),
+            description =(languages.ti('correct_extrem_uv_scale_use_absolute_desc')),
+            default=False,
+            )
 
         def execute(self, context):
             if bpy.context.active_object.mode == "EDIT":
-                bfu_utils.CorrectExtremeUV(stepScale=self.stepScale)
+                bfu_utils.CorrectExtremeUV(step_scale=self.step_scale, move_to_absolute=self.move_to_absolute)
                 self.report(
                     {'INFO'},
                     "UV corrected!")

@@ -725,8 +725,8 @@ def ApplyObjectModifiers(obj: bpy.types.Object, blacklist_type = []):
     
 
 
-def CorrectExtremeUV(stepScale=2):
-
+def CorrectExtremeUV(step_scale=2, move_to_absolute=False):
+    
     def GetHaveConnectedLoop(faceTarget):
         # In bmesh faces
         for loop in faceTarget.loops:
@@ -779,16 +779,24 @@ def CorrectExtremeUV(stepScale=2):
 
         return Islands
 
-    def MoveItlandToCenter(faces, uv_lay, minDistance):
+    def MoveItlandToCenter(faces, uv_lay, min_distance, absolute):
         loop = faces[-1].loops[-1]
 
-        x = round(loop[uv_lay].uv[0]/minDistance, 0)*minDistance
-        y = round(loop[uv_lay].uv[1]/minDistance, 0)*minDistance
+        delta_x = round(loop[uv_lay].uv[0]/min_distance, 0)*min_distance
+        delta_y = round(loop[uv_lay].uv[1]/min_distance, 0)*min_distance
 
         for face in faces:
             for loop in face.loops:
-                loop[uv_lay].uv[0] -= x
-                loop[uv_lay].uv[1] -= y
+                loop[uv_lay].uv[0] -= delta_x
+                loop[uv_lay].uv[1] -= delta_y
+
+        if(absolute == True):
+            # Move Faces to make it alway positive
+            for face in faces:
+                for loop in face.loops:
+                    loop[uv_lay].uv[0] = abs(loop[uv_lay].uv[0])
+                    loop[uv_lay].uv[1] = abs(loop[uv_lay].uv[1])
+
 
     def IsValidForUvEdit(obj):
         if obj.type == "MESH":
@@ -806,10 +814,9 @@ def CorrectExtremeUV(stepScale=2):
 
             for faces in GetAllIsland(bm, uv_lay):
                 uv_lay = bm.loops.layers.uv.active
-                MoveItlandToCenter(faces, uv_lay, stepScale)
+                MoveItlandToCenter(faces, uv_lay, step_scale, move_to_absolute)
 
             obj.data.update()
-
 
 def ApplyExportTransform(obj, use_type="Object"):
 

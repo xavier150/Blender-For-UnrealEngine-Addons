@@ -465,11 +465,12 @@ def ConvertGeometryNodeAttributeToUV(obj, attrib_name):
 
 
 def CorrectExtremUVAtExport(obj):
-    if obj.bfu_correct_extrem_uv_scale:
+    if obj.bfu_use_correct_extrem_uv_scale:
         SavedSelect = bbpl.utils.UserSelectSave()
         SavedSelect.save_current_select()
+        bbpl.utils.select_specific_object(obj)
         if bfu_utils.GoToMeshEditMode():
-            bfu_utils.CorrectExtremeUV(2)
+            bfu_utils.CorrectExtremeUV(obj.bfu_correct_extrem_uv_scale_step_scale, obj.bfu_correct_extrem_uv_scale_use_absolute)
             bbpl.utils.safe_mode_set('OBJECT')
             SavedSelect.reset_select_by_ref()
             return True

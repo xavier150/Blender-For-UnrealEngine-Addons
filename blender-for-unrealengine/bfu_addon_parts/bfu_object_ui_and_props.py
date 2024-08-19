@@ -298,9 +298,25 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         default="UVMap",
         )
 
-    bpy.types.Object.bfu_correct_extrem_uv_scale = bpy.props.BoolProperty(
-        name=(languages.ti('correct_extrem_uv_scale_name')),
-        description=(languages.tt('correct_extrem_uv_scale_desc')),
+    bpy.types.Object.bfu_use_correct_extrem_uv_scale = bpy.props.BoolProperty(
+        name=(languages.ti('correct_use_extrem_uv_scale_name')),
+        description=(languages.tt('correct_use_extrem_uv_scale_desc')),
+        override={'LIBRARY_OVERRIDABLE'},
+        default=False,
+        )
+    
+    bpy.types.Object.bfu_correct_extrem_uv_scale_step_scale = bpy.props.IntProperty(
+        name=(languages.ti('correct_extrem_uv_scale_step_scale_name')),
+        description=(languages.tt('correct_extrem_uv_scale_step_scale_desc')),
+        override={'LIBRARY_OVERRIDABLE'},
+        default=2,
+        min=1,
+        max=100,
+        )
+    
+    bpy.types.Object.bfu_correct_extrem_uv_scale_use_absolute = bpy.props.BoolProperty(
+        name=(languages.ti('correct_extrem_uv_scale_use_absolute_name')),
+        description=(languages.tt('correct_extrem_uv_scale_use_absolute_desc')),
         override={'LIBRARY_OVERRIDABLE'},
         default=False,
         )
@@ -958,7 +974,9 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                 'obj.bfu_generate_light_map_uvs',
                 'obj.bfu_convert_geometry_node_attribute_to_uv',
                 'obj.bfu_convert_geometry_node_attribute_to_uv_name',
-                'obj.bfu_correct_extrem_uv_scale',
+                'obj.bfu_use_correct_extrem_uv_scale',
+                'obj.bfu_correct_extrem_uv_scale_step_scale',
+                'obj.bfu_correct_extrem_uv_scale_use_absolute',
                 'obj.bfu_auto_generate_collision',
                 'obj.bfu_collision_trace_flag',
                 'obj.bfu_enable_skeletal_mesh_per_poly_collision',
@@ -1529,14 +1547,19 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
                     convert_geometry_node_attribute_to_uv_use = bfu_convert_geometry_node_attribute_to_uv.row()
                     convert_geometry_node_attribute_to_uv_use.prop(obj, 'bfu_convert_geometry_node_attribute_to_uv')
                     bbpl.blender_layout.layout_doc_button.add_doc_page_operator(convert_geometry_node_attribute_to_uv_use, url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/UV-Maps#geometry-node-uv")
-                    bfu_convert_geometry_node_attribute_to_uv_name = bfu_convert_geometry_node_attribute_to_uv.row()
+                    bfu_convert_geometry_node_attribute_to_uv_name = bfu_convert_geometry_node_attribute_to_uv.column()
                     bfu_convert_geometry_node_attribute_to_uv_name.prop(obj, 'bfu_convert_geometry_node_attribute_to_uv_name')
                     bfu_convert_geometry_node_attribute_to_uv_name.enabled = obj.bfu_convert_geometry_node_attribute_to_uv
 
                     # Extreme UV Scale
-                    bfu_correct_extrem_uv_scale = layout.row()
-                    bfu_correct_extrem_uv_scale.prop(obj, 'bfu_correct_extrem_uv_scale')
-                    bbpl.blender_layout.layout_doc_button.add_doc_page_operator(bfu_correct_extrem_uv_scale, url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/UV-Maps#extreme-uv-scale")
+                    ui_correct_extrem_uv_scale = layout.column()
+                    ui_correct_extrem_uv_scale_use = ui_correct_extrem_uv_scale.row()
+                    ui_correct_extrem_uv_scale_use.prop(obj, 'bfu_use_correct_extrem_uv_scale')
+                    bbpl.blender_layout.layout_doc_button.add_doc_page_operator(ui_correct_extrem_uv_scale_use, url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/UV-Maps#extreme-uv-scale")
+                    ui_correct_extrem_uv_scale_options = ui_correct_extrem_uv_scale.column()
+                    ui_correct_extrem_uv_scale_options.prop(obj, 'bfu_correct_extrem_uv_scale_step_scale')
+                    ui_correct_extrem_uv_scale_options.prop(obj, 'bfu_correct_extrem_uv_scale_use_absolute')
+                    ui_correct_extrem_uv_scale_options.enabled = obj.bfu_use_correct_extrem_uv_scale
 
         if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("SCENE", "GENERAL"):
 

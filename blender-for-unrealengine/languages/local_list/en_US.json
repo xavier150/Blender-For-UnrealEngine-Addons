@@ -2,7 +2,9 @@
     "interface": {
         "intro": "Unreal Engine Assets Exporter by Xavier Loux. (BleuRaven)",
         "bake_armature_action_name": "Bake Armature animation",
-        "correct_extrem_uv_scale_name": "Correct Extrem UV Scale",
+        "correct_use_extrem_uv_scale_name": "Correct Extrem UV Scale For Unreal",
+        "correct_extrem_uv_scale_step_scale_name": "Step Scale",
+        "correct_extrem_uv_scale_use_absolute_name": "Use Positive Pos",
         "add_skeleton_root_bone_name": "Add root bone",
         "skeleton_root_bone_name_name": "Skeleton root bone name",
         "rescale_full_rig_at_export_name": "Rescale exported rig",
@@ -37,7 +39,10 @@
     },
     "tooltips": {
         "bake_armature_action_desc": "Bake Armature animation for export (Export will take more time).",
-        "correct_extrem_uv_scale_desc": "Correct Extrem UV Scale for better UV quality in UE4 (Export will take more time).",
+        "correct_use_extrem_uv_scale_desc": "Correct Extrem UV Scale for better UV quality in Unreal Engine (Export will take more time).",
+        "correct_extrem_uv_scale_step_scale_desc": "Scale of the snap grid.",
+        "correct_extrem_uv_scale_use_absolute_desc": "Keep uv islands to positive positions.",
+        "correct_extrem_uv_scale_operator_desc": "Correct Extrem UV Scale for better UV quality in Unreal Engine (Export will take more time).",
         "add_skeleton_root_bone_desc": "Remove the armature root bone.",
         "skeleton_root_bone_name_desc": "Name of the armature when exported. This is used to change the root bone name. If egal \"Armature\" Ue4 will remove the Armature root bone.",
         "rescale_full_rig_at_export_desc": "This will rescale the full rig at the export with the all constraints.",

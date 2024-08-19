@@ -2,7 +2,9 @@
     "interface": {
         "intro": "Unreal Engine Assets Exporter от Xavier Loux. (BleuRaven)",
         "bake_armature_action_name": "Запечь анимацию скелета",
-        "correct_extrem_uv_scale_name": "Исправить масштаб UV",
+        "correct_use_extrem_uv_scale_name": "Исправить масштаб UV",
+        "correct_extrem_uv_scale_step_scale_name": "Step Scale",
+        "correct_extrem_uv_scale_use_absolute_name": "Use Positive Pos",
         "add_skeleton_root_bone_name": "Добавить корневую кость",
         "skeleton_root_bone_name_name": "Название корневой кости скелета",
         "rescale_full_rig_at_export_name": "Изменить масштаб экспортированного рига",
@@ -37,7 +39,10 @@
     },
     "tooltips": {
         "bake_armature_action_desc": "Запечь анимацию скелета для экспорта (экспорт займет больше времени).",
-        "correct_extrem_uv_scale_desc": "Исправить масштаб UV для лучшего качества UV в UE4 (экспорт займет больше времени).",
+        "correct_use_extrem_uv_scale_desc": "Исправить масштаб UV для лучшего качества UV в UE4 (экспорт займет больше времени).",
+        "correct_extrem_uv_scale_step_scale_desc": "Scale of the snap grid.",
+        "correct_extrem_uv_scale_use_absolute_desc": "Keep uv islands to positive positions.",
+        "correct_extrem_uv_scale_operator_desc": "Correct Extrem UV Scale for better UV quality in Unreal Engine (Export will take more time).",
         "add_skeleton_root_bone_desc": "Удалить корневую кость скелета.",
         "skeleton_root_bone_name_desc": "Название скелета при экспорте. Это используется для изменения имени корневой кости. Если равно \"Armature\", Ue4 удалит корневую кость Armature.",
         "rescale_full_rig_at_export_desc": "Это изменит масштаб всего рига при экспорте со всеми ограничениями.",
