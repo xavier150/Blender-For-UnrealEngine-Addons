@@ -12,7 +12,7 @@ This add-on allows you to export content created with Blender to Unreal Engine, 
 - Sequencer content
 - And more...
 
-It is compatible with Blender versions 2.8 through 4.0 and works with Unreal Engine 4 and 5!  
+It is compatible with Blender versions 2.8 through 4.2 and works with Unreal Engine 4 and 5!  
 The add-on is open-source and can be easily adapted to any production.  
 Every part is documented, and you can contact me on Discord if you have any issues.  
 Discord -> [BleuRaven side projects](https://discord.gg/XuYeGCFtxa)
