@@ -91,7 +91,7 @@ def WriteImportAssetScript():
             
             # Skeleton
             if(asset.object.bfu_engine_ref_skeleton_search_mode) == "auto":
-                asset_data["target_skeleton_ref"] = bfu_unreal_utils.GetPredictedSkeletonRef(asset.object)
+                asset_data["target_skeleton_ref"] = bfu_unreal_utils.get_predicted_skeleton_ref(asset.object)
 
             elif(asset.object.bfu_engine_ref_skeleton_search_mode) == "custom_name":
                 name = bfu_utils.ValidUnrealAssetsName(asset.object.bfu_engine_ref_skeleton_custom_name)
@@ -111,7 +111,7 @@ def WriteImportAssetScript():
 
             # Skeletal Mesh
             if(asset.object.bfu_engine_ref_skeletal_mesh_search_mode) == "auto":
-                asset_data["target_skeletal_mesh_ref"] = bfu_unreal_utils.GetPredictedSkeletalMeshRef(asset.object)
+                asset_data["target_skeletal_mesh_ref"] = bfu_unreal_utils.get_predicted_skeleton_ref(asset.object)
 
             elif(asset.object.bfu_engine_ref_skeletal_mesh_search_mode) == "custom_name":
                 name = bfu_utils.ValidUnrealAssetsName(asset.object.bfu_engine_ref_skeletal_mesh_custom_name)
