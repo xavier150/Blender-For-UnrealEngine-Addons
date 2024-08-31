@@ -30,7 +30,7 @@ class BFU_AlembicAnimation(bfu_assets_manager.bfu_asset_manager_type.BFU_BaseAss
         super().__init__()
         self.use_materials = True
 
-    def support_asset_type(self, obj):
+    def support_asset_type(self, obj, details = None):
         if obj.bfu_export_as_alembic_animation:
             return True
         return False

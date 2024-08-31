@@ -30,7 +30,7 @@ class BFU_Spline(bfu_assets_manager.bfu_asset_manager_type.BFU_BaseAssetClass):
         super().__init__()
         pass
 
-    def support_asset_type(self, obj):
+    def support_asset_type(self, obj, details = None):
         if obj.type == "CURVE" and not obj.bfu_export_spline_as_static_mesh:
             return True
         return False

@@ -30,7 +30,7 @@ class BFU_Groom(bfu_assets_manager.bfu_asset_manager_type.BFU_BaseAssetClass):
         super().__init__()
         pass
 
-    def support_asset_type(self, obj):
+    def support_asset_type(self, obj, details = None):
         if obj.bfu_export_as_groom_simulation:
             return True
         return False

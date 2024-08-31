@@ -30,7 +30,7 @@ class BFU_Camera(bfu_assets_manager.bfu_asset_manager_type.BFU_BaseAssetClass):
         super().__init__()
         pass
 
-    def support_asset_type(self, obj):
+    def support_asset_type(self, obj, details = None):
         if obj.type == "CAMERA":
             return True
         return False

@@ -32,7 +32,7 @@ class BFU_StaticMesh(bfu_assets_manager.bfu_asset_manager_type.BFU_BaseAssetClas
         self.use_lods = True
         self.use_materials = True
 
-    def support_asset_type(self, obj):
+    def support_asset_type(self, obj, details = None):
         if obj.bfu_export_skeletal_mesh_as_static_mesh:
             return True
         elif obj.bfu_export_as_groom_simulation:

@@ -25,19 +25,19 @@ from .. import bfu_utils
 from .. import bfu_basics
 
 
-class BFU_SkeletalMesh(bfu_assets_manager.bfu_asset_manager_type.BFU_BaseAssetClass):
+class BFU_SkeletalAnimation(bfu_assets_manager.bfu_asset_manager_type.BFU_BaseAssetClass):
     def __init__(self):
         super().__init__()
         self.use_materials = True
 
     def support_asset_type(self, obj, details = None):
         if obj.type == "ARMATURE" and not obj.bfu_export_skeletal_mesh_as_static_mesh:
-            if details == None:
+            if details == "SkeletalAnimation":
                 return True
         return False
 
     def get_asset_type_name(self, obj):
-        return bfu_skeletal_mesh_config.mesh_asset_type_name
+        return bfu_skeletal_mesh_config.animation_asset_type_name
 
     def get_obj_export_name(self, obj):
         if bfu_utils.GetExportAsProxy(obj):
@@ -65,9 +65,9 @@ class BFU_SkeletalMesh(bfu_assets_manager.bfu_asset_manager_type.BFU_BaseAssetCl
             root_path = scene.bfu_export_skeletal_file_path
     
         if obj.bfu_create_sub_folder_with_skeletal_mesh_name:
-            dirpath = os.path.join(root_path, folder_name, self.get_obj_export_name(obj))
+            dirpath = os.path.join(root_path, folder_name, self.get_obj_export_name(obj), scene.bfu_anim_subfolder_name)
         else:
-            dirpath = os.path.join(root_path, folder_name)
+            dirpath = os.path.join(root_path, folder_name, scene.bfu_anim_subfolder_name)
         return dirpath
     
     def get_meshs_object_for_skeletal_mesh(self, obj):
@@ -94,7 +94,7 @@ class BFU_SkeletalMesh(bfu_assets_manager.bfu_asset_manager_type.BFU_BaseAssetCl
             False
 
 def register():
-    bfu_assets_manager.bfu_asset_manager_registred_assets.register_asset_class(BFU_SkeletalMesh())
+    bfu_assets_manager.bfu_asset_manager_registred_assets.register_asset_class(BFU_SkeletalAnimation())
 
 def unregister():
     pass

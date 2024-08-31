@@ -22,10 +22,10 @@ from . import bfu_asset_manager_registred_assets
 
 
 
-def get_asset_class(obj) -> bfu_asset_manager_type.BFU_BaseAssetClass:
+def get_asset_class(obj, details = None) -> bfu_asset_manager_type.BFU_BaseAssetClass:
     for asset in bfu_asset_manager_registred_assets.get_registred_asset_class():
         asset: bfu_asset_manager_type.BFU_BaseAssetClass
-        if asset.support_asset_type(obj):
+        if asset.support_asset_type(obj, details):
             return asset 
 
 def get_all_asset_class():

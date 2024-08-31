@@ -300,7 +300,7 @@ def export_skeletal_mesh_from_asset_list(op, asset_list: bfu_cached_asset_list.A
     print("Start Export SkeletalMesh(s)")
     for asset in asset_list:
         asset: bfu_cached_asset_list.AssetToExport
-        if asset.asset_type == bfu_skeletal_mesh.bfu_skeletal_mesh_config.asset_type_name:
+        if asset.asset_type == bfu_skeletal_mesh.bfu_skeletal_mesh_config.mesh_asset_type_name:
             armature = asset.obj
             mesh_parts = asset.obj_list
             desired_name = asset.name

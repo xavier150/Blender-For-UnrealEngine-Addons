@@ -43,7 +43,7 @@ def deselect_socket(obj):
 def is_skeletal_mesh(obj):
     asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
     if asset_class:
-        if asset_class.get_asset_type_name(obj) == bfu_skeletal_mesh_config.asset_type_name:
+        if asset_class.get_asset_type_name(obj) == bfu_skeletal_mesh_config.mesh_asset_type_name:
             return True
     return False
 

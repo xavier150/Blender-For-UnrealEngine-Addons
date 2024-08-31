@@ -27,7 +27,7 @@ class BFU_BaseAssetClass:
         self.use_materials = False
         self.use_sockets = False
 
-    def support_asset_type(self, obj):
+    def support_asset_type(self, obj, details = None):
         return False
 
     def get_asset_type_name(self, obj):

@@ -32,7 +32,7 @@ from .. import bfu_assets_manager
 def ProcessActionExport(op, obj, action, action_curve_scale):
     scene = bpy.context.scene
 
-    asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj)
+    asset_class = bfu_assets_manager.bfu_asset_manager_utils.get_asset_class(obj, "SkeletalAnimation")
     dirpath = asset_class.get_obj_export_directory_path(obj, True)
 
     MyAsset: bfu_export_logs.BFU_OT_UnrealExportedAsset = scene.UnrealExportedAssetsList.add()

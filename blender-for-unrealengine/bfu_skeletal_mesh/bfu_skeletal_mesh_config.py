@@ -16,4 +16,5 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
-asset_type_name = "SkeletalMesh"
+mesh_asset_type_name = "SkeletalMesh"
+animation_asset_type_name = "SkeletalAnimation"

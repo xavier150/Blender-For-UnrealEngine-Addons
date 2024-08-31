@@ -7,4 +7,5 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
 - New: Correct Extrem UV Scale: Added "Step Scale" option for export.
 - New: Correct Extrem UV Scale: Added "Use Positive Pos" option for export.
 - Fixed: Correct Extrem UV Scale: Apply the UV changes on the full asset.
+- Fixed: Animations are not exported to Sub Folder on the disk.
 - Clean Debugs.
