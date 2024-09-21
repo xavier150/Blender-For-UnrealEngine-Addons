@@ -146,7 +146,7 @@ class ProxyCopy_NlaStrip:
         self.fcurves = []
         # Since 3.5 interact to a NlaStripFCurves not linked to an object produce Blender Crash.
         for fcurve in nla_strip.fcurves:
-            self.fcurves.append(ProxyCopy_FCurve(fcurve))
+            self.fcurves.append(ProxyCopy_StripFCurve(fcurve))
         self.frame_end = nla_strip.frame_end
         if bpy.app.version >= (3, 3, 0):
             self.frame_end_ui = nla_strip.frame_end_ui
@@ -181,15 +181,14 @@ class ProxyCopy_NlaStrip:
         nla_strip.blend_type = self.blend_type
         nla_strip.extrapolation = self.extrapolation
         for fcurve in self.fcurves:
-            new_fcurve = nla_strip.fcurves.find(fcurve.data_path)  # Can't create so use find
-            fcurve.paste_data_on(new_fcurve)
+            fcurve.paste_data_on(nla_strip)
         nla_strip.frame_end = self.frame_end
         if bpy.app.version >= (3, 3, 0):
             nla_strip.frame_end_ui = self.frame_end_ui
         nla_strip.frame_start = self.frame_start
         if bpy.app.version >= (3, 3, 0):
             nla_strip.frame_start_ui = self.frame_start_ui
-        nla_strip.influence = self.influence
+        nla_strip.influence = self.influence 
         # nla_strip.modifiers = self.modifiers #TO DO
         nla_strip.mute = self.mute
         # nla_strip.name = self.name
@@ -208,18 +207,65 @@ class ProxyCopy_NlaStrip:
             nla_strip.use_sync_length = self.use_sync_length
 
 
+class ProxyCopy_StripFCurve():
+    """
+    Proxy class for copying bpy.types.NlaStripFCurves. (NLA Strip only)
+
+    It is used to safely copy the bpy.types.NlaStripFCurves struct.
+    """
+
+    def __init__(self, fcurve: bpy.types.NlaStripFCurves):
+        self.data_path = fcurve.data_path
+        self.keyframe_points = []
+        for keyframe_point in fcurve.keyframe_points:
+            self.keyframe_points.append(ProxyCopy_Keyframe(keyframe_point))
+
+    def paste_data_on(self, strips: bpy.types.NlaStrips):
+        if self.data_path == "influence":
+            # Create the curve with use_animated_influence
+            strips.use_animated_influence = True 
+
+            for key in self.keyframe_points:
+                strips.influence = key.co[1]
+                strips.keyframe_insert(data_path="influence", frame=key.co[0], keytype=key.type)
+
+
+
 class ProxyCopy_FCurve():
     """
-    Proxy class for copying bpy.types.FCurve.
+    Proxy class for copying bpy.types.FCurve. 
 
     It is used to safely copy the bpy.types.FCurve struct.
     """
 
     def __init__(self, fcurve: bpy.types.FCurve):
         self.data_path = fcurve.data_path
+        self.keyframe_points = []
+        for keyframe_point in fcurve.keyframe_points:
+            self.keyframe_points.append(ProxyCopy_Keyframe(keyframe_point))
 
     def paste_data_on(self, fcurve: bpy.types.FCurve):
-        pass
+        fcurve.data_path = self.data_path
+        for keyframe_point in self.keyframe_points:
+            pass
+            #TODO
+
+
+class ProxyCopy_Keyframe():
+    """
+    Proxy class for copying bpy.types.Keyframe. (NLA Strip only)
+
+    It is used to safely copy the bpy.types.Keyframe struct.
+    """
+
+    def __init__(self, keyframe: bpy.types.Keyframe):
+        self.co = keyframe.co
+        self.type = keyframe.type
+
+    def paste_data_on(self, keyframe: bpy.types.Keyframe):
+        keyframe.co = self.co
+        keyframe.type = self.type
+
 
 
 def copy_attributes(a, b):
