@@ -33,7 +33,7 @@ This also works for cameras in a Level Sequence, including all cuts and camera d
 Additionally, the add-on can export data to the clipboard. 
 You simply need to paste it into Unreal Engine, for example, the cameras, splines, or sockets.
 
-# Wiki
+# Documentation
 - [Home](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki)
 
 ### Quick Start
@@ -76,9 +76,6 @@ You simply need to paste it into Unreal Engine, for example, the cameras, spline
 - How Import Blender camera to Unreal Sequencer -> https://youtu.be/Xx_9MQu2EkM
 - Old Teaser -> https://youtu.be/YLOZZIlhgaM
 
-### Community videos
-- Camera Tracking From Blender To Unreal Engine -> https://www.youtube.com/watch?v=Ta0am2wC-SI
-
 ### Additional Information
 - [API](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/API)
 - [Nomenclature](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Nomenclature)
@@ -86,4 +83,7 @@ You simply need to paste it into Unreal Engine, for example, the cameras, spline
 - [Addon Preferences](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Addon-Preferences)
 - [Export process](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Export-process)
 - [Examples files](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Examples-files)
+
+### Community
+- [Community Spotlight](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Community-Spotlight)
 - [Support](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Support) <3
