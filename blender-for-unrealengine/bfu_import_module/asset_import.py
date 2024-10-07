@@ -22,6 +22,7 @@ from . import bps
 from . import import_module_utils
 from . import import_module_unreal_utils
 from . import import_module_post_treatment
+from . import import_module_tasks_helper
 from . import bfu_import_materials
 from . import config
 
@@ -85,7 +86,7 @@ def ImportAsset(asset_data):
                 message += '"target_skeleton_ref": ' + asset_data["target_skeleton_ref"]
                 import_module_unreal_utils.show_warning_message("Skeleton not found.", message)
 
-    # docs.unrealengine.com/5.3/en-US/PythonAPI/class/AssetImportTask.html
+    # docs.unrealengine.com/5.4/en-US/PythonAPI/class/AssetImportTask.html
     task = unreal.AssetImportTask()
 
     def GetStaticMeshImportData() -> unreal.FbxStaticMeshImportData:
@@ -121,15 +122,11 @@ def ImportAsset(asset_data):
         task.filename = asset_data["fbx_path"]
     task.destination_path = os.path.normpath(asset_data["full_import_path"]).replace('\\', '/')
     task.automated = not config.show_import_dialog
-    
     task.save = True
     task.replace_existing = True
 
-    if asset_data["asset_type"] == "Alembic":
-        task.set_editor_property('options', unreal.AbcImportSettings())
-    else:
-        task.set_editor_property('options', unreal.FbxImportUI())
-
+    task = import_module_tasks_helper.init_options_data(task, asset_data["asset_type"])
+        
     # Alembic
     alembic_import_data = GetAlembicImportData()
     if alembic_import_data:
@@ -142,7 +139,7 @@ def ImportAsset(asset_data):
         rotation = unreal.Vector(90, 0, 0)
         alembic_import_data.conversion_settings.set_editor_property("scale", ue_scale) 
         alembic_import_data.conversion_settings.set_editor_property("rotation", rotation)
-
+    
     # Vertex color
     vertex_override_color = import_module_unreal_utils.get_vertex_override_color(asset_additional_data)
     vertex_color_import_option = import_module_unreal_utils.get_vertex_color_import_option(asset_additional_data)
@@ -168,7 +165,7 @@ def ImportAsset(asset_data):
 
     if asset_data["asset_type"] == "Alembic":
         task.get_editor_property('options').set_editor_property('import_type', unreal.AlembicImportType.SKELETAL)
-
+        
     else:
         if asset_data["asset_type"] == "Animation" or asset_data["asset_type"] == "SkeletalMesh":
             if origin_skeleton:
@@ -245,7 +242,7 @@ def ImportAsset(asset_data):
 
                 if vertex_override_color:
                     asset_import_data.set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
-
+                    
     # ###############[ import asset ]################
 
     if asset_data["asset_type"] == "Animation":
