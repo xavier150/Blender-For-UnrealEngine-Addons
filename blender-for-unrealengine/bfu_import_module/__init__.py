@@ -28,6 +28,7 @@ from . import sequencer_import
 from . import sequencer_utils
 from . import bfu_import_materials
 from . import bfu_import_sequencer
+from . import config
 
 if "bps" in locals():
     importlib.reload(bps)
@@ -47,6 +48,8 @@ if "bfu_import_materials" in locals():
     importlib.reload(bfu_import_materials)
 if "bfu_import_sequencer" in locals():
     importlib.reload(bfu_import_sequencer)
+if "config" in locals():
+    importlib.reload(config)
 
 def run_asset_import(assets_data, show_finished_popup=False):
     if asset_import.ready_for_asset_import():

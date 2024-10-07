@@ -23,6 +23,7 @@ from . import import_module_utils
 from . import import_module_unreal_utils
 from . import import_module_post_treatment
 from . import bfu_import_materials
+from . import config
 
 try:
     import unreal
@@ -119,8 +120,8 @@ def ImportAsset(asset_data):
     else:
         task.filename = asset_data["fbx_path"]
     task.destination_path = os.path.normpath(asset_data["full_import_path"]).replace('\\', '/')
-    task.automated = True
-    # task.automated = False #Debug for show dialog
+    task.automated = not config.show_import_dialog
+    
     task.save = True
     task.replace_existing = True
 
