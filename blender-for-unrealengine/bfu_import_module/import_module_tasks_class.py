@@ -18,6 +18,7 @@
 
 
 from . import import_module_unreal_utils
+from . import config
 
 try:
     import unreal
@@ -29,63 +30,76 @@ class ImportTaks():
     def __init__(self) -> None:
         # docs.unrealengine.com/5.4/en-US/PythonAPI/class/AssetImportTask.html
         self.task = unreal.AssetImportTask()
+        self.task_option = None
+
+        if config.force_use_interchange == "Interchange":
+            self.use_interchange = True
+
+        elif config.force_use_interchange == "FBX":
+            self.use_interchange = False
 
         if import_module_unreal_utils.is_unreal_version_greater_or_equal(5,5):
             # Set values inside unreal.InterchangeGenericAssetsPipeline (unreal.InterchangeGenericCommonMeshesProperties or ...)
-            self.use_igap = True
+            self.use_interchange = True
         else:
             # Set values inside unreal.FbxStaticMeshImportData or ...
-            self.use_igap = False
+            self.use_interchange = False
+
+    def set_task_option(self, new_task_option):
+        self.task_option = new_task_option
 
     def get_task(self):
         return self.task
     
     def GetFbxImportUI(self) -> unreal.FbxImportUI:
-        return self.task.get_editor_property('options')
+        return self.task_option
+    
+    def GetAbcImportSettings(self) -> unreal.AbcImportSettings:
+        return self.task_option
 
     def GetStaticMeshImportData(self) -> unreal.FbxStaticMeshImportData:
-        return self.task.get_editor_property('options').static_mesh_import_data
+        return self.task_option.static_mesh_import_data
 
     def GetSkeletalMeshImportData(self) -> unreal.FbxSkeletalMeshImportData:
-        return self.task.get_editor_property('options').skeletal_mesh_import_data
+        return self.task_option.skeletal_mesh_import_data
 
     def GetAnimationImportData(self) -> unreal.FbxAnimSequenceImportData:
-        return self.task.get_editor_property('options').anim_sequence_import_data
+        return self.task_option.anim_sequence_import_data
     
     def GetTextureImportData(self) -> unreal.FbxTextureImportData:
-        return self.task.get_editor_property('options').texture_import_data
+        return self.task_option.texture_import_data
 
     def GetAlembicImportData(self):
-        return self.task.get_editor_property('options')
+        return self.task_option
 
 
     def GetIGAP(self):
         # unreal.InterchangeGenericAssetsPipeline
-        return self.task.get_editor_property('options')
+        return self.task_option
     
     def GetIGAP_Mesh(self):
         # unreal.InterchangeGenericMeshPipeline
-        return self.task.get_editor_property('options').get_editor_property('mesh_pipeline')
+        return self.task_option.get_editor_property('mesh_pipeline')
     
     def GetIGAP_SKMesh(self):
         # unreal.InterchangeGenericCommonSkeletalMeshesAndAnimationsProperties
-        return self.task.get_editor_property('options').get_editor_property('common_skeletal_meshes_and_animations_properties')
+        return self.task_option.get_editor_property('common_skeletal_meshes_and_animations_properties')
     
     def GetIGAP_CommonMeshs(self):
         # unreal.InterchangeGenericCommonMeshesProperties
-        return self.task.get_editor_property('options').get_editor_property('common_meshes_properties')
+        return self.task_option.get_editor_property('common_meshes_properties')
 
     def GetIGAP_Mat(self):
         # unreal.InterchangeGenericMaterialPipeline
-        return self.task.get_editor_property('options').get_editor_property('material_pipeline')
+        return self.task_option.get_editor_property('material_pipeline')
     
     def GetIGAP_Tex(self):
         # unreal.InterchangeGenericTexturePipeline
-        return self.task.get_editor_property('options').get_editor_property('material_pipeline').get_editor_property('texture_pipeline')
+        return self.task_option.get_editor_property('material_pipeline').get_editor_property('texture_pipeline')
     
     def GetIGAP_Anim(self):
         # unreal.InterchangeGenericAnimationPipeline
-        return self.task.get_editor_property('options').get_editor_property('animation_pipeline')
+        return self.task_option.get_editor_property('animation_pipeline')
     
     def GetImportedAssets(self):
         assets = []
@@ -128,3 +142,15 @@ class ImportTaks():
                 if type(asset) is unreal.AnimSequence:
                     return asset
     
+    def import_asset_task(self):
+        print("import - S1")
+        if self.use_interchange:
+            print("import - S2")
+            self.task.set_editor_property('options', unreal.InterchangePipelineStackOverride())
+            self.task.get_editor_property('options').add_pipeline(self.task_option)
+        else:
+            print("import - S3")
+            self.task.set_editor_property('options', self.task_option)
+
+        print("import - S4")
+        unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([self.task])

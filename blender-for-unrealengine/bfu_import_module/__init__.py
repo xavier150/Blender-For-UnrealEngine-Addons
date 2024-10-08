@@ -27,6 +27,7 @@ from . import asset_import
 from . import asset_import
 from . import sequencer_import
 from . import sequencer_utils
+from . import bfu_import_animations
 from . import bfu_import_materials
 from . import bfu_import_vertex_color
 from . import bfu_import_sequencer
@@ -49,6 +50,8 @@ if "sequencer_import" in locals():
     importlib.reload(sequencer_import)
 if "sequencer_utils" in locals():
     importlib.reload(sequencer_utils)
+if "bfu_import_animations" in locals():
+    importlib.reload(bfu_import_animations)
 if "bfu_import_materials" in locals():
     importlib.reload(bfu_import_materials)
 if "bfu_import_vertex_color" in locals():

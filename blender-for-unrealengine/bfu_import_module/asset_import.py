@@ -24,6 +24,7 @@ from . import import_module_unreal_utils
 from . import import_module_post_treatment
 from . import import_module_tasks_class
 from . import import_module_tasks_helper
+from . import bfu_import_animations
 from . import bfu_import_materials
 from . import bfu_import_vertex_color
 from . import config
@@ -83,8 +84,10 @@ def ImportTask(asset_data):
         else:
             origin_skeleton = None
         
-        if origin_skeleton is None:
-            if asset_type == "Animation":
+        if asset_type == "Animation":
+            if origin_skeleton:
+                print('"target_skeleton_ref": ' + asset_data["target_skeleton_ref"] + "was found:", origin_skeleton)
+            else:
                 message = "WARNING: Could not find skeleton." + "\n"
                 message += '"target_skeleton_ref": ' + asset_data["target_skeleton_ref"]
                 import_module_unreal_utils.show_warning_message("Skeleton not found.", message)
@@ -96,11 +99,12 @@ def ImportTask(asset_data):
     else:
         itask.get_task().filename = asset_data["fbx_path"]
     itask.get_task().destination_path = os.path.normpath(asset_data["full_import_path"]).replace('\\', '/')
-    itask.get_task().automated = not config.show_import_dialog
+    itask.get_task().automated = config.automated_import_tasks
     itask.get_task().save = True
     itask.get_task().replace_existing = True
 
-    import_module_tasks_helper.init_options_data(itask, asset_type)
+    TaskOption = import_module_tasks_helper.init_options_data(asset_type, itask.use_interchange)
+    itask.set_task_option(TaskOption)
     print("S1")
     # Alembic
     
@@ -123,7 +127,7 @@ def ImportTask(asset_data):
 
     print("S1.5")
     # Import transform
-    if itask.use_igap:
+    if itask.use_interchange:
         animation_pipeline = itask.GetIGAP_Anim()
         if "do_not_import_curve_with_zero" in asset_data:
             animation_pipeline.set_editor_property('do_not_import_curve_with_zero', asset_data["do_not_import_curve_with_zero"]) 
@@ -136,35 +140,52 @@ def ImportTask(asset_data):
 
     print("S2")
 
-
     if asset_type in ["SkeletalMesh", "StaticMesh"]:
         # Vertex color
         bfu_import_vertex_color.bfu_import_vertex_color_utils.apply_import_settings(itask, asset_type, asset_additional_data)
 
     if asset_type == "Alembic":
         print("S2.1")
-        itask.get_task().get_editor_property('options').set_editor_property('import_type', unreal.AlembicImportType.SKELETAL)
+        itask.GetAbcImportSettings().set_editor_property('import_type', unreal.AlembicImportType.SKELETAL)
         
     else:
 
         print("S2.2")
-        if asset_type == "Animation" or asset_type == "SkeletalMesh":
-            if origin_skeleton:
-                if itask.use_igap:
+        if asset_type == "Animation" :
+            if itask.use_interchange:
+                if origin_skeleton:
                     itask.GetIGAP_SKMesh().set_editor_property('Skeleton', origin_skeleton)
-                 
+                    itask.GetIGAP_SKMesh().set_editor_property('import_only_animations', True)
+                    print("S2.25")
                 else:
-                    itask.GetFbxImportUI().set_editor_property('Skeleton', origin_skeleton)
-            else:
-                if asset_type == "Animation":
                     fail_reason = 'Skeleton ' + asset_data["target_skeleton_ref"] + ' Not found for ' + asset_data["asset_name"] + ' asset.'
                     return fail_reason, None
+
+            else:
+                if origin_skeleton:
+                    itask.GetFbxImportUI().set_editor_property('Skeleton', origin_skeleton)
+                else:
+                    fail_reason = 'Skeleton ' + asset_data["target_skeleton_ref"] + ' Not found for ' + asset_data["asset_name"] + ' asset.'
+                    return fail_reason, None
+
+        print("S2.3")
+        if asset_type == "SkeletalMesh":
+            if itask.use_interchange:
+                if origin_skeleton:
+                    itask.GetIGAP_SKMesh().set_editor_property('Skeleton', origin_skeleton)
                 else:
                     print("Skeleton is not set, a new skeleton asset will be created...")
+                    
+            else:
+                if origin_skeleton:
+                    itask.GetFbxImportUI().set_editor_property('Skeleton', origin_skeleton)
+                else:
+                    print("Skeleton is not set, a new skeleton asset will be created...")                  
+   
 
         print("S3")
         # Set Asset Type
-        if itask.use_igap:
+        if itask.use_interchange:
             if asset_type == "StaticMesh":
                 itask.GetIGAP_CommonMeshs().set_editor_property('force_all_mesh_as_type', unreal.InterchangeForceMeshType.IFMT_STATIC_MESH)
             if asset_type == "SkeletalMesh":
@@ -176,32 +197,32 @@ def ImportTask(asset_data):
 
         else:
             if asset_type == "StaticMesh":
-                itask.get_task().get_editor_property('options').set_editor_property('original_import_type', unreal.FBXImportType.FBXIT_STATIC_MESH)
+                itask.GetFbxImportUI().set_editor_property('original_import_type', unreal.FBXImportType.FBXIT_STATIC_MESH)
             elif asset_type == "Animation":
-                itask.get_task().get_editor_property('options').set_editor_property('original_import_type', unreal.FBXImportType.FBXIT_ANIMATION)
+                itask.GetFbxImportUI().set_editor_property('original_import_type', unreal.FBXImportType.FBXIT_ANIMATION)
             else:
-                itask.get_task().get_editor_property('options').set_editor_property('original_import_type', unreal.FBXImportType.FBXIT_SKELETAL_MESH)
+                itask.GetFbxImportUI().set_editor_property('original_import_type', unreal.FBXImportType.FBXIT_SKELETAL_MESH)
         print("S4")
         # Set Material Use
-        if itask.use_igap:
+        if itask.use_interchange:
             if asset_type == "Animation":
                 itask.GetIGAP_Mat().set_editor_property('import_materials', False)
             else:
                 itask.GetIGAP_Mat().set_editor_property('import_materials', True)
         else:
             if asset_type == "Animation":
-                itask.get_task().get_editor_property('options').set_editor_property('import_materials', False)
+                itask.GetFbxImportUI().set_editor_property('import_materials', False)
             else:
-                itask.get_task().get_editor_property('options').set_editor_property('import_materials', True)
+                itask.GetFbxImportUI().set_editor_property('import_materials', True)
         print("S5")
         # Set Texture Use
-        if itask.use_igap:
+        if itask.use_interchange:
             itask.GetIGAP_Tex().set_editor_property('import_textures', False)
         else:
-            itask.get_task().get_editor_property('options').set_editor_property('import_textures', False)
+            itask.GetFbxImportUI().set_editor_property('import_textures', False)
 
         print("S6")
-        if itask.use_igap:
+        if itask.use_interchange:
             if asset_type == "Animation":
                 itask.GetIGAP_Anim().set_editor_property('import_animations', True)
                 itask.GetIGAP_Mesh().set_editor_property('import_skeletal_meshes', False)
@@ -210,7 +231,7 @@ def ImportTask(asset_data):
             else:
                 itask.GetIGAP_Anim().set_editor_property('import_animations', False)
                 itask.GetIGAP_Mesh().set_editor_property('import_skeletal_meshes', True)
-                itask.GetIGAP_Mesh().set_editor_property('import_static_meshes', False)
+                itask.GetIGAP_Mesh().set_editor_property('import_static_meshes', True)
                 if "create_physics_asset" in asset_data:
                     itask.GetIGAP_Mesh().set_editor_property('create_physics_asset', asset_data["create_physics_asset"])
         else:
@@ -230,7 +251,7 @@ def ImportTask(asset_data):
         bfu_import_materials.bfu_import_materials_utils.apply_import_settings(itask, asset_data)
 
         print("S8")
-        if itask.use_igap:
+        if itask.use_interchange:
             itask.GetIGAP_Mesh().set_editor_property('combine_static_meshes', True)
             itask.GetIGAP_Mesh().set_editor_property('combine_skeletal_meshes', True)
             # @TODO auto_generate_collision Removed with InterchangeGenericAssetsPipeline? 
@@ -289,7 +310,7 @@ def ImportTask(asset_data):
                 unreal.EditorAssetLibrary.delete_asset(asset_path)
 
     print("S10.5")
-    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([itask.get_task()])
+    itask.import_asset_task()
     print("S11")
     
     if len(itask.GetImportedAssets()) == 0:
@@ -298,22 +319,7 @@ def ImportTask(asset_data):
     
     print("S11.5")
     if asset_data["asset_type"] == "Animation":
-        print(itask.GetImportedAssets())
-        # For animation remove the extra mesh
-        if type(asset) is not unreal.AnimSequence:
-            p = itask.get_task().imported_object_paths[0]
-            animAssetName = p.split('.')[0]+'_anim.'+p.split('.')[1]+'_anim'
-            animAssetNameDesiredPath = p.split('.')[0]+'.'+p.split('.')[1]
-            animAsset = unreal.find_asset(animAssetName)
-            if animAsset is not None:
-                unreal.EditorAssetLibrary.delete_asset(p)
-                unreal.EditorAssetLibrary.rename_asset(animAssetName, animAssetNameDesiredPath)
-                asset = animAsset
-            else:
-                fail_reason = 'animAsset ' + asset_data["asset_name"] + ' not found for after inport: ' + animAssetName
-                return fail_reason, None
-
-
+        bfu_import_animations.bfu_import_animations_utils.apply_post_import_assets_changes(itask, asset_data)
 
     print("S12")
     # ###############[ Post treatment ]################
@@ -351,7 +357,7 @@ def ImportTask(asset_data):
             unreal.EditorAssetLibrary.rename_asset(Skeleton.get_path_name(), asset_data["target_skeleton_ref"])
 
     print("S13.5")
-    if itask.use_igap:
+    if itask.use_interchange:
         if asset_type == "StaticMesh":
             if "generate_lightmap_u_vs" in asset_data:
                 mesh_pipeline = itask.GetImportedStaticMeshAsset().get_editor_property('asset_import_data').get_pipelines()[0].get_editor_property('mesh_pipeline')

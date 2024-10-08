@@ -16,6 +16,9 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
+import importlib
 
-automated_import_tasks = True #False when debug only, used to show import dialog.
-force_use_interchange = "Auto" #Auto by default, you can use Interchange or FBX
+from . import bfu_import_animations_utils
+
+if "bfu_import_animations_utils" in locals():
+    importlib.reload(bfu_import_animations_utils)

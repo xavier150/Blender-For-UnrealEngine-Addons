@@ -33,7 +33,7 @@ def apply_import_settings(itask: import_module_tasks_class.ImportTaks, asset_dat
 
     print("Mat S1")
     # Mat and texture use
-    if itask.use_igap:
+    if itask.use_interchange:
         if "import_materials" in asset_data:
             itask.GetIGAP_Mat().set_editor_property('import_materials', asset_data["import_materials"])
 
@@ -49,7 +49,7 @@ def apply_import_settings(itask: import_module_tasks_class.ImportTaks, asset_dat
 
     print("Mat S2")
     # Mat search and normal map green chanel
-    if itask.use_igap:
+    if itask.use_interchange:
         if "material_search_location" in asset_data:
             if asset_data["material_search_location"] == "Local":
                 itask.GetIGAP_Mat().set_editor_property('search_location', unreal.InterchangeMaterialSearchLocation.LOCAL)
@@ -79,7 +79,7 @@ def apply_import_settings(itask: import_module_tasks_class.ImportTaks, asset_dat
 
     print("Mat S3")
     # Mat order
-    if itask.use_igap:
+    if itask.use_interchange:
         # @TODO reorder_material_to_fbx_order Removed with InterchangeGenericAssetsPipeline? 
         # I yes need also remove reorder_material_to_fbx_order from the addon propertys.
         pass

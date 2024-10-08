@@ -66,9 +66,9 @@ def get_vertex_color_import_option(asset_additional_data, use_igcmp = True):
 
 def apply_import_settings(itask: import_module_tasks_class.ImportTaks, asset_type, asset_additional_data):
     vertex_override_color = get_vertex_override_color(asset_additional_data)
-    vertex_color_import_option = get_vertex_color_import_option(asset_additional_data, itask.use_igap)
+    vertex_color_import_option = get_vertex_color_import_option(asset_additional_data, itask.use_interchange)
 
-    if itask.use_igap:
+    if itask.use_interchange:
         # Set values inside unreal.InterchangeGenericCommonMeshesProperties
         itask.GetIGAP_CommonMeshs().set_editor_property('vertex_color_import_option', vertex_color_import_option)
         itask.GetIGAP_CommonMeshs().set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
@@ -95,9 +95,9 @@ def apply_asset_settings(itask, asset, asset_additional_data):
         return
 
     vertex_override_color = get_vertex_override_color(asset_additional_data)
-    vertex_color_import_option = get_vertex_color_import_option(asset_additional_data, itask.use_igap)
+    vertex_color_import_option = get_vertex_color_import_option(asset_additional_data, itask.use_interchange)
 
-    if itask.use_igap:
+    if itask.use_interchange:
         common_meshes_properties = asset.get_editor_property('asset_import_data').get_pipelines()[0].get_editor_property('common_meshes_properties')
         if vertex_override_color:
             common_meshes_properties.set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
