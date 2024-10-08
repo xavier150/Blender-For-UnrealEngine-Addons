@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "unrealengine_assets_exporter"
-version = "4.3.6"
+version = "4.3.7"
 name = "Unreal Engine Assets Exporter"
 tagline = "Allows to batch export and import in Unreal Engine"
 maintainer = "Loux Xavier (BleuRaven) xavierloux.loux@gmail.com"
