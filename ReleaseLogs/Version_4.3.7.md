@@ -3,10 +3,12 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
 
 ### Version 4.3.7
 
-- New: Correct Extrem UV Scale: New Option "Use Positive Pos" to keep uv islands at positive positions.
-- New: Correct Extrem UV Scale: Added "Step Scale" option for export.
-- New: Correct Extrem UV Scale: Added "Use Positive Pos" option for export.
-- Fixed: Correct Extrem UV Scale: Apply the UV changes on the full asset.
-- Fixed: Animations are not exported to Sub Folder on the disk.
+- New: Support for Unreal Engine 5.5.
+- New: Correct Extrem UV Scale: Added the "Use Positive Pos" option to keep UV islands in positive positions.
+- New: Correct Extrem UV Scale: Added the "Step Scale" option for export.
+- New: Correct Extrem UV Scale: Added the "Use Positive Pos" option for export.
+- Changes: The addon now uses the new Interchange Assets pipeline for importing assets into Unreal Engine 5.5.
+- Fixed: Correct Extrem UV Scale: UV changes are now applied to the entire asset.
+- Fixed: Animations were not exported to subfolders on disk.
 - Fixed: NLA lost animated_influence FCurve after export.
-- Clean Debugs.
+- Cleanup: Removed debug logs.
