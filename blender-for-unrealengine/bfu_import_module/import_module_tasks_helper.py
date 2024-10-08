@@ -25,32 +25,37 @@ try:
 except ImportError:
     import unreal_engine as unreal
 
-def task_options_default_preset(use_interchange = True):
+def task_options_default_preset(use_interchange: bool = True) -> unreal.InterchangeGenericAssetsPipeline | unreal.FbxImportUI:
+    """Returns default task options preset based on interchange usage."""
     if use_interchange:
         options = unreal.InterchangeGenericAssetsPipeline()
     else:
         options = unreal.FbxImportUI()
     return options
 
-def task_options_alembic_preset(use_interchange = True):
-    options =  unreal.AbcImportSettings()
+def task_options_alembic_preset(use_interchange: bool = True) -> unreal.AbcImportSettings:
+    """Returns Alembic task options preset."""
+    options = unreal.AbcImportSettings()
     return options
 
-def task_options_static_mesh_preset(use_interchange = True):
+def task_options_static_mesh_preset(use_interchange: bool = True) -> unreal.InterchangeGenericAssetsPipeline | unreal.FbxImportUI:
+    """Returns static mesh task options preset based on interchange usage."""
     if use_interchange:
         options = unreal.InterchangeGenericAssetsPipeline()
     else:
         options = unreal.FbxImportUI()
     return options
 
-def task_options_skeletal_mesh_preset(use_interchange = True):
+def task_options_skeletal_mesh_preset(use_interchange: bool = True) -> unreal.InterchangeGenericAssetsPipeline | unreal.FbxImportUI:
+    """Returns skeletal mesh task options preset based on interchange usage."""
     if use_interchange:
         options = unreal.InterchangeGenericAssetsPipeline()
     else:
         options = unreal.FbxImportUI()
     return options
 
-def task_options_animation_preset(use_interchange = True):
+def task_options_animation_preset(use_interchange: bool = True) -> unreal.InterchangeGenericAssetsPipeline | unreal.FbxImportUI:
+    """Returns animation task options preset based on interchange usage."""
     if use_interchange:
         options = unreal.InterchangeGenericAssetsPipeline()
     else:
@@ -59,19 +64,22 @@ def task_options_animation_preset(use_interchange = True):
 
 
 
-def init_options_data(asset_type, use_interchange = True):
-
+def init_options_data(asset_type: str, use_interchange: bool = True) -> unreal.InterchangeGenericAssetsPipeline | unreal.FbxImportUI | unreal.AbcImportSettings:
+    """Initializes task options based on asset type and interchange usage."""
+    
     if asset_type == "Alembic":
-        return task_options_alembic_preset(use_interchange)
-
+        options = task_options_alembic_preset(use_interchange)
+    
     elif asset_type == "StaticMesh":
-        return task_options_static_mesh_preset(use_interchange)
+        options = task_options_static_mesh_preset(use_interchange)
 
     elif asset_type == "SkeletalMesh":
-        return task_options_skeletal_mesh_preset(use_interchange)
+        options = task_options_skeletal_mesh_preset(use_interchange)
 
     elif asset_type == "Animation":
-        return task_options_animation_preset(use_interchange)
+        options = task_options_animation_preset(use_interchange)
         
     else:
-        return task_options_default_preset(use_interchange)
+        options = task_options_default_preset(use_interchange)
+    
+    return options
