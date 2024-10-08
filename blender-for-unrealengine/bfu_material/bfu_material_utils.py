@@ -30,7 +30,7 @@ def get_material_asset_data(asset: bfu_export_logs.BFU_OT_UnrealExportedAsset):
         if asset.asset_type in ["StaticMesh", "SkeletalMesh"]:
             asset_data["import_materials"] = asset.object.bfu_import_materials
             asset_data["import_textures"] = asset.object.bfu_import_textures
-            asset_data["invert_normal_maps"] = asset.object.bfu_invert_normal_maps
+            asset_data["flip_normal_map_green_channel"] = asset.object.bfu_flip_normal_map_green_channel
             asset_data["reorder_material_to_fbx_order"] = asset.object.bfu_reorder_material_to_fbx_order
             asset_data["material_search_location"] = asset.object.bfu_material_search_location
     return asset_data

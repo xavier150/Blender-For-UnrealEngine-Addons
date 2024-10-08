@@ -60,9 +60,9 @@ def register():
         default=False
     )
 
-    # Used for set invert_normal_maps in FbxTextureImportData
+    # Used for set flip_normal_map_green_channel in FbxTextureImportData
     # https://docs.unrealengine.com/5.3/en-US/PythonAPI/class/FbxTextureImportData.html
-    bpy.types.Object.bfu_invert_normal_maps = bpy.props.BoolProperty(
+    bpy.types.Object.bfu_flip_normal_map_green_channel = bpy.props.BoolProperty(
         name="Invert Normal Maps",
         description="This option will cause normal map Y (Green) values to be inverted.",
         default=False
@@ -117,7 +117,7 @@ def unregister():
 
     del bpy.types.Object.bfu_material_search_location
     del bpy.types.Object.bfu_reorder_material_to_fbx_order
-    del bpy.types.Object.bfu_invert_normal_maps
+    del bpy.types.Object.bfu_flip_normal_map_green_channel
     del bpy.types.Object.bfu_import_textures
     del bpy.types.Object.bfu_import_materials
     

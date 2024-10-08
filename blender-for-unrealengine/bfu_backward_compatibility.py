@@ -104,10 +104,7 @@ def update_old_variables():
         update_variable(obj, ["ExportAsAlembic, bfu_export_as_alembic"], "bfu_export_as_alembic_animation")
         
         update_variable(obj, ["correct_extrem_uv_scale", "bfu_correct_extrem_uv_scale"], "bfu_use_correct_extrem_uv_scale")
-        
-
-        
-
+        update_variable(obj, ["bfu_invert_normal_maps"], "bfu_flip_normal_map_green_channel")
 
     for col in bpy.data.collections:
         update_variable(col, ["exportFolderName"], "bfu_export_folder_name")

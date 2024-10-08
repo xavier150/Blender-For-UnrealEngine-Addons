@@ -28,7 +28,9 @@ from . import asset_import
 from . import sequencer_import
 from . import sequencer_utils
 from . import bfu_import_materials
+from . import bfu_import_vertex_color
 from . import bfu_import_sequencer
+from . import import_module_tasks_class
 from . import import_module_tasks_helper
 
 if "bps" in locals():
@@ -49,8 +51,12 @@ if "sequencer_utils" in locals():
     importlib.reload(sequencer_utils)
 if "bfu_import_materials" in locals():
     importlib.reload(bfu_import_materials)
+if "bfu_import_vertex_color" in locals():
+    importlib.reload(bfu_import_vertex_color)
 if "bfu_import_sequencer" in locals():
     importlib.reload(bfu_import_sequencer)
+if "import_module_tasks_class" in locals():
+    importlib.reload(import_module_tasks_class)
 if "import_module_tasks_helper" in locals():
     importlib.reload(import_module_tasks_helper)
 

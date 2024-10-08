@@ -46,7 +46,7 @@ def draw_ui_object_collision(layout: bpy.types.UILayout):
                             bfu_material_search_location.prop(obj, 'bfu_material_search_location')
                             bfu_material_search_location.prop(obj, 'bfu_import_materials')
                             bfu_material_search_location.prop(obj, 'bfu_import_textures')
-                            bfu_material_search_location.prop(obj, 'bfu_invert_normal_maps')
+                            bfu_material_search_location.prop(obj, 'bfu_flip_normal_map_green_channel')
                             bfu_material_search_location.prop(obj, 'bfu_reorder_material_to_fbx_order')
                             
 

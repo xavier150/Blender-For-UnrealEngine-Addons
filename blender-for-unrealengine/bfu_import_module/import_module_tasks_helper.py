@@ -18,40 +18,60 @@
 
 
 from . import import_module_unreal_utils
+from . import import_module_tasks_class
 
 try:
     import unreal
 except ImportError:
     import unreal_engine as unreal
 
-def task_options_default_preset():
-    options = unreal.FbxImportUI()
+def task_options_default_preset(use_igap = True):
+    if use_igap:
+        options = unreal.InterchangeGenericAssetsPipeline()
+    else:
+        options = unreal.FbxImportUI()
     return options
 
-def task_options_alembic_preset():
+def task_options_alembic_preset(use_igap = True):
     options =  unreal.AbcImportSettings()
     return options
 
-def task_options_static_mesh_preset():
-    options = unreal.FbxImportUI()
+def task_options_static_mesh_preset(use_igap = True):
+    if use_igap:
+        options = unreal.InterchangeGenericAssetsPipeline()
+    else:
+        options = unreal.FbxImportUI()
     return options
 
-def task_options_skeleta_lmesh_preset():
-    options = unreal.FbxImportUI()
+def task_options_skeletal_mesh_preset(use_igap = True):
+    if use_igap:
+        options = unreal.InterchangeGenericAssetsPipeline()
+    else:
+        options = unreal.FbxImportUI()
+    return options
+
+def task_options_animation_preset(use_igap = True):
+    if use_igap:
+        options = unreal.InterchangeGenericAssetsPipeline()
+    else:
+        options = unreal.FbxImportUI()
     return options
 
 
-def init_options_data(task: unreal.AssetImportTask, asset_type):
+
+def init_options_data(itask: import_module_tasks_class.ImportTaks, asset_type):
 
     if asset_type == "Alembic":
-        task.set_editor_property('options', task_options_alembic_preset())
+        itask.get_task().set_editor_property('options', task_options_alembic_preset(itask.use_igap))
 
     elif asset_type == "StaticMesh":
-        task.set_editor_property('options', task_options_static_mesh_preset())
+        itask.get_task().set_editor_property('options', task_options_static_mesh_preset(itask.use_igap))
 
     elif asset_type == "SkeletalMesh":
-        task.set_editor_property('options', task_options_skeleta_lmesh_preset())
+        itask.get_task().set_editor_property('options', task_options_skeletal_mesh_preset(itask.use_igap))
+
+    elif asset_type == "Animation":
+        itask.get_task().set_editor_property('options', task_options_animation_preset(itask.use_igap))
+        
     else:
-        task.set_editor_property('options', task_options_default_preset())
-    
-    return task
+        itask.get_task().set_editor_property('options', task_options_default_preset(itask.use_igap))

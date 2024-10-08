@@ -26,8 +26,6 @@ except ImportError:
 
 
 def import_static_lod(asset, asset_data, asset_additional_data, lod_name, lod_number):
-    vertex_override_color = import_module_unreal_utils.get_vertex_override_color(asset_additional_data)
-    vertex_color_import_option = import_module_unreal_utils.get_vertex_color_import_option(asset_additional_data)
 
     if "LevelOfDetail" in asset_additional_data:
         if lod_name in asset_additional_data["LevelOfDetail"]:
@@ -38,14 +36,8 @@ def import_static_lod(asset, asset_data, asset_additional_data, lod_name, lod_nu
             lodTask.automated = True
             lodTask.replace_existing = True
 
-            # Set vertex color import settings to replicate base StaticMesh's behaviour
-            if asset_data["asset_type"] == "Alembic":
-                lodTask.set_editor_property('options', unreal.AbcImportSettings())
-            else:
-                lodTask.set_editor_property('options', unreal.FbxImportUI())
-
-            lodTask.get_editor_property('options').static_mesh_import_data.set_editor_property('vertex_color_import_option', vertex_color_import_option)
-            lodTask.get_editor_property('options').static_mesh_import_data.set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
+            # Replicate base asset import settings
+            lodTask.set_editor_property('options', asset.get_editor_property('asset_import_data'))
 
             unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([lodTask])
             if len(lodTask.imported_object_paths) > 0:
@@ -79,7 +71,7 @@ def set_skeletal_mesh_lods(asset, asset_data, asset_additional_data):
 
 def set_sequence_preview_skeletal_mesh(asset: unreal.AnimSequence, origin_skeletal_mesh):
     if origin_skeletal_mesh:
-        #todo:: preview_pose_asset doesn’t retarget right now. Need wait update in Unreal Engine Python API.
+        # @TODO preview_pose_asset doesn’t retarget right now. Need wait update in Unreal Engine Python API.
         asset.get_editor_property('preview_pose_asset')
         pass
         

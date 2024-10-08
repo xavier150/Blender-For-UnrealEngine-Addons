@@ -16,50 +16,78 @@
 #
 # ======================= END GPL LICENSE BLOCK =============================
 
+from .. import import_module_unreal_utils
+from .. import import_module_tasks_class
+
 try:
     import unreal
 except ImportError:
     import unreal_engine as unreal
 
-def update_task_with_material_data(task: unreal.AssetImportTask, asset_data):
+def apply_import_settings(itask: import_module_tasks_class.ImportTaks, asset_data):
+    print("Mat S0")
+    asset_type = asset_data["asset_type"]
+    if asset_type not in ["StaticMesh", "SkeletalMesh"]:
+        # Only for Static and Skeletal Mesh
+        return
 
-    if asset_data["asset_type"] in ["StaticMesh", "SkeletalMesh"]:
+    print("Mat S1")
+    # Mat and texture use
+    if itask.use_igap:
+        if "import_materials" in asset_data:
+            itask.GetIGAP_Mat().set_editor_property('import_materials', asset_data["import_materials"])
 
-        fbx_import_ui = task.get_editor_property('options')
-        fbx_import_ui: unreal.FbxTextureImportData
-
+        if "import_textures" in asset_data:
+            itask.GetIGAP_Tex().set_editor_property('import_textures', asset_data["import_textures"])
+    else:
+        fbx_import_ui = itask.GetFbxImportUI()
         if "import_materials" in asset_data:
             fbx_import_ui.set_editor_property('import_materials', asset_data["import_materials"])
 
         if "import_textures" in asset_data:
             fbx_import_ui.set_editor_property('import_textures', asset_data["import_textures"])
 
-
-        fbx_texture_import_data = fbx_import_ui.texture_import_data
-        fbx_texture_import_data: unreal.FbxTextureImportData
-
+    print("Mat S2")
+    # Mat search and normal map green chanel
+    if itask.use_igap:
         if "material_search_location" in asset_data:
             if asset_data["material_search_location"] == "Local":
-                fbx_texture_import_data.set_editor_property('material_search_location', unreal.MaterialSearchLocation.LOCAL)
+                itask.GetIGAP_Mat().set_editor_property('search_location', unreal.InterchangeMaterialSearchLocation.LOCAL)
             if asset_data["material_search_location"] == "UnderParent":
-                fbx_texture_import_data.set_editor_property('material_search_location', unreal.MaterialSearchLocation.UNDER_PARENT)
+                itask.GetIGAP_Mat().set_editor_property('search_location', unreal.InterchangeMaterialSearchLocation.UNDER_PARENT)
             if asset_data["material_search_location"] == "UnderRoot":
-                fbx_texture_import_data.set_editor_property('material_search_location', unreal.MaterialSearchLocation.UNDER_ROOT)
+                itask.GetIGAP_Mat().set_editor_property('search_location', unreal.InterchangeMaterialSearchLocation.UNDER_ROOT)
             if asset_data["material_search_location"] == "AllAssets":
-                fbx_texture_import_data.set_editor_property('material_search_location', unreal.MaterialSearchLocation.ALL_ASSETS)
+                itask.GetIGAP_Mat().set_editor_property('search_location', unreal.InterchangeMaterialSearchLocation.ALL_ASSETS)
 
-        if "invert_normal_maps" in asset_data:
-            fbx_texture_import_data.set_editor_property('invert_normal_maps', asset_data["invert_normal_maps"])
+        if "flip_normal_map_green_channel" in asset_data:
+            itask.GetIGAP_Tex().set_editor_property('flip_normal_map_green_channel', asset_data["flip_normal_map_green_channel"])
 
+    else:
+        if "material_search_location" in asset_data:
+            if asset_data["material_search_location"] == "Local":
+                itask.GetTextureImportData().set_editor_property('material_search_location', unreal.MaterialSearchLocation.LOCAL)
+            if asset_data["material_search_location"] == "UnderParent":
+                itask.GetTextureImportData().set_editor_property('material_search_location', unreal.MaterialSearchLocation.UNDER_PARENT)
+            if asset_data["material_search_location"] == "UnderRoot":
+                itask.GetTextureImportData().set_editor_property('material_search_location', unreal.MaterialSearchLocation.UNDER_ROOT)
+            if asset_data["material_search_location"] == "AllAssets":
+                itask.GetTextureImportData().set_editor_property('material_search_location', unreal.MaterialSearchLocation.ALL_ASSETS)
 
-        if asset_data["asset_type"] =="StaticMesh":
-            static_mesh_import_data = fbx_import_ui.static_mesh_import_data 
-            static_mesh_import_data: unreal.FbxSkeletalMeshImportData
+        if "flip_normal_map_green_channel" in asset_data:
+            itask.GetTextureImportData().set_editor_property('invert_normal_maps', asset_data["flip_normal_map_green_channel"])
+
+    print("Mat S3")
+    # Mat order
+    if itask.use_igap:
+        # @TODO reorder_material_to_fbx_order Removed with InterchangeGenericAssetsPipeline? 
+        # I yes need also remove reorder_material_to_fbx_order from the addon propertys.
+        pass
+    else:
+        if asset_type =="StaticMesh":
             if "reorder_material_to_fbx_order" in asset_data:
-                static_mesh_import_data.set_editor_property('reorder_material_to_fbx_order', asset_data["reorder_material_to_fbx_order"])
+                itask.GetStaticMeshImportData().set_editor_property('reorder_material_to_fbx_order', asset_data["reorder_material_to_fbx_order"])
 
-        if asset_data["asset_type"] == "SkeletalMesh":
-            skeletal_mesh_import_data = fbx_import_ui.skeletal_mesh_import_data  
-            skeletal_mesh_import_data: unreal.FbxStaticMeshImportData
+        elif asset_type == "SkeletalMesh":
             if "reorder_material_to_fbx_order" in asset_data:
-                skeletal_mesh_import_data.set_editor_property('reorder_material_to_fbx_order', asset_data["reorder_material_to_fbx_order"])
+                itask.GetSkeletalMeshImportData().set_editor_property('reorder_material_to_fbx_order', asset_data["reorder_material_to_fbx_order"])
