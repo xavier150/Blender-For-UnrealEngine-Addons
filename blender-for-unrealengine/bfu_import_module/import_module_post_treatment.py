@@ -41,7 +41,7 @@ def import_static_lod(asset, asset_data, asset_additional_data, lod_name, lod_nu
 
             unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([lodTask])
             if len(lodTask.imported_object_paths) > 0:
-                lodAsset = unreal.find_asset(lodTask.imported_object_paths[0])
+                lodAsset = import_module_unreal_utils.load_asset(lodTask.imported_object_paths[0])
                 slot_replaced = unreal.EditorStaticMeshLibrary.set_lod_from_static_mesh(asset, lod_number, lodAsset, 0, True)
                 unreal.EditorAssetLibrary.delete_asset(lodTask.imported_object_paths[0])
 

@@ -24,6 +24,14 @@ try:
 except ImportError:
     import unreal_engine as unreal
 
+def load_asset(name):
+    find_asset = unreal.find_asset(name, follow_redirectors=True)
+    if find_asset is None:
+        # Load asset if not find.
+        find_asset = unreal.load_asset(name, follow_redirectors=True)
+    return find_asset
+     
+
 def get_selected_level_actors() -> list[unreal.Actor]:
     """Returns a list of selected actors in the level."""
     return unreal.EditorLevelLibrary.get_selected_level_actors()

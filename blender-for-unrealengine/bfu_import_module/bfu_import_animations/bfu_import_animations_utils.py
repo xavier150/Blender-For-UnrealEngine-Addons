@@ -75,7 +75,7 @@ def apply_fbxui_post_import(itask: import_module_tasks_class.ImportTaks, asset_d
             base_name = path.split('.')[0]
             anim_asset_name = f"{base_name}_anim.{base_name.split('/')[-1]}_anim"
             desired_anim_path = f"{base_name}.{base_name.split('/')[-1]}"
-            animAsset = unreal.find_asset(anim_asset_name)
+            animAsset = import_module_unreal_utils.load_asset(anim_asset_name)
             if animAsset is not None:
                 # Remove the imported skeletal mesh and rename te anim sequence with his correct name.
                 unreal.EditorAssetLibrary.delete_asset(path)

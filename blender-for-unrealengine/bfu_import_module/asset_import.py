@@ -72,17 +72,26 @@ def ImportTask(asset_data):
     asset_additional_data = GetAdditionalData()
 
     if asset_type in ["Animation", "SkeletalMesh"]:
-        origin_skeletal_mesh = None
         origin_skeleton = None
+        origin_skeletal_mesh = None
 
-        find_asset = unreal.find_asset(asset_data["target_skeleton_ref"])
-        if isinstance(find_asset, unreal.Skeleton):
-            origin_skeleton = find_asset
-        elif isinstance(find_asset, unreal.SkeletalMesh):
-            origin_skeletal_mesh = find_asset
-            origin_skeleton = find_asset.skeleton
-        else:
-            origin_skeleton = None
+
+        if "target_skeleton_ref" in asset_data:
+            find_sk_asset = import_module_unreal_utils.load_asset(asset_data["target_skeleton_ref"])
+            if isinstance(find_sk_asset, unreal.Skeleton):
+                origin_skeleton = find_sk_asset
+            elif isinstance(find_sk_asset, unreal.SkeletalMesh):
+                origin_skeleton = find_sk_asset.skeleton
+                origin_skeletal_mesh = find_sk_asset
+
+        if "target_skeletal_mesh_ref" in asset_data:
+            find_skm_asset = import_module_unreal_utils.load_asset(asset_data["target_skeletal_mesh_ref"])
+            if isinstance(find_skm_asset, unreal.SkeletalMesh):
+                origin_skeleton = find_skm_asset.skeleton
+                origin_skeletal_mesh = find_skm_asset
+            elif isinstance(find_skm_asset, unreal.Skeleton):
+                origin_skeletal_mesh = find_skm_asset
+        
         
         if asset_type == "Animation":
             if origin_skeleton:
@@ -289,11 +298,11 @@ def ImportTask(asset_data):
     if asset_additional_data:
         if "preview_import_path" in asset_additional_data:
             task_asset_full_path = itask.get_task().destination_path+"/"+asset_additional_data["preview_import_path"]+"."+asset_additional_data["preview_import_path"]
-            find_asset = unreal.find_asset(task_asset_full_path)
-            if find_asset:
+            find_target_asset = import_module_unreal_utils.load_asset(task_asset_full_path)
+            if find_target_asset:
 
                 # Vertex color
-                bfu_import_vertex_color.bfu_import_vertex_color_utils.apply_asset_settings(itask, find_asset, asset_additional_data)
+                bfu_import_vertex_color.bfu_import_vertex_color_utils.apply_asset_settings(itask, find_target_asset, asset_additional_data)
                     
     # ###############[ import asset ]################
     print("S10")

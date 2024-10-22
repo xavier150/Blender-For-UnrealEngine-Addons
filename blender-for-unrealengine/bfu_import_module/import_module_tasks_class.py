@@ -100,7 +100,12 @@ class ImportTaks():
         return self.task_option.get_editor_property('animation_pipeline')
     
     def get_imported_assets(self) -> list[unreal.Object]:
-        return [unreal.find_asset(path) for path in self.task.imported_object_paths if unreal.find_asset(path)]
+        assets = []
+        for path in self.task.imported_object_paths:
+            search_asset = import_module_unreal_utils.load_asset(path)
+            if search_asset:
+                assets.append(search_asset)
+        return assets
 
     def get_imported_static_mesh(self) -> unreal.StaticMesh | None:
         return next((asset for asset in self.get_imported_assets() if isinstance(asset, unreal.StaticMesh)), None)
