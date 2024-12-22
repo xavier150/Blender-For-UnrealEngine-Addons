@@ -3525,10 +3525,10 @@ def save_single(operator, scene, depsgraph, filepath="",
         reverse_direction_bone_correction_matrix = Matrix.Rotation(-math.pi if secondary_bone_axis[0] == '-' else math.pi, 4, secondary_bone_axis[-1])
         if use_ue_mannequin_bone_alignment:
             import re
-            PELVIS_OR_FOOT_NAME_PATTERN = re.compile(r'^(pelvis$|foot[_\.$]|ik_foot_[lr]$)', re.IGNORECASE)
+            ROOT_OR_PELVIS_OR_FOOT_NAME_PATTERN = re.compile(r'^(root$|pelvis$|foot[_\.$]|ik_foot_[lr]$)', re.IGNORECASE)
             for arm_obj in [arm_obj for arm_obj in scene.objects if arm_obj.type == 'ARMATURE']:
                 map = {}
-                for bone in [bone for bone in arm_obj.data.bones if PELVIS_OR_FOOT_NAME_PATTERN.match(bone.name) != None]:
+                for bone in [bone for bone in arm_obj.data.bones if ROOT_OR_PELVIS_OR_FOOT_NAME_PATTERN.match(bone.name) != None]:
                     target_rot = Quaternion((1.0, 0.0, 0.0), math.radians(90.0))
                     lowerbonename = bone.name.lower()
                     if lowerbonename.startswith('foot'):
