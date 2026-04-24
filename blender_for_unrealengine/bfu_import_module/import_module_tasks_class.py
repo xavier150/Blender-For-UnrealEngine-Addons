@@ -71,7 +71,7 @@ class ImportTask():
 
 
 
-    if hasattr(unreal, 'InterchangeGenericAssetsPipeline'):
+    if hasattr(unreal, 'InterchangeGenericAssetsPipeline') and hasattr(unreal, 'InterchangeGenericMeshPipeline'):
         def get_igap(self) -> unreal.InterchangeGenericAssetsPipeline:
             # unreal.InterchangeGenericAssetsPipeline
             return self.task_option
