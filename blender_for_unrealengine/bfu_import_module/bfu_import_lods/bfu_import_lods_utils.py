@@ -97,7 +97,6 @@ def apply_asset_settings(itask: import_module_tasks_class.ImportTask, asset_addi
     static_mesh = itask.get_imported_static_mesh()
     skeletal_mesh = itask.get_imported_skeletal_mesh()
 
-     
     if static_mesh is not None:
         # Import custom static mesh lods
         set_static_mesh_lods(static_mesh, itask.get_task_options(), asset_additional_data)
@@ -107,7 +106,13 @@ def apply_asset_settings(itask: import_module_tasks_class.ImportTask, asset_addi
             if "static_mesh_lod_group" in asset_additional_data:
                 if asset_additional_data["static_mesh_lod_group"]:
                     desired_lod_group = asset_additional_data["static_mesh_lod_group"]
-                    static_mesh.set_editor_property('lod_group', desired_lod_group)
+                    if import_module_unreal_utils.get_unreal_version() > (5,4,0):
+                        static_mesh.set_editor_property('lod_group', desired_lod_group)
+                    else:
+                        # Lod group don't auto apply on older Unreal version.
+                        static_mesh.set_editor_property('lod_group', "") # Set to empty string to force Unreal to apply the new LOD group
+                        static_mesh.set_editor_property('lod_group', desired_lod_group)
+                    #print(f"Set Lod Group to '{desired_lod_group}' for StaticMesh '{static_mesh.get_name()}'")
 
     elif skeletal_mesh is not None:
         # Import custom skeletal mesh lods
