@@ -103,7 +103,6 @@ def install_from_blender_with_build_data(
                 steps.end_current_task()
 
                 if validate_success:
-
                     # Check if the addon should be installed based on Blender's version
                     if should_install:
                         pkg_id = build_data.pkg_id
@@ -117,3 +116,8 @@ def install_from_blender_with_build_data(
                         steps.end_current_task()
                     else:
                         print(f"Skipping installation for build '{build_key}'.")
+
+                else:
+                    print(f"Validation failed for build '{build_key}'. Skipping installation.")
+            else:
+                print(f"Error: Failed to create ZIP file for build '{build_key}'.")

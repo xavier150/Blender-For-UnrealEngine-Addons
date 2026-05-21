@@ -10,6 +10,7 @@
 import bpy
 import time
 from typing import List, Tuple, Union
+from .bbam_addon_config.bbam_addon_config_type import BBAM_GenerateMethod
 
 class BBAM_TimedTask:
 
@@ -113,3 +114,9 @@ def get_should_install_for_curren_version(auto_install_range_data: Tuple[List[in
         return tuple(min_version) <= blender_version <= tuple(max_version)
     
     return False
+
+def get_generate_using_extension_command(generate_method: BBAM_GenerateMethod, blender_version_min: List[int]) -> bool:
+    if generate_method == BBAM_GenerateMethod.AUTO_DETECT:
+        return blender_version_min >= [4, 2, 0]
+    else:
+        return (generate_method == BBAM_GenerateMethod.EXTENTION_COMMAND)

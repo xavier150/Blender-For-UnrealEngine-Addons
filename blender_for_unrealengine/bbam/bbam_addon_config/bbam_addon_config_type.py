@@ -125,11 +125,14 @@ class BBAM_AddonManifest:
         return f"{self.addon_version[0]}.{self.addon_version[1]}.{self.addon_version[2]}"
 
 class BBAM_GenerateMethod(Enum):
+    AUTO_DETECT = "AUTO_DETECT"
     EXTENTION_COMMAND = "EXTENTION_COMMAND"
     SIMPLE_ZIP = "SIMPLE_ZIP"
 
     def get_as_string(self) -> str:
-        if self == BBAM_GenerateMethod.EXTENTION_COMMAND:
+        if self == BBAM_GenerateMethod.AUTO_DETECT:
+            return "AUTO_DETECT"
+        elif self == BBAM_GenerateMethod.EXTENTION_COMMAND:
             return "EXTENTION_COMMAND"
         elif self == BBAM_GenerateMethod.SIMPLE_ZIP:
             return "SIMPLE_ZIP"
@@ -138,19 +141,21 @@ class BBAM_GenerateMethod(Enum):
         
     @staticmethod
     def get_from_string(value: str) -> 'BBAM_GenerateMethod':
-        if value == "EXTENTION_COMMAND":
+        if value == "AUTO_DETECT":
+            return BBAM_GenerateMethod.AUTO_DETECT
+        elif value == "EXTENTION_COMMAND":
             return BBAM_GenerateMethod.EXTENTION_COMMAND
         elif value == "SIMPLE_ZIP":
             return BBAM_GenerateMethod.SIMPLE_ZIP
         else:
             print(f"Error: Unknown generate method '{value}' in manifest.")
-            return BBAM_GenerateMethod.EXTENTION_COMMAND
+            return BBAM_GenerateMethod.AUTO_DETECT
 
 class BBAM_AddonBuild:
 
     def __init__(self, build_id: str) -> None:
         self.build_id: str = build_id
-        self.generate_method: BBAM_GenerateMethod = BBAM_GenerateMethod.EXTENTION_COMMAND
+        self.generate_method: BBAM_GenerateMethod = BBAM_GenerateMethod.AUTO_DETECT
         
         # Use "LATEST" at  Tuple[1] to indicate the latest version.
         self.auto_install_range: Tuple[List[int], Union[List[int], str]] = ([0, 0, 0], [0, 0, 0])
@@ -168,14 +173,18 @@ class BBAM_AddonBuild:
 
     def set_from_dict(self, data: Dict[str, Any]) -> bool:
         # Check
-        required_keys = ["generate_method", "auto_install_range", "naming", "module", "pkg_id"]
+        required_keys = ["auto_install_range", "naming", "module", "pkg_id"]
         for key in required_keys:
             if key not in data:
                 print(f"Error: '{key}' key not found in the provided data.")
                 return False
+            
+        # Depercated check
+        if "generate_method" in data:
+            print("Warning: 'generate_method' key is deprecated. BBAM now automatically detects the generate method. You can use 'forced_generate_method' instead if you want to force a specific method.")
+
 
         # Update required fields
-        self.generate_method = BBAM_GenerateMethod.get_from_string(data["generate_method"])
         self.auto_install_range = (data["auto_install_range"][0], data["auto_install_range"][1])
         
         self.naming = data["naming"]
@@ -183,6 +192,8 @@ class BBAM_AddonBuild:
         self.pkg_id = data["pkg_id"]
 
         # Optional fields
+        if "forced_generate_method" in data:
+            self.generate_method = BBAM_GenerateMethod.get_from_string(data["forced_generate_method"])
         self.exclude_paths = data.get("exclude_paths", [])
         self.include_paths = data.get("include_paths", [])
         self.hard_modifications = data.get("hard_modifications", {})
