@@ -33,7 +33,6 @@
 
     "builds": {
         "unrealengine_assets_exporter_5.0": {   
-            "generate_method": "EXTENTION_COMMAND",
             "auto_install_range": [[5,0,0], "LATEST"],
             "naming": "{Name}_{Version}-blender_5.0-5.1.zip",
             "module": "unrealengine_assets_exporter", 
@@ -50,7 +49,6 @@
             "blender_version_min": [5,0,0]
         },
         "unrealengine_assets_exporter_4.5": {   
-            "generate_method": "EXTENTION_COMMAND",
             "auto_install_range": [[4,5,0], [4,5,5]],
             "naming": "{Name}_{Version}-blender_4.5.zip",
             "module": "unrealengine_assets_exporter", 
@@ -67,7 +65,6 @@
             "blender_version_min": [4,5,0]
         },
         "unrealengine_assets_exporter_4.4": {   
-            "generate_method": "EXTENTION_COMMAND",
             "auto_install_range": [[4,4,0], [4,4,3]],
             "naming": "{Name}_{Version}-blender_4.4.zip",
             "module": "unrealengine_assets_exporter", 
@@ -84,7 +81,6 @@
             "blender_version_min": [4,4,0]
         },
         "unrealengine_assets_exporter_4.3": {   
-            "generate_method": "EXTENTION_COMMAND",
             "auto_install_range": [[4,3,0], [4,3,2]],
             "naming": "{Name}_{Version}-blender_4.3.zip",
             "module": "unrealengine_assets_exporter", 
@@ -101,7 +97,6 @@
             "blender_version_min": [4,3,0]
         },
         "unrealengine_assets_exporter_4.2": {   
-            "generate_method": "EXTENTION_COMMAND",
             "auto_install_range": [[4,2,0], [4,2,14]],
             "naming": "{Name}_{Version}-blender_4.2.zip",
             "module": "unrealengine_assets_exporter", 
@@ -118,7 +113,6 @@
             "blender_version_min": [4,2,0]
         },
         "unrealengine_assets_exporter_2.91": {
-            "generate_method": "SIMPLE_ZIP",
             "auto_install_range": [[2,91,0], [4,1,1]],
             "naming": "{Name}_{Version}-blender_2.91-4.1.zip",
             "module": "unrealengine_assets_exporter", 
@@ -143,7 +137,6 @@
             "blender_version_min": [2,91,0]
         },
         "unrealengine_assets_exporter_2.80": {
-            "generate_method": "SIMPLE_ZIP",
             "auto_install_range": [[2,80,0], [2,90,1]],
             "naming": "{Name}_{Version}-blender_2.80.zip",
             "module": "unrealengine_assets_exporter", 
