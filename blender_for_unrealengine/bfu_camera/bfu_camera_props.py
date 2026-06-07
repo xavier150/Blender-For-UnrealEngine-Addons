@@ -7,14 +7,41 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-
-from typing import List
+from enum import Enum
+from typing import List, Tuple
 import bpy
 import math
 from .. import bbpl
-from . import bfu_camera_utils
 from . import bfu_camera_write_paste_commands
 
+class BFU_CameraTypeEnum(Enum):
+    REGULAR = "REGULAR"
+    CINEMATIC = "CINEMATIC"
+    ARCHVIS = "ARCHVIS"
+    CUSTOM = "CUSTOM"
+
+    @staticmethod
+    def default() -> "BFU_CameraTypeEnum":
+        return BFU_CameraTypeEnum.CINEMATIC
+
+def get_cameras_enum_list() -> List[Tuple[str, str, str]]:
+    return [
+        (BFU_CameraTypeEnum.REGULAR.value, 
+            "Regular", 
+            "Regular camera, for standard gameplay views."),
+        (BFU_CameraTypeEnum.CINEMATIC.value, 
+            "Cinematic", 
+            "The Cine Camera Actor is a specialized Camera Actor with additional settings that replicate real-world film camera behavior. You can use the Filmback, Lens, and Focus settings to create realistic scenes, while adhering to industry standards."),
+        (BFU_CameraTypeEnum.ARCHVIS.value, 
+            "ArchVis", 
+            "Support for ArchVis Tools Cameras."),
+        (BFU_CameraTypeEnum.CUSTOM.value, 
+            "Custom", 
+            "If you use an custom camera actor."),
+    ]
+
+def get_default_cameras_enum() -> str:
+    return BFU_CameraTypeEnum.default().value
 
 def get_preset_values() -> List[str]:
     preset_values = [
@@ -26,6 +53,14 @@ def get_preset_values() -> List[str]:
         ]
     return preset_values
 
+def get_object_desired_camera_type(obj: bpy.types.Object) -> BFU_CameraTypeEnum:
+    return BFU_CameraTypeEnum(obj.bfu_desired_camera_type)  # type: ignore
+
+def get_object_fix_axis_flippings(obj: bpy.types.Object) -> bool:
+    return obj.bfu_fix_axis_flippings  # type: ignore
+
+def get_object_fix_axis_flippings_warp_target(obj: bpy.types.Object) -> Tuple[float, float, float]:
+    return obj.bfu_fix_axis_flippings_warp_target  # type: ignore
 
 # Object button
 class BFU_OT_CopyActiveCameraOperator(bpy.types.Operator):
@@ -50,7 +85,7 @@ class BFU_OT_CopySelectedCamerasOperator(bpy.types.Operator):
     bl_description = "Copy selected camera(s) data. (Use CTRL+V in Unreal viewport)"
 
     def execute(self, context: bpy.types.Context):  # type: ignore
-        objs = context.selected_objects
+        objs: list[bpy.types.Object] = context.selected_objects # type: ignore
         result = bfu_camera_write_paste_commands.get_import_camera_script_command(objs)
         if result[0]:
             bbpl.basics.set_windows_clipboard(result[1])
@@ -95,8 +130,8 @@ def register():
     bpy.types.Object.bfu_desired_camera_type = bpy.props.EnumProperty(  # type: ignore[attr-defined]
         name="Camera Type",
         description="Choose the type of camera",
-        items=bfu_camera_utils.get_enum_cameras_list(),
-        default=bfu_camera_utils.get_enum_cameras_default()
+        items=get_cameras_enum_list(),
+        default=get_default_cameras_enum()
     )
     bpy.types.Object.bfu_custom_camera_actor = bpy.props.StringProperty(  # type: ignore[attr-defined]
         name="Custom Camera Actor",

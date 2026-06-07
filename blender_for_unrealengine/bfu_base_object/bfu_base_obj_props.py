@@ -47,8 +47,6 @@ def register():
 
     bpy.types.Scene.bfu_object_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Object Properties")  # type: ignore[attr-defined]
 
-
-    
     bpy.types.Object.bfu_export_folder_name = bpy.props.StringProperty(  # type: ignore[attr-defined]
         name="Sub folder name",
         description=(

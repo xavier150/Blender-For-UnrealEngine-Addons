@@ -11,37 +11,33 @@
 
 import bpy
 import math
-from .. import bfu_basics
+from typing import Tuple
 from .. import bfu_ui
 from .. import bbpl
-from .. import languages
 from .. import bfu_export_control
-from . import bfu_camera_utils
-from . import bfu_camera_write_paste_commands
+from . import bfu_camera_props
+from .bfu_camera_props import BFU_CameraTypeEnum
 
 def draw_ui_object_camera(layout: bpy.types.UILayout, context: bpy.types.Context, obj: bpy.types.Object):
-  
-
-    if obj is None:
-        return
     
-    if obj.type != "CAMERA":
+    if not isinstance(obj.data, bpy.types.Camera):
+        # Also hide the accordion if the selected object is not a camera
         return
 
     scene = bpy.context.scene 
     if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
         accordion = bbpl.blender_layout.layout_accordion.get_accordion(scene, "bfu_camera_properties_expanded")
-        _, panel = accordion.draw(layout)
-        if accordion.is_expanded():
-            camera_ui = panel.column()
-            if obj.type == "CAMERA":
+        if accordion:
+            _, panel = accordion.draw(layout)
+            if panel:
+                camera_ui = panel.column()
                 camera_ui_pop = camera_ui.column()
 
                 export_procedure_prop = camera_ui_pop.column()
                 export_procedure_prop.prop(obj, 'bfu_camera_export_procedure')
 
                 camera_ui_pop.prop(obj, 'bfu_desired_camera_type')
-                if obj.bfu_desired_camera_type == "CUSTOM":
+                if bfu_camera_props.get_object_desired_camera_type(obj) == BFU_CameraTypeEnum.CUSTOM:
                     camera_ui_pop.prop(obj, 'bfu_custom_camera_actor')
                     camera_ui_pop.prop(obj, 'bfu_custom_camera_default_actor')
                     camera_ui_pop.prop(obj, 'bfu_custom_camera_component')
@@ -49,14 +45,16 @@ def draw_ui_object_camera(layout: bpy.types.UILayout, context: bpy.types.Context
                 camera_ui_fix_axis_prop = camera_ui_fix_axis.row()
                 camera_ui_fix_axis_prop.prop(obj, 'bfu_fix_axis_flippings')
                 bbpl.blender_layout.layout_doc_button.add_doc_page_operator(camera_ui_fix_axis_prop, text="", url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Camera-Axis")
-                if obj.bfu_fix_axis_flippings:
+                fix_axis_flippings: bool = bfu_camera_props.get_object_fix_axis_flippings(obj)
+                if fix_axis_flippings:
+                    fix_axis_flippings_warp_target: Tuple[float, float, float] = bfu_camera_props.get_object_fix_axis_flippings_warp_target(obj)
                     camera_ui_fix_axis.prop(obj, 'bfu_fix_axis_flippings_warp_target', text="")
 
                     invalid = False
-                    warp_target_degrees = [math.degrees(v) for v in obj.bfu_fix_axis_flippings_warp_target]
+                    warp_target_degrees = [math.degrees(v) for v in fix_axis_flippings_warp_target]
                     tolerance = 1e-4
 
-                    for axis_value in obj.bfu_fix_axis_flippings_warp_target:
+                    for axis_value in fix_axis_flippings_warp_target:
                         if axis_value == 0.0:
                             invalid = True
                             camera_ui_fix_axis.label(

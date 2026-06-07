@@ -127,10 +127,6 @@ def get_preset_values() -> List[str]:
     ]
     return preset_values
 
-
-
-
-
 def object_action_asset_list(obj: bpy.types.Object) -> List[BFU_OT_ObjExportAction]:
     return obj.bfu_action_asset_list #  type: ignore
 
@@ -147,12 +143,7 @@ def get_object_active_action_asset_list(obj: bpy.types.Object) -> int:
     return obj.bfu_active_action_asset_list  # type: ignore
 
 def get_object_anim_action_export_enum(obj: bpy.types.Object) -> BFU_AnimActionExportEnum:
-    for enum in BFU_AnimActionExportEnum:
-        if obj.bfu_anim_action_export_enum == enum.value:  # type: ignore
-            return enum
-
-    print(f"Warning: Object {obj.name} has unknown export procedure '{obj.bfu_anim_action_export_enum}'. Falling back to default export procedure...")  # type: ignore
-    return BFU_AnimActionExportEnum.default()
+    return BFU_AnimActionExportEnum(obj.bfu_anim_action_export_enum)  # type: ignore
 
 def get_object_prefix_name_to_export(obj: bpy.types.Object) -> str:
     return obj.bfu_prefix_name_to_export  # type: ignore
