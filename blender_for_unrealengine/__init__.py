@@ -38,6 +38,7 @@ try:
     from . import bfu_asset_preview
     from . import bfu_propertys
     from . import bfu_base_object
+    from . import bfu_object
     from . import bfu_adv_object
     from . import bfu_base_collection
     from . import bfu_collection_as_staticmesh
@@ -108,6 +109,8 @@ try:
         importlib.reload(bfu_propertys)
     if "bfu_base_object" in locals():
         importlib.reload(bfu_base_object)
+    if "bfu_object" in locals():
+        importlib.reload(bfu_object)
     if "bfu_adv_object" in locals():
         importlib.reload(bfu_adv_object)
     if "bfu_base_collection" in locals():
@@ -216,6 +219,7 @@ try:
             bfu_asset_preview.register()
             bfu_propertys.register()
             bfu_base_object.register()
+            bfu_object.register()
             bfu_adv_object.register()
             bfu_base_collection.register()
             bfu_collection_as_staticmesh.register()
@@ -303,6 +307,7 @@ try:
             bfu_collection_as_staticmesh.unregister()
             bfu_base_collection.unregister()
             bfu_adv_object.unregister()
+            bfu_object.unregister()
             bfu_base_object.unregister()
             bfu_propertys.unregister()
             bfu_asset_preview.unregister()

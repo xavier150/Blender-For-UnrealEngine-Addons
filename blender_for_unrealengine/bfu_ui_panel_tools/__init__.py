@@ -16,6 +16,7 @@ from .. import bfu_collision
 from .. import bfu_socket
 from .. import bfu_uv_map
 from .. import bfu_light_map
+from .. import bfu_object
 
 class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
     # Tool panel
@@ -37,7 +38,9 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         events.new_event("Draw Tools")
 
         # Tools sections
-        events.add_sub_event("Draw Camera Tools")
+        events.add_sub_event("Draw Object Tools")
+        bfu_object.bfu_object_ui.draw_tools_ui(layout, context)
+        events.stop_last_and_start_new_event("Draw Camera Tools")
         bfu_camera.bfu_camera_ui.draw_tools_ui(layout, context)
         events.stop_last_and_start_new_event("Draw Spline Tools")
         bfu_spline.bfu_spline_ui.draw_tools_ui(layout, context)
