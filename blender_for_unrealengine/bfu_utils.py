@@ -487,6 +487,25 @@ def evaluate_camera_position_for_unreal(camera: bpy.types.Object, previous_euler
 
     return array_transform
 
+def get_object_location_vector_for_unreal(obj: bpy.types.Object) -> mathutils.Vector:
+    # Convert Blender location to Unreal Engine location (X, Y, Z) -> (X, -Y, Z) and scale to cm
+    unit_scale = get_scene_unit_scale()
+    unreal_location = obj.location * mathutils.Vector((1.0, -1.0, 1.0)) # Changes axis from Y to -Y
+    unreal_location *= 100.0 * unit_scale # Convert to cm and apply unit scale
+    return unreal_location
+
+def get_object_euler_for_unreal(obj: bpy.types.Object) -> mathutils.Euler:
+    # Convert Blender world rotation to Unreal-style components used by this addon:
+    # Blender X -> Unreal Roll, Blender Y -> -Unreal Pitch, Blender Z -> -Unreal Yaw.
+    blender_euler = obj.matrix_world.to_euler("XYZ", mathutils.Euler())
+    return mathutils.Euler((-blender_euler.y, -blender_euler.z, blender_euler.x), "XYZ")
+
+def get_object_scale_vector_for_unreal(obj: bpy.types.Object) -> mathutils.Vector:
+    # Convert Blender scale to Unreal Engine scale (X, Y, Z) -> (X, Y, Z) and apply unit scale
+    unit_scale = get_scene_unit_scale()
+    unreal_scale = obj.scale * unit_scale
+    return unreal_scale
+
 def get_export_collection_objects(collection: bpy.types.Collection) -> List[bpy.types.Object]:
     # Found all objects that must be exported in a collection
     found_objs = []

@@ -20,4 +20,7 @@ def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
         _, panel = accordion.draw(layout)
         if panel:
             object_ui = panel.column()
-            object_ui.label(text="Object Tools (TODO)", icon="OBJECT_DATA")
+            object_ui.label(text="Copy Active Transform for Unreal:")
+            object_ui.operator("object.copy_active_object_location_for_unreal", icon="COPYDOWN", text="Location")
+            object_ui.operator("object.copy_active_object_rotation_for_unreal", icon="COPYDOWN", text="Rotation")
+            object_ui.operator("object.copy_active_object_scale_for_unreal", icon="COPYDOWN", text="Scale")
