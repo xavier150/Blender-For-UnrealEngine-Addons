@@ -12,7 +12,6 @@ from typing import List, Tuple
 import bpy
 import math
 from .. import bbpl
-from . import bfu_camera_write_paste_commands
 
 class BFU_CameraTypeEnum(Enum):
     REGULAR = "REGULAR"
@@ -62,37 +61,7 @@ def get_object_fix_axis_flippings(obj: bpy.types.Object) -> bool:
 def get_object_fix_axis_flippings_warp_target(obj: bpy.types.Object) -> Tuple[float, float, float]:
     return obj.bfu_fix_axis_flippings_warp_target  # type: ignore
 
-# Object button
-class BFU_OT_CopyActiveCameraOperator(bpy.types.Operator):
-    bl_label = "Copy active camera for Unreal"
-    bl_idname = "object.bfu_copy_active_camera_data"
-    bl_description = "Copy active camera data. (Use CTRL+V in Unreal viewport)"
 
-    def execute(self, context: bpy.types.Context):  # type: ignore
-        obj = context.object
-        result = bfu_camera_write_paste_commands.get_import_camera_script_command([obj])  # type: ignore
-        if result[0]:
-            bbpl.basics.set_windows_clipboard(result[1])
-            self.report({'INFO'}, result[2])
-        else:
-            self.report({'WARNING'}, result[2])
-        return {'FINISHED'}
-
-# Scene button
-class BFU_OT_CopySelectedCamerasOperator(bpy.types.Operator):
-    bl_label = "Copy selected camera(s) for Unreal"
-    bl_idname = "object.copy_selected_cameras_data"
-    bl_description = "Copy selected camera(s) data. (Use CTRL+V in Unreal viewport)"
-
-    def execute(self, context: bpy.types.Context):  # type: ignore
-        objs: list[bpy.types.Object] = context.selected_objects # type: ignore
-        result = bfu_camera_write_paste_commands.get_import_camera_script_command(objs)
-        if result[0]:
-            bbpl.basics.set_windows_clipboard(result[1])
-            self.report({'INFO'}, result[2])
-        else:
-            self.report({'WARNING'}, result[2])
-        return {'FINISHED'}
 
 
 
@@ -101,8 +70,6 @@ class BFU_OT_CopySelectedCamerasOperator(bpy.types.Operator):
 # -------------------------------------------------------------------
 
 classes = (
-    BFU_OT_CopyActiveCameraOperator,
-    BFU_OT_CopySelectedCamerasOperator
 )
 
 

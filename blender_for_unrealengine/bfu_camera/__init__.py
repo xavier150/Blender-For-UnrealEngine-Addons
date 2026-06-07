@@ -12,6 +12,7 @@ import importlib
 
 from . import bfu_export_procedure
 from . import bfu_camera_props
+from . import bfu_camera_operators
 from . import bfu_camera_ui
 from . import bfu_camera_utils
 from . import bfu_camera_unreal_utils
@@ -56,6 +57,7 @@ def register():
 
     bfu_export_procedure.register()
     bfu_camera_props.register()
+    bfu_camera_operators.register()
     bfu_camera_type.register()
 
 def unregister():
@@ -63,5 +65,6 @@ def unregister():
         bpy.utils.unregister_class(cls)  # type: ignore
 
     bfu_camera_type.unregister()
+    bfu_camera_operators.unregister()
     bfu_camera_props.unregister()
     bfu_export_procedure.unregister()
