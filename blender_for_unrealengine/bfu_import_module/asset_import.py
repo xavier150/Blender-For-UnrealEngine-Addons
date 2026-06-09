@@ -293,8 +293,12 @@ def import_task(asset_data: Dict[str, Any]) -> (str, Optional[List[unreal.AssetD
         bfu_import_nanite.bfu_import_nanite_utils.apply_import_settings(itask, asset_data, asset_additional_data)
 
         if hasattr(unreal, 'InterchangeGenericAssetsPipeline') and isinstance(itask.task_option, unreal.InterchangeGenericAssetsPipeline):
-            itask.get_igap_mesh().set_editor_property('combine_static_meshes', True)
-            itask.get_igap_mesh().set_editor_property('combine_skeletal_meshes', True)
+            if import_module_unreal_utils.get_unreal_version() >= (5, 8, 0):
+                itask.get_igap_mesh().set_editor_property('combine_static_meshes_behavior', unreal.InterchangeCombineStaticMeshesBehavior.ALL)
+                itask.get_igap_mesh().set_editor_property('combine_skeletal_meshes_behavior', unreal.InterchangeCombineSkeletalMeshesBehavior.BY_SKELETON)
+            else:
+                itask.get_igap_mesh().set_editor_property('combine_static_meshes', True)
+                itask.get_igap_mesh().set_editor_property('combine_skeletal_meshes', True)
             # @TODO auto_generate_collision Removed with InterchangeGenericAssetsPipeline? 
             # I yes need also remove auto_generate_collision from the addon propertys.
             itask.get_igap_mesh().set_editor_property('import_morph_targets', True)
