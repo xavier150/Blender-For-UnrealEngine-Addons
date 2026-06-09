@@ -19,15 +19,15 @@ import os
 import sys
 import json
 
-def JsonLoad(json_file):
+def JsonLoad(json_file: object):
     # Changed in Python 3.9: The keyword argument encoding has been removed.
     if sys.version_info >= (3, 9):
-        return json.load(json_file)
+        return json.load(json_file) # pyright: ignore[reportArgumentType]
     else:
         return json.load(json_file, encoding="utf8")
 
 
-def JsonLoadFile(json_file_path):
+def JsonLoadFile(json_file_path: str):
     if sys.version_info[0] < 3:
         with open(json_file_path, "r") as json_file:
             return JsonLoad(json_file)
@@ -44,9 +44,13 @@ def RunImportScriptWithJsonData():
     
     file_path = os.path.join(assets_data["info"]["addon_path"],'run_unreal_import_script.py')
     spec = importlib.util.spec_from_file_location("__import_assets__", file_path)
+    if spec is None:
+        raise ImportError(f"Could not load module from {file_path}")
     module = importlib.util.module_from_spec(spec)
 
     # Run script module function
+    if spec.loader is None:
+        raise ImportError(f"Could not find loader for module from {file_path}")
     spec.loader.exec_module(module)
     module.run_from_asset_import_script(import_file_path)
 

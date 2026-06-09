@@ -38,6 +38,7 @@ from . import bfu_import_light_map
 from . import bfu_import_nanite
 from . import bfu_import_sequencer
 from . import import_module_tasks_helper
+from . import bfu_import_skeletal_mesh
 
 if "bpl" in locals():
     importlib.reload(bpl)
@@ -75,6 +76,8 @@ if "bfu_import_sequencer" in locals():
     importlib.reload(bfu_import_sequencer)
 if "import_module_tasks_helper" in locals():
     importlib.reload(import_module_tasks_helper)
+if "bfu_import_skeletal_mesh" in locals():
+    importlib.reload(bfu_import_skeletal_mesh)
 
 def run_asset_import(assets_data: Dict[str, Any], show_finished_popup: bool = False):
     try:

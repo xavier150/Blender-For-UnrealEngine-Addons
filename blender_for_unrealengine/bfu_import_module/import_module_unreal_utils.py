@@ -9,11 +9,8 @@
 
 import string
 import re
-from typing import List, Tuple, TYPE_CHECKING
+from typing import List, Tuple, TYPE_CHECKING, Optional
 import unreal
-from . import config
-from . import constrcut_config
-
 
 def get_package_path_from_any_string(asset_string: str) -> str:
     """
@@ -35,7 +32,7 @@ def get_package_path_from_any_string(asset_string: str) -> str:
     return asset_path
 
 
-def load_asset(name: str) -> None:
+def load_asset(name: str) -> Optional[unreal.Object]:
     # Convert ObjectPath to PackageName
     package_name = get_package_path_from_any_string(name)
     asset_exist = unreal.EditorAssetLibrary.does_asset_exist(package_name)
@@ -83,18 +80,18 @@ def clean_filename_for_unreal(filename: str) -> str:
     filename = ''.join(c for c in filename if c in valid_chars)
     return filename
 
-def show_simple_message(title: str, message: str) -> unreal.AppReturnType:
+def show_simple_message(title: str, message: str) -> Optional[unreal.AppReturnType]:
     """Displays a simple message dialog in Unreal Editor."""
     if hasattr(unreal, 'EditorDialog'):
-        return unreal.EditorDialog.show_message(title, message, unreal.AppMsgType.OK)
+        return unreal.EditorDialog.show_message(unreal.Text(title), unreal.Text(message), unreal.AppMsgType.OK) # type: ignore
     else:
         print('--------------------------------------------------')
         print(message)
 
-def show_warning_message(title: str, message: str) -> unreal.AppReturnType:
+def show_warning_message(title: str, message: str) -> Optional[unreal.AppReturnType]:
     """Displays a warning message in Unreal Editor and prints it to the console."""
     if hasattr(unreal, 'EditorDialog'):
-        unreal.EditorDialog.show_message(title, message, unreal.AppMsgType.OK)
+        unreal.EditorDialog.show_message(unreal.Text(title), unreal.Text(message), unreal.AppMsgType.OK) # type: ignore
     else:
         print('--------------------------------------------------')
         print(message)

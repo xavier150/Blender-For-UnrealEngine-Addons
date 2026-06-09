@@ -26,6 +26,7 @@ from . import bfu_import_light_map
 from . import bfu_import_nanite
 from . import config
 from .asset_types import ExportAssetType, AssetFileTypeEnum
+from . import bfu_import_skeletal_mesh
 
 
 
@@ -48,7 +49,7 @@ def ready_for_asset_import():
 
 
 
-def import_task(asset_data: Dict[str, Any]) -> (str, Optional[List[unreal.AssetData]]):
+def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.AssetData]]]:
     asset_type = ExportAssetType.get_asset_type_from_string(asset_data["asset_type"])
 
     if asset_type in [ExportAssetType.STATIC_MESH, ExportAssetType.SKELETAL_MESH]:
@@ -65,39 +66,7 @@ def import_task(asset_data: Dict[str, Any]) -> (str, Optional[List[unreal.AssetD
 
     asset_additional_data = found_additional_data()
 
-    if asset_type.is_skeletal():
-        origin_skeleton = None
-        origin_skeletal_mesh = None
-
-
-        if "target_skeleton_search_ref" in asset_data:
-            find_sk_asset = import_module_unreal_utils.load_asset(asset_data["target_skeleton_search_ref"])
-            if isinstance(find_sk_asset, unreal.Skeleton):
-                origin_skeleton = find_sk_asset
-            elif isinstance(find_sk_asset, unreal.SkeletalMesh):
-                origin_skeleton = find_sk_asset.skeleton
-                origin_skeletal_mesh = find_sk_asset
-
-        if "target_skeletal_mesh_search_ref" in asset_data:
-            find_skm_asset = import_module_unreal_utils.load_asset(asset_data["target_skeletal_mesh_search_ref"])
-            if isinstance(find_skm_asset, unreal.SkeletalMesh):
-                origin_skeleton = find_skm_asset.skeleton
-                origin_skeletal_mesh = find_skm_asset
-            elif isinstance(find_skm_asset, unreal.Skeleton):
-                origin_skeletal_mesh = find_skm_asset
-                
-        if asset_type in [ExportAssetType.ANIM_ACTION, ExportAssetType.ANIM_POSE, ExportAssetType.ANIM_NLA]:
-            skeleton_search_str = f'"target_skeleton_search_ref": {asset_data["target_skeleton_search_ref"]}'
-            skeletal_mesh_search_str = f'"target_skeletal_mesh_search_ref": {asset_data["target_skeletal_mesh_search_ref"]}'
-    
-            if origin_skeleton:
-                print(f'{skeleton_search_str} and "{skeletal_mesh_search_str} "was found for animation immport:" {str(origin_skeleton)}')
-            else:
-                message = "WARNING: Could not find skeleton for animation import." + "\n"
-                message += f" -{skeleton_search_str}" + "\n"
-                message += f" -{skeletal_mesh_search_str}" + "\n"
-                import_module_unreal_utils.show_warning_message("Skeleton not found.", message)
-
+    origin_skeleton, origin_skeletal_mesh = bfu_import_skeletal_mesh.bfu_import_skeletal_mesh_utils.get_origin_skeleton_and_skeletal_mesh(asset_data, asset_type)
     itask = import_module_tasks_class.ImportTask()
 
     def get_file_from_types(file_types: List[str]) -> Tuple[str, AssetFileTypeEnum]:
