@@ -1,10 +1,14 @@
 {
-    // When I'm using a virtual environment, it disable the type checking for some reason.
-    /*
-    "python.defaultInterpreterPath": "${env:VIRTUAL_ENV}/bin/python",
+    "python.analysis.typeCheckingMode": "strict",
+    "python.defaultInterpreterPath": "C:/venvs/blender_for_unrealengine/Scripts/python.exe",
     "python.analysis.extraPaths": [
-        "${env:VIRTUAL_ENV}/lib/python3.13/site-packages",
-        "${env:VIRTUAL_ENV}/Lib/site-packages"
-    ],*/
-    "python.analysis.typeCheckingMode": "strict"
+        "C:/venvs/blender_for_unrealengine/Lib/site-packages"
+    ],
+    "python-envs.pythonProjects": [
+        {
+            "path": ".",
+            "envManager": "ms-python.python:venv",
+            "packageManager": "ms-python.python:pip"
+        }
+    ]
 }
