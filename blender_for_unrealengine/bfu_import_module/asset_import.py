@@ -147,7 +147,7 @@ def import_task(asset_data: Dict[str, Any]) -> (str, Optional[List[unreal.AssetD
         alembic_import_data.set_editor_property("import_type", unreal.AlembicImportType.SKELETAL)
         alembic_import_data.conversion_settings.set_editor_property("flip_u", False)
         alembic_import_data.conversion_settings.set_editor_property("flip_v", True)
-        scale = asset_data["scene_unit_scale"] * asset_data["asset_global_scale"]
+        scale = asset_data["scene_unit_scale"]
         ue_scale = unreal.Vector(scale * 100, scale * -100, scale * 100) # Unit scale * object scale * 100
         rotation = unreal.Vector(90, 0, 0)
         alembic_import_data.conversion_settings.set_editor_property("scale", ue_scale) 
@@ -166,10 +166,11 @@ def import_task(asset_data: Dict[str, Any]) -> (str, Optional[List[unreal.AssetD
             animation_pipeline.set_editor_property('do_not_import_curve_with_zero', asset_data["do_not_import_curve_with_zero"]) 
 
     else:
-        anim_sequence_import_data = itask.get_animation_import_data()
-        anim_sequence_import_data.import_translation = unreal.Vector(0, 0, 0)
-        if "do_not_import_curve_with_zero" in asset_data:
-            anim_sequence_import_data.set_editor_property('do_not_import_curve_with_zero', asset_data["do_not_import_curve_with_zero"]) 
+        if asset_type != ExportAssetType.ANIM_ALEMBIC:
+            anim_sequence_import_data = itask.get_animation_import_data()
+            anim_sequence_import_data.import_translation = unreal.Vector(0, 0, 0)
+            if "do_not_import_curve_with_zero" in asset_data:
+                anim_sequence_import_data.set_editor_property('do_not_import_curve_with_zero', asset_data["do_not_import_curve_with_zero"]) 
 
     if asset_type == ExportAssetType.ANIM_ALEMBIC:
         itask.get_abc_import_settings().set_editor_property('import_type', unreal.AlembicImportType.SKELETAL)
