@@ -1,0 +1,6 @@
+{
+    "python.defaultInterpreterPath": "/home/bleuraven/venvs/modular_auto_rig/bin/python",
+    "python.analysis.extraPaths": [
+        "/home/bleuraven/venvs/modular_auto_rig/lib/python3.11/site-packages"
+    ]
+}

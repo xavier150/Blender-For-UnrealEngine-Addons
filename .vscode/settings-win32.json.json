@@ -1,0 +1,6 @@
+{
+    "python.defaultInterpreterPath": "C:/venvs/blender_for_unrealengine/Scripts/python.exe",
+    "python.analysis.extraPaths": [
+        "C:/venvs/blender_for_unrealengine/Lib/site-packages"
+    ]
+}

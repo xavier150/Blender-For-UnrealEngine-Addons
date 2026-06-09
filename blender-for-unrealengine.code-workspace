@@ -5,15 +5,7 @@
 		}
 	],
 	"settings": {
+		"files.eol": "\n",
 		"python.analysis.typeCheckingMode": "strict"
-
-	},
-	"extensions": {
-		"recommendations": [
-			"ms-python.python",
-			"ms-python.vscode-pylance",
-			"batisteo.vscode-django",
-			"ms-python.python-insiders"
-		]
 	}
 }
