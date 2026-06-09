@@ -1,4 +1,8 @@
 {
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingModuleSource": "none"
+    },
     "python.analysis.typeCheckingMode": "strict",
     "python-envs.pythonProjects": [
         {
