@@ -7,6 +7,7 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
+import os
 from typing import List
 import bpy
 from .. import bfu_debug_settings
@@ -82,6 +83,7 @@ def get_object_global_preset_propertys() -> List[str]:
 
     return preset_values
 
+
 class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
     # Unreal engine export panel
 
@@ -118,6 +120,88 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         # Directory to store the presets
         preset_subdir = 'blender-for-unrealengine/global-properties-presets'
 
+    class BFU_MT_ApplyGlobalPropertiesPresets(bpy.types.Menu):
+        bl_label = 'Apply Preset'
+
+        def draw(self, context):
+            layout = self.layout
+            preset_paths = bpy.utils.preset_paths('blender-for-unrealengine/global-properties-presets')
+            found = False
+            for preset_dir in preset_paths:
+                if os.path.isdir(preset_dir):
+                    for f in sorted(os.listdir(preset_dir)):
+                        if not f.endswith('.py'):
+                            continue
+                        found = True
+                        filepath = os.path.join(preset_dir, f)
+                        name = os.path.splitext(f)[0]
+                        op = layout.operator(
+                            'wm.store_globalproperties_preset',
+                            text=name,
+                        )
+                        op.filepath = filepath
+            if not found:
+                layout.label(text="No presets found. Use '+' to save one first.")
+
+    class BFU_OT_StoreGlobalPropertiesPreset(bpy.types.Operator):  # type: ignore
+        bl_idname = 'wm.store_globalproperties_preset'
+        bl_label = 'Store Selected Preset'
+        bl_description = 'Store the selected preset filepath for later application'
+        filepath: bpy.props.StringProperty()  # type: ignore[valid-type]
+
+        def execute(self, context):
+            context.window_manager.bfu_selected_global_preset_path = self.filepath  # type: ignore[attr-defined]
+            return {'FINISHED'}
+
+    class BFU_OT_ApplyGlobalPropertiesPresetToSelected(bpy.types.Operator):  # type: ignore
+        bl_idname = 'wm.apply_globalproperties_preset_to_selected'
+        bl_label = 'Apply Selected'
+        bl_description = 'Apply the selected preset to all currently selected objects'
+        bl_options = {'REGISTER', 'UNDO'}
+
+        @classmethod
+        def poll(cls, context):
+            return bool(context.selected_objects)
+
+        def execute(self, context: bpy.types.Context):
+            wm = context.window_manager
+            filepath = wm.bfu_selected_global_preset_path  # type: ignore[attr-defined]
+            if not filepath:
+                self.report({'ERROR'}, 'No preset selected. Choose one from the dropdown first.')
+                return {'CANCELLED'}
+            if not os.path.isfile(filepath):
+                self.report({'ERROR'}, f'Preset file not found: {filepath}')
+                return {'CANCELLED'}
+
+            # Read the preset file
+            with open(filepath, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # Extract lines that assign obj. properties
+            obj_lines = []
+            for line in content.split('\n'):
+                stripped = line.strip()
+                if stripped.startswith('obj.') and '=' in stripped and not stripped.startswith('obj ='):
+                    obj_lines.append(stripped)
+
+            if not obj_lines:
+                self.report({'WARNING'}, 'No object properties found in preset')
+                return {'CANCELLED'}
+
+            applied_count = 0
+            for obj in context.selected_objects:
+                namespace = {'obj': obj, 'bpy': bpy}
+                for line in obj_lines:
+                    try:
+                        exec(line, namespace)
+                    except Exception as e:
+                        self.report({'WARNING'}, f'Failed to set property on {obj.name}: {e}')
+                applied_count += 1
+
+            preset_name = os.path.splitext(os.path.basename(filepath))[0]
+            self.report({'INFO'}, f'Applied preset "{preset_name}" to {applied_count} object(s)')
+            return {'FINISHED'}
+
     def draw(self, context: bpy.types.Context):
 
         layout = self.layout
@@ -150,6 +234,24 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
         row.menu('BFU_MT_ObjectGlobalPropertiesPresets', text='Global Properties Presets')
         row.operator('object.add_globalproperties_preset', text='', icon='ADD')
         row.operator('object.add_globalproperties_preset', text='', icon='REMOVE').remove_active = True  # type: ignore
+
+        # Apply preset to all selected
+        events.stop_last_and_start_new_event("Apply Preset")
+        try:
+            row = layout.row(align=True)
+            wm = context.window_manager
+            preset_path = getattr(wm, "bfu_selected_global_preset_path", "")
+            if preset_path and os.path.isfile(preset_path):
+                preset_name = os.path.splitext(os.path.basename(preset_path))[0]
+                row.menu('BFU_MT_ApplyGlobalPropertiesPresets', text=preset_name)
+            else:
+                row.menu('BFU_MT_ApplyGlobalPropertiesPresets', text='Select Preset')
+            row.operator('wm.apply_globalproperties_preset_to_selected', text='Apply to Selected')
+        except Exception as e:
+            print("[BFU ERROR] Apply preset UI draw failed:", e)
+            row = layout.row(align=True)
+            row.label(text="[Apply Selected UI error]")
+        events.stop_last_event()
 
         # Tab Buttons
         events.stop_last_and_start_new_event("Draw Tab Buttons")
@@ -221,13 +323,29 @@ classes = (
     BFU_PT_BlenderForUnrealObject,
     BFU_PT_BlenderForUnrealObject.BFU_MT_ObjectGlobalPropertiesPresets,
     BFU_PT_BlenderForUnrealObject.BFU_OT_AddObjectGlobalPropertiesPreset,
+    BFU_PT_BlenderForUnrealObject.BFU_MT_ApplyGlobalPropertiesPresets,
+    BFU_PT_BlenderForUnrealObject.BFU_OT_StoreGlobalPropertiesPreset,
+    BFU_PT_BlenderForUnrealObject.BFU_OT_ApplyGlobalPropertiesPresetToSelected,
 )
 
 def register():
     for cls in classes:
-        bpy.utils.register_class(cls)
+        try:
+            bpy.utils.register_class(cls)
+        except Exception as e:
+            print(f"[BFU ERROR] Failed to register {cls.__name__}: {e}")
+    bpy.types.WindowManager.bfu_selected_global_preset_path = bpy.props.StringProperty(  # type: ignore[attr-defined]
+        name="Global Preset Path",
+        description="Internal: stores the selected preset filepath",
+        default="",
+    )
 
 
 def unregister():
+    if hasattr(bpy.types.WindowManager, "bfu_selected_global_preset_path"):
+        del bpy.types.WindowManager.bfu_selected_global_preset_path  # type: ignore[attr-defined]
     for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
+        try:
+            bpy.utils.unregister_class(cls)
+        except Exception as e:
+            print(f"[BFU ERROR] Failed to unregister {cls.__name__}: {e}")
