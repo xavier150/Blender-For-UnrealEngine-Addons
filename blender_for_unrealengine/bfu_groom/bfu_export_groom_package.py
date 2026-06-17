@@ -101,8 +101,9 @@ def export_single_groom_simulation(
     # Process export
     my_timer_group.start_timer(f"Process export")
     groom_simulation_export_procedure: BFU_GroomExportProcedure = bfu_export_procedure.get_object_export_procedure(active)
+    export_result = None
     if (groom_simulation_export_procedure.value == BFU_GroomExportProcedure.STANDARD_ALEMBIC.value):
-        bpy.ops.wm.alembic_export(  # type: ignore
+        export_result = bpy.ops.wm.alembic_export(  # type: ignore
             filepath=str(fullpath),
             check_existing=False,
             selected=True,
@@ -128,4 +129,9 @@ def export_single_groom_simulation(
     for obj in scene.objects:
         bfu_utils.clear_all_bfu_temp_vars(obj)
     my_timer_group.end_last_timer()
-    return True
+
+    # [RETURN EXPORT RESULT]
+    if export_result:
+        if export_result == {'FINISHED'}:
+            return True
+    return False

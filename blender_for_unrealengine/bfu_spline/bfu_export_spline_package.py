@@ -99,8 +99,9 @@ def export_single_fbx_spline(
     # Process export
     my_timer_group.start_timer(f"Process export")
     spline_export_procedure: BFU_SplineExportProcedure = bfu_export_procedure.get_object_export_procedure(active)
+    export_result = None
     if (spline_export_procedure.value == BFU_SplineExportProcedure.STANDARD_FBX.value):
-        bfu_export.bfu_fbx_export.export_scene_fbx(
+        export_result = bfu_export.bfu_fbx_export.export_scene_fbx(
             filepath=str(fullpath),
             check_existing=False,
             use_selection=True,
@@ -149,4 +150,9 @@ def export_single_fbx_spline(
         for obj in scene.objects:
             bfu_utils.clear_all_bfu_temp_vars(obj)
     my_timer_group.end_last_timer()
-    return True
+
+    # [RETURN EXPORT RESULT]
+    if export_result:
+        if export_result == {'FINISHED'}:
+            return True
+    return False

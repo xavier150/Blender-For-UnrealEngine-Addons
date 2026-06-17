@@ -182,8 +182,9 @@ def export_as_action_animation(
     # Process export
     my_timer_group.start_timer(f"Process export")
     skeleton_export_procedure: BFU_SkeletonExportProcedure = bfu_skeletal_mesh.bfu_export_procedure.get_object_export_procedure(active)
+    export_result = None
     if (skeleton_export_procedure.value == BFU_SkeletonExportProcedure.CUSTOM_FBX_EXPORT.value):
-        bfu_export.bfu_fbx_export.export_scene_fbx_with_custom_fbx_io(
+        export_result = bfu_export.bfu_fbx_export.export_scene_fbx_with_custom_fbx_io(
             operator=op,
             context=bpy.context,
             filepath=str(fullpath),
@@ -221,7 +222,7 @@ def export_as_action_animation(
             bake_space_transform=False
             )
     elif (skeleton_export_procedure == BFU_SkeletonExportProcedure.STANDARD_FBX.value):
-        bfu_export.bfu_fbx_export.export_scene_fbx(
+        export_result = bfu_export.bfu_fbx_export.export_scene_fbx(
             filepath=str(fullpath),
             check_existing=False,
             use_selection=True,
@@ -252,7 +253,7 @@ def export_as_action_animation(
             bake_space_transform=False
             )
     elif (skeleton_export_procedure == BFU_SkeletonExportProcedure.STANDARD_GLTF.value):
-        bpy.ops.export_scene.gltf(
+        export_result = bpy.ops.export_scene.gltf(
             filepath=str(fullpath),
             check_existing=False,
             use_selection=True,
@@ -310,4 +311,9 @@ def export_as_action_animation(
     for obj in scene.objects:
         bfu_utils.clear_all_bfu_temp_vars(obj)
     my_timer_group.end_last_timer()
-    return True
+
+    # [RETURN EXPORT RESULT]
+    if export_result:
+        if export_result == {'FINISHED'}:
+            return True
+    return False
