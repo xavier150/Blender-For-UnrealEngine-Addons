@@ -21,6 +21,11 @@ class BFU_CollectionExportProcedure(str, Enum):
     def default() -> "BFU_CollectionExportProcedure":
         return BFU_CollectionExportProcedure.STANDARD_FBX
 
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_CollectionExportProcedure":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
+
 def get_collection_export_procedure_enum_property_list() -> List[Tuple[str, str, str, str, int]]:
     return [
         (BFU_CollectionExportProcedure.CUSTOM_FBX_EXPORT.value,

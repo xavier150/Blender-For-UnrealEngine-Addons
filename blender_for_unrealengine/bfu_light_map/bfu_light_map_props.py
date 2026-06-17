@@ -22,6 +22,11 @@ class BFU_StaticMeshLightMapMode(str, Enum):
     @staticmethod
     def default() -> "BFU_StaticMeshLightMapMode":
         return BFU_StaticMeshLightMapMode.DEFAULT
+
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_StaticMeshLightMapMode":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
     
 def get_static_mesh_light_map_mode_enum_list() -> List[Tuple[str, str, str]]:
     return [

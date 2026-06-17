@@ -24,6 +24,11 @@ class BFU_SplineDesiredComponent(str, Enum):
     def default() -> "BFU_SplineDesiredComponent":
         return BFU_SplineDesiredComponent.SPLINE
 
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_SplineDesiredComponent":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
+
 def get_spline_desired_component_enum_property_list() -> List[Tuple[str, str, str, int]]:
     return [
         (BFU_SplineDesiredComponent.SPLINE.value,

@@ -21,6 +21,11 @@ class BFU_CameraExportProcedure(str, Enum):
     def default() -> "BFU_CameraExportProcedure":
         return BFU_CameraExportProcedure.ADITIONAL_DATA_ONLY
 
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_CameraExportProcedure":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
+
 def get_camera_export_procedure_enum_property_list() -> List[Tuple[str, str, str, str, int]]:
     return [
         (BFU_CameraExportProcedure.ADITIONAL_DATA_ONLY.value,

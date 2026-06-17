@@ -21,6 +21,11 @@ class BFU_ExportSelectionFilterEnum(str, Enum):
     @staticmethod
     def default() -> "BFU_ExportSelectionFilterEnum":
         return BFU_ExportSelectionFilterEnum.DEFAULT
+
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_ExportSelectionFilterEnum":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
     
 def get_export_selection_filter_enum_list() -> List[Tuple[str, str, str]]:
     return [

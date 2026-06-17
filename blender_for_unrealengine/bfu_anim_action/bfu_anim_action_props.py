@@ -24,6 +24,11 @@ class BFU_AnimActionExportEnum(str, Enum):
     def default() -> "BFU_AnimActionExportEnum":
         return BFU_AnimActionExportEnum.EXPORT_AUTO
 
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_AnimActionExportEnum":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
+
 def get_anim_action_export_enum_list() -> List[Tuple[str, str, str, str, int]]:
     return [
         (BFU_AnimActionExportEnum.EXPORT_AUTO.value,
@@ -65,6 +70,11 @@ class BFU_AnimNamingTypeEnum(str, Enum):
     @staticmethod
     def default() -> "BFU_AnimNamingTypeEnum":
         return BFU_AnimNamingTypeEnum.ACTION_NAME
+
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_AnimNamingTypeEnum":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
     
 def get_anim_naming_type_enum_list() -> List[Tuple[str, str, str]]:
     return [
@@ -92,6 +102,11 @@ class BFU_AnimActionStartEndTimeEnum(str, Enum):
     @staticmethod
     def default() -> "BFU_AnimActionStartEndTimeEnum":
         return BFU_AnimActionStartEndTimeEnum.WITH_KEYFRAMES
+
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_AnimActionStartEndTimeEnum":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
     
 def get_anim_action_start_end_time_enum_list() -> List[Tuple[str, str, str]]:
     return [

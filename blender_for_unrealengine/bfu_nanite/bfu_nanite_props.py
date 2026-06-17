@@ -21,6 +21,11 @@ class BFU_BuildNaniteMode(str, Enum):
     @staticmethod
     def default() -> "BFU_BuildNaniteMode":
         return BFU_BuildNaniteMode.AUTO
+
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_BuildNaniteMode":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
     
 def get_build_nanite_mode_enum_list() -> List[Tuple[str, str, str]]:
     return [

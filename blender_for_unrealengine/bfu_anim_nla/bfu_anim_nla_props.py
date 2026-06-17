@@ -20,6 +20,11 @@ class BFU_AnimNLAStartEndTimeEnum(str, Enum):
     @staticmethod
     def default() -> "BFU_AnimNLAStartEndTimeEnum":
         return BFU_AnimNLAStartEndTimeEnum.WITH_SCENEFRAMES
+
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_AnimNLAStartEndTimeEnum":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
     
 def get_anim_nla_start_end_time_enum_list() -> List[Tuple[str, str, str]]:
     return [

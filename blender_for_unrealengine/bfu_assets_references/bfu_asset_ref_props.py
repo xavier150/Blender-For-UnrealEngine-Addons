@@ -44,6 +44,11 @@ class BFU_EngineRefSkeletonSearchModeEnum(str, Enum):
     @staticmethod
     def default() -> "BFU_EngineRefSkeletonSearchModeEnum":
         return BFU_EngineRefSkeletonSearchModeEnum.AUTO
+
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_EngineRefSkeletonSearchModeEnum":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
     
 def get_engine_ref_skeleton_search_mode_enum_property_list() -> List[Tuple[str, str, str, str, int]]:
     return [
@@ -81,6 +86,11 @@ class BFU_EngineRefSkeletalMeshSearchModeEnum(str, Enum):
     @staticmethod
     def default() -> "BFU_EngineRefSkeletalMeshSearchModeEnum":
         return BFU_EngineRefSkeletalMeshSearchModeEnum.AUTO
+
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_EngineRefSkeletalMeshSearchModeEnum":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
     
 def get_engine_ref_skeletal_mesh_search_mode_enum_property_list() -> List[Tuple[str, str, str, str, int]]:
     return [

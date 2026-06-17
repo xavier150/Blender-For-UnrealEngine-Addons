@@ -19,6 +19,11 @@ class BFU_AlembicExportProcedure(str, Enum):
     def default() -> "BFU_AlembicExportProcedure":
         return BFU_AlembicExportProcedure.STANDARD_ALEMBIC
 
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_AlembicExportProcedure":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
+
 def get_alembic_export_procedure_enum_property_list() -> List[Tuple[str, str, str, str, int]]:
     return [
         (BFU_AlembicExportProcedure.STANDARD_ALEMBIC.value,

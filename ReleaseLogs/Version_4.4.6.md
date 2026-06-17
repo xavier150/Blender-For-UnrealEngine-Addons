@@ -7,3 +7,5 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
 - Fixed: Import script set but don't apply LOD Group to Static Meshes in older Unreal Engine version.
     (This is due to a bug on older version that is now fixed.)
 - Fixed: Alembic import produce script fail.
+- Fixed: When Blender enum value matches not enum in a property the export can produce script fail.
+    (Enum will now return a default value instead)

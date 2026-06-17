@@ -43,6 +43,11 @@ class BFU_VertexColorImportOptionEnum(str, Enum):
     @staticmethod
     def default() -> "BFU_VertexColorImportOptionEnum":
         return BFU_VertexColorImportOptionEnum.REPLACE
+
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_VertexColorImportOptionEnum":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
     
 def get_vertex_color_import_option_enum_property_list() -> List[Tuple[str, str, str, str, int]]:
     return [
@@ -75,6 +80,11 @@ class BFU_VertexColorToUseEnum(str, Enum):
     @staticmethod
     def default() -> "BFU_VertexColorToUseEnum":
         return BFU_VertexColorToUseEnum.ACTIVE_INDEX
+
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_VertexColorToUseEnum":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
     
 def get_vertex_color_to_use_enum_property_list() -> List[Tuple[str, str, str, str, int]]:
     return [

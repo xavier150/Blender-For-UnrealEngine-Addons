@@ -21,6 +21,11 @@ class BFU_SplineExportProcedure(str, Enum):
     def default() -> "BFU_SplineExportProcedure":
         return BFU_SplineExportProcedure.ADITIONAL_DATA_ONLY
 
+    @classmethod
+    def _missing_(cls, value: object) -> "BFU_SplineExportProcedure":
+        # Fallback for old scenes/transient states with empty or invalid value.
+        return cls.default()
+
 def get_spline_export_procedure_enum_property_list() -> List[Tuple[str, str, str, str, int]]:
     return [
         (BFU_SplineExportProcedure.ADITIONAL_DATA_ONLY.value,
