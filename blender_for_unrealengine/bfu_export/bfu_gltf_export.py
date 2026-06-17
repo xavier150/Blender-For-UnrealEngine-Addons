@@ -12,27 +12,28 @@
 # Better to look about an class that amange all export type in future?
 
 import traceback
+from typing import Dict, Any
+
 import bpy
-from mathutils import Matrix
+
 from .. import bpl
 
 
-debug_show_arguments = False
-
+debug_show_arguments: bool = False
 
 def export_scene_gltf(
-        filepath='', 
-        check_existing=True, 
+        filepath: str = '', 
+        check_existing: bool = True, 
         filter_glob: str = "*.glb",
-        use_selection=False, 
-        use_visible=False, 
-        use_armature_deform_only=False,
-        use_active_collection=False, 
-        use_mesh_edges=False, 
-        bake_anim=True,
+        use_selection: bool = False, 
+        use_visible: bool = False, 
+        use_armature_deform_only: bool = False,
+        use_active_collection: bool = False, 
+        use_mesh_edges: bool = False, 
+        bake_anim: bool = True,
     ):
     # Base parameters for all versions
-    params = {
+    params: Dict[str, Any] = {
         'filepath': filepath,
         'check_existing': check_existing,
         'filter_glob': filter_glob,
@@ -46,10 +47,10 @@ def export_scene_gltf(
 
     try:
         # Call the FBX export operator with the appropriate parameters
-        if (debug_show_arguments):
+        if debug_show_arguments:
             print("(Blender) EXPORT PARMS:", params)
-        bpy.ops.export_scene.gltf(**params)
-    except Exception as e:
+        return bpy.ops.export_scene.gltf(**params)
+    except Exception as e:  # type: ignore
         # Capture and print the detailed error information
         error_message = traceback.format_exc()
         print(bpl.color_set.red(error_message))

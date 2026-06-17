@@ -12,16 +12,16 @@
 # Better to look about an class that amange all export type in future?
 
 import traceback
-import bpy
-from mathutils import Matrix
 from typing import Set, Dict, Any
+from mathutils import Matrix
+
+import bpy
+
 from .. import bpl
 from .. import fbxio
 
 
-debug_show_arguments = False
-
-
+debug_show_arguments: bool = False
 
 def export_scene_fbx_with_custom_fbx_io(
     operator: bpy.types.Operator, 
@@ -143,10 +143,10 @@ def export_scene_fbx_with_custom_fbx_io(
 
     try:
         # Call the FBX export operator with the appropriate parameters
-        if (debug_show_arguments):
+        if debug_show_arguments:
             print("(Custom) EXPORT PARMS:", params)
-        fbxio.current_fbxio.export_fbx_bin.save(**params)
-    except Exception as e:
+        return fbxio.current_fbxio.export_fbx_bin.save(**params)  # type: ignore
+    except Exception as e:  # type: ignore
         # Capture and print the detailed error information
         error_message = traceback.format_exc()
         print(bpl.color_set.red(error_message))
@@ -256,8 +256,8 @@ def export_scene_fbx(
         # Call the FBX export operator with the appropriate parameters
         if (debug_show_arguments):
             print("(Blender) EXPORT PARMS:", params)
-        bpy.ops.export_scene.fbx(**params)
-    except Exception as e:
+        return bpy.ops.export_scene.fbx(**params)
+    except Exception as e:  # type: ignore
         # Capture and print the detailed error information
         error_message = traceback.format_exc()
         print(bpl.color_set.red(error_message))
