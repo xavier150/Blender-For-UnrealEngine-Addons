@@ -8,7 +8,7 @@
 # ----------------------------------------------
 
 from pathlib import Path
-from typing import List, Set, Any, Dict
+from typing import List, Set, Any
 
 import bpy
 from bl_operators.presets import AddPresetBase
@@ -115,28 +115,9 @@ class BFU_OT_AddObjectGlobalPropertiesPreset(AddPresetBase, bpy.types.Operator):
 class BFU_MT_ApplyGlobalPropertiesPresets(bpy.types.Menu):
     bl_label = 'Apply Preset'
     preset_subdir = object_preset_subdir
-
-    def draw(self, context: bpy.types.Context):
-        layout = self.layout
-        if layout:
-            preset_paths = bpy.utils.preset_paths(self.preset_subdir)
-            found = False
-            for preset_dir in preset_paths:
-                preset_dir_path = Path(preset_dir)
-                if preset_dir_path.is_dir():
-                    for f in sorted(preset_dir_path.iterdir()):
-                        if not f.suffix == '.py':
-                            continue
-                        found = True
-                        filepath = str(f)
-                        name = f.stem
-                        op = layout.operator(
-                            'wm.store_globalproperties_preset',
-                            text=name,
-                        )
-                        op.filepath = filepath
-            if not found:
-                layout.label(text="No presets found. Use '+' to save one first.")
+    preset_operator = 'wm.store_globalproperties_preset'
+    preset_extensions = {'.py'}
+    draw = bpy.types.Menu.draw_preset  # type: ignore
 
 
 class BFU_OT_StoreGlobalPropertiesPreset(bpy.types.Operator):
@@ -170,34 +151,37 @@ class BFU_OT_ApplyGlobalPropertiesPresetToSelected(bpy.types.Operator):  # type:
             self.report({'ERROR'}, f'Preset file not found: {filepath}')
             return {'CANCELLED'}
 
-        # Read the preset file
-        with open(filepath, 'r', encoding='utf-8') as f:
-            content = f.read()
-
-        # Extract lines that assign obj. properties
-        obj_lines: List[str] = []
-        for line in content.split('\n'):
-            stripped = line.strip()
-            if stripped.startswith('obj.') and '=' in stripped and not stripped.startswith('obj ='):
-                obj_lines.append(stripped)
-
-        if not obj_lines:
-            self.report({'WARNING'}, 'No object properties found in preset')
+        selected_objects = list(context.selected_objects or [])
+        if not selected_objects:
             return {'CANCELLED'}
 
-        if context.selected_objects:
-            applied_count = 0
-            for obj in context.selected_objects:
-                namespace_defines: Dict[str, Any] = {'obj': obj, 'bpy': bpy}
-                for line in obj_lines:
-                    try:
-                        exec(line, namespace_defines)
-                    except Exception as e:
-                        self.report({'WARNING'}, f'Failed to set property on {obj.name}: {e}')
-                applied_count += 1
+        active_before = context.view_layer.objects.active
+        menu_idname = getattr(BFU_MT_ObjectGlobalPropertiesPresets, 'bl_idname', 'BFU_MT_ObjectGlobalPropertiesPresets')
 
-            preset_name = Path(filepath).stem
-            self.report({'INFO'}, f'Applied preset "{preset_name}" to {applied_count} object(s)')
+        applied_count = 0
+        try:
+            for obj in selected_objects:
+                context.view_layer.objects.active = obj
+                result = bpy.ops.script.execute_preset(
+                    filepath=filepath,
+                    menu_idname=menu_idname,
+                )
+                if 'FINISHED' in result:
+                    applied_count += 1
+                else:
+                    self.report({'WARNING'}, f'Preset application did not finish for {obj.name}')
+        except Exception as e:
+            self.report({'ERROR'}, f'Failed to apply preset: {e}')
+            return {'CANCELLED'}
+        finally:
+            context.view_layer.objects.active = active_before
+
+        if applied_count == 0:
+            self.report({'WARNING'}, 'Preset was not applied to any selected object')
+            return {'CANCELLED'}
+
+        preset_name = Path(filepath).stem
+        self.report({'INFO'}, f'Applied preset "{preset_name}" to {applied_count} object(s)')
         return {'FINISHED'}
 
 # -------------------------------------------------------------------
