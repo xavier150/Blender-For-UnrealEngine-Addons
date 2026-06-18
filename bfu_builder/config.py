@@ -30,7 +30,7 @@ is_linux = platform.system() == "Linux"
 
 if is_linux:
     # Linux paths
-    add_blender_version((5, 1, 0), Path(linux_blender_install_path / "blender-5.1.0-linux-x64/blender"))
+    add_blender_version((5, 1, 2), Path(linux_blender_install_path / "blender-5.1.2-linux-x64/blender"))
     add_blender_version((5, 0, 1), Path(linux_blender_install_path / "blender-5.0.1-linux-x64/blender"))
     add_blender_version((4, 5, 1), Path(linux_blender_install_path / "blender-4.5.1-linux-x64/blender"))
     add_blender_version((4, 4, 3), Path(linux_blender_install_path / "blender-4.4.3-linux-x64/blender"))
