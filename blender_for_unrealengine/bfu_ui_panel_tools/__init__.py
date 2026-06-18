@@ -17,6 +17,7 @@ from .. import bfu_socket
 from .. import bfu_uv_map
 from .. import bfu_light_map
 from .. import bfu_object
+from .. import bfu_presets
 
 class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
     # Tool panel
@@ -54,6 +55,8 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         bfu_uv_map.bfu_uv_map_ui.draw_tools_ui(layout, context)
         events.stop_last_and_start_new_event("Draw Light Map Tools")
         bfu_light_map.bfu_light_map_ui.draw_tools_ui(layout, context)
+        events.stop_last_and_start_new_event("Draw Presets Tools")
+        bfu_presets.bfu_presets_ui.draw_tools_ui(layout, context)
         events.stop_last_event()
 
         events.stop_last_event()
