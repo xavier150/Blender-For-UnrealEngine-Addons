@@ -10,7 +10,7 @@
 
 import bpy
 
-from .. import bbpl
+from ... import bbpl
 
 
 def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):

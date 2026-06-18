@@ -65,6 +65,7 @@ try:
     from . import bfu_assets_references
     from . import bfu_custom_property
     from . import bfu_addon_parts
+    from . import bfu_presets
     from . import bfu_ui_panel_object
     from . import bfu_ui_panel_tools
     from . import bfu_ui_panel_export
@@ -73,7 +74,6 @@ try:
     from . import bfu_export_process
     from . import bfu_addon_prefs
     from . import bfu_export_logs
-    from . import bfu_presets
     from . import bfu_ui
     from . import bfu_export_text_files
     from . import bfu_basics
@@ -164,6 +164,8 @@ try:
         importlib.reload(bfu_custom_property)
     if "bfu_addon_parts" in locals():
         importlib.reload(bfu_addon_parts)
+    if "bfu_presets" in locals():
+        importlib.reload(bfu_presets)
     if "bfu_ui_panel_object" in locals():
         importlib.reload(bfu_ui_panel_object)
     if "bfu_ui_panel_tools" in locals():
@@ -180,8 +182,6 @@ try:
         importlib.reload(bfu_addon_prefs)
     if "bfu_export_logs" in locals():
         importlib.reload(bfu_export_logs)
-    if "bfu_presets" in locals():
-        importlib.reload(bfu_presets)
     if "bfu_ui" in locals():
         importlib.reload(bfu_ui)
     if "bfu_export_text_files" in locals():
@@ -248,6 +248,7 @@ try:
             bfu_nanite.register()
             bfu_assets_references.register()
             bfu_custom_property.register()
+            bfu_presets.register()
             bfu_ui_panel_object.register()
             bfu_ui_panel_tools.register()
             bfu_ui_panel_export.register()
@@ -259,7 +260,6 @@ try:
             bfu_export_logs.register()
             bfu_ui.register()
             bfu_backward_compatibility.register()
-            bfu_presets.register()
             bfu_cached_assets.register()        
             bfu_cached_action_assets.register()
 
@@ -275,7 +275,6 @@ try:
             # Unregister in reverse order of register()
             bfu_cached_action_assets.unregister()
             bfu_cached_assets.unregister()
-            bfu_presets.unregister()
             bfu_backward_compatibility.unregister()
             bfu_ui.unregister()
             bfu_export_logs.unregister()
@@ -287,6 +286,7 @@ try:
             bfu_ui_panel_export.unregister()
             bfu_ui_panel_tools.unregister()
             bfu_ui_panel_object.unregister()
+            bfu_presets.unregister()
             bfu_custom_property.unregister()
             bfu_assets_references.unregister()
             bfu_nanite.unregister()

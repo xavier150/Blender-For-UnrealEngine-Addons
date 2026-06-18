@@ -9,7 +9,7 @@
 
 import bpy
 
-from .. import bbpl
+from ... import bbpl
 
 
 def get_tools_presets_properties_expanded(scene: bpy.types.Scene) -> bool:

@@ -11,19 +11,16 @@ import importlib
 
 import bpy
 
-from . import bfu_presets_props
-from . import bfu_presets_operator
-from . import bfu_presets_ui
-from . import bfu_presets_utils
+from . import bfu_base_presets
+from . import bfu_object_presets
+from . import bfu_export_presets
 
-if "bfu_presets_props" in locals():
-    importlib.reload(bfu_presets_props)
-if "bfu_presets_operator" in locals():
-    importlib.reload(bfu_presets_operator)
-if "bfu_presets_ui" in locals():
-    importlib.reload(bfu_presets_ui)
-if "bfu_presets_utils" in locals():
-    importlib.reload(bfu_presets_utils)
+if "bfu_base_presets" in locals():
+    importlib.reload(bfu_base_presets)
+if "bfu_object_presets" in locals():
+    importlib.reload(bfu_object_presets)
+if "bfu_export_presets" in locals():
+    importlib.reload(bfu_export_presets)
 
 classes = (
 )
@@ -33,12 +30,14 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bfu_presets_props.register()
-    bfu_presets_operator.register()
+    bfu_base_presets.register()
+    bfu_object_presets.register()
+    bfu_export_presets.register()
 
 def unregister():
-    bfu_presets_operator.unregister()
-    bfu_presets_props.unregister()
+    bfu_export_presets.unregister()
+    bfu_object_presets.unregister()
+    bfu_base_presets.unregister()
 
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)

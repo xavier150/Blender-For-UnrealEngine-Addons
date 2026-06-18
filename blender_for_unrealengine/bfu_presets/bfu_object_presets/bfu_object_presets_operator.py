@@ -7,14 +7,8 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import importlib
 
 import bpy
-
-from . import bfu_ui_panel_tools_class
-
-if "bfu_ui_panel_tools_class" in locals():
-    importlib.reload(bfu_ui_panel_tools_class)
 
 
 # -------------------------------------------------------------------
@@ -29,12 +23,7 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bfu_ui_panel_tools_class.register()
-
-
 def unregister():
-
-    bfu_ui_panel_tools_class.unregister()
-
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
+
