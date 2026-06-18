@@ -7,7 +7,6 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-
 from typing import List
 
 import bpy
@@ -25,10 +24,11 @@ def get_export_global_preset_propertys() -> List[str]:
     preset_values += bfu_export_process.bfu_export_process_props.get_preset_values()
     return preset_values
 
+export_preset_subdir = 'blender-for-unrealengine/nomenclature-presets'
 
 class BFU_MT_NomenclaturePresets(bpy.types.Menu):
     bl_label = 'Nomenclature Presets'
-    preset_subdir = 'blender-for-unrealengine/nomenclature-presets'
+    preset_subdir = export_preset_subdir
     preset_operator = 'script.execute_preset'
     draw = bpy.types.Menu.draw_preset  # type: ignore
 
@@ -43,6 +43,7 @@ class BFU_OT_AddNomenclaturePreset(AddPresetBase, bpy.types.Operator):  # type: 
     # Common variable used for all preset values
     preset_defines = [
                         'obj = bpy.context.object',
+                        'col = bpy.context.collection',
                         'scene = bpy.context.scene'
                         ]
 
@@ -50,7 +51,9 @@ class BFU_OT_AddNomenclaturePreset(AddPresetBase, bpy.types.Operator):  # type: 
     preset_values = get_export_global_preset_propertys()
 
     # Directory to store the presets
-    preset_subdir = 'blender-for-unrealengine/nomenclature-presets'
+    preset_subdir = export_preset_subdir
+
+
 
 # -------------------------------------------------------------------
 #   Register & Unregister

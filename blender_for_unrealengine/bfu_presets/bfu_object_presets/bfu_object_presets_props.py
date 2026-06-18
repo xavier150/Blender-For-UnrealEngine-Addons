@@ -15,6 +15,8 @@ from ... import bbpl
 def get_tools_presets_properties_expanded(scene: bpy.types.Scene) -> bool:
     return scene.bfu_tools_presets_properties_expanded.is_expanded()  # type: ignore
 
+def get_selected_global_preset_path(wm: bpy.types.WindowManager) -> str:
+    return getattr(wm, "bfu_selected_global_preset_path", "")
 
 
 # -------------------------------------------------------------------
@@ -30,10 +32,15 @@ def register():
         bpy.utils.register_class(cls)
 
     bpy.types.Scene.bfu_tools_presets_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Presets")  # type: ignore[attr-defined]
-
+    bpy.types.WindowManager.bfu_selected_global_preset_path = bpy.props.StringProperty(  # type: ignore[attr-defined]
+        name="Global Preset Path",
+        description="Internal: stores the selected preset filepath",
+        default="",
+    )
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
     del bpy.types.Scene.bfu_tools_presets_properties_expanded  # type: ignore[attr-defined]
+    del bpy.types.WindowManager.bfu_selected_global_preset_path  # type: ignore[attr-defined]
