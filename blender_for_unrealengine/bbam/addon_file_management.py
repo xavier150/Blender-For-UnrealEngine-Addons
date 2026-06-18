@@ -172,7 +172,7 @@ def zip_addon_folder(
         if result.returncode == 0:
             created_filename = blender_exec.get_build_file(result)
             if created_filename:
-                print(f"EXTENTION_COMMAND created successfully at {created_filename}")
+                print(f"EXTENSION_COMMAND created successfully at {created_filename}")
                 return created_filename
             else:
                 print("Error: No created filename found in the result of the extension command.")

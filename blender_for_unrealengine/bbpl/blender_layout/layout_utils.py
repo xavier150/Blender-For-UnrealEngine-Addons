@@ -13,7 +13,7 @@ from typing import Union, Optional
 def get_property_name_from_property_group(property_group: bpy.types.PropertyGroup, property_group_instance: type) -> str:
     # Attempts to retrieve the property name from a given PropertyGroup instance
     # by inspecting its owner and matching pointers.
-    # I not found better way to get the property name of a property group...
+    # I haven't found a better way to get the property name of a property group...
     # WTF Blender ?
 
     # For Blender 3.0 and newer

@@ -14,7 +14,7 @@ import importlib.util
 
 # ---------------------------------------------------------------
 #  This script is used to install the BBAM addon from Blender.
-#  See 'exemple_file.py' for running this script from Blender
+#  See 'example_file.py' for running this script from Blender
 # ----------------------------------------------------------------
 
 parser = argparse.ArgumentParser(description="Installer BBAM depuis Blender")

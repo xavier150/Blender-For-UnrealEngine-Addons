@@ -191,12 +191,12 @@ class BBPL_OT_TemplateButtonBase(bpy.types.Operator):
 # ----------------- Init Template button Class Functions ----------------
 
 def create_template_button_base_class():
-    # Create an custom class ussing addon name for avoid name collision.
+    # Create a custom class using addon name to avoid name collision.
     BBPL_OT_TemplateButtonBase.__name__ = utils.get_template_button_class_name("base")
     return BBPL_OT_TemplateButtonBase
 
 def create_template_button_duplicate_class(TemplateButtonBase):  # type: ignore
-    # Create an custom class ussing addon name for avoid name collision.
+    # Create a custom class using addon name to avoid name collision.
 
     class BBPL_OT_TemplateButtonDuplicate(TemplateButtonBase):  # type: ignore
         bl_idname = utils.get_template_button_idname("duplicate")
@@ -216,7 +216,7 @@ def create_template_button_duplicate_class(TemplateButtonBase):  # type: ignore
     return BBPL_OT_TemplateButtonDuplicate
 
 def create_template_button_add_class(TemplateButtonBase):  # type: ignore
-    # Create an custom class ussing addon name for avoid name collision.
+    # Create a custom class using addon name to avoid name collision.
 
     class BBPL_OT_TemplateButtonAdd(TemplateButtonBase):  # type: ignore
         bl_idname = utils.get_template_button_idname("add")
@@ -234,12 +234,12 @@ def create_template_button_add_class(TemplateButtonBase):  # type: ignore
     return BBPL_OT_TemplateButtonAdd
 
 def create_template_button_remove_class(TemplateButtonBase):  # type: ignore
-    # Create an custom class ussing addon name for avoid name collision.
+    # Create a custom class using addon name to avoid name collision.
 
     class BBPL_OT_TemplateButtonRemove(TemplateButtonBase):  # type: ignore
 
         bl_idname = utils.get_template_button_idname("remove")
-        bl_description = "remove item."
+        bl_description = "Remove item."
 
         def invoke(self, context, event):  # type: ignore
             template = get_template_from_button(self)  # type: ignore
@@ -253,7 +253,7 @@ def create_template_button_remove_class(TemplateButtonBase):  # type: ignore
     return BBPL_OT_TemplateButtonRemove
 
 def create_template_button_moveup_class(TemplateButtonBase):  # type: ignore
-    # Create an custom class ussing addon name for avoid name collision.
+    # Create a custom class using addon name to avoid name collision.
 
     class BBPL_OT_TemplateButtonMoveUp(TemplateButtonBase):  # type: ignore
         bl_idname = utils.get_template_button_idname("moveup")

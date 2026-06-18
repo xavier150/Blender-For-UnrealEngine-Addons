@@ -32,7 +32,7 @@ def get_mirror_arrays() -> Tuple[List[str], List[str]]:
     return source_suffixes, mirror_suffixes
 
 
-def contain_laterality_suffix(string: str) -> bool:
+def contains_laterality_suffix(string: str) -> bool:
     source_suffixes, mirror_suffixes = get_mirror_arrays()
     return any(string.endswith(suffix) for suffix in source_suffixes + mirror_suffixes)
 

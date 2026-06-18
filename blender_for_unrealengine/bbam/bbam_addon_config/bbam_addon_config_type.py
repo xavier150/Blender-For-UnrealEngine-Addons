@@ -126,14 +126,14 @@ class BBAM_AddonManifest:
 
 class BBAM_GenerateMethod(Enum):
     AUTO_DETECT = "AUTO_DETECT"
-    EXTENTION_COMMAND = "EXTENTION_COMMAND"
+    EXTENSION_COMMAND = "EXTENSION_COMMAND"
     SIMPLE_ZIP = "SIMPLE_ZIP"
 
     def get_as_string(self) -> str:
         if self == BBAM_GenerateMethod.AUTO_DETECT:
             return "AUTO_DETECT"
-        elif self == BBAM_GenerateMethod.EXTENTION_COMMAND:
-            return "EXTENTION_COMMAND"
+        elif self == BBAM_GenerateMethod.EXTENSION_COMMAND:
+            return "EXTENSION_COMMAND"
         elif self == BBAM_GenerateMethod.SIMPLE_ZIP:
             return "SIMPLE_ZIP"
         else:
@@ -143,8 +143,8 @@ class BBAM_GenerateMethod(Enum):
     def get_from_string(value: str) -> 'BBAM_GenerateMethod':
         if value == "AUTO_DETECT":
             return BBAM_GenerateMethod.AUTO_DETECT
-        elif value == "EXTENTION_COMMAND":
-            return BBAM_GenerateMethod.EXTENTION_COMMAND
+        elif value == "EXTENSION_COMMAND":
+            return BBAM_GenerateMethod.EXTENSION_COMMAND
         elif value == "SIMPLE_ZIP":
             return BBAM_GenerateMethod.SIMPLE_ZIP
         else:
@@ -179,7 +179,7 @@ class BBAM_AddonBuild:
                 print(f"Error: '{key}' key not found in the provided data.")
                 return False
             
-        # Depercated check
+        # Deprecated check
         if "generate_method" in data:
             print("Warning: 'generate_method' key is deprecated. BBAM now automatically detects the generate method. You can use 'forced_generate_method' instead if you want to force a specific method.")
 

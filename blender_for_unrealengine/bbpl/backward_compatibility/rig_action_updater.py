@@ -133,5 +133,5 @@ class RigActionUpdater:
         Returns:
             None
         """
-        print(f'{self.update_fcurve} fcurve data_path have been updated.')
-        print(f'{self.remove_fcurve} fcurve data_path have been removed.')
+        print(f'{self.update_fcurve} fcurve data_paths have been updated.')
+        print(f'{self.remove_fcurve} fcurve data_paths have been removed.')

@@ -97,7 +97,7 @@ def apply_auto_rig_parent(
     Optionally, specify a white list or black list of bones to control the deform flag.
     """
 
-    save_defom = save_deform_bones(armature)
+    save_deform = save_deform_bones(armature)
 
     if len(white_list_bones) > 0:
         set_all_bones_deforms(armature, False)
@@ -127,4 +127,4 @@ def apply_auto_rig_parent(
         bpy.ops.object.parent_set(override_context, type=parent_type)  # type: ignore
 
 
-    reset_deform_bones(armature, save_defom)
+    reset_deform_bones(armature, save_deform)

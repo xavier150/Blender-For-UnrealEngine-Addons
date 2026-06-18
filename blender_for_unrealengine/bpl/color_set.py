@@ -37,7 +37,7 @@ class Colors:
     LIGHT_CYAN = "\033[1;36m"
     LIGHT_WHITE = "\033[1;37m"
 
-    #Style
+    # Style
     BOLD = "\033[1m"
     FAINT = "\033[2m"
     ITALIC = "\033[3m"

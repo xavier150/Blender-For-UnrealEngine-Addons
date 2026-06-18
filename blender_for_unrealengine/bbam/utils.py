@@ -119,4 +119,4 @@ def get_generate_using_extension_command(generate_method: BBAM_GenerateMethod, b
     if generate_method == BBAM_GenerateMethod.AUTO_DETECT:
         return blender_version_min >= [4, 2, 0]
     else:
-        return (generate_method == BBAM_GenerateMethod.EXTENTION_COMMAND)
+        return (generate_method == BBAM_GenerateMethod.EXTENSION_COMMAND)

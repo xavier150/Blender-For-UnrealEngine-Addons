@@ -38,7 +38,7 @@ class CounterTimer():
 
     def get_str_time(self) -> str:
         """
-        Get the elapsed str time since the timer started.
+        Get the elapsed time as a string since the timer started.
 
         Returns:
             str: Elapsed time formatted as a string.
