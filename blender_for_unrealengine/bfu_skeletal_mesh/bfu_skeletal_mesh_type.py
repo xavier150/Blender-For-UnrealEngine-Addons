@@ -8,15 +8,16 @@
 # ----------------------------------------------
 
 from pathlib import Path
-from typing import List, Any, Dict, Optional
+from typing import List, Any, Dict, Optional, TypeGuard
+
 import bpy
-from . import bfu_export_skeletal_mesh_package
-from . import bfu_export_procedure
+
 from .. import bfu_assets_manager
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetType, AssetToExport, AssetDataSearchMode, BFU_ObjectAssetClass
 from .. import bfu_basics
 from .. import bbpl
 from .. import bfu_modular_skeletal_mesh
+from ..bfu_modular_skeletal_mesh.bfu_modular_skeletal_mesh_type import BFU_UI_ModularSkeletalSpecifiedPartsMeshItem
 from .. import bfu_socket
 from .. import bfu_light_map
 from .. import bfu_nanite
@@ -27,6 +28,8 @@ from ..bfu_simple_file_type_enum import BFU_FileTypeEnum
 from .. import bfu_base_object
 from .. import bfu_export_filter
 from ..bfu_export_filter.bfu_export_filter_props import BFU_ExportSelectionFilterEnum
+from . import bfu_export_skeletal_mesh_package
+from . import bfu_export_procedure
 
 
 
@@ -34,6 +37,13 @@ class BFU_SkeletalMesh(BFU_ObjectAssetClass):
     def __init__(self):
         super().__init__()
         self.use_materials = True
+
+    @staticmethod
+    def _is_specified_parts_mesh_item(details: Any) -> TypeGuard[BFU_UI_ModularSkeletalSpecifiedPartsMeshItem]:
+        if isinstance(details, BFU_UI_ModularSkeletalSpecifiedPartsMeshItem):
+            return True
+        bl_rna = getattr(details, "bl_rna", None)
+        return getattr(bl_rna, "identifier", "") == "BFU_UI_ModularSkeletalSpecifiedPartsMeshItem"
 
 
 # ###################################################################
@@ -92,7 +102,7 @@ class BFU_SkeletalMesh(BFU_ObjectAssetClass):
                     without_extension=without_extension,
                 )
             
-        if isinstance(details, bfu_modular_skeletal_mesh.bfu_modular_skeletal_mesh_type.BFU_UI_ModularSkeletalSpecifiedPartsMeshItem):
+        if self._is_specified_parts_mesh_item(details):
             if bfu_modular_skeletal_mesh.bfu_modular_skeletal_mesh_utils.modular_mode_is_specified_parts(data):
                 asset_name = details.name
                 return super().get_package_file_name(
@@ -110,13 +120,19 @@ class BFU_SkeletalMesh(BFU_ObjectAssetClass):
         )
 
 
-    def get_asset_folder_path(self, data: bpy.types.Object, details: Any = None) -> Path:
+    def get_asset_folder_path(self, data: bpy.types.Object, details: Optional[BFU_UI_ModularSkeletalSpecifiedPartsMeshItem] = None) -> Path:
         # Add skeletal sub folder path
         if data.bfu_create_sub_folder_with_skeletal_mesh_name:  # type: ignore[attr-defined]
             sub_folder = bfu_basics.valid_file_name(data.name)
-            return Path(sub_folder) / super().get_asset_folder_path(data, details)
+            path = Path(sub_folder) / super().get_asset_folder_path(data, details)
+        else:
+            path = super().get_asset_folder_path(data, details)
 
-        return super().get_asset_folder_path(data, details)
+        if self._is_specified_parts_mesh_item(details):
+            if bfu_modular_skeletal_mesh.bfu_modular_skeletal_mesh_utils.modular_mode_is_specified_parts(data):
+                path /= Path(details.sub_folder)
+
+        return path
 
 
 # ###################################################################

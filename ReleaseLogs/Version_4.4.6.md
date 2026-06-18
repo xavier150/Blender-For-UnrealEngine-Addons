@@ -10,3 +10,4 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
 - Fixed: When Blender enum value matches not enum in a property the export can produce script fail.
     (Enum will now return a default value instead)
 - Fixed: When the export fails because of the internal exporter, the addon will detect it and indicate it in the console.
+- Fixed: Modular Skeleton Export don't use the sub folder in the export path.

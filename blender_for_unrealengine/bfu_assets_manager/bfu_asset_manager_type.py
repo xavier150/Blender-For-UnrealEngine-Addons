@@ -438,13 +438,13 @@ class BFU_BaseAssetClass(ABC):
 # ####################################################################
 
     def set_package_file(self, package: AssetPackage, data: Any, details: Any) -> None:
-        dirpath = self.get_package_export_directory_path(data, absolute=True)
+        dirpath = self.get_package_export_directory_path(data, details, absolute=True)
         file_name = self.get_package_file_name(data, details)
         file_type = self.get_package_file_type(data, details)
         package.set_file(dirpath, file_name, file_type)
 
     def set_additional_data_file(self, additional_data: AdditionalAssetData, data: Any, details: Any) -> None:
-        dirpath = self.get_package_export_directory_path(data, absolute=True)
+        dirpath = self.get_package_export_directory_path(data, details, absolute=True)
         file_name = self.get_package_file_name(data, details, without_extension=True) + "_additional_data.json"
         additional_data.set_file(dirpath, file_name)
 

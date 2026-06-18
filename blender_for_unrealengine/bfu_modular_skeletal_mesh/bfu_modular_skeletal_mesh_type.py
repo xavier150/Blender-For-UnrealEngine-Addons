@@ -17,38 +17,40 @@ BBPL_UL_TemplateItemDraw = bbpl.blender_layout.layout_template_list.types.create
 BBPL_UI_TemplateList = bbpl.blender_layout.layout_template_list.types.create_template_list_class(BBPL_UI_TemplateItem, BBPL_UL_TemplateItemDraw)
 
 class BFU_UI_ModularSkeletalSpecifiedPartsTargetItem(BBPL_UI_TemplateItem): # Item class (bpy.types.PropertyGroup)
-    enabled: bpy.props.BoolProperty(
-        name="Use",
-        default=True
-        )
 
-    target_type: bpy.props.EnumProperty(
-        name="Target Type",
-        description="Choose the type of target (Object or Collection)",
-        items=[
-            ('OBJECT', 'Object', 'Use an Object as the target'),
-            ('COLLECTION', 'Collection', 'Use a Collection as the target'),
-        ],
-        default='OBJECT',
-    )
-
-    obj: bpy.props.PointerProperty(
-        name="Obj target",
-        description="Target object for modular skeletal mesh.",
-        type=bpy.types.Object,
-    )
-
-    collection: bpy.props.PointerProperty(
-        name="Collection target",
-        description="Target collection for modular skeletal mesh.",
-        type=bpy.types.Collection,
-    )
 
     if TYPE_CHECKING:
         enabled: bool
         target_type: str
         obj: bpy.types.Object
         collection: bpy.types.Collection
+    else:
+        enabled: bpy.props.BoolProperty(
+            name="Use",
+            default=True
+            )
+
+        target_type: bpy.props.EnumProperty(
+            name="Target Type",
+            description="Choose the type of target (Object or Collection)",
+            items=[
+                ('OBJECT', 'Object', 'Use an Object as the target'),
+                ('COLLECTION', 'Collection', 'Use a Collection as the target'),
+            ],
+            default='OBJECT',
+        )
+
+        obj: bpy.props.PointerProperty(
+            name="Obj target",
+            description="Target object for modular skeletal mesh.",
+            type=bpy.types.Object,
+        )
+
+        collection: bpy.props.PointerProperty(
+            name="Collection target",
+            description="Target collection for modular skeletal mesh.",
+            type=bpy.types.Collection,
+        )
 
 class BFU_UL_ModularSkeletalSpecifiedPartsTargetItemDraw(BBPL_UL_TemplateItemDraw): # Draw Item class (bpy.types.UIList)
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
@@ -88,32 +90,34 @@ class BFU_UI_ModularSkeletalSpecifiedPartsTargetList(BBPL_UI_TemplateList): # Dr
             return self.template_collection
 
 class BFU_UI_ModularSkeletalSpecifiedPartsMeshItem(BBPL_UI_TemplateItem): # Item class (bpy.types.PropertyGroup)
-    enabled: bpy.props.BoolProperty(
-        name="Use",
-        default=True
-        )
 
-    name: bpy.props.StringProperty(
-        name="Name",
-        description="Bone group name.",
-        default="MyGroupName",
-        )
-    
-    sub_folder: bpy.props.StringProperty(
-        name="Sub Folder",
-        description="sub_folder_to export the mesh",
-        default="",
-        )
-    
-    skeletal_parts: bpy.props.PointerProperty(
-       type=BFU_UI_ModularSkeletalSpecifiedPartsTargetList
-       )
     
     if TYPE_CHECKING:
         enabled: bool
         name: str
         sub_folder: str
         skeletal_parts: BFU_UI_ModularSkeletalSpecifiedPartsTargetList
+    else:
+        enabled: bpy.props.BoolProperty(
+            name="Use",
+            default=True
+            )
+
+        name: bpy.props.StringProperty(
+            name="Name",
+            description="Bone group name.",
+            default="MyGroupName",
+            )
+        
+        sub_folder: bpy.props.StringProperty(
+            name="Sub Folder",
+            description="sub_folder_to export the mesh",
+            default="",
+            )
+        
+        skeletal_parts: bpy.props.PointerProperty(
+            type=BFU_UI_ModularSkeletalSpecifiedPartsTargetList
+        )
 
 class BFU_UL_ModularSkeletalSpecifiedPartsMeshItemDraw(BBPL_UL_TemplateItemDraw): # Draw Item class (bpy.types.UIList)
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
