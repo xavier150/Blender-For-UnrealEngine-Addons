@@ -7,8 +7,9 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 import importlib
+
+import bpy
 
 from . import bfu_presets_props
 from . import bfu_presets_operator
@@ -36,8 +37,8 @@ def register():
     bfu_presets_operator.register()
 
 def unregister():
-    for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
-
     bfu_presets_operator.unregister()
     bfu_presets_props.unregister()
+
+    for cls in reversed(classes):
+        bpy.utils.unregister_class(cls)
