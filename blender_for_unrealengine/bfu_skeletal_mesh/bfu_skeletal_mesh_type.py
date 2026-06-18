@@ -8,7 +8,15 @@
 # ----------------------------------------------
 
 from pathlib import Path
-from typing import List, Any, Dict, Optional, TypeGuard
+from sys import version_info
+from typing import TYPE_CHECKING, List, Any, Dict, Optional
+if TYPE_CHECKING or version_info >= (3, 10):
+    from typing import TypeGuard
+else:
+    class _FakeTypeGuard:
+        def __class_getitem__(cls, item):
+            return bool
+    TypeGuard = _FakeTypeGuard
 
 import bpy
 

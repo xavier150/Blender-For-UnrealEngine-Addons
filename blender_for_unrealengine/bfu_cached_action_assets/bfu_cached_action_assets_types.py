@@ -7,11 +7,9 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-
-import bpy
+from sys import version_info
 from typing import List, Tuple, Optional, TYPE_CHECKING
-if TYPE_CHECKING or bpy.app.version >= (3, 1, 0):
-    # TypeGuard was added in Python 3.10 (In Blender 3.1)
+if TYPE_CHECKING or version_info >= (3, 10):
     from typing import TypeGuard
 else:
     class _FakeTypeGuard:
@@ -19,6 +17,7 @@ else:
             return bool
     TypeGuard = _FakeTypeGuard
 
+import bpy
 
 from .. import bfu_export_filter
 from .. import bfu_anim_action
