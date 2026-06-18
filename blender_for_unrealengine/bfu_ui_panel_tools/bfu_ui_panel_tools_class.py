@@ -9,6 +9,7 @@
 
 
 import bpy
+
 from .. import bfu_debug_settings
 from .. import bfu_camera
 from .. import bfu_spline
@@ -56,7 +57,7 @@ class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):
         events.stop_last_and_start_new_event("Draw Light Map Tools")
         bfu_light_map.bfu_light_map_ui.draw_tools_ui(layout, context)
         events.stop_last_and_start_new_event("Draw Presets Tools")
-        bfu_object_presets.bfu_object_presets_ui.draw_tools_ui(layout, context)
+        bfu_object_presets.bfu_object_presets_ui.draw_object_presets_tools_ui(layout, context)
         events.stop_last_event()
 
         events.stop_last_event()

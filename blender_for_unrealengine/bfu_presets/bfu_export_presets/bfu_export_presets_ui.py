@@ -10,13 +10,8 @@
 
 import bpy
 
-from ... import bbpl
-
-
-def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
-    scene = context.scene
-    accordion = bbpl.blender_layout.layout_accordion.get_accordion(scene, "bfu_tools_presets_properties_expanded")
-    if accordion:
-        _, panel = accordion.draw(layout)
-        if panel:
-            panel.label(text="Presets @TODO")
+def draw_export_presets_export_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
+    row = layout.row(align=True)
+    row.menu('BFU_MT_NomenclaturePresets', text='Export Presets')
+    row.operator('object.add_nomenclature_preset', text='', icon='ADD')
+    row.operator('object.add_nomenclature_preset', text='', icon='REMOVE').remove_active = True  # type: ignore
