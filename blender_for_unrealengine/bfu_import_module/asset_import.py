@@ -549,7 +549,7 @@ def import_all_assets(assets_data: Dict[str, Any], show_finished_popup: bool = T
     import_log.append('Imported SkeletalMesh: '+str(len(SkeletalMesh_ImportedList)))
     import_log.append('Imported Alembic: '+str(len(Alembic_ImportedList)))
     import_log.append('Imported Animation: '+str(len(Animation_ImportedList)))
-    import_log.append('Import failled: '+str(len(import_fail_list)))
+    import_log.append('Import failed: '+str(len(import_fail_list)))
 
     for import_row in import_log:
         print(import_row)
