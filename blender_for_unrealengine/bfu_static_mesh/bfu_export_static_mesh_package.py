@@ -70,8 +70,8 @@ def export_as_static_mesh(
     # Select and duplicate objects for export (Export the duplicated objects)
     bbpl.utils.safe_mode_set('OBJECT')
     bbpl.utils.select_specific_object_list(objs[0], objs)
-    duplicate_data = bfu_export.bfu_export_utils.duplicate_select_for_export(bpy.context, False)
-    duplicate_data.set_duplicate_name_for_export()
+    duplicate_data = bfu_export.bfu_export_utils.DuplicateData()
+    duplicate_data.duplicate_select_for_export_with_rename_and_reparent(bpy.context, False)
 
     # Duplicated active that should be used for export.
     if bpy.context.active_object is None:

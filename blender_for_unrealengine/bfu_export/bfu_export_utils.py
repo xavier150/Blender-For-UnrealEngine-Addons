@@ -13,7 +13,7 @@ import math
 import mathutils
 from bpy_extras.io_utils import axis_conversion
 from pathlib import Path
-from typing import Optional, Dict, Any, List, TYPE_CHECKING
+from typing import Optional, Dict, Any, List, Tuple, Sequence
 from .. import bfu_export_text_files
 from .. import bfu_utils
 from .. import bbpl
@@ -131,18 +131,23 @@ class DuplicateData():
         self.data_to_remove: List[DelegateOldData] = []
         self.origin_select: Optional[bbpl.save_data.select_save.UserSelectSave] = None
         self.duplicate_select: Optional[bbpl.save_data.select_save.UserSelectSave] = None
+        self.origin_reparenting: List[Tuple[str, str]] = []
 
     def duplicate_select_for_export(self, context: bpy.types.Context, reset_simplify_after_duplicate: bool = True):
+        if context.selected_objects is None or len(context.selected_objects) == 0:
+            raise Exception("No object selected for duplicate.")
+        
         duplicate_time_log = bfu_export_logs.bfu_process_time_logs_utils.start_time_log(f"Duplicate asset selection")
 
-        # Enable simplify for faster duplicate (Don't )
+        # Enable simplify for faster duplicate
         saved_simplify: SaveUserRenderSimplify = SaveUserRenderSimplify()
         saved_simplify.simplify_scene()
 
         log_4 = bfu_export_logs.bfu_process_time_logs_utils.start_time_log(f"Prepare duplicate")
         scene = context.scene
 
-        self.set_origin_select()
+        self.save_origin_select()
+        # Save object original data as custom property for reset after export.
         if self.origin_select:
             for user_selected in self.origin_select.user_selecteds:
                 if user_selected:
@@ -156,7 +161,24 @@ class DuplicateData():
         action_names: List[str] = []
         for action in bpy.data.actions:
             action_names.append(action.name)
+        log_4.end_time_log()
 
+        log_4 = bfu_export_logs.bfu_process_time_logs_utils.start_time_log(f"Prepare reparenting")
+        # Get selection hyerarchy to fix parenting issue after duplicate.
+        def get_object_best_parent_after_duplicate(obj: bpy.types.Object, valid_objects: Sequence[bpy.types.Object]) -> Optional[str]:
+            current_obj = obj
+            while current_obj.parent is not None:
+                if current_obj.parent in valid_objects:
+                    return current_obj.parent.name
+                current_obj = current_obj.parent
+            return None
+        
+        self.origin_reparenting = []
+        for obj in context.selected_objects:
+            result = get_object_best_parent_after_duplicate(obj, context.selected_objects)
+            if result is not None:
+                self.origin_reparenting.append((obj.name, result))
+        print(f"Reparenting list: {self.origin_reparenting}")
         log_4.end_time_log()
 
         log_4 = bfu_export_logs.bfu_process_time_logs_utils.start_time_log(f"Duplicate")
@@ -193,17 +215,17 @@ class DuplicateData():
         log_4.end_time_log()
 
         log_4 = bfu_export_logs.bfu_process_time_logs_utils.start_time_log(f"Update select")
-        self.set_duplicate_select()
+        self.save_duplicate_select()
         log_4.end_time_log()
 
         duplicate_time_log.end_time_log()
 
-    def set_origin_select(self):
+    def save_origin_select(self):
         select = bbpl.save_data.select_save.UserSelectSave()
         select.save_current_select()
         self.origin_select = select
 
-    def set_duplicate_select(self):
+    def save_duplicate_select(self):
         select = bbpl.save_data.select_save.UserSelectSave()
         select.save_current_select()
         self.duplicate_select = select
@@ -219,6 +241,14 @@ class DuplicateData():
             for user_selected in self.duplicate_select.user_selecteds:
                 user_selected.name = bfu_utils.get_obj_origin_name(user_selected)
 
+    def apply_duplicate_reparenting(self):
+        # Reparent duplicated objects to fix parenting issue after duplicate.
+        scene = bpy.context.scene 
+        for obj_name, parent_name in self.origin_reparenting:
+            if obj_name in scene.objects and parent_name in scene.objects:
+                duplicated_obj = scene.objects[obj_name]
+                duplicated_parent = scene.objects[parent_name]
+                duplicated_obj.parent = duplicated_parent
 
     def reset_duplicate_name_after_export(self):
         # Restore the original names of the objects after export.
@@ -228,11 +258,10 @@ class DuplicateData():
                 user_selected.name = bfu_utils.get_obj_origin_name(user_selected)
                 bfu_utils.clear_obj_origin_name_var(user_selected)
 
-
-def duplicate_select_for_export(context: bpy.types.Context, reset_simplify_after_duplicate: bool = True) -> DuplicateData:
-    duplicate_data = DuplicateData()
-    duplicate_data.duplicate_select_for_export(context, reset_simplify_after_duplicate)
-    return duplicate_data
+    def duplicate_select_for_export_with_rename_and_reparent(self, context: bpy.types.Context, reset_simplify_after_duplicate: bool = True):
+        self.duplicate_select_for_export(context, reset_simplify_after_duplicate)
+        self.set_duplicate_name_for_export()
+        self.apply_duplicate_reparenting()
 
 
 def apply_select_needed_modifiers_for_export():

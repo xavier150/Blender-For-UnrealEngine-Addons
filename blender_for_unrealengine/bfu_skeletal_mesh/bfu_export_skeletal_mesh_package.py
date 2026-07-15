@@ -83,8 +83,7 @@ def export_as_skeletal_mesh(
 
     duplicate_data = bfu_export.bfu_export_utils.DuplicateData()
     if not is_library:
-        duplicate_data.duplicate_select_for_export(bpy.context, False)
-        duplicate_data.set_duplicate_name_for_export()
+        duplicate_data.duplicate_select_for_export_with_rename_and_reparent(bpy.context, False)
 
     # Duplicated active that should be used for export.
     if bpy.context.active_object is None:
