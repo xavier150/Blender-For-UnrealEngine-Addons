@@ -34,7 +34,7 @@
     "builds": {
         "unrealengine_assets_exporter_5.0": {   
             "auto_install_range": [[5,0,0], "LATEST"],
-            "naming": "{Name}_{Version}-blender_5.0-5.1.zip",
+            "naming": "{Name}_{Version}-blender_5.0-5.2.zip",
             "module": "unrealengine_assets_exporter", 
             "pkg_id": "unrealengine_assets_exporter",
             "exclude_paths": [
