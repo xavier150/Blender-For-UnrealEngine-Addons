@@ -737,15 +737,15 @@ def apply_export_transform(obj: bpy.types.Object, use_type: str = "Object"):
     obj.matrix_world = new_matrix
     # Turn object to the center of the scene for export
     if rotate_to_zero:
-        mat_trans = mathutils.Matrix.Translation(new_matrix.to_translation())
+        mat_trans = mathutils.Matrix.Translation(new_matrix.to_translation()) # type: ignore
         mat_rot = mathutils.Matrix.Rotation(0, 4, 'X')
         new_matrix = mat_trans @ mat_rot
 
-    eul = obj.bfu_additional_rotation_for_export
-    loc = obj.bfu_additional_location_for_export
+    eul = bfu_adv_object.bfu_adv_obj_props.get_object_additional_rotation_for_export(obj)
+    loc = bfu_adv_object.bfu_adv_obj_props.get_object_additional_location_for_export(obj)
 
     mat_rot = eul.to_matrix()
-    mat_loc = mathutils.Matrix.Translation(loc)
+    mat_loc = mathutils.Matrix.Translation(loc) # type: ignore
     add_mattrix_rot = mat_loc @ mat_rot.to_4x4()
 
     obj.matrix_world = new_matrix @ add_mattrix_rot
@@ -904,6 +904,33 @@ class ActionCurveScale():
 
     def rescale_all_action_curves(self, bone_scale: float, scene_scale: float):
 
+        def rescale_location_fcurves(fcurves: List[bpy.types.FCurve]):
+
+            def rescale_fcurve(fcurve: bpy.types.FCurve, scale: float):
+                # Rescale fcurve keyframe points
+                for key in fcurve.keyframe_points:
+                    key.co[1] *= scale
+                    key.handle_left[1] *= scale
+                    key.handle_right[1] *= scale
+
+                # Rescale fcurve modifiers
+                for mod in fcurve.modifiers:
+                    if isinstance(mod, bpy.types.FModifierNoise):
+                        mod.strength *= scale
+
+            for fcurve in fcurves:
+                # Rescale scene location curves
+                if fcurve.data_path == "location":
+                    if self.print_debug:
+                            print(f"Rescale scene location: {fcurve.data_path}, scene_scale: {scene_scale}")
+                    rescale_fcurve(fcurve, scene_scale)
+
+                # Rescale bone location curves
+                elif fcurve.data_path.split(".")[-1] == "location":
+                    if self.print_debug:
+                        print(f"Rescale bone location: {fcurve.data_path}, bone_scale: {bone_scale}")
+                    rescale_fcurve(fcurve, bone_scale)
+
         if bpy.app.version >= (4, 4, 0):
             def rescale_all_action_curves_with_channelbag(bone_scale: float, scene_scale: float):
 
@@ -914,10 +941,12 @@ class ActionCurveScale():
                     
                     for layer in action.layers:
                         for strip in layer.strips:
-                            channelbag = strip.channelbag(slot)
-                            if channelbag:
-                                rescale_location_fcurves(channelbag.fcurves)
-                                return True
+                            if isinstance(strip, bpy.types.ActionKeyframeStrip):
+                                channelbag = strip.channelbag(slot)
+                                if channelbag:
+                                    # bpy_prop_collection to list of FCurve
+                                    rescale_location_fcurves(list(channelbag.fcurves))
+                                    return True
 
                 for action in bpy.data.actions:
                     if self.print_debug:
@@ -931,38 +960,11 @@ class ActionCurveScale():
 
             def rescale_all_action_curves_with_fcurves(bone_scale: float, scene_scale: float):
 
-                def rescale_location_fcurves(fcurves: List[bpy.types.FCurve]):
-
-                    def rescale_fcurve(fcurve: bpy.types.FCurve, scale: float):
-                        # Rescale fcurve keyframe points
-                        for key in fcurve.keyframe_points:
-                            key.co[1] *= scale
-                            key.handle_left[1] *= scale
-                            key.handle_right[1] *= scale
-
-                        # Rescale fcurve modifiers
-                        for mod in fcurve.modifiers:
-                            if mod.type == "NOISE":
-                                mod.strength *= scale
-
-                    for fcurve in fcurves:
-                        # Rescale scene location curves
-                        if fcurve.data_path == "location":
-                            if self.print_debug:
-                                    print(f"Rescale scene location: {fcurve.data_path}, scene_scale: {scene_scale}")
-                            rescale_fcurve(fcurve, scene_scale)
-
-                        # Rescale bone location curves
-                        elif fcurve.data_path.split(".")[-1] == "location":
-                            if self.print_debug:
-                                print(f"Rescale bone location: {fcurve.data_path}, bone_scale: {bone_scale}")
-                            rescale_fcurve(fcurve, bone_scale)
-
                 for action in bpy.data.actions:
                     if self.print_debug:
                         print(f"Rescale: {action.name} bone_scale: {bone_scale} scene_scale: {scene_scale}")
 
-                    rescale_location_fcurves(action.fcurves)
+                    rescale_location_fcurves(action.fcurves) # type: ignore
 
             rescale_all_action_curves_with_fcurves(bone_scale, scene_scale)
 

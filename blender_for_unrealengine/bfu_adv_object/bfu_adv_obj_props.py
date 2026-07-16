@@ -9,7 +9,10 @@
 
 
 from typing import List
+
 import bpy
+import mathutils
+
 from .. import bbpl
 
 
@@ -39,10 +42,10 @@ def get_object_move_to_center_for_export(obj: bpy.types.Object) -> bool:
 def get_object_rotate_to_zero_for_export(obj: bpy.types.Object) -> bool:
     return obj.bfu_rotate_to_zero_for_export  # type: ignore
 
-def get_object_additional_location_for_export(obj: bpy.types.Object) -> List[float]:
+def get_object_additional_location_for_export(obj: bpy.types.Object) -> mathutils.Vector:
     return obj.bfu_additional_location_for_export  # type: ignore
 
-def get_object_additional_rotation_for_export(obj: bpy.types.Object) -> List[float]:
+def get_object_additional_rotation_for_export(obj: bpy.types.Object) -> mathutils.Euler:
     return obj.bfu_additional_rotation_for_export  # type: ignore
 
 def get_object_export_global_scale(obj: bpy.types.Object) -> float:
