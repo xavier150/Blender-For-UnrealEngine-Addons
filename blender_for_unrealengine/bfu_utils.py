@@ -13,7 +13,7 @@ import string
 import fnmatch
 import math
 import os
-from typing import List, Tuple, Optional, TYPE_CHECKING, Any
+from typing import List, Tuple, Optional, TYPE_CHECKING, Any, Dict, Union
 from pathlib import Path
 
 import bpy
@@ -27,27 +27,6 @@ from . import bfu_addon_prefs
 from . import bpl
 
 
-class SavedBones():
-
-    def __init__(self, bone):
-        if bone:
-            self.name = bone.name
-            self.select = bone.select
-            self.hide = bone.hide
-
-
-class SavedViewLayerChildren():
-
-    def __init__(self, vlayer, childCol):
-        if childCol:
-            self.vlayer_name = vlayer.name
-            self.name = childCol.name
-            self.exclude = childCol.exclude
-            self.hide_viewport = childCol.hide_viewport
-            self.children = []
-
-            for children in childCol.children:
-                SavedViewLayerChildren(vlayer, children)
 
 
 class MarkerSequence():
@@ -79,8 +58,8 @@ class TimelineMarkerSequence():
             print("Scene has no timeline_markers.")
             return []
 
-        def get_first_marker(marker_list: List[bpy.types.TimelineMarker]) -> bpy.types.TimelineMarker:
-            best_marker: bpy.types.TimelineMarker
+        def get_first_marker(marker_list: List[bpy.types.TimelineMarker]) -> Optional[bpy.types.TimelineMarker]:
+            best_marker: Optional[bpy.types.TimelineMarker] = None
             best_marker_frame = 0
             init = False
 
@@ -104,8 +83,9 @@ class TimelineMarkerSequence():
         order_marker_list: List[bpy.types.TimelineMarker] = []
         while len(marker_list) != 0:
             first_marker = get_first_marker(marker_list)
-            order_marker_list.append(first_marker)
-            marker_list.remove(first_marker)
+            if first_marker:
+                order_marker_list.append(first_marker)
+                marker_list.remove(first_marker)
 
         marker_sequences: List[MarkerSequence] = []
 
@@ -164,7 +144,7 @@ def clean_join_select():
         if view_layer.objects.active is None:
             view_layer.objects.active = bpy.context.selected_objects[0]
 
-        if bpy.ops.object.convert.poll():
+        if bpy.ops.object.join.poll(): # type: ignore
             bpy.ops.object.join()
 
 
@@ -338,25 +318,30 @@ class ShapeKeysCurveScale():
 
     class DriverProxyData():
         def __init__(self, obj: bpy.types.Object, driver: bpy.types.FCurve):
-            self.obj = obj
-            self.driver = driver
-            self.keyframe_points = []
-            self.modifiers = []
-            for key in self.driver.keyframe_points:
+            self.obj: bpy.types.Object = obj
+            self.driver_curve: bpy.types.FCurve = driver
+            self.keyframe_points: List[ShapeKeysCurveScale.DriverProxyData.DriverKeyProxyData] = []
+            self.modifiers: List[ShapeKeysCurveScale.DriverProxyData.DriverModifierProxyData] = []
+
+            for key in self.driver_curve.keyframe_points:
                 self.keyframe_points.append(self.DriverKeyProxyData(key))
 
-            for mod in self.driver.modifiers:
+            for mod in self.driver_curve.modifiers:
                 self.modifiers.append(self.DriverModifierProxyData(mod))
 
         class DriverKeyProxyData():
-            def __init__(self, key):
+            def __init__(self, key: bpy.types.Keyframe):
                 self.co = key.co[1]
                 self.handle_left = key.handle_left[1]
                 self.handle_right = key.handle_right[1]
 
         class DriverModifierProxyData():
-            def __init__(self, modifier):
-                self.coefficients = modifier.coefficients
+            def __init__(self, modifier: bpy.types.FModifier):
+                self.coefficients: List[float] = []
+
+
+                if isinstance(modifier, bpy.types.FModifierGenerator):
+                    self.coefficients = list(modifier.coefficients) # type: ignore
 
     def rescale_for_unreal_engine(self):
         scale = 1/self.rescale_rig_factor
@@ -393,10 +378,8 @@ class ShapeKeysCurveScale():
 
     def shape_keys_driver_refs(self):
         drivers: List[Any] = []
-        obj_list = bpy.context.selected_objects
-
-        if self.export_as_proxy is False:
-            for obj in obj_list:
+        if self.export_as_proxy is False and bpy.context.selected_objects:
+            for obj in bpy.context.selected_objects:
                 if isinstance(obj.data, bpy.types.Mesh):
                     if obj.data.shape_keys is not None:
                         if obj.data.shape_keys.animation_data is not None:
@@ -420,34 +403,33 @@ class ShapeKeysCurveScale():
 
 class ModifiersDataScale():
 
-    def __init__(self, rescale_rig_factor, is_a_proxy=False):
+    def __init__(self, rescale_rig_factor: float, is_a_proxy: bool = False):
         self.export_as_proxy = is_a_proxy
         self.rescale_rig_factor = rescale_rig_factor  # rigRescaleFactor
-        self.modifiers = self.ModifiersRefs()  # Save driver data as proxy
-        self.saved_data = {}
+        self.modifiers: List[bpy.types.Modifier] = self.ModifiersRefs()  # Save driver data as proxy
+        self.saved_data: Dict[int, Any] = {}
 
 
     def rescale_for_unreal_engine(self):
         for x, mod in enumerate(self.modifiers):
-            if mod.type == "MIRROR":
+            if isinstance(mod, bpy.types.MirrorModifier):
                 self.saved_data[x] = mod.merge_threshold
                 mod.merge_threshold *= self.rescale_rig_factor
 
 
     def ResetScaleAfterExport(self):
         for x, mod in enumerate(self.modifiers):
-            if mod.type == "MIRROR":
+            if isinstance(mod, bpy.types.MirrorModifier):
                 mod.merge_threshold = self.saved_data[x]
 
-    def ModifiersRefs(self):
-        modifiers = []
-        obj_list = bpy.context.selected_objects
-        if self.export_as_proxy is False:
-            for obj in obj_list:
-                if obj.type == "MESH":
+    def ModifiersRefs(self) -> List[bpy.types.Modifier]:
+        modifier_refs: List[bpy.types.Modifier] = []
+        if self.export_as_proxy is False and bpy.context.selected_objects:
+            for obj in bpy.context.selected_objects:
+                if isinstance(obj.data, bpy.types.Mesh):
                     for mod in obj.modifiers:
-                        modifiers.append(mod)
-        return modifiers
+                        modifier_refs.append(mod)
+        return modifier_refs
 
 def lerp_quaternion(q1: mathutils.Quaternion, q2: mathutils.Quaternion, alpha: float) -> mathutils.Quaternion:
     # Manual LERP because Blender lacks direct Quaternion.lerp()
@@ -460,7 +442,7 @@ def lerp_quaternion(q1: mathutils.Quaternion, q2: mathutils.Quaternion, alpha: f
     result.normalize()
     return result
 
-def evaluate_camera_position(camera: bpy.types.Object, previous_euler: mathutils.Euler = mathutils.Euler()) -> Tuple[mathutils.Vector, List[float], mathutils.Vector]:
+def evaluate_camera_position(camera: bpy.types.Object, previous_euler: mathutils.Euler = mathutils.Euler()) -> Tuple[mathutils.Vector, List[float], mathutils.Vector]: # type: ignore
     pass
     # TODO
 
@@ -542,7 +524,7 @@ def get_export_as_proxy(obj: bpy.types.Object) -> bool:
     return False
 
 # @TODO: @Deprecated
-def get_export_proxy_child(obj: bpy.types.Object) -> bpy.types.Object:
+def get_export_proxy_child(obj: bpy.types.Object) -> Union[Optional[bpy.types.Object], bool]:
 
     if get_obj_proxy_child(obj):
         return get_obj_proxy_child(obj)
@@ -564,7 +546,7 @@ def SelectParentAndDesiredChilds(active: bpy.types.Object):
         print(f"The active object {active.name} not found in bpy.context.view_layer.objects!")
         return
 
-    new_select_list = []
+    new_select_list: List[bpy.types.Object] = []
     bpy.ops.object.select_all(action='DESELECT')
     for obj in get_export_desired_childs(active):
         if obj.name in bpy.context.view_layer.objects:
@@ -576,7 +558,7 @@ def SelectParentAndDesiredChilds(active: bpy.types.Object):
     # Select proxy at end to move a list end
     if get_export_as_proxy(active):
         proxy_child = get_export_proxy_child(active)
-        if proxy_child is not None:
+        if isinstance(proxy_child, bpy.types.Object):
             new_select_list.append(proxy_child)
 
     return bbpl.utils.select_specific_object_list(active, new_select_list)
@@ -588,7 +570,7 @@ def SelectParentAndSpecificChilds(active: bpy.types.Object, objects: List[bpy.ty
         print(f"The active object {active.name} not found in bpy.context.view_layer.objects!")
         return
 
-    new_select_list = []
+    new_select_list: List[bpy.types.Object] = []
     bpy.ops.object.select_all(action='DESELECT')
     for obj in objects:
         if obj.name in bpy.context.view_layer.objects:
@@ -599,7 +581,7 @@ def SelectParentAndSpecificChilds(active: bpy.types.Object, objects: List[bpy.ty
 
     if get_export_as_proxy(active):
         proxy_child = get_export_proxy_child(active)
-        if proxy_child is not None:
+        if isinstance(proxy_child, bpy.types.Object):
             new_select_list.append(proxy_child)
 
     return bbpl.utils.select_specific_object_list(active, new_select_list)
@@ -632,34 +614,34 @@ def GoToMeshEditMode():
 
 def correct_extreme_uv(step_scale: int = 2, move_to_absolute: bool = False):
     
-    def get_have_connected_loop(faceTarget):
+    def get_have_connected_loop(face_target: bmesh.types.BMFace) -> bool:
         # In bmesh faces
-        for loop in faceTarget.loops:
+        for loop in face_target.loops:
             uv = loop[uv_lay].uv
             for face in bm.faces:
                 if face.select:
-                    if faceTarget != face:
+                    if face_target != face:
                         for loop in face.loops:
                             if uv == loop[uv_lay].uv:
                                 return True
         return False
 
-    def select_recursive_uv_linked(uv_lay):
+    def select_recursive_uv_linked(uv_lay: bmesh.types.BMLayerItem[Any]):
 
-        AddedFaces = []
+        added_faces: List[bmesh.types.BMFace] = []
         for v in [v for v in bm.verts if v.select]:
             for f in v.link_faces:
                 if not f.select:
                     if get_have_connected_loop(f):
-                        AddedFaces.append(f)
+                        added_faces.append(f)
                         f.select = True
 
-        if len(AddedFaces) == 0:
-            return AddedFaces
+        if len(added_faces) == 0:
+            return added_faces
         else:
             for addedFace in select_recursive_uv_linked(uv_lay):
-                AddedFaces.append(addedFace)
-            return AddedFaces
+                added_faces.append(addedFace)
+            return added_faces
 
     def get_all_island(bm: bmesh.types.BMesh, uv_lay: bmesh.types.BMLayerItem[Any]) -> List[List[bmesh.types.BMFace]]:
         faces_to_cheak: List[bmesh.types.BMFace] = []
@@ -684,7 +666,7 @@ def correct_extreme_uv(step_scale: int = 2, move_to_absolute: bool = False):
 
         return island_list
 
-    def move_it_land_to_center(faces, uv_lay, min_distance, absolute):
+    def move_it_land_to_center(faces: List[bmesh.types.BMFace], uv_lay: bmesh.types.BMLayerItem[Any], min_distance: float, absolute: bool):
         loop = faces[-1].loops[-1]
 
         delta_x = round(loop[uv_lay].uv[0]/min_distance, 0)*min_distance
@@ -714,7 +696,6 @@ def correct_extreme_uv(step_scale: int = 2, move_to_absolute: bool = False):
                     return
 
                 for faces in get_all_island(bm, uv_lay):
-                    uv_lay = bm.loops.layers.uv.active
                     move_it_land_to_center(faces, uv_lay, step_scale, move_to_absolute)
 
                 obj.data.update()
