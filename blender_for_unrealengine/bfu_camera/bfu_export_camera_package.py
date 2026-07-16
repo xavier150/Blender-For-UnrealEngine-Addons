@@ -19,6 +19,7 @@ from ..bfu_assets_manager.bfu_asset_manager_type import AssetPackage
 from .. import bfu_export
 from ..bfu_export_logs.bfu_process_time_logs_types import SafeTimeGroup
 from .. import bfu_anim_base
+from .. import bfu_adv_object
 from . import bfu_export_procedure
 from .bfu_export_procedure import BFU_CameraExportProcedure
 
@@ -118,7 +119,7 @@ def export_camera_animation(
             check_existing=False,
             use_selection=True,
             apply_unit_scale=True,
-            global_scale=bfu_utils.GetObjExportScale(active),
+            global_scale=bfu_adv_object.bfu_adv_obj_props.get_object_export_global_scale(active),
             apply_scale_options='FBX_SCALE_NONE',
             object_types={'CAMERA'},
             use_custom_props=active.bfu_fbx_export_with_custom_props,

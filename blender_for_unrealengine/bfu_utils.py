@@ -1031,10 +1031,6 @@ def get_desired_export_armature_name(obj: bpy.types.Object) -> str:
     return "Armature"
 
 
-def GetObjExportScale(obj: bpy.types.Object) -> float:
-    return obj.bfu_export_global_scale
-
-
 def AddFrontEachLine(ImportScript: str, text: str = "\t") -> str:
 
     NewImportScript = ""

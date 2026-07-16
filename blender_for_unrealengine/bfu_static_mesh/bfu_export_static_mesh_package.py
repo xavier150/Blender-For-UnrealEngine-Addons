@@ -20,6 +20,7 @@ from .. import bfu_vertex_color
 from .. import bfu_material
 from ..bfu_export_logs.bfu_process_time_logs_types import SafeTimeGroup
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetPackage
+from .. import bfu_adv_object
 from . import bfu_export_procedure
 from .bfu_export_procedure import BFU_StaticExportProcedure
 
@@ -104,15 +105,16 @@ def export_as_static_mesh(
     bfu_export.bfu_export_utils.make_select_visual_real()
 
     bfu_export.bfu_export_utils.apply_select_needed_modifiers_for_export() 
-    for selected_obj in bpy.context.selected_objects:
-        if active.bfu_convert_geometry_node_attribute_to_uv:
-            attrib_name: str = str(active.bfu_convert_geometry_node_attribute_to_uv_name)
-            bfu_export.bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
-        bfu_vertex_color.bfu_vertex_color_utils.SetVertexColorForUnrealExport(selected_obj)
-        bfu_export.bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
-        bfu_export.bfu_export_utils.SetSocketsExportTransform(selected_obj)
-        bfu_export.bfu_export_utils.SetSocketsExportName(selected_obj)
-    bfu_export.bfu_export_utils.RemoveMaterialsOnCollisionMeshes(bpy.context.selected_objects)
+    if bpy.context.selected_objects:
+        for selected_obj in bpy.context.selected_objects:
+            if active.bfu_convert_geometry_node_attribute_to_uv:
+                attrib_name: str = str(active.bfu_convert_geometry_node_attribute_to_uv_name)
+                bfu_export.bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
+            bfu_vertex_color.bfu_vertex_color_utils.SetVertexColorForUnrealExport(selected_obj)
+            bfu_export.bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
+            bfu_export.bfu_export_utils.SetSocketsExportTransform(selected_obj)
+            bfu_export.bfu_export_utils.SetSocketsExportName(selected_obj)
+        bfu_export.bfu_export_utils.RemoveMaterialsOnCollisionMeshes(list(bpy.context.selected_objects))
 
     bfu_utils.apply_export_transform(active, "Object")
 
@@ -135,7 +137,7 @@ def export_as_static_mesh(
             use_selection=True,
             global_matrix=bfu_export.bfu_export_utils.get_static_axis_conversion(active),
             apply_unit_scale=True,
-            global_scale=bfu_utils.GetObjExportScale(active),
+            global_scale=bfu_adv_object.bfu_adv_obj_props.get_object_export_global_scale(active),
             apply_scale_options='FBX_SCALE_NONE',
             object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
             colors_type=bfu_vertex_color.bfu_vertex_color_utils.get_export_colors_type(active),
@@ -164,7 +166,7 @@ def export_as_static_mesh(
             check_existing=False,
             use_selection=True,
             apply_unit_scale=True,
-            global_scale=bfu_utils.GetObjExportScale(active),
+            global_scale=bfu_adv_object.bfu_adv_obj_props.get_object_export_global_scale(active),
             apply_scale_options='FBX_SCALE_NONE',
             object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
             colors_type=bfu_vertex_color.bfu_vertex_color_utils.get_export_colors_type(active),

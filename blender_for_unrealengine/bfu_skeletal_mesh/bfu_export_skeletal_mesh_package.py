@@ -20,6 +20,7 @@ from ..bfu_skeletal_mesh.bfu_export_procedure import BFU_SkeletonExportProcedure
 from .. import bfu_vertex_color
 from .. import bfu_material
 from .. import bfu_export
+from .. import bfu_adv_object
 from ..bfu_export_logs.bfu_process_time_logs_types import SafeTimeGroup
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetPackage
 
@@ -162,7 +163,7 @@ def export_as_skeletal_mesh(
             use_active_collection=False,
             global_matrix=bfu_export.bfu_export_utils.get_skeleton_axis_conversion(active),
             apply_unit_scale=True,
-            global_scale=bfu_utils.GetObjExportScale(active),
+            global_scale=bfu_adv_object.bfu_adv_obj_props.get_object_export_global_scale(active),
             apply_scale_options='FBX_SCALE_NONE',
             object_types={
                 'ARMATURE',
@@ -200,7 +201,7 @@ def export_as_skeletal_mesh(
             use_selection=True,
             use_active_collection=False,
             apply_unit_scale=True,
-            global_scale=bfu_utils.GetObjExportScale(active),
+            global_scale=bfu_adv_object.bfu_adv_obj_props.get_object_export_global_scale(active),
             apply_scale_options='FBX_SCALE_NONE',
             object_types={
                 'ARMATURE',

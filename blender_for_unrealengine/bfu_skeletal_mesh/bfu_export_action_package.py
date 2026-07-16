@@ -23,6 +23,7 @@ from ..bfu_export_logs.bfu_process_time_logs_types import SafeTimeGroup
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetPackage
 from .. import bfu_addon_prefs
 from .. import bfu_anim_base
+from .. import bfu_adv_object
 
 
 def process_action_animation_export_from_package(
@@ -193,7 +194,7 @@ def export_as_action_animation(
             animation_only=active.bfu_export_animation_without_mesh,
             global_matrix=bfu_export.bfu_export_utils.get_skeleton_axis_conversion(active),
             apply_unit_scale=True,
-            global_scale=bfu_utils.GetObjExportScale(active),
+            global_scale=bfu_adv_object.bfu_adv_obj_props.get_object_export_global_scale(active),
             apply_scale_options='FBX_SCALE_NONE',
             object_types={'ARMATURE', 'EMPTY', 'MESH'},
             use_custom_props=active.bfu_fbx_export_with_custom_props,
@@ -227,7 +228,7 @@ def export_as_action_animation(
             check_existing=False,
             use_selection=True,
             apply_unit_scale=True,
-            global_scale=bfu_utils.GetObjExportScale(active),
+            global_scale=bfu_adv_object.bfu_adv_obj_props.get_object_export_global_scale(active),
             apply_scale_options='FBX_SCALE_NONE',
             object_types={'ARMATURE', 'EMPTY', 'MESH'},
             use_custom_props=active.bfu_fbx_export_with_custom_props,
