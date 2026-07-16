@@ -28,7 +28,7 @@ def get_modular_objects_from_part(part: BFU_UI_ModularSkeletalSpecifiedPartsMesh
             if skeletal_part.target_type == 'OBJECT':
                 # Object target
                 if skeletal_part.obj:
-                    if bfu_export_control.bfu_export_control_utils.is_auto_or_export_recursive(skeletal_part.obj):
+                    if bfu_export_control.bfu_export_control_utils.is_not_dont_export(skeletal_part.obj):
                         if skeletal_part.obj.library is None: # type: ignore
                             objects.append(skeletal_part.obj)
                         else:
@@ -41,7 +41,7 @@ def get_modular_objects_from_part(part: BFU_UI_ModularSkeletalSpecifiedPartsMesh
                 # Objects from collection target
                 if skeletal_part.collection:
                     for collection_obj in skeletal_part.collection.objects:
-                        if bfu_export_control.bfu_export_control_utils.is_auto_or_export_recursive(collection_obj):
+                        if bfu_export_control.bfu_export_control_utils.is_not_dont_export(collection_obj):
                             if collection_obj.library is None: # type: ignore
                                 objects.append(collection_obj)
                             else:

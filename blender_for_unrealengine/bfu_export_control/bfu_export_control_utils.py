@@ -86,12 +86,6 @@ def is_not_export_self(obj: bpy.types.Object) -> bool:
     """
     return not is_export_self(obj)
 
-def is_auto_or_export_recursive(obj: bpy.types.Object) -> bool:
-    """
-    Check if the object is set to auto or export recursively.
-    """
-    return get_object_export_type(obj).is_auto() or get_object_export_type(obj).is_export_recursive()
-
 # Set functions
 
 def set_auto(obj: bpy.types.Object) -> None:

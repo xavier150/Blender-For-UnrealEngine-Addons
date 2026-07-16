@@ -88,7 +88,7 @@ def write_sequencer_tracks_data(exported_asset_log: List[bfu_export_logs.bfu_ass
         marker_sections["end_time"] = section[1]
         if section[2]:
 
-            if bfu_export_control.bfu_export_control_utils.is_auto_or_export_recursive(section[2]):
+            if bfu_export_control.bfu_export_control_utils.is_not_dont_export(section[2]):
                 marker_sections["has_camera"] = True
                 marker_sections["camera_name"] = section[2].name
             else:

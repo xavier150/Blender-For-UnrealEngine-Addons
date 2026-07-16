@@ -56,7 +56,7 @@ def get_recursive_obj_childs(obj: bpy.types.Object) -> List[bpy.types.Object]:
             if child_obj.name in view_layer.objects:
                 # Export only objects that are not library linked.
                 # Still work on overridden objects.
-                if bfu_export_control.bfu_export_control_utils.is_auto_or_export_recursive(child_obj):
+                if bfu_export_control.bfu_export_control_utils.is_not_dont_export(child_obj):
                     if check_valid_object(child_obj):
                         if child_obj.library is None:  # type: ignore
                             if child_obj.parent is not None:

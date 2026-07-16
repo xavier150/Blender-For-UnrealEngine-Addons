@@ -233,7 +233,7 @@ def get_export_desired_childs(obj: bpy.types.Object) -> List[bpy.types.Object]:
 
     desired_objs: List[bpy.types.Object] = []
     for child in bbpl.basics.get_recursive_obj_childs(obj):
-        if bfu_export_control.bfu_export_control_utils.is_auto_or_export_recursive(child):
+        if bfu_export_control.bfu_export_control_utils.is_not_dont_export(child):
             if child.name in w.view_layer.objects:
                 desired_objs.append(child)
 
@@ -510,7 +510,7 @@ def get_export_collection_objects(collection: bpy.types.Collection) -> List[bpy.
     # Found all objects that must be exported in a collection
     found_objs = []
     for select_obj in collection.all_objects:
-        if bfu_export_control.bfu_export_control_utils.is_auto_or_export_recursive(select_obj):
+        if bfu_export_control.bfu_export_control_utils.is_not_dont_export(select_obj):
             if select_obj.name in bpy.context.view_layer.objects:
                 found_objs.append(select_obj)
 
