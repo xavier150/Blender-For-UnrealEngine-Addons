@@ -15,9 +15,11 @@ import math
 import os
 from typing import List, Tuple, Optional, TYPE_CHECKING, Any
 from pathlib import Path
+
 import bpy
 import bmesh
 import mathutils
+
 from . import bbpl
 from . import bfu_basics
 from . import bfu_export_control

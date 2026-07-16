@@ -9,11 +9,13 @@
 
 
 import bpy
+
 from .. import bfu_ui
 from .. import bbpl
 from .. import bfu_assets_manager
 from .. import bfu_export_control
 from .. import bfu_lod
+from . import bfu_material_props
 
 
 
@@ -44,7 +46,7 @@ def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: 
                     export_material_ui.prop(obj, 'bfu_export_materials')
 
                     export_export_texture_ui = export_material_ui.column()
-                    export_export_texture_ui.enabled = obj.bfu_export_materials
+                    export_export_texture_ui.enabled = bfu_material_props.get_object_export_materials(obj)
                     export_export_texture_ui.prop(obj, 'bfu_export_textures')
 
                     # To Unreal Engine
@@ -56,12 +58,12 @@ def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: 
                     import_material_ui.prop(obj, 'bfu_import_materials')
 
                     import_texture_ui = import_material_ui.column()
-                    import_texture_ui.enabled = obj.bfu_import_materials
+                    import_texture_ui.enabled = bfu_material_props.get_object_import_materials(obj)
                     import_texture_ui.prop(obj, 'bfu_import_textures')
 
 
                     normal_texture_ui = import_texture_ui.column()
-                    normal_texture_ui.enabled = obj.bfu_import_textures and obj.bfu_import_materials
+                    normal_texture_ui.enabled = bfu_material_props.get_object_import_textures(obj) and bfu_material_props.get_object_import_materials(obj)
                     normal_texture_ui.prop(obj, 'bfu_flip_normal_map_green_channel')
 
                     material_utils_ui = bfu_material_search_location.column()
