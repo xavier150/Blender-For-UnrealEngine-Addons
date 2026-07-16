@@ -13,6 +13,7 @@ from .. import bfu_utils
 from .. import bfu_ui
 from .. import bbpl
 from .. import bfu_export_control
+from . import bfu_uv_map_props
 
 
 def draw_obj_ui(layout: bpy.types.UILayout, context: bpy.types.Context, obj: bpy.types.Object):
@@ -31,23 +32,23 @@ def draw_obj_ui(layout: bpy.types.UILayout, context: bpy.types.Context, obj: bpy
             _, panel = accordion.draw(layout)
             if panel:
                 # Geometry Node Uv
-                bfu_convert_geometry_node_attribute_to_uv = panel.column()
-                convert_geometry_node_attribute_to_uv_use = bfu_convert_geometry_node_attribute_to_uv.row()
+                bfu_convert_geometry_node_attribute_to_uv_ui = panel.column()
+                convert_geometry_node_attribute_to_uv_use = bfu_convert_geometry_node_attribute_to_uv_ui.row()
                 convert_geometry_node_attribute_to_uv_use.prop(obj, 'bfu_convert_geometry_node_attribute_to_uv')
                 bbpl.blender_layout.layout_doc_button.add_doc_page_operator(convert_geometry_node_attribute_to_uv_use, url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/UV-Maps#geometry-node-uv")
-                bfu_convert_geometry_node_attribute_to_uv_name = bfu_convert_geometry_node_attribute_to_uv.column()
+                bfu_convert_geometry_node_attribute_to_uv_name = bfu_convert_geometry_node_attribute_to_uv_ui.column()
                 bfu_convert_geometry_node_attribute_to_uv_name.prop(obj, 'bfu_convert_geometry_node_attribute_to_uv_name')
-                bfu_convert_geometry_node_attribute_to_uv_name.enabled = obj.bfu_convert_geometry_node_attribute_to_uv
+                bfu_convert_geometry_node_attribute_to_uv_name.enabled = bfu_uv_map_props.get_object_convert_geometry_node_attribute_to_uv(obj)
 
                 # Extreme UV Scale
                 ui_correct_extrem_uv_scale = panel.column()
-                ui_correct_extrem_uv_scale_use = ui_correct_extrem_uv_scale.row()
-                ui_correct_extrem_uv_scale_use.prop(obj, 'bfu_use_correct_extrem_uv_scale')
-                bbpl.blender_layout.layout_doc_button.add_doc_page_operator(ui_correct_extrem_uv_scale_use, url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/UV-Maps#extreme-uv-scale")
+                ui_correct_extrem_uv_scale_use_ui = ui_correct_extrem_uv_scale.row()
+                ui_correct_extrem_uv_scale_use_ui.prop(obj, 'bfu_use_correct_extrem_uv_scale')
+                bbpl.blender_layout.layout_doc_button.add_doc_page_operator(ui_correct_extrem_uv_scale_use_ui, url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/UV-Maps#extreme-uv-scale")
                 ui_correct_extrem_uv_scale_options = ui_correct_extrem_uv_scale.column()
                 ui_correct_extrem_uv_scale_options.prop(obj, 'bfu_correct_extrem_uv_scale_step_scale')
                 ui_correct_extrem_uv_scale_options.prop(obj, 'bfu_correct_extrem_uv_scale_use_absolute')
-                ui_correct_extrem_uv_scale_options.enabled = obj.bfu_use_correct_extrem_uv_scale
+                ui_correct_extrem_uv_scale_options.enabled = bfu_uv_map_props.get_object_use_correct_extrem_uv_scale(obj)
 
 
 def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):

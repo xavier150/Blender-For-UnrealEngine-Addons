@@ -15,6 +15,7 @@ from .. import bfu_alembic_animation
 from .. import bfu_export_control
 from .. import bfu_asset_preview
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetToSearch
+from . import bfu_anim_base_props
 
 def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: bpy.types.Object):
     
@@ -43,11 +44,11 @@ def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: 
 
                 props_animation_materials = panel.column()
                 props_animation_materials.prop(obj, "bfu_export_animation_without_materials")
-                props_animation_materials.enabled = not obj.bfu_export_animation_without_mesh
+                props_animation_materials.enabled = not  bfu_anim_base_props.get_object_export_animation_without_mesh(obj)
 
                 props_animation_textures = panel.column()
                 props_animation_textures.prop(obj, "bfu_export_animation_without_textures")
-                props_animation_textures.enabled = not obj.bfu_export_animation_without_materials and not obj.bfu_export_animation_without_mesh
+                props_animation_textures.enabled = not bfu_anim_base_props.get_object_export_animation_without_materials(obj) and not bfu_anim_base_props.get_object_export_animation_without_mesh(obj)
 
         layout.label(text='Note: The Action with only one frame is exported like Pose.')
         bfu_asset_preview.bfu_asset_preview_ui.draw_asset_preview_bar(layout, context, asset_to_search=AssetToSearch.ANIMATION_ONLY)
