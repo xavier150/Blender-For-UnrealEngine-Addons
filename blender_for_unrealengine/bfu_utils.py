@@ -989,15 +989,6 @@ def clean_filename_for_unreal(filename: str) -> str:
     filename = ''.join(c for c in filename if c in valid_chars)
     return filename
 
-def get_unreal_import_location():
-    scene = bpy.context.scene
-
-    dirpath = os.path.join(scene.bfu_unreal_import_module,scene.bfu_unreal_import_location)
-
-    # Clean path
-    dirpath = os.path.normpath(dirpath)
-    return dirpath
-
 def get_import_asset_script_command() -> str:
     scene = bpy.context.scene
     fileName = scene.bfu_file_import_asset_script_name

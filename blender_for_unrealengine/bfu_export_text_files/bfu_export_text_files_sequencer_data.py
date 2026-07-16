@@ -7,10 +7,12 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from typing import Dict, List, Any, Union
+
+import bpy
+
+from ..  import bfu_export_nomenclature
 from .. import bfu_export_logs
-from .. import bfu_utils
 from .. import bfu_export_control
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetType
 from . import bfu_export_text_files_utils
@@ -39,7 +41,7 @@ def write_sequencer_tracks_data(exported_asset_log: List[bfu_export_logs.bfu_ass
         data['render_resolution_x'] = render.resolution_x
         data['render_resolution_y'] = render.resolution_y
     data['secure_crop'] = 0.0001  # add end crop for avoid section overlay
-    data['unreal_import_location'] = bfu_utils.get_unreal_import_location()
+    data['unreal_import_location'] = str(bfu_export_nomenclature.bfu_export_nomenclature_utils.get_import_location())
 
     # Import camera
     cameras: List[Dict[str, Any]] = []

@@ -7,11 +7,10 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-
-import os
-import bpy
 from typing import List, Dict, Any, Union, Optional
-from . import bfu_export_text_files_utils
+
+import bpy
+
 from .. import bfu_export_logs
 from .. import bfu_utils
 from .. import bfu_material
@@ -22,6 +21,7 @@ from .. import bfu_vertex_color
 from .. import bfu_lod
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetType
 from .. import bfu_export_nomenclature
+from . import bfu_export_text_files_utils
 
 def write_main_assets_data(exported_asset_log: List[bfu_export_logs.bfu_asset_export_logs_types.ExportedAssetLog]) -> Dict[str, Any]:
     # Generate a script for import assets in Unreal Engine.
