@@ -421,7 +421,7 @@ def SetSocketsExportTransform(obj: bpy.types.Object):
         if get_should_rescale_sockets():
             socket.delta_scale *= GetRescaleSocketFactor()
 
-        if addon_prefs.staticSocketsAdd90X:
+        if addon_prefs.static_sockets_add_90x:
             savedScale = socket.scale.copy()
             savedLocation = socket.location.copy()
             AddMat = mathutils.Matrix.Rotation(math.radians(90.0), 4, 'X')
@@ -686,15 +686,15 @@ def get_should_rescale_skeleton_for_fbx_export(obj: bpy.types.Object) -> bool:
         return False  # Rescale only if FBX export.
 
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
-    if addon_prefs.rescaleFullRigAtExport == "auto":
+    if addon_prefs.rescale_full_rig_at_export == "auto":
 
         if bfu_utils.get_scene_unit_scale_is_close(0.01):
             return False  # False because that useless to rescale at 1 :v
         else:
             return True
-    if addon_prefs.rescaleFullRigAtExport == "custom_rescale":
+    if addon_prefs.rescale_full_rig_at_export == "custom_rescale":
         return True
-    if addon_prefs.rescaleFullRigAtExport == "dont_rescale":
+    if addon_prefs.rescale_full_rig_at_export == "dont_rescale":
         return False
     return False
 
@@ -703,24 +703,24 @@ def get_rescale_rig_factor() -> float:
     # This will return the rescale factor.
 
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
-    if addon_prefs.rescaleFullRigAtExport == "auto":
+    if addon_prefs.rescale_full_rig_at_export == "auto":
         return 100 * bfu_utils.get_scene_unit_scale()
     else:
-        return addon_prefs.newRigScale  # rigRescaleFactor
+        return addon_prefs.new_rig_scale  # rigRescaleFactor
 
 
 def get_should_rescale_sockets():
     # This will return if the socket should be rescale.
 
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
-    if addon_prefs.rescaleSocketsAtExport == "auto":
+    if addon_prefs.rescale_sockets_at_export == "auto":
         if bpy.context.scene.unit_settings.scale_length == 0.01:
             return False  # False because that useless to rescale at 1 :v
         else:
             return True
-    if addon_prefs.rescaleSocketsAtExport == "custom_rescale":
+    if addon_prefs.rescale_sockets_at_export == "custom_rescale":
         return True
-    if addon_prefs.rescaleSocketsAtExport == "dont_rescale":
+    if addon_prefs.rescale_sockets_at_export == "dont_rescale":
         return False
     return False
 
@@ -729,10 +729,10 @@ def GetRescaleSocketFactor():
     # This will return the rescale factor.
 
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
-    if addon_prefs.rescaleSocketsAtExport == "auto":
+    if addon_prefs.rescale_sockets_at_export == "auto":
         return 1/(100*bfu_utils.get_scene_unit_scale())
     else:
-        return addon_prefs.staticSocketsImportedSize
+        return addon_prefs.static_sockets_imported_size
 
 def export_additional_data(fullpath: Path, data: Dict[str, str]) -> None:
     # Export additional parameter from static and skeletal mesh track for

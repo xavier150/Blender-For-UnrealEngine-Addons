@@ -42,7 +42,7 @@ def draw_ui_scene(layout: bpy.types.UILayout, context: bpy.types.Context):
             FileCol.prop(scene, 'bfu_use_text_export_log')
             FileCol.prop(scene, 'bfu_use_text_import_asset_script')
             FileCol.prop(scene, 'bfu_use_text_import_sequence_script')
-            if addon_prefs.useGeneratedScripts:
+            if addon_prefs.use_generated_scripts:
                 FileCol.prop(scene, 'bfu_use_text_additional_data')
 
             # exportProperty

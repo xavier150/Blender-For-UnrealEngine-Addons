@@ -45,7 +45,7 @@ def draw_ui_scene(layout: bpy.types.UILayout, context: bpy.types.Context):
             propsSub = propsSub.column()
             propsSub.prop(scene, 'bfu_anim_subfolder_name', icon='FILE_FOLDER')
 
-            if addon_prefs.useGeneratedScripts:
+            if addon_prefs.use_generated_scripts:
                 bfu_unreal_import_module = propsSub.column()
                 bfu_unreal_import_module.prop(scene, 'bfu_unreal_import_module', icon='FILE_FOLDER')
                 bfu_unreal_import_location = propsSub.column()
@@ -69,7 +69,7 @@ def draw_ui_scene(layout: bpy.types.UILayout, context: bpy.types.Context):
             fileName = panel.row()
             fileName = fileName.column()
             fileName.prop(scene, 'bfu_file_export_log_name', icon='FILE')
-            if addon_prefs.useGeneratedScripts:
+            if addon_prefs.use_generated_scripts:
                 fileName.prop(
                     scene,
                     'bfu_file_import_asset_script_name',

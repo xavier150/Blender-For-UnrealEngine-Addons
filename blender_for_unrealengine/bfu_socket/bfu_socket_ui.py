@@ -45,7 +45,7 @@ def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
             convertStaticSocketButtons.operator("object.converttostaticsocket", icon='OUTLINER_DATA_EMPTY')
 
 
-            if addon_prefs.useGeneratedScripts:
+            if addon_prefs.use_generated_scripts:
 
                 # Draw user tips and check can use buttons (skeletal_socket)
                 ready_for_convert_skeletal_socket = False

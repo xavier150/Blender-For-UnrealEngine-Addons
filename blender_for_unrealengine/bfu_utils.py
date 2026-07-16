@@ -521,7 +521,7 @@ def draw_proxy_propertys(obj: bpy.types.Object):
     
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
     # Debug option to alway show linked propertys
-    if addon_prefs.show_hiden_linked_propertys:
+    if addon_prefs.show_hidden_linked_properties:
         return True
 
     # Hide likned object propertys

@@ -238,7 +238,7 @@ def convert_to_unrealengine_collision(
                 obj.show_transparent = True
                 obj.display.show_shadows = False
                 obj.display_type = 'SOLID'
-                obj.color = addon_prefs.collisionColor
+                obj.color = addon_prefs.collision_color
 
 
                 saved_matrix = obj.matrix_world.copy()
@@ -273,7 +273,7 @@ def update_collision_material(mat: bpy.types.Material) -> None:
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
 
     # Viewport display settings
-    mat.diffuse_color = addon_prefs.collisionColor
+    mat.diffuse_color = addon_prefs.collision_color
     mat.metallic = 0.0
     mat.roughness = 0.5
     mat.specular_intensity = 0.5
@@ -295,7 +295,7 @@ def update_collision_material(mat: bpy.types.Material) -> None:
         mix.location = (-200, 0)
         fac_input = mix.inputs[0]
         if isinstance(fac_input, bpy.types.NodeSocketFloatFactor):
-            fac_input.default_value = addon_prefs.collisionColor[3]  # Alpha value
+            fac_input.default_value = addon_prefs.collision_color[3]  # Alpha value
         node_tree.links.new(mix.outputs['Shader'], out.inputs[0])
 
         # Add transparent shader for Cycles use
@@ -308,7 +308,7 @@ def update_collision_material(mat: bpy.types.Material) -> None:
         diff.location = (-400, -100)
         colour_input = diff.inputs[0]
         if isinstance(colour_input, bpy.types.NodeSocketColor):
-            colour_input.default_value = addon_prefs.collisionColor
+            colour_input.default_value = addon_prefs.collision_color
         node_tree.links.new(diff.outputs['BSDF'], mix.inputs[2])
 
 def get_current_visibility_state() -> bool:

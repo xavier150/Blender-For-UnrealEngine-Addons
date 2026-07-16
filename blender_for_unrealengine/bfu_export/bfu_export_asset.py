@@ -64,7 +64,7 @@ def process_export(op: bpy.types.Operator, final_asset_list_to_export: List[Asse
     bbpl.utils.safe_mode_set('OBJECT', user_scene_save.user_select_class.user_active)
     prepare_scene_for_export()
 
-    if addon_prefs.revertExportPath:
+    if addon_prefs.revert_export_path:
         bfu_basics.RemoveFolderTree(Path(bpy.path.abspath(scene.bfu_export_static_mesh_file_path)).resolve())  # type: ignore
         bfu_basics.RemoveFolderTree(Path(bpy.path.abspath(scene.bfu_export_skeletal_mesh_file_path)).resolve())  # type: ignore
         bfu_basics.RemoveFolderTree(Path(bpy.path.abspath(scene.bfu_export_skeletal_animation_file_path)).resolve())  # type: ignore

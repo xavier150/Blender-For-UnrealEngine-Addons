@@ -453,7 +453,7 @@ class BFU_BaseAssetClass(ABC):
             scene = bpy.context.scene
             if scene:
                 addon_prefs = bfu_addon_prefs.get_addon_preferences()
-                if (scene.bfu_use_text_additional_data and addon_prefs.useGeneratedScripts):  # type: ignore[attr-defined]
+                if (scene.bfu_use_text_additional_data and addon_prefs.use_generated_scripts):  # type: ignore[attr-defined]
 
                     # Set additional data for the asset to export.
                     additional_data_data = self.get_asset_additional_data(data, details, search_mode)

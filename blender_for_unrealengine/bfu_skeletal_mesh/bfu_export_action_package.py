@@ -132,7 +132,7 @@ def export_as_action_animation(
     else:
         active.animation_data.action = target_action  # Apply desired action
     
-    if addon_prefs.bakeArmatureAction:
+    if addon_prefs.bake_armature_animations:
         bfu_export.bfu_export_utils.bake_armature_animation(active, scene.frame_start, scene.frame_end)
 
     bfu_utils.apply_export_transform(active, "Action")  # Apply export transform before rescale
@@ -163,7 +163,7 @@ def export_as_action_animation(
         if active.animation_data:
             active.animation_data.use_tweak_mode = False
 
-    if addon_prefs.ignoreNLAForAction:  # Reset NLA
+    if addon_prefs.ignore_nla_for_action:  # Reset NLA
         if active.animation_data:
             active.animation_data.action_extrapolation = 'HOLD'
             active.animation_data.action_blend_type = 'REPLACE'

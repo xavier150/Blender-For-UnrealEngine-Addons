@@ -30,7 +30,7 @@ def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: 
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
 
     # Hide filters
-    if addon_prefs.useGeneratedScripts is False:
+    if addon_prefs.use_generated_scripts is False:
         return
     if bfu_export_control.bfu_export_control_utils.is_not_export_self(obj):
         return

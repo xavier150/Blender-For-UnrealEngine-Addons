@@ -106,7 +106,7 @@ def get_skeletal_mesh_socket_data(obj: bpy.types.Object) -> List[Dict[str, Any]]
         # Decompose matrix
         t = RelativeMatrix.to_translation()
         r = RelativeMatrix.to_euler()
-        s = socket.scale*addon_prefs.skeletalSocketsImportedSize
+        s = socket.scale*addon_prefs.skeletal_sockets_imported_size
 
         # Convert to array for Json and apply final change of axis
         if object_export_procedure.value == BFU_SkeletonExportProcedure.STANDARD_GLTF.value:

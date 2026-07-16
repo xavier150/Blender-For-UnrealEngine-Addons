@@ -35,7 +35,7 @@ class BFU_Checker_UnitScale(bfu_checker):
             if file_type in [BFU_FileTypeEnum.FBX, BFU_FileTypeEnum.ALEMBIC]:
 
                 # Check if the unit scale is equal to 0.01 for FBX and Alembic export.
-                if addon_prefs.notifyUnitScalePotentialError:
+                if addon_prefs.notify_unit_scale_potential_error:
                     if not bfu_utils.get_scene_unit_scale_is_close(0.01):
                         str_unit_scale = str(bfu_utils.get_scene_unit_scale())
                         my_po_error = self.add_potential_error()
@@ -51,7 +51,7 @@ class BFU_Checker_UnitScale(bfu_checker):
             elif file_type in [BFU_FileTypeEnum.GLTF]:
                 
                 # Check if the unit scale is equal to 1.0 for GLTF export.
-                if addon_prefs.notifyUnitScalePotentialError:
+                if addon_prefs.notify_unit_scale_potential_error:
                     if not bfu_utils.get_scene_unit_scale_is_close(1.0):
                         str_unit_scale = str(bfu_utils.get_scene_unit_scale())
                         my_po_error = self.add_potential_error()

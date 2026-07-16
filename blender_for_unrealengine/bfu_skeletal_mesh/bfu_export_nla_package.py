@@ -126,7 +126,7 @@ def process_nla_anim_export(
     # Apply full Non Linear Animation (NLA) data to the active armature.
     animation_data.set_animation_data(active, True)
 
-    if addon_prefs.bakeArmatureAction:
+    if addon_prefs.bake_armature_animations:
         bfu_export.bfu_export_utils.bake_armature_animation(active, scene.frame_start, scene.frame_end)
 
     bfu_utils.apply_export_transform(active, "NLA")  # Apply export transform before rescale

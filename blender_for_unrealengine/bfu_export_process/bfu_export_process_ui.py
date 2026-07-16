@@ -53,7 +53,7 @@ def draw_copy_import_script_ui(
     if accordion:
         _, panel = accordion.draw(layout)
         if panel:
-            if addon_prefs.useGeneratedScripts:
+            if addon_prefs.use_generated_scripts:
                 copyButton = panel.row()
                 copyButton.operator("object.copy_importassetscript_command")
                 copyButton.operator("object.copy_importsequencerscript_command")

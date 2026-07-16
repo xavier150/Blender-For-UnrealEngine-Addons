@@ -23,7 +23,7 @@ def draw_obj_ui(layout: bpy.types.UILayout, context: bpy.types.Context, obj: bpy
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
 
     # Hide filters
-    if addon_prefs.useGeneratedScripts is False:
+    if addon_prefs.use_generated_scripts is False:
         return
     if not bfu_utils.draw_proxy_propertys(obj):
         return
