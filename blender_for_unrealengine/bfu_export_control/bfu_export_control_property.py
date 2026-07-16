@@ -29,7 +29,7 @@ def get_blender_enum_property_list() -> List[Tuple[str, str, str, str, int]]:
             2),
         (BFU_ExportTypeEnum.EXPORT_SELF_ONLY.value,
             "Export Self Only",
-            "Export self object only.",
+            "Export self object only without children.",
             "KEYINGSET",
             4), # 4 to keep enum order with the previous version of the addon
         (BFU_ExportTypeEnum.DONT_EXPORT.value,
