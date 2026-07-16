@@ -91,6 +91,9 @@ def update_old_variables(print_log: bool = False) -> None:
 
         bfu_addon_updater.update_data_variable(obj, ["computedStaticMeshLightMapRes"], "bfu_computed_static_mesh_light_map_res")
 
+        bfu_addon_updater.update_data_variable(obj, ["bfu_use_socket_custom_Name"], "bfu_use_socket_custom_name")
+        bfu_addon_updater.update_data_variable(obj, ["bfu_socket_custom_Name"], "bfu_socket_custom_name")
+
     for col in bpy.data.collections:
         bfu_addon_updater.update_data_variable(col, ["exportFolderName"], "bfu_export_folder_name")
         bfu_addon_updater.update_data_variable(col, ["bfu_collection_export_procedure"], "bfu_static_collection_export_procedure")

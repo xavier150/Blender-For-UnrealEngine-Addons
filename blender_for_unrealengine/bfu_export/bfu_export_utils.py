@@ -27,6 +27,7 @@ from .. import bfu_export_logs
 from .. import bfu_addon_prefs
 from .. import bfu_collision
 from .. import bfu_adv_object
+from .. import bfu_uv_map
 
 # @TODO: Move this to a config file.
 dup_temp_name = "BFU_Temp"  # Duplicate object temporary name
@@ -332,17 +333,20 @@ def SetSocketsExportName(obj: bpy.types.Object):
 
     scene = bpy.context.scene
     for socket in bfu_socket.bfu_socket_utils.get_socket_desired_children(obj):
-        if socket.bfu_use_socket_custom_Name:
-            if socket.bfu_socket_custom_Name not in scene.objects:
+        use_socket_custom_name = bfu_socket.bfu_socket_props.get_object_use_socket_custom_Name(socket)
+        socket_custom_name = bfu_socket.bfu_socket_props.get_object_socket_custom_Name(socket)
+
+        if use_socket_custom_name:
+            if socket_custom_name not in scene.objects:
 
                 # Save the previous name
                 socket["BFU_PreviousSocketName"] = socket.name
-                socket.name = "SOCKET_"+socket.bfu_socket_custom_Name
+                socket.name = "SOCKET_" + socket_custom_name
             else:
                 print(
                     'Can\'t rename socket "' +
                     socket.name +
-                    '" to "'+socket.bfu_socket_custom_Name +
+                    '" to "' + socket_custom_name +
                     '".'
                     )
 
@@ -532,12 +536,15 @@ def ConvertGeometryNodeAttributeToUV(obj: bpy.types.Object, attrib_name: str):
 
 
 def CorrectExtremUVAtExport(obj: bpy.types.Object):
-    if obj.bfu_use_correct_extrem_uv_scale:
+    if bfu_uv_map.bfu_uv_map_props.get_object_use_correct_extrem_uv_scale(obj):
         SavedSelect = bbpl.save_data.select_save.UserSelectSave()
         SavedSelect.save_current_select()
         bbpl.utils.select_specific_object(obj)
         if bfu_utils.GoToMeshEditMode():
-            bfu_utils.correct_extreme_uv(obj.bfu_correct_extrem_uv_scale_step_scale, obj.bfu_correct_extrem_uv_scale_use_absolute)
+            bfu_utils.correct_extreme_uv(
+                bfu_uv_map.bfu_uv_map_props.get_object_correct_extrem_uv_scale_step_scale(obj),
+                bfu_uv_map.bfu_uv_map_props.get_object_correct_extrem_uv_scale_use_absolute(obj)
+            )
             bbpl.utils.safe_mode_set('OBJECT')
             SavedSelect.reset_select()
             return True
@@ -684,49 +691,49 @@ def export_additional_data(fullpath: Path, data: Dict[str, str]) -> None:
 
 def get_final_fbx_export_primary_bone_axis(obj: bpy.types.Object) -> str:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
-        return obj.bfu_fbx_export_primary_bone_axis
+        return bfu_adv_object.bfu_adv_obj_props.get_object_fbx_export_primary_bone_axis(obj)
     else:
         return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["primary_bone_axis"] # type: ignore
 
 def get_final_fbx_export_secondary_bone_axis(obj: bpy.types.Object) -> str:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
-        return obj.bfu_fbx_export_secondary_bone_axis
+        return bfu_adv_object.bfu_adv_obj_props.get_object_fbx_export_secondary_bone_axis(obj)
     else:
         return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["secondary_bone_axis"] # type: ignore
 
 def get_skeleton_fbx_export_use_space_transform(obj: bpy.types.Object) -> bool:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
-        return obj.bfu_fbx_export_use_space_transform
+        return bfu_adv_object.bfu_adv_obj_props.get_object_fbx_export_use_space_transform(obj)
     else:
         return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["use_space_transform"] # type: ignore
 
 def get_skeleton_export_axis_forward(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
-        return obj.bfu_fbx_export_axis_forward
+        return bfu_adv_object.bfu_adv_obj_props.get_object_fbx_export_axis_forward(obj)
     else:
         return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["axis_forward"] # type: ignore
 
 def get_skeleton_export_axis_up(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
-        return obj.bfu_fbx_export_axis_up
+        return bfu_adv_object.bfu_adv_obj_props.get_object_fbx_export_axis_up(obj)
     else:
         return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["axis_up"] # type: ignore
 
 def get_static_fbx_export_use_space_transform(obj: bpy.types.Object) -> bool:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
-        return obj.bfu_fbx_export_use_space_transform
+        return bfu_adv_object.bfu_adv_obj_props.get_object_fbx_export_use_space_transform(obj)
     else:
         return bfu_static_mesh.bfu_export_procedure.get_obj_static_fbx_procedure_preset(obj)["use_space_transform"] # type: ignore
 
 def get_static_fbx_export_axis_forward(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
-        return obj.bfu_fbx_export_axis_forward
+        return bfu_adv_object.bfu_adv_obj_props.get_object_fbx_export_axis_forward(obj)
     else:
         return bfu_static_mesh.bfu_export_procedure.get_obj_static_fbx_procedure_preset(obj)["axis_forward"] # type: ignore
 
 def get_static_fbx_export_axis_up(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
-        return obj.bfu_fbx_export_axis_up
+        return bfu_adv_object.bfu_adv_obj_props.get_object_fbx_export_axis_up(obj)
     else:
         return bfu_static_mesh.bfu_export_procedure.get_obj_static_fbx_procedure_preset(obj)["axis_up"] # type: ignore
     
