@@ -8,6 +8,8 @@
 # ----------------------------------------------
 
 
+from typing import List, Literal
+
 import bpy
 import math
 import mathutils
@@ -201,8 +203,6 @@ class DuplicateData():
 
 
 def apply_select_needed_modifiers_for_export():
-    if bpy.context is None:
-        return
 
     apply_modifiers_time_log = bfu_export_logs.bfu_process_time_logs_utils.start_time_log(f"Apply modifiers")
     apply_modifiers_prepare_time_log = bfu_export_logs.bfu_process_time_logs_utils.start_time_log(f"Prepare for apply modifiers")
@@ -214,15 +214,16 @@ def apply_select_needed_modifiers_for_export():
     apply_modifiers_prepare_time_log.end_time_log()
 
     # Get selected objects with modifiers.
-    for obj in bpy.context.selected_objects:
-        apply_object_modifiers(obj, ['ARMATURE'])
+    if bpy.context.selected_objects:
+        for obj in bpy.context.selected_objects:
+            apply_object_modifiers(obj, ['ARMATURE'])
 
     saved_select.reset_select()
     apply_modifiers_time_log.end_time_log()
 
-def apply_object_modifiers(obj: bpy.types.Object, blacklist_type = []):
+def apply_object_modifiers(obj: bpy.types.Object, blacklist_type: List[str] = []):
 
-    if(obj.type == "MESH" and obj.data.shape_keys is not None):
+    if(isinstance(obj.data, bpy.types.Mesh) and obj.data.shape_keys is not None):
         # Can't apply modifiers with shape key
         return
 
@@ -242,13 +243,13 @@ def apply_object_modifiers(obj: bpy.types.Object, blacklist_type = []):
         time_log.end_time_log()
         
         time_log = bfu_export_logs.bfu_process_time_logs_utils.start_time_log(f"Make single user")
-        if obj.data.users > 1:
+        if obj.data and obj.data.users > 1:
             # Make single user.
             obj.data = obj.data.copy()
         time_log.end_time_log()
 
         for mod in mod_to_apply:
-            if bpy.ops.object.modifier_apply.poll():
+            if bpy.ops.object.modifier_apply.poll(): # type: ignore
                 apply_modifier_time_log = bfu_export_logs.bfu_process_time_logs_utils.start_time_log(f"Apply modifier: {mod.name} ({mod.type})")
                 try:
                     bpy.ops.object.modifier_apply(modifier=mod.name)
@@ -266,7 +267,7 @@ def convert_selected_to_mesh():
     scene = bpy.context.scene
 
     # Save current scene object list
-    previous_objects = []
+    previous_objects: List[bpy.types.Object] = []
     for obj in scene.objects:
         previous_objects.append(obj)
 
@@ -302,7 +303,7 @@ def make_select_visual_real():
     select.save_current_select()
 
     # Save object list
-    previous_objects = []
+    previous_objects: List[bpy.types.Object] = []
     for obj in scene.objects:
         previous_objects.append(obj)
 
@@ -455,6 +456,8 @@ def ConvertGeometryNodeAttributeToUV(obj: bpy.types.Object, attrib_name: str):
     # So this work only when I do export of the duplicate object.
     
     if hasattr(obj.data, "attributes"):  # Cuves has not attributes.
+        if not isinstance(obj.data, bpy.types.Mesh):
+            return
         if attrib_name in obj.data.attributes:
 
             # TO DO: Bad why to do this. Need found a way to convert without using ops.
@@ -474,13 +477,13 @@ def ConvertGeometryNodeAttributeToUV(obj: bpy.types.Object, attrib_name: str):
                     bpy.ops.geometry.attribute_convert(mode='GENERIC', domain='CORNER', data_type='FLOAT2')
             else:
                 if obj.data.attributes.active:
-                    bpy.ops.geometry.attribute_convert(mode='UV_MAP', domain='CORNER', data_type='FLOAT2')
+                    bpy.ops.geometry.attribute_convert(mode='UV_MAP', domain='CORNER', data_type='FLOAT2') # type: ignore
             SavedSelect.reset_select()
 
             # Because it not possible to move UV index I need recreate all UV for place new UV Map at start...
             if len(obj.data.uv_layers) < 8:  # Blender Cannot add more than 8 UV maps.
 
-                uv_names = []  # Cache uv names
+                uv_names: List[str] = []  # Cache uv names
                 for old_uv in obj.data.uv_layers:
                     uv_names.append(old_uv.name)
 
@@ -683,54 +686,54 @@ def get_final_fbx_export_primary_bone_axis(obj: bpy.types.Object) -> str:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
         return obj.bfu_fbx_export_primary_bone_axis
     else:
-        return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["primary_bone_axis"]
+        return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["primary_bone_axis"] # type: ignore
 
 def get_final_fbx_export_secondary_bone_axis(obj: bpy.types.Object) -> str:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
         return obj.bfu_fbx_export_secondary_bone_axis
     else:
-        return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["secondary_bone_axis"]
+        return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["secondary_bone_axis"] # type: ignore
 
 def get_skeleton_fbx_export_use_space_transform(obj: bpy.types.Object) -> bool:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
         return obj.bfu_fbx_export_use_space_transform
     else:
-        return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["use_space_transform"]
+        return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["use_space_transform"] # type: ignore
 
-def get_skeleton_export_axis_forward(obj: bpy.types.Object) -> str:
+def get_skeleton_export_axis_forward(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
         return obj.bfu_fbx_export_axis_forward
     else:
-        return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["axis_forward"]
+        return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["axis_forward"] # type: ignore
 
-def get_skeleton_export_axis_up(obj: bpy.types.Object) -> str:
+def get_skeleton_export_axis_up(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
         return obj.bfu_fbx_export_axis_up
     else:
-        return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["axis_up"]
+        return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["axis_up"] # type: ignore
 
 def get_static_fbx_export_use_space_transform(obj: bpy.types.Object) -> bool:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
         return obj.bfu_fbx_export_use_space_transform
     else:
-        return bfu_static_mesh.bfu_export_procedure.get_obj_static_fbx_procedure_preset(obj)["use_space_transform"]
+        return bfu_static_mesh.bfu_export_procedure.get_obj_static_fbx_procedure_preset(obj)["use_space_transform"] # type: ignore
 
-def get_static_fbx_export_axis_forward(obj: bpy.types.Object) -> str:
+def get_static_fbx_export_axis_forward(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
         return obj.bfu_fbx_export_axis_forward
     else:
-        return bfu_static_mesh.bfu_export_procedure.get_obj_static_fbx_procedure_preset(obj)["axis_forward"]
+        return bfu_static_mesh.bfu_export_procedure.get_obj_static_fbx_procedure_preset(obj)["axis_forward"] # type: ignore
 
-def get_static_fbx_export_axis_up(obj: bpy.types.Object) -> str:
+def get_static_fbx_export_axis_up(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
         return obj.bfu_fbx_export_axis_up
     else:
-        return bfu_static_mesh.bfu_export_procedure.get_obj_static_fbx_procedure_preset(obj)["axis_up"]
+        return bfu_static_mesh.bfu_export_procedure.get_obj_static_fbx_procedure_preset(obj)["axis_up"] # type: ignore
     
 class SaveTransformObjects():
     def __init__(self, obj: bpy.types.Object):
 
-        self.saved_transform_objects = []
+        self.saved_transform_objects: List[bbpl.utils.SaveTransformObject] = []
         obj_recursive_childs = bbpl.basics.get_recursive_obj_childs(obj, True)
         for obj in obj_recursive_childs:
             self.saved_transform_objects.append(bbpl.utils.SaveTransformObject(obj))
