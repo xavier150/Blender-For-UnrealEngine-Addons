@@ -11,3 +11,5 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
 - Fixed: Asset cache don't setup the animation correctly after reinstalling the addon without restarting Blender.
     (This was due to enum class comparison. Should use "Enum.value == Enum.value" instead of "Enum == Enum" to compare enum values.)
 - Fixed: Addon GitHub link is wrong.
+- Fixed: Open latest release page button in addon preferences does not work.
+    (This was due to the use of deprecated function "os.system". Use "webbrowser.open" instead.)

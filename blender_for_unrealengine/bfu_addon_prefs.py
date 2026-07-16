@@ -7,7 +7,7 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import os
+import webbrowser
 import bpy
 from typing import TYPE_CHECKING, Tuple, Any, Set
 from .bbpl.blender_layout import layout_doc_button
@@ -184,16 +184,14 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 
     
     class BFU_OT_NewReleaseInfo(bpy.types.Operator):
-        """Open last release page"""
-        bl_label = "Open last release page"
-        bl_idname = "object.new_release_info"
+        bl_label = "Open Latest Release Page"
+        bl_idname = "object.open_latest_release_page"
         bl_description = "Click to open the latest release page."
 
+        release_url: str = "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/releases/latest"
+
         def execute(self, context: bpy.types.Context) -> Set[Any]:
-            os.system(
-                "start \"\" https://github.com/xavier150/" +
-                "Blender-For-UnrealEngine-Addons/releases/latest"
-                )
+            webbrowser.open(self.release_url)
             return {'FINISHED'}
 
     def draw(self, context: bpy.types.Context):
@@ -252,7 +250,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 
         updateButton = layout.row()
         updateButton.scale_y = 2.0
-        updateButton.operator("object.new_release_info", icon="TIME")  # type: ignore
+        updateButton.operator("object.open_latest_release_page", icon="TIME")  # type: ignore
 
 
 def get_addon_preferences() -> BFU_AP_AddonPreferences:
