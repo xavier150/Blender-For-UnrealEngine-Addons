@@ -207,7 +207,8 @@ def export_as_static_mesh(
     bfu_vertex_color.bfu_vertex_color_utils.clear_vertex_color_for_unreal_export(active)
     bfu_export.bfu_export_utils.reset_sockets_export_name(active)
     bfu_export.bfu_export_utils.reset_sockets_transform(active)
-    bfu_utils.clean_delete_objects(bpy.context.selected_objects)
+    if bpy.context.selected_objects:
+        bfu_utils.clean_delete_objects(list(bpy.context.selected_objects)) #sequence to list
     for data in duplicate_data.data_to_remove:
         data.remove_data()
 

@@ -166,18 +166,19 @@ def clean_join_select():
             bpy.ops.object.join()
 
 
-def CleanDeleteSelect():
+def clean_delete_select() -> List[str]:
 
-    removed_objects = []
-    oldDataToRemove = []
-    for obj in bpy.context.selected_objects:
-        removed_objects.append(obj.name)
-        if obj.data is not None:
-            oldDataToRemove.append([obj.data.name, obj.type])
+    removed_objects: List[str] = []
+    old_data_list_to_remove: List[List[str]] = []
+    if bpy.context.selected_objects:
+        for obj in bpy.context.selected_objects:
+            removed_objects.append(obj.name)
+            if obj.data is not None:
+                old_data_list_to_remove.append([obj.data.name, obj.type])
 
     bpy.ops.object.delete()
 
-    for data in oldDataToRemove:
+    for data in old_data_list_to_remove:
         remove_useless_specific_data(data[0], data[1])
 
     return removed_objects
@@ -187,25 +188,25 @@ def clean_delete_objects(objs: List[bpy.types.Object]) -> List[str]:
 
     objs = list(dict.fromkeys(objs))
 
-    removed_objects = []
+    removed_objects: List[str] = []
     for obj in objs:
 
-        souldRemoveData = False
+        old_data_to_remove: Optional[str] = None
+        old_data_type_to_remove: Optional[str] = None
         if obj.data is not None:
-            oldDataToRemove = obj.data.name
-            oldDataTypeToRemove = obj.type
-            souldRemoveData = True
+            old_data_to_remove = obj.data.name
+            old_data_type_to_remove = obj.type
 
         removed_objects.append(obj.name)
         bpy.data.objects.remove(obj)
 
-        if souldRemoveData:
-            remove_useless_specific_data(oldDataToRemove, oldDataTypeToRemove)
+        if old_data_to_remove and old_data_type_to_remove:
+            remove_useless_specific_data(old_data_to_remove, old_data_type_to_remove)
 
     return removed_objects
 
 
-def get_all_collision_and_sockets_obj(objs_list=None):
+def get_all_collision_and_sockets_obj(objs_list: Optional[List[bpy.types.Object]] = None) -> List[bpy.types.Object]:
     # Get any object that can be understood
     # as a collision or a socket by unreal
 
