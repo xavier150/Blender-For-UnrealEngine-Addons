@@ -31,12 +31,18 @@ def get_modular_objects_from_part(part: BFU_UI_ModularSkeletalSpecifiedPartsMesh
                 if skeletal_part.obj:
                     if bfu_export_control.bfu_export_control_utils.is_not_dont_export(skeletal_part.obj):
                         if skeletal_part.obj.library is None: # type: ignore
-                            objects.append(skeletal_part.obj)
+                            if skeletal_part.obj.name in scene.objects:
+                                objects.append(skeletal_part.obj)
+                            else:
+                                print(f"Warning: Object '{skeletal_part.obj.name}' is not present in the current scene!")
                         else:
                             # When the object come from a linked library, get the scene reference
                             scene_obj = scene.objects.get(skeletal_part.obj.name)
                             if scene_obj:
-                                objects.append(scene_obj)
+                                if scene_obj.name in scene.objects:
+                                    objects.append(scene_obj)
+                                else:
+                                    print(f"Warning: Object '{scene_obj.name}' from linked library is not present in the current scene!")
 
             elif skeletal_part.target_type == 'COLLECTION':
                 # Objects from collection target
@@ -44,12 +50,18 @@ def get_modular_objects_from_part(part: BFU_UI_ModularSkeletalSpecifiedPartsMesh
                     for collection_obj in skeletal_part.collection.objects:
                         if bfu_export_control.bfu_export_control_utils.is_not_dont_export(collection_obj):
                             if collection_obj.library is None: # type: ignore
-                                objects.append(collection_obj)
+                                if collection_obj.name in scene.objects:
+                                    objects.append(collection_obj)
+                                else:
+                                    print(f"Warning: Object '{collection_obj.name}' is not present in the current scene!")
                             else:
                                 # When the object come from a linked library, get the scene reference
                                 scene_obj = scene.objects.get(collection_obj.name)
                                 if scene_obj:
-                                    objects.append(scene_obj)
+                                    if scene_obj.name in scene.objects:
+                                        objects.append(scene_obj)
+                                    else:
+                                        print(f"Warning: Object '{scene_obj.name}' from linked library is not present in the current scene!")
     return objects
 
 def modular_mode_is_all_in_one(obj: bpy.types.Object) -> bool:

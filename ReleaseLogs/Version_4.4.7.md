@@ -13,3 +13,5 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
 - Fixed: Addon GitHub link is wrong.
 - Fixed: Open latest release page button in addon preferences does not work.
     (This was due to the use of deprecated function "os.system". Use "webbrowser.open" instead.)
+- Fixed: Export fail with modular skeletal mesh when a object is not in the scene.
+    (Not what will just send a warning in the console log.)
