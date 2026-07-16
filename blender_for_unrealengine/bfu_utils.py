@@ -156,7 +156,7 @@ def remove_useless_specific_data(name: str, data_type: str):
                 bpy.data.armatures.remove(oldData)  # type: ignore
 
 
-def CleanJoinSelect():
+def clean_join_select():
     view_layer = bpy.context.view_layer
     if len(bpy.context.selected_objects) > 1:
         if view_layer.objects.active is None:

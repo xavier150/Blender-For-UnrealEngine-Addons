@@ -23,7 +23,7 @@ from .bfu_light_map_props import BFU_StaticMeshLightMapMode
 
 
 
-def GetExportRealSurfaceArea(obj: bpy.types.Object) -> float:
+def get_export_real_surface_area(obj: bpy.types.Object) -> float:
 
     bbpl.scene_utils.move_to_global_view()
     bbpl.utils.safe_mode_set('OBJECT')
@@ -64,7 +64,7 @@ def GetExportRealSurfaceArea(obj: bpy.types.Object) -> float:
 
     active = view_layer.objects.active
 
-    bfu_utils.CleanJoinSelect()
+    bfu_utils.clean_join_select()
     active = view_layer.objects.active
     area = bfu_basics.get_surface_area(active)
     bfu_utils.clean_delete_objects(list(bpy.context.selected_objects)) # Sequence to list
@@ -72,7 +72,7 @@ def GetExportRealSurfaceArea(obj: bpy.types.Object) -> float:
     bbpl.scene_utils.move_to_local_view()
     return area
 
-def GetCompuntedLightMap(obj: bpy.types.Object) -> int:
+def get_compunted_light_map(obj: bpy.types.Object) -> int:
     if bfu_light_map_props.get_object_static_mesh_light_map_mode(obj).value == BFU_StaticMeshLightMapMode.DEFAULT.value:
         return -1
 
@@ -146,6 +146,6 @@ def get_light_map_additional_data(obj: bpy.types.Object, asset_type: AssetType) 
             asset_data["generate_light_map_uvs"] = obj.bfu_generate_light_map_uvs
 
             asset_data["use_custom_light_map_resolution"] = GetUseCustomLightMapResolution(obj)
-            asset_data["light_map_resolution"] = GetCompuntedLightMap(obj)
+            asset_data["light_map_resolution"] = get_compunted_light_map(obj)
 
     return asset_data

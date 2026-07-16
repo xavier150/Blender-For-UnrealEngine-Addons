@@ -22,12 +22,12 @@ class BFU_OT_ComputLightMap(bpy.types.Operator):
     def execute(self, context: bpy.types.Context) -> Set[Any]:
         obj = context.object
         if obj:
-            new_surface_area: float = bfu_light_map_utils.GetExportRealSurfaceArea(obj)
+            new_surface_area: float = bfu_light_map_utils.get_export_real_surface_area(obj)
             obj.bfu_computed_static_mesh_light_map_res = new_surface_area  # type: ignore
             self.report(
                 {'INFO'},
                 "Light map area updated to " + str(round(new_surface_area)) + ". " +
-                "Compunted Light map: " + str(bfu_light_map_utils.GetCompuntedLightMap(obj)))
+                "Compunted Light map: " + str(bfu_light_map_utils.get_compunted_light_map(obj)))
         return {'FINISHED'}
 
 class BFU_OT_ComputAllLightMap(bpy.types.Operator):

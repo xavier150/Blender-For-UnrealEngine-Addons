@@ -57,7 +57,7 @@ def draw_obj_ui(layout: bpy.types.UILayout, context: bpy.types.Context, obj: bpy
                         SurfaceAreaLightMap.prop(obj, 'bfu_static_mesh_light_map_surface_scale')
                         SurfaceAreaLightMap.prop(obj, 'bfu_static_mesh_light_map_round_power_of_two')
                     if bfu_light_map.bfu_light_map_props.get_object_static_mesh_light_map_mode(obj).value != BFU_StaticMeshLightMapMode.DEFAULT.value:
-                        CompuntedLightMap = str(bfu_light_map_utils.GetCompuntedLightMap(obj))
+                        CompuntedLightMap = str(bfu_light_map_utils.get_compunted_light_map(obj))
                         StaticMeshLightMapRes.label(text='Compunted light map: ' + CompuntedLightMap)
                     bfu_generate_light_map_uvs = panel.row()
                     bfu_generate_light_map_uvs.prop(obj, 'bfu_generate_light_map_uvs')
