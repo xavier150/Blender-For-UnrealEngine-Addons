@@ -16,6 +16,7 @@ from .. import bfu_modular_skeletal_mesh
 from .. import bfu_export_control
 from .. import bfu_base_object
 from .. import bfu_alembic_animation
+from .. import bfu_lod
 
 
 def draw_general_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
@@ -54,12 +55,12 @@ def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: 
             _, panel = accordion.draw(layout)
             if panel:
                 # SkeletalMesh prop
-                if not obj.bfu_export_as_lod_mesh:
+                if not bfu_lod.bfu_lod_props.get_object_export_as_lod_mesh(obj):
                     modular_skeletal_mesh = panel.column()
                     modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_mode")
-                    if obj.bfu_modular_skeletal_mesh_mode == "every_meshs":
+                    if bfu_modular_skeletal_mesh.bfu_modular_skeletal_mesh_utils.modular_mode_is_every_meshs(obj):
                         modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_every_meshs_separate")
-                    if obj.bfu_modular_skeletal_mesh_mode == "specified_parts":
+                    if bfu_modular_skeletal_mesh.bfu_modular_skeletal_mesh_utils.modular_mode_is_specified_parts(obj):
                         bfu_modular_skeletal_mesh.bfu_modular_skeletal_mesh_utils.get_modular_skeletal_specified_parts_meshs_template(obj).draw(modular_skeletal_mesh)
 
 def draw_ui_scene(layout: bpy.types.UILayout):

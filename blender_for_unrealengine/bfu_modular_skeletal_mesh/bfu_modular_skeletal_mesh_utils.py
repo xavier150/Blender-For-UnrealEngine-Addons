@@ -11,6 +11,7 @@ import bpy
 from typing import List
 from .bfu_modular_skeletal_mesh_type import BFU_UI_ModularSkeletalSpecifiedPartsMeshs, BFU_UI_ModularSkeletalSpecifiedPartsMeshItem
 from .. import bfu_export_control
+from . import bfu_modular_skeletal_mesh_props
 
 def get_modular_skeletal_specified_parts_meshs_template(obj: bpy.types.Object) -> BFU_UI_ModularSkeletalSpecifiedPartsMeshs:
     return obj.bfu_modular_skeletal_specified_parts_meshs_template  # type: ignore[attr-defined]
@@ -52,10 +53,10 @@ def get_modular_objects_from_part(part: BFU_UI_ModularSkeletalSpecifiedPartsMesh
     return objects
 
 def modular_mode_is_all_in_one(obj: bpy.types.Object) -> bool:
-    return obj.bfu_modular_skeletal_mesh_mode == 'all_in_one'  # type: ignore[attr-defined]
+    return bfu_modular_skeletal_mesh_props.get_object_modular_skeletal_mesh_mode_enum(obj).is_all_in_one()
 
 def modular_mode_is_every_meshs(obj: bpy.types.Object) -> bool:
-    return obj.bfu_modular_skeletal_mesh_mode == 'every_meshs'  # type: ignore[attr-defined]
+    return bfu_modular_skeletal_mesh_props.get_object_modular_skeletal_mesh_mode_enum(obj).is_every_meshs()
 
 def modular_mode_is_specified_parts(obj: bpy.types.Object) -> bool:
-    return obj.bfu_modular_skeletal_mesh_mode == 'specified_parts'  # type: ignore[attr-defined]
+    return bfu_modular_skeletal_mesh_props.get_object_modular_skeletal_mesh_mode_enum(obj).is_specified_parts()
