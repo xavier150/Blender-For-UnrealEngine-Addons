@@ -119,7 +119,6 @@ class DuplicateData():
             result = get_object_best_parent_after_duplicate(obj, context.selected_objects)
             if result is not None:
                 self.origin_reparenting.append((obj.name, result))
-        print(f"Reparenting list: {self.origin_reparenting}")
         log_4.end_time_log()
 
         log_4 = bfu_export_logs.bfu_process_time_logs_utils.start_time_log(f"Duplicate")
