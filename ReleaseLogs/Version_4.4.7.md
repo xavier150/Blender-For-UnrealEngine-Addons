@@ -8,3 +8,5 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
     (Re-parenting was not applied correctly after duplication, so rescaling was not applied to them.)
 - Fixed: Animation export produce script fail in older versions of Blender (4.3 and below).
     (This was due to the use of a new API in Blender 4.4, which is not available in older versions. "bpy.types.ActionSlot")
+- Fixed: Asset cache don't setup the animation correctly after reinstalling the addon without restarting Blender.
+    (This was due to enum class comparison. Should use "Enum.value == Enum.value" instead of "Enum == Enum" to compare enum values.)
