@@ -50,16 +50,17 @@ def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: 
 
     if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
         accordion = bbpl.blender_layout.layout_accordion.get_accordion(scene, "bfu_modular_skeletal_mesh_properties_expanded")
-        _, panel = accordion.draw(layout)
-        if accordion.is_expanded():
-            # SkeletalMesh prop
-            if not obj.bfu_export_as_lod_mesh:
-                modular_skeletal_mesh = panel.column()
-                modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_mode")
-                if obj.bfu_modular_skeletal_mesh_mode == "every_meshs":
-                    modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_every_meshs_separate")
-                if obj.bfu_modular_skeletal_mesh_mode == "specified_parts":
-                    bfu_modular_skeletal_mesh.bfu_modular_skeletal_mesh_utils.get_modular_skeletal_specified_parts_meshs_template(obj).draw(modular_skeletal_mesh)
+        if accordion:
+            _, panel = accordion.draw(layout)
+            if panel:
+                # SkeletalMesh prop
+                if not obj.bfu_export_as_lod_mesh:
+                    modular_skeletal_mesh = panel.column()
+                    modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_mode")
+                    if obj.bfu_modular_skeletal_mesh_mode == "every_meshs":
+                        modular_skeletal_mesh.prop(obj, "bfu_modular_skeletal_mesh_every_meshs_separate")
+                    if obj.bfu_modular_skeletal_mesh_mode == "specified_parts":
+                        bfu_modular_skeletal_mesh.bfu_modular_skeletal_mesh_utils.get_modular_skeletal_specified_parts_meshs_template(obj).draw(modular_skeletal_mesh)
 
 def draw_ui_scene(layout: bpy.types.UILayout):
     pass

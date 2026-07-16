@@ -508,7 +508,7 @@ def get_object_scale_vector_for_unreal(obj: bpy.types.Object) -> mathutils.Vecto
 
 def get_export_collection_objects(collection: bpy.types.Collection) -> List[bpy.types.Object]:
     # Found all objects that must be exported in a collection
-    found_objs = []
+    found_objs: List[bpy.types.Object] = []
     for select_obj in collection.all_objects:
         if bfu_export_control.bfu_export_control_utils.is_not_dont_export(select_obj):
             if select_obj.name in bpy.context.view_layer.objects:

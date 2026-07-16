@@ -7,10 +7,7 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import os
-import pathlib
 import bpy
-import datetime
 from shutil import copyfile
 from typing import List
 
@@ -39,10 +36,10 @@ def write_all_data_files(exported_asset_log: List[bfu_export_logs.bfu_asset_expo
         Text = bpy.app.translations.pgettext("This file was generated with the addons Blender for UnrealEngine : https://github.com/xavier150/Blender-For-UnrealEngine-Addons", "interface.write_text_additional_track_start") + "\n"
         Text += "" + "\n"
         Text += bfu_export_logs.bfu_asset_export_logs_utils.get_export_asset_logs_details(exported_asset_log)
-        if Text is not None:
-            Filename = bfu_basics.valid_file_name(scene.bfu_file_export_log_name)
-            log_fullpath = root_dirpath / Filename
-            bfu_export_text_files_utils.export_single_text_file(Text, log_fullpath)
+
+        Filename = bfu_basics.valid_file_name(scene.bfu_file_export_log_name)
+        log_fullpath = root_dirpath / Filename
+        bfu_export_text_files_utils.export_single_text_file(Text, log_fullpath)
 
 
     # Import script

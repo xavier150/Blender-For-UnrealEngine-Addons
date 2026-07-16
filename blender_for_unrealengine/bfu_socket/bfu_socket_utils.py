@@ -225,9 +225,10 @@ def convert_to_unrealengine_socket(
     # Convert objects to Unreal Engine Sockets
 
     def deselect_all_except_active() -> None:
-        for obj in bpy.context.selected_objects:
-            if obj != bpy.context.active_object:
-                obj.select_set(False)
+        if bpy.context.selected_objects:
+            for obj in bpy.context.selected_objects:
+                if obj != bpy.context.active_object:
+                    obj.select_set(False)
 
     converted_objs: List[bpy.types.Object] = []
 
@@ -269,15 +270,18 @@ def convert_to_unrealengine_socket(
 def convert_select_to_unrealengine_socket(socket_type: SocketType) -> List[bpy.types.Object]:
     # Convert selected objects to Unreal Engine Sockets
 
-    socket_owner = bpy.context.active_object
-    objs_to_convert = bpy.context.selected_objects
-    if socket_owner is None:
+    if bpy.context.selected_objects is None:
+        print("No selected objects found!")
+        return []
+    if bpy.context.active_object is None:
         print("No active object found!")
         return []
-    if len(objs_to_convert) < 2:
+    if len(bpy.context.selected_objects) < 2:
         print("Please select two objects. (Active object is the owner of the collision)")
         return []
-    return convert_to_unrealengine_socket(socket_owner, objs_to_convert, socket_type)
+    
+    # Convert sequence to list.
+    return convert_to_unrealengine_socket(bpy.context.active_object, list(bpy.context.selected_objects), socket_type)
 
 def get_import_skeletal_mesh_socket_script_command(obj: bpy.types.Object) -> str:
 

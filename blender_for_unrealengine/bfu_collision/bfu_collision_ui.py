@@ -124,7 +124,7 @@ def draw_and_get_ready_for_convert_collider(layout: bpy.types.UILayout, context:
         layout.label(text="Switch to Object Mode.", icon='INFO')
     else:
         if bbpl.utils.found_type_in_selection("MESH", False):
-            if bbpl.utils.active_type_is_not("ARMATURE") and len(bpy.context.selected_objects) > 1:
+            if bbpl.utils.active_type_is_not("ARMATURE") and bpy.context.selected_objects and len(bpy.context.selected_objects) > 1:
                 layout.label(text="Click on button for convert to collider.", icon='INFO')
                 return True
             else:

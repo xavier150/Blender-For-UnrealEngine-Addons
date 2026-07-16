@@ -40,7 +40,10 @@ def GetExportRealSurfaceArea(obj: bpy.types.Object) -> float:
     
     view_layer = bpy.context.view_layer
     if view_layer is None:
-        return 0.0
+        raise ValueError("No active view layer found!")
+    
+    if bpy.context.selected_objects is None:
+        raise ValueError("No selected objects found!")
 
     bfu_export.bfu_export_utils.apply_select_needed_modifiers_for_export()
     bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
@@ -64,7 +67,7 @@ def GetExportRealSurfaceArea(obj: bpy.types.Object) -> float:
     bfu_utils.CleanJoinSelect()
     active = view_layer.objects.active
     area = bfu_basics.get_surface_area(active)
-    bfu_utils.clean_delete_objects(bpy.context.selected_objects)
+    bfu_utils.clean_delete_objects(list(bpy.context.selected_objects)) # Sequence to list
     SavedSelect.reset_select()
     bbpl.scene_utils.move_to_local_view()
     return area

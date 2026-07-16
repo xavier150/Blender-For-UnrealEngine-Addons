@@ -62,14 +62,15 @@ class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
                 recursive_list = bfu_export_control.bfu_export_control_utils.get_all_export_objects(scene)
 
                 events.stop_last_and_start_new_event("filter recursive objects")
-                for obj in bpy.context.selected_objects:
-                    if obj in recursive_list:
-                        if obj not in obj_list:
-                            obj_list.append(obj)
-                    parent_target = get_have_recursive_parent_to_export(obj)
-                    if parent_target is not None:
-                        if parent_target not in obj_list:
-                            obj_list.append(parent_target)
+                if bpy.context.selected_objects:
+                    for obj in bpy.context.selected_objects:
+                        if obj in recursive_list:
+                            if obj not in obj_list:
+                                obj_list.append(obj)
+                        parent_target = get_have_recursive_parent_to_export(obj)
+                        if parent_target is not None:
+                            if parent_target not in obj_list:
+                                obj_list.append(parent_target)
                 events.stop_last_event()
 
             events.add_sub_event("Create object assets class")
@@ -113,14 +114,15 @@ class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
             elif export_filter.value in [BFU_ExportSelectionFilterEnum.ONLY_OBJECT.value, BFU_ExportSelectionFilterEnum.ONLY_OBJECT_AND_ACTIVE.value]:
                 armature_recursive_list = bfu_export_control.bfu_export_control_utils.get_all_export_armatures(scene)
 
-                for obj in bpy.context.selected_objects:
-                    if obj in armature_recursive_list:
-                        if obj not in armature_list:
-                            armature_list.append(obj)
-                    armature_parent_target = get_have_recursive_parent_to_export(obj)
-                    if armature_parent_target is not None:
-                        if armature_parent_target not in armature_list:
-                            armature_list.append(armature_parent_target)
+                if bpy.context.selected_objects:
+                    for obj in bpy.context.selected_objects:
+                        if obj in armature_recursive_list:
+                            if obj not in armature_list:
+                                armature_list.append(obj)
+                        armature_parent_target = get_have_recursive_parent_to_export(obj)
+                        if armature_parent_target is not None:
+                            if armature_parent_target not in armature_list:
+                                armature_list.append(armature_parent_target)
 
             events.stop_last_and_start_new_event("-> S2")
 
