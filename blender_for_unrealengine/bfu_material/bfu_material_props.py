@@ -85,10 +85,10 @@ def get_object_import_textures(obj: bpy.types.Object) -> bool:
 def get_object_flip_normal_map_green_channel(obj: bpy.types.Object) -> bool:
     return obj.bfu_flip_normal_map_green_channel  # type: ignore
 
-def get_reorder_material_to_fbx_order(obj: bpy.types.Object) -> bool:
+def get_object_reorder_material_to_fbx_order(obj: bpy.types.Object) -> bool:
     return obj.bfu_reorder_material_to_fbx_order  # type: ignore
 
-def get_object_material_search_location_enum(obj: bpy.types.Object) -> BFU_MaterialSearchLocationEnum:
+def get_object_material_search_location(obj: bpy.types.Object) -> BFU_MaterialSearchLocationEnum:
     return BFU_MaterialSearchLocationEnum(obj.bfu_material_search_location)  # type: ignore
 
 

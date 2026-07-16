@@ -52,8 +52,6 @@ def get_material_asset_additional_data(obj: bpy.types.Object, asset_type: AssetT
 
         if TYPE_CHECKING:
             class FakeObject(bpy.types.Object):
-                bfu_export_materials: bool = False
-                bfu_export_textures: bool = False
                 bfu_flip_normal_map_green_channel: bool = False
                 bfu_reorder_material_to_fbx_order: bool = False
                 bfu_material_search_location: str = ""
@@ -64,7 +62,7 @@ def get_material_asset_additional_data(obj: bpy.types.Object, asset_type: AssetT
             asset_data["import_materials"] = bfu_material_props.get_object_export_materials(obj)
             asset_data["import_textures"] = bfu_material_props.get_object_export_textures(obj)
 
-            asset_data["flip_normal_map_green_channel"] = obj.bfu_flip_normal_map_green_channel
-            asset_data["reorder_material_to_fbx_order"] = obj.bfu_reorder_material_to_fbx_order
-            asset_data["material_search_location"] = obj.bfu_material_search_location
+            asset_data["flip_normal_map_green_channel"] = bfu_material_props.get_object_flip_normal_map_green_channel(obj)
+            asset_data["reorder_material_to_fbx_order"] = bfu_material_props.get_object_reorder_material_to_fbx_order(obj)
+            asset_data["material_search_location"] = bfu_material_props.get_object_material_search_location(obj)
     return asset_data
