@@ -29,6 +29,7 @@ from . import bfu_addon_prefs
 from . import bfu_adv_object #TODO Move the use outside utils to avoid import cycle
 from . import bfu_anim_action_adv #TODO Move the use outside utils to avoid import cycle
 from . import bfu_anim_nla_adv #TODO Move the use outside utils to avoid import cycle
+from . import bfu_skeletal_mesh #TODO Move the use outside utils to avoid import cycle
 
 class MarkerSequence():
     def __init__(self, marker: Optional[bpy.types.TimelineMarker] = None):
@@ -1008,7 +1009,7 @@ def get_armature_root_bones(armature: bpy.types.Object) -> List[bpy.types.Bone]:
     root_bones: List[bpy.types.Bone] = []
     if isinstance(armature.data, bpy.types.Armature):
 
-        if armature.bfu_export_deform_only:
+        if bfu_skeletal_mesh.bfu_skeletal_mesh_props.get_object_export_deform_only(armature):
             for bone in armature.data.bones:
                 if bone.use_deform:
                     rootBone = bfu_basics.get_root_bone_parent(bone)
