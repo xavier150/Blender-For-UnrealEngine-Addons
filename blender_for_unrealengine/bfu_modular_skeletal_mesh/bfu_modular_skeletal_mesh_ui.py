@@ -28,7 +28,7 @@ def draw_general_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
     
     if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
         if bfu_base_object.bfu_base_obj_props.get_scene_object_properties_expanded(scene):
-            if bfu_export_control.bfu_export_control_utils.is_export_recursive(obj):
+            if bfu_export_control.bfu_export_control_utils.is_export_self(obj):
                 if not bfu_alembic_animation.bfu_alembic_animation_props.get_object_export_as_alembic_animation(obj):
                     AssetType2 = layout.column()
                     # Show asset type
@@ -45,7 +45,7 @@ def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: 
     is_skeletal_mesh = bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj)
     if is_skeletal_mesh is False:
         return
-    if bfu_export_control.bfu_export_control_utils.is_not_export_recursive(obj):
+    if bfu_export_control.bfu_export_control_utils.is_not_export_self(obj):
         return
 
     if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):

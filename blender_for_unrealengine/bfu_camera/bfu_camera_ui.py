@@ -74,7 +74,7 @@ def draw_ui_object_camera(layout: bpy.types.UILayout, context: bpy.types.Context
                                     icon='INFO'
                                 )
 
-                camera_ui_pop.enabled = bfu_export_control.bfu_export_control_utils.is_export_recursive(obj)
+                camera_ui_pop.enabled = bfu_export_control.bfu_export_control_utils.is_export_self(obj)
                 camera_ui.operator("object.bfu_copy_active_camera_data", icon="COPYDOWN")
 
 

@@ -23,7 +23,7 @@ def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: 
         return
 
     # Hide filters
-    if bfu_export_control.bfu_export_control_utils.is_not_export_recursive(obj):
+    if bfu_export_control.bfu_export_control_utils.is_not_export_self(obj):
         return
     if bfu_alembic_animation.bfu_alembic_animation_utils.is_alembic_animation(obj):
         return

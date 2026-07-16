@@ -22,31 +22,75 @@ def get_object_export_type(obj: bpy.types.Object) -> BFU_ExportTypeEnum:
     print(f"Warning: Object '{obj.name}' has an invalid export type '{obj.bfu_export_type}'. Using default export type.")  # type: ignore
     return BFU_ExportTypeEnum.default()
 
-# Check functions
+# Direct Type Check functions
 
 def is_auto(obj: bpy.types.Object) -> bool:
     """
     Check if the object is set to auto export.
     """
-    return get_object_export_type(obj) == BFU_ExportTypeEnum.AUTO
+    return get_object_export_type(obj).is_auto()
+
+def is_not_auto(obj: bpy.types.Object) -> bool:
+    """
+    Check if the object is not set to auto export.
+    """
+    return not is_auto(obj)
+
+def is_export_self_only(obj: bpy.types.Object) -> bool:
+    """
+    Check if the object is set to export self.
+    """
+    return get_object_export_type(obj).is_export_self_only()
+
+def is_not_export_self_only(obj: bpy.types.Object) -> bool:
+    """
+    Check if the object is not set to export self.
+    """
+    return not is_export_self_only(obj)
 
 def is_export_recursive(obj: bpy.types.Object) -> bool:
     """
     Check if the object is set to export recursively.
     """
-    return get_object_export_type(obj) == BFU_ExportTypeEnum.EXPORT_RECURSIVE
+    return get_object_export_type(obj).is_export_recursive()
 
 def is_not_export_recursive(obj: bpy.types.Object) -> bool:
     """
     Check if the object is not set to export recursively.
     """
-    return get_object_export_type(obj) != BFU_ExportTypeEnum.EXPORT_RECURSIVE
+    return not is_export_recursive(obj)
+
+def is_dont_export(obj: bpy.types.Object) -> bool:
+    """
+    Check if the object is set to not export.
+    """
+    return get_object_export_type(obj).is_dont_export()
+
+def is_not_dont_export(obj: bpy.types.Object) -> bool:
+    """
+    Check if the object is not set to not export.
+    """
+    return not is_dont_export(obj)
+
+# Type Check functions
+
+def is_export_self(obj: bpy.types.Object) -> bool:
+    """
+    Check if the object is set to export self or export recursively.
+    """
+    return get_object_export_type(obj).is_export_self()
+
+def is_not_export_self(obj: bpy.types.Object) -> bool:
+    """
+    Check if the object is not set to export self or export recursively.
+    """
+    return not is_export_self(obj)
 
 def is_auto_or_export_recursive(obj: bpy.types.Object) -> bool:
     """
     Check if the object is set to auto or export recursively.
     """
-    return get_object_export_type(obj) in (BFU_ExportTypeEnum.AUTO, BFU_ExportTypeEnum.EXPORT_RECURSIVE)
+    return get_object_export_type(obj).is_auto() or get_object_export_type(obj).is_export_recursive()
 
 # Set functions
 

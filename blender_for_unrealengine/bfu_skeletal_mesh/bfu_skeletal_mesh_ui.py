@@ -29,7 +29,7 @@ def draw_general_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):
         accordion = bbpl.blender_layout.layout_accordion.get_accordion(scene, "bfu_object_properties_expanded")
         if accordion:
             if accordion.is_expanded():
-                if bfu_export_control.bfu_export_control_utils.is_export_recursive(obj):
+                if bfu_export_control.bfu_export_control_utils.is_export_self(obj):
                     if not bfu_alembic_animation.bfu_alembic_animation_props.get_object_export_as_alembic_animation(obj):
                         skeletal_mesh_ui = layout.column()
                         # Show asset type
@@ -42,7 +42,7 @@ def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: 
         return
     if is_skeletal_mesh is False:
         return
-    if bfu_export_control.bfu_export_control_utils.is_not_export_recursive(obj):
+    if bfu_export_control.bfu_export_control_utils.is_not_export_self(obj):
         return
     if bfu_lod.bfu_lod_props.get_object_export_as_lod_mesh(obj):
         return

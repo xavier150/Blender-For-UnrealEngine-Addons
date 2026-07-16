@@ -25,7 +25,7 @@ def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: 
     scene = bpy.context.scene
 
     # Hide filters
-    if bfu_export_control.bfu_export_control_utils.is_not_export_recursive(obj):
+    if bfu_export_control.bfu_export_control_utils.is_not_export_self(obj):
         return
     if obj.bfu_export_as_lod_mesh:
         return

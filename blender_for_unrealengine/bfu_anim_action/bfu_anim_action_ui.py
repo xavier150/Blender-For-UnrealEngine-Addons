@@ -26,8 +26,9 @@ def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: 
         return
 
     # Hide filters
-    if bfu_export_control.bfu_export_control_utils.is_not_export_recursive(obj):
+    if bfu_export_control.bfu_export_control_utils.is_not_export_self(obj):
         return
+    
     is_skeletal_mesh = bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_skeletal_mesh(obj)
     is_camera = bfu_camera.bfu_camera_utils.is_camera(obj)
     is_alembic_animation = bfu_alembic_animation.bfu_alembic_animation_utils.is_alembic_animation(obj)

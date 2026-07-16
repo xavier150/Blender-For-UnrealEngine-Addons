@@ -58,7 +58,7 @@ def fix_collision_export_type(obj_list: List[bpy.types.Object]) -> int:
     # Corrects bad properties
     fixed_collisions_export = 0
     for obj in obj_list:
-        if bfu_export_control.bfu_export_control_utils.is_export_recursive(obj):
+        if bfu_export_control.bfu_export_control_utils.is_export_self(obj):
             bfu_export_control.bfu_export_control_utils.set_auto(obj)
             fixed_collisions_export += 1
     return fixed_collisions_export

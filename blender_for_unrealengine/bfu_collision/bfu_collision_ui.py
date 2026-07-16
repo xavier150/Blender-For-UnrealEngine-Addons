@@ -31,7 +31,7 @@ def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: 
         return
     if not bfu_utils.draw_proxy_propertys(obj):
         return
-    if bfu_export_control.bfu_export_control_utils.is_not_export_recursive(obj):
+    if bfu_export_control.bfu_export_control_utils.is_not_export_self(obj):
         return
     if is_static_mesh == False and is_skeletal_mesh == False:
         return

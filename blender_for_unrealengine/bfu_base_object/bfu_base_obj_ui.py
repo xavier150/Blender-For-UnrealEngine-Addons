@@ -42,7 +42,7 @@ def draw_general_ui_object(layout: bpy.types.UILayout, context: bpy.types.Contex
                 if asset_class:
                     asset_class.draw_ui_export_procedure(export_type, context, obj)
 
-                if bfu_export_control.bfu_export_control_utils.is_export_recursive(obj):
+                if bfu_export_control.bfu_export_control_utils.is_export_self(obj):
 
                     folderNameProperty = panel.column()
                     folderNameProperty.prop(obj, 'bfu_export_folder_name', icon='FILE_FOLDER')
