@@ -8,7 +8,7 @@
 # ----------------------------------------------
 
 
-from typing import List
+from typing import List, Optional
 import bpy
 from .. import bbpl
 
@@ -38,19 +38,19 @@ def get_object_use_static_mesh_lod_group(obj: bpy.types.Object) -> bool:
 def get_object_static_mesh_lod_group(obj: bpy.types.Object) -> str:
     return obj.bfu_static_mesh_lod_group # type: ignore
 
-def get_object_lod_target1(obj: bpy.types.Object) -> bpy.types.Object:
+def get_object_lod_target1(obj: bpy.types.Object) -> Optional[bpy.types.Object]:
     return obj.bfu_lod_target1 # type: ignore
 
-def get_object_lod_target2(obj: bpy.types.Object) -> bpy.types.Object:
+def get_object_lod_target2(obj: bpy.types.Object) -> Optional[bpy.types.Object]:
     return obj.bfu_lod_target2 # type: ignore
 
-def get_object_lod_target3(obj: bpy.types.Object) -> bpy.types.Object:
+def get_object_lod_target3(obj: bpy.types.Object) -> Optional[bpy.types.Object]:
     return obj.bfu_lod_target3 # type: ignore
 
-def get_object_lod_target4(obj: bpy.types.Object) -> bpy.types.Object:
+def get_object_lod_target4(obj: bpy.types.Object) -> Optional[bpy.types.Object]:
     return obj.bfu_lod_target4 # type: ignore
 
-def get_object_lod_target5(obj: bpy.types.Object) -> bpy.types.Object:
+def get_object_lod_target5(obj: bpy.types.Object) -> Optional[bpy.types.Object]:
     return obj.bfu_lod_target5 # type: ignore
 
 # -------------------------------------------------------------------

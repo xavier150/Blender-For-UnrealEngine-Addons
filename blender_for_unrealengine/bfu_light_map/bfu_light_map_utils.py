@@ -7,8 +7,10 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
+from typing import Dict, Any, Optional, List
+
 import bpy
-from typing import Dict, TYPE_CHECKING, Any, Optional, List
+
 from .. import bpl
 from .. import bbpl
 from .. import bfu_basics
@@ -138,12 +140,7 @@ def get_light_map_additional_data(obj: bpy.types.Object, asset_type: AssetType) 
     if asset_type in [AssetType.STATIC_MESH]:
         if obj:
 
-            if TYPE_CHECKING:
-                class FakeObject(bpy.types.Object):
-                    bfu_generate_light_map_uvs: bool = False
-                obj = FakeObject()
-
-            asset_data["generate_light_map_uvs"] = obj.bfu_generate_light_map_uvs
+            asset_data["generate_light_map_uvs"] = bfu_light_map_props.get_object_generate_light_map_uvs(obj)
 
             asset_data["use_custom_light_map_resolution"] = GetUseCustomLightMapResolution(obj)
             asset_data["light_map_resolution"] = get_compunted_light_map(obj)

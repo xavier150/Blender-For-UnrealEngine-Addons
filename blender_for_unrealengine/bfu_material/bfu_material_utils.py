@@ -7,7 +7,7 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-from typing import Dict, Any, TYPE_CHECKING, Literal
+from typing import Dict, Any, Literal
 
 import bpy
 
@@ -49,13 +49,6 @@ def get_material_asset_data(obj: bpy.types.Object, asset_type: AssetType) -> Dic
 def get_material_asset_additional_data(obj: bpy.types.Object, asset_type: AssetType) -> Dict[str, Any]:
     asset_data: Dict[str, Any] = {}
     if obj:
-
-        if TYPE_CHECKING:
-            class FakeObject(bpy.types.Object):
-                bfu_flip_normal_map_green_channel: bool = False
-                bfu_reorder_material_to_fbx_order: bool = False
-                bfu_material_search_location: str = ""
-            obj = FakeObject()
 
         if asset_type in [AssetType.STATIC_MESH, AssetType.SKELETAL_MESH]:
             # Set import material/texture only is export materials/textures is enabled

@@ -7,12 +7,14 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from enum import Enum
 import pathlib
-from typing import List, Optional, Tuple, Callable, Any, Dict, TYPE_CHECKING
+from typing import List, Optional, Tuple, Callable, Any, Dict
 from abc import ABC, abstractmethod
 from pathlib import Path
+
+import bpy
+
 from ..bfu_simple_file_type_enum import BFU_FileTypeEnum
 from .. import bfu_basics
 from .. import bfu_base_collection
@@ -479,20 +481,15 @@ class BFU_ObjectAssetClass(BFU_BaseAssetClass):
         super().__init__()
 
     def get_package_file_name(self, data: bpy.types.Object, details: Any = None, desired_name: str = "", without_extension: bool = False) -> str:
+     
+        use_custom_export_name = bfu_base_object.bfu_base_obj_props.get_object_use_custom_export_name(data)
+        custom_export_name = bfu_base_object.bfu_base_obj_props.get_object_custom_export_name(data)
 
-        # Use custom export name if set
-        if TYPE_CHECKING:
-            class FakeObject(bpy.types.Object): 
-                bfu_use_custom_export_name: str = ""
-                bfu_custom_export_name: str = ""
-            data = FakeObject()
-        
-
-        if data.bfu_use_custom_export_name and data.bfu_custom_export_name:
+        if use_custom_export_name and custom_export_name:
             if without_extension:
-                return bfu_basics.valid_file_name(data.bfu_custom_export_name)
+                return bfu_basics.valid_file_name(custom_export_name)
             else:
-                return bfu_basics.valid_file_name(data.bfu_custom_export_name + self.get_package_file_type(data).get_file_extension())
+                return bfu_basics.valid_file_name(custom_export_name + self.get_package_file_type(data).get_file_extension())
 
         # Use desired name if provided and add prefix and suffix
         base_name = desired_name if desired_name else data.name

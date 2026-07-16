@@ -7,15 +7,18 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
+from pathlib import Path
 
 import bpy
-from pathlib import Path
-from typing import TYPE_CHECKING
+
 from .. import bfu_export
 from .. import bbpl
 from ..bbpl.utils import SaveUserRenderSimplify
 from .. import bfu_utils
 from .. import bfu_vertex_color
+from .. import bfu_uv_map
+from .. import bfu_custom_property
+from .. import bfu_adv_object
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetPackage
 from ..bfu_export_logs.bfu_process_time_logs_types import SafeTimeGroup
 from . import bfu_export_procedure
@@ -83,37 +86,21 @@ def export_collection_as_static_mesh(
         is_skeletal=False
     )
 
-    if TYPE_CHECKING:
-        class FakeCollection(bpy.types.Collection):
-            bfu_static_collection_export_procedure: str
-        col = FakeCollection()  # type: ignore
-        class FakeObject(bpy.types.Object):
-            bfu_static_export_procedure: str
-            bfu_convert_geometry_node_attribute_to_uv: bool
-            bfu_convert_geometry_node_attribute_to_uv_name: str
-            bfu_fbx_export_with_custom_props: bool
-            bfu_export_deform_only: bool
-            bfu_export_with_meta_data: bool
-            bfu_mirror_symmetry_right_side_bones: bool
-            bfu_use_ue_mannequin_bone_alignment: bool
-            bfu_disable_free_scale_animation: bool
-            bfu_fbx_export_with_custom_props: bool
-        active = FakeObject()  # type: ignore
-
     # [MAKE REAL COPY] Make objects real to be able to edit before export
     bfu_export.bfu_export_utils.convert_selected_to_mesh()
     bfu_export.bfu_export_utils.make_select_visual_real()
 
     bfu_export.bfu_export_utils.apply_select_needed_modifiers_for_export()
-    for selected_obj in bpy.context.selected_objects:
-        if active.bfu_convert_geometry_node_attribute_to_uv:
-            attrib_name = active.bfu_convert_geometry_node_attribute_to_uv_name
-            bfu_export.bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
-        bfu_vertex_color.bfu_vertex_color_utils.SetVertexColorForUnrealExport(selected_obj)
-        bfu_export.bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
-        bfu_export.bfu_export_utils.SetSocketsExportTransform(selected_obj)
-        bfu_export.bfu_export_utils.SetSocketsExportName(selected_obj)
-    bfu_export.bfu_export_utils.RemoveMaterialsOnCollisionMeshes(bpy.context.selected_objects)
+    if bpy.context.selected_objects:
+        for selected_obj in bpy.context.selected_objects:
+            if bfu_uv_map.bfu_uv_map_props.get_object_convert_geometry_node_attribute_to_uv(active):
+                attrib_name = bfu_uv_map.bfu_uv_map_props.get_object_convert_geometry_node_attribute_to_uv_name(active)
+                bfu_export.bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
+            bfu_vertex_color.bfu_vertex_color_utils.SetVertexColorForUnrealExport(selected_obj)
+            bfu_export.bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
+            bfu_export.bfu_export_utils.SetSocketsExportTransform(selected_obj)
+            bfu_export.bfu_export_utils.SetSocketsExportName(selected_obj)
+        bfu_export.bfu_export_utils.RemoveMaterialsOnCollisionMeshes(list(bpy.context.selected_objects))
 
     # [PREPARE SCENE FOR EXPORT]
     # Prepare scene for export (frame range, simplefying, etc.)
@@ -135,12 +122,12 @@ def export_collection_as_static_mesh(
             global_scale=1,
             object_types={'EMPTY', 'CAMERA', 'LIGHT', 'MESH', 'OTHER'},
             colors_type=bfu_vertex_color.bfu_vertex_color_utils.get_export_colors_type(active),
-            use_custom_props=active.bfu_fbx_export_with_custom_props,
+            use_custom_props=bfu_custom_property.bfu_custom_property_props.get_object_fbx_export_with_custom_props(active),
             mesh_smooth_type="FACE",
             add_leaf_bones=False,
             # use_armature_deform_only=active.bfu_export_deform_only,
             bake_anim=False,
-            use_metadata=active.bfu_export_with_meta_data,
+            use_metadata=bfu_adv_object.bfu_adv_obj_props.get_object_export_with_meta_data(active),
             # primary_bone_axis=bfu_export_utils.get_final_export_primary_bone_axis(active),
             # secondary_bone_axis=bfu_export_utils.get_final_export_secondary_bone_axis(active),
             # use_space_transform=bfu_export_utils.get_export_use_space_transform(active),
@@ -181,13 +168,13 @@ def export_collection_as_static_mesh(
     saved_selection_names.restore_names()
     saved_simplify.reset_scene()
 
+    if bpy.context.selected_objects:
+        for obj in bpy.context.selected_objects:
+            bfu_vertex_color.bfu_vertex_color_utils.clear_vertex_color_for_unreal_export(obj)
+            bfu_export.bfu_export_utils.reset_sockets_export_name(obj)
+            bfu_export.bfu_export_utils.reset_sockets_transform(obj)
 
-    for obj in bpy.context.selected_objects:
-        bfu_vertex_color.bfu_vertex_color_utils.clear_vertex_color_for_unreal_export(obj)
-        bfu_export.bfu_export_utils.reset_sockets_export_name(obj)
-        bfu_export.bfu_export_utils.reset_sockets_transform(obj)
-
-    bfu_utils.clean_delete_objects(bpy.context.selected_objects)
+        bfu_utils.clean_delete_objects(list(bpy.context.selected_objects))
     for data in duplicate_data.data_to_remove:
         data.remove_data()
 

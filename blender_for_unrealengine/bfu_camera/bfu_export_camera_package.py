@@ -8,7 +8,7 @@
 # ----------------------------------------------
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Tuple, Optional
+from typing import Tuple, Optional
 
 import bpy
 
@@ -20,6 +20,8 @@ from .. import bfu_export
 from ..bfu_export_logs.bfu_process_time_logs_types import SafeTimeGroup
 from .. import bfu_anim_base
 from .. import bfu_adv_object
+from .. import bfu_custom_property
+from .. import bfu_skeletal_mesh
 from . import bfu_export_procedure
 from .bfu_export_procedure import BFU_CameraExportProcedure
 
@@ -82,21 +84,6 @@ def export_camera_animation(
     active: bpy.types.Object = bpy.context.active_object
     bfu_export.bfu_export_utils.set_object_export_name(obj=active, is_skeletal=False)
 
-    if TYPE_CHECKING:
-        class FakeObject(bpy.types.Object):
-            bfu_camera_export_procedure: str
-            bfu_convert_geometry_node_attribute_to_uv: bool
-            bfu_convert_geometry_node_attribute_to_uv_name: str
-            bfu_fbx_export_with_custom_props: bool
-            bfu_export_deform_only: bool
-            bfu_export_with_meta_data: bool
-            bfu_mirror_symmetry_right_side_bones: bool
-            bfu_use_ue_mannequin_bone_alignment: bool
-            bfu_disable_free_scale_animation: bool
-            bfu_fbx_export_with_custom_props: bool
-            bfu_simplify_anim_for_export: float
-        active = FakeObject()  # type: ignore
-
     # Select and rescale camera for export
     active.delta_scale *= 0.01
 
@@ -122,20 +109,20 @@ def export_camera_animation(
             global_scale=bfu_adv_object.bfu_adv_obj_props.get_object_export_global_scale(active),
             apply_scale_options='FBX_SCALE_NONE',
             object_types={'CAMERA'},
-            use_custom_props=active.bfu_fbx_export_with_custom_props,
+            use_custom_props=bfu_custom_property.bfu_custom_property_props.get_object_fbx_export_with_custom_props(active),
             add_leaf_bones=False,
-            use_armature_deform_only=active.bfu_export_deform_only,
+            use_armature_deform_only=bfu_skeletal_mesh.bfu_skeletal_mesh_props.get_object_export_deform_only(active),
             bake_anim=True,
             bake_anim_use_nla_strips=False,
             bake_anim_use_all_actions=False,
             bake_anim_force_startend_keying=True,
             bake_anim_step=bfu_anim_base.bfu_anim_base_props.get_object_sample_anim_for_export(active),
-            bake_anim_simplify_factor=active.bfu_simplify_anim_for_export,
+            bake_anim_simplify_factor=bfu_anim_base.bfu_anim_base_props.get_object_simplify_anim_for_export(active),
             path_mode='AUTO',
             embed_textures=False,
             batch_mode='OFF',
             use_batch_own_dir=True,
-            use_metadata=active.bfu_export_with_meta_data,
+            use_metadata=bfu_adv_object.bfu_adv_obj_props.get_object_export_with_meta_data(active),
             primary_bone_axis=bfu_export.bfu_export_utils.get_final_fbx_export_primary_bone_axis(active),
             secondary_bone_axis=bfu_export.bfu_export_utils.get_final_fbx_export_secondary_bone_axis(active),
             use_space_transform=bfu_export.bfu_export_utils.get_static_fbx_export_use_space_transform(active),

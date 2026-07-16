@@ -7,10 +7,11 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
+from pathlib import Path
+from typing import List, Tuple, Optional
 
 import bpy
-from pathlib import Path
-from typing import List, TYPE_CHECKING, Tuple, Optional
+
 from .. import bbpl
 from .. import bfu_utils
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetPackage
@@ -77,20 +78,6 @@ def export_alembic_animation(
         raise ValueError("No active object found after duplicate!")
     active: bpy.types.Object = bpy.context.active_object
     bfu_export.bfu_export_utils.set_object_export_name(obj=active, is_skeletal=False)
-
-    if TYPE_CHECKING:
-        class FakeObject(bpy.types.Object):
-            bfu_alembic_export_procedure: str
-            bfu_convert_geometry_node_attribute_to_uv: bool
-            bfu_convert_geometry_node_attribute_to_uv_name: str
-            bfu_fbx_export_with_custom_props: bool
-            bfu_export_deform_only: bool
-            bfu_export_with_meta_data: bool
-            bfu_mirror_symmetry_right_side_bones: bool
-            bfu_use_ue_mannequin_bone_alignment: bool
-            bfu_disable_free_scale_animation: bool
-            bfu_fbx_export_with_custom_props: bool
-        active = FakeObject()  # type: ignore
 
     bfu_utils.apply_export_transform(active, "Object")
 
