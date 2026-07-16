@@ -11,31 +11,33 @@ from typing import Dict, Any, TYPE_CHECKING, Literal
 
 import bpy
 
+from .. import bfu_anim_base
+from . import bfu_material_props
 from .. bfu_assets_manager.bfu_asset_manager_type import AssetType
 
 
 def get_gltf_export_materials(obj: bpy.types.Object, is_animation: bool = False) -> 'Literal["EXPORT", "PLACEHOLDER", "VIEWPORT", "NONE"]':
     if is_animation:
-        if obj.bfu_export_animation_without_mesh:
+        if bfu_anim_base.bfu_anim_base_props.get_object_export_animation_without_mesh(obj):
             return "NONE"
-        elif obj.bfu_export_animation_without_materials:
+        elif bfu_anim_base.bfu_anim_base_props.get_object_export_animation_without_materials(obj):
             return "NONE"
 
-    if obj.bfu_export_materials:
+    if bfu_material_props.get_object_export_materials(obj):
         return "EXPORT"
     else:
         return "PLACEHOLDER"
 
 def get_gltf_export_textures(obj: bpy.types.Object, is_animation: bool = False) -> 'Literal["AUTO", "JPEG", "WEBP", "NONE"]':
     if is_animation:
-        if obj.bfu_export_animation_without_mesh:
+        if bfu_anim_base.bfu_anim_base_props.get_object_export_animation_without_mesh(obj):
             return "NONE"
-        elif obj.bfu_export_animation_without_materials:
+        elif bfu_anim_base.bfu_anim_base_props.get_object_export_animation_without_materials(obj):
             return "NONE"  
-        elif obj.bfu_export_animation_without_textures:
+        elif bfu_anim_base.bfu_anim_base_props.get_object_export_animation_without_textures(obj):
             return "NONE"
 
-    if obj.bfu_export_textures and obj.bfu_export_materials:
+    if bfu_material_props.get_object_export_textures(obj) and bfu_material_props.get_object_export_materials(obj):
         return "AUTO"
     else:
         return "NONE"
@@ -59,8 +61,8 @@ def get_material_asset_additional_data(obj: bpy.types.Object, asset_type: AssetT
 
         if asset_type in [AssetType.STATIC_MESH, AssetType.SKELETAL_MESH]:
             # Set import material/texture only is export materials/textures is enabled
-            asset_data["import_materials"] = obj.bfu_import_materials
-            asset_data["import_textures"] = obj.bfu_import_textures
+            asset_data["import_materials"] = bfu_material_props.get_object_export_materials(obj)
+            asset_data["import_textures"] = bfu_material_props.get_object_export_textures(obj)
 
             asset_data["flip_normal_map_green_channel"] = obj.bfu_flip_normal_map_green_channel
             asset_data["reorder_material_to_fbx_order"] = obj.bfu_reorder_material_to_fbx_order
