@@ -7,9 +7,11 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from typing import List, Tuple, TYPE_CHECKING, Optional
 from pathlib import Path
+
+import bpy
+
 from .. import bbpl
 from ..bbpl.utils import SaveUserRenderSimplify
 from .. import bfu_utils
@@ -20,6 +22,7 @@ from .. import bfu_material
 from .. import bfu_addon_prefs
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetPackage
 from .. import bfu_export
+from .. import bfu_anim_base
 
 
 def process_nla_animation_export_from_package(
@@ -184,7 +187,7 @@ def process_nla_anim_export(
             bake_anim_use_nla_strips=False,
             bake_anim_use_all_actions=False,
             bake_anim_force_startend_keying=True,
-            bake_anim_step=bfu_utils.get_anim_sample(active),
+            bake_anim_step=bfu_anim_base.bfu_anim_base_props.get_object_sample_anim_for_export(active),
             bake_anim_simplify_factor=active.bfu_simplify_anim_for_export,
             path_mode='AUTO',
             embed_textures=False,
@@ -217,7 +220,7 @@ def process_nla_anim_export(
             bake_anim_use_nla_strips=False,
             bake_anim_use_all_actions=False,
             bake_anim_force_startend_keying=True,
-            bake_anim_step=bfu_utils.get_anim_sample(active),
+            bake_anim_step=bfu_anim_base.bfu_anim_base_props.get_object_sample_anim_for_export(active),
             bake_anim_simplify_factor=active.bfu_simplify_anim_for_export,
             path_mode='AUTO',
             embed_textures=False,
@@ -287,7 +290,8 @@ def process_nla_anim_export(
         my_modifiers_data_scale.ResetScaleAfterExport()  # type: ignore
 
     if not is_library:
-        bfu_utils.clean_delete_objects(bpy.context.selected_objects)
+        if bpy.context.selected_objects:
+            bfu_utils.clean_delete_objects(list(bpy.context.selected_objects))
 
         for data in duplicate_data.data_to_remove:
             data.remove_data()

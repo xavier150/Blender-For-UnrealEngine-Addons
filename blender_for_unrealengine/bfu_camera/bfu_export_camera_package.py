@@ -7,16 +7,18 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-
-import bpy
 from pathlib import Path
 from typing import TYPE_CHECKING, Tuple, Optional
+
+import bpy
+
 from .. import bbpl
 from ..bbpl.utils import SaveUserRenderSimplify
 from .. import bfu_utils
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetPackage
 from .. import bfu_export
 from ..bfu_export_logs.bfu_process_time_logs_types import SafeTimeGroup
+from .. import bfu_anim_base
 from . import bfu_export_procedure
 from .bfu_export_procedure import BFU_CameraExportProcedure
 
@@ -126,7 +128,7 @@ def export_camera_animation(
             bake_anim_use_nla_strips=False,
             bake_anim_use_all_actions=False,
             bake_anim_force_startend_keying=True,
-            bake_anim_step=bfu_utils.get_anim_sample(active),
+            bake_anim_step=bfu_anim_base.bfu_anim_base_props.get_object_sample_anim_for_export(active),
             bake_anim_simplify_factor=active.bfu_simplify_anim_for_export,
             path_mode='AUTO',
             embed_textures=False,

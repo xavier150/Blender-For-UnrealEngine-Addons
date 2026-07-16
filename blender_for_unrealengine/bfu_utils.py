@@ -30,10 +30,6 @@ from . import bfu_adv_object #TODO Move the use outside utils to avoid import cy
 from . import bfu_anim_action_adv #TODO Move the use outside utils to avoid import cycle
 from . import bfu_anim_nla_adv #TODO Move the use outside utils to avoid import cycle
 
-
-
-
-
 class MarkerSequence():
     def __init__(self, marker: Optional[bpy.types.TimelineMarker] = None):
         scene = bpy.context.scene
@@ -1004,11 +1000,6 @@ def get_import_sequencer_script_command() -> str:
     fullpath = absdirpath / fileName
 
     return 'py "'+str(fullpath)+'"'
-
-
-def get_anim_sample(obj: bpy.types.Object) -> float:
-    # return obj sample animation
-    return obj.bfu_sample_anim_for_export
 
 
 def get_armature_root_bones(armature: bpy.types.Object) -> List[bpy.types.Bone]:
