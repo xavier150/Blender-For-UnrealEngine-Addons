@@ -23,6 +23,7 @@ from ..bfu_export_logs.bfu_process_time_logs_types import SafeTimeGroup
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetPackage
 from .. import bfu_addon_prefs
 from .. import bfu_anim_base
+from .. import bfu_anim_action_adv
 from .. import bfu_adv_object
 from .. import bfu_custom_property
 
@@ -121,7 +122,7 @@ def export_as_action_animation(
     if addon_prefs.bake_armature_animations:
         bfu_export.bfu_export_utils.bake_armature_animation(active, scene.frame_start, scene.frame_end)
 
-    bfu_utils.apply_export_transform(active, "Action")  # Apply export transform before rescale
+    bfu_anim_action_adv.bfu_anim_action_adv_utils.apply_action_export_transform(active)  # Apply export transform before rescale
 
     # This will rescale the rig and unit scale to get a root bone egal to 1
     should_rescale_rig = bfu_export.bfu_export_utils.get_should_rescale_skeleton_for_fbx_export(active)

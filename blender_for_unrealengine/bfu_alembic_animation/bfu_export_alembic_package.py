@@ -14,6 +14,7 @@ import bpy
 
 from .. import bbpl
 from .. import bfu_utils
+from .. import bfu_adv_object
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetPackage
 from .. import bfu_export
 from ..bbpl.utils import SaveUserRenderSimplify
@@ -79,7 +80,7 @@ def export_alembic_animation(
     active: bpy.types.Object = bpy.context.active_object
     bfu_export.bfu_export_utils.set_object_export_name(obj=active, is_skeletal=False)
 
-    bfu_utils.apply_export_transform(active, "Object")
+    bfu_adv_object.bfu_adv_obj_utils.apply_object_export_transform(active)
 
     # [PREPARE SCENE FOR EXPORT]
     # Prepare scene for export (frame range, simplefying, etc.)

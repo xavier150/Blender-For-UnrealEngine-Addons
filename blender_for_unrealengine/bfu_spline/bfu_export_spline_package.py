@@ -77,7 +77,7 @@ def export_single_fbx_spline(
     active: bpy.types.Object = bpy.context.active_object
     bfu_export.bfu_export_utils.set_object_export_name(obj=active, is_skeletal=False)
 
-    bfu_utils.apply_export_transform(active, "Object")
+    bfu_adv_object.bfu_adv_obj_utils.apply_object_export_transform(active)
 
     # [PREPARE SCENE FOR EXPORT]
     # Prepare scene for export (frame range, simplefying, etc.)

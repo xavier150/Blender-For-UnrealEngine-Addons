@@ -33,75 +33,11 @@ export_temp_preFix = "_ESO_Temp"  # _ExportSubObject_TempName
 previous_enabled_armature_constraints_key = "BFU_PreviousEnabledArmatureConstraints"
 armature_modifier_prefix = "BFU_Const_"
 
-def ApplyProxyData(obj: bpy.types.Object) -> None:
-
-    scene = bpy.context.scene
-    # Apply proxy data if needed.
-    if bfu_utils.get_export_proxy_child(obj) is not None:
-
-        def ReasignProxySkeleton(newArmature, oldArmature):
-            for select in bpy.context.selected_objects:
-                if select.type == "CURVE":
-                    for mod in select.modifiers:
-                        if mod.type == "HOOK":
-                            if mod.object == oldArmature:
-                                matrix_inverse = mod.matrix_inverse.copy()
-                                mod.object = newArmature
-                                mod.matrix_inverse = matrix_inverse
-
-                else:
-                    for mod in select.modifiers:
-                        if mod.type == 'ARMATURE':
-                            if mod.object == oldArmature:
-                                mod.object = newArmature
-
-            for bone in newArmature.pose.bones:
-                for cons in bone.constraints:
-                    if hasattr(cons, 'target'):
-                        if cons.target == oldArmature:
-                            cons.target = newArmature
-                        else:
-                            ChildProxyName = (
-                                cons.target.name +
-                                "_UEProxyChild"
-                            )
-                            if ChildProxyName in scene.objects:
-                                cons.target = scene.objects[ChildProxyName]
-
-        # Get old armature in selected objects
-        OldProxyChildArmature = None
-        for selectedObj in bpy.context.selected_objects:
-            if selectedObj != obj:
-                if selectedObj.type == "ARMATURE":
-                    OldProxyChildArmature = selectedObj
-
-        # Reasing parent + add to remove
-        if OldProxyChildArmature is not None:
-            ToRemove = []
-            ToRemove.append(OldProxyChildArmature)
-            for selectedObj in bpy.context.selected_objects:
-                if selectedObj != obj:
-                    if selectedObj.parent == OldProxyChildArmature:
-                        # Reasing parent and keep position
-                        SavedPos = selectedObj.matrix_world.copy()
-                        selectedObj.name += "_UEProxyChild"
-                        selectedObj.parent = obj
-                        selectedObj.matrix_world = SavedPos
-                    else:
-                        ToRemove.append(selectedObj)
-            ReasignProxySkeleton(obj, OldProxyChildArmature)
-            SavedSelect = bbpl.save_data.select_save.UserSelectSave()
-            SavedSelect.save_current_select()
-
-            RemovedObjects = bfu_utils.clean_delete_objects(ToRemove)
-            SavedSelect.remove_from_list_by_name(RemovedObjects)
-            SavedSelect.reset_select()
-
 
 def bake_armature_animation(armature: bpy.types.Object, frame_start: int, frame_end: int):
     # Change to pose mode
-    SavedSelect = bbpl.save_data.select_save.UserSelectSave()
-    SavedSelect.save_current_select()
+    saved_select = bbpl.save_data.select_save.UserSelectSave()
+    saved_select.save_current_select()
     bpy.ops.object.select_all(action='DESELECT')  # type: ignore
     bbpl.utils.select_specific_object(armature)
     bpy.ops.nla.bake(  # type: ignore
@@ -114,7 +50,7 @@ def bake_armature_animation(armature: bpy.types.Object, frame_start: int, frame_
         bake_types={'POSE'}
         )
     bpy.ops.object.select_all(action='DESELECT')  # type: ignore
-    SavedSelect.reset_select()
+    saved_select.reset_select()
 
 class DelegateOldData():
     # contain a data to remove and function for remove
@@ -497,7 +433,7 @@ def set_duplicated_object_export_name(duplicated_obj: bpy.types.Object, original
 
     # get the desired export name.
     if is_skeletal:
-        desired_export_name: str = bfu_utils.get_desired_export_armature_name(original_obj)
+        desired_export_name: str = bfu_skeletal_mesh.bfu_skeletal_mesh_utils.get_desired_export_armature_name(original_obj)
     else:
         # Consider duplicated object as already renamed in set_duplicate_name_for_export() so keep the name.
         desired_export_name: str = duplicated_obj.name # Could be used in future?

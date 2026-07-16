@@ -116,7 +116,7 @@ def export_as_skeletal_mesh(
             bfu_export.bfu_export_utils.SetSocketsExportName(selected_obj)
         bfu_export.bfu_export_utils.RemoveMaterialsOnCollisionMeshes(list(bpy.context.selected_objects))
 
-    bfu_utils.apply_export_transform(active, "Object")  # Apply export transform before rescale
+    bfu_adv_object.bfu_adv_obj_utils.apply_object_export_transform(active)  # Apply export transform before rescale
 
     # This will rescale the rig and unit scale to get a root bone egal to 1
     should_rescale_rig = bfu_export.bfu_export_utils.get_should_rescale_skeleton_for_fbx_export(active) 

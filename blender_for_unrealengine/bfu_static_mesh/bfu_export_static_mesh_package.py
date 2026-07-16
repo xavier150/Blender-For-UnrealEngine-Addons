@@ -105,7 +105,7 @@ def export_as_static_mesh(
             bfu_export.bfu_export_utils.SetSocketsExportName(selected_obj)
         bfu_export.bfu_export_utils.RemoveMaterialsOnCollisionMeshes(list(bpy.context.selected_objects))
 
-    bfu_utils.apply_export_transform(active, "Object")
+    bfu_adv_object.bfu_adv_obj_utils.apply_object_export_transform(active)
 
     # [PREPARE SCENE FOR EXPORT]
     # Prepare scene for export (frame range, simplefying, etc.)

@@ -26,11 +26,6 @@ from . import bfu_basics
 from . import bfu_export_control
 from . import bfu_addon_prefs
 
-from . import bfu_adv_object #TODO Move the use outside utils to avoid import cycle
-from . import bfu_anim_action_adv #TODO Move the use outside utils to avoid import cycle
-from . import bfu_anim_nla_adv #TODO Move the use outside utils to avoid import cycle
-from . import bfu_skeletal_mesh #TODO Move the use outside utils to avoid import cycle
-
 class MarkerSequence():
     def __init__(self, marker: Optional[bpy.types.TimelineMarker] = None):
         scene = bpy.context.scene
@@ -709,64 +704,6 @@ def correct_extreme_uv(step_scale: int = 2, move_to_absolute: bool = False):
                 obj.data.update()
 
 
-
-def apply_export_transform(obj: bpy.types.Object, use_type: str = "Object"):
-
-    new_matrix = obj.matrix_world @ mathutils.Matrix.Translation((0, 0, 0))
-    saveScale = obj.scale * 1
-
-    # Ref
-    # Moves object to the center of the scene for export
-    if use_type == "Object":
-        move_to_center = bfu_adv_object.bfu_adv_obj_props.get_object_move_to_center_for_export(obj)
-        rotate_to_zero = bfu_adv_object.bfu_adv_obj_props.get_object_rotate_to_zero_for_export(obj)
-
-    elif use_type == "Action":
-        move_to_center = bfu_anim_action_adv.bfu_anim_action_adv_props.get_object_move_action_to_center_for_export(obj)
-        rotate_to_zero = bfu_anim_action_adv.bfu_anim_action_adv_props.get_object_rotate_action_to_zero_for_export(obj)
-
-    elif use_type == "NLA":
-        move_to_center = bfu_anim_nla_adv.bfu_anim_nla_adv_props.get_object_move_nla_to_center_for_export(obj)
-        rotate_to_zero = bfu_anim_nla_adv.bfu_anim_nla_adv_props.get_object_rotate_nla_to_zero_for_export(obj)
-
-    else:
-        return
-
-    if move_to_center:
-        mat_trans = mathutils.Matrix.Translation((0, 0, 0))
-        mat_rot = new_matrix.to_quaternion().to_matrix()
-        new_matrix = mat_trans @ mat_rot.to_4x4()
-
-    obj.matrix_world = new_matrix
-    # Turn object to the center of the scene for export
-    if rotate_to_zero:
-        mat_trans = mathutils.Matrix.Translation(new_matrix.to_translation()) # type: ignore
-        mat_rot = mathutils.Matrix.Rotation(0, 4, 'X')
-        new_matrix = mat_trans @ mat_rot
-
-    eul = bfu_adv_object.bfu_adv_obj_props.get_object_additional_rotation_for_export(obj)
-    loc = bfu_adv_object.bfu_adv_obj_props.get_object_additional_location_for_export(obj)
-
-    mat_rot = eul.to_matrix()
-    mat_loc = mathutils.Matrix.Translation(loc) # type: ignore
-    add_mattrix_rot = mat_loc @ mat_rot.to_4x4()
-
-    obj.matrix_world = new_matrix @ add_mattrix_rot
-    obj.scale = saveScale
-
-# @TODO @Deprecated
-class SceneUnitSettings():
-    def __init__(self, scene: bpy.types.Scene):
-        self.scene: bpy.types.Scene = scene
-        self.default_scale_length: float = get_scene_unit_scale()
-
-    def SetUnitForUnrealEngineExport(self):
-        self.scene.unit_settings.scale_length = 0.01  # *= 1/rrf
-
-    def ResetUnit(self):
-        self.scene.unit_settings.scale_length = self.default_scale_length
-
-
 class SkeletalExportScale():
 
     def __init__(self, armature: bpy.types.Object):
@@ -1007,34 +944,6 @@ def get_import_sequencer_script_command() -> str:
     fullpath = absdirpath / fileName
 
     return 'py "'+str(fullpath)+'"'
-
-
-def get_armature_root_bones(armature: bpy.types.Object) -> List[bpy.types.Bone]:
-    # DEPRECATED: Use bfu_skeletal_mesh.bfu_skeletal_mesh_utils.get_armature_root_bones()
-    
-    root_bones: List[bpy.types.Bone] = []
-    if isinstance(armature.data, bpy.types.Armature):
-
-        if bfu_skeletal_mesh.bfu_skeletal_mesh_props.get_object_export_deform_only(armature):
-            for bone in armature.data.bones:
-                if bone.use_deform:
-                    rootBone = bfu_basics.get_root_bone_parent(bone)
-                    if rootBone not in root_bones:
-                        root_bones.append(rootBone)
-
-        else:
-            for bone in armature.data.bones:
-                if bone.parent is None:
-                    root_bones.append(bone)
-    return root_bones
-
-
-def get_desired_export_armature_name(obj: bpy.types.Object) -> str:
-    addon_prefs = bfu_addon_prefs.get_addon_preferences()
-    single_root = len(get_armature_root_bones(obj)) == 1
-    if addon_prefs.add_skeleton_root_bone or single_root != 1:
-        return addon_prefs.skeleton_root_bone_name
-    return "Armature"
 
 
 def AddFrontEachLine(ImportScript: str, text: str = "\t") -> str:

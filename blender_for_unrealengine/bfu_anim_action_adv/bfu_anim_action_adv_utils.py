@@ -8,5 +8,11 @@
 # ----------------------------------------------
 
 import bpy
-from .. import bbpl
 
+from .. import bfu_adv_object
+from . import bfu_anim_action_adv_props
+
+def apply_action_export_transform(obj: bpy.types.Object):
+    move_to_center = bfu_anim_action_adv_props.get_object_move_action_to_center_for_export(obj)
+    rotate_to_zero = bfu_anim_action_adv_props.get_object_rotate_action_to_zero_for_export(obj)
+    bfu_adv_object.bfu_adv_obj_utils.apply_export_transform(obj, move_to_center, rotate_to_zero)

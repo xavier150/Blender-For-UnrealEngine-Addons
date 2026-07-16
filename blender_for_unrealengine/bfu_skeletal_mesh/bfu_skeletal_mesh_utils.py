@@ -7,14 +7,17 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 import fnmatch
 from typing import List
-from . import bfu_skeletal_mesh_props
+
+import bpy
+
 from .. import bfu_basics
 from .. import bfu_utils
 from .. import bfu_assets_manager
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetType
+from .. import bfu_addon_prefs
+from . import bfu_skeletal_mesh_props
 
 def get_socket_in_desired_childs(obj: bpy.types.Object) -> List[bpy.types.Object]:
     socket_objs: List[bpy.types.Object] = []
@@ -57,3 +60,10 @@ def get_armature_root_bones(armature: bpy.types.Object) -> List[bpy.types.Bone]:
                 if bone.parent is None:
                     root_bones.append(bone)
     return root_bones
+
+def get_desired_export_armature_name(obj: bpy.types.Object) -> str:
+    addon_prefs = bfu_addon_prefs.get_addon_preferences()
+    single_root = len(get_armature_root_bones(obj)) == 1
+    if addon_prefs.add_skeleton_root_bone or single_root != 1:
+        return addon_prefs.skeleton_root_bone_name
+    return "Armature"

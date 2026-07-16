@@ -24,6 +24,7 @@ from ..bfu_assets_manager.bfu_asset_manager_type import AssetPackage
 from .. import bfu_export
 from .. import bfu_anim_base
 from .. import bfu_adv_object
+from .. import bfu_anim_nla_adv
 from .. import bfu_custom_property
 
 
@@ -117,7 +118,7 @@ def process_nla_anim_export(
     if addon_prefs.bake_armature_animations:
         bfu_export.bfu_export_utils.bake_armature_animation(active, scene.frame_start, scene.frame_end)
 
-    bfu_utils.apply_export_transform(active, "NLA")  # Apply export transform before rescale
+    bfu_anim_nla_adv.bfu_anim_nla_adv_utils.apply_nla_export_transform(active)  # Apply export transform before rescale
 
     # This will rescale the rig and unit scale to get a root bone egal to 1
     should_rescale_rig = bfu_export.bfu_export_utils.get_should_rescale_skeleton_for_fbx_export(active)

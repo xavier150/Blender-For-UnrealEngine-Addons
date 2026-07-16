@@ -15,6 +15,7 @@ import bpy
 from .. import bbpl
 from ..bbpl.utils import SaveUserRenderSimplify
 from .. import bfu_utils
+from .. import bfu_adv_object
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetPackage
 from .. import bfu_export
 from ..bfu_export_logs.bfu_process_time_logs_types import SafeTimeGroup
@@ -77,7 +78,7 @@ def export_single_groom_simulation(
 
     frame = scene.frame_current = 1
     
-    bfu_utils.apply_export_transform(active, "Object")
+    bfu_adv_object.bfu_adv_obj_utils.apply_object_export_transform(active)
 
     # [PREPARE SCENE FOR EXPORT]
     # Prepare scene for export (frame range, simplefying, etc.)
