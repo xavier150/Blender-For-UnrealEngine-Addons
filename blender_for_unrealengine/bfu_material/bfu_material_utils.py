@@ -7,7 +7,9 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-from typing import Dict, Any, Literal
+from typing import Dict, Any
+if hasattr(__builtins__, 'Literal'):
+    from typing import Literal
 
 import bpy
 

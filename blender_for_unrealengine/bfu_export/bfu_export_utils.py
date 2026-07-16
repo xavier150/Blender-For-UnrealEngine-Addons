@@ -8,7 +8,9 @@
 # ----------------------------------------------
 
 
-from typing import List, Literal
+from typing import List
+if hasattr(__builtins__, 'Literal'):
+    from typing import Literal
 
 import bpy
 import math
@@ -707,13 +709,13 @@ def get_skeleton_fbx_export_use_space_transform(obj: bpy.types.Object) -> bool:
     else:
         return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["use_space_transform"] # type: ignore
 
-def get_skeleton_export_axis_forward(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
+def get_skeleton_export_axis_forward(obj: bpy.types.Object) -> 'Literal["X", "Y", "Z", "-X", "-Y", "-Z"]':
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
         return bfu_adv_object.bfu_adv_obj_props.get_object_fbx_export_axis_forward(obj)
     else:
         return bfu_skeletal_mesh.bfu_export_procedure.get_obj_skeleton_fbx_procedure_preset(obj)["axis_forward"] # type: ignore
 
-def get_skeleton_export_axis_up(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
+def get_skeleton_export_axis_up(obj: bpy.types.Object) -> 'Literal["X", "Y", "Z", "-X", "-Y", "-Z"]':
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
         return bfu_adv_object.bfu_adv_obj_props.get_object_fbx_export_axis_up(obj)
     else:
@@ -725,13 +727,13 @@ def get_static_fbx_export_use_space_transform(obj: bpy.types.Object) -> bool:
     else:
         return bfu_static_mesh.bfu_export_procedure.get_obj_static_fbx_procedure_preset(obj)["use_space_transform"] # type: ignore
 
-def get_static_fbx_export_axis_forward(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
+def get_static_fbx_export_axis_forward(obj: bpy.types.Object) -> 'Literal["X", "Y", "Z", "-X", "-Y", "-Z"]':
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
         return bfu_adv_object.bfu_adv_obj_props.get_object_fbx_export_axis_forward(obj)
     else:
         return bfu_static_mesh.bfu_export_procedure.get_obj_static_fbx_procedure_preset(obj)["axis_forward"] # type: ignore
 
-def get_static_fbx_export_axis_up(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
+def get_static_fbx_export_axis_up(obj: bpy.types.Object) -> 'Literal["X", "Y", "Z", "-X", "-Y", "-Z"]':
     if bfu_adv_object.bfu_adv_obj_props.get_object_override_procedure_preset(obj):
         return bfu_adv_object.bfu_adv_obj_props.get_object_fbx_export_axis_up(obj)
     else:

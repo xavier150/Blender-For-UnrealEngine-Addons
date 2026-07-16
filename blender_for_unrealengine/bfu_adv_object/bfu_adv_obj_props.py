@@ -8,7 +8,9 @@
 # ----------------------------------------------
 
 
-from typing import List, Literal
+from typing import List
+if hasattr(__builtins__, 'Literal'):
+    from typing import Literal
 
 import bpy
 import mathutils
@@ -57,16 +59,16 @@ def get_object_override_procedure_preset(obj: bpy.types.Object) -> bool:
 def get_object_fbx_export_use_space_transform(obj: bpy.types.Object) -> bool:
     return obj.bfu_fbx_export_use_space_transform  # type: ignore
 
-def get_object_fbx_export_axis_forward(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
+def get_object_fbx_export_axis_forward(obj: bpy.types.Object) -> 'Literal["X", "Y", "Z", "-X", "-Y", "-Z"]':
     return obj.bfu_fbx_export_axis_forward  # type: ignore
 
-def get_object_fbx_export_axis_up(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
+def get_object_fbx_export_axis_up(obj: bpy.types.Object) -> 'Literal["X", "Y", "Z", "-X", "-Y", "-Z"]':
     return obj.bfu_fbx_export_axis_up  # type: ignore
 
-def get_object_fbx_export_primary_bone_axis(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
+def get_object_fbx_export_primary_bone_axis(obj: bpy.types.Object) -> 'Literal["X", "Y", "Z", "-X", "-Y", "-Z"]':
     return obj.bfu_fbx_export_primary_bone_axis  # type: ignore
 
-def get_object_fbx_export_secondary_bone_axis(obj: bpy.types.Object) -> Literal["X", "Y", "Z", "-X", "-Y", "-Z"]:
+def get_object_fbx_export_secondary_bone_axis(obj: bpy.types.Object) -> 'Literal["X", "Y", "Z", "-X", "-Y", "-Z"]':
     return obj.bfu_fbx_export_secondary_bone_axis  # type: ignore
 
 def get_object_export_with_meta_data(obj: bpy.types.Object) -> bool:
