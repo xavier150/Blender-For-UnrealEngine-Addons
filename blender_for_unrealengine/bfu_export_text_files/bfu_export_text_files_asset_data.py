@@ -19,6 +19,8 @@ from .. import bfu_light_map
 from .. import bfu_assets_references
 from .. import bfu_vertex_color
 from .. import bfu_lod
+from .. import bfu_collision
+from .. import bfu_custom_property
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetType
 from .. import bfu_export_nomenclature
 from . import bfu_export_text_files_utils
@@ -81,15 +83,15 @@ def write_single_asset_data(unreal_exported_asset: bfu_export_logs.bfu_asset_exp
         main_object = unreal_exported_asset.exported_asset.get_primary_asset_package()
         if main_object:
             if asset_type in [AssetType.STATIC_MESH]:
-                asset_data["auto_generate_collision"] = main_object.bfu_auto_generate_collision
-                asset_data["collision_trace_flag"] = main_object.bfu_collision_trace_flag
+                asset_data["auto_generate_collision"] =  bfu_collision.bfu_collision_props.get_object_auto_generate_collision(main_object)
+                asset_data["collision_trace_flag"] = bfu_collision.bfu_collision_props.get_object_collision_trace_flag(main_object)
 
             if asset_type in [AssetType.SKELETAL_MESH]:
-                asset_data["create_physics_asset"] = main_object.bfu_create_physics_asset
-                asset_data["enable_skeletal_mesh_per_poly_collision"] = main_object.bfu_enable_skeletal_mesh_per_poly_collision
+                asset_data["create_physics_asset"] = bfu_collision.bfu_collision_props.get_object_create_physics_asset(main_object)
+                asset_data["enable_skeletal_mesh_per_poly_collision"] = bfu_collision.bfu_collision_props.get_object_enable_skeletal_mesh_per_poly_collision(main_object)
 
             if asset_type in [AssetType.ANIM_ACTION, AssetType.ANIM_POSE, AssetType.ANIM_NLA]:
-                asset_data["do_not_import_curve_with_zero"] = main_object.bfu_do_not_import_curve_with_zero
+                asset_data["do_not_import_curve_with_zero"] = bfu_custom_property.bfu_custom_property_props.get_object_do_not_import_curve_with_zero(main_object)
         main_obj_data = main_object
 
     if main_obj_data is not None:
