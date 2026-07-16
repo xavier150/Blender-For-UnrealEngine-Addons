@@ -158,7 +158,7 @@ def remove_useless_specific_data(name: str, data_type: str):
 
 def clean_join_select():
     view_layer = bpy.context.view_layer
-    if len(bpy.context.selected_objects) > 1:
+    if bpy.context.selected_objects and len(bpy.context.selected_objects) > 1:
         if view_layer.objects.active is None:
             view_layer.objects.active = bpy.context.selected_objects[0]
 
@@ -525,12 +525,12 @@ def draw_proxy_propertys(obj: bpy.types.Object):
         return True
 
     # Hide likned object propertys
-    if GetExportAsProxy(obj):
+    if get_export_as_proxy(obj):
         return False
     return True
 
 # @TODO: @Deprecated
-def GetExportAsProxy(obj: bpy.types.Object) -> bool:
+def get_export_as_proxy(obj: bpy.types.Object) -> bool:
     if get_obj_proxy_child(obj):
         return True
 
@@ -540,7 +540,7 @@ def GetExportAsProxy(obj: bpy.types.Object) -> bool:
     return False
 
 # @TODO: @Deprecated
-def GetExportProxyChild(obj: bpy.types.Object) -> bpy.types.Object:
+def get_export_proxy_child(obj: bpy.types.Object) -> bpy.types.Object:
 
     if get_obj_proxy_child(obj):
         return get_obj_proxy_child(obj)
@@ -572,8 +572,8 @@ def SelectParentAndDesiredChilds(active: bpy.types.Object):
     new_select_list.append(active)
 
     # Select proxy at end to move a list end
-    if GetExportAsProxy(active):
-        proxy_child = GetExportProxyChild(active)
+    if get_export_as_proxy(active):
+        proxy_child = get_export_proxy_child(active)
         if proxy_child is not None:
             new_select_list.append(proxy_child)
 
@@ -595,8 +595,8 @@ def SelectParentAndSpecificChilds(active: bpy.types.Object, objects: List[bpy.ty
     # Select active at end to move a list end
     new_select_list.append(active)
 
-    if GetExportAsProxy(active):
-        proxy_child = GetExportProxyChild(active)
+    if get_export_as_proxy(active):
+        proxy_child = get_export_proxy_child(active)
         if proxy_child is not None:
             new_select_list.append(proxy_child)
 
@@ -608,27 +608,29 @@ def RemoveSocketFromSelectForProxyArmature():
     select.save_current_select()
     # With skeletal mesh the socket must be not exported,
     # Unreal Engine read it like a bone
-    sockets = []
-    for obj in bpy.context.selected_objects:
-        if fnmatch.fnmatchcase(obj.name, "SOCKET*"):
-            sockets.append(obj)
+    sockets: List[bpy.types.Object] = []
+    if bpy.context.selected_objects:
+        for obj in bpy.context.selected_objects:
+            if fnmatch.fnmatchcase(obj.name, "SOCKET*"):
+                sockets.append(obj)
     clean_delete_objects(sockets)
     select.reset_select(use_names = True)
 
 
 def GoToMeshEditMode():
-    for obj in bpy.context.selected_objects:
-        if obj.type == "MESH":
-            bpy.context.view_layer.objects.active = obj
-            bbpl.utils.safe_mode_set('EDIT')
+    if bpy.context.selected_objects:
+        for obj in bpy.context.selected_objects:
+            if obj.type == "MESH":
+                bpy.context.view_layer.objects.active = obj
+                bbpl.utils.safe_mode_set('EDIT')
 
-            return True
+                return True
     return False
 
 
-def CorrectExtremeUV(step_scale=2, move_to_absolute=False):
+def correct_extreme_uv(step_scale: int = 2, move_to_absolute: bool = False):
     
-    def GetHaveConnectedLoop(faceTarget):
+    def get_have_connected_loop(faceTarget):
         # In bmesh faces
         for loop in faceTarget.loops:
             uv = loop[uv_lay].uv
@@ -640,47 +642,47 @@ def CorrectExtremeUV(step_scale=2, move_to_absolute=False):
                                 return True
         return False
 
-    def SelectRecursiveUVLinked(uv_lay):
+    def select_recursive_uv_linked(uv_lay):
 
         AddedFaces = []
         for v in [v for v in bm.verts if v.select]:
             for f in v.link_faces:
                 if not f.select:
-                    if GetHaveConnectedLoop(f):
+                    if get_have_connected_loop(f):
                         AddedFaces.append(f)
                         f.select = True
 
         if len(AddedFaces) == 0:
             return AddedFaces
         else:
-            for addedFace in SelectRecursiveUVLinked(uv_lay):
+            for addedFace in select_recursive_uv_linked(uv_lay):
                 AddedFaces.append(addedFace)
             return AddedFaces
 
-    def GetAllIsland(bm, uv_lay):
-        ToCheakFace = []
-        Islands = []
+    def get_all_island(bm: bmesh.types.BMesh, uv_lay: bmesh.types.BMLayerItem[Any]) -> List[List[bmesh.types.BMFace]]:
+        faces_to_cheak: List[bmesh.types.BMFace] = []
+        island_list: List[List[bmesh.types.BMFace]] = []
         for face in bm.faces:
-            ToCheakFace.append(face)
+            faces_to_cheak.append(face)
 
-        while len(ToCheakFace) > 0:
+        while len(faces_to_cheak) > 0:
             for face in bm.faces:
                 face.select = False
 
-            ToCheakFace[-1].select = True
-            SelectRecursiveUVLinked(uv_lay)
+            faces_to_cheak[-1].select = True
+            select_recursive_uv_linked(uv_lay)
 
-            Island = []
+            island_faces: List[bmesh.types.BMFace] = []
             for face in bm.faces:
                 if face.select:
-                    Island.append(face)
-                    if face in ToCheakFace:
-                        ToCheakFace.remove(face)
-            Islands.append(Island)
+                    island_faces.append(face)
+                    if face in faces_to_cheak:
+                        faces_to_cheak.remove(face)
+            island_list.append(island_faces)
 
-        return Islands
+        return island_list
 
-    def MoveItlandToCenter(faces, uv_lay, min_distance, absolute):
+    def move_it_land_to_center(faces, uv_lay, min_distance, absolute):
         loop = faces[-1].loops[-1]
 
         delta_x = round(loop[uv_lay].uv[0]/min_distance, 0)*min_distance
@@ -699,77 +701,73 @@ def CorrectExtremeUV(step_scale=2, move_to_absolute=False):
                     loop[uv_lay].uv[1] = abs(loop[uv_lay].uv[1])
 
 
-    def IsValidForUvEdit(obj):
-        if obj.type == "MESH":
-            return True
-        return False
+    if bpy.context.selected_objects:
+        for obj in bpy.context.selected_objects:
+            if isinstance(obj.data, bpy.types.Mesh):
+                # pylint: disable=E1128
+                bm = bmesh.from_edit_mesh(obj.data)
 
-    for obj in bpy.context.selected_objects:
-        if IsValidForUvEdit(obj):
-            # pylint: disable=E1128
-            bm = bmesh.from_edit_mesh(obj.data)
+                uv_lay: Optional[bmesh.types.BMLayerItem[Any]] = bm.loops.layers.uv.active
+                if uv_lay is None:
+                    return
 
-            uv_lay = bm.loops.layers.uv.active
-            if uv_lay is None:
-                return
+                for faces in get_all_island(bm, uv_lay):
+                    uv_lay = bm.loops.layers.uv.active
+                    move_it_land_to_center(faces, uv_lay, step_scale, move_to_absolute)
 
-            for faces in GetAllIsland(bm, uv_lay):
-                uv_lay = bm.loops.layers.uv.active
-                MoveItlandToCenter(faces, uv_lay, step_scale, move_to_absolute)
-
-            obj.data.update()
+                obj.data.update()
 
 
 
 def apply_export_transform(obj: bpy.types.Object, use_type: str = "Object"):
 
-    newMatrix = obj.matrix_world @ mathutils.Matrix.Translation((0, 0, 0))
+    new_matrix = obj.matrix_world @ mathutils.Matrix.Translation((0, 0, 0))
     saveScale = obj.scale * 1
 
     # Ref
     # Moves object to the center of the scene for export
     if use_type == "Object":
-        MoveToCenter = obj.bfu_move_to_center_for_export
-        RotateToZero = obj.bfu_rotate_to_zero_for_export
+        move_to_center = obj.bfu_move_to_center_for_export
+        rotate_to_zero = obj.bfu_rotate_to_zero_for_export
 
     elif use_type == "Action":
-        MoveToCenter = obj.bfu_move_action_to_center_for_export
-        RotateToZero = obj.bfu_rotate_action_to_zero_for_export
+        move_to_center = obj.bfu_move_action_to_center_for_export
+        rotate_to_zero = obj.bfu_rotate_action_to_zero_for_export
 
     elif use_type == "NLA":
-        MoveToCenter = obj.bfu_move_nla_to_center_for_export
-        RotateToZero = obj.bfu_rotate_nla_to_zero_for_export
+        move_to_center = obj.bfu_move_nla_to_center_for_export
+        rotate_to_zero = obj.bfu_rotate_nla_to_zero_for_export
 
     else:
         return
 
-    if MoveToCenter:
+    if move_to_center:
         mat_trans = mathutils.Matrix.Translation((0, 0, 0))
-        mat_rot = newMatrix.to_quaternion().to_matrix()
-        newMatrix = mat_trans @ mat_rot.to_4x4()
+        mat_rot = new_matrix.to_quaternion().to_matrix()
+        new_matrix = mat_trans @ mat_rot.to_4x4()
 
-    obj.matrix_world = newMatrix
+    obj.matrix_world = new_matrix
     # Turn object to the center of the scene for export
-    if RotateToZero:
-        mat_trans = mathutils.Matrix.Translation(newMatrix.to_translation())
+    if rotate_to_zero:
+        mat_trans = mathutils.Matrix.Translation(new_matrix.to_translation())
         mat_rot = mathutils.Matrix.Rotation(0, 4, 'X')
-        newMatrix = mat_trans @ mat_rot
+        new_matrix = mat_trans @ mat_rot
 
     eul = obj.bfu_additional_rotation_for_export
     loc = obj.bfu_additional_location_for_export
 
     mat_rot = eul.to_matrix()
     mat_loc = mathutils.Matrix.Translation(loc)
-    AddMat = mat_loc @ mat_rot.to_4x4()
+    add_mattrix_rot = mat_loc @ mat_rot.to_4x4()
 
-    obj.matrix_world = newMatrix @ AddMat
+    obj.matrix_world = new_matrix @ add_mattrix_rot
     obj.scale = saveScale
 
 # @TODO @Deprecated
 class SceneUnitSettings():
-    def __init__(self, scene):
-        self.scene = scene
-        self.default_scale_length = get_scene_unit_scale()
+    def __init__(self, scene: bpy.types.Scene):
+        self.scene: bpy.types.Scene = scene
+        self.default_scale_length: float = get_scene_unit_scale()
 
     def SetUnitForUnrealEngineExport(self):
         self.scene.unit_settings.scale_length = 0.01  # *= 1/rrf
@@ -780,18 +778,21 @@ class SceneUnitSettings():
 
 class SkeletalExportScale():
 
-    def __init__(self, armature):
-        self.armature = armature
-        self.default_armature_data = armature.data
-        self.default_transform = armature.matrix_world.copy()
+    def __init__(self, armature: bpy.types.Object):
+        if not isinstance(armature.data, bpy.types.Armature):
+            raise TypeError(f"Object {armature.name} is not an armature")
+        
+        self.armature: bpy.types.Object = armature
+        self.default_armature_data: bpy.types.Armature = armature.data
+        self.default_transform: mathutils.Matrix = armature.matrix_world.copy()
 
         # Save childs location
-        self.childs = []
+        self.childs: List["SkeletalExportScale.SkeletalChilds"] = []
         for child in bbpl.basics.get_obj_childs(armature):
             self.childs.append(self.SkeletalChilds(child))
 
     class SkeletalChilds():
-        def __init__(self, obj):
+        def __init__(self, obj: bpy.types.Object):
             self.obj = obj
             self.default_matrix_local = obj.matrix_local.copy()
             self.default_matrix_parent_inverse = obj.matrix_parent_inverse.copy()
@@ -804,7 +805,7 @@ class SkeletalExportScale():
         for child in self.childs:
             child.ResetObjTransform()
 
-    def apply_skeletal_export_scale(self, rescale: float, target_animation_data: bbpl.anim_utils.AnimationManagment=None):
+    def apply_skeletal_export_scale(self, rescale: float, target_animation_data: Optional[bbpl.anim_utils.AnimationManagment]=None):
         # This function will rescale the armature and applys the new scale
 
         armature = self.armature
@@ -824,6 +825,9 @@ class SkeletalExportScale():
         # Need break multi users for apply scale.
 
         # armature.make_local()
+        if armature.data is None:
+            raise ValueError(f"Armature {armature.name} has no data to make local.")
+        
         armature_data_copy_name = armature.data.name + "_copy"
         armature.data.make_local()
         armature.data.name = armature_data_copy_name
@@ -876,18 +880,19 @@ def rescale_select_curve_hooks(scale: float):
 
         return newMatrix
 
-    for obj in bpy.context.selected_objects:
-        if obj.type == "CURVE":
-            for mod in obj.modifiers:
-                if mod.type == "HOOK":
-                    scale_factor = 100
-                    mod.matrix_inverse = get_rescaled_matrix(
-                        mod.matrix_inverse,
-                        scale_factor
-                        )
-            for spline in obj.data.splines:
-                for bezier_point in spline.bezier_points:
-                    bezier_point.radius *= scale
+    if bpy.context.selected_objects:
+        for obj in bpy.context.selected_objects:
+            if isinstance(obj.data, bpy.types.Curve):
+                for mod in obj.modifiers:
+                    if isinstance(mod, bpy.types.HookModifier):
+                        scale_factor = 100
+                        mod.matrix_inverse = get_rescaled_matrix(
+                            mod.matrix_inverse,
+                            scale_factor
+                            )
+                for spline in obj.data.splines:
+                    for bezier_point in spline.bezier_points:
+                        bezier_point.radius *= scale
 
 
 class ActionCurveScale():
@@ -1070,21 +1075,21 @@ def AddFrontEachLine(ImportScript: str, text: str = "\t") -> str:
 # Custom property
 
 
-def set_var_on_object(obj, VarName, Value):
-    obj[VarName] = Value
+def set_var_on_object(obj: bpy.types.Object, var_name: str, Value: Any) -> None:
+    obj[var_name] = Value
 
 
-def get_var_on_object(obj, VarName):
-    return obj[VarName]
+def get_var_on_object(obj: bpy.types.Object, var_name: str) -> Any:
+    return obj[var_name]
 
 
-def has_var_on_object(obj, VarName):
-    return VarName in obj
+def has_var_on_object(obj: bpy.types.Object, var_name: str) -> bool:
+    return var_name in obj
 
 
-def clear_var_on_object(obj, VarName):
-    if VarName in obj:
-        del obj[VarName]
+def clear_var_on_object(obj: bpy.types.Object, var_name: str) -> None:
+    if var_name in obj:
+        del obj[var_name]
 
 
 def save_obj_current_name(obj: bpy.types.Object):
@@ -1102,8 +1107,8 @@ def clear_obj_origin_name_var(obj: bpy.types.Object) -> None:
 
 def set_obj_proxy_data(obj: bpy.types.Object):
     # Save object proxy info as Custom property
-    set_var_on_object(obj, "BFU_ExportAsProxy", GetExportAsProxy(obj))
-    set_var_on_object(obj, "BFU_ExportProxyChild", GetExportProxyChild(obj))
+    set_var_on_object(obj, "BFU_ExportAsProxy", get_export_as_proxy(obj))
+    set_var_on_object(obj, "BFU_ExportProxyChild", get_export_proxy_child(obj))
 
 
 def get_obj_proxy_child(obj: bpy.types.Object) -> bool:
@@ -1130,8 +1135,6 @@ def clear_all_bfu_temp_vars(obj: bpy.types.Object) -> None:
 
 def get_scene_unit_scale() -> float:
     #Have to round for avoid microscopic offsets.
-    if bpy.context is None:
-        return 1.0
     scene = bpy.context.scene
     return round(scene.unit_settings.scale_length, 8)
 

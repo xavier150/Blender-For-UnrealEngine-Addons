@@ -50,7 +50,7 @@ def draw_general_ui_object(layout: bpy.types.UILayout, context: bpy.types.Contex
                     ProxyProp = panel.column()
                     if not bfu_utils.draw_proxy_propertys(obj):
                         ProxyProp.label(text="The Armature was detected as a proxy.")
-                        proxy_child = bfu_utils.GetExportProxyChild(obj)
+                        proxy_child = bfu_utils.get_export_proxy_child(obj)
                         if proxy_child:
                             ProxyProp.label(text="Proxy child: " + proxy_child.name)
                         else:

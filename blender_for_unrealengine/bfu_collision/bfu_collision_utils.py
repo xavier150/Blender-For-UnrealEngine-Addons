@@ -124,6 +124,10 @@ def fix_scene_collisions() -> Tuple[int, int, int]:
 
 def create_unrealengine_collision_from_selection(collision_shape: CollisionShapeType, selected_the_new_objects: bool = True) -> List[bpy.types.Object]:
     # Create Unreal Engine Collisions Shapes from selected objects
+    if not bpy.context.selected_objects:
+        print("No objects selected.")
+        return []
+
     object_names: List[str] = [obj.name for obj in bpy.context.selected_objects]
     new_collision_objects: List[bpy.types.Object] = []
     new_collision_object_names: List[str] = create_unrealengine_collision(collision_shape, object_names)
@@ -147,8 +151,8 @@ def create_unrealengine_collision(collision_shape: CollisionShapeType, object_na
     # Better to use name to avoid rna loosed reference
     new_collision_object_names: List[str] = []
     for obj_name in object_names:
-        obj = bpy.data.objects.get(obj_name)
-        if obj is not None and isinstance(obj.data, bpy.types.Mesh):
+        obj: Optional[bpy.types.Object] = bpy.data.objects.get(obj_name)
+        if obj and isinstance(obj.data, bpy.types.Mesh): # pyright: ignore[reportUnnecessaryIsInstance]
             # Create a new object
             new_obj = bpy.data.objects.new(name=obj.name + "_ColTemp", object_data=obj.data.copy())
             new_obj.parent = obj
@@ -164,16 +168,18 @@ def create_unrealengine_collision(collision_shape: CollisionShapeType, object_na
 def convert_select_to_unrealengine_collision(collision_shape: CollisionShapeType) -> List[bpy.types.Object]:
     # Convert selected objects to Unreal Engine Collisions Shapes
 
-    collision_owner: Optional[bpy.types.Object] = bpy.context.active_object
-    objs_to_convert: List[bpy.types.Object] = bpy.context.selected_objects
-    if collision_owner is None:
+    if not bpy.context.selected_objects:
+        print("No objects selected.")
+        return []
+    if not bpy.context.active_object:
         print("No active object found!")
         return []
-    if len(objs_to_convert) < 2:
+    if len(bpy.context.selected_objects) < 2:
         print("Please select two objects. (Active object is the owner of the collision)")
         return []
 
-    return convert_to_unrealengine_collision(collision_owner, objs_to_convert, collision_shape)
+    # Sequence to list
+    return convert_to_unrealengine_collision(bpy.context.active_object, list(bpy.context.selected_objects), collision_shape)
 
 def convert_to_unrealengine_collision(
     collision_owner: bpy.types.Object, 
@@ -191,9 +197,10 @@ def convert_to_unrealengine_collision(
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
 
     def deselect_all_except_active() -> None:
-        for obj in bpy.context.selected_objects:
-            if obj != bpy.context.active_object:
-                obj.select_set(False)
+        if bpy.context.selected_objects:
+            for obj in bpy.context.selected_objects:
+                if obj != bpy.context.active_object:
+                    obj.select_set(False)
 
 
     converted_objs: List[bpy.types.Object] = []
@@ -368,15 +375,14 @@ def toggle_collision_visibility() -> None:
 
 def select_collision_from_current_selection() -> List[bpy.types.Object]:
     # Select all collision objects related to the current selection
-    selected_objs: List[bpy.types.Object] = bpy.context.selected_objects
-    if not selected_objs:
+    if not bpy.context.selected_objects:
         print("No objects selected.")
         return []
 
     collision_objs_to_select: List[bpy.types.Object] = []
     prefix_list: List[str] = CollisionShapeType.get_prefix_list()
 
-    for obj in selected_objs:
+    for obj in bpy.context.selected_objects:
         # Check if the object itself is a collision object
         if obj.name.startswith(tuple(prefix_list)):
             collision_objs_to_select.append(obj)

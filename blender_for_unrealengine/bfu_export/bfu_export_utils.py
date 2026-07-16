@@ -37,7 +37,7 @@ def ApplyProxyData(obj: bpy.types.Object) -> None:
 
     scene = bpy.context.scene
     # Apply proxy data if needed.
-    if bfu_utils.GetExportProxyChild(obj) is not None:
+    if bfu_utils.get_export_proxy_child(obj) is not None:
 
         def ReasignProxySkeleton(newArmature, oldArmature):
             for select in bpy.context.selected_objects:
@@ -598,7 +598,7 @@ def CorrectExtremUVAtExport(obj: bpy.types.Object):
         SavedSelect.save_current_select()
         bbpl.utils.select_specific_object(obj)
         if bfu_utils.GoToMeshEditMode():
-            bfu_utils.CorrectExtremeUV(obj.bfu_correct_extrem_uv_scale_step_scale, obj.bfu_correct_extrem_uv_scale_use_absolute)
+            bfu_utils.correct_extreme_uv(obj.bfu_correct_extrem_uv_scale_step_scale, obj.bfu_correct_extrem_uv_scale_use_absolute)
             bbpl.utils.safe_mode_set('OBJECT')
             SavedSelect.reset_select()
             return True

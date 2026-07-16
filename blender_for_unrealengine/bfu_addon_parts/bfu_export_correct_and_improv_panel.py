@@ -42,7 +42,7 @@ class BFU_PT_CorrectAndImprov(bpy.types.Panel):
 
         def execute(self, context):
             if bpy.context.active_object.mode == "EDIT":
-                bfu_utils.CorrectExtremeUV(step_scale=self.step_scale, move_to_absolute=self.move_to_absolute)
+                bfu_utils.correct_extreme_uv(step_scale=self.step_scale, move_to_absolute=self.move_to_absolute)
                 self.report(
                     {'INFO'},
                     "UV corrected!")
