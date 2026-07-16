@@ -1089,7 +1089,7 @@ def get_obj_proxy_child(obj: bpy.types.Object) -> bool:
 
     if get_var_on_object(obj, "BFU_ExportAsProxy"):
         return get_var_on_object(obj, "BFU_ExportProxyChild")
-    return None
+    return False
 
 
 def clear_obj_proxy_data_vars(obj: bpy.types.Object) -> None:
