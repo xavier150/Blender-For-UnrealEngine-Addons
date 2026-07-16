@@ -69,7 +69,7 @@ def process_nla_anim_export(
         raise ValueError("No active scene found!")
     
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
-    is_library = armature.data.library is not None
+    is_library = bfu_utils.get_object_is_library(armature)
 
     # [SAVE ASSET DATA]
     # Save asset data before export like transforms, animation data, etc.

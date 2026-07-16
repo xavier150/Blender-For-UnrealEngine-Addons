@@ -515,6 +515,12 @@ def draw_proxy_propertys(obj: bpy.types.Object):
         return False
     return True
 
+def get_object_is_library(obj: bpy.types.Object) -> bool:
+    if obj.data:
+        if obj.data.library:
+            return True
+    return False
+
 # @TODO: @Deprecated
 def get_export_as_proxy(obj: bpy.types.Object) -> bool:
     if get_obj_proxy_child(obj):

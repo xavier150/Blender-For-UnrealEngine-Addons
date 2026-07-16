@@ -116,15 +116,16 @@ def export_as_skeletal_mesh(
     bfu_export.bfu_export_utils.make_select_visual_real()
 
     bfu_export.bfu_export_utils.apply_select_needed_modifiers_for_export()
-    for selected_obj in bpy.context.selected_objects:
-        if active.bfu_convert_geometry_node_attribute_to_uv:
-            attrib_name: str = str(active.bfu_convert_geometry_node_attribute_to_uv_name)
-            bfu_export.bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
-        bfu_vertex_color.bfu_vertex_color_utils.SetVertexColorForUnrealExport(selected_obj)
-        bfu_export.bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
-        bfu_export.bfu_export_utils.SetSocketsExportTransform(selected_obj)
-        bfu_export.bfu_export_utils.SetSocketsExportName(selected_obj)
-    bfu_export.bfu_export_utils.RemoveMaterialsOnCollisionMeshes(bpy.context.selected_objects)
+    if bpy.context.selected_objects:
+        for selected_obj in bpy.context.selected_objects:
+            if active.bfu_convert_geometry_node_attribute_to_uv:
+                attrib_name: str = str(active.bfu_convert_geometry_node_attribute_to_uv_name)
+                bfu_export.bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
+            bfu_vertex_color.bfu_vertex_color_utils.SetVertexColorForUnrealExport(selected_obj)
+            bfu_export.bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
+            bfu_export.bfu_export_utils.SetSocketsExportTransform(selected_obj)
+            bfu_export.bfu_export_utils.SetSocketsExportName(selected_obj)
+        bfu_export.bfu_export_utils.RemoveMaterialsOnCollisionMeshes(list(bpy.context.selected_objects))
 
     bfu_utils.apply_export_transform(active, "Object")  # Apply export transform before rescale
 
@@ -270,7 +271,8 @@ def export_as_skeletal_mesh(
         armature_bones_constraints.reset_all_bone_constraints()
         armature_rest_pose_data.reset_armature_pose_position()
     else:
-        bfu_utils.clean_delete_objects(bpy.context.selected_objects)
+        if bpy.context.selected_objects:
+            bfu_utils.clean_delete_objects(list(bpy.context.selected_objects))
 
         for data in duplicate_data.data_to_remove:
             data.remove_data()
