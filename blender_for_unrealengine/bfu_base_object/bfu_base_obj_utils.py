@@ -78,7 +78,8 @@ def get_exportable_objects(obj: bpy.types.Object) -> List[bpy.types.Object]:
     # Include the object itself
 
     desired_obj_list: List[bpy.types.Object] = [obj]
-    desired_obj_list.extend(get_recursive_obj_childs(obj))
+    if bfu_export_control.bfu_export_control_property.get_object_export_type(obj).is_export_recursive():
+        desired_obj_list.extend(get_recursive_obj_childs(obj))
     return desired_obj_list
 
 def get_obj_import_location(obj: bpy.types.Object) -> Path:

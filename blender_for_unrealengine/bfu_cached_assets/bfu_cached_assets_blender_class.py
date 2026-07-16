@@ -30,12 +30,12 @@ class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
         events.add_sub_event("Get Final Asset List")
         events.add_sub_event("Prepare")
 
-        def get_have_parent_to_export(obj: bpy.types.Object) -> Optional[bpy.types.Object]:
+        def get_have_recursive_parent_to_export(obj: bpy.types.Object) -> Optional[bpy.types.Object]:
             if obj.parent is not None:
                 if bfu_export_control.bfu_export_control_utils.is_export_recursive(obj.parent):
                     return obj.parent
                 else:
-                    return get_have_parent_to_export(obj.parent)
+                    return get_have_recursive_parent_to_export(obj.parent)
             else:
                 return None
 
@@ -53,20 +53,20 @@ class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
             # Search for objects
             obj_list: List[bpy.types.Object] = []
             if export_filter.value == BFU_ExportSelectionFilterEnum.DEFAULT.value:
-                events.add_sub_event("Search recursive objects 01")
-                obj_list = bfu_export_control.bfu_export_control_utils.get_all_export_recursive_objects(scene)
+                events.add_sub_event("Search export objects 01")
+                obj_list = bfu_export_control.bfu_export_control_utils.get_all_export_objects(scene)
                 events.stop_last_event()
 
             elif export_filter.value in [BFU_ExportSelectionFilterEnum.ONLY_OBJECT.value, BFU_ExportSelectionFilterEnum.ONLY_OBJECT_AND_ACTIVE.value]:
-                events.add_sub_event("Search recursive objects 02")
-                recursive_list = bfu_export_control.bfu_export_control_utils.get_all_export_recursive_objects(scene)
+                events.add_sub_event("Search export objects 02")
+                recursive_list = bfu_export_control.bfu_export_control_utils.get_all_export_objects(scene)
 
                 events.stop_last_and_start_new_event("filter recursive objects")
                 for obj in bpy.context.selected_objects:
                     if obj in recursive_list:
                         if obj not in obj_list:
                             obj_list.append(obj)
-                    parent_target = get_have_parent_to_export(obj)
+                    parent_target = get_have_recursive_parent_to_export(obj)
                     if parent_target is not None:
                         if parent_target not in obj_list:
                             obj_list.append(parent_target)
@@ -109,15 +109,15 @@ class BFU_FinalExportAssetCache(bpy.types.PropertyGroup):
             # Search for armatures and their actions
             armature_list: List[bpy.types.Object] = []
             if export_filter.value == BFU_ExportSelectionFilterEnum.DEFAULT.value:
-                armature_list = bfu_export_control.bfu_export_control_utils.get_all_export_recursive_armatures(scene)
+                armature_list = bfu_export_control.bfu_export_control_utils.get_all_export_armatures(scene)
             elif export_filter.value in [BFU_ExportSelectionFilterEnum.ONLY_OBJECT.value, BFU_ExportSelectionFilterEnum.ONLY_OBJECT_AND_ACTIVE.value]:
-                armature_recursive_list = bfu_export_control.bfu_export_control_utils.get_all_export_recursive_armatures(scene)
+                armature_recursive_list = bfu_export_control.bfu_export_control_utils.get_all_export_armatures(scene)
 
                 for obj in bpy.context.selected_objects:
                     if obj in armature_recursive_list:
                         if obj not in armature_list:
                             armature_list.append(obj)
-                    armature_parent_target = get_have_parent_to_export(obj)
+                    armature_parent_target = get_have_recursive_parent_to_export(obj)
                     if armature_parent_target is not None:
                         if armature_parent_target not in armature_list:
                             armature_list.append(armature_parent_target)

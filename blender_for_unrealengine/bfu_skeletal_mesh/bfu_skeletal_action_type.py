@@ -75,7 +75,7 @@ class BFU_SkeletalActionAnimation(BFU_ObjectAssetClass):
     def get_package_file_prefix(self, data: Any, details: Any = None) -> str:
         if bpy.context:
             scene = bpy.context.scene
-            if self.get_asset_type(data, details) == AssetType.ANIM_POSE:
+            if self.get_asset_type(data, details).value == AssetType.ANIM_POSE.value:
                 return scene.bfu_pose_prefix_export_name  # type: ignore[attr-defined]
             else:
                 return scene.bfu_anim_prefix_export_name  # type: ignore[attr-defined]
@@ -178,16 +178,16 @@ class BFU_SkeletalActionAnimation(BFU_ObjectAssetClass):
         export_filter: BFU_ExportSelectionFilterEnum = bfu_export_filter.bfu_export_filter_props.scene_export_selection_filter(scene)
 
         armature_actions_map: List[Tuple[bpy.types.Object, bpy.types.Action]] = []
-        if export_filter == BFU_ExportSelectionFilterEnum.ONLY_OBJECT_AND_ACTIVE.value:
+        if export_filter.value == BFU_ExportSelectionFilterEnum.ONLY_OBJECT_AND_ACTIVE.value:
             # Export only the current action for selected armatures
-            armature_list = bfu_export_control.bfu_export_control_utils.get_all_selected_export_recursive_objects(scene)
+            armature_list = bfu_export_control.bfu_export_control_utils.get_all_selected_export_objects(scene)
             for armature in armature_list:
                 if armature.animation_data and armature.animation_data.action:
                     armature_actions_map.append((armature, armature.animation_data.action))
 
-        elif export_filter == BFU_ExportSelectionFilterEnum.ONLY_OBJECT.value:
+        elif export_filter.value == BFU_ExportSelectionFilterEnum.ONLY_OBJECT.value:
             # Export all actions for selected armatures
-            armature_list = bfu_export_control.bfu_export_control_utils.get_all_selected_export_recursive_objects(scene)
+            armature_list = bfu_export_control.bfu_export_control_utils.get_all_selected_export_objects(scene)
             cached_action_manager = bfu_cached_action_assets.bfu_cached_action_assets_types.cached_action_manager
             if force_cache_update:
                 armature_actions_map = bfu_anim_action.bfu_anim_action_utils.optimizated_asset_search(scene, armature_list)
@@ -203,9 +203,9 @@ class BFU_SkeletalActionAnimation(BFU_ObjectAssetClass):
                     # Ignore typing error because value alredy check in cached_action_manager.get_need_update_cache()
                     armature_actions_map = cached_action_manager.get_cache() # type: ignore
 
-        elif export_filter == BFU_ExportSelectionFilterEnum.DEFAULT.value:
+        elif export_filter.value == BFU_ExportSelectionFilterEnum.DEFAULT.value:
             # Export all actions for all armatures with recursive export option
-            armature_list = bfu_export_control.bfu_export_control_utils.get_all_export_recursive_armatures(scene)
+            armature_list = bfu_export_control.bfu_export_control_utils.get_all_export_armatures(scene)
             cached_action_manager = bfu_cached_action_assets.bfu_cached_action_assets_types.cached_action_manager
             if force_cache_update:
                 armature_actions_map = bfu_anim_action.bfu_anim_action_utils.optimizated_asset_search(scene, armature_list)

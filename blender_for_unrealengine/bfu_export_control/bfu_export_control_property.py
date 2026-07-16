@@ -27,17 +27,30 @@ def get_blender_enum_property_list() -> List[Tuple[str, str, str, str, int]]:
             "Export self object and all children",
             "KEYINGSET",
             2),
+        (BFU_ExportTypeEnum.EXPORT_SELF.value,
+            "Export self",
+            "Export self object only",
+            "KEYINGSET",
+            4), # 4 to keep enum order with the previous version of the addon
         (BFU_ExportTypeEnum.DONT_EXPORT.value,
             "Not exported",
             "Will never export",
             "CANCEL",
-            3),
+            3)
         ]
 
 
 classes = (
 )
 
+def set_object_export_type(obj: bpy.types.Object, export_type: BFU_ExportTypeEnum) -> None:
+    """
+    Set the object export type.
+    """
+    obj.bfu_export_type = export_type.value  # type: ignore
+
+def get_object_export_type(obj: bpy.types.Object) -> BFU_ExportTypeEnum:
+    return BFU_ExportTypeEnum(obj.bfu_export_type)  # type: ignore
 
 def register():
     for cls in classes:

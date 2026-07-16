@@ -9,6 +9,7 @@
 
 import bpy
 from typing import List
+from . import bfu_export_control_property
 from .bfu_export_control_type import BFU_ExportTypeEnum
 
 
@@ -53,14 +54,36 @@ def set_auto(obj: bpy.types.Object) -> None:
     """
     Set the object to auto export.
     """
-    obj.bfu_export_type = BFU_ExportTypeEnum.AUTO.value  # type: ignore
+    bfu_export_control_property.set_object_export_type(obj, BFU_ExportTypeEnum.AUTO)
 
 # Objects getters
+def get_all_export_objects(scene: bpy.types.Scene) -> List[bpy.types.Object]:
+    found_objects: List[bpy.types.Object] = []
+    for obj in scene.objects:
+        if bfu_export_control_property.get_object_export_type(obj).is_export_self():
+            found_objects.append(obj)
+    return found_objects
+
+def get_all_export_armatures(scene: bpy.types.Scene) ->  List[bpy.types.Object]:
+    found_objects: List[bpy.types.Object] = []
+    for obj in scene.objects:
+        if isinstance(obj.data, bpy.types.Armature):
+            if bfu_export_control_property.get_object_export_type(obj).is_export_self():
+                found_objects.append(obj)
+    return found_objects
+
+def get_all_selected_export_objects(scene: bpy.types.Scene) -> List[bpy.types.Object]:
+    found_objects: List[bpy.types.Object] = []
+    for obj in scene.objects:
+        if obj.select_get():
+            if bfu_export_control_property.get_object_export_type(obj).is_export_self():
+                found_objects.append(obj)
+    return found_objects
 
 def get_all_export_recursive_objects(scene: bpy.types.Scene) -> List[bpy.types.Object]:
     found_objects: List[bpy.types.Object] = []
     for obj in scene.objects:
-        if obj.bfu_export_type == BFU_ExportTypeEnum.EXPORT_RECURSIVE.value:  # type: ignore
+        if bfu_export_control_property.get_object_export_type(obj).is_export_recursive():
             found_objects.append(obj)
     return found_objects
 
@@ -68,7 +91,7 @@ def get_all_export_recursive_armatures(scene: bpy.types.Scene) ->  List[bpy.type
     found_objects: List[bpy.types.Object] = []
     for obj in scene.objects:
         if isinstance(obj.data, bpy.types.Armature):
-            if obj.bfu_export_type == BFU_ExportTypeEnum.EXPORT_RECURSIVE.value:  # type: ignore
+            if bfu_export_control_property.get_object_export_type(obj).is_export_recursive():
                 found_objects.append(obj)
     return found_objects
 
@@ -76,7 +99,7 @@ def get_all_selected_export_recursive_objects(scene: bpy.types.Scene) -> List[bp
     found_objects: List[bpy.types.Object] = []
     for obj in scene.objects:
         if obj.select_get():
-            if obj.bfu_export_type == BFU_ExportTypeEnum.EXPORT_RECURSIVE.value:  # type: ignore
+            if bfu_export_control_property.get_object_export_type(obj).is_export_recursive():
                 found_objects.append(obj)
     return found_objects
 
