@@ -7,9 +7,9 @@
         "tagline": "Allows to batch export and import in Unreal Engine",
         "maintainer": "Loux Xavier (BleuRaven) xavierloux.loux@gmail.com",
 
-        "website_url": "https://github.com/xavier150/unrealengine_assets_exporter-Addons/",
-        "report_issue_url": "https://github.com/xavier150/unrealengine_assets_exporter-Addons/issues",
-        "documentation_url": "https://github.com/xavier150/unrealengine_assets_exporter-Addons/wiki",
+        "website_url": "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/",
+        "report_issue_url": "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/issues",
+        "documentation_url": "https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki",
         "support": "COMMUNITY",
 
         "type": "add-on",

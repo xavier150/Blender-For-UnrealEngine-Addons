@@ -10,3 +10,4 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
     (This was due to the use of a new API in Blender 4.4, which is not available in older versions. "bpy.types.ActionSlot")
 - Fixed: Asset cache don't setup the animation correctly after reinstalling the addon without restarting Blender.
     (This was due to enum class comparison. Should use "Enum.value == Enum.value" instead of "Enum == Enum" to compare enum values.)
+- Fixed: Addon GitHub link is wrong.
