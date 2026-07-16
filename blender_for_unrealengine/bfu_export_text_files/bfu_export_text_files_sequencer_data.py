@@ -8,7 +8,7 @@
 # ----------------------------------------------
 
 import bpy
-from typing import Dict, List, Any, Union, Optional
+from typing import Dict, List, Any, Union
 from .. import bfu_export_logs
 from .. import bfu_utils
 from .. import bfu_export_control
@@ -49,9 +49,9 @@ def write_sequencer_tracks_data(exported_asset_log: List[bfu_export_logs.bfu_ass
             cameras.append(write_single_asset_camera_data(unreal_exported_asset))
     data['cameras'] = cameras
 
-    def get_marker_scene_sections():
+    def get_marker_scene_sections() -> List[List[Any]]:
         scene = bpy.context.scene
-        markersOrderly = []
+        markers_orderly: List[bpy.types.TimelineMarker] = []
         firstMarkersFrame = scene.frame_start
         lastMarkersFrame = scene.frame_end+1
 
@@ -67,23 +67,23 @@ def write_sequencer_tracks_data(exported_asset_log: List[bfu_export_logs.bfu_ass
         for x in range(firstMarkersFrame, lastMarkersFrame):
             for marker in scene.timeline_markers:
                 if marker.frame == x:
-                    markersOrderly.append(marker)
+                    markers_orderly.append(marker)
         # ---
-        sectionCuts = []
-        for x in range(len(markersOrderly)):
-            if scene.frame_end+1 > markersOrderly[x].frame:
-                startTime = markersOrderly[x].frame
-                if x+1 != len(markersOrderly):
-                    EndTime = markersOrderly[x+1].frame
+        section_cuts: List[List[Any]] = []
+        for x in range(len(markers_orderly)):
+            if scene.frame_end+1 > markers_orderly[x].frame:
+                startTime = markers_orderly[x].frame
+                if x+1 != len(markers_orderly):
+                    EndTime = markers_orderly[x+1].frame
                 else:
                     EndTime = scene.frame_end+1
-                sectionCuts.append([startTime, EndTime, markersOrderly[x].camera])
+                section_cuts.append([startTime, EndTime, markers_orderly[x].camera])
 
-        return sectionCuts
+        return section_cuts
 
-    data['marker_sections'] = []
+    marker_sections_list: List[Dict[str, Any]] = []
     for section in get_marker_scene_sections():
-        marker_sections = {}
+        marker_sections: Dict[str, Any] = {}
         marker_sections["start_time"] = section[0]
         marker_sections["end_time"] = section[1]
         if section[2]:
@@ -98,7 +98,8 @@ def write_sequencer_tracks_data(exported_asset_log: List[bfu_export_logs.bfu_ass
             marker_sections["has_camera"] = False
             marker_sections["camera_name"] = ""
 
-        data['marker_sections'].append(marker_sections)
+        marker_sections_list.append(marker_sections)
+    data['marker_sections'] = marker_sections_list
 
     bfu_export_text_files_utils.add_generated_json_footer(data)
     return data
