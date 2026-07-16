@@ -9,7 +9,9 @@
 
 
 from typing import List
+
 import bpy
+
 from .. import bbpl
 
 
@@ -19,6 +21,12 @@ def get_preset_values() -> List[str]:
         'obj.bfu_rotate_action_to_zero_for_export',
     ]
     return preset_values
+
+def get_object_move_action_to_center_for_export(obj: bpy.types.Object) -> bool:
+    return obj.bfu_move_action_to_center_for_export  # type: ignore
+
+def get_object_rotate_action_to_zero_for_export(obj: bpy.types.Object) -> bool:
+    return obj.bfu_rotate_action_to_zero_for_export  # type: ignore
 
 # -------------------------------------------------------------------
 #   Register & Unregister
@@ -32,9 +40,9 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bpy.types.Scene.bfu_animation_action_advanced_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Actions Advanced Properties")
+    bpy.types.Scene.bfu_animation_action_advanced_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Actions Advanced Properties")  # type: ignore
 
-    bpy.types.Object.bfu_move_action_to_center_for_export = bpy.props.BoolProperty(
+    bpy.types.Object.bfu_move_action_to_center_for_export = bpy.props.BoolProperty(  # type: ignore
         name="Move animation to center",
         description=(
             "(Action animation only) If true use object origin else use scene origin." +
@@ -48,7 +56,7 @@ def register():
         default=True
         )
 
-    bpy.types.Object.bfu_rotate_action_to_zero_for_export = bpy.props.BoolProperty(
+    bpy.types.Object.bfu_rotate_action_to_zero_for_export = bpy.props.BoolProperty(  # type: ignore
         name="Rotate Action to zero",
         description=(
             "(Action animation only) If true use object rotation else use scene rotation." +
@@ -62,7 +70,7 @@ def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
-    del bpy.types.Object.bfu_rotate_action_to_zero_for_export
-    del bpy.types.Object.bfu_move_action_to_center_for_export
+    del bpy.types.Object.bfu_rotate_action_to_zero_for_export  # type: ignore
+    del bpy.types.Object.bfu_move_action_to_center_for_export  # type: ignore
 
-    del bpy.types.Scene.bfu_animation_action_advanced_properties_expanded
+    del bpy.types.Scene.bfu_animation_action_advanced_properties_expanded  # type: ignore

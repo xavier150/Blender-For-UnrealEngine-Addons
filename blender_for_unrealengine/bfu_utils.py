@@ -20,11 +20,16 @@ import bpy
 import bmesh
 import mathutils
 
+from . import bpl
 from . import bbpl
 from . import bfu_basics
 from . import bfu_export_control
 from . import bfu_addon_prefs
-from . import bpl
+
+from . import bfu_adv_object #TODO Move the use outside utils to avoid import cycle
+from . import bfu_anim_action_adv #TODO Move the use outside utils to avoid import cycle
+from . import bfu_anim_nla_adv #TODO Move the use outside utils to avoid import cycle
+
 
 
 
@@ -710,16 +715,16 @@ def apply_export_transform(obj: bpy.types.Object, use_type: str = "Object"):
     # Ref
     # Moves object to the center of the scene for export
     if use_type == "Object":
-        move_to_center = obj.bfu_move_to_center_for_export
-        rotate_to_zero = obj.bfu_rotate_to_zero_for_export
+        move_to_center = bfu_adv_object.bfu_adv_obj_props.get_object_move_to_center_for_export(obj)
+        rotate_to_zero = bfu_adv_object.bfu_adv_obj_props.get_object_rotate_to_zero_for_export(obj)
 
     elif use_type == "Action":
-        move_to_center = obj.bfu_move_action_to_center_for_export
-        rotate_to_zero = obj.bfu_rotate_action_to_zero_for_export
+        move_to_center = bfu_anim_action_adv.bfu_anim_action_adv_props.get_object_move_action_to_center_for_export(obj)
+        rotate_to_zero = bfu_anim_action_adv.bfu_anim_action_adv_props.get_object_rotate_action_to_zero_for_export(obj)
 
     elif use_type == "NLA":
-        move_to_center = obj.bfu_move_nla_to_center_for_export
-        rotate_to_zero = obj.bfu_rotate_nla_to_zero_for_export
+        move_to_center = bfu_anim_nla_adv.bfu_anim_nla_adv_props.get_object_move_nla_to_center_for_export(obj)
+        rotate_to_zero = bfu_anim_nla_adv.bfu_anim_nla_adv_props.get_object_rotate_nla_to_zero_for_export(obj)
 
     else:
         return
