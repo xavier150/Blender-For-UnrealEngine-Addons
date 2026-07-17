@@ -31,7 +31,7 @@ def get_blender_enum_property_list() -> List[Tuple[str, str, str, str, int]]:
     return [
         (BFU_StaticExportProcedure.CUSTOM_FBX_EXPORT.value,
             "UE Standard (FBX)",
-            "Modified fbx I/O for Unreal Engine",
+            "Modified fbx I/O for Unreal Engine. (Warning: will be deprecated in the future, use \"(GLTF)\" instead.)",
             "OUTLINER_OB_GROUP_INSTANCE",
             1),
         (BFU_StaticExportProcedure.STANDARD_FBX.value,
