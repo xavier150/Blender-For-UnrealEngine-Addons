@@ -91,5 +91,6 @@ You simply need to paste it into Unreal Engine, for example, the cameras, spline
 - [Examples files](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Examples-files)
 
 ### Community
+- [FAQ](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/FAQ)
 - [Community Spotlight](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Community-Spotlight)
 - [Support](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Support) <3
