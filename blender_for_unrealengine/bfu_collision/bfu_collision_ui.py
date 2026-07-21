@@ -94,17 +94,21 @@ def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
 
 def draw_create_collision(layout: bpy.types.UILayout, context: bpy.types.Context) -> bpy.types.UILayout:
     def draw_create_collision_tips_steps(layout: bpy.types.UILayout, context: bpy.types.Context) -> bool:
-        is_ready = False
         if not bbpl.utils.active_mode_is("OBJECT"):
             layout.label(text="(1/3) Switch to Object Mode.", icon='INFO')
-        else:
-            if bbpl.utils.found_type_in_selection("MESH", True):
-                if bbpl.utils.active_type_is_not("ARMATURE"):
-                    layout.label(text="(3/3) Click on button to create collision from selection.", icon='INFO')
-                    is_ready = True
-            else:
-                layout.label(text="(2/3) Select the mesh object(s) on which to create colliders.", icon='INFO')
-        return is_ready
+            return False
+
+        if not bbpl.utils.found_type_in_selection("MESH", True):
+            layout.label(text="(2/3) Select the mesh object(s) on which to create colliders.", icon='INFO')
+            return False
+
+        if bbpl.utils.active_type_is_not("MESH"):
+            layout.label(text=f"Active need to be a mesh object.", icon='ERROR')
+            return False
+
+        layout.label(text="(3/3) Click on button to create collision from selection.", icon='INFO')
+        return True
+
     
     # Draw create new collider panel
     panel = layout.box()
@@ -120,19 +124,24 @@ def draw_create_collision(layout: bpy.types.UILayout, context: bpy.types.Context
 
 def draw_convert_collider(layout: bpy.types.UILayout, context: bpy.types.Context) -> bpy.types.UILayout:
     def draw_convert_collider_tips(layout: bpy.types.UILayout, context: bpy.types.Context) -> bool:
-        is_ready = False
         if not bbpl.utils.active_mode_is("OBJECT"):
             layout.label(text="(1/4) Switch to Object Mode.", icon='INFO')
-        else:
-            if bbpl.utils.found_type_in_selection("MESH", True):
-                if bbpl.utils.active_type_is_not("ARMATURE") and bpy.context.selected_objects and len(bpy.context.selected_objects) > 1:
-                    layout.label(text="(4/4) Click on button to convert to collider. (Active is the owner)", icon='INFO')
-                    is_ready = True
-                else:
-                    layout.label(text="(3/4) Select with [SHIFT] the collider owner.", icon='INFO')
-            else:
-                layout.label(text="(2/4) Select your collider object(s).", icon='INFO')
-        return is_ready
+            return False
+
+        if not bbpl.utils.found_type_in_selection("MESH", True):
+            layout.label(text="(2/4) Select your collider object(s).", icon='INFO')
+            return False
+
+        if not (
+            bbpl.utils.active_type_is_not("ARMATURE")
+            and bpy.context.selected_objects
+            and len(bpy.context.selected_objects) > 1
+        ):
+            layout.label(text="(3/4) Select with [SHIFT] the collider owner.", icon='INFO')
+            return False
+
+        layout.label(text="(4/4) Click on button to convert to collider. (Active is the owner)", icon='INFO')
+        return True
     
     # Draw convert to collider panel
     panel = layout.box()
