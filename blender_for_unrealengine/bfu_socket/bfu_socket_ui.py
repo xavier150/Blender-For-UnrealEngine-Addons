@@ -82,7 +82,7 @@ def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
                     socketName.prop(obj, "bfu_use_socket_custom_Name")
                     socketNameText = socketName.column()
                     socketNameText.enabled = bfu_socket_props.get_object_use_socket_custom_Name(obj)
-                    socketNameText.prop(obj, "bfu_socket_custom_Name")
+                    socketNameText.prop(obj, "bfu_socket_custom_name")
 
             copy_skeletalsocket_buttons = panel.column()
             copy_skeletalsocket_buttons.enabled = False
