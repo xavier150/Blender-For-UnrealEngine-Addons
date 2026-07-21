@@ -12,6 +12,7 @@ import bpy
 from . import bfu_socket_props
 from .. import bfu_addon_prefs
 from .. import bbpl
+from ..bbpl.blender_layout import layout_doc_button
 
 
 def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
@@ -21,6 +22,14 @@ def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
     if accordion:
         _, panel = accordion.draw(layout)
         if accordion.is_expanded() and panel:
+
+            # Draw user documentation button
+            layout_doc_button.add_doc_page_operator(
+                layout=panel, 
+                url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Sockets#create-sockets-in-blender",
+                text="About creating sockets in Blender"
+            )
+
             addon_prefs = bfu_addon_prefs.get_addon_preferences()
 
             # Draw user tips and check can use buttons
@@ -30,7 +39,7 @@ def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
             else:
 
                 if bbpl.utils.found_type_in_selection("EMPTY", False):
-                    if bbpl.utils.active_type_is_not("ARMATURE") and len(bpy.context.selected_objects) > 1:
+                    if bbpl.utils.active_type_is_not("ARMATURE") and bpy.context.selected_objects and len(bpy.context.selected_objects) > 1:
                         panel.label(text="Click on button for convert to Socket.", icon='INFO')
                         ready_for_convert_socket = True
                     else:
@@ -55,7 +64,7 @@ def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
                             panel.label(text="Switch to Object Mode.", icon='INFO')
                 else:
                     if bbpl.utils.found_type_in_selection("EMPTY"):
-                        if bbpl.utils.active_type_is("ARMATURE") and len(bpy.context.selected_objects) > 1:
+                        if bbpl.utils.active_type_is("ARMATURE") and bpy.context.selected_objects and len(bpy.context.selected_objects) > 1:
                             panel.label(text="Switch to Pose Mode.", icon='INFO')
                         else:
                             panel.label(text="Select with [SHIFT] the socket owner. (Armature)", icon='INFO')
@@ -63,7 +72,7 @@ def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
                         panel.label(text="Select your socket Empty(s).", icon='INFO')
 
                 if bbpl.utils.active_mode_is("POSE") and bbpl.utils.active_type_is("ARMATURE") and bbpl.utils.found_type_in_selection("EMPTY"):
-                    if len(bpy.context.selected_pose_bones) > 0:
+                    if  bpy.context.selected_pose_bones and len(bpy.context.selected_pose_bones) > 0:
                         panel.label(text="Click on button for convert to Socket.", icon='INFO')
                         ready_for_convert_skeletal_socket = True
                     else:
