@@ -25,12 +25,18 @@ class BFU_SkeletonExportProcedure(str, Enum):
     def _missing_(cls, value: object) -> "BFU_SkeletonExportProcedure":
         # Fallback for old scenes/transient states with empty or invalid value.
         return cls.default()
+    
+    def is_fbx(self) -> bool:
+        return self.value in [BFU_SkeletonExportProcedure.CUSTOM_FBX_EXPORT.value, BFU_SkeletonExportProcedure.STANDARD_FBX.value]
+    
+    def is_gltf(self) -> bool:
+        return self.value == BFU_SkeletonExportProcedure.STANDARD_GLTF.value
 
 def get_skeleton_export_procedure_enum_property_list() -> List[Tuple[str, str, str, str, int]]:
     return [
         (BFU_SkeletonExportProcedure.CUSTOM_FBX_EXPORT.value,
             "UE Standard (FBX)",
-            "Modified fbx I/O for Unreal Engine",
+            "Modified fbx I/O for Unreal Engine. (Warning: will be deprecated in the future, use \"(GLTF)\" instead.)",
             "OUTLINER_OB_GROUP_INSTANCE",
             1),
         (BFU_SkeletonExportProcedure.STANDARD_FBX.value,

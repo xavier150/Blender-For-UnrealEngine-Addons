@@ -23,6 +23,12 @@ class BFU_StaticExportProcedure(Enum):
         # But in the future I will change on glTF when fully stable and supported by Unreal Engine.
         # glTF is more modern and open than FBX.
         return BFU_StaticExportProcedure.STANDARD_FBX
+    
+    def is_fbx(self) -> bool:
+        return self.value in [BFU_StaticExportProcedure.CUSTOM_FBX_EXPORT.value, BFU_StaticExportProcedure.STANDARD_FBX.value]
+    
+    def is_gltf(self) -> bool:
+        return self.value == BFU_StaticExportProcedure.STANDARD_GLTF.value
 
 def get_blender_default() -> str:
     return BFU_StaticExportProcedure.STANDARD_FBX.value

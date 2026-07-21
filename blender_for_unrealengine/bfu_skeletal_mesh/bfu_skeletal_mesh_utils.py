@@ -9,7 +9,6 @@
 
 import fnmatch
 from typing import List
-
 import bpy
 
 from .. import bfu_basics
@@ -18,6 +17,7 @@ from .. import bfu_assets_manager
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetType
 from .. import bfu_addon_prefs
 from . import bfu_skeletal_mesh_props
+from . import bfu_export_procedure
 
 def get_socket_in_desired_childs(obj: bpy.types.Object) -> List[bpy.types.Object]:
     socket_objs: List[bpy.types.Object] = []
@@ -43,6 +43,11 @@ def is_skeletal_mesh(obj: bpy.types.Object):
 
 def is_not_skeletal_mesh(obj: bpy.types.Object):
     return not is_skeletal_mesh(obj)
+
+def is_fbx_skeletal_mesh(obj: bpy.types.Object) -> bool:
+    if is_skeletal_mesh(obj) and bfu_export_procedure.get_object_export_procedure(obj).is_fbx():
+            return True
+    return False
 
 def get_armature_root_bones(armature: bpy.types.Object) -> List[bpy.types.Bone]:
     root_bones: List[bpy.types.Bone] = []
