@@ -188,7 +188,10 @@ class DuplicateData():
             if obj_name in scene.objects and parent_name in scene.objects:
                 duplicated_obj = scene.objects[obj_name]
                 duplicated_parent = scene.objects[parent_name]
+                # Parent may change the object prosition because inverse transform. So I save the matrix_world and restore it after reparenting.
+                duplicated_obj_matrix_world = duplicated_obj.matrix_world.copy()
                 duplicated_obj.parent = duplicated_parent
+                duplicated_obj.matrix_world = duplicated_obj_matrix_world
 
     def reset_duplicate_name_after_export(self):
         # Restore the original names of the objects after export.
