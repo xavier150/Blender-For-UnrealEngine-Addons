@@ -55,27 +55,27 @@ def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
 def draw_convert_static_socket(layout: bpy.types.UILayout, context: bpy.types.Context) -> bpy.types.UILayout:
     def draw_convert_static_socket_tips(layout: bpy.types.UILayout, context: bpy.types.Context) -> bool:
         # Draw user tips and check can use buttons
-        ready_for_convert_socket = False
+        is_ready = False
         if not bbpl.utils.active_mode_is("OBJECT"):
-            layout.label(text="Switch to Object Mode.", icon='INFO')
+            layout.label(text="(1/4) Switch to Object Mode.", icon='INFO')
         else:
 
-            if bbpl.utils.found_type_in_selection("EMPTY", False):
+            if bbpl.utils.found_type_in_selection("EMPTY", True):
                 if bbpl.utils.active_type_is_not("ARMATURE") and bpy.context.selected_objects and len(bpy.context.selected_objects) > 1:
-                    layout.label(text="Click on button for convert to Socket.", icon='INFO')
-                    ready_for_convert_socket = True
+                    layout.label(text="(4/4) Click on button to convert to Socket. (Active is the owner)", icon='INFO')
+                    is_ready = True
                 else:
-                    layout.label(text="Select with [SHIFT] the socket owner.", icon='INFO')
+                    layout.label(text="(3/4) Select with [SHIFT] the socket owner.", icon='INFO')
             else:
-               layout.label(text="Please select your socket Empty(s). Active should be the owner.", icon='INFO')
-        return ready_for_convert_socket
+               layout.label(text="(2/4) Select socket Empty(s).", icon='INFO')
+        return is_ready
 
     # Draw buttons
     panel = layout.box()
-    ready_for_convert_socket = draw_convert_static_socket_tips(panel, context)
+    is_ready = draw_convert_static_socket_tips(panel, context)
     buttons_ui = panel.row().split(factor=0.80)
     column_button_ui = buttons_ui.column()
-    column_button_ui.enabled = ready_for_convert_socket
+    column_button_ui.enabled = is_ready
     column_button_ui.operator("object.converttostaticsocket", icon='OUTLINER_DATA_EMPTY')
     return panel
 
@@ -89,34 +89,34 @@ def draw_convert_skeletal_socket(layout: bpy.types.UILayout, context: bpy.types.
     
     def draw_convert_skeletal_socket_tips(layout: bpy.types.UILayout, context: bpy.types.Context) -> bool:
         # Draw user tips and check can use buttons (skeletal_socket)
-        ready_for_convert_skeletal_socket = False
+        is_ready = False
         if not bbpl.utils.active_mode_is("OBJECT"):
             if not bbpl.utils.active_type_is("ARMATURE"):
                 if not bbpl.utils.found_type_in_selection("EMPTY"):
-                    layout.label(text="Switch to Object Mode.", icon='INFO')
+                    layout.label(text="(2/6) Switch to Object Mode.", icon='INFO')
         else:
             if bbpl.utils.found_type_in_selection("EMPTY"):
                 if bbpl.utils.active_type_is("ARMATURE") and bpy.context.selected_objects and len(bpy.context.selected_objects) > 1:
-                    layout.label(text="Switch to Pose Mode.", icon='INFO')
+                    layout.label(text="(4/6) Switch to Pose Mode.", icon='INFO')
                 else:
-                    layout.label(text="Select with [SHIFT] the socket owner. (Armature)", icon='INFO')
+                    layout.label(text="(3/6) Select with [SHIFT] the socket owner. (Armature)", icon='INFO')
             else:
-                layout.label(text="Select your socket Empty(s).", icon='INFO')
-
+                layout.label(text="(2/6) Select your socket Empty(s).", icon='INFO')
+    
         if bbpl.utils.active_mode_is("POSE") and bbpl.utils.active_type_is("ARMATURE") and bbpl.utils.found_type_in_selection("EMPTY"):
             if  bpy.context.selected_pose_bones and len(bpy.context.selected_pose_bones) > 0:
-                layout.label(text="Click on button for convert to Socket.", icon='INFO')
-                ready_for_convert_skeletal_socket = True
+                layout.label(text="(6/6) Click on button for convert to Socket.", icon='INFO')
+                is_ready = True
             else:
-                layout.label(text="Select the owner bone.", icon='INFO')
-        return ready_for_convert_skeletal_socket
+                layout.label(text="(5/?) Select the owner bone.", icon='INFO')
+        return is_ready
 
     # Draw buttons (skeletal_socket)
     panel = layout.box()
-    ready_for_convert_skeletal_socket = draw_convert_skeletal_socket_tips(panel, context)
+    is_ready = draw_convert_skeletal_socket_tips(panel, context)
     buttons_ui = panel.row().split(factor=0.80)
     column_button_ui = buttons_ui.column()
-    column_button_ui.enabled = ready_for_convert_skeletal_socket
+    column_button_ui.enabled = is_ready
     column_button_ui.operator("object.converttoskeletalsocket",icon='OUTLINER_DATA_EMPTY')
     return panel
         

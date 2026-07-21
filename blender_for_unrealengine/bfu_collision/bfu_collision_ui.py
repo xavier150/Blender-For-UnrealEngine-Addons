@@ -94,21 +94,24 @@ def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
 
 def draw_create_collision(layout: bpy.types.UILayout, context: bpy.types.Context) -> bpy.types.UILayout:
     def draw_create_collision_tips_steps(layout: bpy.types.UILayout, context: bpy.types.Context) -> bool:
+        is_ready = False
         if not bbpl.utils.active_mode_is("OBJECT"):
-            layout.label(text="Switch to Object Mode.", icon='INFO')
+            layout.label(text="(1/3) Switch to Object Mode.", icon='INFO')
         else:
-            if bbpl.utils.found_type_in_selection("MESH", False):
+            if bbpl.utils.found_type_in_selection("MESH", True):
                 if bbpl.utils.active_type_is_not("ARMATURE"):
-                    layout.label(text="Click on button for create collision from selection.", icon='INFO')
+                    layout.label(text="(3/3) Click on button to create collision from selection.", icon='INFO')
+                    is_ready = True
             else:
-                layout.label(text="Please select the mesh object(s) on which to create the collider.", icon='INFO')
-        return True
+                layout.label(text="(2/3) Select the mesh object(s) on which to create colliders.", icon='INFO')
+        return is_ready
     
     # Draw create new collider panel
     panel = layout.box()
-    draw_create_collision_tips_steps(panel, context)
+    is_ready = draw_create_collision_tips_steps(panel, context)
     buttons_ui = panel.row().split(factor=0.80)
     column_button_ui = buttons_ui.column()
+    column_button_ui.enabled = is_ready
     column_button_ui.operator("object.createboxcollisionfromselection", icon='MESH_CUBE')
     column_button_ui.operator("object.createconvexcollisionfromselection", icon='MESH_ICOSPHERE')
     column_button_ui.operator("object.createcapsulecollisionfromselection", icon='MESH_CAPSULE')
@@ -117,25 +120,26 @@ def draw_create_collision(layout: bpy.types.UILayout, context: bpy.types.Context
 
 def draw_convert_collider(layout: bpy.types.UILayout, context: bpy.types.Context) -> bpy.types.UILayout:
     def draw_convert_collider_tips(layout: bpy.types.UILayout, context: bpy.types.Context) -> bool:
+        is_ready = False
         if not bbpl.utils.active_mode_is("OBJECT"):
-            layout.label(text="Switch to Object Mode.", icon='INFO')
+            layout.label(text="(1/4) Switch to Object Mode.", icon='INFO')
         else:
-            if bbpl.utils.found_type_in_selection("MESH", False):
+            if bbpl.utils.found_type_in_selection("MESH", True):
                 if bbpl.utils.active_type_is_not("ARMATURE") and bpy.context.selected_objects and len(bpy.context.selected_objects) > 1:
-                    layout.label(text="Click on button for convert to collider.", icon='INFO')
-                    return True
+                    layout.label(text="(4/4) Click on button to convert to collider. (Active is the owner)", icon='INFO')
+                    is_ready = True
                 else:
-                    layout.label(text="Select with [SHIFT] the collider owner.", icon='INFO')
+                    layout.label(text="(3/4) Select with [SHIFT] the collider owner.", icon='INFO')
             else:
-                layout.label(text="Please select your collider mesh object(s). Active should be the owner.", icon='INFO')
-        return False
+                layout.label(text="(2/4) Select your collider object(s).", icon='INFO')
+        return is_ready
     
     # Draw convert to collider panel
     panel = layout.box()
-    ready_for_convert_collider = draw_convert_collider_tips(panel, context)
+    is_ready = draw_convert_collider_tips(panel, context)
     buttons_ui = panel.row().split(factor=0.80)
     column_button_ui = buttons_ui.column()
-    column_button_ui.enabled = ready_for_convert_collider
+    column_button_ui.enabled = is_ready
     column_button_ui.operator("object.converttoboxcollision", icon='MESH_CUBE')
     column_button_ui.operator("object.converttoconvexcollision", icon='MESH_ICOSPHERE')
     column_button_ui.operator("object.converttocapsulecollision", icon='MESH_CAPSULE')
