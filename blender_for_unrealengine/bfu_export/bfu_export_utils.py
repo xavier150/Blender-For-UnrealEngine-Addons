@@ -659,12 +659,16 @@ def get_rescale_rig_factor() -> float:
 def get_should_rescale_sockets():
     # This will return if the socket should be rescale.
 
+    scene = bpy.context.scene
+    if scene is None:
+        raise Exception("No active scene found.")
+
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
     if addon_prefs.rescale_sockets_at_export == "auto":
-        if bpy.context.scene.unit_settings.scale_length == 0.01:
-            return False  # False because that useless to rescale at 1 :v
-        else:
-            return True
+        if scene.unit_settings:
+            if scene.unit_settings.scale_length == 0.01:
+                return False  # False because that useless to rescale at 1.
+        return True
     if addon_prefs.rescale_sockets_at_export == "custom_rescale":
         return True
     if addon_prefs.rescale_sockets_at_export == "dont_rescale":
