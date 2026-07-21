@@ -53,12 +53,94 @@ def set_sockets_export_name(socket: bpy.types.Object) -> str:
         return bfu_socket_props.get_object_socket_custom_name(socket)
     return socket.name[7:]
 
+def get_static_export_should_rescale_sockets(obj: bpy.types.Object) -> bool:
+    # This will return if the socket should be rescale.
+
+    scene = bpy.context.scene
+    if scene is None:
+        raise Exception("No active scene found.")
+
+    addon_prefs = bfu_addon_prefs.get_addon_preferences()
+    if addon_prefs.rescale_sockets_at_export == "auto":
+        if scene.unit_settings:
+            if bfu_static_mesh.bfu_static_mesh_utils.is_fbx_static_mesh(obj):
+                if scene.unit_settings.scale_length == 0.01:
+                    return False  # False because that useless to rescale at 1.
+            elif bfu_static_mesh.bfu_static_mesh_utils.is_gltf_static_mesh(obj):
+                if scene.unit_settings.scale_length == 1:
+                    return False  # False because that useless to rescale at 1.
+        return True
+    if addon_prefs.rescale_sockets_at_export == "custom_rescale":
+        return True
+    if addon_prefs.rescale_sockets_at_export == "dont_rescale":
+        return False
+    return False
+
+def get_skeletal_export_should_rescale_sockets(obj: bpy.types.Object) -> bool:
+    # This will return if the socket should be rescale.
+
+    scene = bpy.context.scene
+    if scene is None:
+        raise Exception("No active scene found.")
+
+    addon_prefs = bfu_addon_prefs.get_addon_preferences()
+    if addon_prefs.rescale_sockets_at_export == "auto":
+        if scene.unit_settings:
+            if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_fbx_skeletal_mesh(obj):
+                if scene.unit_settings.scale_length == 0.01:
+                    return False  # False because that useless to rescale at 1.
+            elif bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_gltf_skeletal_mesh(obj):
+                if scene.unit_settings.scale_length == 1:
+                    return False  # False because that useless to rescale at 1.
+        return True
+    if addon_prefs.rescale_sockets_at_export == "custom_rescale":
+        return True
+    if addon_prefs.rescale_sockets_at_export == "dont_rescale":
+        return False
+    return False
+
+def get_static_export_rescale_socket_factor(obj: bpy.types.Object) -> float:
+    # This will return the rescale factor.
+
+    addon_prefs = bfu_addon_prefs.get_addon_preferences()
+    if addon_prefs.rescale_sockets_at_export == "auto":
+        if bfu_static_mesh.bfu_static_mesh_utils.is_fbx_static_mesh(obj):
+            return 1/(100*bfu_utils.get_scene_unit_scale())
+        elif bfu_static_mesh.bfu_static_mesh_utils.is_gltf_static_mesh(obj):
+            return 1/(1*bfu_utils.get_scene_unit_scale())
+        return 1.0
+    else:
+        return addon_prefs.static_sockets_imported_size
+    
+def get_skeletal_export_rescale_socket_factor(obj: bpy.types.Object) -> float:
+    # This will return the rescale factor.
+
+    addon_prefs = bfu_addon_prefs.get_addon_preferences()
+    if addon_prefs.rescale_sockets_at_export == "auto":
+        if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_fbx_skeletal_mesh(obj):
+            return 1/(100*bfu_utils.get_scene_unit_scale())
+        elif bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_gltf_skeletal_mesh(obj):
+            return 1/(1*bfu_utils.get_scene_unit_scale())
+        return 1.0
+    else:
+        return addon_prefs.skeletal_sockets_imported_size
+    
+def get_skeletal_spacing_export_rescale_socket_factor(obj: bpy.types.Object) -> float:
+    addon_prefs = bfu_addon_prefs.get_addon_preferences()
+    if addon_prefs.rescale_sockets_at_export == "auto":
+        if bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_fbx_skeletal_mesh(obj):
+            return 100*bfu_utils.get_scene_unit_scale()
+        elif bfu_skeletal_mesh.bfu_skeletal_mesh_utils.is_gltf_skeletal_mesh(obj):
+            return 1*bfu_utils.get_scene_unit_scale()
+        return 1.0
+    else:
+        return 1.0
+
 def get_skeletal_mesh_socket_data(obj: bpy.types.Object) -> List[Dict[str, Any]]:
 
     if not isinstance(obj.data, bpy.types.Armature):
         return []
 
-    addon_prefs = bfu_addon_prefs.get_addon_preferences()
     sockets: List[bpy.types.Object] = []
 
     for socket in get_socket_desired_children(obj):
@@ -77,10 +159,12 @@ def get_skeletal_mesh_socket_data(obj: bpy.types.Object) -> List[Dict[str, Any]]
             print("Socket parent", socket_parent.name, " parent is not an Armature!")
             break
 
+        # Found the deform bone parent to use.
         if bfu_skeletal_mesh.bfu_skeletal_mesh_props.get_object_export_deform_only(socket_parent):
             b = bfu_basics.get_first_deform_bone_parent(socket_parent.data.bones[socket.parent_bone])
         else:
             b = socket_parent.data.bones[socket.parent_bone]
+
 
         bbpl.anim_utils.reset_armature_pose(socket_parent)
         # GetRelativePosition
@@ -93,21 +177,21 @@ def get_skeletal_mesh_socket_data(obj: bpy.types.Object) -> List[Dict[str, Any]]
 
         # Calculate relative matrix depending on the export procedure
         if object_export_procedure.value == BFU_SkeletonExportProcedure.STANDARD_GLTF.value:
-            RelativeMatrix = (bml.inverted() @ am.inverted() @ em)
-            RelativeMatrix = mathutils.Matrix.Rotation(math.radians(90), 4, 'X') @ RelativeMatrix
+            relative_matrix = (bml.inverted() @ am.inverted() @ em)
+            relative_matrix = mathutils.Matrix.Rotation(math.radians(90), 4, 'X') @ relative_matrix
         elif object_export_procedure.value == BFU_SkeletonExportProcedure.STANDARD_FBX.value:
-            RelativeMatrix = (bml.inverted() @ am.inverted() @ em)
+            relative_matrix = (bml.inverted() @ am.inverted() @ em)
         elif object_export_procedure.value == BFU_SkeletonExportProcedure.CUSTOM_FBX_EXPORT.value:
-            RelativeMatrix = (bml.inverted() @ am.inverted() @ em)
-            RelativeMatrix = mathutils.Matrix.Rotation(math.radians(90), 4, 'Y') @ RelativeMatrix
-            RelativeMatrix = mathutils.Matrix.Rotation(math.radians(-90), 4, 'Z') @ RelativeMatrix
+            relative_matrix = (bml.inverted() @ am.inverted() @ em)
+            relative_matrix = mathutils.Matrix.Rotation(math.radians(90), 4, 'Y') @ relative_matrix
+            relative_matrix = mathutils.Matrix.Rotation(math.radians(-90), 4, 'Z') @ relative_matrix
         else:
-            raise ValueError("Unknown export procedure")
+            raise ValueError("Unknown export procedure!")
         
         # Decompose matrix
-        t = RelativeMatrix.to_translation()
-        r = RelativeMatrix.to_euler()
-        s = socket.scale*addon_prefs.skeletal_sockets_imported_size
+        t = relative_matrix.to_translation() * get_skeletal_spacing_export_rescale_socket_factor(obj)
+        r = relative_matrix.to_euler()
+        s = socket.scale
 
         # Convert to array for Json and apply final change of axis
         if object_export_procedure.value == BFU_SkeletonExportProcedure.STANDARD_GLTF.value:
@@ -304,43 +388,6 @@ def get_import_skeletal_mesh_socket_script_command(obj: bpy.types.Object) -> str
             t += "End Object" + "\n"
         return t
     return "Please select an armature."
-
-
-def get_export_should_rescale_sockets(obj: bpy.types.Object) -> bool:
-    # This will return if the socket should be rescale.
-
-    scene = bpy.context.scene
-    if scene is None:
-        raise Exception("No active scene found.")
-
-    addon_prefs = bfu_addon_prefs.get_addon_preferences()
-    if addon_prefs.rescale_sockets_at_export == "auto":
-        if scene.unit_settings:
-            if bfu_static_mesh.bfu_static_mesh_utils.is_fbx_static_mesh(obj):
-                if scene.unit_settings.scale_length == 0.01:
-                    return False  # False because that useless to rescale at 1.
-            elif bfu_static_mesh.bfu_static_mesh_utils.is_gltf_static_mesh(obj):
-                if scene.unit_settings.scale_length == 1:
-                    return False  # False because that useless to rescale at 1.
-        return True
-    if addon_prefs.rescale_sockets_at_export == "custom_rescale":
-        return True
-    if addon_prefs.rescale_sockets_at_export == "dont_rescale":
-        return False
-    return False
-
-def get_export_rescale_socket_factor(obj: bpy.types.Object) -> float:
-    # This will return the rescale factor.
-
-    addon_prefs = bfu_addon_prefs.get_addon_preferences()
-    if addon_prefs.rescale_sockets_at_export == "auto":
-        if bfu_static_mesh.bfu_static_mesh_utils.is_fbx_static_mesh(obj):
-            return 1/(100*bfu_utils.get_scene_unit_scale())
-        elif bfu_static_mesh.bfu_static_mesh_utils.is_gltf_static_mesh(obj):
-            return 1/(1*bfu_utils.get_scene_unit_scale())
-        return 1.0
-    else:
-        return addon_prefs.static_sockets_imported_size
     
 def set_sockets_export_transform(obj: bpy.types.Object):
     '''
@@ -356,8 +403,8 @@ def set_sockets_export_transform(obj: bpy.types.Object):
     # Set socket Transform for Unreal
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
     for socket in get_socket_desired_children(obj):
-        if get_export_should_rescale_sockets(obj):
-            socket.delta_scale *= get_export_rescale_socket_factor(obj)
+        if get_static_export_should_rescale_sockets(obj):
+            socket.delta_scale *= get_static_export_rescale_socket_factor(obj)
 
         if bfu_static_mesh.bfu_static_mesh_utils.is_fbx_static_mesh(obj):
             if addon_prefs.fbx_static_sockets_add_90x:

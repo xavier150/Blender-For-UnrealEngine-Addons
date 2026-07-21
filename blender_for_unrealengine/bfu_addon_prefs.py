@@ -94,13 +94,13 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
     static_sockets_imported_size: bpy.props.FloatProperty(  # type: ignore
         name=bpy.app.translations.pgettext("StaticMesh sockets import size", "interface.static_sockets_imported_size_name"),
         description=bpy.app.translations.pgettext("ize of the socket when imported in Unreal Engine.", "tooltips.static_sockets_imported_size_desc"),
-        default=1,
+        default=1.0,
         )
 
     skeletal_sockets_imported_size: bpy.props.FloatProperty(  # type: ignore
         name=bpy.app.translations.pgettext("SkeletalMesh sockets import size", "interface.skeletal_sockets_imported_size_name"),
         description=bpy.app.translations.pgettext("Size of the socket when imported in Unreal Engine. AUTO: 1 ([New scale} = 100 / [Unit scale])", "tooltips.skeletal_sockets_imported_size_desc"),
-        default=1,
+        default=1.0,
         )
 
     ignore_nla_for_action: bpy.props.BoolProperty(  # type: ignore
