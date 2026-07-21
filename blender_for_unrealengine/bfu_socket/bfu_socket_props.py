@@ -15,10 +15,10 @@ from .. import bbpl
 def get_scene_socket_properties_expanded(scene: bpy.types.Scene) -> bool:
     return scene.bfu_tools_socket_properties_expanded.is_expanded() # type: ignore
 
-def get_object_use_socket_custom_Name(obj: bpy.types.Object) -> bool:
+def get_object_use_socket_custom_name(obj: bpy.types.Object) -> bool:
     return obj.bfu_use_socket_custom_name # type: ignore
 
-def get_object_socket_custom_Name(obj: bpy.types.Object) -> str:
+def get_object_socket_custom_name(obj: bpy.types.Object) -> str:
     return obj.bfu_socket_custom_name # type: ignore
 
 # -------------------------------------------------------------------

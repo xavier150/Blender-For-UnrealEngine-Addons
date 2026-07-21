@@ -48,8 +48,8 @@ def set_sockets_export_name(socket: bpy.types.Object) -> str:
     '''
     Get the current socket custom name
     '''
-    if bfu_socket_props.get_object_use_socket_custom_Name(socket):
-        return bfu_socket_props.get_object_socket_custom_Name(socket)
+    if bfu_socket_props.get_object_use_socket_custom_name(socket):
+        return bfu_socket_props.get_object_socket_custom_name(socket)
     return socket.name[7:]
 
 def get_skeletal_mesh_socket_data(obj: bpy.types.Object) -> List[Dict[str, Any]]:
