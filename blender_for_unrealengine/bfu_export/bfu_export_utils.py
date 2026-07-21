@@ -334,8 +334,8 @@ def SetSocketsExportName(obj: bpy.types.Object):
 
     scene = bpy.context.scene
     for socket in bfu_socket.bfu_socket_utils.get_socket_desired_children(obj):
-        use_socket_custom_name = bfu_socket.bfu_socket_props.get_object_use_socket_custom_Name(socket)
-        socket_custom_name = bfu_socket.bfu_socket_props.get_object_socket_custom_Name(socket)
+        use_socket_custom_name = bfu_socket.bfu_socket_props.get_object_use_socket_custom_name(socket)
+        socket_custom_name = bfu_socket.bfu_socket_props.get_object_socket_custom_name(socket)
 
         if use_socket_custom_name:
             if socket_custom_name not in scene.objects:
