@@ -36,14 +36,14 @@ def register():
     bpy.types.Scene.bfu_tools_socket_properties_expanded = bbpl.blender_layout.layout_accordion.add_ui_accordion(name="Socket")  # type: ignore
 
     bpy.types.Object.bfu_use_socket_custom_name = bpy.props.BoolProperty(  # type: ignore
-        name="Socket custom name",
+        name="Use Socket Custom Name",
         description='Use a custom name in Unreal Engine for this socket?',
         default=False
         )
 
     bpy.types.Object.bfu_socket_custom_name = bpy.props.StringProperty(  # type: ignore
-        name="",
-        description='',
+        name="Socket Custom Name",
+        description='Custom name for this socket in Unreal Engine.',
         default="MySocket"
         )
 

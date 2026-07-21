@@ -36,11 +36,11 @@ def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
             obj = bpy.context.object
             if obj is not None:
                 if obj.type == "EMPTY":
-                    socketName = panel.column()
-                    socketName.prop(obj, "bfu_use_socket_custom_name")
-                    socketNameText = socketName.column()
-                    socketNameText.enabled = bfu_socket_props.get_object_use_socket_custom_name(obj)
-                    socketNameText.prop(obj, "bfu_socket_custom_name")
+                    socket_name = panel.column()
+                    socket_name.prop(obj, "bfu_use_socket_custom_name", text="Custom Name")
+                    socket_name_text = socket_name.column()
+                    socket_name_text.enabled = bfu_socket_props.get_object_use_socket_custom_name(obj)
+                    socket_name_text.prop(obj, "bfu_socket_custom_name", text="")
 
             copy_skeletalsocket_buttons = panel.column()
             copy_skeletalsocket_buttons.enabled = False
