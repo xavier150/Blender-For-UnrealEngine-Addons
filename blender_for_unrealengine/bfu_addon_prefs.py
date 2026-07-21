@@ -63,9 +63,9 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         default=100,
         )
 
-    static_sockets_add_90x: bpy.props.BoolProperty(  # type: ignore
-        name=bpy.app.translations.pgettext("Export StaticMesh Sockets with +90 degrees on X", "interface.static_sockets_add_90_x_name"),
-        description=bpy.app.translations.pgettext("On StaticMesh the sockets are auto imported by unreal with -90 degrees on X", "tooltips.static_sockets_add_90_x_desc"),
+    fbx_static_sockets_add_90x: bpy.props.BoolProperty(  # type: ignore
+        name=bpy.app.translations.pgettext("Export FBX StaticMesh Sockets with +90 degrees on X", "interface.static_sockets_add_90_x_name"),
+        description=bpy.app.translations.pgettext("On FBX StaticMesh the sockets are auto imported by unreal with -90 degrees on X to correct their orientation.", "tooltips.static_sockets_add_90_x_desc"),
         default=True,
         )
 
@@ -168,7 +168,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
         skeleton_root_bone_name: str        
         rescale_full_rig_at_export: str
         new_rig_scale: float
-        static_sockets_add_90x: bool
+        fbx_static_sockets_add_90x: bool
         rescale_sockets_at_export: str
         static_sockets_imported_size: float
         skeletal_sockets_imported_size: float
@@ -218,7 +218,7 @@ class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):
 
         socket = ColumnLeft.box()
         socket.label(text='SOCKET')  # type: ignore
-        socket.prop(self, "static_sockets_add_90x")  # type: ignore
+        socket.prop(self, "fbx_static_sockets_add_90x")  # type: ignore
         socket.prop(self, "rescale_sockets_at_export")  # type: ignore
         socket_rescale_ui = socket.column()
         socket_rescale_ui.enabled = self.rescale_sockets_at_export == "custom_rescale"

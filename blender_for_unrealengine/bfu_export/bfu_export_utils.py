@@ -356,25 +356,32 @@ def SetSocketsExportName(obj: bpy.types.Object):
 
 
 def SetSocketsExportTransform(obj: bpy.types.Object):
-    # Set socket Transform for Unreal
+    '''
+    Save the previous transform and apply the Unreal Engine transform for export.
+    '''
 
-    addon_prefs = bfu_addon_prefs.get_addon_preferences()
+    # Save socket transform for reset after export.
     for socket in bfu_socket.bfu_socket_utils.get_socket_desired_children(obj):
         socket["BFU_PreviousSocketScale"] = socket.scale
         socket["BFU_PreviousSocketLocation"] = socket.location
         socket["BFU_PreviousSocketRotationEuler"] = socket.rotation_euler
-        if get_should_rescale_sockets():
-            socket.delta_scale *= GetRescaleSocketFactor()
 
-        if addon_prefs.static_sockets_add_90x:
-            savedScale = socket.scale.copy()
-            savedLocation = socket.location.copy()
-            AddMat = mathutils.Matrix.Rotation(math.radians(90.0), 4, 'X')
-            socket.matrix_world = socket.matrix_world @ AddMat
-            socket.scale.x = savedScale.x
-            socket.scale.z = savedScale.y
-            socket.scale.y = savedScale.z
-            socket.location = savedLocation
+    # Set socket Transform for Unreal
+    addon_prefs = bfu_addon_prefs.get_addon_preferences()
+    for socket in bfu_socket.bfu_socket_utils.get_socket_desired_children(obj):
+        if get_should_rescale_sockets():
+            socket.delta_scale *= get_rescale_socket_factor()
+
+        if bfu_static_mesh.bfu_static_mesh_utils.is_fbx_static_mesh(obj):
+            if addon_prefs.fbx_static_sockets_add_90x:
+                savedScale = socket.scale.copy()
+                savedLocation = socket.location.copy()
+                AddMat = mathutils.Matrix.Rotation(math.radians(90.0), 4, 'X')
+                socket.matrix_world = socket.matrix_world @ AddMat
+                socket.scale.x = savedScale.x
+                socket.scale.z = savedScale.y
+                socket.scale.y = savedScale.z
+                socket.location = savedLocation
 
 
 def reset_sockets_export_name(obj: bpy.types.Object):
@@ -679,7 +686,7 @@ def get_should_rescale_sockets():
     return False
 
 
-def GetRescaleSocketFactor():
+def get_rescale_socket_factor():
     # This will return the rescale factor.
 
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
