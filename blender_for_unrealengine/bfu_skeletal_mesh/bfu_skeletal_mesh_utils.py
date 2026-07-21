@@ -49,6 +49,11 @@ def is_fbx_skeletal_mesh(obj: bpy.types.Object) -> bool:
             return True
     return False
 
+def  is_gltf_skeletal_mesh(obj: bpy.types.Object) -> bool:
+    if is_skeletal_mesh(obj) and bfu_export_procedure.get_object_export_procedure(obj).is_gltf():
+            return True
+    return False
+
 def get_armature_root_bones(armature: bpy.types.Object) -> List[bpy.types.Bone]:
     root_bones: List[bpy.types.Bone] = []
     if isinstance(armature.data, bpy.types.Armature):

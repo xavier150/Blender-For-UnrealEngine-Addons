@@ -25,3 +25,8 @@ def is_fbx_static_mesh(obj: bpy.types.Object) -> bool:
     if is_static_mesh(obj) and bfu_export_procedure.get_object_export_procedure(obj).is_fbx():
             return True
     return False
+
+def is_gltf_static_mesh(obj: bpy.types.Object) -> bool:
+    if is_static_mesh(obj) and bfu_export_procedure.get_object_export_procedure(obj).is_gltf():
+            return True
+    return False
