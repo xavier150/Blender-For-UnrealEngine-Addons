@@ -71,64 +71,73 @@ def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):
         _, panel = accordion.draw(layout)
         if accordion.is_expanded() and panel:
 
-            # Check draw collision settings
+            # Draw user documentation button
             layout_doc_button.add_doc_page_operator(
                 layout=panel, 
-                url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Collisions#create-collisions-in-blender",
-                text="About creating collisions in Blender"
+                url="https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Collisions",
+                text="Collisions Documentation"
             )
 
-            setting_panel = panel.column()
+            setting_panel = panel.column(align=True)
             setting_panel.prop(scene, "bfu_keep_original_geometry_for_collision")
             setting_panel.prop(scene, "bfu_use_world_space_for_collision")
             setting_panel.prop(scene, "bfu_use_fast_bounding_box_approximation")  # New option for fast/slow MVBB
 
-            # Draw create new collider panel
-            draw_how_create_collision_from_selection(panel, context)
-            create_buttons_ui = panel.row().split(factor=0.80)
-            create_static_collision_buttons = create_buttons_ui.column()
-            create_static_collision_buttons.operator("object.createboxcollisionfromselection", icon='MESH_CUBE')
-            create_static_collision_buttons.operator("object.createconvexcollisionfromselection", icon='MESH_ICOSPHERE')
-            create_static_collision_buttons.operator("object.createcapsulecollisionfromselection", icon='MESH_CAPSULE')
-            create_static_collision_buttons.operator("object.createspherecollisionfromselection", icon='MESH_UVSPHERE')
-
-            # Draw convert to collider panel
-            ready_for_convert_collider = draw_and_get_ready_for_convert_collider(panel, context)
-            convert_buttons_ui = panel.row().split(factor=0.80)
-            convert_static_collision_buttons = convert_buttons_ui.column()
-            convert_static_collision_buttons.enabled = ready_for_convert_collider
-            convert_static_collision_buttons.operator("object.converttoboxcollision", icon='MESH_CUBE')
-            convert_static_collision_buttons.operator("object.converttoconvexcollision", icon='MESH_ICOSPHERE')
-            convert_static_collision_buttons.operator("object.converttocapsulecollision", icon='MESH_CAPSULE')
-            convert_static_collision_buttons.operator("object.converttospherecollision", icon='MESH_UVSPHERE')
-
+            draw_create_collision(panel, context)
+            draw_convert_collider(panel, context)
+        
             # Draw button toggle visibility panel
             sub_tool_panel = panel.column()
             sub_tool_panel.operator("object.toggle_collision_visibility", text="Toggle Collision Visibility", icon='HIDE_OFF')
             sub_tool_panel.operator("object.select_collision_from_current_selection", text="Select Collision from Current Selection", icon='RESTRICT_SELECT_OFF')
 
 
-def draw_how_create_collision_from_selection(layout: bpy.types.UILayout, context: bpy.types.Context) -> None:
-    if not bbpl.utils.active_mode_is("OBJECT"):
-        layout.label(text="Switch to Object Mode.", icon='INFO')
-    else:
-        if bbpl.utils.found_type_in_selection("MESH", False):
-            if bbpl.utils.active_type_is_not("ARMATURE"):
-                layout.label(text="Click on button for create collision from selection.", icon='INFO')
+def draw_create_collision(layout: bpy.types.UILayout, context: bpy.types.Context) -> bpy.types.UILayout:
+    def draw_create_collision_tips_steps(layout: bpy.types.UILayout, context: bpy.types.Context) -> bool:
+        if not bbpl.utils.active_mode_is("OBJECT"):
+            layout.label(text="Switch to Object Mode.", icon='INFO')
         else:
-            layout.label(text="Please select the mesh object(s) on which to create the collider.", icon='INFO')
-
-
-def draw_and_get_ready_for_convert_collider(layout: bpy.types.UILayout, context: bpy.types.Context) -> bool:
-    if not bbpl.utils.active_mode_is("OBJECT"):
-        layout.label(text="Switch to Object Mode.", icon='INFO')
-    else:
-        if bbpl.utils.found_type_in_selection("MESH", False):
-            if bbpl.utils.active_type_is_not("ARMATURE") and bpy.context.selected_objects and len(bpy.context.selected_objects) > 1:
-                layout.label(text="Click on button for convert to collider.", icon='INFO')
-                return True
+            if bbpl.utils.found_type_in_selection("MESH", False):
+                if bbpl.utils.active_type_is_not("ARMATURE"):
+                    layout.label(text="Click on button for create collision from selection.", icon='INFO')
             else:
-                layout.label(text="Select with [SHIFT] the collider owner.", icon='INFO')
+                layout.label(text="Please select the mesh object(s) on which to create the collider.", icon='INFO')
+        return True
+    
+    # Draw create new collider panel
+    panel = layout.box()
+    draw_create_collision_tips_steps(panel, context)
+    buttons_ui = panel.row().split(factor=0.80)
+    column_button_ui = buttons_ui.column()
+    column_button_ui.operator("object.createboxcollisionfromselection", icon='MESH_CUBE')
+    column_button_ui.operator("object.createconvexcollisionfromselection", icon='MESH_ICOSPHERE')
+    column_button_ui.operator("object.createcapsulecollisionfromselection", icon='MESH_CAPSULE')
+    column_button_ui.operator("object.createspherecollisionfromselection", icon='MESH_UVSPHERE')
+    return panel
+
+def draw_convert_collider(layout: bpy.types.UILayout, context: bpy.types.Context) -> bpy.types.UILayout:
+    def draw_convert_collider_tips(layout: bpy.types.UILayout, context: bpy.types.Context) -> bool:
+        if not bbpl.utils.active_mode_is("OBJECT"):
+            layout.label(text="Switch to Object Mode.", icon='INFO')
         else:
-            layout.label(text="Please select your collider mesh object(s). Active should be the owner.", icon='INFO')
-    return False
+            if bbpl.utils.found_type_in_selection("MESH", False):
+                if bbpl.utils.active_type_is_not("ARMATURE") and bpy.context.selected_objects and len(bpy.context.selected_objects) > 1:
+                    layout.label(text="Click on button for convert to collider.", icon='INFO')
+                    return True
+                else:
+                    layout.label(text="Select with [SHIFT] the collider owner.", icon='INFO')
+            else:
+                layout.label(text="Please select your collider mesh object(s). Active should be the owner.", icon='INFO')
+        return False
+    
+    # Draw convert to collider panel
+    panel = layout.box()
+    ready_for_convert_collider = draw_convert_collider_tips(panel, context)
+    buttons_ui = panel.row().split(factor=0.80)
+    column_button_ui = buttons_ui.column()
+    column_button_ui.enabled = ready_for_convert_collider
+    column_button_ui.operator("object.converttoboxcollision", icon='MESH_CUBE')
+    column_button_ui.operator("object.converttoconvexcollision", icon='MESH_ICOSPHERE')
+    column_button_ui.operator("object.converttocapsulecollision", icon='MESH_CAPSULE')
+    column_button_ui.operator("object.converttospherecollision", icon='MESH_UVSPHERE')
+    return panel
