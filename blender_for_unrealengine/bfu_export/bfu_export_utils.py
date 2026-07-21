@@ -13,7 +13,6 @@ if hasattr(__builtins__, 'Literal'):
     from typing import Literal
 
 import bpy
-import math
 import mathutils
 from bpy_extras.io_utils import axis_conversion
 from pathlib import Path
@@ -184,6 +183,9 @@ class DuplicateData():
     def apply_duplicate_reparenting(self):
         # Reparent duplicated objects to fix parenting issue after duplicate.
         scene = bpy.context.scene 
+        if scene is None:
+            raise Exception("No active scene found.")
+        
         for obj_name, parent_name in self.origin_reparenting:
             if obj_name in scene.objects and parent_name in scene.objects:
                 duplicated_obj = scene.objects[obj_name]
@@ -215,7 +217,9 @@ def apply_select_needed_modifiers_for_export():
     saved_select.save_current_select()
 
     # Disable simplify for avoid, skipping apply.
-    bpy.context.scene.render.use_simplify = False
+    scene = bpy.context.scene
+    if scene and scene.render:
+        scene.render.use_simplify = False
     apply_modifiers_prepare_time_log.end_time_log()
 
     # Get selected objects with modifiers.
@@ -270,6 +274,8 @@ def convert_selected_to_mesh():
     type_to_convert = ["CURVE", "SURFACE", "META", "FONT"]
 
     scene = bpy.context.scene
+    if scene is None:
+        raise Exception("No active scene found.")
 
     # Save current scene object list
     previous_objects: List[bpy.types.Object] = []
@@ -289,7 +295,7 @@ def convert_selected_to_mesh():
             selected_obj.select_set(True)
 
     # Convert selct to mesh
-    if bpy.context.selected_objects:
+    if bpy.context.view_layer and bpy.context.selected_objects:
         bpy.context.view_layer.objects.active = bpy.context.selected_objects[0] #Convert fail if active is none.
         bpy.ops.object.convert(target='MESH')
 
@@ -304,6 +310,9 @@ def convert_selected_to_mesh():
 
 def make_select_visual_real():
     scene = bpy.context.scene
+    if scene is None:
+        raise Exception("No active scene found.")
+
     select = bbpl.save_data.select_save.UserSelectSave()
     select.save_current_select()
 
@@ -336,6 +345,9 @@ def SetSocketsExportName(obj: bpy.types.Object):
     '''
 
     scene = bpy.context.scene
+    if scene is None:
+        raise Exception("No active scene found.")
+
     for socket in bfu_socket.bfu_socket_utils.get_socket_desired_children(obj):
         use_socket_custom_name = bfu_socket.bfu_socket_props.get_object_use_socket_custom_name(socket)
         socket_custom_name = bfu_socket.bfu_socket_props.get_object_socket_custom_name(socket)
@@ -353,70 +365,6 @@ def SetSocketsExportName(obj: bpy.types.Object):
                     '" to "' + socket_custom_name +
                     '".'
                     )
-
-def get_should_rescale_sockets(obj: bpy.types.Object) -> bool:
-    # This will return if the socket should be rescale.
-
-    scene = bpy.context.scene
-    if scene is None:
-        raise Exception("No active scene found.")
-
-    addon_prefs = bfu_addon_prefs.get_addon_preferences()
-    if addon_prefs.rescale_sockets_at_export == "auto":
-        if scene.unit_settings:
-            if bfu_static_mesh.bfu_static_mesh_utils.is_fbx_static_mesh(obj):
-                if scene.unit_settings.scale_length == 0.01:
-                    return False  # False because that useless to rescale at 1.
-            elif bfu_static_mesh.bfu_static_mesh_utils.is_gltf_static_mesh(obj):
-                if scene.unit_settings.scale_length == 1:
-                    return False  # False because that useless to rescale at 1.
-        return True
-    if addon_prefs.rescale_sockets_at_export == "custom_rescale":
-        return True
-    if addon_prefs.rescale_sockets_at_export == "dont_rescale":
-        return False
-    return False
-
-def get_rescale_socket_factor(obj: bpy.types.Object) -> float:
-    # This will return the rescale factor.
-
-    addon_prefs = bfu_addon_prefs.get_addon_preferences()
-    if addon_prefs.rescale_sockets_at_export == "auto":
-        if bfu_static_mesh.bfu_static_mesh_utils.is_fbx_static_mesh(obj):
-            return 1/(100*bfu_utils.get_scene_unit_scale())
-        elif bfu_static_mesh.bfu_static_mesh_utils.is_gltf_static_mesh(obj):
-            return 1/(1*bfu_utils.get_scene_unit_scale())
-        return 1.0
-    else:
-        return addon_prefs.static_sockets_imported_size
-
-def SetSocketsExportTransform(obj: bpy.types.Object):
-    '''
-    Save the previous transform and apply the Unreal Engine transform for export.
-    '''
-
-    # Save socket transform for reset after export.
-    for socket in bfu_socket.bfu_socket_utils.get_socket_desired_children(obj):
-        socket["BFU_PreviousSocketScale"] = socket.scale
-        socket["BFU_PreviousSocketLocation"] = socket.location
-        socket["BFU_PreviousSocketRotationEuler"] = socket.rotation_euler
-
-    # Set socket Transform for Unreal
-    addon_prefs = bfu_addon_prefs.get_addon_preferences()
-    for socket in bfu_socket.bfu_socket_utils.get_socket_desired_children(obj):
-        if get_should_rescale_sockets(obj):
-            socket.delta_scale *= get_rescale_socket_factor(obj)
-
-        if bfu_static_mesh.bfu_static_mesh_utils.is_fbx_static_mesh(obj):
-            if addon_prefs.fbx_static_sockets_add_90x:
-                savedScale = socket.scale.copy()
-                savedLocation = socket.location.copy()
-                AddMat = mathutils.Matrix.Rotation(math.radians(90.0), 4, 'X')
-                socket.matrix_world = socket.matrix_world @ AddMat
-                socket.scale.x = savedScale.x
-                socket.scale.z = savedScale.y
-                socket.scale.y = savedScale.z
-                socket.location = savedLocation
 
 
 def reset_sockets_export_name(obj: bpy.types.Object):

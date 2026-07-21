@@ -24,6 +24,7 @@ from .. import bfu_adv_object
 from .. import bfu_uv_map
 from .. import bfu_custom_property
 from .. import bfu_anim_base
+from .. import bfu_socket
 from ..bfu_export_logs.bfu_process_time_logs_types import SafeTimeGroup
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetPackage
 
@@ -75,7 +76,10 @@ def export_as_skeletal_mesh(
     saved_selection_names = bfu_export.bfu_export_utils.SavedObjectNames()
     saved_selection_names.save_new_name(armature)
     saved_selection_names.save_new_names(mesh_parts)
-    saved_unit_scale = scene.unit_settings.scale_length
+    if scene.unit_settings:
+        saved_unit_scale = scene.unit_settings.scale_length
+    else:
+        saved_unit_scale = 1.0
 
 
     # [SELECT AND DUPLICATE] 
@@ -112,7 +116,7 @@ def export_as_skeletal_mesh(
                 bfu_export.bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
             bfu_vertex_color.bfu_vertex_color_utils.SetVertexColorForUnrealExport(selected_obj)
             bfu_export.bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
-            bfu_export.bfu_export_utils.SetSocketsExportTransform(selected_obj)
+            bfu_socket.bfu_socket_utils.set_sockets_export_transform(selected_obj)
             bfu_export.bfu_export_utils.SetSocketsExportName(selected_obj)
         bfu_export.bfu_export_utils.RemoveMaterialsOnCollisionMeshes(list(bpy.context.selected_objects))
 
@@ -122,7 +126,8 @@ def export_as_skeletal_mesh(
     should_rescale_rig = bfu_export.bfu_export_utils.get_should_rescale_skeleton_for_fbx_export(active) 
     if should_rescale_rig:
         rrf = bfu_export.bfu_export_utils.get_rescale_rig_factor()  # rigRescaleFactor
-        scene.unit_settings.scale_length = 0.01
+        if scene.unit_settings:
+            scene.unit_settings.scale_length = 0.01
         my_skeletal_export_scale = bfu_utils.SkeletalExportScale(active)
         my_skeletal_export_scale.apply_skeletal_export_scale(rrf)
         my_modifiers_data_scale = bfu_utils.ModifiersDataScale(rrf)
@@ -242,7 +247,8 @@ def export_as_skeletal_mesh(
     # [RESTORE ASSET DATA]
     # Restore asset data after export like transforms, animation data, etc.
     my_timer_group.start_timer(f"Clean after export")
-    scene.unit_settings.scale_length = saved_unit_scale
+    if scene.unit_settings:
+        scene.unit_settings.scale_length = saved_unit_scale
     saved_selection_names.restore_names()
     saved_simplify.reset_scene()
 

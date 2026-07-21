@@ -25,6 +25,7 @@ from .. import bfu_uv_map
 from .. import bfu_custom_property
 from .. import bfu_anim_base
 from .. import bfu_skeletal_mesh
+from .. import bfu_socket
 from . import bfu_export_procedure
 from .bfu_export_procedure import BFU_StaticExportProcedure
 
@@ -101,7 +102,7 @@ def export_as_static_mesh(
                 bfu_export.bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
             bfu_vertex_color.bfu_vertex_color_utils.SetVertexColorForUnrealExport(selected_obj)
             bfu_export.bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
-            bfu_export.bfu_export_utils.SetSocketsExportTransform(selected_obj)
+            bfu_socket.bfu_socket_utils.set_sockets_export_transform(selected_obj)
             bfu_export.bfu_export_utils.SetSocketsExportName(selected_obj)
         bfu_export.bfu_export_utils.RemoveMaterialsOnCollisionMeshes(list(bpy.context.selected_objects))
 

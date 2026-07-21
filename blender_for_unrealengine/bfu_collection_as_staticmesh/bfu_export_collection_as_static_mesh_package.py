@@ -19,6 +19,7 @@ from .. import bfu_vertex_color
 from .. import bfu_uv_map
 from .. import bfu_custom_property
 from .. import bfu_adv_object
+from .. import bfu_socket
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetPackage
 from ..bfu_export_logs.bfu_process_time_logs_types import SafeTimeGroup
 from . import bfu_export_procedure
@@ -98,7 +99,7 @@ def export_collection_as_static_mesh(
                 bfu_export.bfu_export_utils.ConvertGeometryNodeAttributeToUV(selected_obj, attrib_name)
             bfu_vertex_color.bfu_vertex_color_utils.SetVertexColorForUnrealExport(selected_obj)
             bfu_export.bfu_export_utils.CorrectExtremUVAtExport(selected_obj)
-            bfu_export.bfu_export_utils.SetSocketsExportTransform(selected_obj)
+            bfu_socket.bfu_socket_utils.set_sockets_export_transform(selected_obj)
             bfu_export.bfu_export_utils.SetSocketsExportName(selected_obj)
         bfu_export.bfu_export_utils.RemoveMaterialsOnCollisionMeshes(list(bpy.context.selected_objects))
 
