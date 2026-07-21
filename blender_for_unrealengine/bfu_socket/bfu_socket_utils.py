@@ -136,7 +136,9 @@ def get_skeletal_spacing_export_rescale_socket_factor(obj: bpy.types.Object) -> 
     else:
         return 1.0
 
-def get_skeletal_mesh_socket_data(obj: bpy.types.Object) -> List[Dict[str, Any]]:
+
+
+def get_skeletal_mesh_socket_data(obj: bpy.types.Object, invert_ordered: bool = False) -> List[Dict[str, Any]]:
 
     if not isinstance(obj.data, bpy.types.Armature):
         return []
@@ -146,8 +148,7 @@ def get_skeletal_mesh_socket_data(obj: bpy.types.Object) -> List[Dict[str, Any]]
     for socket in get_socket_desired_children(obj):
         sockets.append(socket)
 
-    socket_data: List[Dict[str, Any]] = []
-    # config.set('Sockets', '; SocketName, BoneName, Location, Rotation, Scale')
+    socket_dict: Dict[str, Dict[str, Any]] = {}
 
     for socket in sockets:
         socket_parent = socket.parent
@@ -211,15 +212,27 @@ def get_skeletal_mesh_socket_data(obj: bpy.types.Object) -> List[Dict[str, Any]]
 
 
 
-        MySocket: Dict[str, Any] = {}
-        MySocket["SocketName"] = set_sockets_export_name(socket)
-        MySocket["BoneName"] = b.name.replace('.', '_')
-        MySocket["Location"] = array_location
-        MySocket["Rotation"] = array_rotation
-        MySocket["Scale"] = array_scale
-        socket_data.append(MySocket)
+        my_sockets: Dict[str, Any] = {}
+        socket_name = set_sockets_export_name(socket)
+        my_sockets["SocketName"] = socket_name
+        my_sockets["BoneName"] = b.name.replace('.', '_')
+        my_sockets["Location"] = array_location
+        my_sockets["Rotation"] = array_rotation
+        my_sockets["Scale"] = array_scale
+        socket_dict[socket_name] = my_sockets  
 
-    return socket_data
+    # Sort the sockets by name
+    orderred_socket_data: List[Dict[str, Any]] = []
+    socket_names = list(socket_dict.keys())
+    if invert_ordered:
+        ordered_socket_names = sorted(socket_names, key=lambda x: x.lower(), reverse=True)
+    else:
+        ordered_socket_names = sorted(socket_names, key=lambda x: x.lower())
+    
+    for socket_name in ordered_socket_names:
+        orderred_socket_data.append(socket_dict[socket_name])
+
+    return orderred_socket_data
 
 def get_all_scene_socket_objs() -> List[bpy.types.Object]:
     # Get any socket objects from bpy.context.scene.objects or List if valid.
@@ -371,7 +384,7 @@ def convert_select_to_unrealengine_socket(socket_type: SocketType) -> List[bpy.t
 def get_import_skeletal_mesh_socket_script_command(obj: bpy.types.Object) -> str:
 
     if obj and isinstance(obj.data, bpy.types.Armature):
-        sockets = get_skeletal_mesh_socket_data(obj)
+        sockets = get_skeletal_mesh_socket_data(obj, True)
         t = "SocketCopyPasteBuffer" + "\n"
         t += "NumSockets=" + str(len(sockets)) + "\n"
         t += "IsOnSkeleton=1" + "\n"
