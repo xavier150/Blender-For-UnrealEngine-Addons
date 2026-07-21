@@ -354,6 +354,41 @@ def SetSocketsExportName(obj: bpy.types.Object):
                     '".'
                     )
 
+def get_should_rescale_sockets(obj: bpy.types.Object) -> bool:
+    # This will return if the socket should be rescale.
+
+    scene = bpy.context.scene
+    if scene is None:
+        raise Exception("No active scene found.")
+
+    addon_prefs = bfu_addon_prefs.get_addon_preferences()
+    if addon_prefs.rescale_sockets_at_export == "auto":
+        if scene.unit_settings:
+            if bfu_static_mesh.bfu_static_mesh_utils.is_fbx_static_mesh(obj):
+                if scene.unit_settings.scale_length == 0.01:
+                    return False  # False because that useless to rescale at 1.
+            elif bfu_static_mesh.bfu_static_mesh_utils.is_gltf_static_mesh(obj):
+                if scene.unit_settings.scale_length == 1:
+                    return False  # False because that useless to rescale at 1.
+        return True
+    if addon_prefs.rescale_sockets_at_export == "custom_rescale":
+        return True
+    if addon_prefs.rescale_sockets_at_export == "dont_rescale":
+        return False
+    return False
+
+def get_rescale_socket_factor(obj: bpy.types.Object) -> float:
+    # This will return the rescale factor.
+
+    addon_prefs = bfu_addon_prefs.get_addon_preferences()
+    if addon_prefs.rescale_sockets_at_export == "auto":
+        if bfu_static_mesh.bfu_static_mesh_utils.is_fbx_static_mesh(obj):
+            return 1/(100*bfu_utils.get_scene_unit_scale())
+        elif bfu_static_mesh.bfu_static_mesh_utils.is_gltf_static_mesh(obj):
+            return 1/(1*bfu_utils.get_scene_unit_scale())
+        return 1.0
+    else:
+        return addon_prefs.static_sockets_imported_size
 
 def SetSocketsExportTransform(obj: bpy.types.Object):
     '''
@@ -369,8 +404,8 @@ def SetSocketsExportTransform(obj: bpy.types.Object):
     # Set socket Transform for Unreal
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
     for socket in bfu_socket.bfu_socket_utils.get_socket_desired_children(obj):
-        if get_should_rescale_sockets():
-            socket.delta_scale *= get_rescale_socket_factor()
+        if get_should_rescale_sockets(obj):
+            socket.delta_scale *= get_rescale_socket_factor(obj)
 
         if bfu_static_mesh.bfu_static_mesh_utils.is_fbx_static_mesh(obj):
             if addon_prefs.fbx_static_sockets_add_90x:
@@ -664,36 +699,6 @@ def get_rescale_rig_factor() -> float:
         return 100 * bfu_utils.get_scene_unit_scale()
     else:
         return addon_prefs.new_rig_scale  # rigRescaleFactor
-
-
-def get_should_rescale_sockets():
-    # This will return if the socket should be rescale.
-
-    scene = bpy.context.scene
-    if scene is None:
-        raise Exception("No active scene found.")
-
-    addon_prefs = bfu_addon_prefs.get_addon_preferences()
-    if addon_prefs.rescale_sockets_at_export == "auto":
-        if scene.unit_settings:
-            if scene.unit_settings.scale_length == 0.01:
-                return False  # False because that useless to rescale at 1.
-        return True
-    if addon_prefs.rescale_sockets_at_export == "custom_rescale":
-        return True
-    if addon_prefs.rescale_sockets_at_export == "dont_rescale":
-        return False
-    return False
-
-
-def get_rescale_socket_factor():
-    # This will return the rescale factor.
-
-    addon_prefs = bfu_addon_prefs.get_addon_preferences()
-    if addon_prefs.rescale_sockets_at_export == "auto":
-        return 1/(100*bfu_utils.get_scene_unit_scale())
-    else:
-        return addon_prefs.static_sockets_imported_size
 
 def export_additional_data(fullpath: Path, data: Dict[str, str]) -> None:
     # Export additional parameter from static and skeletal mesh track for

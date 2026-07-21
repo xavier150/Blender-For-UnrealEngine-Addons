@@ -6,3 +6,5 @@ Fixed: Socket UI use the wrong value and produice script warning in the console.
     (Case issue: bfu_socket_custom_Name -> bfu_socket_custom_name)
 Fixed: Durring export child objects may change their position.
     (reparenting of duplicated objects may change the object position because of inverse transform.)
+Fixed: Socket transform is wrong with gltf exports.
+    (I added fix for FBX export transform but gltf export should not use that fix or it will produce wrong transform.)
