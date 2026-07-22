@@ -190,6 +190,10 @@ class DuplicateData():
             if obj_name in scene.objects and parent_name in scene.objects:
                 duplicated_obj = scene.objects[obj_name]
                 duplicated_parent = scene.objects[parent_name]
+                # Avoid reparenting if that is already the parent.
+                if duplicated_obj.parent == duplicated_parent:
+                    continue
+
                 # Parent may change the object prosition because inverse transform. So I save the matrix_world and restore it after reparenting.
                 duplicated_obj_matrix_world = duplicated_obj.matrix_world.copy()
                 duplicated_obj.parent = duplicated_parent
