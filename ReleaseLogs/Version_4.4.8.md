@@ -3,7 +3,7 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
 
 ### Version 4.4.8
 - New: Skeletal Mesh Socket clipboard is now ordered by socket name.
-Changed: Better UI for collision and socket in Tools panel.
+- Changed: Better UI for collision and socket in Tools panel.
 - Fixed: Socket UI uses the wrong value and produces script warning in the console.
     (Case issue: bfu_socket_custom_Name -> bfu_socket_custom_name)
 - Fixed: During export child objects may change their position.
