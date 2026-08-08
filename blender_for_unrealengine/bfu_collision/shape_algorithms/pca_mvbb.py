@@ -20,7 +20,7 @@
 
 import numpy as np
 import bmesh
-from typing import Any
+from typing import Any, List
 from ... import bpl
 
 # Compatibility fix for older Python versions - numpy type annotations
@@ -98,7 +98,7 @@ def get_mvbb_bmesh(src_bm: bmesh.types.BMesh) -> bmesh.types.BMesh:
     obb_bm = bmesh.new()
 
     # Create verts at corners
-    verts: list[bmesh.types.BMVert] = []
+    verts: List[bmesh.types.BMVert] = []
     for corner in corners_world:
         # Convert numpy array to tuple of floats for bmesh
         coord = tuple(float(x) for x in corner)  # type: ignore[arg-type]

@@ -8,7 +8,7 @@
 # ----------------------------------------------
 
 
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Optional, cast, Tuple
 import unreal
 from .. import import_module_unreal_utils
 from ..asset_types import ExportAssetType
@@ -16,7 +16,7 @@ from ..asset_types import ExportAssetType
 def get_origin_skeleton_and_skeletal_mesh(
     asset_data: Dict[str, Any],
     asset_type: ExportAssetType,
-) -> tuple[Optional[unreal.Skeleton], Optional[unreal.SkeletalMesh]]:
+) -> Tuple[Optional[unreal.Skeleton], Optional[unreal.SkeletalMesh]]:
 
     if asset_type.is_skeletal():
         origin_skeleton: Optional[unreal.Skeleton] = None
