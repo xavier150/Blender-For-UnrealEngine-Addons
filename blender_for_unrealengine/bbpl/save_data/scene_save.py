@@ -239,7 +239,7 @@ class UserSceneSave():
         for vlayer in scene.view_layers:
             layer_collections = utils.get_layer_collections_recursive(vlayer.layer_collection)
 
-            def get_layer_collection_in_list(name: str, collections: list[bpy.types.LayerCollection]) -> Optional[bpy.types.LayerCollection]:
+            def get_layer_collection_in_list(name: str, collections: List[bpy.types.LayerCollection]) -> Optional[bpy.types.LayerCollection]:
                 for layer_collection in collections:
                     if layer_collection.name == name:
                         return layer_collection
