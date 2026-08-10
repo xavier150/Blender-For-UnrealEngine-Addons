@@ -36,6 +36,8 @@ from .. import bfu_light_map
 from .. import bfu_nanite
 from .. import bfu_assets_references
 from .. import bfu_collision
+from .. import bfu_export_control
+from .. import bfu_ui
 from ..bfu_presets import bfu_object_presets
 
 
@@ -130,6 +132,10 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
             bfu_anim_nla_adv.bfu_anim_nla_adv_ui.draw_ui_object(layout, context, obj)
             bfu_anim_base.bfu_anim_base_ui.draw_ui_object(layout, context, obj)
             events.stop_last_event()
+
+            if bfu_export_control.bfu_export_control_utils.is_not_export_self(obj):
+                if bfu_ui.bfu_ui_utils.DisplayPropertyFilterList("OBJECT", ["ANIM", "MISC"], include_all=False):
+                    layout.label(text="The object is not set as exportable. no animation properties to show.")
 
         # Scene
         events.add_sub_event("Draw Scene UI")

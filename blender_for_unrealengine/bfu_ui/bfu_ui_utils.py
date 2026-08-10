@@ -9,20 +9,25 @@
 
 
 import bpy
+from typing import List
 
-
-def DisplayPropertyFilter(active_tab:str, active_sub_tab:str) -> bool:
+def DisplayPropertyFilterList(active_tab:str, active_sub_tabs:List[str], include_all: bool = True) -> bool:
     # Define more easily the options which must be displayed or not
 
     scene = bpy.context.scene
     if scene.bfu_active_tab == active_tab == "OBJECT":
-        if scene.bfu_active_object_tab == active_sub_tab or scene.bfu_active_object_tab == "ALL":
+        if scene.bfu_active_object_tab in active_sub_tabs or (include_all and scene.bfu_active_object_tab == "ALL"): 
             return True
         
     if scene.bfu_active_tab == active_tab == "SCENE":
         return True
     
     return False
+
+def DisplayPropertyFilter(active_tab:str, active_sub_tab:str) -> bool:
+    # Define more easily the options which must be displayed or not
+
+    return DisplayPropertyFilterList(active_tab, [active_sub_tab], include_all=True)
 
 
 
