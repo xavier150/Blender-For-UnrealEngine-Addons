@@ -135,7 +135,7 @@ class BFU_PT_BlenderForUnrealObject(bpy.types.Panel):
 
             if bfu_export_control.bfu_export_control_utils.is_not_export_self(obj):
                 if bfu_ui.bfu_ui_utils.DisplayPropertyFilterList("OBJECT", ["ANIM", "MISC"], include_all=False):
-                    layout.label(text="The object is not set as exportable. no animation properties to show.")
+                    layout.label(text="The object is not set as exportable. no properties to show.")
 
         # Scene
         events.add_sub_event("Draw Scene UI")

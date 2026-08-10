@@ -23,6 +23,7 @@ def draw_general_ui_object(layout: bpy.types.UILayout, context: bpy.types.Contex
 
     # Hide filters
     if not bfu_utils.draw_proxy_propertys(obj):
+        layout.label(text="To set the object as exportable, do it in the linked source file.")
         return
     if bfu_ui.bfu_ui_utils.DisplayPropertyFilter("OBJECT", "GENERAL"):
         accordion = bbpl.blender_layout.layout_accordion.get_accordion(scene, "bfu_object_properties_expanded")
