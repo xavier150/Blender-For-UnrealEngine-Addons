@@ -337,7 +337,7 @@ def get_vertex_colors_render_color_index(obj: bpy.types.Object) -> Optional[int]
         return obj.data.color_attributes.render_color_index # type: ignore
     else:
         for index, vertex_color in enumerate(obj.data.vertex_colors):  # type: ignore
-            if vertex_color.active_render:
+            if vertex_color.active_render:  # type: ignore
                 return index
 
 def get_vertex_color_active_color_index(obj: bpy.types.Object) -> Optional[int]:

@@ -6,3 +6,5 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
     (For example when the object is not set as exportable or for linked objects)
 - Fixed: Import fail in Unreal Engine 4.27
     (Typing: old Python versions require typing.List[] instead of list[])
+- Fixed: Vertex Color is not exported with the option Active Render when the active render use index 0.
+    (Used "if target_index:" replaced by "if target_index is not None:")

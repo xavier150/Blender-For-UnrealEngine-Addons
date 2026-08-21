@@ -80,7 +80,7 @@ class VertexColorExportData:
 
                         if bfu_vertex_color_to_use == "ActiveIndex":
                             target_index = bbpl.utils.get_vertex_colors_render_color_index(obj)
-                            if target_index:
+                            if target_index is not None:
                                 return target_index
 
                         if bfu_vertex_color_to_use == "CustomIndex":
