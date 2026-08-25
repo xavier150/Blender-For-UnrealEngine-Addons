@@ -10,5 +10,7 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
     (Used "if target_index:" replaced by "if target_index is not None:")
 - Fixed: Collection Static Meshes are not imported correctly in Unreal Engine.
     (Wrong asset type checking in the import script)
-- Fixed: Linked objects from a same scene may not correctly exported.
+- Fixed: Linked objects from a same scene may not be exported.
     (Make Instances Real don't work if the source object is not visible in the viewport.)
+- Fixed: Linked objects from a same scene may not moved with parent objects at the center of the scene.
+    (Make Instances Real don't apply parent when several objects are created.)

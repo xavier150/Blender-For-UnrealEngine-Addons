@@ -337,8 +337,9 @@ def make_select_visual_real():
             obj.hide_viewport = False
             changed_object_names.append(obj.name)
 
+    # Note: use_base_parent need to be True to keep attachment when seveal objects are created from a same source object.
     bpy.ops.object.duplicates_make_real(
-        use_base_parent=False,
+        use_base_parent=True,
         use_hierarchy=True
         )
 
