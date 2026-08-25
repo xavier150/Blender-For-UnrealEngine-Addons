@@ -212,7 +212,6 @@ class DuplicateData():
         self.set_duplicate_name_for_export()
         self.apply_duplicate_reparenting()
 
-
 def apply_select_needed_modifiers_for_export():
 
     apply_modifiers_time_log = bfu_export_logs.bfu_process_time_logs_utils.start_time_log(f"Apply modifiers")
@@ -272,7 +271,6 @@ def apply_object_modifiers(obj: bpy.types.Object, blacklist_type: List[str] = []
                 apply_modifier_time_log.end_time_log()
     apply_modifiers_time_log.end_time_log()
 
-
 def convert_selected_to_mesh():
     # Have to convert text and curve objects to mesh before MakeSelectVisualReal to avoid duplicate issue.
     type_to_convert = ["CURVE", "SURFACE", "META", "FONT"]
@@ -311,7 +309,6 @@ def convert_selected_to_mesh():
         if obj not in previous_objects:
             obj.select_set(True)
 
-
 def make_select_visual_real():
     scene = bpy.context.scene
     if scene is None:
@@ -329,11 +326,27 @@ def make_select_visual_real():
     bpy.ops.object.visual_transform_apply()
 
     # Make Instances Real 
-    # Note:Text and curve need to be converted to mesh before Make Instances Real to avoid duplicate issue.
+    # Note 1: Text and curve need to be converted to mesh before Make Instances Real to avoid duplicate issue.
+    # Note 2: Make Instances Real don't work if the source object is not visible in the viewport.
+    # I think this is new? Blender really need more function that not depend on the viewport or context.
+
+    # Save the name of the objects that are hidden on viewport and unhide them for make real.
+    changed_object_names: List[str] = []
+    for obj in scene.objects:
+        if obj.hide_viewport:
+            obj.hide_viewport = False
+            changed_object_names.append(obj.name)
+
     bpy.ops.object.duplicates_make_real(
         use_base_parent=False,
         use_hierarchy=True
         )
+
+    # Reset the visibility of the objects that were hidden on viewport before make real.
+    for obj_name in changed_object_names:
+        if obj_name in scene.objects:
+            obj = scene.objects[obj_name]
+            obj.hide_viewport = True
 
     select.reset_select(use_names = True)
     
@@ -370,7 +383,6 @@ def SetSocketsExportName(obj: bpy.types.Object):
                     '".'
                     )
 
-
 def reset_sockets_export_name(obj: bpy.types.Object):
     # Reset socket Name
 
@@ -378,7 +390,6 @@ def reset_sockets_export_name(obj: bpy.types.Object):
         if "BFU_PreviousSocketName" in socket:
             socket.name = socket["BFU_PreviousSocketName"]
             del socket["BFU_PreviousSocketName"]
-
 
 def reset_sockets_transform(obj: bpy.types.Object):
     # Reset socket Transform
@@ -450,7 +461,6 @@ def set_duplicated_object_export_name(duplicated_obj: bpy.types.Object, original
             conflict_asset = scene.objects[desired_export_name]
             conflict_asset.name = dup_temp_name
         duplicated_obj.name = desired_export_name
-
 
 # UVs
 def ConvertGeometryNodeAttributeToUV(obj: bpy.types.Object, attrib_name: str):
@@ -532,7 +542,6 @@ def ConvertGeometryNodeAttributeToUV(obj: bpy.types.Object, attrib_name: str):
 
             obj.data.attributes.remove(attrib_name)
 
-
 def CorrectExtremUVAtExport(obj: bpy.types.Object):
     if bfu_uv_map.bfu_uv_map_props.get_object_use_correct_extrem_uv_scale(obj):
         SavedSelect = bbpl.save_data.select_save.UserSelectSave()
@@ -547,8 +556,6 @@ def CorrectExtremUVAtExport(obj: bpy.types.Object):
             SavedSelect.reset_select()
             return True
     return False
-
-
 
 # Armature
 def convert_armature_constraint_to_modifiers(armature: bpy.types.Object):
@@ -585,7 +592,6 @@ def convert_armature_constraint_to_modifiers(armature: bpy.types.Object):
         # Save data for reset after export
         obj[previous_enabled_armature_constraints_key] = previous_enabled_armature_constraints
 
-
 def reset_armature_constraint_to_modifiers(armature: bpy.types.Object):
     for obj in bfu_utils.get_export_desired_childs(armature):
         if previous_enabled_armature_constraints_key in obj:
@@ -620,7 +626,6 @@ def reset_armature_constraint_to_modifiers(armature: bpy.types.Object):
                 # Enable back constraint
                 #const.enabled = True
 
-
 def get_should_rescale_skeleton_for_fbx_export(obj: bpy.types.Object) -> bool:
     # This will return if the rig should be rescale.
     # This is only with FBX export. 
@@ -641,7 +646,6 @@ def get_should_rescale_skeleton_for_fbx_export(obj: bpy.types.Object) -> bool:
     if addon_prefs.rescale_full_rig_at_export == "dont_rescale":
         return False
     return False
-
 
 def get_rescale_rig_factor() -> float:
     # This will return the rescale factor.
@@ -829,7 +833,6 @@ class ArmatureEnabledContraintsData():
                 for c in b.constraints:
                     if c.name in self.bone_constraints_enabled[b.name]:
                         c.enabled = self.bone_constraints_enabled[b.name][c.name]
-
 
 def disable_all_bone_constraints(obj: bpy.types.Object) -> ArmatureEnabledContraintsData:
     # Disable all bone constraints for export

@@ -33,7 +33,7 @@ def prepare_scene_for_export():
         if obj.hide_get():
             obj.hide_set(False)
 
-    # Hhide all collections on viewport and make them selectable
+    # Unhide all collections on viewport and make them selectable
     for col in bpy.data.collections:
         if col.hide_select:
             col.hide_select = False
