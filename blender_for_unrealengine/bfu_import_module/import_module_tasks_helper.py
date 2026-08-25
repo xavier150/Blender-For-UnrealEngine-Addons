@@ -88,7 +88,7 @@ if hasattr(unreal, 'InterchangeGenericAssetsPipeline'):
         if asset_type.value == ExportAssetType.ANIM_ALEMBIC.value and import_module_unreal_utils.alembic_importer_active():
             options = task_options_alembic_preset(use_interchange)
 
-        elif asset_type.value == ExportAssetType.STATIC_MESH.value:
+        elif asset_type.is_static_mesh():
             options = task_options_static_mesh_preset(use_interchange)
 
         elif asset_type.value == ExportAssetType.SKELETAL_MESH.value:
@@ -109,7 +109,7 @@ else:
         if asset_type.value == ExportAssetType.ANIM_ALEMBIC.value and import_module_unreal_utils.alembic_importer_active():
             options = task_options_alembic_preset(False)
 
-        elif asset_type.value == ExportAssetType.STATIC_MESH.value:
+        elif asset_type.is_static_mesh():
             options = task_options_static_mesh_preset(False)
 
         elif asset_type.value == ExportAssetType.SKELETAL_MESH.value:

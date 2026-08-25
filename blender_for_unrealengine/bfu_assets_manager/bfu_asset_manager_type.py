@@ -124,34 +124,7 @@ class AssetType(Enum):
             return "Alembic Animation"
         else:
             return "Unknown"    
-        
-    def get_type_as_string(self):
-        if self.value == AssetType.UNKNOWN.value:
-            return "Unknown"
-        elif self.value == AssetType.SKELETAL_MESH.value:
-            return "SkeletalMesh"
-        elif self.value == AssetType.STATIC_MESH.value:
-            return "StaticMesh"
-        elif self.value == AssetType.COLLECTION_AS_STATIC_MESH.value:
-            return "CollectionStaticMesh"
-        elif self.value == AssetType.CAMERA.value:
-            return "Camera"
-        elif self.value == AssetType.GROOM_SIMULATION.value:
-            return "GroomSimulation"
-        elif self.value == AssetType.SPLINE.value:
-            return "Spline"
-        elif self.value == AssetType.ANIM_ACTION.value:
-            return "Action"
-        elif self.value == AssetType.ANIM_POSE.value:
-            return "Pose"
-        elif self.value == AssetType.ANIM_NLA.value:
-            return "NonLinearAnimation"
-        elif self.value == AssetType.ANIM_ALEMBIC.value:
-            return "AlembicAnimation"
-        else:
-            return "Unknown"
-
-    
+            
 
     def can_use_frame_range(self) -> bool:
         return self in [

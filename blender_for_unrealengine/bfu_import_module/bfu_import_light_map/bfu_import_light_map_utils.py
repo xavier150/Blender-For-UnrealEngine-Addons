@@ -17,16 +17,16 @@ def apply_import_settings(itask: import_module_tasks_class.ImportTask, asset_dat
     import_module_utils.print_debug_step("Set Light Map import settings.")
 
     asset_type = ExportAssetType.get_asset_type_from_string(asset_data.get("asset_type"))
-    if asset_type not in [ExportAssetType.STATIC_MESH]:
+    if asset_type not in [ExportAssetType.STATIC_MESH, ExportAssetType.SKELETAL_MESH]:
         # Only apply settings for StaticMesh and SkeletalMesh
         return
 
     if hasattr(unreal, 'InterchangeGenericAssetsPipeline') and isinstance(itask.task_option, unreal.InterchangeGenericAssetsPipeline):
-        if asset_type == ExportAssetType.STATIC_MESH:
+        if asset_type.value == ExportAssetType.STATIC_MESH.value:
             if "generate_light_map_uvs" in asset_additional_data:
                 itask.get_igap_mesh().set_editor_property('generate_lightmap_u_vs', asset_additional_data["generate_light_map_uvs"])
     else:
-        if asset_type == ExportAssetType.STATIC_MESH:
+        if asset_type.value == ExportAssetType.STATIC_MESH.value:
             if "generate_light_map_uvs" in asset_additional_data:
                 itask.get_static_mesh_import_data().set_editor_property('generate_lightmap_u_vs', asset_additional_data["generate_light_map_uvs"])
 

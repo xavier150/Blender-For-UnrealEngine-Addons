@@ -76,7 +76,7 @@ def apply_import_settings(itask: import_module_tasks_class.ImportTask, asset_dat
     # Set lod group in import settings before import.
     asset_type = ExportAssetType.get_asset_type_from_string(asset_data.get("asset_type"))
 
-    if asset_type == ExportAssetType.STATIC_MESH:
+    if asset_type.value == ExportAssetType.STATIC_MESH.value:
 
         if "static_mesh_lod_group" in asset_additional_data:
             desired_lod_group = asset_additional_data["static_mesh_lod_group"]

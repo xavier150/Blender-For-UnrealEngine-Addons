@@ -49,7 +49,7 @@ def write_single_asset_data(unreal_exported_asset: bfu_export_logs.bfu_asset_exp
     asset_data["scene_unit_scale"] = bfu_utils.get_scene_unit_scale()
 
     asset_data["asset_name"] = unreal_exported_asset.exported_asset.name
-    asset_data["asset_type"] = unreal_exported_asset.exported_asset.asset_type.get_type_as_string()
+    asset_data["asset_type"] = unreal_exported_asset.exported_asset.asset_type.value
     asset_data["asset_import_name"] = unreal_exported_asset.exported_asset.import_name
     asset_data["asset_import_path"] = str(unreal_exported_asset.exported_asset.import_dirpath) 
     asset_data["files"] = unreal_exported_asset.exported_asset.get_asset_files_as_data()

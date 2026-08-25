@@ -48,40 +48,14 @@ class ExportAssetType(Enum):
             return "Alembic Animation"
         else:
             return "Unknown"    
-        
-    def get_type_as_string(self):
-        if self.value == ExportAssetType.UNKNOWN.value:
-            return "Unknown"
-        elif self.value == ExportAssetType.SKELETAL_MESH.value:
-            return "SkeletalMesh"
-        elif self.value == ExportAssetType.STATIC_MESH.value:
-            return "StaticMesh"
-        elif self.value == ExportAssetType.COLLECTION_AS_STATIC_MESH.value:
-            return "CollectionStaticMesh"
-        elif self.value == ExportAssetType.CAMERA.value:
-            return "Camera"
-        elif self.value == ExportAssetType.GROOM_SIMULATION.value:
-            return "GroomSimulation"
-        elif self.value == ExportAssetType.SPLINE.value:
-            return "Spline"
-        elif self.value == ExportAssetType.ANIM_ACTION.value:
-            return "Action"
-        elif self.value == ExportAssetType.ANIM_POSE.value:
-            return "Pose"
-        elif self.value == ExportAssetType.ANIM_NLA.value:
-            return "NonLinearAnimation"
-        elif self.value == ExportAssetType.ANIM_ALEMBIC.value:
-            return "AlembicAnimation"
-        else:
-            return "Unknown"
-    
+            
     @staticmethod
     def get_asset_type_from_string(asset_type_str: str) -> 'ExportAssetType':
-        for asset_type in ExportAssetType:
-            if asset_type.value == asset_type_str:
-                return asset_type
-        print("Warning: Unknown asset type string: ", asset_type_str)
-        return ExportAssetType.UNKNOWN
+        try:
+            return ExportAssetType(asset_type_str)
+        except ValueError:
+            print("Warning: Unknown asset type string: ", asset_type_str)
+            return ExportAssetType.UNKNOWN
     
     def is_skeletal(self) -> bool:
         return self.value in [
@@ -114,10 +88,11 @@ class AssetFileTypeEnum(Enum):
 
     @staticmethod
     def get_file_type_from_string(file_type_str: str) -> 'AssetFileTypeEnum':
-        for file_type in AssetFileTypeEnum:
-            if file_type.value == file_type_str:
-                return file_type
-        return AssetFileTypeEnum.UNKNOWN
+        try:
+            return AssetFileTypeEnum(file_type_str)
+        except ValueError:
+            print("Warning: Unknown file type string: ", file_type_str)
+            return AssetFileTypeEnum.UNKNOWN
 
     def get_file_extension(self) -> str:
         if self == AssetFileTypeEnum.FBX:

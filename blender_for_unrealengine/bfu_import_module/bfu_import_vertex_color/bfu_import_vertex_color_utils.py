@@ -88,12 +88,12 @@ def apply_import_settings(itask: import_module_tasks_class.ImportTask, asset_dat
         if vertex_override_color:
             itask.get_igap_common_mesh().set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
     else:
-        if asset_type == ExportAssetType.STATIC_MESH:
+        if asset_type.value == ExportAssetType.STATIC_MESH.value:
             itask.get_static_mesh_import_data().set_editor_property('vertex_color_import_option', vertex_color_import_option)
             if vertex_override_color:
                 itask.get_static_mesh_import_data().set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())
 
-        elif asset_type == ExportAssetType.SKELETAL_MESH:
+        elif asset_type.value == ExportAssetType.SKELETAL_MESH.value:
             itask.get_skeletal_mesh_import_data().set_editor_property('vertex_color_import_option', vertex_color_import_option)
             if vertex_override_color:
                 itask.get_skeletal_mesh_import_data().set_editor_property('vertex_override_color', vertex_override_color.to_rgbe())

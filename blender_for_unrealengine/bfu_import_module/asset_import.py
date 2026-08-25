@@ -77,7 +77,7 @@ def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.A
         return "", AssetFileTypeEnum.UNKNOWN
 
     # Search for the file to import
-    if asset_type == ExportAssetType.ANIM_ALEMBIC:
+    if asset_type.value == ExportAssetType.ANIM_ALEMBIC.value:
         file_name, file_type = get_file_from_types([AssetFileTypeEnum.ALEMBIC.value])
         if not file_name:
             return "FAIL", None
@@ -109,7 +109,7 @@ def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.A
 
 
     # Alembic
-    if asset_type == ExportAssetType.ANIM_ALEMBIC:
+    if asset_type.value == ExportAssetType.ANIM_ALEMBIC.value:
         import_module_utils.print_debug_step("Process Alembic")
         alembic_import_data = itask.get_abc_import_settings()
         alembic_import_data.static_mesh_settings.set_editor_property("merge_meshes", True)
@@ -135,13 +135,13 @@ def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.A
             animation_pipeline.set_editor_property('do_not_import_curve_with_zero', asset_data["do_not_import_curve_with_zero"]) 
 
     else:
-        if asset_type != ExportAssetType.ANIM_ALEMBIC:
+        if asset_type.value != ExportAssetType.ANIM_ALEMBIC.value:
             anim_sequence_import_data = itask.get_animation_import_data()
             anim_sequence_import_data.import_translation = unreal.Vector(0, 0, 0)
             if "do_not_import_curve_with_zero" in asset_data:
                 anim_sequence_import_data.set_editor_property('do_not_import_curve_with_zero', asset_data["do_not_import_curve_with_zero"]) 
 
-    if asset_type == ExportAssetType.ANIM_ALEMBIC:
+    if asset_type.value == ExportAssetType.ANIM_ALEMBIC.value:
         itask.get_abc_import_settings().set_editor_property('import_type', unreal.AlembicImportType.SKELETAL)
         
     else:
@@ -154,7 +154,7 @@ def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.A
                 if origin_skeleton:
                     itask.get_fbx_import_ui().set_editor_property('skeleton', origin_skeleton)
 
-        if asset_type == ExportAssetType.SKELETAL_MESH:
+        if asset_type.value == ExportAssetType.SKELETAL_MESH.value:
             if isinstance(itask.task_option, unreal.InterchangeGenericAssetsPipeline):
                 if origin_skeleton:
                     itask.get_igap_skeletal_mesh().set_editor_property('skeleton', origin_skeleton)
@@ -184,9 +184,9 @@ def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.A
         import_module_utils.print_debug_step("Set Asset Type")
         # Set Asset Type
         if hasattr(unreal, 'InterchangeGenericAssetsPipeline') and isinstance(itask.task_option, unreal.InterchangeGenericAssetsPipeline):
-            if asset_type == ExportAssetType.STATIC_MESH:
+            if asset_type.is_static_mesh():
                 itask.get_igap_common_mesh().set_editor_property('force_all_mesh_as_type', unreal.InterchangeForceMeshType.IFMT_STATIC_MESH)
-            if asset_type == ExportAssetType.SKELETAL_MESH:
+            if asset_type.value == ExportAssetType.SKELETAL_MESH.value:
                 itask.get_igap_common_mesh().set_editor_property('force_all_mesh_as_type', unreal.InterchangeForceMeshType.IFMT_SKELETAL_MESH)
             if asset_type.is_skeletal_animation():
                 itask.get_igap_common_mesh().set_editor_property('force_all_mesh_as_type', unreal.InterchangeForceMeshType.IFMT_NONE)
@@ -194,7 +194,7 @@ def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.A
                 itask.get_igap_common_mesh().set_editor_property('force_all_mesh_as_type', unreal.InterchangeForceMeshType.IFMT_NONE)
 
         else:
-            if asset_type == ExportAssetType.STATIC_MESH:
+            if asset_type.is_static_mesh():
                 itask.get_fbx_import_ui().set_editor_property('original_import_type', unreal.FBXImportType.FBXIT_STATIC_MESH)
             elif asset_type.is_skeletal_animation():
                 itask.get_fbx_import_ui().set_editor_property('original_import_type', unreal.FBXImportType.FBXIT_ANIMATION)
@@ -340,7 +340,7 @@ def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.A
             import_module_utils.print_debug_step(fail_reason)
             return fail_reason, None
 
-    if asset_type == ExportAssetType.STATIC_MESH:
+    if asset_type.is_static_mesh():
 
         if "collision_trace_flag" in asset_data:
             collision_data = itask.get_imported_static_mesh().get_editor_property('body_setup')
@@ -354,7 +354,7 @@ def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.A
                 elif asset_data["collision_trace_flag"] == "CTF_UseComplexAsSimple":
                     collision_data.set_editor_property('collision_trace_flag', unreal.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE)
 
-    if asset_type == ExportAssetType.SKELETAL_MESH:
+    if asset_type.value == ExportAssetType.SKELETAL_MESH.value:
         if origin_skeleton is None:
             # Unreal create a new skeleton when no skeleton was selected, so addon rename it.
             if import_module_unreal_utils.get_unreal_version() >= (5, 5, 0):
@@ -382,11 +382,11 @@ def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.A
                     print(" -", path)
 
     if hasattr(unreal, 'InterchangeGenericAssetsPipeline') and isinstance(itask.task_option, unreal.InterchangeGenericAssetsPipeline):
-        if asset_type == ExportAssetType.STATIC_MESH:
+        if asset_type.is_static_mesh():
             itask.get_igap_common_mesh().set_editor_property('recompute_normals', False)
             itask.get_igap_common_mesh().set_editor_property('recompute_tangents', False)
 
-        if asset_type == ExportAssetType.SKELETAL_MESH:
+        if asset_type.value == ExportAssetType.SKELETAL_MESH.value:
             itask.get_igap_common_mesh().set_editor_property('recompute_normals', False)
             itask.get_igap_common_mesh().set_editor_property('recompute_tangents', False)
 
@@ -394,7 +394,7 @@ def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.A
                 itask.get_imported_skeletal_mesh().set_editor_property('enable_per_poly_collision', asset_data["enable_skeletal_mesh_per_poly_collision"])
         
     else:
-        if asset_type == ExportAssetType.STATIC_MESH:
+        if asset_type.is_static_mesh():
             static_mesh = itask.get_imported_static_mesh()
             if static_mesh:
                 asset_import_data = static_mesh.get_editor_property('asset_import_data')
@@ -402,7 +402,7 @@ def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.A
             else:
                 print("Error: Static Mesh not found after import!")
 
-        elif asset_type == ExportAssetType.SKELETAL_MESH:
+        elif asset_type.value == ExportAssetType.SKELETAL_MESH.value:
             skeletal_mesh = itask.get_imported_skeletal_mesh()
             if skeletal_mesh:
                 asset_import_data = skeletal_mesh.get_editor_property('asset_import_data')
@@ -416,7 +416,7 @@ def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.A
 
 
     # Socket
-    if asset_type == ExportAssetType.SKELETAL_MESH:
+    if asset_type.value == ExportAssetType.SKELETAL_MESH.value:
         # Import the SkeletalMesh socket(s)
         sockets_to_add = asset_additional_data["Sockets"]
         for socket in sockets_to_add:
@@ -457,7 +457,7 @@ def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.A
     # Nanite
     bfu_import_nanite.bfu_import_nanite_utils.apply_asset_settings(itask, asset_additional_data)
 
-    if asset_type == ExportAssetType.ANIM_ALEMBIC:
+    if asset_type.value == ExportAssetType.ANIM_ALEMBIC.value:
         pass
         # @TODO Need to found how create an physical asset, generate bodies, and assign it.
         """
@@ -535,11 +535,11 @@ def import_all_assets(assets_data: Dict[str, Any], show_finished_popup: bool = T
     for inport_data in imported_list:
         assets = inport_data[0]
         source_asset_type = ExportAssetType.get_asset_type_from_string(inport_data[1])
-        if source_asset_type == ExportAssetType.STATIC_MESH:
+        if source_asset_type.is_static_mesh():
             StaticMesh_ImportedList.append(assets)
-        elif source_asset_type == ExportAssetType.SKELETAL_MESH:
+        elif source_asset_type.value == ExportAssetType.SKELETAL_MESH.value:
             SkeletalMesh_ImportedList.append(assets)
-        elif source_asset_type == ExportAssetType.ANIM_ALEMBIC:
+        elif source_asset_type.value == ExportAssetType.ANIM_ALEMBIC.value:
             Alembic_ImportedList.append(assets)
         else:
             Animation_ImportedList.append(assets)

@@ -79,11 +79,11 @@ def apply_import_settings(itask: import_module_tasks_class.ImportTask, asset_dat
         pass
 
     else:
-        if asset_type == ExportAssetType.STATIC_MESH:
+        if asset_type.value == ExportAssetType.STATIC_MESH.value:
             if "reorder_material_to_fbx_order" in asset_additional_data:
                 itask.get_static_mesh_import_data().set_editor_property('reorder_material_to_fbx_order', asset_additional_data["reorder_material_to_fbx_order"])
 
-        elif asset_type == ExportAssetType.SKELETAL_MESH:
+        elif asset_type.value == ExportAssetType.SKELETAL_MESH.value:
             if "reorder_material_to_fbx_order" in asset_additional_data:
                 itask.get_skeletal_mesh_import_data().set_editor_property('reorder_material_to_fbx_order', asset_additional_data["reorder_material_to_fbx_order"])
 
