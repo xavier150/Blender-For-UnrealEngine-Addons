@@ -10,14 +10,11 @@
 import bpy
 import importlib
 
-from . import bfu_export_procedure
 from . import bfu_base_col_props
 from . import bfu_base_col_ui
 from . import bfu_base_col_utils
 from . import bfu_base_col_type
 
-if "bfu_export_procedure" in locals():
-    importlib.reload(bfu_export_procedure)
 if "bfu_base_col_props" in locals():
     importlib.reload(bfu_base_col_props)
 if "bfu_base_col_ui" in locals():
@@ -34,7 +31,6 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)  # type: ignore
 
-    bfu_export_procedure.register()
     bfu_base_col_props.register()
     bfu_base_col_type.register()
 
@@ -44,4 +40,3 @@ def unregister():
 
     bfu_base_col_type.unregister()
     bfu_base_col_props.unregister()
-    bfu_export_procedure.unregister()

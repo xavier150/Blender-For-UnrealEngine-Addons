@@ -516,9 +516,12 @@ def import_all_assets(assets_data: Dict[str, Any], show_finished_popup: bool = T
 
     # Import assets with a specific order
 
+    for asset_data in assets_data["assets"]:
+        print("Asset to import:", asset_data["asset_name"], "Type:", asset_data["asset_type"])
     for asset_data in get_asset_by_type(["AlembicAnimation", "GroomSimulation", "Spline", "Camera"]):
         prepare_import_task(asset_data)
     for asset_data in get_asset_by_type(["StaticMesh", "CollectionStaticMesh"]):
+        print("Importing StaticMesh:", asset_data["asset_name"])
         prepare_import_task(asset_data)
     for asset_data in get_asset_by_type(["SkeletalMesh"]):
         prepare_import_task(asset_data)

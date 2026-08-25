@@ -29,15 +29,20 @@ class BFU_CollectionExportProcedure(str, Enum):
 def get_collection_export_procedure_enum_property_list() -> List[Tuple[str, str, str, str, int]]:
     return [
         (BFU_CollectionExportProcedure.CUSTOM_FBX_EXPORT.value,
-            "UE Standard",
+            "UE Standard (FBX)",
             "Modified fbx I/O for Unreal Engine",
             "OUTLINER_OB_GROUP_INSTANCE",
             1),
         (BFU_CollectionExportProcedure.STANDARD_FBX.value,
-            "Blender Standard",
+            "Blender Standard (FBX)",
             "Standard fbx I/O.",
             "OUTLINER_OB_GROUP_INSTANCE",
             2),
+        (BFU_CollectionExportProcedure.STANDARD_GLTF.value,
+            "Blender Standard (glTF 2.0)",
+            "Standard glTF 2.0.",
+            "OUTLINER_OB_GROUP_INSTANCE",
+            3),
         ]
 
 def get_default_collection_export_procedure() -> str:
@@ -46,8 +51,13 @@ def get_default_collection_export_procedure() -> str:
 def get_col_export_type(col: bpy.types.Collection) -> BFU_FileTypeEnum:
     return get_export_file_type(get_col_export_procedure(col))
 
-def get_export_file_type(procedure: BFU_CollectionExportProcedure) -> BFU_FileTypeEnum:
-    return BFU_FileTypeEnum.FBX
+def get_export_file_type(procedure: BFU_CollectionExportProcedure) -> BFU_FileTypeEnum: # Object.bfu_static_collection_export_procedure
+    if procedure == BFU_CollectionExportProcedure.CUSTOM_FBX_EXPORT:
+        return BFU_FileTypeEnum.FBX
+    elif procedure == BFU_CollectionExportProcedure.STANDARD_FBX:
+        return BFU_FileTypeEnum.FBX
+    elif procedure == BFU_CollectionExportProcedure.STANDARD_GLTF:
+        return BFU_FileTypeEnum.GLTF
 
 def get_col_export_procedure(col: bpy.types.Collection) -> BFU_CollectionExportProcedure:
     for procedure in BFU_CollectionExportProcedure:

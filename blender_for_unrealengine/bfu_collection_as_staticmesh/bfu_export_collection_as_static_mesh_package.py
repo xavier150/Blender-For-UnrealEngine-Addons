@@ -157,8 +157,14 @@ def export_collection_as_static_mesh(
             bake_space_transform=False
             )
     elif (static_collection_export_procedure.value == BFU_CollectionExportProcedure.STANDARD_GLTF.value):
-        # @TODO: Implement GLTF export
-        export_result = bfu_export.bfu_gltf_export.export_scene_gltf()
+        export_result = bpy.ops.export_scene.gltf(
+            filepath=str(fullpath),
+            check_existing=False,
+            use_selection=True,
+            export_materials="EXPORT",
+            export_image_format="AUTO",
+            export_apply = True,
+        )
     else:
         print(f"Error: The export procedure '{static_collection_export_procedure}' was not found!")
     my_timer_group.end_last_timer()
