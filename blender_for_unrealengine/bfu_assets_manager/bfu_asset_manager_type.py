@@ -90,7 +90,7 @@ class AssetType(Enum):
     UNKNOWN = "Unknown" # Unknown asset type.
     SKELETAL_MESH = "SkeletalMesh"
     STATIC_MESH = "StaticMesh"
-    COLLECTION_AS_STATIC_MESH = "Collection StaticMesh"
+    COLLECTION_AS_STATIC_MESH = "CollectionStaticMesh"
     CAMERA = "Camera"
     GROOM_SIMULATION = "GroomSimulation" # Groom simulation.
     SPLINE = "Spline" # Curve and spline objects.
