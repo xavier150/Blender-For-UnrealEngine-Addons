@@ -277,7 +277,7 @@ def import_task(asset_data: Dict[str, Any]) -> Tuple[str, Optional[List[unreal.A
             itask.get_igap_common_mesh().set_editor_property('recompute_tangents', False)
 
         else:
-            if asset_type == ExportAssetType.STATIC_MESH:
+            if asset_type.is_static_mesh():
                 # unreal.FbxStaticMeshImportData
                 itask.get_static_mesh_import_data().set_editor_property('combine_meshes', True)
                 if "auto_generate_collision" in asset_data:

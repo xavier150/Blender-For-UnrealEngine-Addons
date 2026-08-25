@@ -14,7 +14,7 @@ class ExportAssetType(Enum):
     UNKNOWN = "Unknown" # Unknown asset type.
     SKELETAL_MESH = "SkeletalMesh"
     STATIC_MESH = "StaticMesh"
-    COLLECTION_AS_STATIC_MESH = "Collection StaticMesh"
+    COLLECTION_AS_STATIC_MESH = "CollectionStaticMesh"
     CAMERA = "Camera"
     GROOM_SIMULATION = "GroomSimulation" # Groom simulation.
     SPLINE = "Spline" # Curve and spline objects.
@@ -80,6 +80,7 @@ class ExportAssetType(Enum):
         for asset_type in ExportAssetType:
             if asset_type.value == asset_type_str:
                 return asset_type
+        print("Warning: Unknown asset type string: ", asset_type_str)
         return ExportAssetType.UNKNOWN
     
     def is_skeletal(self) -> bool:
@@ -95,6 +96,12 @@ class ExportAssetType(Enum):
             ExportAssetType.ANIM_ACTION.value, 
             ExportAssetType.ANIM_POSE.value, 
             ExportAssetType.ANIM_NLA.value
+        ]
+
+    def is_static_mesh(self) -> bool:
+        return self.value in [
+            ExportAssetType.STATIC_MESH.value, 
+            ExportAssetType.COLLECTION_AS_STATIC_MESH.value
         ]
     
 class AssetFileTypeEnum(Enum):

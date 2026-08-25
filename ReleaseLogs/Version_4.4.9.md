@@ -8,3 +8,5 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
     (Typing: old Python versions require typing.List[] instead of list[])
 - Fixed: Vertex Color is not exported with the option Active Render when the active render use index 0.
     (Used "if target_index:" replaced by "if target_index is not None:")
+- Fixed: Collection Static Meshes are not imported correctly in Unreal Engine.
+    (Wrong asset type checking in the import script)
