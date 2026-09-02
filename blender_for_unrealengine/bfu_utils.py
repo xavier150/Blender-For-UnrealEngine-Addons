@@ -629,7 +629,7 @@ def correct_extreme_uv(step_scale: int = 2, move_to_absolute: bool = False):
                                 return True
         return False
 
-    def select_recursive_uv_linked(uv_lay: bmesh.types.BMLayerItem[Any]):
+    def select_recursive_uv_linked(uv_lay: "bmesh.types.BMLayerItem[Any]"):
 
         added_faces: List[bmesh.types.BMFace] = []
         for v in [v for v in bm.verts if v.select]:
@@ -646,7 +646,7 @@ def correct_extreme_uv(step_scale: int = 2, move_to_absolute: bool = False):
                 added_faces.append(addedFace)
             return added_faces
 
-    def get_all_island(bm: bmesh.types.BMesh, uv_lay: bmesh.types.BMLayerItem[Any]) -> List[List[bmesh.types.BMFace]]:
+    def get_all_island(bm: bmesh.types.BMesh, uv_lay: "bmesh.types.BMLayerItem[Any]") -> List[List[bmesh.types.BMFace]]:
         faces_to_cheak: List[bmesh.types.BMFace] = []
         island_list: List[List[bmesh.types.BMFace]] = []
         for face in bm.faces:
@@ -669,7 +669,7 @@ def correct_extreme_uv(step_scale: int = 2, move_to_absolute: bool = False):
 
         return island_list
 
-    def move_it_land_to_center(faces: List[bmesh.types.BMFace], uv_lay: bmesh.types.BMLayerItem[Any], min_distance: float, absolute: bool):
+    def move_it_land_to_center(faces: List[bmesh.types.BMFace], uv_lay: "bmesh.types.BMLayerItem[Any]", min_distance: float, absolute: bool):
         loop = faces[-1].loops[-1]
 
         delta_x = round(loop[uv_lay].uv[0]/min_distance, 0)*min_distance
@@ -694,7 +694,7 @@ def correct_extreme_uv(step_scale: int = 2, move_to_absolute: bool = False):
                 # pylint: disable=E1128
                 bm = bmesh.from_edit_mesh(obj.data)
 
-                uv_lay: Optional[bmesh.types.BMLayerItem[Any]] = bm.loops.layers.uv.active
+                uv_lay: Optional["bmesh.types.BMLayerItem[Any]"] = bm.loops.layers.uv.active
                 if uv_lay is None:
                     return
 

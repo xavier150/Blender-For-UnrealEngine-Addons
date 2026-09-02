@@ -14,3 +14,5 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
     (Make Instances Real don't work if the source object is not visible in the viewport.)
 - Fixed: Linked objects from a same scene may not moved with parent objects at the center of the scene.
     (Make Instances Real don't apply parent when several objects are created.)
+- Fixed: Extreme UV correction do script fail.
+    (Wrong typing stubs BMLayerItem[Any], Added quotes to make it a forward reference)
