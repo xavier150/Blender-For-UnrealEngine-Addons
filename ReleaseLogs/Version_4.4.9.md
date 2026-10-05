@@ -4,6 +4,7 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
 ### Version 4.4.9
 - New: Better feedback when no properties are displayed in the UI panel.
     (For example when the object is not set as exportable or for linked objects)
+- New: You can now set add categories for modular skeletal mesh items in the Blender UI using the "Sub Folder" property.
 - Fixed: Import fail in Unreal Engine 4.27
     (Typing: old Python versions require typing.List[] instead of list[])
 - Fixed: Vertex Color is not exported with the option Active Render when the active render use index 0.
