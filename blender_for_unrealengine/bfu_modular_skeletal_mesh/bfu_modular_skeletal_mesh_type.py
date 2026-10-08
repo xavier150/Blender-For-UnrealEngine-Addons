@@ -95,6 +95,7 @@ class BFU_UI_ModularSkeletalSpecifiedPartsMeshItem(BBPL_UI_TemplateItem): # Item
     if TYPE_CHECKING:
         enabled: bool
         name: str
+        category: str
         sub_folder: str
         skeletal_parts: BFU_UI_ModularSkeletalSpecifiedPartsTargetList
     else:
@@ -108,10 +109,16 @@ class BFU_UI_ModularSkeletalSpecifiedPartsMeshItem(BBPL_UI_TemplateItem): # Item
             description="Bone group name.",
             default="MyGroupName",
             )
+
+        category: bpy.props.StringProperty(
+            name="Category",
+            description="Category used to group the items in the Blender UI. Leave empty for no category.",
+            default="",
+            )
         
         sub_folder: bpy.props.StringProperty(
             name="Sub Folder",
-            description="sub_folder_to export the mesh. (Also used as category in Blender UI)",
+            description="Sub folder to export the mesh.",
             default="",
             )
         
@@ -163,7 +170,7 @@ class BFU_UI_ModularSkeletalSpecifiedPartsMeshs(BBPL_UI_TemplateList): # Draw It
             return self.template_collection
 
     def get_item_category(self, item: BFU_UI_ModularSkeletalSpecifiedPartsMeshItem) -> str:
-        return item.sub_folder
+        return item.category
 
     def draw(self, layout: bpy.types.UILayout):
         super().draw(layout)
@@ -175,6 +182,7 @@ class BFU_UI_ModularSkeletalSpecifiedPartsMeshs(BBPL_UI_TemplateList): # Draw It
             prop_data = box.column()
             prop_data.enabled = item.enabled
             prop_data.prop(item, "name")
+            prop_data.prop(item, "category")
             prop_data.prop(item, "sub_folder")
 
             item.skeletal_parts.draw(box).enabled = item.enabled
