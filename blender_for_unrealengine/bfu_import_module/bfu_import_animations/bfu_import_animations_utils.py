@@ -28,7 +28,12 @@ def set_animation_sample_rate(itask: import_module_tasks_class.ImportTask, asset
                     print("Set GLTF animation sample rate to:", animation_sample_rate)
                     animation_pipeline = itask.get_igap_animation()
                     animation_pipeline.set_editor_property('custom_bone_animation_sample_rate', animation_sample_rate)
-                    animation_pipeline.set_editor_property('snap_to_closest_frame_boundary', True)
+                    try:
+                        animation_pipeline.set_editor_property('snap_to_closest_frame_boundary', True)
+                    except Exception as error:
+                        if "Failed to find property" not in str(error):
+                            raise
+                        print("Animation frame snapping is unavailable in this Unreal Engine version.")
                     return
                 
             # For other file types, use automatic sample rate.
