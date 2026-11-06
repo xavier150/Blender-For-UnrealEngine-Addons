@@ -30,7 +30,11 @@ def set_animation_sample_rate(itask: import_module_tasks_class.ImportTask, asset
                     print("Set GLTF animation sample rate to:", animation_sample_rate)
                     animation_pipeline = itask.get_igap_animation()
                     animation_pipeline.set_editor_property('custom_bone_animation_sample_rate', animation_sample_rate)
-                    animation_pipeline.set_editor_property('snap_to_closest_frame_boundary', True)
+                    if import_module_unreal_utils.get_unreal_version() >= (5, 8, 0):
+                        # For Unreal Engine 5.8 and above, use frame alignment instead of snap to closest frame boundary.
+                        animation_pipeline.set_editor_property('frame_alignment', unreal.InterchangeFrameAlignment.SNAP_TO_CLOSEST)
+                    else:
+                        animation_pipeline.set_editor_property('snap_to_closest_frame_boundary', True)
                     return
                 
             # For other file types, use automatic sample rate.
