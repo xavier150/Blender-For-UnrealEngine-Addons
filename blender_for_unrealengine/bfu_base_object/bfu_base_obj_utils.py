@@ -17,12 +17,12 @@ from . import bfu_base_obj_props
 
 def in_hidden_collection(obj: bpy.types.Object) -> bool:
     # When link an object some object may follow the link and be placed in a collection named "OVERRIDE_HIDDEN"
-    # Most of the case is the hidden object is placed in a collection named "OVERRIDE_HIDDEN".
+    # Most of the case the is hidden object that should not be exported with the linked collection.
     # So I don't export them.
     for coll in obj.users_collection:
         if coll.name == "OVERRIDE_HIDDEN":
             # Print for debug only:
-            # print(f"Object {obj.name} is in collection named OVERRIDE_HIDDEN.")
+            # print(f"Object {obj.name} is in collection {coll.name} and will not be exported.")
             return True
     return False
 
