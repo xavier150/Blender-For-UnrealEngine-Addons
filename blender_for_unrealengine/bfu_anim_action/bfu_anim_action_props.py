@@ -9,7 +9,9 @@
 
 from enum import Enum
 from typing import List, Tuple
+
 import bpy
+
 from .. import bbpl
 from .bfu_anim_action_operator_action_group import BFU_OT_ObjExportAction
 

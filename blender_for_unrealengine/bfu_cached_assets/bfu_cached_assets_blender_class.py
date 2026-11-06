@@ -8,14 +8,16 @@
 # ----------------------------------------------
 
 
-import bpy
 from typing import List, Optional
-from ..bfu_assets_manager.bfu_asset_manager_type import AssetToExport, AssetToSearch, AssetDataSearchMode, AssetType
+
+import bpy
+
 from .. import bfu_assets_manager
-from .. import bfu_export_control
-from .. import bfu_debug_settings
 from .. import bfu_collection_as_staticmesh
+from .. import bfu_debug_settings
+from .. import bfu_export_control
 from .. import bfu_export_filter
+from ..bfu_assets_manager.bfu_asset_manager_type import AssetToExport, AssetToSearch, AssetDataSearchMode, AssetType
 from ..bfu_export_filter.bfu_export_filter_props import BFU_ExportSelectionFilterEnum
 
 

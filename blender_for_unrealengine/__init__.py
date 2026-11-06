@@ -24,8 +24,10 @@ xavierloux.loux@gmail.com
 '''
 
 try:
-    import bpy
     import importlib
+
+    import bpy
+
     from . import bpl
     from . import bbpl
     from . import languages

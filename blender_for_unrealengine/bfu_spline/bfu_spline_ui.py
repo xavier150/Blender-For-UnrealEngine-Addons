@@ -9,15 +9,17 @@
 
 
 from typing import Optional, TYPE_CHECKING
+
 import bpy
-from .. import bfu_ui
+
 from .. import bbpl
-from .. import bfu_export_control
-from .. import bfu_debug_settings
 from .. import bfu_alembic_animation
+from .. import bfu_debug_settings
+from .. import bfu_export_control
+from .. import bfu_ui
 from ..bbpl.blender_layout import layout_doc_button
-from . import bfu_spline_utils
 from . import bfu_spline_data
+from . import bfu_spline_utils
 from .bfu_spline_data import BFU_SimpleSpline
 
 def draw_debug_panel(layout: bpy.types.UILayout, context: bpy.types.Context, obj: bpy.types.Object):

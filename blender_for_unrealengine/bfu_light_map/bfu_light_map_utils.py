@@ -11,14 +11,14 @@ from typing import Dict, Any, Optional, List
 
 import bpy
 
-from .. import bpl
 from .. import bbpl
 from .. import bfu_basics
-from .. import bfu_utils
-from .. import bfu_static_mesh
-from .. import bfu_export_control
-from .. import bfu_export
 from .. import bfu_collision
+from .. import bfu_export
+from .. import bfu_export_control
+from .. import bfu_static_mesh
+from .. import bfu_utils
+from .. import bpl
 from .. bfu_assets_manager.bfu_asset_manager_type import AssetType
 from . import bfu_light_map_props
 from .bfu_light_map_props import BFU_StaticMeshLightMapMode

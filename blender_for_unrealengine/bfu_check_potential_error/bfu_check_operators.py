@@ -8,8 +8,10 @@
 # ----------------------------------------------
 
 
-import bpy
 from typing import List, Dict, Set, Any
+
+import bpy
+
 from .. import bbpl
 from . import bfu_check_list
 from . import bfu_check_utils

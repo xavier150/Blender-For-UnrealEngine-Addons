@@ -7,8 +7,9 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 import importlib
+
+import bpy
 
 from . import bfu_export_correct_and_improv_panel
 

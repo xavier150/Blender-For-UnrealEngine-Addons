@@ -1,5 +1,5 @@
-import subprocess
 import platform
+import subprocess
 from pathlib import Path
 
 # Get script path and its directory

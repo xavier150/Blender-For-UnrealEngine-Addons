@@ -8,10 +8,12 @@
 # ----------------------------------------------
 
 
-from typing import List, Set, Any
 import os
 from pathlib import Path
+from typing import List, Set, Any
+
 import bpy
+
 from .. import bbpl
 
 

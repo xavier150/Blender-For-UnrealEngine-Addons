@@ -7,8 +7,9 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 import importlib
+
+import bpy
 
 from . import bfu_anim_action_operator_action_group
 from . import bfu_anim_action_props

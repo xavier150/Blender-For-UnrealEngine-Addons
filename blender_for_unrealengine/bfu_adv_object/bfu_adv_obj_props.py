@@ -7,15 +7,15 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-
 from typing import List
-if hasattr(__builtins__, 'Literal'):
-    from typing import Literal
 
 import bpy
 import mathutils
 
 from .. import bbpl
+
+if hasattr(__builtins__, 'Literal'):
+    from typing import Literal
 
 
 def get_preset_values() -> List[str]:

@@ -1,5 +1,6 @@
-from typing import List, Tuple, Dict
 from pathlib import Path
+from typing import List, Tuple, Dict
+
 from . import bpl
 from . import config
 from .config import BlenderVersionDetails

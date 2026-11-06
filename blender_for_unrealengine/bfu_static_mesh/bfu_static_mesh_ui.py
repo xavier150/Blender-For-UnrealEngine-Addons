@@ -9,9 +9,10 @@
 
 
 import bpy
+
 from .. import bfu_base_object
-from .. import bfu_ui
 from .. import bfu_export_control
+from .. import bfu_ui
 from . import bfu_static_mesh_utils
 
 def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: bpy.types.Object):

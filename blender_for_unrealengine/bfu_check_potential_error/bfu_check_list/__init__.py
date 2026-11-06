@@ -7,11 +7,13 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
-import os
 import importlib
 import inspect
+import os
 from typing import List, Any, Dict
+
+import bpy
+
 from ..bfu_check_types import bfu_checker
 from .. import bfu_check_utils
 from ... import bpl

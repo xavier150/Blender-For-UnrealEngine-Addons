@@ -7,14 +7,16 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 import math
-import mathutils
 from typing import Dict, Any, List, Union, TYPE_CHECKING, Optional, Tuple
+
+import bpy
+import mathutils
+
 from .. import bbpl
 from .. import bpl
-from . import bfu_spline_utils
 from . import bfu_spline_unreal_utils
+from . import bfu_spline_utils
 
 def float_as_ue(my_float: float) -> str:
     return "{:.6f}".format(my_float)

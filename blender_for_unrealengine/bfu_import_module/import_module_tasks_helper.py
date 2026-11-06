@@ -9,10 +9,12 @@
 
 
 from typing import Union
+
 import unreal
+
+from . import config
 from . import import_module_unreal_utils
 from .asset_types import ExportAssetType, AssetFileTypeEnum
-from . import config
 
 
 if hasattr(unreal, 'InterchangeGenericAssetsPipeline'):

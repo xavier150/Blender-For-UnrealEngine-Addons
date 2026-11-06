@@ -7,8 +7,10 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from typing import Tuple
+
+import bpy
+
 from .. import bfu_anim_nla
 from ..bfu_anim_nla.bfu_anim_nla_props import BFU_AnimNLAStartEndTimeEnum
 

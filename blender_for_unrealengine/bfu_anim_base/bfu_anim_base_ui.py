@@ -9,11 +9,12 @@
 
 
 import bpy
-from .. import bfu_ui
+
 from .. import bbpl
 from .. import bfu_alembic_animation
-from .. import bfu_export_control
 from .. import bfu_asset_preview
+from .. import bfu_export_control
+from .. import bfu_ui
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetToSearch
 from . import bfu_anim_base_props
 

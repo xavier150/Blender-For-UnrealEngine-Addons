@@ -7,10 +7,12 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
-import bmesh
-import mathutils
 from typing import List, Optional
+
+import bmesh
+import bpy
+import mathutils
+
 from . import shape_algorithms
 
 def join_bmeshes(target_bm: bmesh.types.BMesh, other_bm: List[bmesh.types.BMesh]) -> None:

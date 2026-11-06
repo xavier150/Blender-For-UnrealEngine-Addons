@@ -1,8 +1,8 @@
 # Script that run in Blender to generate and install the addon Blender-For-UnrealEngine.
 
-from pathlib import Path
-import sys
 import importlib.util
+import sys
+from pathlib import Path
 
 # ----------------------------------------------
 # Configuration

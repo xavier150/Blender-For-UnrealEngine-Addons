@@ -7,12 +7,14 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import unreal
 from typing import Any, Dict, List, TYPE_CHECKING
-from .. import import_module_unreal_utils
-from .. import import_module_tasks_class
-from .. import import_module_utils
+
+import unreal
+
 from .. import bpl
+from .. import import_module_tasks_class
+from .. import import_module_unreal_utils
+from .. import import_module_utils
 from ..asset_types import ExportAssetType, AssetFileTypeEnum
 
 def set_animation_sample_rate(itask: import_module_tasks_class.ImportTask, asset_additional_data: Dict[str, Any], asset_type: ExportAssetType, filetype: AssetFileTypeEnum) -> None:

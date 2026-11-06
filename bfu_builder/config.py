@@ -1,6 +1,6 @@
-from typing import List, Tuple
-from pathlib import Path
 import platform
+from pathlib import Path
+from typing import List, Tuple
 
 windows_blender_install_path: Path = Path("C:/Program Files/Blender Foundation")
 linux_blender_install_path: Path = Path("/media/bleuraven/engines/BlenderBuilds/BlenderLinuxBuilds/HandDownload")

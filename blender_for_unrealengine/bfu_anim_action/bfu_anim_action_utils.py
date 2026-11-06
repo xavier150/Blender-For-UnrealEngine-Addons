@@ -8,12 +8,14 @@
 # ----------------------------------------------
 
 import fnmatch
+from typing import List, Tuple, Set, Dict, Optional
+
 import bpy
 from bpy_extras import anim_utils
-from typing import List, Tuple, Set, Dict, Optional
+
+from .. import bfu_anim_nla
 from .. import bfu_debug_settings
 from .. import bfu_export_filter
-from .. import bfu_anim_nla
 from . import bfu_anim_action_props
 from .bfu_anim_action_props import BFU_AnimActionExportEnum
 

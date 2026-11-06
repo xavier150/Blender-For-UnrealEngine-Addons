@@ -7,11 +7,13 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
-from typing import List
 from pathlib import Path
-from .. import bfu_export_control
+from typing import List
+
+import bpy
+
 from .. import bfu_basics
+from .. import bfu_export_control
 from .. import bfu_export_nomenclature
 from . import bfu_base_obj_props
 

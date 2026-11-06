@@ -7,9 +7,10 @@
 #  https://github.com/xavier150/BPL
 # ----------------------------------------------
 
-from . import edit_files
-from typing import Tuple
 from pathlib import Path
+from typing import Tuple
+
+from . import edit_files
 
 def update_export_fbx_bin(file_path: Path, version: Tuple[int, int, int], fbx_addon_version: Tuple[int, int, int]):
     add_new_import(file_path)

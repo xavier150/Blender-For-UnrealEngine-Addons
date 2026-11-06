@@ -7,9 +7,11 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
-from .. import bbpl
 from typing import TYPE_CHECKING, List
+
+import bpy
+
+from .. import bbpl
 
 
 BBPL_UI_TemplateItem = bbpl.blender_layout.layout_template_list.types.create_template_item_class()

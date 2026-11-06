@@ -8,6 +8,7 @@
 # ----------------------------------------------
 
 import bpy
+
 from ...bfu_check_types import bfu_checker
 
 class BFU_Checker_SceneFrameRate(bfu_checker):

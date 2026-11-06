@@ -8,6 +8,7 @@
 # ----------------------------------------------
 
 import bpy
+
 from . import bbpl
 
 def get_addon_version() -> str:

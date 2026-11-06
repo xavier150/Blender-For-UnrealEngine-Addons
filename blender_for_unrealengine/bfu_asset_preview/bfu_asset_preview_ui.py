@@ -8,12 +8,14 @@
 # ----------------------------------------------
 
 
-import bpy
 from typing import List
+
+import bpy
+
 from .. import bfu_cached_assets
-from ..bfu_assets_manager.bfu_asset_manager_type import AssetToSearch, AssetToExport, AssetDataSearchMode, AssetType, AssetPackage
-from .. import bpl
 from .. import bfu_debug_settings
+from .. import bpl
+from ..bfu_assets_manager.bfu_asset_manager_type import AssetToSearch, AssetToExport, AssetDataSearchMode, AssetType, AssetPackage
 
 def get_asset_title_text(asset_count: int, asset_to_search: AssetToSearch) -> str:
     return asset_to_search.get_asset_title_text(asset_count)

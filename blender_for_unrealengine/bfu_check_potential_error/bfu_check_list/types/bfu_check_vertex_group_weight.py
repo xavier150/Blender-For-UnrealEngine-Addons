@@ -8,9 +8,10 @@
 # ----------------------------------------------
 
 import bpy
-from ...bfu_check_types import bfu_checker
-from ... import bfu_check_utils
+
 from ....bfu_cached_assets.bfu_cached_assets_blender_class import AssetToExport
+from ... import bfu_check_utils
+from ...bfu_check_types import bfu_checker
 
 
 class BFU_Checker_VertexGroupWeight(bfu_checker):

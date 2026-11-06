@@ -7,10 +7,11 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
+import importlib
 from typing import Dict, Optional, Tuple
 
-import importlib
+import bpy
+
 from . import config
 from . import utils
 

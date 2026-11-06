@@ -15,13 +15,15 @@
 #   "Efficiently approximating the minimum-volume bounding box of a point set in three dimensions."
 #   Journal of Algorithms, 38(1):91–109.
 
-import numpy as np
-import bmesh
+import sys
 from typing import Any, Optional
+
+import bmesh
+import numpy as np
+
 from ... import bpl
 
 # Compatibility fix for older Python versions - numpy type annotations
-import sys
 if sys.version_info >= (3, 10):
     # Python 3.10+ supports subscriptable numpy types natively
     pass

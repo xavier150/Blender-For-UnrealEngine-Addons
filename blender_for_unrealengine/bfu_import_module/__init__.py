@@ -27,7 +27,6 @@ from . import import_module_utils
 from . import import_module_unreal_utils
 from . import import_module_post_treatment
 from . import asset_import
-from . import asset_import
 from . import sequencer_import
 from . import sequencer_utils
 from . import bfu_import_animations

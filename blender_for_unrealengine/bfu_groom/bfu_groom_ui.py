@@ -9,13 +9,14 @@
 
 
 import bpy
-from .. import bfu_utils
-from .. import bfu_ui
+
 from .. import bbpl
-from .. import bfu_static_mesh
-from .. import bfu_skeletal_mesh
-from .. import bfu_export_control
 from .. import bfu_base_object
+from .. import bfu_export_control
+from .. import bfu_skeletal_mesh
+from .. import bfu_static_mesh
+from .. import bfu_ui
+from .. import bfu_utils
 from . import bfu_groom_utils
 
 

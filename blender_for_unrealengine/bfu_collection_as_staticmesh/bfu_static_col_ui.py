@@ -10,12 +10,11 @@
 
 import bpy
 
-
-from . import bfu_export_procedure
-from .. import bfu_ui
-from .. import bfu_asset_preview
-from ..bfu_assets_manager.bfu_asset_manager_type import AssetToSearch
 from .. import bbpl
+from .. import bfu_asset_preview
+from .. import bfu_ui
+from ..bfu_assets_manager.bfu_asset_manager_type import AssetToSearch
+from . import bfu_export_procedure
 from . import bfu_static_col_props
 
 

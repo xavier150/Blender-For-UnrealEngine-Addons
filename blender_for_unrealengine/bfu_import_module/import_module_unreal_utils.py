@@ -7,9 +7,10 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import string
 import re
+import string
 from typing import List, Tuple, TYPE_CHECKING, Optional
+
 import unreal
 
 def get_package_path_from_any_string(asset_string: str) -> str:

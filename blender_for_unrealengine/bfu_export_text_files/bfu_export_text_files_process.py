@@ -7,18 +7,18 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
+from pathlib import Path
 from shutil import copyfile
 from typing import List
 
-from pathlib import Path
-from . import bfu_export_text_files_asset_data
-from . import bfu_export_text_files_sequencer_data
-from . import bfu_export_text_files_utils
+import bpy
 
 from .. import bbpl
 from .. import bfu_basics
 from .. import bfu_export_logs
+from . import bfu_export_text_files_asset_data
+from . import bfu_export_text_files_sequencer_data
+from . import bfu_export_text_files_utils
 
 
 def write_all_data_files(exported_asset_log: List[bfu_export_logs.bfu_asset_export_logs_types.ExportedAssetLog]) -> None:

@@ -7,8 +7,9 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 import importlib
+
+import bpy
 
 from . import bfu_cached_assets_blender_class
 

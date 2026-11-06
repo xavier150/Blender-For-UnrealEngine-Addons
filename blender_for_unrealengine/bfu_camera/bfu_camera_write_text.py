@@ -7,10 +7,12 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from typing import Any, Optional,Dict
-from . import bfu_camera_data
+
+import bpy
+
 from .. import bfu_export_text_files
+from . import bfu_camera_data
 
 def WriteOneFrameCameraAnimationTracks(obj: bpy.types.Object, target_frame: int, pre_bake_camera: Optional[bfu_camera_data.BFU_CameraTracks] = None):
     return WriteCameraAnimationTracks(obj, target_frame, target_frame+1, pre_bake_camera)

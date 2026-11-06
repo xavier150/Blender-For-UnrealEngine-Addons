@@ -9,10 +9,11 @@
 
 
 import bpy
-from . import bfu_socket_props
-from .. import bfu_addon_prefs
+
 from .. import bbpl
+from .. import bfu_addon_prefs
 from ..bbpl.blender_layout import layout_doc_button
+from . import bfu_socket_props
 
 
 def draw_tools_ui(layout: bpy.types.UILayout, context: bpy.types.Context):

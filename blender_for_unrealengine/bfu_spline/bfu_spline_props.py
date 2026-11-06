@@ -8,9 +8,11 @@
 # ----------------------------------------------
 
 
-from typing import List, Set, TYPE_CHECKING, Tuple
 from enum import Enum
+from typing import List, Set, TYPE_CHECKING, Tuple
+
 import bpy
+
 from .. import bbpl
 from . import bfu_spline_utils
 from . import bfu_spline_write_paste_commands

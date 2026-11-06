@@ -8,9 +8,10 @@
 # ----------------------------------------------
 
 
-import bpy
-from typing import List
 from enum import Enum
+from typing import List
+
+import bpy
 
 class SocketType(Enum):
     STATIC_SOCKET = "Static Socket"

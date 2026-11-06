@@ -9,7 +9,9 @@
 
 import os
 from typing import List, Optional, Union, TYPE_CHECKING, TypeVar, Type
+
 import unreal
+
 from . import import_module_unreal_utils
 
 # Type variable for Unreal Engine objects

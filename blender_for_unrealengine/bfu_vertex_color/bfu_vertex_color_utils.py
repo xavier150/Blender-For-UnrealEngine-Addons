@@ -8,14 +8,16 @@
 # ----------------------------------------------
 
 
-import bpy
 from typing import Dict, Any, Optional, Tuple
-from . import bfu_vertex_color_utils
+
+import bpy
+
 from .. import bbpl
-from .. import bfu_utils
 from .. import bfu_assets_manager
+from .. import bfu_utils
 from .. bfu_assets_manager.bfu_asset_manager_type import AssetType
 from . import bfu_vertex_color_props
+from . import bfu_vertex_color_utils
 from .bfu_vertex_color_props import BFU_VertexColorImportOptionEnum
 
 previous_target_index_name: str = "BFU_PreviousTargetIndex"

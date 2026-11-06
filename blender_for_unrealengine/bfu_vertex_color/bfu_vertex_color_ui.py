@@ -9,16 +9,17 @@
 
 
 import bpy
-from .. import bfu_ui
+
 from .. import bbpl
-from .. import bfu_static_mesh
-from .. import bfu_skeletal_mesh
-from .. import bfu_export_control
 from .. import bfu_addon_prefs
-from ..bfu_skeletal_mesh.bfu_export_procedure import BFU_FileTypeEnum
+from .. import bfu_export_control
 from .. import bfu_lod
-from . import bfu_vertex_color_utils
+from .. import bfu_skeletal_mesh
+from .. import bfu_static_mesh
+from .. import bfu_ui
+from ..bfu_skeletal_mesh.bfu_export_procedure import BFU_FileTypeEnum
 from . import bfu_vertex_color_props
+from . import bfu_vertex_color_utils
 from .bfu_vertex_color_props import BFU_VertexColorImportOptionEnum
 
 

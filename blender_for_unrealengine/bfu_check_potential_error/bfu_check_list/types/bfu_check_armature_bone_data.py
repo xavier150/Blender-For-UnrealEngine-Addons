@@ -8,8 +8,9 @@
 # ----------------------------------------------
 
 import bpy
-from ...bfu_check_types import bfu_checker
+
 from ....bfu_assets_manager.bfu_asset_manager_type import AssetToExport
+from ...bfu_check_types import bfu_checker
 
 class BFU_Checker_ArmatureBoneData(bfu_checker):
 

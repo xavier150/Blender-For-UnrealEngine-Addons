@@ -9,14 +9,15 @@
 
 import os
 import platform
-import shutil
 import re
-from typing import List, Tuple
+import shutil
 from pathlib import Path
-from . import edit_files
-from . import edit_fbx_utils
-from . import edit_export_fbx_bin
+from typing import List, Tuple
+
 from . import config
+from . import edit_export_fbx_bin
+from . import edit_fbx_utils
+from . import edit_files
 
 # Detect the current operating system
 current_system = platform.system()
@@ -190,8 +191,8 @@ def run_all_generate():
 def create_root_init_file(generated_list: List[Tuple[Tuple[int, int, int], str]]) -> Path:
     init_file_path: Path = Path(parent_directory) / '__init__.py'
     with open(init_file_path, 'w', newline='\n') as init_file:
+        init_file.write("import importlib\n\n")
         init_file.write("import bpy\n")
-        init_file.write("import importlib\n")
         init_file.write("blender_version = bpy.app.version\n\n")
 
         # Write conditional imports

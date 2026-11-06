@@ -8,9 +8,11 @@
 # ----------------------------------------------
 
 from typing import Any, Set, Optional
+
 import bpy
-from . import bfu_anim_action_utils
+
 from . import bfu_anim_action_props
+from . import bfu_anim_action_utils
 from .bfu_anim_action_operator_action_group import BFU_OT_ObjExportAction
 
 debug_show_override_info: bool = False # Private debug variable

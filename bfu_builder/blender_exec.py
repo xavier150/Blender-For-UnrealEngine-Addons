@@ -1,8 +1,9 @@
 import os
 import subprocess
+from pathlib import Path
+
 from . import bpl
 from .config import BlenderVersionDetails
-from pathlib import Path
 
 
 def test_blender_installation(

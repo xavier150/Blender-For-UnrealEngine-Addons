@@ -7,10 +7,12 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
+import math
 from enum import Enum
 from typing import List, Tuple
+
 import bpy
-import math
+
 from .. import bbpl
 
 class BFU_CameraTypeEnum(Enum):

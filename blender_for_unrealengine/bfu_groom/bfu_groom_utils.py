@@ -8,6 +8,7 @@
 # ----------------------------------------------
 
 import bpy
+
 from .. import bfu_assets_manager
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetType
 

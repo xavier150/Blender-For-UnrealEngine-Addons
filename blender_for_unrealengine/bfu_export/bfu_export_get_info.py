@@ -9,6 +9,5 @@
 
 from .. import bfu_basics
 from .. import bfu_utils
-
 from ..bbpl import utils
 

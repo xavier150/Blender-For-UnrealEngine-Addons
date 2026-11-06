@@ -15,9 +15,9 @@
 
 import importlib
 import importlib.util
+import json
 import os
 import sys
-import json
 
 def JsonLoad(json_file):
     # Changed in Python 3.9: The keyword argument encoding has been removed.

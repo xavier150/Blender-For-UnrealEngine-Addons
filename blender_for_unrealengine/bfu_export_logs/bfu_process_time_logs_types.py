@@ -7,9 +7,11 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 import time
 from typing import TYPE_CHECKING, Optional
+
+import bpy
+
 from .. import bpl
 
 

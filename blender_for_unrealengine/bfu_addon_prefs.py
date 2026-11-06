@@ -8,8 +8,10 @@
 # ----------------------------------------------
 
 import webbrowser
-import bpy
 from typing import TYPE_CHECKING, Tuple, Any, Set
+
+import bpy
+
 from .bbpl.blender_layout import layout_doc_button
 
 class BFU_AP_AddonPreferences(bpy.types.AddonPreferences):

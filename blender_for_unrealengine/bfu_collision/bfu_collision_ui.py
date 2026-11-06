@@ -9,14 +9,15 @@
 
 
 import bpy
-from .. import bfu_utils
-from .. import bfu_ui
+
 from .. import bbpl
-from .. import bfu_static_mesh
-from .. import bfu_skeletal_mesh
-from .. import bfu_export_control
 from .. import bfu_addon_prefs
+from .. import bfu_export_control
 from .. import bfu_lod
+from .. import bfu_skeletal_mesh
+from .. import bfu_static_mesh
+from .. import bfu_ui
+from .. import bfu_utils
 from ..bbpl.blender_layout import layout_doc_button
 
 

@@ -9,11 +9,12 @@
 
 
 import bpy
-from .. import bfu_ui
+
 from .. import bbpl
-from .. import bfu_skeletal_mesh
-from .. import bfu_export_control
 from .. import bfu_anim_nla
+from .. import bfu_export_control
+from .. import bfu_skeletal_mesh
+from .. import bfu_ui
 from ..bfu_anim_nla.bfu_anim_nla_props import BFU_AnimNLAStartEndTimeEnum
 
 def draw_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: bpy.types.Object):

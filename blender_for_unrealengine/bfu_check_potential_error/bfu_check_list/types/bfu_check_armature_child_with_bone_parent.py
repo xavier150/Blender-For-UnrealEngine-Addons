@@ -8,10 +8,11 @@
 # ----------------------------------------------
 
 import bpy
-from ... import bfu_check_props
-from ...bfu_check_types import bfu_checker
+
 from .... import bfu_utils
 from ....bfu_assets_manager.bfu_asset_manager_type import AssetToExport
+from ... import bfu_check_props
+from ...bfu_check_types import bfu_checker
 
 class BFU_Checker_ArmatureChildWithBoneParent(bfu_checker):
 

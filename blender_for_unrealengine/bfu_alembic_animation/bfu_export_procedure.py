@@ -7,9 +7,11 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from enum import Enum
 from typing import List, Tuple, Dict, Union
+
+import bpy
+
 from ..bfu_simple_file_type_enum import BFU_FileTypeEnum
 
 class BFU_AlembicExportProcedure(str, Enum):

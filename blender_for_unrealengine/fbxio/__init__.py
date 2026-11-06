@@ -8,8 +8,9 @@
 # More info: https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # --------------------------------------------- 
 
-import bpy
 import importlib
+
+import bpy
 blender_version = bpy.app.version
 
 if blender_version >= (5, 0, 0):

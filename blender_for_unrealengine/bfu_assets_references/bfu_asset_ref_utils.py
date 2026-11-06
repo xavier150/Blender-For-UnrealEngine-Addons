@@ -7,14 +7,16 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 import os
+
+import bpy
+
+from .. import bfu_assets_references
+from .. import bfu_base_object
+from .. import bfu_export_nomenclature
 from .. import bfu_unreal_utils
 from .. import bfu_utils
-from .. import bfu_assets_references
 from ..bfu_assets_references.bfu_asset_ref_props import BFU_EngineRefSkeletalMeshSearchModeEnum, BFU_EngineRefSkeletonSearchModeEnum
-from .. import bfu_export_nomenclature
-from .. import bfu_base_object
 
 def get_skeleton_search_ref(obj: bpy.types.Object) -> str:
     scene = bpy.context.scene

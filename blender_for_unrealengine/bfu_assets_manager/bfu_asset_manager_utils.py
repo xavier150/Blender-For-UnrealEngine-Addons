@@ -8,8 +8,9 @@
 # ----------------------------------------------
 
 from typing import Any, Optional, List
-from . import bfu_asset_manager_type
+
 from . import bfu_asset_manager_registred_assets
+from . import bfu_asset_manager_type
 
 def get_all_supported_asset_class(data: Any, details: Any = None) -> List[bfu_asset_manager_type.BFU_BaseAssetClass]:
     """

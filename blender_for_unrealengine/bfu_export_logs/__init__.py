@@ -7,8 +7,9 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 import importlib
+
+import bpy
 
 from . import bfu_asset_export_logs_types
 from . import bfu_asset_export_logs_utils

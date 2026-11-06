@@ -9,7 +9,9 @@
 
 
 from typing import Any, Set
+
 import bpy
+
 from . import bfu_light_map_utils
 
 

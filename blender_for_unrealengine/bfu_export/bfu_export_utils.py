@@ -7,28 +7,28 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-
-from typing import List
-if hasattr(__builtins__, 'Literal'):
-    from typing import Literal
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import bpy
 import mathutils
 from bpy_extras.io_utils import axis_conversion
-from pathlib import Path
-from typing import Optional, Dict, Any, List, Tuple, Sequence
-from .. import bfu_export_text_files
-from .. import bfu_utils
+
 from .. import bbpl
-from ..bbpl.utils import SaveUserRenderSimplify
-from .. import bfu_static_mesh
+from .. import bfu_addon_prefs
+from .. import bfu_adv_object
+from .. import bfu_collision
+from .. import bfu_export_logs
+from .. import bfu_export_text_files
 from .. import bfu_skeletal_mesh
 from .. import bfu_socket
-from .. import bfu_export_logs
-from .. import bfu_addon_prefs
-from .. import bfu_collision
-from .. import bfu_adv_object
+from .. import bfu_static_mesh
+from .. import bfu_utils
 from .. import bfu_uv_map
+from ..bbpl.utils import SaveUserRenderSimplify
+
+if hasattr(__builtins__, 'Literal'):
+    from typing import Literal
 
 # @TODO: Move this to a config file.
 dup_temp_name = "BFU_Temp"  # Duplicate object temporary name

@@ -7,15 +7,17 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from typing import List, Optional, Tuple
-from .bfu_collision_types import CollisionShapeType
+
+import bpy
+
+from .. import bbpl
+from .. import bfu_addon_prefs
+from .. import bfu_export_control
+from .. import bfu_unreal_utils
 from . import bfu_collision_mesh_shape
 from . import bfu_collision_props
-from .. import bfu_unreal_utils
-from .. import bfu_export_control
-from .. import bfu_addon_prefs
-from .. import bbpl
+from .bfu_collision_types import CollisionShapeType
 
 
 name_for_collision_material = "UE_Collision"

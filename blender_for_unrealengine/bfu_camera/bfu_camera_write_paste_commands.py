@@ -7,8 +7,10 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from typing import List, TYPE_CHECKING, Tuple
+
+import bpy
+
 from . import bfu_camera_data
 from . import bfu_camera_unreal_utils
 from . import bfu_camera_write_text

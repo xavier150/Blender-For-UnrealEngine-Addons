@@ -7,11 +7,13 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from typing import List
-from .bfu_modular_skeletal_mesh_type import BFU_UI_ModularSkeletalSpecifiedPartsMeshs, BFU_UI_ModularSkeletalSpecifiedPartsMeshItem
+
+import bpy
+
 from .. import bfu_export_control
 from . import bfu_modular_skeletal_mesh_props
+from .bfu_modular_skeletal_mesh_type import BFU_UI_ModularSkeletalSpecifiedPartsMeshs, BFU_UI_ModularSkeletalSpecifiedPartsMeshItem
 
 def get_modular_skeletal_specified_parts_meshs_template(obj: bpy.types.Object) -> BFU_UI_ModularSkeletalSpecifiedPartsMeshs:
     return obj.bfu_modular_skeletal_specified_parts_meshs_template  # type: ignore[attr-defined]

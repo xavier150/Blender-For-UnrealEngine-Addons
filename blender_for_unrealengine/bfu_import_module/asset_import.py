@@ -9,24 +9,26 @@
 
 
 import os.path
-from typing import List, Dict, Any, Tuple, Optional
 from pathlib import Path
+from typing import List, Dict, Any, Tuple, Optional
+
 import unreal
+
+from . import bfu_import_animations
+from . import bfu_import_light_map
+from . import bfu_import_lods
+from . import bfu_import_materials
+from . import bfu_import_nanite
+from . import bfu_import_skeletal_mesh
+from . import bfu_import_vertex_color
 from . import bpl
-from . import import_module_utils
-from . import import_module_unreal_utils
+from . import config
 from . import import_module_post_treatment
 from . import import_module_tasks_class
 from . import import_module_tasks_helper
-from . import bfu_import_animations
-from . import bfu_import_lods
-from . import bfu_import_materials
-from . import bfu_import_vertex_color
-from . import bfu_import_light_map
-from . import bfu_import_nanite
-from . import config
+from . import import_module_unreal_utils
+from . import import_module_utils
 from .asset_types import ExportAssetType, AssetFileTypeEnum
-from . import bfu_import_skeletal_mesh
 
 
 

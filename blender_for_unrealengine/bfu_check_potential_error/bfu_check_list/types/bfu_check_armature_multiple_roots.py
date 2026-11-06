@@ -7,13 +7,15 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from typing import List
+
+import bpy
+
+from .... import bbpl
+from .... import bfu_skeletal_mesh
+from ....bfu_cached_assets.bfu_cached_assets_blender_class import AssetToExport
 from ... import bfu_check_props
 from ...bfu_check_types import bfu_checker
-from .... import bbpl
-from ....bfu_cached_assets.bfu_cached_assets_blender_class import AssetToExport
-from .... import bfu_skeletal_mesh
 
 class BFU_Checker_ArmatureMultipleRoots(bfu_checker):
 

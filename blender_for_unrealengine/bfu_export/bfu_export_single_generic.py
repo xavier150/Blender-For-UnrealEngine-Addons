@@ -8,13 +8,15 @@
 # ----------------------------------------------
 
 
-import bpy
 from typing import List
-from . import bfu_export_utils
+
+import bpy
+
 from .. import bfu_export_logs
-from ..bfu_export_logs.bfu_process_time_logs_types import SafeTimeGroup
-from ..bfu_assets_manager.bfu_asset_manager_type import AssetToExport, AssetPackage
 from .. import bfu_utils
+from ..bfu_assets_manager.bfu_asset_manager_type import AssetToExport, AssetPackage
+from ..bfu_export_logs.bfu_process_time_logs_types import SafeTimeGroup
+from . import bfu_export_utils
 
 def prepare_scene_for_package_export(package: AssetPackage):    
     scene = bpy.context.scene

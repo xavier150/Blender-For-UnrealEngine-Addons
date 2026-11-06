@@ -8,6 +8,7 @@
 # ----------------------------------------------
 
 from typing import List, Dict
+
 from .bfu_asset_manager_type import BFU_BaseAssetClass
 
 registred_asset_class: List[BFU_BaseAssetClass] = []

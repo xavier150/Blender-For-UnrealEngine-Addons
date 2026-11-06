@@ -8,9 +8,9 @@
 # ----------------------------------------------
 
 
-from ...bfu_check_types import bfu_checker
-from ....bfu_cached_assets.bfu_cached_assets_blender_class import AssetToExport
 from .... import bfu_collision
+from ....bfu_cached_assets.bfu_cached_assets_blender_class import AssetToExport
+from ...bfu_check_types import bfu_checker
 
 class BFU_Checker_UVMaps(bfu_checker):
 

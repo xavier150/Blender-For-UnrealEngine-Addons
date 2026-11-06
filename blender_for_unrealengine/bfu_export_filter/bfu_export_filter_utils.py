@@ -8,6 +8,7 @@
 # ----------------------------------------------
 
 import bpy
+
 from . import bfu_export_filter_props
 
 def get_use_static_export() -> bool: 

@@ -7,19 +7,19 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-from enum import Enum
 import pathlib
-from typing import List, Optional, Tuple, Callable, Any, Dict
 from abc import ABC, abstractmethod
+from enum import Enum
 from pathlib import Path
+from typing import List, Optional, Tuple, Callable, Any, Dict
 
 import bpy
 
-from ..bfu_simple_file_type_enum import BFU_FileTypeEnum
-from .. import bfu_basics
-from .. import bfu_base_collection
 from .. import bfu_addon_prefs
+from .. import bfu_base_collection
 from .. import bfu_base_object
+from .. import bfu_basics
+from ..bfu_simple_file_type_enum import BFU_FileTypeEnum
 
 class AssetToSearch(Enum):
     ALL_ASSETS = "all_assets"  # Search for all assets.

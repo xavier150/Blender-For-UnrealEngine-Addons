@@ -8,6 +8,7 @@
 # ----------------------------------------------
 
 from typing import TYPE_CHECKING
+
 import bpy
 
 class BFU_OT_ObjExportAction(bpy.types.PropertyGroup):

@@ -7,10 +7,11 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import sys
 import json
+import sys
 from pathlib import Path
 from typing import Dict, Any
+
 from . import config
 
 

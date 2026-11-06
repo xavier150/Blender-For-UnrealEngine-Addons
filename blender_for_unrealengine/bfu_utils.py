@@ -9,22 +9,22 @@
 
 
 
-import string
 import fnmatch
 import math
 import os
-from typing import List, Tuple, Optional, TYPE_CHECKING, Any, Dict, Union
+import string
 from pathlib import Path
+from typing import List, Tuple, Optional, TYPE_CHECKING, Any, Dict, Union
 
-import bpy
 import bmesh
+import bpy
 import mathutils
 
-from . import bpl
 from . import bbpl
+from . import bfu_addon_prefs
 from . import bfu_basics
 from . import bfu_export_control
-from . import bfu_addon_prefs
+from . import bpl
 
 class MarkerSequence():
     def __init__(self, marker: Optional[bpy.types.TimelineMarker] = None):

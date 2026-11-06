@@ -9,12 +9,14 @@
 
 
 
-import bpy
 import math
 from typing import Tuple
-from .. import bfu_ui
+
+import bpy
+
 from .. import bbpl
 from .. import bfu_export_control
+from .. import bfu_ui
 from . import bfu_camera_props
 from .bfu_camera_props import BFU_CameraTypeEnum
 

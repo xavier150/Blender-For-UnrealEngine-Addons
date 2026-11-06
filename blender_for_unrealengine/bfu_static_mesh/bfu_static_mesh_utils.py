@@ -8,6 +8,7 @@
 # ----------------------------------------------
 
 import bpy
+
 from .. import bfu_assets_manager
 from . import bfu_export_procedure
 

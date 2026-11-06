@@ -13,9 +13,9 @@
 
 import traceback
 from typing import Set, Dict, Any
-from mathutils import Matrix
 
 import bpy
+from mathutils import Matrix
 
 from .. import bpl
 from .. import fbxio

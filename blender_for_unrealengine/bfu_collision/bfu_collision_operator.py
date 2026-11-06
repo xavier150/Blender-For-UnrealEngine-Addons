@@ -7,8 +7,10 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from typing import Any, Set, List
+
+import bpy
+
 from . import bfu_collision_utils
 from .bfu_collision_types import CollisionShapeType
 

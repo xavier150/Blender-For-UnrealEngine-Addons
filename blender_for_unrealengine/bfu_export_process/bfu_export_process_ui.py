@@ -9,9 +9,10 @@
 
 
 import bpy
+
 from .. import bbpl
-from .. import bfu_asset_preview
 from .. import bfu_addon_prefs
+from .. import bfu_asset_preview
 
 
 def draw_ui_scene(layout: bpy.types.UILayout, context: bpy.types.Context):

@@ -10,6 +10,28 @@
 from pathlib import Path
 from sys import version_info
 from typing import TYPE_CHECKING, List, Any, Dict, Optional
+
+import bpy
+
+from .. import bbpl
+from .. import bfu_assets_manager
+from .. import bfu_base_object
+from .. import bfu_basics
+from .. import bfu_export_filter
+from .. import bfu_light_map
+from .. import bfu_lod
+from .. import bfu_material
+from .. import bfu_modular_skeletal_mesh
+from .. import bfu_nanite
+from .. import bfu_socket
+from .. import bfu_vertex_color
+from ..bfu_assets_manager.bfu_asset_manager_type import AssetType, AssetToExport, AssetDataSearchMode, BFU_ObjectAssetClass
+from ..bfu_export_filter.bfu_export_filter_props import BFU_ExportSelectionFilterEnum
+from ..bfu_modular_skeletal_mesh.bfu_modular_skeletal_mesh_type import BFU_UI_ModularSkeletalSpecifiedPartsMeshItem
+from ..bfu_simple_file_type_enum import BFU_FileTypeEnum
+from . import bfu_export_procedure
+from . import bfu_export_skeletal_mesh_package
+
 if TYPE_CHECKING or version_info >= (3, 10):
     from typing import TypeGuard
 else:
@@ -17,27 +39,6 @@ else:
         def __class_getitem__(cls, item):
             return bool
     TypeGuard = _FakeTypeGuard
-
-import bpy
-
-from .. import bfu_assets_manager
-from ..bfu_assets_manager.bfu_asset_manager_type import AssetType, AssetToExport, AssetDataSearchMode, BFU_ObjectAssetClass
-from .. import bfu_basics
-from .. import bbpl
-from .. import bfu_modular_skeletal_mesh
-from ..bfu_modular_skeletal_mesh.bfu_modular_skeletal_mesh_type import BFU_UI_ModularSkeletalSpecifiedPartsMeshItem
-from .. import bfu_socket
-from .. import bfu_light_map
-from .. import bfu_nanite
-from .. import bfu_vertex_color
-from .. import bfu_material
-from .. import bfu_lod
-from ..bfu_simple_file_type_enum import BFU_FileTypeEnum
-from .. import bfu_base_object
-from .. import bfu_export_filter
-from ..bfu_export_filter.bfu_export_filter_props import BFU_ExportSelectionFilterEnum
-from . import bfu_export_skeletal_mesh_package
-from . import bfu_export_procedure
 
 
 

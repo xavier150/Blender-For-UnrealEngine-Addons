@@ -8,11 +8,13 @@
 # ----------------------------------------------
 
 
-import bpy
 from typing import TYPE_CHECKING
-from . import bfu_basics
+
+import bpy
+
 from . import bfu_anim_action
 from . import bfu_anim_nla
+from . import bfu_basics
 from . import bfu_export_nomenclature
 from . bfu_anim_action.bfu_anim_action_props import BFU_AnimNamingTypeEnum
 

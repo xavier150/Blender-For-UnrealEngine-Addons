@@ -9,10 +9,11 @@
 
 
 import bpy
-from .. import bfu_utils
-from .. import bfu_ui
+
 from .. import bbpl
 from .. import bfu_export_control
+from .. import bfu_ui
+from .. import bfu_utils
 from . import bfu_uv_map_props
 
 

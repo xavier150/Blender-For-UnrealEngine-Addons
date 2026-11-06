@@ -6,8 +6,10 @@
 #  Blender For UnrealEngine
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
-import bpy
 from typing import List
+
+import bpy
+
 from .. import bbpl
 from . import bfu_camera_write_paste_commands
 

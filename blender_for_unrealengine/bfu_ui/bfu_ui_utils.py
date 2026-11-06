@@ -8,8 +8,9 @@
 # ----------------------------------------------
 
 
-import bpy
 from typing import List
+
+import bpy
 
 def DisplayPropertyFilterList(active_tab:str, active_sub_tabs:List[str], include_all: bool = True) -> bool:
     # Define more easily the options which must be displayed or not

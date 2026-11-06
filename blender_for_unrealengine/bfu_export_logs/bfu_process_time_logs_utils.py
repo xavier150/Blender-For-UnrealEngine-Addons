@@ -7,9 +7,11 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from typing import List
-from . import bfu_process_time_logs_types 
+
+import bpy
+
+from . import bfu_process_time_logs_types
 
 
 def get_process_time_logs() -> List[bfu_process_time_logs_types.BFU_OT_ExportProcessTimeLog]:

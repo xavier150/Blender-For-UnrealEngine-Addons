@@ -8,8 +8,10 @@
 # ----------------------------------------------
 
 from typing import Any
+
 import bpy
 from bpy.app.handlers import persistent
+
 from . import bbpl
 from .bbpl.backward_compatibility.data_variable_updater import enum_callback
 from .bbpl.backward_compatibility.data_variable_updater import object_pointer_callback

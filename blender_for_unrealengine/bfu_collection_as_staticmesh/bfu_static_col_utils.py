@@ -8,9 +8,11 @@
 # ----------------------------------------------
 
 from typing import List
+
 import bpy
-from .. import bfu_export_filter
+
 from .. import bfu_debug_settings
+from .. import bfu_export_filter
 from . import bfu_static_col_props
 
 def support_static_collection_export(scene: bpy.types.Scene) -> bool:

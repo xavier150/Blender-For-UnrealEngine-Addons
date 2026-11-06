@@ -10,14 +10,14 @@
 
 import bpy
 
-from .. import bfu_debug_settings
 from .. import bfu_camera
-from .. import bfu_spline
 from .. import bfu_collision
-from .. import bfu_socket
-from .. import bfu_uv_map
+from .. import bfu_debug_settings
 from .. import bfu_light_map
 from .. import bfu_object
+from .. import bfu_socket
+from .. import bfu_spline
+from .. import bfu_uv_map
 from ..bfu_presets import bfu_object_presets
 
 class BFU_PT_BlenderForUnrealTool(bpy.types.Panel):

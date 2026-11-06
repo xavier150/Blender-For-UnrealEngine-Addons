@@ -8,10 +8,11 @@
 # ----------------------------------------------
 
 import bpy
-from .... import bfu_utils
-from ....bfu_simple_file_type_enum import BFU_FileTypeEnum
+
 from .... import bfu_addon_prefs
+from .... import bfu_utils
 from ....bfu_cached_assets.bfu_cached_assets_blender_class import AssetToExport
+from ....bfu_simple_file_type_enum import BFU_FileTypeEnum
 from ...bfu_check_types import bfu_checker
 
 

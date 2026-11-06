@@ -9,14 +9,15 @@
 
 
 import bpy
+
 from .. import bbpl
-from .. import bfu_ui
-from .. import bfu_skeletal_mesh
-from .. import bfu_modular_skeletal_mesh
-from .. import bfu_export_control
-from .. import bfu_base_object
 from .. import bfu_alembic_animation
+from .. import bfu_base_object
+from .. import bfu_export_control
 from .. import bfu_lod
+from .. import bfu_modular_skeletal_mesh
+from .. import bfu_skeletal_mesh
+from .. import bfu_ui
 
 
 def draw_general_ui_object(layout: bpy.types.UILayout, obj: bpy.types.Object):

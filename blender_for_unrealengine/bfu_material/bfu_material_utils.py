@@ -8,14 +8,15 @@
 # ----------------------------------------------
 
 from typing import Dict, Any
-if hasattr(__builtins__, 'Literal'):
-    from typing import Literal
 
 import bpy
 
 from .. import bfu_anim_base
+from ..bfu_assets_manager.bfu_asset_manager_type import AssetType
 from . import bfu_material_props
-from .. bfu_assets_manager.bfu_asset_manager_type import AssetType
+
+if hasattr(__builtins__, 'Literal'):
+    from typing import Literal
 
 
 def get_gltf_export_materials(obj: bpy.types.Object, is_animation: bool = False) -> 'Literal["EXPORT", "PLACEHOLDER", "VIEWPORT", "NONE"]':

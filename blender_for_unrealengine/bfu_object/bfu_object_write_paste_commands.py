@@ -7,10 +7,12 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
-import mathutils
 import math
 from typing import Tuple, List
+
+import bpy
+import mathutils
+
 from .. import bfu_utils
 
 def get_object_location_for_unreal_script_command(obj: bpy.types.Object) -> Tuple[bool, str, str]:

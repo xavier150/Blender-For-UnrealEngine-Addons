@@ -7,11 +7,11 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-from ...bfu_check_types import bfu_checker
-from ....bfu_cached_assets.bfu_cached_assets_blender_class import AssetToExport
 from .... import bfu_collision
 from .... import bfu_nanite
+from ....bfu_cached_assets.bfu_cached_assets_blender_class import AssetToExport
 from ....bfu_nanite.bfu_nanite_props import BFU_BuildNaniteMode
+from ...bfu_check_types import bfu_checker
 
 maxium_uv_maps_without_nanite = 8 # Unreal Engine supports a maximum of 8 UV channels for non-Nanite meshes.
 maxium_uv_maps_with_nanite = 4 # Unreal Engine supports a maximum of 4 UV channels for Nanite meshes.

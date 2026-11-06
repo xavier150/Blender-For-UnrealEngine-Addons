@@ -7,11 +7,12 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
+import shutil
 import string
 from pathlib import Path
-import bpy
-import shutil
+
 import bmesh
+import bpy
 
 def RemoveFolderTree(folder: str) -> None:
     dirpath = Path(folder)

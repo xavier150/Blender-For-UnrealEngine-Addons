@@ -9,22 +9,24 @@
 
 from pathlib import Path
 from typing import List, Any, Dict, Optional
+
 import bpy
-from . import bfu_export_static_mesh_package
-from . import bfu_export_procedure
-from .. import bfu_assets_manager
-from ..bfu_assets_manager.bfu_asset_manager_type import AssetType, AssetToExport, AssetDataSearchMode, BFU_ObjectAssetClass
-from .. import bfu_socket
-from .. import bfu_light_map
-from .. import bfu_nanite
-from .. import bfu_vertex_color
-from .. import bfu_material
-from .. import bfu_lod
-from .. import bfu_base_object
-from ..bfu_simple_file_type_enum import BFU_FileTypeEnum
-from .. import bfu_export_filter
+
 from .. import bfu_alembic_animation
+from .. import bfu_assets_manager
+from .. import bfu_base_object
+from .. import bfu_export_filter
 from .. import bfu_groom
+from .. import bfu_light_map
+from .. import bfu_lod
+from .. import bfu_material
+from .. import bfu_nanite
+from .. import bfu_socket
+from .. import bfu_vertex_color
+from ..bfu_assets_manager.bfu_asset_manager_type import AssetType, AssetToExport, AssetDataSearchMode, BFU_ObjectAssetClass
+from ..bfu_simple_file_type_enum import BFU_FileTypeEnum
+from . import bfu_export_procedure
+from . import bfu_export_static_mesh_package
 
 class BFU_StaticMesh(BFU_ObjectAssetClass):
     def __init__(self):

@@ -8,11 +8,13 @@
 # ----------------------------------------------
 
 
-import bpy
-from . import bfu_check_props
-from typing import List
 from abc import ABC
+from typing import List
+
+import bpy
+
 from ..bfu_cached_assets.bfu_cached_assets_blender_class import AssetToExport
+from . import bfu_check_props
 
 class bfu_checker(ABC):
 

@@ -13,8 +13,8 @@ from typing import List
 import bpy
 
 from .. import bfu_debug_settings
-from .. import bfu_export_nomenclature
 from .. import bfu_export_filter
+from .. import bfu_export_nomenclature
 from .. import bfu_export_process
 from ..bfu_presets import bfu_export_presets
 

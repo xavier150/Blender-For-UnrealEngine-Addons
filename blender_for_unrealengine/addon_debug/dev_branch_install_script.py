@@ -11,9 +11,9 @@
 # Ensure the paths in `addon_directories` point to the correct addon directories.
 # For more details: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Download-And-Installation-From-Dev-Branch
 
-from pathlib import Path
-import sys
 import importlib.util
+import sys
+from pathlib import Path
 
 # ----------------------------------------------
 # Configuration

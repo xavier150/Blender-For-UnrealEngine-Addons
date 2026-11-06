@@ -7,8 +7,10 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from typing import Tuple, List, Any
+
+import bpy
+
 from .. import bfu_assets_manager
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetType
 

@@ -9,7 +9,9 @@
 
 
 from typing import List, Optional
+
 import bpy
+
 from .. import bbpl
 
 

@@ -8,10 +8,12 @@
 # ----------------------------------------------
 
 
-from typing import List
-import bpy
 from enum import Enum
+from typing import List
 from typing import Tuple
+
+import bpy
+
 from .. import bbpl
 
 ''' Example of usage:

@@ -8,9 +8,11 @@
 # ----------------------------------------------
 
 
-from typing import List, Tuple
-import bpy
 from enum import Enum
+from typing import List, Tuple
+
+import bpy
+
 from .. import bbpl
 
 class BFU_AnimNLAStartEndTimeEnum(str, Enum):

@@ -7,9 +7,11 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 import time
 from typing import Dict
+
+import bpy
+
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetToExport, AssetPackage
 
 class ExportedPackageLog():

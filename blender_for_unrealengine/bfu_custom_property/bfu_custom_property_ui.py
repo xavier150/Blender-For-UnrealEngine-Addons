@@ -8,8 +8,9 @@
 # ----------------------------------------------
 
 import bpy
-from .. import bfu_static_mesh
+
 from .. import bfu_skeletal_mesh
+from .. import bfu_static_mesh
 from ..bfu_skeletal_mesh.bfu_export_procedure import BFU_FileTypeEnum
 
 def draw_ui_custom_property(layout: bpy.types.UILayout, obj: bpy.types.Object):

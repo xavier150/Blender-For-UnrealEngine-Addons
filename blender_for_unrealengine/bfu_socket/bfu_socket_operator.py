@@ -8,8 +8,10 @@
 # ----------------------------------------------
 
 
-import bpy
 from typing import Set, Any
+
+import bpy
+
 from .. import bbpl
 from . import bfu_socket_utils
 from .bfu_socket_types import SocketType

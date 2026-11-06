@@ -8,6 +8,7 @@
 # ----------------------------------------------
 
 import bpy
+
 from .. import bbpl
 from . import bfu_object_write_paste_commands
 

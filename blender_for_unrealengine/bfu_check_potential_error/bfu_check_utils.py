@@ -8,17 +8,17 @@
 # ----------------------------------------------
 
 
-import bpy
 from typing import List, Set, Dict
 
-from . import bfu_check_list
-from . import bfu_check_props
+import bpy
+
 from .. import bbpl
 from .. import bfu_basics
-
 from .. import bfu_collision
-from .. import bfu_socket
 from .. import bfu_export_logs
+from .. import bfu_socket
+from . import bfu_check_list
+from . import bfu_check_props
 
 def get_potential_errors() -> List[bfu_check_props.BFU_OT_UnrealPotentialError]:
     scene = bpy.context.scene

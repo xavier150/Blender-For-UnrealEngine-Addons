@@ -18,13 +18,15 @@
 # This version aligns the bounding box to the principal axes of variance
 # computed from the point cloud covariance matrix (fast approximation of MVBB).
 
-import numpy as np
-import bmesh
+import sys
 from typing import Any, List
+
+import bmesh
+import numpy as np
+
 from ... import bpl
 
 # Compatibility fix for older Python versions - numpy type annotations
-import sys
 if sys.version_info >= (3, 10):
     # Python 3.10+ supports subscriptable numpy types natively
     pass

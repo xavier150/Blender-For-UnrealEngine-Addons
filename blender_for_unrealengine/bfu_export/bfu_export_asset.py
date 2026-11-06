@@ -8,13 +8,15 @@
 # ----------------------------------------------
 
 from pathlib import Path
-import bpy
 from typing import List
+
+import bpy
+
 from .. import bbpl
-from ..bfu_assets_manager.bfu_asset_manager_type import AssetToExport
+from .. import bfu_addon_prefs
 from .. import bfu_basics
 from .. import bfu_export_logs
-from .. import bfu_addon_prefs
+from ..bfu_assets_manager.bfu_asset_manager_type import AssetToExport
 from . import bfu_export_single_generic
 
 

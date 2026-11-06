@@ -8,8 +8,10 @@
 # ----------------------------------------------
 
 
-import bpy
 from typing import TYPE_CHECKING, Set
+
+import bpy
+
 from .. import bfu_cached_assets
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetToSearch, AssetDataSearchMode
 from . import bfu_asset_preview_ui

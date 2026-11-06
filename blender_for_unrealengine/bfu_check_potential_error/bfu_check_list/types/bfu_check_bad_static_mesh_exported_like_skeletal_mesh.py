@@ -7,8 +7,8 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-from ...bfu_check_types import bfu_checker
 from ....bfu_cached_assets.bfu_cached_assets_blender_class import AssetToExport, AssetType
+from ...bfu_check_types import bfu_checker
 
 class BFU_Checker_BadStaticMeshExportedLikeSkeletalMesh(bfu_checker):
 

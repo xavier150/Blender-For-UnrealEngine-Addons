@@ -7,10 +7,12 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from typing import Any, Optional, Dict
-from . import bfu_spline_data
+
+import bpy
+
 from .. import bfu_export_text_files
+from . import bfu_spline_data
 
 def write_spline_points_data(obj: bpy.types.Object, pre_bake_spline: Optional[bfu_spline_data.BFU_SplinesList] = None) -> Dict[str, Any]:
     # Write as data spline animation tracks

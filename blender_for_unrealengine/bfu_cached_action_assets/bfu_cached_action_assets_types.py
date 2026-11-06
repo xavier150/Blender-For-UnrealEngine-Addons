@@ -9,6 +9,15 @@
 
 from sys import version_info
 from typing import List, Tuple, Optional, TYPE_CHECKING
+
+import bpy
+
+from .. import bfu_anim_action
+from .. import bfu_anim_nla
+from .. import bfu_debug_settings
+from .. import bfu_export_filter
+from ..bfu_anim_action.bfu_anim_action_props import BFU_AnimActionExportEnum
+
 if TYPE_CHECKING or version_info >= (3, 10):
     from typing import TypeGuard
 else:
@@ -16,14 +25,6 @@ else:
         def __class_getitem__(cls, item):
             return bool
     TypeGuard = _FakeTypeGuard
-
-import bpy
-
-from .. import bfu_export_filter
-from .. import bfu_anim_action
-from ..bfu_anim_action.bfu_anim_action_props import BFU_AnimActionExportEnum
-from .. import bfu_debug_settings
-from .. import bfu_anim_nla
 
 class CachedActionObjectInfo():
     def __init__(self) -> None:

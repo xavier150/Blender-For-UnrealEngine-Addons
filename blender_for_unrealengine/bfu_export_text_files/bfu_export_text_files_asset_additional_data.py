@@ -8,8 +8,10 @@
 # ----------------------------------------------
 
 from typing import Dict, Any
-from . import bfu_export_text_files_utils
+
 import bpy
+
+from . import bfu_export_text_files_utils
 
 def write_additional_data(data: Dict[str, Any]) -> Dict[str, Any]:
     """

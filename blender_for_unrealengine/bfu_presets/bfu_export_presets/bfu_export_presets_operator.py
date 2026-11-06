@@ -12,8 +12,8 @@ from typing import List
 import bpy
 from bl_operators.presets import AddPresetBase
 
-from ... import bfu_export_nomenclature
 from ... import bfu_export_filter
+from ... import bfu_export_nomenclature
 from ... import bfu_export_process
 
 

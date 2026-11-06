@@ -1,5 +1,5 @@
-from typing import List, Tuple, Optional
 from pathlib import Path
+from typing import List, Tuple, Optional
 
 
 windows_blender_install_path: Path = Path("C:/Program Files/Blender Foundation")

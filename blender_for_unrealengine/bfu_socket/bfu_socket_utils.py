@@ -7,21 +7,23 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 import math
-import mathutils
 from typing import List, Any, Dict, Tuple
-from .bfu_socket_types import SocketType
-from . import bfu_socket_props
+
+import bpy
+import mathutils
+
 from .. import bbpl
-from .. import bfu_basics
-from .. import bfu_utils
-from .. import bfu_unreal_utils
-from .. import bfu_export_control
 from .. import bfu_addon_prefs
-from .. import bfu_static_mesh
+from .. import bfu_basics
+from .. import bfu_export_control
 from .. import bfu_skeletal_mesh
+from .. import bfu_static_mesh
+from .. import bfu_unreal_utils
+from .. import bfu_utils
 from ..bfu_skeletal_mesh.bfu_export_procedure import BFU_SkeletonExportProcedure
+from . import bfu_socket_props
+from .bfu_socket_types import SocketType
 
 
 

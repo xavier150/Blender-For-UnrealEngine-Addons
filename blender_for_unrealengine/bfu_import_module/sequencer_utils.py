@@ -8,7 +8,9 @@
 # ----------------------------------------------
 
 from typing import TYPE_CHECKING, Dict, Any
+
 import unreal
+
 from . import import_module_unreal_utils
 
 # Since 5.1 MovieSceneBindingProxy replace SequencerBindingProxy.

@@ -8,6 +8,7 @@
 # ----------------------------------------------
 
 import bpy
+
 from . import bfu_spline_props
 
 def get_spline_unreal_component(spline: bpy.types.Object) -> str:

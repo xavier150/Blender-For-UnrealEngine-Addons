@@ -8,6 +8,7 @@
 # ----------------------------------------------
 
 from typing import Tuple
+
 import unreal
 
 def get_unreal_version() -> Tuple[int, int, int]:

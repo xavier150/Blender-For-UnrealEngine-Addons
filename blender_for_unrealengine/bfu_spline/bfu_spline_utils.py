@@ -7,10 +7,12 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
-from typing import List, Dict, Any, Tuple, Optional
 import math
+from typing import List, Dict, Any, Tuple, Optional
+
+import bpy
 import mathutils
+
 from .. import bbpl
 from .. import bfu_assets_manager
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetType

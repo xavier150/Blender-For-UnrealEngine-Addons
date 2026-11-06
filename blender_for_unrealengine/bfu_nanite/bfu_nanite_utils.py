@@ -7,8 +7,10 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from typing import Dict, Any
+
+import bpy
+
 from .. bfu_assets_manager.bfu_asset_manager_type import AssetType
 from . import bfu_nanite_props
 from .bfu_nanite_props import BFU_BuildNaniteMode

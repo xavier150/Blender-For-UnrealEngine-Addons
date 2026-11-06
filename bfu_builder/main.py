@@ -1,9 +1,10 @@
 from typing import Optional
-from .blender_version_manager import BlenderVersionList
+
+from . import blender_exec
 from . import bpl
 from . import config
-from . import blender_exec
 from . import output_logger
+from .blender_version_manager import BlenderVersionList
 
 
 

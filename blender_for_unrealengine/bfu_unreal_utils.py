@@ -8,10 +8,12 @@
 # ----------------------------------------------
 
 import os
+
 import bpy
-from . import bfu_utils
-from . import bfu_export_nomenclature
+
 from . import bfu_base_object
+from . import bfu_export_nomenclature
+from . import bfu_utils
 
 def get_predicted_skeleton_name(obj: bpy.types.Object) -> str:
     # Get the predicted skeleton name in Unreal Engine

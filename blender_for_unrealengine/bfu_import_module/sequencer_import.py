@@ -9,10 +9,12 @@
 
 from pathlib import Path
 from typing import Dict, Any, List, Tuple
+
 import unreal
+
 from . import bpl
-from . import import_module_utils
 from . import import_module_unreal_utils
+from . import import_module_utils
 from . import sequencer_utils
 
 

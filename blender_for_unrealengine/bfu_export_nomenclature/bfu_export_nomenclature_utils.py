@@ -7,8 +7,10 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from pathlib import Path
+
+import bpy
+
 from .. import bfu_basics
 from .. import bfu_export_nomenclature
 

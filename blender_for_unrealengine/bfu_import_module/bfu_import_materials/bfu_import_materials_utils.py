@@ -8,9 +8,10 @@
 # ----------------------------------------------
 
 import unreal
+
 from .. import import_module_tasks_class
 from .. import import_module_utils
-from ..asset_types import ExportAssetType 
+from ..asset_types import ExportAssetType
 
 
 def apply_import_settings(itask: import_module_tasks_class.ImportTask, asset_data: dict, asset_additional_data: dict) -> None:

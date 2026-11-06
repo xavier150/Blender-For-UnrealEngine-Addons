@@ -9,15 +9,16 @@
 
 import fnmatch
 from typing import List
+
 import bpy
 
+from .. import bfu_addon_prefs
+from .. import bfu_assets_manager
 from .. import bfu_basics
 from .. import bfu_utils
-from .. import bfu_assets_manager
 from ..bfu_assets_manager.bfu_asset_manager_type import AssetType
-from .. import bfu_addon_prefs
-from . import bfu_skeletal_mesh_props
 from . import bfu_export_procedure
+from . import bfu_skeletal_mesh_props
 
 def get_socket_in_desired_childs(obj: bpy.types.Object) -> List[bpy.types.Object]:
     socket_objs: List[bpy.types.Object] = []

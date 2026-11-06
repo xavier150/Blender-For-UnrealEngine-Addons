@@ -7,12 +7,14 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import os
-import bpy
 import datetime
 import json
-from typing import Dict, Any
+import os
 from pathlib import Path
+from typing import Dict, Any
+
+import bpy
+
 from .. import bbpl
 from .. import bfu_utils
 

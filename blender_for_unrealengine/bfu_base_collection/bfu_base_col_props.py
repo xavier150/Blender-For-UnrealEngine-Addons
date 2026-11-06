@@ -9,7 +9,9 @@
 
 
 from typing import List
+
 import bpy
+
 from .. import bbpl
 
 def get_preset_values() -> List[str]:

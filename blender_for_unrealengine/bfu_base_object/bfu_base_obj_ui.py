@@ -9,12 +9,13 @@
 
 
 import bpy
-from .. import bfu_utils
-from .. import bfu_ui
+
 from .. import bbpl
 from .. import bfu_assets_manager
-from .. import bfu_export_control
 from .. import bfu_base_object
+from .. import bfu_export_control
+from .. import bfu_ui
+from .. import bfu_utils
 
 
 def draw_general_ui_object(layout: bpy.types.UILayout, context: bpy.types.Context, obj: bpy.types.Object):

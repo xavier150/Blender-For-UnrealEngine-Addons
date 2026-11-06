@@ -11,18 +11,18 @@ from typing import List, Dict, Any, Union, Optional
 
 import bpy
 
-from .. import bfu_export_logs
-from .. import bfu_utils
-from .. import bfu_material
-from .. import bfu_nanite
-from .. import bfu_light_map
 from .. import bfu_assets_references
-from .. import bfu_vertex_color
-from .. import bfu_lod
 from .. import bfu_collision
 from .. import bfu_custom_property
-from ..bfu_assets_manager.bfu_asset_manager_type import AssetType
+from .. import bfu_export_logs
 from .. import bfu_export_nomenclature
+from .. import bfu_light_map
+from .. import bfu_lod
+from .. import bfu_material
+from .. import bfu_nanite
+from .. import bfu_utils
+from .. import bfu_vertex_color
+from ..bfu_assets_manager.bfu_asset_manager_type import AssetType
 from . import bfu_export_text_files_utils
 
 def write_main_assets_data(exported_asset_log: List[bfu_export_logs.bfu_asset_export_logs_types.ExportedAssetLog]) -> Dict[str, Any]:

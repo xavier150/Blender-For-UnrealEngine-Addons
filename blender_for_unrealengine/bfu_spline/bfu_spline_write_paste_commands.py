@@ -9,11 +9,13 @@
 
 
 from typing import Optional, List, Dict, Any, Tuple
+
 import bpy
+
+from .. import bbpl
 from . import bfu_spline_data
 from . import bfu_spline_unreal_utils
 from . import bfu_spline_write_text
-from .. import bbpl
 
 def add_spline_to_command(spline: bpy.types.Object, pre_bake_spline: bfu_spline_data.BFU_SplinesList) -> Optional[str]:
     if spline.type == "CURVE":

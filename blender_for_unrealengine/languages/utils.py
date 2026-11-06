@@ -10,8 +10,9 @@
 import json
 from pathlib import Path
 from typing import Dict, Optional, Tuple
-from . import config
+
 from .. import bpl
+from . import config
 
 def construct_translations_dict() -> Optional[Dict[str, Dict[Tuple[Optional[str], str], str]]]:
     translations_dict: Optional[Dict[str, Dict[Tuple[Optional[str], str], str]]] = {

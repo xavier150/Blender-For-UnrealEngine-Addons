@@ -9,15 +9,17 @@
 
 from pathlib import Path
 from typing import List, Any, Optional, Dict
+
 import bpy
+
+from .. import bfu_assets_manager
+from .. import bfu_base_object
+from .. import bfu_export_filter
+from .. import bfu_spline
+from ..bfu_assets_manager.bfu_asset_manager_type import AssetType, BFU_ObjectAssetClass, AssetDataSearchMode, AssetToExport
+from ..bfu_simple_file_type_enum import BFU_FileTypeEnum
 from . import bfu_export_procedure
 from . import bfu_export_spline_package
-from .. import bfu_spline
-from .. import bfu_assets_manager
-from ..bfu_assets_manager.bfu_asset_manager_type import AssetType, BFU_ObjectAssetClass, AssetDataSearchMode, AssetToExport
-from .. import bfu_base_object
-from ..bfu_simple_file_type_enum import BFU_FileTypeEnum
-from .. import bfu_export_filter
 
 
 class BFU_Spline(BFU_ObjectAssetClass):

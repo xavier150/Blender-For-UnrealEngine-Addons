@@ -7,8 +7,10 @@
 #  https://github.com/xavier150/Blender-For-UnrealEngine-Addons
 # ----------------------------------------------
 
-import bpy
 from typing import List, Tuple
+
+import bpy
+
 from .bfu_export_control_type import BFU_ExportTypeEnum
 
 
