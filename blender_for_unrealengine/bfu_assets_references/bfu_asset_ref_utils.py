@@ -26,10 +26,8 @@ def get_skeleton_search_ref(obj: bpy.types.Object) -> str:
 
     elif bfu_assets_references.bfu_asset_ref_props.get_object_engine_ref_skeleton_search_mode(obj).value == BFU_EngineRefSkeletonSearchModeEnum.CUSTOM_NAME.value:
         name = bfu_utils.clean_filename_for_unreal(bfu_assets_references.bfu_asset_ref_props.get_object_engine_ref_skeleton_custom_name(obj))
-        unreal_import_module = bfu_export_nomenclature.bfu_export_nomenclature_props.get_unreal_import_module(scene)
-        unreal_import_location = bfu_export_nomenclature.bfu_export_nomenclature_props.get_unreal_import_location(scene)
-        export_folder_name = bfu_base_object.bfu_base_obj_props.get_object_export_folder_name(obj)
-        target_ref = os.path.join("/" + unreal_import_module + "/", unreal_import_location, export_folder_name, name+"."+name)
+        import_location = bfu_base_object.bfu_base_obj_utils.get_obj_import_location_as_unreal_path(obj)
+        target_ref = os.path.join(import_location, name+"."+name)
         target_ref = target_ref.replace('\\', '/')
         return target_ref
 
