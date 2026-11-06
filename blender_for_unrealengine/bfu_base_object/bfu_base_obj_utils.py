@@ -84,13 +84,24 @@ def get_exportable_objects(obj: bpy.types.Object) -> List[bpy.types.Object]:
 
 def get_obj_import_location(obj: bpy.types.Object) -> Path:
     """Get the path to import an object into Unreal Engine."""
-    
+
+    if bfu_base_obj_props.get_object_use_custom_import_location(obj):
+        custom_import_location = bfu_base_obj_props.get_object_custom_import_location(obj).strip()
+        if custom_import_location:
+            path_parts = custom_import_location.replace("\\", "/").strip("/").split("/")
+            path_parts = [bfu_basics.valid_folder_name(part) for part in path_parts if part]
+            if path_parts:
+                return Path(*path_parts)
+
     export_folder_name = bfu_base_obj_props.get_object_export_folder_name(obj)
     return bfu_export_nomenclature.bfu_export_nomenclature_utils.get_import_location() / bfu_basics.valid_folder_name(export_folder_name)
+
+def get_obj_import_location_as_unreal_path(obj: bpy.types.Object) -> str:
+    """Return an object's import location as a normalized Unreal package path."""
+    return "/" + str(get_obj_import_location(obj)).replace("\\", "/").strip("/")
 
 def get_obj_export_folder(obj: bpy.types.Object) -> str:
     """Get the export folder name for an object."""
     
     export_folder_name = bfu_base_obj_props.get_object_export_folder_name(obj)
     return bfu_basics.valid_folder_name(export_folder_name)
-

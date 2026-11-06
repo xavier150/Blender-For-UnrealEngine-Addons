@@ -47,6 +47,13 @@ def draw_general_ui_object(layout: bpy.types.UILayout, context: bpy.types.Contex
                     folderNameProperty = panel.column()
                     folderNameProperty.prop(obj, 'bfu_export_folder_name', icon='FILE_FOLDER')
 
+                    customImportLocationToggle = panel.row()
+                    customImportLocationToggle.prop(obj, 'bfu_use_custom_import_location')
+                    customImportLocation = panel.column()
+                    customImportLocation.prop(obj, 'bfu_custom_import_location')
+                    custom_import_location_enabled = bfu_base_object.bfu_base_obj_props.get_object_use_custom_import_location(obj)
+                    customImportLocation.enabled = custom_import_location_enabled
+
                     ProxyProp = panel.column()
                     if not bfu_utils.draw_proxy_propertys(obj):
                         ProxyProp.label(text="The Armature was detected as a proxy.")

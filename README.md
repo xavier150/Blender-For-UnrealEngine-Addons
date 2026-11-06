@@ -94,3 +94,16 @@ You simply need to paste it into Unreal Engine, for example, the cameras, spline
 - [FAQ](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/FAQ)
 - [Community Spotlight](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Community-Spotlight)
 - [Support](https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/Support) <3
+
+
+## Per-object Unreal import paths
+
+For assets that belong in different Content Browser folders, set an import destination on each exported object:
+
+1. Select the object and open the add-on's **Object Properties** panel.
+2. Enable **Use custom Unreal import path**.
+3. Enter the full Unreal package path, for example `Game/ImportedBlenderAssets/Props`.
+
+The path may use `/` or `\` separators, and leading or trailing slashes are optional. Include the mount point (usually `Game`). This setting overrides the scene's Unreal import module and location for that object, and the same destination is used for predicted skeletal mesh and skeleton references.
+
+When the option is off, the scene import module and location plus the object's **Sub folder name** determine the Unreal destination. The custom path is included in object presets. Existing projects keep their current behavior because the option is off by default.

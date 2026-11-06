@@ -22,17 +22,7 @@ def get_predicted_skeleton_name(obj: bpy.types.Object) -> str:
     return bfu_export_nomenclature.bfu_export_nomenclature_props.get_skeleton_prefix_export_name(scene) + bfu_utils.clean_filename_for_unreal(obj.name) + "_Skeleton"
 
 def get_predicted_skeleton_path(obj: bpy.types.Object) -> str:
-    scene = bpy.context.scene
-    if scene is None:
-        raise ValueError("No active scene found!")
-
-    unreal_import_module = bfu_export_nomenclature.bfu_export_nomenclature_props.get_unreal_import_module(scene)
-    unreal_import_location = bfu_export_nomenclature.bfu_export_nomenclature_props.get_unreal_import_location(scene)
-    export_folder_name = bfu_base_object.bfu_base_obj_props.get_object_export_folder_name(obj)
-
-    ref_path = os.path.join("/" + unreal_import_module + "/", unreal_import_location, export_folder_name)
-    ref_path = ref_path.replace('\\', '/')
-    return ref_path
+    return bfu_base_object.bfu_base_obj_utils.get_obj_import_location_as_unreal_path(obj)
 
 def get_predicted_skeleton_ref(obj: bpy.types.Object) -> str:
     name = get_predicted_skeleton_name(obj)
@@ -50,17 +40,7 @@ def get_predicted_skeletal_mesh_name(obj: bpy.types.Object) -> str:
     return bfu_export_nomenclature.bfu_export_nomenclature_props.get_skeletal_mesh_prefix_export_name(scene) + bfu_utils.clean_filename_for_unreal(obj.name)
 
 def get_predicted_skeletal_mesh_path(obj: bpy.types.Object) -> str:
-    scene = bpy.context.scene
-    if scene is None:
-        raise ValueError("No active scene found!")
-
-    unreal_import_module = bfu_export_nomenclature.bfu_export_nomenclature_props.get_unreal_import_module(scene)
-    unreal_import_location = bfu_export_nomenclature.bfu_export_nomenclature_props.get_unreal_import_location(scene)
-    export_folder_name = bfu_base_object.bfu_base_obj_props.get_object_export_folder_name(obj)
-
-    ref_path = os.path.join("/" + unreal_import_module + "/", unreal_import_location, export_folder_name)
-    ref_path = ref_path.replace('\\', '/')
-    return ref_path
+    return bfu_base_object.bfu_base_obj_utils.get_obj_import_location_as_unreal_path(obj)
 
 def get_predicted_skeletal_mesh_ref(obj: bpy.types.Object) -> str:
     name = get_predicted_skeletal_mesh_name(obj)
