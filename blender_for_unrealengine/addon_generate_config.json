@@ -46,6 +46,13 @@
                 "fbxio/__init__.py/",
                 "fbxio/io_scene_fbx_5_0/"
             ],
+            "use_license_validation": true,
+            "license_validation_exclude_paths": [
+                "fbxio/",
+                "bbam/",
+                "bbpl/",
+                "bpl/"
+            ],
             "blender_version_min": [5,0,0]
         },
         "unrealengine_assets_exporter_4.5": {   
@@ -61,6 +68,13 @@
             "include_paths": [
                 "fbxio/__init__.py/",
                 "fbxio/io_scene_fbx_4_5/"
+            ],
+            "use_license_validation": true,
+            "license_validation_exclude_paths": [
+                "fbxio/",
+                "bbam/",
+                "bbpl/",
+                "bpl/"
             ],
             "blender_version_min": [4,5,0]
         },
@@ -78,6 +92,13 @@
                 "fbxio/__init__.py/",
                 "fbxio/io_scene_fbx_4_4/"
             ],
+            "use_license_validation": true,
+            "license_validation_exclude_paths": [
+                "fbxio/",
+                "bbam/",
+                "bbpl/",
+                "bpl/"
+            ],
             "blender_version_min": [4,4,0]
         },
         "unrealengine_assets_exporter_4.3": {   
@@ -94,6 +115,13 @@
                 "fbxio/__init__.py/",
                 "fbxio/io_scene_fbx_4_3/"
             ],
+            "use_license_validation": true,
+            "license_validation_exclude_paths": [
+                "fbxio/",
+                "bbam/",
+                "bbpl/",
+                "bpl/"
+            ],
             "blender_version_min": [4,3,0]
         },
         "unrealengine_assets_exporter_4.2": {   
@@ -109,6 +137,13 @@
             "include_paths": [
                 "fbxio/__init__.py/",
                 "fbxio/io_scene_fbx_4_2/"
+            ],
+            "use_license_validation": true,
+            "license_validation_exclude_paths": [
+                "fbxio/",
+                "bbam/",
+                "bbpl/",
+                "bpl/"
             ],
             "blender_version_min": [4,2,0]
         },
@@ -133,6 +168,13 @@
                 "fbxio/io_scene_fbx_3_2/", 
                 "fbxio/io_scene_fbx_3_1/", 
                 "fbxio/io_scene_fbx_2_93/"
+            ],
+            "use_license_validation": true,
+            "license_validation_exclude_paths": [
+                "fbxio/",
+                "bbam/",
+                "bbpl/",
+                "bpl/"
             ],
             "blender_version_min": [2,91,0]
         },
@@ -159,6 +201,13 @@
                     {"search": "override={'LIBRARY_OVERRIDABLE', 'USE_INSERTION'}", "replace": ""}
                 ]
             },
+            "use_license_validation": true,
+            "license_validation_exclude_paths": [
+                "fbxio/",
+                "bbam/",
+                "bbpl/",
+                "bpl/"
+            ],
             "blender_version_min": [2,80,0]
         }
     }
