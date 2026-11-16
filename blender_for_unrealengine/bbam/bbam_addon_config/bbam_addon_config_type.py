@@ -167,6 +167,8 @@ class BBAM_AddonBuild:
         self.exclude_paths: List[str] = []
         self.include_paths: List[str] = []
         self.hard_modifications: Dict[str, Any] = {}  # For hard modifications in python files
+        self.use_license_validation: bool = False
+        self.license_validation_exclude_paths: List[str] = []
 
         # Minimum supported Blender version - use at least version 4.2.0
         self.blender_version_min: List[int] = [4, 2, 0]
@@ -197,6 +199,11 @@ class BBAM_AddonBuild:
         self.exclude_paths = data.get("exclude_paths", [])
         self.include_paths = data.get("include_paths", [])
         self.hard_modifications = data.get("hard_modifications", {})
+        self.use_license_validation = data.get("use_license_validation", False)
+        self.license_validation_exclude_paths = data.get(
+            "license_validation_exclude_paths",
+            [],
+        )
         self.blender_version_min = data.get("blender_version_min", [4, 2, 0])
 
         return True

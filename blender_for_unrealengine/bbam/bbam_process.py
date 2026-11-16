@@ -14,6 +14,7 @@ from . import addon_file_management
 from . import utils
 from . import blender_utils
 from . import bbam_addon_config
+from . import license_validation
 from .bbam_addon_config.bbam_addon_config_type import BBAM_AddonConfig
 
 def process_install_from_blender(current_only: bool = False):
@@ -66,7 +67,7 @@ def install_from_blender_with_build_data(
             print(f"Processing build: {build_key}")
 
             steps = utils.BBAM_TimedTaskManager()
-            steps.set_step_count(5)
+            steps.set_step_count(7)
             steps.start_new_task(1, "Create temporary addon folder")
             # Create temporary addon folder
             temp_addon_path = addon_file_management.create_temp_addon_folder(
@@ -82,7 +83,22 @@ def install_from_blender_with_build_data(
                 show_debug = config.show_debug,
             )
 
-            steps.end_current_task_and_start_new(3, "Start build addon as ZIP")
+            steps.end_current_task_and_start_new(3, "Validate addon files")
+            if build_data.use_license_validation:
+                licenses_valid = license_validation.validate_spdx_license_headers(
+                    addon_path=temp_addon_path,
+                    licenses=addon_config.addon_manifest.license,
+                    exclude_paths=build_data.license_validation_exclude_paths,
+                )
+                if not licenses_valid:
+                    steps.end_current_task()
+                    print(
+                        f"License validation failed for build '{build_key}'. "
+                        "Skipping ZIP creation."
+                    )
+                    continue
+
+            steps.end_current_task_and_start_new(4, "Start build addon as ZIP")
             # Zip the addon folder for installation
             zip_file = addon_file_management.zip_addon_folder(
                 src = temp_addon_path, 
@@ -94,7 +110,7 @@ def install_from_blender_with_build_data(
             steps.end_current_task()
             
             if zip_file:
-                steps.start_new_task(4, "Validate ZIP file")
+                steps.start_new_task(5, "Validate ZIP file")
                 validate_success = addon_file_management.validate_zip_file(
                     zip_file = zip_file, 
                     build_config = build_data,
@@ -108,10 +124,10 @@ def install_from_blender_with_build_data(
                         pkg_id = build_data.pkg_id
                         module = build_data.module
                         # Uninstall previous versions if they exist
-                        steps.start_new_task(4, "Uninstall previous addon version")
+                        steps.start_new_task(6, "Uninstall previous addon version")
                         blender_utils.uninstall_addon_from_blender(pkg_id, module)
 
-                        steps.end_current_task_and_start_new(5, "Install addon from ZIP")
+                        steps.end_current_task_and_start_new(7, "Install addon from ZIP")
                         blender_utils.install_zip_addon_from_blender(zip_file, module)
                         steps.end_current_task()
                     else:

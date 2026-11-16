@@ -19,6 +19,7 @@ from . import addon_file_management
 from . import utils
 from . import blender_exec
 from . import blender_utils
+from . import license_validation
 
 # Reloading modules if they're already loaded
 if "bbam_addon_config" in locals():
@@ -39,6 +40,8 @@ if "blender_exec" in locals():
     importlib.reload(blender_exec)
 if "blender_utils" in locals():
     importlib.reload(blender_utils)
+if "license_validation" in locals():
+    importlib.reload(license_validation)
 
 
 def install_from_blender(current_only: bool = False):
