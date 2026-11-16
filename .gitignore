@@ -1,6 +1,7 @@
 # Docs exported files
 ExportedFbx/
 ExportedAssets/
+tests/
 
 # BleuRaven Blender Addons
 /generated_builds
