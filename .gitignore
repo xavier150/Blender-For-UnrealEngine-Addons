@@ -2,6 +2,7 @@
 ExportedFbx/
 ExportedAssets/
 tests/
+unit_tests/
 
 # BleuRaven Blender Addons
 /generated_builds
