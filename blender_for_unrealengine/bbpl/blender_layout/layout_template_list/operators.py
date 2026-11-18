@@ -38,16 +38,22 @@ def create_template_button_duplicate_class(TemplateButtonBase):  # type: ignore
 
     class BBPL_OT_TemplateButtonDuplicate(TemplateButtonBase):  # type: ignore
         bl_idname = utils.get_template_button_idname("duplicate")
-        bl_description = "Duplicate active item."
+        bl_description = "Duplicate active item and insert the copy immediately after it."
 
         def invoke(self, context, event):  # type: ignore
             template = get_template_from_button(self)  # type: ignore
+            itemToCopy = template.get_active_item()  # type: ignore
+            if itemToCopy is None:
+                self.report({'WARNING'}, "No active item to duplicate.")
+                return {"CANCELLED"}
             new_item = template.template_collection.add()  # type: ignore
-            itemToCopy = template.template_collection[template.active_template_property]  # type: ignore
             for k, v in list(itemToCopy.items()):  # type: ignore
                 new_item[k] = v
             last_index = len(template.template_collection)-1  # type: ignore
-            template.active_template_property = last_index  # type: ignore
+            new_index = template.active_template_property + 1  # type: ignore
+            if new_index != last_index:
+                template.template_collection.move(last_index, new_index)  # type: ignore
+            template.active_template_property = new_index  # type: ignore
             template.sync_display_rows()  # type: ignore
             return {"FINISHED"}
 
@@ -59,14 +65,16 @@ def create_template_button_add_class(TemplateButtonBase):  # type: ignore
 
     class BBPL_OT_TemplateButtonAdd(TemplateButtonBase):  # type: ignore
         bl_idname = utils.get_template_button_idname("add")
-        bl_description = "Add item."
+        bl_description = "Add item after the active item."
 
         def invoke(self, context, event):  # type: ignore
             template = get_template_from_button(self)  # type: ignore
-            new_item = template.template_collection.add()  # type: ignore
+            template.template_collection.add()  # type: ignore
             last_index = len(template.template_collection)-1  # type: ignore
-            template.template_collection.move(last_index, template.active_template_property + 10)  # type: ignore
-            template.active_template_property = last_index  # type: ignore
+            new_index = min(template.active_template_property + 1, last_index)  # type: ignore
+            if new_index != last_index:
+                template.template_collection.move(last_index, new_index)  # type: ignore
+            template.active_template_property = new_index  # type: ignore
             template.sync_display_rows()  # type: ignore
             return {"FINISHED"}
         

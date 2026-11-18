@@ -8,7 +8,7 @@
 # ----------------------------------------------
 
 import bpy
-from typing import List, Callable, Optional, Any
+from typing import List, Callable, Optional, Any, Union
 from . import types
 
 def add_string_selector(
@@ -17,9 +17,13 @@ def add_string_selector(
     default: str="", 
     name: str="", 
     description: str="", 
-    items: List[Any] = [], 
+    items: Union[List[Any], Callable[..., List[Any]]] = [],
     update: Optional[Callable[..., None]] = None
 ) -> types.StringSelector:
+    """Create a string selector from static items or a Blender enum callback.
+
+    Dynamic callbacks must retain their returned strings, as required by Blender.
+    """
     my_string_selector = types.StringSelector(property_name, property_selector_name)
     my_string_selector.name = name
     my_string_selector.default = default

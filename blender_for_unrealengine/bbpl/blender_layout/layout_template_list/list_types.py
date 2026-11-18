@@ -61,7 +61,7 @@ def create_template_list_class(TemplateItem, TemplateItemDraw):  # type: ignore
             return self.active_template_property  # type: ignore
         
         def get_active_item(self):  # type: ignore
-            if len(self.template_collection) > 0:  # type: ignore
+            if 0 <= self.active_template_property < len(self.template_collection):  # type: ignore
                 return self.template_collection[self.active_template_property]  # type: ignore
 
         def get_name(self):
@@ -198,7 +198,9 @@ def create_template_list_class(TemplateItem, TemplateItemDraw):  # type: ignore
             utils.send_template_data_on_button(button_moveup, self)
             button_movedown = template_column.operator(utils.get_template_button_idname("movedown"), icon='TRIA_DOWN', text="")  # type: ignore
             utils.send_template_data_on_button(button_movedown, self)
-            button_duplicate = template_column.operator(utils.get_template_button_idname("duplicate"), icon='ADD', text="")  # type: ignore
+            duplicate_row = template_column.row(align=True)
+            duplicate_row.enabled = self.get_active_item() is not None
+            button_duplicate = duplicate_row.operator(utils.get_template_button_idname("duplicate"), icon='ADD', text="")  # type: ignore
             utils.send_template_data_on_button(button_duplicate, self)
             return template_row
 
