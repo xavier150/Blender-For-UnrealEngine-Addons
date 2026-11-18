@@ -20,3 +20,4 @@ Release Logs: https://github.com/xavier150/Blender-For-UnrealEngine-Addons/wiki/
     (Wrong typing stubs BMLayerItem[Any], Added quotes to make it a forward reference)
 - Fixed: GLTF animation import fails in Unreal Engine 5.8 when setting frame alignment.
     (Use frame_alignment with InterchangeFrameAlignment.SNAP_TO_CLOSEST in UE 5.8 and newer, and snap_to_closest_frame_boundary in older versions.)
+- Fixed: Some old properties are not correctly migrated.

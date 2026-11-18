@@ -24,8 +24,7 @@ class bfu_checker(ABC):
     # Helpers
 
     def add_potential_error(self) -> bfu_check_props.BFU_OT_UnrealPotentialError:
-        scene = bpy.context.scene  # type: ignore
-        return scene.bfu_export_potential_errors.add()  # type: ignore
+        return bfu_check_props.add_scene_potential_error()
 
     # Prepare list of skeletal objects to check
     def get_armatures_to_check(self, asset: AssetToExport) -> List[bpy.types.Object]:

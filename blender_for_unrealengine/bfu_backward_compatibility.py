@@ -83,11 +83,11 @@ def update_old_variables(print_log: bool = False) -> None:
         bfu_addon_updater.update_data_variable(obj, ["correct_extrem_uv_scale", "bfu_correct_extrem_uv_scale"], "bfu_use_correct_extrem_uv_scale")
         bfu_addon_updater.update_data_variable(obj, ["bfu_invert_normal_maps"], "bfu_flip_normal_map_green_channel")
 
-        bfu_addon_updater.update_data_variable(obj, ["exportAxisForward", "bfu_export_use_space_transform"], "bfu_fbx_export_use_space_transform")
-        bfu_addon_updater.update_data_variable(obj, ["exportAxisForward", "bfu_export_axis_forward"], "bfu_fbx_export_axis_forward")
-        bfu_addon_updater.update_data_variable(obj, ["exportAxisUp", "bfu_export_axis_up"], "bfu_fbx_export_axis_up")
-        bfu_addon_updater.update_data_variable(obj, ["exportPrimaryBoneAxis", "bfu_export_primary_bone_axis"], "bfu_fbx_export_primary_bone_axis")
-        bfu_addon_updater.update_data_variable(obj, ["exportSecondaryBoneAxis", "bfu_export_secondary_bone_axis"], "bfu_fbx_export_secondary_bone_axis")
+        bfu_addon_updater.update_data_variable(obj, ["bfu_export_use_space_transform"], "bfu_fbx_export_use_space_transform")
+        bfu_addon_updater.update_data_variable(obj, ["exportAxisForward", "bfu_export_axis_forward"], "bfu_fbx_export_axis_forward", enum_callback)
+        bfu_addon_updater.update_data_variable(obj, ["exportAxisUp", "bfu_export_axis_up"], "bfu_fbx_export_axis_up", enum_callback)
+        bfu_addon_updater.update_data_variable(obj, ["exportPrimaryBoneAxis", "bfu_export_primary_bone_axis"], "bfu_fbx_export_primary_bone_axis", enum_callback)
+        bfu_addon_updater.update_data_variable(obj, ["exportSecondaryBoneAxis", "bfu_export_secondary_bone_axis"], "bfu_fbx_export_secondary_bone_axis", enum_callback)
 
         bfu_addon_updater.update_data_variable(obj, ["exportWithCustomProps", "bfu_export_with_custom_props"], "bfu_fbx_export_with_custom_props")
 
@@ -137,7 +137,7 @@ def update_old_variables(print_log: bool = False) -> None:
         bfu_addon_updater.update_data_variable(scene, ["text_ImportSequenceScript"], "bfu_use_text_import_sequence_script")
         bfu_addon_updater.update_data_variable(scene, ["text_AdditionalData"], "bfu_use_text_additional_data")
         bfu_addon_updater.remove_data_variable(scene, ["UnrealExportedAssetsList", "bfu_unreal_exported_assets_logs"])
-        bfu_addon_updater.update_data_variable(scene, ["potentialErrorList"], "bfu_export_potential_errors")
+        bfu_addon_updater.remove_data_variable(scene, ["potentialErrorList", "bfu_export_potential_errors"])
 
     print("End update_rig_backward_compatibility")
     if print_log:

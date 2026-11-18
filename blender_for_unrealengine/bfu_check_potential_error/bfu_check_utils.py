@@ -21,20 +21,22 @@ from . import bfu_check_list
 from . import bfu_check_props
 
 def get_potential_errors() -> List[bfu_check_props.BFU_OT_UnrealPotentialError]:
-    scene = bpy.context.scene
-    return scene.bfu_export_potential_errors
+    errors = bfu_check_props.get_scene_potential_errors()
+    return errors if errors is not None else []
 
 def get_potential_issue_by_index(index: int) -> bfu_check_props.BFU_OT_UnrealPotentialError:
-    scene = bpy.context.scene
-    return scene.bfu_export_potential_errors[index]
+    return get_potential_errors()[index]
 
 def remove_potential_by_index(index: int):
-    scene = bpy.context.scene
-    scene.bfu_export_potential_errors.remove(index)
+    errors = bfu_check_props.get_scene_potential_errors()
+    if errors is None:
+        raise IndexError(index)
+    errors.remove(index)
 
 def clear_potential_errors():
-    scene = bpy.context.scene
-    scene.bfu_export_potential_errors.clear()
+    errors = bfu_check_props.get_scene_potential_errors()
+    if errors is not None:
+        errors.clear()
 
 def process_general_fix()-> Dict[str, str]:
     time_log = bfu_export_logs.bfu_process_time_logs_utils.start_time_log("Clean before export")
