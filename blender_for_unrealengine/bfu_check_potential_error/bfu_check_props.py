@@ -13,6 +13,9 @@ from typing import TYPE_CHECKING, List
 import bpy
 
 
+ISSUE_TYPE_LABELS = {0: "INFO", 1: "WARNING", 2: "ERROR"}
+
+
 def get_preset_values() -> List[str]:
     preset_values = [
         ]

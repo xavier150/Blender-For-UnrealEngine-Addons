@@ -15,6 +15,7 @@ import bpy
 from .. import bbpl
 from . import bfu_check_list
 from . import bfu_check_utils
+from .bfu_check_props import ISSUE_TYPE_LABELS
 
 class BFU_OT_CheckPotentialErrorPopup(bpy.types.Operator):
     bl_label = "Check Potential Issues"
@@ -124,17 +125,14 @@ class BFU_OT_OpenPotentialErrorPopup(bpy.types.Operator):
         for x, error in enumerate(potential_errors):
             myLine = col.box().split(factor=0.85)
             # ----
+            msg_type = ISSUE_TYPE_LABELS.get(error.type, 'UNKNOWN')
             if error.type == 0:
-                msg_type: str = 'INFO'
                 msg_icon: str = 'INFO'
             elif error.type == 1:
-                msg_type: str = 'WARNING'
                 msg_icon: str = 'ERROR'
             elif error.type == 2:
-                msg_type: str = 'ERROR'
                 msg_icon: str = 'CANCEL'
             else:
-                msg_type: str = 'UNKNOWN'
                 msg_icon: str = 'QUESTION'
             # ----
 

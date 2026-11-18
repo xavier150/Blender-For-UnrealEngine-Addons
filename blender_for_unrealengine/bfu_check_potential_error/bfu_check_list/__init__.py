@@ -16,6 +16,7 @@ import bpy
 
 from ..bfu_check_types import bfu_checker
 from .. import bfu_check_utils
+from ..bfu_check_props import ISSUE_TYPE_LABELS
 from ... import bpl
 from ... import bfu_cached_assets
 from ...bfu_cached_assets.bfu_cached_assets_blender_class import AssetToSearch, AssetDataSearchMode
@@ -68,6 +69,7 @@ def run_all_check()-> Dict[str, str]:
     final_asset_list_to_export = final_asset_cache.get_final_asset_list(AssetToSearch.ALL_ASSETS, AssetDataSearchMode.FULL, force_cache_update=True)
 
     check_info: Dict[str, str] = {}
+    potential_errors = bfu_check_utils.get_potential_errors()
 
     for index, my_check_cls in enumerate(checker_classes, start=1):
         counter = bpl.utils.CounterTimer()
@@ -76,7 +78,7 @@ def run_all_check()-> Dict[str, str]:
         print(f"Check {index}/{total}: {check_name}...")
 
         # Count errors before and after to determine how many were added by this check
-        before = len(bpy.context.scene.bfu_export_potential_errors)  # type: ignore
+        before = len(potential_errors)
 
         # First run the scene check
         instance.run_scene_check(scene=bpy.context.scene)  # type: ignore
@@ -86,7 +88,7 @@ def run_all_check()-> Dict[str, str]:
             instance.run_asset_check(asset)
 
 
-        after = len(bpy.context.scene.bfu_export_potential_errors)  # type: ignore
+        after = len(potential_errors)
         new_issues = after - before
 
         # Display result with appropriate color
@@ -95,7 +97,13 @@ def run_all_check()-> Dict[str, str]:
         else:
             issue_result = bpl.color_set.green("no issues")
 
-        print(f"{check_name} finished in: {counter.get_str_time()} with {issue_result}\n")
+        print(f"{check_name} finished in: {counter.get_str_time()} with {issue_result}")
+        for issue_index in range(before, after):
+            issue = potential_errors[issue_index]
+            if issue.type in (1, 2):
+                color = bpl.color_set.yellow if issue.type == 1 else bpl.color_set.red
+                print(color(f"{ISSUE_TYPE_LABELS[issue.type]}: {issue.text}"))
+        print()
 
 
     check_info["Total Check(s)"] = str(total) + " For more details, see console log."
