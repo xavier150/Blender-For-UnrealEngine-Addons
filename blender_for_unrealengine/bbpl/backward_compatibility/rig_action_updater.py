@@ -1,30 +1,53 @@
+# SPDX-FileCopyrightText: Xavier Loux (BleuRaven)
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Callable, List, Optional
+# ----------------------------------------------
+#  BBPL -> BleuRaven Blender Python Library
+#  https://github.com/xavier150/BBPL
+# ----------------------------------------------
+
+from typing import TYPE_CHECKING, Callable, Iterator, List, Optional, cast
 
 import bpy
+
+if TYPE_CHECKING:
+    from typing import Protocol
+
+    class _FCurveCollection(Protocol):
+        def __iter__(self) -> Iterator[bpy.types.FCurve]: ...
+
+        def find(self, data_path: str, *, index: int = 0) -> Optional[bpy.types.FCurve]: ...
+
+        def remove(self, fcurve: bpy.types.FCurve) -> None: ...
+
 
 class RigActionUpdater:
     """
     A class to update FCurves in Blender actions by modifying their data paths.
+
+    Uses legacy action FCurves before Blender 4.4 and per-slot channelbags
+    in Blender 4.4 and newer.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.update_fcurve: int = 0
         self.remove_fcurve: int = 0
         self.print_log: bool = False
 
-    def _fcurve_collections(self, action: bpy.types.Action):
-        if bpy.app.version < (4, 4, 0):
-            yield action.fcurves
-        else:
+    def _fcurve_collections(self, action: bpy.types.Action) -> Iterator["_FCurveCollection"]:
+        if bpy.app.version >= (4, 4, 0):
             for layer in action.layers:
                 for strip in layer.strips:
                     if strip.type == 'KEYFRAME':
                         for slot in action.slots:
                             channelbag = strip.channelbag(slot)
                             if channelbag is not None:
-                                yield channelbag.fcurves
+                                yield cast("_FCurveCollection", channelbag.fcurves)
+        else:
+            # Modern bpy stubs no longer declare the legacy Action.fcurves API.
+            yield cast("_FCurveCollection", getattr(action, "fcurves"))
 
-    def update_action_curve_data_path(self, action: bpy.types.Action, old_data_paths: List[str], new_data_path: str, remove_if_already_exists: bool = False, show_debug: bool = False):
+    def update_action_curve_data_path(self, action: bpy.types.Action, old_data_paths: List[str], new_data_path: str, remove_if_already_exists: bool = False, show_debug: bool = False) -> None:
         """
         Update the data paths of FCurves in a given action by replacing old data paths with a new one.
 
@@ -41,12 +64,18 @@ class RigActionUpdater:
         for fcurves in self._fcurve_collections(action):
             self._update_fcurve_collection(action, fcurves, old_data_paths, new_data_path, remove_if_already_exists, show_debug)
 
-    def _update_fcurve_collection(self, action, fcurves, old_data_paths, new_data_path, remove_if_already_exists, show_debug):
+    def _update_fcurve_collection(
+        self,
+        action: bpy.types.Action,
+        fcurves: "_FCurveCollection",
+        old_data_paths: List[str],
+        new_data_path: str,
+        remove_if_already_exists: bool,
+        show_debug: bool,
+    ) -> None:
         cache_action_fcurves: List[bpy.types.FCurve] = []
-        cache_data_paths: List[str] = []
         for fcurve in fcurves:
             cache_action_fcurves.append(fcurve)
-            cache_data_paths.append(fcurve.data_path)
             
         for action_fcurve in cache_action_fcurves:
             for old_data_path in old_data_paths:
@@ -58,7 +87,9 @@ class RigActionUpdater:
                         print(f"{old_data_path} found in {current_target} for action {action.name}.")
 
                     new_target = current_target.replace(old_data_path, new_data_path)
-                    if new_target not in cache_data_paths:
+                    if new_target == current_target:
+                        continue
+                    if fcurves.find(new_target, index=action_fcurve.array_index) is None:
                         action_fcurve.data_path = new_target
                         if self.print_log or show_debug:
                             print(f'"{current_target}" updated to "{new_target}" in {action.name} action.')
@@ -77,7 +108,7 @@ class RigActionUpdater:
                     if show_debug: 
                         print(f"{old_data_path} not found in {current_target} for action {action.name}.")
 
-    def remove_action_curve_by_data_path(self, action: bpy.types.Action, data_paths: List[str]):
+    def remove_action_curve_by_data_path(self, action: bpy.types.Action, data_paths: List[str]) -> None:
         """
         Remove FCurves from a given action based on specified data paths.
 
@@ -91,12 +122,12 @@ class RigActionUpdater:
         for fcurves in self._fcurve_collections(action):
             self._remove_from_fcurve_collection(action, fcurves, data_paths)
 
-    def _remove_from_fcurve_collection(self, action, fcurves, data_paths):
+    def _remove_from_fcurve_collection(
+        self, action: bpy.types.Action, fcurves: "_FCurveCollection", data_paths: List[str],
+    ) -> None:
         cache_action_fcurves: List[bpy.types.FCurve] = []
-        cache_data_paths: List[str] = []
         for fcurve in fcurves:
             cache_action_fcurves.append(fcurve)
-            cache_data_paths.append(fcurve.data_path)
 
         for action_fcurve in cache_action_fcurves:
             for data_path in data_paths:
@@ -111,7 +142,7 @@ class RigActionUpdater:
                     self.remove_fcurve += 1
                     break #FCurve removed so no need to test the other old_var_names
 
-    def edit_action_curve(self, action: bpy.types.Action, data_paths: List[str], callback: Optional[Callable[[bpy.types.Action, bpy.types.FCurve, str], None]] = None):
+    def edit_action_curve(self, action: bpy.types.Action, data_paths: List[str], callback: Optional[Callable[[bpy.types.Action, bpy.types.FCurve, str], None]] = None) -> None:
         """
         Edit FCurves in a given action based on specified data paths using a custom callback function.
 
@@ -129,12 +160,16 @@ class RigActionUpdater:
         for fcurves in self._fcurve_collections(action):
             self._edit_fcurve_collection(action, fcurves, data_paths, callback)
 
-    def _edit_fcurve_collection(self, action, fcurves, data_paths, callback):
+    def _edit_fcurve_collection(
+        self,
+        action: bpy.types.Action,
+        fcurves: "_FCurveCollection",
+        data_paths: List[str],
+        callback: Optional[Callable[[bpy.types.Action, bpy.types.FCurve, str], None]],
+    ) -> None:
         cache_action_fcurves: List[bpy.types.FCurve] = []
-        cache_data_paths: List[str] = []
         for fcurve in fcurves:
             cache_action_fcurves.append(fcurve)
-            cache_data_paths.append(fcurve.data_path)
 
 
         for action_fcurve in cache_action_fcurves:
@@ -148,7 +183,7 @@ class RigActionUpdater:
                         callback(action, action_fcurve, data_path)
 
 
-    def print_update_log(self):
+    def print_update_log(self) -> None:
         """
         Print a log of the number of FCurves updated and removed.
 
