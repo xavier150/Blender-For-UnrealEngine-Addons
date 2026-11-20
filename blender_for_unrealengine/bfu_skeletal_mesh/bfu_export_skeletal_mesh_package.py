@@ -8,7 +8,7 @@
 # ----------------------------------------------
 
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import bpy
 
@@ -124,14 +124,27 @@ def export_as_skeletal_mesh(
 
     # This will rescale the rig and unit scale to get a root bone egal to 1
     should_rescale_rig = bfu_export.bfu_export_utils.get_should_rescale_skeleton_for_fbx_export(active) 
+    rrf: Optional[float] = None
+    export_objects: List[bpy.types.Object] = []
+    my_skeletal_export_scale: Optional[bfu_utils.SkeletalExportScale] = None
     if should_rescale_rig:
         rrf = bfu_export.bfu_export_utils.get_rescale_rig_factor()  # rigRescaleFactor
         if scene.unit_settings:
             scene.unit_settings.scale_length = 0.01
-        my_skeletal_export_scale = bfu_utils.SkeletalExportScale(active)
-        my_skeletal_export_scale.apply_skeletal_export_scale(rrf)
-        my_modifiers_data_scale = bfu_utils.ModifiersDataScale(rrf)
-        my_modifiers_data_scale.rescale_for_unreal_engine()
+        export_objects = list(bpy.context.selected_objects or [])
+        if active not in export_objects:
+            export_objects.append(active)
+        skeletal_export_scale = bfu_utils.SkeletalExportScale(active)
+        my_skeletal_export_scale = skeletal_export_scale
+        skeletal_export_scale.apply_skeletal_export_scale(rrf)
+        bbpl.scene.scale_utils.scale_rigs_data(
+            rrf,
+            export_objects,
+            [],
+            use_shape_key_drivers=False,
+            use_armature_constraint=False,
+            use_curve_hooks=False,
+        )
 
     # Set rename temporarily the Armature as "Armature"
     armature_bones_constraints = bfu_export.bfu_export_utils.disable_all_bone_constraints(active) # @TODO: Please what the reason to disable all bones constraints at skeletal mesh export?
@@ -254,8 +267,17 @@ def export_as_skeletal_mesh(
 
     # This will rescale the rig and unit scale to get a root bone egal to 1
     if should_rescale_rig:
-        # Reset Curve an unit
-        my_modifiers_data_scale.ResetScaleAfterExport()  # type: ignore
+        if rrf is None or my_skeletal_export_scale is None:
+            raise RuntimeError("Export scale state is missing during cleanup.")
+        bbpl.scene.scale_utils.scale_rigs_data(
+            1/rrf,
+            export_objects,
+            [],
+            use_shape_key_drivers=False,
+            use_armature_constraint=False,
+            use_curve_hooks=False,
+        )
+        my_skeletal_export_scale.ResetSkeletalExportScale()
 
     bfu_vertex_color.bfu_vertex_color_utils.clear_vertex_color_for_unreal_export(active)
     bfu_export.bfu_export_utils.reset_armature_constraint_to_modifiers(active)

@@ -69,6 +69,9 @@ def process_nla_anim_export(
     scene = bpy.context.scene
     if scene is None:
         raise ValueError("No active scene found!")
+    unit_settings = scene.unit_settings
+    if unit_settings is None:
+        raise ValueError("No scene unit settings found!")
     
     addon_prefs = bfu_addon_prefs.get_addon_preferences()
     is_library = bfu_utils.get_object_is_library(armature)
@@ -80,7 +83,7 @@ def process_nla_anim_export(
     saved_selection_names = bfu_export.bfu_export_utils.SavedObjectNames()
     saved_selection_names.save_new_name(armature)
     saved_selection_names.save_new_names(mesh_parts)
-    saved_unit_scale = scene.unit_settings.scale_length
+    saved_unit_scale = unit_settings.scale_length
     animation_data = bbpl.anim_utils.AnimationManagment()
     animation_data.save_animation_data(armature)
     saved_frame_range: Tuple[int, int] = (scene.frame_start, scene.frame_end)
@@ -122,22 +125,43 @@ def process_nla_anim_export(
 
     # This will rescale the rig and unit scale to get a root bone egal to 1
     should_rescale_rig = bfu_export.bfu_export_utils.get_should_rescale_skeleton_for_fbx_export(active)
+    rrf: Optional[float] = None
+    animation_scale_factor: Optional[float] = None
+    export_objects: List[bpy.types.Object] = []
+    my_skeletal_export_scale: Optional[bfu_utils.SkeletalExportScale] = None
     if should_rescale_rig:
         rrf = bfu_export.bfu_export_utils.get_rescale_rig_factor()  # rigRescaleFactor
-        scene.unit_settings.scale_length = 0.01
-        my_skeletal_export_scale = bfu_utils.SkeletalExportScale(active)
-        my_skeletal_export_scale.apply_skeletal_export_scale(rrf, target_animation_data=animation_data)
-        my_action_curve_scale = bfu_utils.ActionCurveScale(rrf*active.scale.z)
-        my_action_curve_scale.rescale_for_export()
-        my_shape_keys_curve_scale = bfu_utils.ShapeKeysCurveScale(rrf)
-        my_shape_keys_curve_scale.rescale_for_unreal_engine()
-        my_modifiers_data_scale = bfu_utils.ModifiersDataScale(rrf)
-        my_modifiers_data_scale.rescale_for_unreal_engine()
-
-        bfu_utils.rescale_select_curve_hooks(1/rrf)
+        unit_settings.scale_length = 0.01
+        export_objects = list(bpy.context.selected_objects or [])
+        if active not in export_objects:
+            export_objects.append(active)
+        skeletal_export_scale = bfu_utils.SkeletalExportScale(active)
+        my_skeletal_export_scale = skeletal_export_scale
+        skeletal_export_scale.apply_skeletal_export_scale(rrf, target_animation_data=animation_data)
+        rescale_animation_factor = rrf*active.scale.z
+        animation_scale_factor = rescale_animation_factor
+        bbpl.scene.scale_utils.scale_animations(
+            rescale_animation_factor,
+            [],
+            [],
+            object_location_scale_factor=round(saved_unit_scale, 8)/0.01,
+        )
+        bbpl.scene.scale_utils.scale_rigs_data(
+            rrf,
+            export_objects,
+            [],
+            use_armature_constraint=False,
+            curve_hook_matrix_scale_factor=100.0,
+        )
         bbpl.anim_utils.reset_armature_pose(active)
-        my_rig_consraints_scale = bfu_utils.RigConsraintScale(active, rrf)
-        my_rig_consraints_scale.rescale_rig_consraint_for_unreal_engine()
+        bbpl.scene.scale_utils.scale_rigs_data(
+            rrf,
+            [active],
+            [],
+            use_shape_key_drivers=False,
+            use_modifiers=False,
+            use_curve_hooks=False,
+        )
         bbpl.anim_utils.copy_drivers(armature, active)
 
     # [PREPARE SCENE FOR EXPORT]
@@ -251,7 +275,7 @@ def process_nla_anim_export(
     # [RESTORE ASSET DATA]
     # Restore asset data after export like transforms, animation data, etc.
     my_timer_group.start_timer(f"Clean after export")
-    scene.unit_settings.scale_length = saved_unit_scale
+    unit_settings.scale_length = saved_unit_scale
     saved_selection_names.restore_names()
     saved_simplify.reset_scene()
     animation_data.set_animation_data(armature, copy_nla=True)
@@ -269,11 +293,30 @@ def process_nla_anim_export(
 
     # This will rescale the rig and unit scale to get a root bone egal to 1
     if should_rescale_rig:
-        my_rig_consraints_scale.reset_scale_after_export()  # type: ignore
+        if rrf is None or animation_scale_factor is None or my_skeletal_export_scale is None:
+            raise RuntimeError("Export scale state is missing during cleanup.")
+        bbpl.scene.scale_utils.scale_rigs_data(
+            1/rrf,
+            [active],
+            [],
+            use_shape_key_drivers=False,
+            use_modifiers=False,
+            use_curve_hooks=False,
+        )
         my_skeletal_export_scale.ResetSkeletalExportScale()  # type: ignore
-        my_action_curve_scale.restore_scale_after_export()  # type: ignore
-        my_shape_keys_curve_scale.reset_scale_after_export()  # type: ignore
-        my_modifiers_data_scale.ResetScaleAfterExport()  # type: ignore
+        bbpl.scene.scale_utils.scale_animations(
+            1/animation_scale_factor,
+            [],
+            [],
+            object_location_scale_factor=0.01/round(saved_unit_scale, 8),
+        )
+        bbpl.scene.scale_utils.scale_rigs_data(
+            1/rrf,
+            export_objects,
+            [],
+            use_armature_constraint=False,
+            curve_hook_matrix_scale_factor=0.01,
+        )
 
     if not is_library:
         if bpy.context.selected_objects:
