@@ -75,15 +75,13 @@ def _iter_action_fcurves(action: bpy.types.Action) -> Iterator[bpy.types.FCurve]
 
 def _scale_location_fcurves(
     fcurves: Iterable[bpy.types.FCurve],
-    bone_scale_factor: float,
-    object_location_scale_factor: float,
+    scale_factor: float,
 ) -> None:
     for fcurve in fcurves:
-        if fcurve.data_path == "location":
-            scale_factor = object_location_scale_factor
-        elif fcurve.data_path.split(".")[-1] == "location":
-            scale_factor = bone_scale_factor
-        else:
+        if (
+            fcurve.data_path != "location"
+            and fcurve.data_path.split(".")[-1] != "location"
+        ):
             continue
 
         for key in fcurve.keyframe_points:
@@ -100,19 +98,14 @@ def scale_animations(
     scale_factor: float,
     white_list: Optional[Iterable[bpy.types.Action]] = None,
     black_list: Optional[Iterable[bpy.types.Action]] = None,
-    object_location_scale_factor: Optional[float] = None,
 ) -> None:
     """Scale object and bone location curves in matching actions."""
     _validate_scale_factor(scale_factor)
-    if object_location_scale_factor is None:
-        object_location_scale_factor = scale_factor
-    _validate_scale_factor(object_location_scale_factor)
 
     for action in _iter_filtered_items(bpy.data.actions, white_list, black_list):
         _scale_location_fcurves(
             _iter_action_fcurves(action),
             scale_factor,
-            object_location_scale_factor,
         )
 
 
@@ -176,7 +169,6 @@ def _scale_armature_constraints(obj: bpy.types.Object, scale_factor: float) -> N
 def _scale_curve_hooks(
     obj: bpy.types.Object,
     scale_factor: float,
-    matrix_scale_factor: float,
 ) -> None:
     if not isinstance(obj.data, bpy.types.Curve):
         return
@@ -187,7 +179,7 @@ def _scale_curve_hooks(
 
         inverse_matrix = modifier.matrix_inverse.copy()
         for axis in range(3):
-            inverse_matrix[axis][3] *= matrix_scale_factor
+            inverse_matrix[axis][3] *= scale_factor
         modifier.matrix_inverse = inverse_matrix
 
     inverse_scale = 1 / scale_factor
@@ -204,13 +196,9 @@ def scale_rigs_data(
     use_armature_constraint: bool = True,
     use_modifiers: bool = True,
     use_curve_hooks: bool = True,
-    curve_hook_matrix_scale_factor: Optional[float] = None,
 ) -> None:
     """Scale selected rig data categories without applying object transforms."""
     _validate_scale_factor(scale_factor)
-    if curve_hook_matrix_scale_factor is None:
-        curve_hook_matrix_scale_factor = scale_factor
-    _validate_scale_factor(curve_hook_matrix_scale_factor)
 
     for obj in _iter_filtered_items(bpy.data.objects, white_list, black_list):
         if use_armature_constraint:
@@ -218,7 +206,7 @@ def scale_rigs_data(
         if use_shape_key_drivers:
             _scale_shape_key_drivers(obj, scale_factor)
         if use_curve_hooks:
-            _scale_curve_hooks(obj, scale_factor, curve_hook_matrix_scale_factor)
+            _scale_curve_hooks(obj, scale_factor)
 
         if use_modifiers and isinstance(obj.data, bpy.types.Mesh):
             for modifier in obj.modifiers:

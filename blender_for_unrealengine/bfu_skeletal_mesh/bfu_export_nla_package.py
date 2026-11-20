@@ -130,7 +130,7 @@ def process_nla_anim_export(
     export_objects: List[bpy.types.Object] = []
     my_skeletal_export_scale: Optional[bfu_utils.SkeletalExportScale] = None
     if should_rescale_rig:
-        rrf = bfu_export.bfu_export_utils.get_rescale_rig_factor()  # rigRescaleFactor
+        rrf = round(bfu_export.bfu_export_utils.get_rescale_rig_factor(), 8)  # rigRescaleFactor
         unit_settings.scale_length = 0.01
         export_objects = list(bpy.context.selected_objects or [])
         if active not in export_objects:
@@ -138,20 +138,18 @@ def process_nla_anim_export(
         skeletal_export_scale = bfu_utils.SkeletalExportScale(active)
         my_skeletal_export_scale = skeletal_export_scale
         skeletal_export_scale.apply_skeletal_export_scale(rrf, target_animation_data=animation_data)
-        rescale_animation_factor = rrf*active.scale.z
+        rescale_animation_factor = round(rrf*active.scale.z, 8)
         animation_scale_factor = rescale_animation_factor
         bbpl.scene.scale_utils.scale_animations(
             rescale_animation_factor,
             [],
             [],
-            object_location_scale_factor=round(saved_unit_scale, 8)/0.01,
         )
         bbpl.scene.scale_utils.scale_rigs_data(
             rrf,
             export_objects,
             [],
             use_armature_constraint=False,
-            curve_hook_matrix_scale_factor=100.0,
         )
         bbpl.anim_utils.reset_armature_pose(active)
         bbpl.scene.scale_utils.scale_rigs_data(
@@ -295,8 +293,10 @@ def process_nla_anim_export(
     if should_rescale_rig:
         if rrf is None or animation_scale_factor is None or my_skeletal_export_scale is None:
             raise RuntimeError("Export scale state is missing during cleanup.")
+        inverse_rig_scale_factor = round(1/rrf, 8)
+        inverse_animation_scale_factor = round(1/animation_scale_factor, 8)
         bbpl.scene.scale_utils.scale_rigs_data(
-            1/rrf,
+            inverse_rig_scale_factor,
             [active],
             [],
             use_shape_key_drivers=False,
@@ -305,17 +305,15 @@ def process_nla_anim_export(
         )
         my_skeletal_export_scale.ResetSkeletalExportScale()  # type: ignore
         bbpl.scene.scale_utils.scale_animations(
-            1/animation_scale_factor,
+            inverse_animation_scale_factor,
             [],
             [],
-            object_location_scale_factor=0.01/round(saved_unit_scale, 8),
         )
         bbpl.scene.scale_utils.scale_rigs_data(
-            1/rrf,
+            inverse_rig_scale_factor,
             export_objects,
             [],
             use_armature_constraint=False,
-            curve_hook_matrix_scale_factor=0.01,
         )
 
     if not is_library:

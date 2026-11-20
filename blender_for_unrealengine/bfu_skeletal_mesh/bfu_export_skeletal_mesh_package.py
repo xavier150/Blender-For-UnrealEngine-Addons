@@ -128,7 +128,7 @@ def export_as_skeletal_mesh(
     export_objects: List[bpy.types.Object] = []
     my_skeletal_export_scale: Optional[bfu_utils.SkeletalExportScale] = None
     if should_rescale_rig:
-        rrf = bfu_export.bfu_export_utils.get_rescale_rig_factor()  # rigRescaleFactor
+        rrf = round(bfu_export.bfu_export_utils.get_rescale_rig_factor(), 8)  # rigRescaleFactor
         if scene.unit_settings:
             scene.unit_settings.scale_length = 0.01
         export_objects = list(bpy.context.selected_objects or [])
@@ -269,8 +269,9 @@ def export_as_skeletal_mesh(
     if should_rescale_rig:
         if rrf is None or my_skeletal_export_scale is None:
             raise RuntimeError("Export scale state is missing during cleanup.")
+        inverse_rig_scale_factor = round(1/rrf, 8)
         bbpl.scene.scale_utils.scale_rigs_data(
-            1/rrf,
+            inverse_rig_scale_factor,
             export_objects,
             [],
             use_shape_key_drivers=False,
