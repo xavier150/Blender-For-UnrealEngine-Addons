@@ -460,22 +460,38 @@ def set_driver(armature: bpy.types.Object, driver: bpy.types.Driver, bone_name: 
     driver.expression = v.name
     return v
 
-def subdivise_one_bone(armature: bpy.types.Object, bone_name: str, subdivise_prefix_name: str ="Subdivise_", split_number: int =2, keep_parent: bool = True) -> List[str]:
+def subdivise_one_bone(
+    armature: bpy.types.Object,
+    bone_name: str,
+    subdivise_prefix_name: str = "Subdivise_",
+    split_number: int = 2,
+    keep_parent: bool = True,
+    new_bone_names: Optional[List[str]] = None,
+) -> List[str]:
     """
     Subdivides a bone into multiple segments.
 
     Args:
         armature (bpy.types.Object): The armature object.
-        edit_bone (bpy.types.EditBone): The bone to subdivide.
+        bone_name (str): The name of the bone to subdivide.
+        subdivise_prefix_name (str, optional): Prefix used for default segment names.
         split_number (int, optional): The number of segments to create. Defaults to 2.
         keep_parent (bool, optional): Indicates whether to keep the original bone as the parent. Defaults to True.
+        new_bone_names (list[str], optional): One name per additional segment, excluding
+            the original bone. If omitted, names are generated using the prefix.
 
     Returns:
-        list: A list of the created bones.
+        list: The original bone name followed by the names of the additional segments.
+
+    Raises:
+        ValueError: If the number of custom names does not match the number of additional segments.
     """
 
     if not isinstance(armature.data, bpy.types.Armature):
         raise TypeError("The provided object is not an armature.")
+
+    if new_bone_names is not None and len(new_bone_names) != max(0, split_number - 1):
+        raise ValueError("new_bone_names must contain one name per additional segment.")
 
     # Vars
     edit_bone: bpy.types.EditBone = armature.data.edit_bones[bone_name]
@@ -484,7 +500,11 @@ def subdivise_one_bone(armature: bpy.types.Object, bone_name: str, subdivise_pre
     # Duplication
     chain = [bone_name]
     for x in range(1, split_number):
-        dup_bone_name = duplicate_bone(armature, edit_bone.name, subdivise_prefix_name + str(x).zfill(2) + "_" + edit_bone.name)
+        if new_bone_names is None:
+            new_name = subdivise_prefix_name + str(x).zfill(2) + "_" + edit_bone.name
+        else:
+            new_name = new_bone_names[x - 1]
+        dup_bone_name = duplicate_bone(armature, edit_bone.name, new_name)
         chain.append(dup_bone_name)
 
     if not keep_parent:

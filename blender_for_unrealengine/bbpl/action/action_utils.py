@@ -7,10 +7,31 @@
 #  https://github.com/xavier150/BBPL
 # ----------------------------------------------
 
-from typing import List, Optional, cast
+from typing import Iterable, List, Optional, cast
 
 import bpy
 from bpy_extras import anim_utils
+
+
+def get_used_actions(obj: bpy.types.Object) -> List[bpy.types.Action]:
+    """Return the active action and all actions referenced by the object's NLA strips."""
+    animation_data = obj.animation_data
+    if animation_data is None:
+        return []
+    actions: List[bpy.types.Action] = []
+    if animation_data.action is not None:
+        actions.append(animation_data.action)
+
+    def collect_strips(strips: Iterable[bpy.types.NlaStrip]) -> None:
+        for strip in strips:
+            if strip.action is not None and strip.action not in actions:
+                actions.append(strip.action)
+            if strip.type == 'META':
+                collect_strips(strip.strips)
+
+    for track in animation_data.nla_tracks:
+        collect_strips(track.strips)
+    return actions
 
 
 def _fcurves_match_armature(
